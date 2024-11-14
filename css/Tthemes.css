@@ -1,0 +1,23 @@
+/* General Light Theme */
+:root {
+    --bg-color: #f5f2e9; /* Light beige background */
+    --text-color: #b0b0b0; /* Silver text color */
+    --box-color-light: #3e5a47; /* Green for feature and step boxes */
+    --button-bg-color: #f3b623; /* Yellow button color */
+    --button-text-color: #3e5a47; /* Green text color on button */
+    --box-outline: #3e5a47; /* Green outline for the boxes */
+    --nav-bg-color: #333; /* Darker nav background color */
+    --navbar-text-color: #ffffff; /* White text in navbar */
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+    --bg-color: #1c1c1e; /* Dark background */
+    --text-color: #eeeeee; /* Light text color */
+    --box-color-light: #2c2c3e; /* Darker green-gray for boxes */
+    --button-bg-color: #4682b4; /* Blue button */
+    --button-text-color: #ffffff; /* White text on button */
+    --box-outline: #4682b4; /* Blue outline for boxes */
+    --nav-bg-color: #333; /* Same dark nav background color */
+    --navbar-text-color: #eeeeee; /* Light text in navbar */
+}

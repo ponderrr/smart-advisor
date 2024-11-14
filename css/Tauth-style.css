@@ -1,0 +1,138 @@
+/* Color Scheme Variables */
+:root {
+    --bg-color: #ffffff;
+    --text-color: #333333;
+    --input-bg-color: #f1f1f1;
+    --button-bg-gradient: linear-gradient(135deg, #6a5acd, #ff7f50);
+    --box-color-light: #ff7f50; /* Solid orange for light mode box */
+    --button-text-color-light: #000000; /* Black text for buttons in light mode */
+    --button-bg-color: #ff7f50;
+    --title-color-light: #000000;
+    --border-color: #4682b4;
+    --link-color: #4682b4; /* Blue color for links */
+}
+
+[data-theme="dark"] {
+    --bg-color: #1c1c2e;
+    --text-color: #eeeeee;
+    --input-bg-color: #33334e;
+    --button-bg-gradient: linear-gradient(135deg, #ff4500, #d2691e);
+    --box-color-light: #2c2c3e;
+    --button-text-color-light: #ffffff;
+    --title-color-light: #ffffff;
+    --border-color: #4682b4;
+    --link-color: #87ceeb; /* Lighter blue for links in dark mode */
+}
+
+/* General Styling */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Auth Container */
+.auth-container {
+    background-color: var(--box-color-light);
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 0 15px var(--border-color); /* Blue shadow around the orange box */
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.auth-title {
+    font-size: 2em;
+    margin-bottom: 20px;
+    color: var(--title-color-light);
+}
+
+label {
+    display: block;
+    margin-top: 15px;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+input[type="email"],
+input[type="password"],
+input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    font-size: 1em;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    background-color: var(--input-bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.auth-button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 20px;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background: var(--button-bg-gradient);
+    color: var(--button-text-color-light);
+    transition: box-shadow 0.3s ease, background 0.3s;
+}
+
+.auth-button:hover {
+    box-shadow: 0 0 10px var(--button-bg-color);
+}
+
+.auth-alternate {
+    margin-top: 20px;
+}
+
+.switch-auth {
+    margin-top: 25px; /* Increased space below Google button */
+    font-size: 0.9em;
+}
+
+.auth-link {
+    color: var(--link-color); /* Blue link color */
+    text-decoration: none;
+}
+
+.auth-link:hover {
+    text-decoration: underline;
+}
+
+/* Dark Mode Toggle Button */
+#toggle-dark-mode {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px;
+    font-size: 1.2em;
+    cursor: pointer;
+    background-color: var(--button-bg-color);
+    color: var(--button-text-color-light);
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 4px 8px var(--box-shadow-color);
+    transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+}
+
+#toggle-dark-mode:hover {
+    box-shadow: 0 0 10px var(--button-bg-color);
+}

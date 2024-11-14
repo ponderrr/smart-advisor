@@ -1,0 +1,48 @@
+/* General Light Theme */
+:root {
+    --bg-color: #f0f4f8;
+    --text-color: #333;
+    --navbar-bg-color: #424141;
+    --navbar-text-color: #ffffff;
+    --link-color: #4682b4;
+    --section-bg-color: #ffffff;
+    --outline-color: #cccccc;
+    --button-bg-color: #1a73e8;
+    --button-text-color: #ffffff;
+    --input-border-color: #cccccc;
+    --recommendation-bg-color: #e8f0fe;
+    --button-hover-color: #0b5ed7;
+    --highlight-color: #000000;
+}
+
+/* General Dark Theme */
+[data-theme="dark"] {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --navbar-bg-color: #1f1f1f;
+    --navbar-text-color: #e0e0e0;
+    --link-color: #f6f6f6;
+    --section-bg-color: #1f1f1f;
+    --outline-color: #333333;
+    --button-bg-color: #bb86fc;
+    --button-text-color: #121212;
+    --recommendation-bg-color: #2a2a2a;
+    --button-hover-color: #3700b3;
+    --highlight-color: #ffffff;
+}
+
+/* Light Theme Specific for Results Page */
+:root {
+    --results-bg-color: #f7f9fc;
+    --results-outline-color: #d1d9e6;
+    --results-button-bg-color: #1d72b8;
+    --results-button-hover-color: #155a8a;
+}
+
+/* Dark Theme Specific for Results Page */
+[data-theme="dark"] {
+    --results-bg-color: #1b1b1b;
+    --results-outline-color: #3a3a3a;
+    --results-button-bg-color: #4dabf7;
+    --results-button-hover-color: #337ab7;
+}

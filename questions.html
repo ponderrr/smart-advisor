@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartAdvisor - Question Page</title>
+    <link rel="stylesheet" href="css/v-auth-style.css">
+    <script type="module" src="js/questions.js"></script>
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="navbar-container">
+            <div class="logo">
+                <img src="images/logo.png" alt="Smart Advisor Logo">
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="account.html">Account</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    
+    
+    
+    
+<!-- Slider or input for question count -->
+<input type="range" id="question-count" min="3" max="15" value="5">
+<button id="start-questions">Start Questions</button>
+
+<!-- Container for displaying questions -->
+<div id="question-container"></div>
+
+<!-- Button to submit answers -->
+<button id="submit-answers" style="display:none;">Submit Answers</button>
+
+<!-- Add user age input if it's not retrieved automatically -->
+<input type="hidden" id="user-age" value="YOUR_USER_AGE" />
+
+    
+    
+    
+    
+    
+    
+    
+    
+    <!-- Content goes below the navbar -->
+    <div class="container question-container" id="question-container">
+        <h1>Smart Advisor</h1>
+        <div id="count-display">Number of Questions: 3</div>
+        <input type="range" id="question-count" min="3" max="15" value="3" step="1">
+        <button id="start-quiz">Start Quiz</button>
+        <div id="question-number"></div>
+        <div id="question"></div>
+        <form id="answer-form">
+            <input type="text" id="answer-input" placeholder="Type your answer here...">
+            <button type="submit">Submit Answer</button>
+        </form>
+        <div id="feedback"></div>
+        <div id="success"></div>
+
+        <div class="loading-container" id="loading-container">
+            <div class="loading-text">Analyzing your answers...</div>
+            <div class="loading-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+        <button id="show-results-button">Show Results</button>
+    </div>
+
+    <script src="js/v-auth-script.js"></script>
+</body>
+</html>

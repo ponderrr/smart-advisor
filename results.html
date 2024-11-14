@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Advisor - Recommendations</title>
+    <link rel="stylesheet" href="css/Tstyles.css">
+    <link rel="stylesheet" href="css/Tthemes.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo">
+            <img src="images/Smart_AdvisorLogo.png" alt="Smart Advisor Logo">
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="account.html" id="account-nav" style="display:none;">Account</a></li>
+            </ul>
+        </nav>
+        <div class="toggle-box">
+            <button id="mode-toggle" class="mode-toggle-btn">
+                <span id="mode-icon"></span>
+    </header>
+
+    <main class="results-container">
+        <h1>Your Recommendations</h1>
+        <p>Based on your questionnaire responses</p>
+
+        <!-- Movie Recommendation Section with Background Image -->
+        <section class="recommendation-block movie-recommendation outlined-box">
+            <h2>Movie Recommendation</h2>
+            <div class="recommendation-item">
+                <img src="images/Oppenheimer.jpg" alt="Oppenheimer Movie Poster" class="recommendation-img">
+                <p class="title">OPPENHEIMER</p>
+            </div>
+        </section>
+
+        <!-- Book Recommendation Section with Background Image -->
+        <section class="recommendation-block book-recommendation outlined-box">
+            <h2>Book Recommendation</h2>
+            <div class="recommendation-item">
+                <img src="images/ThinkAndGrowRich.jpg" alt="Think and Grow Rich Book Cover" class="recommendation-img">
+                <p class="title">THINK AND GROW RICH</p>
+            </div>
+        </section>
+
+        <!-- Retake Questionnaire Section with Background Image -->
+        <section class="retake-section outlined-box">
+            <button class="retake-btn" onclick="window.location.href='questions.html';">Retake Questionnaire</button>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Smart Advisor. All Rights Reserved.</p>
+    </footer>
+
+    <script src="js/Tapp.js"></script>
+    <script src="js/Tscript.js"></script>
+</body>
+</html>

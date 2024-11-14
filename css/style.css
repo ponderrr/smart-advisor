@@ -1,0 +1,172 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Color Variables */
+:root {
+    --bg-color: #f5f2e9; /* Light beige background for home page */
+    --text-color: #b0b0b0; /* Silver text color for feature/step box text */
+    --box-color-light: #3e5a47; /* Green for feature and step boxes */
+    --button-bg-color: #f3b623; /* Yellow button for movie/book buttons */
+    --button-text-color: #3e5a47; /* Green text color on button */
+    --box-outline: #3e5a47; /* Green outline for the boxes */
+    --nav-bg-color: #333; /* Darker nav background color */
+}
+
+[data-theme="dark"] {
+    --bg-color: #1c1c1e;
+    --text-color: #eeeeee;
+    --box-color-light: #2c2c3e;
+    --button-bg-color: #4682b4;
+    --button-text-color: #ffffff;
+    --box-outline: #4682b4;
+}
+
+/* Body Styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    padding: 20px;
+}
+
+/* Header Styling */
+header nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--nav-bg-color);
+    padding: 20px 30px;
+    border-radius: 8px;
+}
+
+.logo img {
+    width: 150px;
+}
+
+.nav-links a {
+    color: white;
+    margin: 0 15px;
+    text-decoration: none;
+}
+
+.nav-links a:hover {
+    text-decoration: underline;
+}
+
+/* Hero Section */
+.hero {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-color);
+}
+
+.hero h1 {
+    font-size: 2.5em;
+    margin-bottom: 0.5em;
+}
+
+.hero p {
+    font-size: 1.2em;
+    margin-bottom: 1.5em;
+}
+
+/* Recommendation Section */
+.recommend-section {
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.recommend-box {
+    flex: 1;
+    padding: 60px 20px;
+    border-radius: 8px;
+    border: 2px solid var(--box-outline);
+    box-shadow: 0 4px 10px var(--box-outline);
+    background-size: cover;
+    background-position: center;
+    height: 600px; /* Increased height for movie cover images */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.recommend-box button {
+    padding: 15px 30px;
+    font-size: 1.4em;
+    border: none;
+    cursor: pointer;
+    color: var(--button-text-color);
+    background-color: var(--button-bg-color);
+    border-radius: 6px;
+}
+
+/* Hover effect for buttons */
+button:hover {
+    box-shadow: 0 0 15px var(--button-bg-color), 0 0 25px var(--button-bg-color), 0 0 35px var(--button-bg-color);
+}
+
+/* Why Choose Us and How It Works Sections */
+.why-choose-us, .how-it-works {
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.why-choose-us h2, .how-it-works h2 {
+    font-size: 3em;
+    margin-bottom: 20px;
+}
+
+.features, .steps {
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.feature-box, .step-box {
+    background-color: var(--box-color-light); /* Green background */
+    color: var(--text-color); /* Silver text color */
+    padding: 30px;
+    margin: 10px;
+    box-shadow: 0 4px 10px var(--box-outline);
+    border: 2px solid var(--box-outline);
+    border-radius: 8px;
+    width: 30%;
+    min-width: 250px;
+    text-align: center;
+}
+
+.feature-box h3, .step-box p {
+    font-size: 2em;
+    margin-bottom: 15px;
+    color: var(--text-color); /* Silver text color */
+}
+
+.feature-box p, .step-box p {
+    font-size: 1.6em;
+    line-height: 1.6;
+    margin-top: 15px;
+    color: var(--text-color); /* Silver text color */
+}
+
+/* Dark Mode Toggle */
+#toggle-dark-mode {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px;
+    font-size: 1.2em;
+    cursor: pointer;
+    background-color: var(--button-bg-color);
+    color: var(--button-text-color);
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Advisor - Account</title>
+    <link rel="stylesheet" href="css/Tstyles.css">
+    <link rel="stylesheet" href="css/Tthemes.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo">
+            <img src="images/Smart_AdvisorLogo.png" alt="Smart Advisor Logo">
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="sign-in.html">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+ <div class="toggle-box">
+    <button id="mode-toggle" class="mode-toggle-btn">
+        <span id="mode-icon"></span>
+    </button>
+</div>
+
+
+    <main class="account-container">
+<!-- User Profile Section -->
+<section class="profile-section outlined-box profile">
+    <div class="user-info">
+        <h2>Tyler Leggio</h2>
+</section>
+
+
+<!-- Movie Recommendations Section -->
+<section class="recommendations-section movies outlined-box">
+    <h2>Recent Movie Recommendations</h2>
+    <p>Check out your latest movie recommendations</p>
+    <div class="recommendation-item">
+        <img src="images/StarWars.jpg" alt="Star Wars: Episode IV - A New Hope" class="recommendation-img">
+        <div class="recommendation-details">
+            <p><strong>Star Wars: Episode IV - A New Hope</strong></p>
+            <p><a href="https://www.imdb.com/title/tt0076759/" target="_blank">View on IMDb</a></p>
+        </div>
+    </div>
+    <div class="recommendation-item">
+        <img src="images/Terrifier3.jpg" alt="Terrifier 3" class="recommendation-img">
+        <div class="recommendation-details">
+            <p><strong>Terrifier 3</strong></p>
+            <p><a href="https://www.imdb.com/title/tt27911000/" target="_blank">View on IMDb</a></p>
+        </div>
+    </div>
+</section>
+
+
+<!-- Book Recommendations Section -->
+<section class="recommendations-section books outlined-box">
+    <h2>Recent Book Recommendations</h2>
+    <p>Explore your latest book recommendations</p>
+    <div class="recommendation-item">
+        <img src="images/ToKillAMockingBird.jpg" alt="To Kill A Mockingbird" class="recommendation-img">
+        <div class="recommendation-details">
+            <p><strong>To Kill A Mockingbird</strong></p>
+            <p>Rating: 5/5 stars</p>
+        </div>
+    </div>
+    <div class="recommendation-item">
+        <img src="images/The Road.jpg" alt="The Road" class="recommendation-img">
+        <div class="recommendation-details">
+            <p><strong>The Road</strong></p>
+            <p>Rating: 4/5 stars</p>
+        </div>
+    </div>
+</section>
+
+
+        <!-- Change Password Section -->
+        <section class="change-password-section outlined-box">
+            <h2>Change Email</h2>
+            <form action="account.html" method="POST" class="change-password-form">
+                <input type="email" name="current-email" placeholder="Current Email" required>
+                <input type="password" name="confirm-password" placeholder="Confirm New Email" required>
+                <button type="submit" class="update-password-btn">Update Email</button>
+            </form>
+        </section>
+        <section class="change-password-section outlined-box">
+            <h2>Change Password</h2>
+            <form id="change-password-form" class="change-password-form">
+                <input type="password" name="current-password" placeholder="Current Password" required>
+                <input type="password" name="new-password" placeholder="New Password" required>
+                <input type="password" name="confirm-password" placeholder="Confirm New Password" required>
+                <button type="submit" class="update-password-btn">Update Password</button>
+            </form>
+            <p class="success-message" style="display: none; color: green; font-weight: bold;">Password Updated</p>
+        </section>
+        
+        </section>
+    <section class="change-password-section outlined-box">
+        <h2>Change Age</h2>
+        <form action="account.html" method="POST" class="change-password-form">
+            <input type="age" name="current-age" placeholder="Current Age" required>
+            <button type="submit" class="update-password-btn">Update Age</button>
+        </form>
+    </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Smart Advisor. All Rights Reserved.</p>
+    </footer>
+
+    <script src="js/Tapp.js"></script>
+    <script src="js/Tscript.js"></script>
+    <script src="js/Tauth-script.js"></script>
+</body>
+</html>

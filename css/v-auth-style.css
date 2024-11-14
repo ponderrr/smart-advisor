@@ -1,0 +1,408 @@
+/* Navbar Styling */
+.navbar {
+    position: fixed;
+    top: 10px;
+    width: 90%;
+    z-index: 1000;
+    display: flex;
+    justify-content: center; /* Centers the navbar container */
+    background-color: #333;
+    padding: 20px 0;
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+  }
+  
+  .navbar-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Spaces logo and links to edges */
+    width: 90%;
+    max-width: 1200px;
+  }
+  
+  .logo {
+    display: flex;
+    align-items: center;
+  }
+  
+  .logo img {
+    height: 50px;
+    width: 150px;
+  }
+  
+  nav ul {
+    list-style-type: none;
+    display: flex;
+    gap: 30px;
+  }
+  
+  nav ul li {
+    margin: 0;
+  }
+  
+  nav ul li a {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: color 0.3s ease;
+  }
+  
+  nav ul li a:hover {
+    color: #d10000;
+  }
+  
+  
+  
+    @media (max-width: 700px) {
+      .navbar {
+          flex-direction: column;
+          align-items: flex-start;
+      }
+      .nav-links {
+          display: flex;
+          flex-direction: column;
+          width: 100%;
+      }
+      .nav-links li {
+          padding: 10px 0;
+      }
+    }
+  
+  
+  /* Color Scheme Variables */
+  :root {
+    --bg-color: #fdf5e6;
+    --text-color: #333333;
+    --navbar-bg-color: #424141;
+    --navbar-text-color: #ffffff;
+    --input-bg-color: #f1f1f1;
+    --button-bg-color: #ffcc33; /* Yellow button color for light mode */
+    --button-text-color: #ffffff;
+    --box-color-light: #35524a; /* Green color for light mode box */
+    --highlight-color: #c0c0c0; /* Silver color for main text */
+    --outline-color: #cccccc;
+    --link-color: #4682b4;
+    --shadow-color: rgba(0, 0, 0, 0.2);
+    --transition-speed: 0.3s;
+  }
+  
+  [data-theme="dark"] {
+    --bg-color: #1c1c2e;
+    --text-color: #eeeeee;
+    --navbar-bg-color: #33334e;
+    --input-bg-color: #2c2c3e;
+    --input-border-color: #444;
+    --button-bg-color: #4682b4; /* Purple button color for dark mode */
+    --box-color-light: #2c2c3e;
+    --highlight-color: #ffffff;
+    --outline-color: #444;
+    --link-color: #87ceeb;
+    --shadow-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    padding-top: 70px;
+    transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+  }
+  
+  /* Container with Pulsing Box-Shadow Effect */
+  .container {
+    background-color: var(--box-color-light);
+    width: 80%;
+    max-width: 600px;
+    text-align: center;
+    padding: 20px;
+    background: var(--box-color-light);
+    border-radius: 15px;
+    box-shadow: 0 4px 20px var(--shadow-color), 0 0 10px var(--button-bg-color); /* Initial glow */
+    transition: background var(--transition-speed) ease, color var(--transition-speed) ease;
+    animation: pulse-shadow 3s ease-in-out infinite; /* Add pulsing animation */
+  }
+  
+  /* Keyframes for pulsing box-shadow */
+  @keyframes pulse-shadow {
+    0% {
+        box-shadow: 0 4px 20px var(--shadow-color), 0 0 10px var(--button-bg-color);
+    }
+    50% {
+        box-shadow: 0 6px 30px var(--shadow-color), 0 0 15px var(--button-bg-color); /* Larger shadow */
+    }
+    100% {
+        box-shadow: 0 4px 20px var(--shadow-color), 0 0 10px var(--button-bg-color); /* Reset shadow */
+    }
+  }
+  
+  
+  h1 {
+    color: var(--highlight-color);
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+  }
+  
+  #question, #question-number {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+  
+  #answer-form {
+    margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    display: none;
+  }
+  
+  #answer-input {
+    padding: 10px;
+    width: calc(100% - 20px);
+    border: 1px solid var(--input-border-color);
+    border-radius: 5px;
+    font-size: 1rem;
+    margin-bottom: 10px;
+  }
+  
+  #answer-input:focus {
+    border-color: var(--button-bg-color);
+    outline: none;
+  }
+  
+  /* Shake animation */
+  @keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+  }
+  
+  /* Apply shake animation */
+  .shake {
+    animation: shake 0.5s ease-in-out;
+  }
+  
+  /* Red color for error */
+  .error {
+    color: red;
+  }
+  
+  
+  
+  
+  button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--button-bg-color);
+    color: var(--button-text-color);
+    cursor: pointer;
+    font-size: 1.2rem;
+    margin-top: 10px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+  
+  button:hover {
+    box-shadow: 0 0 10px var(--button-bg-color), 0 0 20px var(--button-bg-color);
+    transform: scale(1.05); /* Slight scale for effect */
+  }
+  
+  /* Loading Animation */
+  .loading-container {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px 0;
+  }
+  
+  /* Loading Text with Moving Gradient */
+  .loading-text {
+      font-size: 1.4rem;
+      font-weight: bold;
+      margin-bottom: 25px;
+      background: linear-gradient(90deg, #ff0000, #6366f1, #ccff00); /* Gradient colors */
+      background-size: 200%; /* Allows gradient to move */
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: gradient-shift 4s linear infinite;
+  }
+  
+  /* Animation to shift the gradient */
+  @keyframes gradient-shift {
+      0% {
+          background-position: 0% 50%;
+      }
+      100% {
+          background-position: 100% 50%;
+      }
+  }
+  
+  /* Loading Dots with Bounce Animation */
+  .loading-dots {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+  }
+  
+  .dot {
+      width: 12px;
+      height: 12px;
+      background-color: var(--button-bg-color); /* Define this color in root or body */
+      border-radius: 50%;
+      animation: wave 0.5s infinite alternate;
+  }
+  
+  .dot:nth-child(2) { animation-delay: 0.1s; }
+  .dot:nth-child(3) { animation-delay: 0.2s; }
+  
+  /* Bounce Animation for Dots */
+  @keyframes wave {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+  }
+  
+  
+  .progress-bar {
+    width: 100%;
+    height: 4px;
+    background-color: var(--outline-color);
+    color: #33334e;
+  }
+  
+  .progress-fill {
+    width: 0%;
+    height: 100%;
+    background-color: var(--button-bg-color);
+    animation: fillProgress 3s linear forwards;
+  }
+  
+  @keyframes fillProgress {
+    from { width: 0%; }
+    to { width: 100%; }
+  }
+  
+  /* Media Queries */
+  @media (max-width: 768px) {
+    h1 { font-size: 2rem; }
+    #question { font-size: 1.2rem; }
+    button { font-size: 1rem; }
+  } 
+  
+  /* Dark Mode Toggle Button */
+  #toggle-dark-mode {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px;
+    font-size: 1.2em;
+    cursor: pointer;
+    background-color: var(--button-bg-color);
+    color: var(--button-text-color);
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 4px 8px var(--shadow-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  /* Hover effect */
+  #toggle-dark-mode:hover {
+    transform: scale(1.1) rotate(15deg); /* Slightly scale up and rotate */
+    box-shadow: 0 0 15px var(--button-bg-color); /* Glow effect */
+    background-color: var(--button-hover-bg-color); /* Change background on hover */
+    color: var(--button-hover-text-color); /* Change text color on hover */
+  }
+  
+  /* Optional active effect (when clicked) */
+  #toggle-dark-mode:active {
+    transform: scale(1.05); /* Slightly shrink on click */
+    box-shadow: 0 4px 6px var(--shadow-color); /* Reduced shadow when pressed */
+  }
+  
+  
+  
+  #count-display, #question-number, #question {
+    color: var(--highlight-color);
+    font-size: 1.3rem;
+  }
+  
+  /* Enhanced Slider Styles */
+  input[type="range"] {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: var(--outline-color);
+    outline: none;
+    margin: 20px 0;
+    cursor: pointer;
+  }
+  
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--button-bg-color);
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+  }
+  
+  input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 10px var(--button-bg-color);
+  }
+  
+  /* Show Results Button Styles */
+  #show-results-button {
+    display: none; /* Initially hidden */
+    opacity: 0;
+    transform: translateY(20px); /* Initially off-screen */
+    transition: opacity 0.5s ease, transform 0.5s ease; /* Smooth transition */
+    background: var(--button-bg-color);
+    color: var(--button-text-color);
+    padding: 15px 30px;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    margin-top: 20px;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  #show-results-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  #show-results-button:disabled {
+    opacity: 0.7;
+    cursor: wait;
+  }
+  
+  /* Text Field Styles */
+  input[type="text"], input[type="password"], textarea {
+    background-color: var(--input-bg-color);
+    color: var(--input-text-color);
+    border: 2px solid var(--box-color-light);
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 5px;
+    width: 100%;
+    transition: all 0.3s ease;
+  }
+  
+  input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
+    outline: none;
+    border-color: var(--highlight-color);
+  }
+  

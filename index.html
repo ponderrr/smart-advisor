@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book & Movie Finder</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <img src="images/logo.png" alt="Book & Movie Finder Logo"> <!-- Replace 'logo.png' with your logo file name -->
+            </div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="#" onclick="redirectToAccount()">Account</a>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <section class="hero">
+            <h1>Discover Your Next Favorite Book, Movie, or Both!</h1>
+            <p>AI-powered personalized recommendations tailored just for you.</p>
+            <div class="recommend-section">
+                <div class="recommend-box movie" style="background-image: url('images/movie-background.jpg');"> <!-- Replace 'movie-image.jpg' with your movie image file -->
+                    <button onclick="chooseRecommendation('Movie')">Movies</button>
+                </div>
+                <div class="recommend-box book" style="background-image: url('images/book-background.jpg');"> <!-- Replace 'book-image.jpg' with your book image file -->
+                    <button onclick="chooseRecommendation('Book')">Books</button>
+                </div>
+                <div class="recommend-box both" style="background-image: url('images/both-background.jpg');"> <!-- Replace 'both-image.jpg' with your image for both -->
+                    <button onclick="chooseRecommendation('Movie & Book')">Movie & Book</button>
+                </div>
+            </div>
+        </section>
+        <section class="why-choose-us">
+            <h2>Why Choose Us?</h2>
+            <div class="features">
+                <div class="feature-box">
+                    <h3>AI-Personalized</h3>
+                    <p>Recommendations crafted based on your preferences, whether you're a movie buff or a bookworm.</p>
+                </div>
+                <div class="feature-box">
+                    <h3>Cross-Media Suggestions</h3>
+                    <p>Love the book? We’ll recommend a movie based on it, or vice-versa.</p>
+                </div>
+                <div class="feature-box">
+                    <h3>Curated by Experts</h3>
+                    <p>In addition to AI recommendations, our team of experts curates selections to give you the best options.</p>
+                </div>
+            </div>
+        </section>
+        <section class="how-it-works">
+            <h2>How It Works</h2>
+            <div class="steps">
+                <div class="step-box">
+                    <p>Create an account.</p>
+                </div>
+                <div class="step-box">
+                    <p>Tell us your preferences.</p>
+                </div>
+                <div class="step-box">
+                    <p>Receive personalized recommendations.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script src="js/script.js"></script>
+</body>
+</html>

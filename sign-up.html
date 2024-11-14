@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="css/auth-style.css">
+    <script type="module" src="js/register.js"></script>
+</head>
+<body>
+    <div class="auth-container card">
+        <h2 class="auth-title">Sign Up</h2>
+        <form id="signUpForm">
+            <label for="email"><strong>Email</strong></label>
+            <input type="email" id="email" name="email" required>
+            
+            <label for="password"><strong>Password</strong></label>
+            <input type="password" id="password" name="password" required>
+
+            <label for="age"><strong>Age</strong></label>
+            <input type="number" id="age" name="age" required>
+
+            <button type="submit" class="auth-button">Sign Up</button>
+
+            <div class="auth-alternate">
+                <button type="button" onclick="googleLogin()" class="auth-button">Sign up with Google</button>
+            </div>
+
+            <p class="switch-auth">Already have an account? <a href="sign-in.html" onclick="preserveDarkMode()" class="auth-link">Log in</a></p>
+        </form>
+    </div>
+    <button id="toggle-dark-mode" onclick="toggleDarkMode()">🌙</button>
+    <script src="js/auth-script.js"></script>
+</body>
+</html>
