@@ -1,35 +1,24 @@
+// Import required functions
+import { handleAuthRedirect, handleAccountClick, isLoggedIn } from './auth-redirect.js';
+
 // Dark Mode Toggle
-function toggleDarkMode() {
+export function toggleDarkMode() {
     const currentTheme = document.body.getAttribute('data-theme');
-    document.body.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.body.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
 }
 
-// Redirect to account page based on login status
-function redirectToAccount() {
-    if (isLoggedIn()) {
-        window.location.href = 'account.html';
-    } else {
-        window.location.href = 'sign-in.html';
-    }
+// Export recommendation handler for global access
+window.handleRecommendationClick = function(type) {
+    handleAuthRedirect(type);
 }
 
-// Simulated login check
-function isLoggedIn() {
-    return localStorage.getItem('loggedIn') === 'true';
-}
+// Export account handler for global access
+window.handleAccountClick = handleAccountClick;
 
-// Choose Recommendation Functionality
-function chooseRecommendation(type) {
-    if (isLoggedIn()) {
-        // Redirect to questions page with the selected type of recommendation
-        window.location.href = `questions.html?type=${type}`;
-    } else {
-        window.location.href = 'sign-in.html';
-    }
-}
-
-// Dark Mode Toggle Button
-document.body.insertAdjacentHTML(
-    'beforeend',
-    '<button id="toggle-dark-mode" onclick="toggleDarkMode()">🌙</button>'
-);
+// Apply theme on load
+document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.body.setAttribute('data-theme', savedTheme);
+});

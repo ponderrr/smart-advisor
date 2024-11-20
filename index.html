@@ -8,32 +8,40 @@
 </head>
 <body>
     <header>
-        <nav>
+        <nav class="navbar">
             <div class="logo">
-                <img src="images/logo.png" alt="Book & Movie Finder Logo"> <!-- Replace 'logo.png' with your logo file name -->
+                <img src="images/logo.png" alt="Book & Movie Finder Logo">
             </div>
             <div class="nav-links">
                 <a href="index.html">Home</a>
-                <a href="#" onclick="redirectToAccount()">Account</a>
+                <a href="#" onclick="handleAccountClick()">Account</a>
             </div>
         </nav>
     </header>
+
     <main>
         <section class="hero">
             <h1>Discover Your Next Favorite Book, Movie, or Both!</h1>
             <p>AI-powered personalized recommendations tailored just for you.</p>
+
             <div class="recommend-section">
-                <div class="recommend-box movie" style="background-image: url('images/movie-background.jpg');"> <!-- Replace 'movie-image.jpg' with your movie image file -->
-                    <button onclick="chooseRecommendation('Movie')">Movies</button>
+                <div class="recommend-box movie" onclick="handleRecommendationClick('movie')" 
+                     style="background-image: url('images/movie-background.jpg')">
+                    <button>Movies</button>
                 </div>
-                <div class="recommend-box book" style="background-image: url('images/book-background.jpg');"> <!-- Replace 'book-image.jpg' with your book image file -->
-                    <button onclick="chooseRecommendation('Book')">Books</button>
+
+                <div class="recommend-box book" onclick="handleRecommendationClick('book')"
+                     style="background-image: url('images/book-background.jpg')">
+                    <button>Books</button>
                 </div>
-                <div class="recommend-box both" style="background-image: url('images/both-background.jpg');"> <!-- Replace 'both-image.jpg' with your image for both -->
-                    <button onclick="chooseRecommendation('Movie & Book')">Movie & Book</button>
+
+                <div class="recommend-box both" onclick="handleRecommendationClick('both')"
+                     style="background-image: url('images/both-background.jpg')">
+                    <button>Movie & Book</button>
                 </div>
             </div>
         </section>
+
         <section class="why-choose-us">
             <h2>Why Choose Us?</h2>
             <div class="features">
@@ -41,31 +49,61 @@
                     <h3>AI-Personalized</h3>
                     <p>Recommendations crafted based on your preferences, whether you're a movie buff or a bookworm.</p>
                 </div>
+
                 <div class="feature-box">
                     <h3>Cross-Media Suggestions</h3>
-                    <p>Love the book? We’ll recommend a movie based on it, or vice-versa.</p>
+                    <p>Love the book? We'll recommend a movie based on it, or vice-versa.</p>
                 </div>
+
                 <div class="feature-box">
                     <h3>Curated by Experts</h3>
                     <p>In addition to AI recommendations, our team of experts curates selections to give you the best options.</p>
                 </div>
             </div>
         </section>
+
         <section class="how-it-works">
             <h2>How It Works</h2>
             <div class="steps">
                 <div class="step-box">
                     <p>Create an account.</p>
                 </div>
+
                 <div class="step-box">
                     <p>Tell us your preferences.</p>
                 </div>
+
                 <div class="step-box">
                     <p>Receive personalized recommendations.</p>
                 </div>
             </div>
         </section>
     </main>
-    <script src="js/script.js"></script>
+
+    <button id="toggle-dark-mode" onclick="toggleDarkMode()">🌙</button>
+
+    <script type="module">
+        import { handleAuthRedirect, handleAccountClick } from './js/auth-redirect.js'
+
+        window.handleRecommendationClick = function(type) {
+            handleAuthRedirect(type);
+        }
+
+        window.handleAccountClick = handleAccountClick;
+
+        // Dark mode toggle function
+        window.toggleDarkMode = function() {
+            const currentTheme = document.body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // Apply saved theme on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.setAttribute('data-theme', savedTheme);
+        });
+    </script>
 </body>
 </html>

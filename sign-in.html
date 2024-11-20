@@ -3,30 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In</title>
+    <title>Sign In - Book & Movie Finder</title>
     <link rel="stylesheet" href="css/auth-style.css">
-    <script type="module" src="js/register.js"></script>
 </head>
 <body>
-    <div class="auth-container card">
+    <div class="auth-container">
         <h2 class="auth-title">Log In</h2>
+        
         <form id="signInForm">
-            <label for="email"><strong>Email</strong></label>
-            <input type="email" id="email" name="email" required>
+            <input type="hidden" id="redirectTo" name="redirectTo">
             
-            <label for="password"><strong>Password</strong></label>
-            <input type="password" id="password" name="password" required>
-            
-            <button type="submit" class="auth-button">Log In</button>
-            
-            <div class="auth-alternate">
-                <button type="button" onclick="googleLogin()" class="auth-button">Log in with Google</button>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" required>
             </div>
             
-            <p class="switch-auth">Don't have an account? <a href="sign-up.html" onclick="preserveDarkMode()" class="auth-link">Sign up</a></p>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required>
+            </div>
+            
+            <button type="submit" class="auth-button">Log In</button>
         </form>
+
+        <div class="switch-auth">
+            Don't have an account? 
+            <a href="sign-up.html" class="auth-link" onclick="preserveDarkMode()">Sign up</a>
+        </div>
     </div>
+
     <button id="toggle-dark-mode" onclick="toggleDarkMode()">🌙</button>
-    <script src="js/auth-script.js"></script>
+
+    <script type="module">
+        import { login } from './js/register.js';
+
+        // Handle form submission
+        document.getElementById('signInForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const redirectTo = document.getElementById('redirectTo').value;
+            
+            try {
+                await login(email, password, redirectTo);
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+
+        // Set redirect path from URL parameters
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const redirectTo = urlParams.get('redirectTo');
+            if (redirectTo) {
+                document.getElementById('redirectTo').value = redirectTo;
+            }
+        });
+
+        // Dark mode functions
+        window.toggleDarkMode = function() {
+            const currentTheme = document.body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        window.preserveDarkMode = function() {
+            const currentTheme = document.body.getAttribute('data-theme');
+            if (currentTheme === 'dark') {
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Apply saved theme on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.setAttribute('data-theme', savedTheme);
+        });
+    </script>
 </body>
 </html>

@@ -1,75 +1,148 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-functions.js";
+import { getQuestionsAndRecommendation } from './openai-service.js';
+import { getUserAge } from './register.js';
+import { saveUserRecommendation } from './firebase-utils.js';
 
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
-};
+// DOM Elements
+const questionCountSlider = document.getElementById('question-count-slider');
+const countDisplay = document.getElementById('count-display');
+const startQuizButton = document.getElementById('start-quiz');
+const questionCountSection = document.getElementById('question-count-section');
+const questionsSection = document.getElementById('questions-section');
+const questionNumber = document.getElementById('question-number');
+const questionElement = document.getElementById('question');
+const answerForm = document.getElementById('answer-form');
+const answerInput = document.getElementById('answer-input');
+const loadingContainer = document.getElementById('loading-container');
 
-const app = initializeApp(firebaseConfig);
-const functions = getFunctions(app);
-const getQuestionsAndRecommendation = httpsCallable(functions, 'getQuestionsAndRecommendation');
+let currentQuestions = [];
+let currentAnswers = [];
+let currentQuestionIndex = 0;
 
-// Get questions based on user input
-async function loadQuestions(numberOfQuestions, age) {
-  try {
-    const response = await getQuestionsAndRecommendation({ numberOfQuestions, age });
-    const questions = response.data.questions;
-    displayQuestions(questions);
-  } catch (error) {
-    console.error("Error loading questions:", error);
-  }
-}
+document.addEventListener('DOMContentLoaded', async () => {
+    const user = localStorage.getItem('userId');
+    const recommendationType = localStorage.getItem('recommendationType');
+    
+    if (!user || !recommendationType) {
+        window.location.href = 'index.html';
+        return;
+    }
 
-// Display the generated questions
-function displayQuestions(questions) {
-  const questionContainer = document.getElementById("question-container");
-  questionContainer.innerHTML = "";
+    questionCountSlider.addEventListener('input', (e) => {
+        countDisplay.textContent = `Number of Questions: ${e.target.value}`;
+    });
 
-  questions.forEach((questionText, index) => {
-    const questionElement = document.createElement("div");
-    questionElement.className = "question";
-    questionElement.innerHTML = `<p>${index + 1}. ${questionText}</p><input type="text" class="answer-input" />`;
-    questionContainer.appendChild(questionElement);
-  });
-
-  // Show submit button after questions are displayed
-  document.getElementById("submit-answers").style.display = "block";
-}
-
-// Submit answers and get recommendation
-async function submitAnswers(age) {
-  const answerInputs = document.querySelectorAll(".answer-input");
-  const answers = Array.from(answerInputs).map(input => input.value);
-
-  try {
-    const response = await getQuestionsAndRecommendation({ age, answers });
-    const recommendation = response.data.recommendation;
-    displayRecommendation(recommendation);
-  } catch (error) {
-    console.error("Error getting recommendation:", error);
-  }
-}
-
-// Display the recommendation on the results page
-function displayRecommendation(recommendation) {
-  document.getElementById("recommendation-container").innerText = recommendation;
-}
-
-// Event listener for submitting answers
-document.getElementById("submit-answers").addEventListener("click", () => {
-  const age = parseInt(document.getElementById("user-age").value); // Assuming user age is available
-  submitAnswers(age);
+    questionsSection.classList.add('questions-section');
 });
 
-// Assuming there's a slider or input for selecting question count
-document.getElementById("start-questions").addEventListener("click", () => {
-  const numberOfQuestions = parseInt(document.getElementById("question-count").value);
-  const age = parseInt(document.getElementById("user-age").value); // Assuming user age is available
-  loadQuestions(numberOfQuestions, age);
+startQuizButton.addEventListener('click', async () => {
+    try {
+        const questionCount = parseInt(questionCountSlider.value);
+        const userAge = await getUserAge();
+        const type = localStorage.getItem('recommendationType');
+
+        loadingContainer.style.display = 'flex';
+        
+        const result = await getQuestionsAndRecommendation({ 
+            numberOfQuestions: questionCount,
+            age: userAge,
+            type: type
+        });
+
+        currentQuestions = result.questions;
+        currentAnswers = new Array(currentQuestions.length).fill('');
+        
+        questionCountSection.style.display = 'none';
+        questionsSection.style.display = 'block';
+        loadingContainer.style.display = 'none';
+        
+        questionsSection.classList.add('visible');
+        
+        displayCurrentQuestion();
+    } catch (error) {
+        console.error('Error starting quiz:', error);
+        loadingContainer.style.display = 'none';
+    }
 });
+
+answerForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const answer = answerInput.value.trim();
+    if (!answer) {
+        showFeedback('Please provide an answer.', true);
+        return;
+    }
+
+    currentAnswers[currentQuestionIndex] = answer;
+    answerInput.value = '';
+    
+    if (currentQuestionIndex < currentQuestions.length - 1) {
+        currentQuestionIndex++;
+        displayCurrentQuestion();
+        showSuccess('Answer submitted!');
+    } else {
+        await submitAllAnswers();
+    }
+});
+
+async function submitAllAnswers() {
+    try {
+        hideQuestionsSection();
+        loadingContainer.style.display = 'flex';
+
+        const userAge = await getUserAge();
+        const type = localStorage.getItem('recommendationType');
+        
+        const result = await getQuestionsAndRecommendation({
+            answers: currentAnswers,
+            age: userAge,
+            type: type
+        });
+
+        const recommendationData = {
+            type: type,
+            questionData: currentQuestions.reduce((acc, q, i) => ({ ...acc, [`question${i + 1}`]: q }), {}),
+            answerData: currentAnswers.reduce((acc, a, i) => ({ ...acc, [`answer${i + 1}`]: a }), {}),
+            recommendationDetails: result.recommendation,
+            timestamp: new Date().toISOString()
+        };
+
+        await saveUserRecommendation(recommendationData);
+        window.location.href = 'results.html';
+    } catch (error) {
+        console.error('Error submitting answers:', error);
+        loadingContainer.style.display = 'none';
+        showFeedback('Error getting recommendation. Please try again.', true);
+    }
+}
+
+function displayCurrentQuestion() {
+    questionNumber.textContent = `Question ${currentQuestionIndex + 1} of ${currentQuestions.length}`;
+    questionElement.textContent = currentQuestions[currentQuestionIndex];
+    answerInput.focus();
+}
+
+function showFeedback(message, isError = false) {
+    const feedbackElement = document.getElementById('feedback');
+    feedbackElement.textContent = message;
+    feedbackElement.className = isError ? 'shake error' : '';
+    setTimeout(() => feedbackElement.classList.remove('shake'), 500);
+}
+
+function showSuccess(message) {
+    const successElement = document.getElementById('success');
+    successElement.textContent = message;
+    successElement.style.opacity = 1;
+    setTimeout(() => {
+        successElement.style.opacity = 0;
+    }, 2000);
+}
+
+function hideQuestionsSection() {
+    questionsSection.classList.remove('visible');
+    setTimeout(() => {
+        questionsSection.style.display = 'none';
+    }, 300);
+}
+
+export { getQuestionsAndRecommendation };
