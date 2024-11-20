@@ -59,6 +59,7 @@ export async function getQuestionsAndRecommendation({ numberOfQuestions, age, ty
 
     const recommendation = JSON.parse(response.data.choices[0].message.content);
     console.log("recommendation", recommendation);
+    localStorage.setItem("recommendationDetails", JSON.stringify(recommendation))
     return { recommendation };
 
   } catch (error) {

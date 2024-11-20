@@ -21,27 +21,42 @@
         <div class="toggle-box">
             <button id="mode-toggle" class="mode-toggle-btn">
                 <span id="mode-icon"></span>
+            </button>  <!-- Added closing button tag -->
+        </div>
     </header>
+
 
     <main class="results-container">
         <h1>Your Recommendations</h1>
         <p>Based on your questionnaire responses</p>
-
+    
         <!-- Movie Recommendation Section with Background Image -->
-        <section class="recommendation-block movie-recommendation outlined-box">
+        <section class="recommendation-block movie-recommendation outlined-box" id="movieSection" style="display: none;">
             <h2>Movie Recommendation</h2>
             <div class="recommendation-item">
-                <img src="images/Oppenheimer.jpg" alt="Oppenheimer Movie Poster" class="recommendation-img">
-                <p class="title">OPPENHEIMER</p>
+                <div class="recommendation-content">
+                    <p class="title" id="movieTitle"></p>
+                    <div class="recommendation-details">
+                        <p class="age-rating" id="movieAgeRating"></p>
+                        <p class="genres" id="movieGenres"></p>
+                        <p class="rating" id="movieRating"></p>
+                    </div>
+                </div>
             </div>
         </section>
-
+    
         <!-- Book Recommendation Section with Background Image -->
-        <section class="recommendation-block book-recommendation outlined-box">
+        <section class="recommendation-block book-recommendation outlined-box" id="bookSection" style="display: none;">
             <h2>Book Recommendation</h2>
             <div class="recommendation-item">
-                <img src="images/ThinkAndGrowRich.jpg" alt="Think and Grow Rich Book Cover" class="recommendation-img">
-                <p class="title">THINK AND GROW RICH</p>
+                <div class="recommendation-content">
+                    <p class="title" id="bookTitle"></p>
+                    <div class="recommendation-details">
+                        <p class="age-rating" id="bookAgeRating"></p>
+                        <p class="genres" id="bookGenres"></p>
+                        <p class="rating" id="bookRating"></p>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -57,5 +72,6 @@
 
     <script src="js/Tapp.js"></script>
     <script src="js/Tscript.js"></script>
+    <script type="module" src="js/displayResults.js"></script>
 </body>
 </html>
