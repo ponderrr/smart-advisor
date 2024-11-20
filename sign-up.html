@@ -3,33 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
+    <title>Sign Up - Book & Movie Finder</title>
     <link rel="stylesheet" href="css/auth-style.css">
-    <script type="module" src="js/register.js"></script>
 </head>
 <body>
-    <div class="auth-container card">
+    <div class="auth-container">
         <h2 class="auth-title">Sign Up</h2>
+        
         <form id="signUpForm">
-            <label for="email"><strong>Email</strong></label>
-            <input type="email" id="email" name="email" required>
+            <input type="hidden" id="redirectTo" name="redirectTo">
             
-            <label for="password"><strong>Password</strong></label>
-            <input type="password" id="password" name="password" required>
-
-            <label for="age"><strong>Age</strong></label>
-            <input type="number" id="age" name="age" required>
-
-            <button type="submit" class="auth-button">Sign Up</button>
-
-            <div class="auth-alternate">
-                <button type="button" onclick="googleLogin()" class="auth-button">Sign up with Google</button>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" required>
             </div>
-
-            <p class="switch-auth">Already have an account? <a href="sign-in.html" onclick="preserveDarkMode()" class="auth-link">Log in</a></p>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="age">Age</label>
+                <input type="number" id="age" required min="1" max="120">
+            </div>
+            
+            <button type="submit" class="auth-button">Sign Up</button>
         </form>
+
+        <div class="switch-auth">
+            Already have an account? 
+            <a href="sign-in.html" class="auth-link" onclick="preserveDarkMode()">Log in</a>
+        </div>
     </div>
+
     <button id="toggle-dark-mode" onclick="toggleDarkMode()">🌙</button>
-    <script src="js/auth-script.js"></script>
+
+    <script type="module">
+        import { signup } from './js/register.js';
+
+        // Handle form submission
+        document.getElementById('signUpForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const age = document.getElementById('age').value;
+            const redirectTo = document.getElementById('redirectTo').value;
+            
+            try {
+                await signup(email, password, age, redirectTo);
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+
+        // Set redirect path from URL parameters
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const redirectTo = urlParams.get('redirectTo');
+            if (redirectTo) {
+                document.getElementById('redirectTo').value = redirectTo;
+            }
+        });
+
+        // Dark mode functions
+        window.toggleDarkMode = function() {
+            const currentTheme = document.body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        window.preserveDarkMode = function() {
+            const currentTheme = document.body.getAttribute('data-theme');
+            if (currentTheme === 'dark') {
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Apply saved theme on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.setAttribute('data-theme', savedTheme);
+        });
+    </script>
 </body>
 </html>
