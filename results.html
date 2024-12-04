@@ -8,16 +8,19 @@
     <link rel="stylesheet" href="css/Tthemes.css">
 </head>
 <body>
-    <header class="navbar">
-        <div class="logo">
-            <img src="images/Smart_AdvisorLogo.png" alt="Smart Advisor Logo">
-        </div>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="account.html" id="account-nav" style="display:none;">Account</a></li>
-            </ul>
+         <nav class="navbar">
+            <div class="navbar-container">
+                <div class="logo">
+                    <img src="images/logo.png" alt="Smart Advisor Logo">
+                </div>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="account.html">Account</a></li>
+                </ul>
+            </div>
         </nav>
+
+        </div>
         <div class="toggle-box">
             <button id="mode-toggle" class="mode-toggle-btn">
                 <span id="mode-icon"></span>
@@ -31,7 +34,7 @@
         <p>Based on your questionnaire responses</p>
     
         <!-- Movie Recommendation Section with Background Image -->
-        <section class="recommendation-block movie-recommendation outlined-box" id="movieSection" style="display: none;">
+        <section class="recommendation-block movie-recommendation" id="movieSection" style="display: none;">
             <h2>Movie Recommendation</h2>
             <div class="recommendation-item">
                 <div class="recommendation-content">
@@ -65,10 +68,6 @@
             <button class="retake-btn" onclick="window.location.href='questions.html';">Retake Questionnaire</button>
         </section>
     </main>
-
-    <footer>
-        <p>&copy; 2024 Smart Advisor. All Rights Reserved.</p>
-    </footer>
 
     <script src="js/Tapp.js"></script>
     <script src="js/Tscript.js"></script>

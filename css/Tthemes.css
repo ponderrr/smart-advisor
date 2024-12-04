@@ -1,17 +1,26 @@
-/* General Light Theme */
+/* Light Theme */
 :root {
-    --bg-color: #f5f2e9; /* Light beige background */
-    --text-color: #b0b0b0; /* Silver text color */
-    --box-color-light: #3e5a47; /* Green for feature and step boxes */
-    --button-bg-color: #f3b623; /* Yellow button color */
-    --button-text-color: #3e5a47; /* Green text color on button */
-    --box-outline: #3e5a47; /* Green outline for the boxes */
-    --nav-bg-color: #333; /* Darker nav background color */
-    --navbar-text-color: #ffffff; /* White text in navbar */
+    --navbar-bg-color: #EAD7A4; /* Pale sand */
+    --bg-color: #F5DEB3; /* Tan/Wheat */
+    --text-color: #6B5B4D; /* Soft brown-gray */
+    --box-color-light: #FAE6C8; /* Pale cream */
+    --button-bg-color: #6B5B4D; /* Soft beige */
+    --button-text-color: #F9F3E9; /* Soft brown-gray */
+    --box-outline: #C8B28A; /* Light tan */
+    --nav-bg-color: #6B5B4D; /* Pale sand */
+    --navbar-text-color: #f9f9f9; /* Soft brown-gray */
+    --background-color: #F9F3E9; /* Cream white */
+    --button-hover-color: #D4B483; /* Soft tan */
+    --recommendation-outline-color: #C8B28A; /* Light tan */
 }
+
+
+
+
 
 /* Dark Theme */
 [data-theme="dark"] {
+    --navbar-bg-color: #424141;
     --bg-color: #1c1c1e; /* Dark background */
     --text-color: #eeeeee; /* Light text color */
     --box-color-light: #2c2c3e; /* Darker green-gray for boxes */
@@ -20,4 +29,6 @@
     --box-outline: #4682b4; /* Blue outline for boxes */
     --nav-bg-color: #333; /* Same dark nav background color */
     --navbar-text-color: #eeeeee; /* Light text in navbar */
+    --button-hover-color: #a247ae;
+    --recommendation-outline-color: #4682b4; /* Bright blue outline for recommendation box */
 }

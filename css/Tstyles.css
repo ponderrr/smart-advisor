@@ -1,334 +1,75 @@
-/* General Styling */
+/* General Reset */
 * {
-  box-sizing: border-box;
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Body Styling */
+body {
   font-family: Arial, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  padding-top: 70px;
 }
 
 /* Navbar Styling */
 .navbar {
+  position: fixed;
+  top: 1px;
+  width: 100%;
+  z-index: 1000;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: #333; /* Dark background color */
-  padding: 10px 30px;
+  justify-content: center; /* Centers the navbar container */
+  background-color: #333;
+  padding: 20px 0;
   color: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
 }
 
-.navbar .logo img {
-  height: 50px; /* Adjust the logo height as needed */
+.navbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Spaces logo and links to edges */
+  width: 100%;
+  max-width: 1200px;
 }
 
-.navbar nav ul {
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.logo img {
+  height: 50px;
+  width: 150px;
+}
+
+nav ul {
   list-style-type: none;
   display: flex;
-  gap: 20px;
+  gap: 30px;
 }
 
-.navbar nav ul li {
+nav ul li {
   margin: 0;
 }
 
-.navbar nav ul li a {
-  color: #ffffff; /* White text color */
+nav ul li a {
+  color: #ffffff;
   text-decoration: none;
   font-size: 1rem;
   font-weight: bold;
   transition: color 0.3s ease;
 }
 
-.navbar nav ul li a:hover {
-  color: #f3b623; /* Highlight color on hover */
+nav ul li a:hover {
+  color: #d10000;
 }
 
-/* Responsive Design */
-@media (max-width: 700px) {
-  .navbar {
-      flex-direction: column;
-      align-items: flex-start;
-  }
-  .nav-links {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-  }
-  .nav-links li {
-      padding: 10px 0;
-  }
-}
-
-
-.account-container {
-  max-width: 900px;
-  margin: 20px auto;
-  padding: 20px;
-  display: grid;
-  gap: 30px;
-}
-
-.outlined-box {
-  padding: 20px;
-  border: 3px solid var(--box-outline);
-  border-radius: 10px;
-  background-color: var(--box-color-light);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-}
-
-.profile-section.profile {
-  background-image: url('../images/Profile background.jpg'); /* Use the correct path to your profile background image */
-  background-size: cover;
-  background-position: center;
-  color: var(--text-color); /* Ensures text is readable */
-  padding: 20px;
-  border-radius: 10px;
-  position: relative;
-  overflow: hidden;
-}
-
-.profile-section.profile::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5); /* Dark overlay for readability */
-  z-index: 1;
-}
-
-.profile-section.profile .user-info,
-.profile-section.profile .profile-buttons {
-  position: relative;
-  z-index: 2;
-}
-
-.profile-section, .recommendations-section, .change-password-section {
-  transition: background-color 0.3s, border-color 0.3s;
-}
-
-.profile-section {
-  text-align: center;
-}
-
-.user-info {
-  margin-bottom: 15px;
-}
-
-.profile-img {
-  width: 120px;
-  border-radius: 50%;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
-
-.profile-buttons button {
-  margin: 5px;
-  padding: 10px 15px;
-  font-weight: bold;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  background-color: var(--button-bg-color);
-  color: var(--button-text-color);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.3s;
-}
-
-.profile-buttons button:hover {
-  background-color: var(--button-hover-color);
-}
-
-.recommendations-section.movies {
-  background-image: url('../images/Movie background.jpg'); /* Use the correct path to your image */
-  background-size: cover;
-  background-position: center;
-  color: var(--text-color); /* Ensures text is readable */
-  padding: 20px;
-  border-radius: 10px;
-  position: relative;
-  overflow: hidden;
-}
-
-.recommendations-section.movies::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6); /* Dark overlay for readability */
-  z-index: 1;
-}
-
-.recommendations-section.movies .recommendation-item,
-.recommendations-section.movies h2,
-.recommendations-section.movies p {
-  position: relative;
-  z-index: 2;
-}
-
-.recommendations-section.books {
-  background-image: url('../images/Book background.jpg'); /* Use the correct path to your book background image */
-  background-size: cover;
-  background-position: center;
-  color: var(--text-color); /* Ensures text is readable */
-  padding: 20px;
-  border-radius: 10px;
-  position: relative;
-  overflow: hidden;
-}
-
-.recommendations-section.books::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6); /* Dark overlay for readability */
-  z-index: 1;
-}
-
-.recommendations-section.books .recommendation-item,
-.recommendations-section.books h2,
-.recommendations-section.books p {
-  position: relative;
-  z-index: 2;
-}
-
-.recommendation-item {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-top: 15px;
-  padding: 15px;
-  border: 1px solid var(--box-outline);
-  border-radius: 8px;
-  background-color: var(--box-color-light);
-}
-
-.recommendation-img {
-  width: 80px;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-}
-
-.recommendation-details p {
-  margin: 3px 0;
-}
-
-.change-password-form input {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border: 1px solid var(--box-outline);
-  border-radius: 5px;
-  background-color: var(--bg-color);
-  color: var(--text-color);
-}
-
-.change-password-form button {
-  padding: 12px 20px;
-  background-color: var(--button-bg-color);
-  color: var(--button-text-color);
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s;
-}
-
-.change-password-form button:hover {
-  background-color: var(--button-hover-color);
-}
-
-footer {
-  text-align: center;
-  padding: 15px 0;
-  background-color: var(--nav-bg-color);
-  color: var(--navbar-text-color);
-  margin-top: 20px;
-  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Styling for the Toggle Button Inside the Box */
-.toggle-box {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: var(--section-bg-color);
-  padding: 10px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.mode-toggle-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1.5em;
-  color: var(--link-color);
-  transition: color 0.3s;
-}
-
-.mode-toggle-btn:hover {
-  color: var(--button-hover-color);
-}
-
-/* Recommendations Page Styles */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: Arial, sans-serif;
-}
-
-body {
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  transition: background-color 0.3s, color 0.3s;
-}
-
-/* Header Styling */
-header.navbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: var(--nav-bg-color);
-  padding: 20px 30px;
-  border-radius: 8px;
-  color: var(--navbar-text-color);
-}
-
-.logo img {
-  width: 150px;
-}
-
-.navbar nav ul {
-  display: flex;
-  list-style-type: none;
-}
-
-.navbar nav ul li {
-  margin-left: 20px;
-}
-
-.navbar nav ul li a,
-.mode-toggle-btn {
-  color: var(--link-color);
-  text-decoration: none;
-  font-weight: bold;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
+/* Results Container */
 .results-container {
   max-width: 900px;
   margin: 20px auto;
@@ -336,122 +77,170 @@ header.navbar {
   text-align: center;
 }
 
-/* Recommendation Section Styling */
-.recommendation-block {
-  padding: 80px;
-  border-radius: 10px;
-  margin: 20px 0;
-  background-color: var(--box-color-light);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-  position: relative;
-  overflow: hidden;
-}
-
-/* Movie Recommendation Background Box */
-.recommendation-block.movie-recommendation {
-  background-image: url('../images/Result Movie Background.jpg'); /* Update to correct path */
-  background-size: cover;
-  background-position: center;
-  color: var(--text-color);
-}
-
-.recommendation-block.book-recommendation::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6); /* Dark overlay for readability */
-  z-index: 1;
-}
-
-.recommendation-block.movie-recommendation .recommendation-item,
-.recommendation-block.movie-recommendation h2,
-.recommendation-block.movie-recommendation p {
-  position: relative;
-  z-index: 2;
-}
-
-/* Book Recommendation Background Box */
-.recommendation-block.book-recommendation {
-  background-image: url('../images/Results Book Background.webp'); /* Update to correct path */
-  background-size: cover;
-  background-position: center;
-  color: var(--text-color);
-}
-
-.recommendation-block.book-recommendation::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6); /* Dark overlay for readability */
-  z-index: 1;
-}
-
-.recommendation-block.book-recommendation .recommendation-item,
-.recommendation-block.book-recommendation h2,
-.recommendation-block.book-recommendation p {
-  position: relative;
-  z-index: 2;
-}
-
-.recommendation-item {
+/* Recommendation Content Layout */
+.recommendation-content {
   display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-top: 15px;
-  padding: 15px;
-  border: 1px solid var(--box-outline);
-  border-radius: 8px;
+  align-items: flex-start;
+  gap: 2rem;
+  padding: 2rem;
   background-color: var(--box-color-light);
+  border-radius: 12px;
+  margin: 1rem 0;
+  position: relative;
+  z-index: 2;
 }
 
-.recommendation-img {
-  width: 120px;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+.poster-container {
+  flex: 0 0 300px;
+  max-width: 300px;
+  transition: transform 0.3s ease;
 }
 
-.title {
-  font-size: 1.2em;
-  font-weight: bold;
+.poster-container:hover {
+  transform: scale(1.02);
+}
+
+.recommendation-poster {
+  width: 100%;
+  height: auto;
+}
+
+.recommendation-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.recommendation-title {
+  font-size: 2rem;
   color: var(--text-color);
-}
-
-/* Save or Share Section Styling */
-.save-share-section,
-.retake-section {
-  background-color: var(--box-color-light);
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  margin-top: 20px;
-}
-
-.save-btn,
-.share-btn,
-.retake-btn {
-  padding: 10px 20px;
+  margin-bottom: 0.5rem;
   font-weight: bold;
-  background-color: var(--button-bg-color);
-  color: var(--button-text-color);
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
 }
 
-.save-btn:hover,
-.share-btn:hover,
-.retake-btn:hover {
-  background-color: var(--button-hover-color);
+.recommendation-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-/* Dark Mode Toggle Button */
+.meta-label {
+  font-weight: bold;
+  color: var(--button-bg-color);
+  margin-right: 0.5rem;
+}
+
+.recommendation-description {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: var(--text-color);
+  margin-top: 1rem;
+}
+
+.recommendation-rating {
+  font-size: 1.2rem;
+  color: var(--button-bg-color);
+}
+
+.rating-number {
+  font-size: 0.9rem;
+  color: var(--text-color);
+  margin-left: 0.5rem;
+}
+
+/* Recommendation Block Styling */
+.recommendation-block {
+  padding: 2rem;
+  margin: 2rem 0;
+  border-radius: 12px;
+  position: relative;
+  border: 2px solid var(--recommendation-outline-color); /* Add dynamic outline */
+  background-color: var(--box-color-light);
+  box-shadow: 0 4px 8px var(--shadow-color);
+}
+
+
+.recommendation-block::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 12px;
+  z-index: 1;
+}
+
+.recommendation-block h2 {
+  color: var(--text-color);
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+  z-index: 2;
+}
+
+/* Animation */
+.recommendation-content {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+      opacity: 0;
+      transform: translateY(20px);
+  }
+  to {
+      opacity: 1;
+      transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .recommendation-content {
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+  }
+
+  .poster-container {
+      width: 100%;
+      max-width: 250px;
+      margin-bottom: 1rem;
+  }
+
+  .recommendation-title {
+      font-size: 1.5rem;
+      text-align: center;
+  }
+
+  .recommendation-meta {
+      align-items: center;
+      text-align: center;
+  }
+
+  .recommendation-description {
+      text-align: center;
+  }
+
+  .navbar {
+      flex-direction: column;
+      align-items: flex-start;
+  }
+
+  .nav-links {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+  }
+
+  .nav-links li {
+      padding: 10px 0;
+  }
+}
+
+/* Dark Mode Toggle */
 .toggle-box {
   position: fixed;
   bottom: 20px;
@@ -459,7 +248,7 @@ header.navbar {
   background-color: var(--section-bg-color);
   padding: 10px;
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px var(--shadow-color);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -479,13 +268,29 @@ header.navbar {
   color: var(--button-hover-color);
 }
 
-/* Media Queries for Responsiveness */
-@media (max-width: 768px) {
-  .results-container {
-      padding: 10px;
-  }
-  .recommendation-img {
-      width: 80px;
-  }
+/* Retake Button Styling */
+.retake-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: var(--button-bg-color);
+    color: var(--button-text-color);
+    font-size: 1rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px var(--shadow-color);
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
+.retake-btn:hover {
+    background-color: var(--button-hover-color);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px var(--shadow-color);
+}
+
+.retake-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px var(--shadow-color);
+}

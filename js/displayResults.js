@@ -50,10 +50,41 @@ function displayMovieRecommendation(data) {
 
     movieSection.style.display = 'block';
     
-    document.getElementById('movieTitle').textContent = data.title || 'Title Not Available';
-    document.getElementById('movieAgeRating').textContent = `Age Rating: ${data.ageRating || 'Not Rated'}`;
-    document.getElementById('movieGenres').textContent = `Genres: ${data.genres ? data.genres.join(', ') : 'Not Available'}`;
-    document.getElementById('movieRating').textContent = `Rating: ${data.rating || '0'}/5`;
+    const movieContent = `
+        <div class="recommendation-content">
+            <div class="poster-container">
+                <img src="${data.posterPath || '/api/placeholder/300/450'}" 
+                     alt="${data.title} Poster" 
+                     class="recommendation-poster"
+                     onerror="this.src='/api/placeholder/300/450'">
+            </div>
+            <div class="recommendation-details">
+                <h3 class="recommendation-title">${data.title || 'Title Not Available'}</h3>
+                <div class="recommendation-meta">
+                    <p class="recommendation-age-rating">
+                        <span class="meta-label">Age Rating:</span> 
+                        ${data.ageRating || 'Not Rated'}
+                    </p>
+                    <p class="recommendation-genres">
+                        <span class="meta-label">Genres:</span> 
+                        ${data.genres ? data.genres.join(', ') : 'Not Available'}
+                    </p>
+                    <p class="recommendation-rating">
+                        <span class="meta-label">Rating:</span> 
+                        ${generateStarRating(data.rating)}
+                    </p>
+                </div>
+                <p class="recommendation-description">
+                    ${data.description || 'No description available.'}
+                </p>
+            </div>
+        </div>
+    `;
+
+    const recommendationContainer = movieSection.querySelector('.recommendation-item');
+    if (recommendationContainer) {
+        recommendationContainer.innerHTML = movieContent;
+    }
 }
 
 function displayBookRecommendation(data) {
@@ -62,10 +93,54 @@ function displayBookRecommendation(data) {
 
     bookSection.style.display = 'block';
     
-    document.getElementById('bookTitle').textContent = data.title || 'Title Not Available';
-    document.getElementById('bookAgeRating').textContent = `Age Rating: ${data.ageRating || 'Not Rated'}`;
-    document.getElementById('bookGenres').textContent = `Genres: ${data.genres ? data.genres.join(', ') : 'Not Available'}`;
-    document.getElementById('bookRating').textContent = `Rating: ${data.rating || '0'}/5`;
+    const bookContent = `
+        <div class="recommendation-content">
+            <div class="poster-container">
+                <img src="${data.posterPath || '/api/placeholder/300/450'}" 
+                     alt="${data.title} Cover" 
+                     class="recommendation-poster"
+                     onerror="this.src='/api/placeholder/300/450'">
+            </div>
+            <div class="recommendation-details">
+                <h3 class="recommendation-title">${data.title || 'Title Not Available'}</h3>
+                <div class="recommendation-meta">
+                    <p class="recommendation-age-rating">
+                        <span class="meta-label">Age Rating:</span> 
+                        ${data.ageRating || 'Not Rated'}
+                    </p>
+                    <p class="recommendation-genres">
+                        <span class="meta-label">Genres:</span> 
+                        ${data.genres ? data.genres.join(', ') : 'Not Available'}
+                    </p>
+                    <p class="recommendation-rating">
+                        <span class="meta-label">Rating:</span> 
+                        ${generateStarRating(data.rating)}
+                    </p>
+                </div>
+                <p class="recommendation-description">
+                    ${data.description || 'No description available.'}
+                </p>
+            </div>
+        </div>
+    `;
+
+    const recommendationContainer = bookSection.querySelector('.recommendation-item');
+    if (recommendationContainer) {
+        recommendationContainer.innerHTML = bookContent;
+    }
+}
+
+function generateStarRating(rating) {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    const emptyStars = 5 - Math.ceil(rating);
+    
+    return `
+        ${'★'.repeat(fullStars)}
+        ${hasHalfStar ? '½' : ''}
+        ${'☆'.repeat(emptyStars)}
+        <span class="rating-number">(${rating}/5)</span>
+    `;
 }
 
 function showError(message) {

@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { getMoviePoster } from './tmdb-service';
+import { getBookCover } from './google-books-service';
 
 const OPENAI_API_URL = import.meta.env.VITE_OPENAI_URL;
 const openaiApiKey = import.meta.env.VITE_OPENAI_API_KEY;
@@ -26,8 +28,6 @@ export async function getQuestionsAndRecommendation({ numberOfQuestions, age, ty
       });
 
       const rawQuestions = response.data.choices[0].message.content;
-
-      console.log("here", rawQuestions);
       const questions = rawQuestions.split('\n')
         .filter(q => q.trim())
         .map(q => q.replace(/^\d+\.\s*/, '').trim());
@@ -41,12 +41,44 @@ export async function getQuestionsAndRecommendation({ numberOfQuestions, age, ty
     2. Matches their interests
     3. Has good entertainment value
     
-    Format the response as JSON with these fields:
+    For each recommendation, provide:
     - title (string)
-    - type (string: "movie", "book", or "both")
-    - rating (number 1-5)
+    - type (string: "movie" or "book")
+    - rating (number between 1-5)
     - genres (array of strings)
-    - ageRating (string)`;
+    - ageRating (string)
+    - description (string of ~100 words describing the plot/content)
+    - posterPath (string URL to movie poster or book cover - for now just use "placeholder.jpg")
+    
+    Format the response as JSON with this structure:
+    {
+      ${type === 'both' ? `
+      "movie": {
+        "title": "",
+        "type": "movie",
+        "rating": 0,
+        "genres": [],
+        "ageRating": "",
+        "description": "",
+        "posterPath": ""
+      },
+      "book": {
+        "title": "",
+        "type": "book",
+        "rating": 0,
+        "genres": [],
+        "ageRating": "",
+        "description": "",
+        "posterPath": ""
+      }` : `
+      "title": "",
+      "type": "${type}",
+      "rating": 0,
+      "genres": [],
+      "ageRating": "",
+      "description": "",
+      "posterPath": ""`}
+    }`;
 
     const response = await axiosInstance.post('', {
       model: "gpt-3.5-turbo",
@@ -58,8 +90,30 @@ export async function getQuestionsAndRecommendation({ numberOfQuestions, age, ty
     });
 
     const recommendation = JSON.parse(response.data.choices[0].message.content);
+
+    if (type === 'both') {
+      // Get movie poster
+      const moviePosterUrl = await getMoviePoster(recommendation.movie.title);
+      console.log('Movie poster URL:', moviePosterUrl);
+      recommendation.movie.posterPath = moviePosterUrl || '/api/placeholder/300/450';
+      
+      // Get book cover
+      const bookCoverUrl = await getBookCover(recommendation.book.title);
+      console.log('Book cover URL:', bookCoverUrl);
+      recommendation.book.posterPath = bookCoverUrl || '/api/placeholder/300/450';
+  } else {
+      // Handle single type
+      if (type === 'movie') {
+          const posterUrl = await getMoviePoster(recommendation.title);
+          recommendation.posterPath = posterUrl || '/api/placeholder/300/450';
+      } else if (type === 'book') {
+          const coverUrl = await getBookCover(recommendation.title);
+          recommendation.posterPath = coverUrl || '/api/placeholder/300/450';
+      }
+  }
+
     console.log("recommendation", recommendation);
-    localStorage.setItem("recommendationDetails", JSON.stringify(recommendation))
+    localStorage.setItem("recommendationDetails", JSON.stringify(recommendation));
     return { recommendation };
 
   } catch (error) {
