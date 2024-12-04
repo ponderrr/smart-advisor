@@ -1,408 +1,475 @@
 /* Navbar Styling */
 .navbar {
-    position: fixed;
-    top: 10px;
-    width: 90%;
-    z-index: 1000;
-    display: flex;
-    justify-content: center; /* Centers the navbar container */
-    background-color: #333;
-    padding: 20px 0;
-    color: #fff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-  }
-  
-  .navbar-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between; /* Spaces logo and links to edges */
-    width: 90%;
-    max-width: 1200px;
-  }
-  
-  .logo {
-    display: flex;
-    align-items: center;
-  }
-  
-  .logo img {
-    height: 50px;
-    width: 150px;
-  }
-  
-  nav ul {
-    list-style-type: none;
-    display: flex;
-    gap: 30px;
-  }
-  
-  nav ul li {
-    margin: 0;
-  }
-  
-  nav ul li a {
-    color: #ffffff;
-    text-decoration: none;
-    font-size: 1rem;
-    font-weight: bold;
-    transition: color 0.3s ease;
-  }
-  
-  nav ul li a:hover {
-    color: #d10000;
-  }
-  
-  
-  
-    @media (max-width: 700px) {
-      .navbar {
-          flex-direction: column;
-          align-items: flex-start;
-      }
-      .nav-links {
-          display: flex;
-          flex-direction: column;
-          width: 100%;
-      }
-      .nav-links li {
-          padding: 10px 0;
-      }
+  position: fixed;
+  top: 10px;
+  width: 90%;
+  z-index: 1000;
+  display: flex;
+  justify-content: center; /* Centers the navbar container */
+  background-color: #333;
+  padding: 20px 0;
+  color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.navbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Spaces logo and links to edges */
+  width: 90%;
+  max-width: 1200px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.logo img {
+  height: 50px;
+  width: 150px;
+}
+
+nav ul {
+  list-style-type: none;
+  display: flex;
+  gap: 30px;
+}
+
+nav ul li {
+  margin: 0;
+}
+
+nav ul li a {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+nav ul li a:hover {
+  color: #ffcc33;
+}
+
+[data-theme='dark'] nav ul li a:hover {
+  color: #4682b4; /* Dark mode hover color */
+}
+
+
+  @media (max-width: 700px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
     }
-  
-  
-  /* Color Scheme Variables */
-  :root {
-    --bg-color: #fdf5e6;
-    --text-color: #333333;
-    --navbar-bg-color: #424141;
-    --navbar-text-color: #ffffff;
-    --input-bg-color: #f1f1f1;
-    --button-bg-color: #ffcc33; /* Yellow button color for light mode */
-    --button-text-color: #ffffff;
-    --box-color-light: #35524a; /* Green color for light mode box */
-    --highlight-color: #c0c0c0; /* Silver color for main text */
-    --outline-color: #cccccc;
-    --link-color: #4682b4;
-    --shadow-color: rgba(0, 0, 0, 0.2);
-    --transition-speed: 0.3s;
-  }
-  
-  [data-theme="dark"] {
-    --bg-color: #1c1c2e;
-    --text-color: #eeeeee;
-    --navbar-bg-color: #33334e;
-    --input-bg-color: #2c2c3e;
-    --input-border-color: #444;
-    --button-bg-color: #4682b4; /* Purple button color for dark mode */
-    --box-color-light: #2c2c3e;
-    --highlight-color: #ffffff;
-    --outline-color: #444;
-    --link-color: #87ceeb;
-    --shadow-color: rgba(255, 255, 255, 0.1);
-  }
-  
-  body {
-    font-family: 'Arial', sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    padding-top: 70px;
-    transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
-  }
-  
-  /* Container with Pulsing Box-Shadow Effect */
-  .container {
-    background-color: var(--box-color-light);
-    width: 80%;
-    max-width: 600px;
-    text-align: center;
-    padding: 20px;
-    background: var(--box-color-light);
-    border-radius: 15px;
-    box-shadow: 0 4px 20px var(--shadow-color), 0 0 10px var(--button-bg-color); /* Initial glow */
-    transition: background var(--transition-speed) ease, color var(--transition-speed) ease;
-    animation: pulse-shadow 3s ease-in-out infinite; /* Add pulsing animation */
-  }
-  
-  /* Keyframes for pulsing box-shadow */
-  @keyframes pulse-shadow {
-    0% {
-        box-shadow: 0 4px 20px var(--shadow-color), 0 0 10px var(--button-bg-color);
+    .nav-links {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
     }
-    50% {
-        box-shadow: 0 6px 30px var(--shadow-color), 0 0 15px var(--button-bg-color); /* Larger shadow */
-    }
-    100% {
-        box-shadow: 0 4px 20px var(--shadow-color), 0 0 10px var(--button-bg-color); /* Reset shadow */
+    .nav-links li {
+        padding: 10px 0;
     }
   }
-  
-  
-  h1 {
-    color: var(--highlight-color);
-    font-size: 2.5rem;
-    margin-bottom: 20px;
+
+
+/* Color Scheme Variables */
+:root {
+  --bg-color: #fdf5e6;
+  --text-color: #333333;
+  --navbar-bg-color: #424141;
+  --navbar-text-color: #ffffff;
+  --input-bg-color: #f1f1f1;
+  --button-bg-color: #ffcc33; /* Yellow button color for light mode */
+  --button-text-color: #ffffff;
+  --box-color-light: #35524a; /* Green color for light mode box */
+  --highlight-color: #c0c0c0; /* Silver color for main text */
+  --outline-color: #cccccc;
+  --link-color: #4682b4;
+  --shadow-color: rgba(0, 0, 0, 0.2);
+  --transition-speed: 0.3s;
+}
+
+[data-theme="dark"] {
+  --bg-color: #1c1c2e;
+  --text-color: #eeeeee;
+  --navbar-bg-color: #33334e;
+  --input-bg-color: #2c2c3e;
+  --input-border-color: #444;
+  --button-bg-color: #4682b4; /* Purple button color for dark mode */
+  --box-color-light: #2c2c3e;
+  --highlight-color: #ffffff;
+  --outline-color: #444;
+  --link-color: #87ceeb;
+  --shadow-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] #answer-input:focus {
+  border-color: var(--button-bg-color);
+  box-shadow: 0 0 5px var(--button-bg-color);
+}
+
+body {
+  overflow-y: hidden;
+  font-family: 'Arial', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  padding-top: 70px;
+  transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+}
+
+/* Container with Pulsing Box-Shadow Effect */
+.container {
+  background-color: var(--box-color-light);
+  width: 80%;
+  max-width: 600px;
+  text-align: center;
+  padding: 20px;
+  background: var(--box-color-light);
+  border-radius: 15px;
+  box-shadow: 0 4px 20px var(--shadow-color), 0 0 10px var(--button-bg-color); /* Initial glow */
+  transition: background var(--transition-speed) ease, color var(--transition-speed) ease;
+  animation: pulse-shadow 3s ease-in-out infinite; /* Add pulsing animation */
+}
+
+/* Keyframes for pulsing box-shadow */
+@keyframes pulse-shadow {
+  0% {
+      box-shadow: 0 4px 20px var(--shadow-color), 0 0 10px var(--button-bg-color);
   }
-  
-  #question, #question-number {
-    font-size: 1.5rem;
-    margin-bottom: 20px;
+  50% {
+      box-shadow: 0 6px 30px var(--shadow-color), 0 0 15px var(--button-bg-color); /* Larger shadow */
   }
-  
-  #answer-form {
-    margin: 20px 0;
+  100% {
+      box-shadow: 0 4px 20px var(--shadow-color), 0 0 10px var(--button-bg-color); /* Reset shadow */
+  }
+}
+
+
+h1 {
+  color: var(--highlight-color);
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+#question, #question-number {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
+
+#answer-form {
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* display: none; */
+}
+
+#answer-input {
+  padding: 10px;
+  width: calc(100% - 20px);
+  border: 1px solid var(--input-border-color);
+  border-radius: 5px;
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+#answer-input:focus {
+  border-color: var(--button-bg-color);
+  outline: none;
+}
+
+#answer-input {
+  padding: 10px;
+  width: calc(100% - 20px);
+  border: 1px solid var(--input-border-color, var(--outline-color)); /* Fallback for light mode */
+  border-radius: 5px;
+  font-size: 1rem;
+  margin-bottom: 10px;
+  background-color: var(--input-bg-color);
+  transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+#answer-input:focus {
+  border-color: var(--button-bg-color);
+  box-shadow: 0 0 5px var(--button-bg-color);
+  outline: none;
+}
+
+
+
+
+/* Shake animation */
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
+
+/* Apply shake animation */
+.shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Red color for error */
+.error {
+  color: red;
+}
+
+button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: var(--button-bg-color);
+  color: var(--button-text-color);
+  cursor: pointer;
+  font-size: 1.2rem;
+  margin-top: 10px;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+button:hover {
+  box-shadow: 0 0 10px var(--button-bg-color), 0 0 20px var(--button-bg-color);
+  transform: scale(1.05); /* Slight scale for effect */
+}
+
+/* Loading Animation */
+.loading-container {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  margin: 20px 0;
+}
+
+/* Loading Text with Moving Gradient */
+.loading-text {
+  font-size: 1.4rem;
+  font-weight: bold;
+  margin-bottom: 25px;
+  background: linear-gradient(90deg, #ff0000, #6366f1, #ccff00, #ff0000, #6366f1, #ccff00); /* Start and end colors match */
+  background-size: 300%; /* Allows gradient to move smoothly */
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradient-shift 10s linear infinite; /* Continuous animation */
+}
+
+/* Keyframes for a smooth flow */
+@keyframes gradient-shift {
+  0% {
+      background-position: 0% 50%;
+  }
+  100% {
+      background-position: 200% 50%; /* Ensures the gradient loops smoothly */
+  }
+}
+
+
+
+/* Loading Dots with Bounce Animation */
+.loading-dots {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    /* display: none; */
-  }
-  
-  #answer-input {
-    padding: 10px;
-    width: calc(100% - 20px);
-    border: 1px solid var(--input-border-color);
-    border-radius: 5px;
-    font-size: 1rem;
-    margin-bottom: 10px;
-  }
-  
-  #answer-input:focus {
-    border-color: var(--button-bg-color);
-    outline: none;
-  }
-  
-  /* Shake animation */
-  @keyframes shake {
-    0% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    50% { transform: translateX(5px); }
-    75% { transform: translateX(-5px); }
-    100% { transform: translateX(0); }
-  }
-  
-  /* Apply shake animation */
-  .shake {
-    animation: shake 0.5s ease-in-out;
-  }
-  
-  /* Red color for error */
-  .error {
-    color: red;
-  }
-  
-  
-  
-  
-  button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    background-color: var(--button-bg-color);
-    color: var(--button-text-color);
-    cursor: pointer;
-    font-size: 1.2rem;
+    gap: 8px;
     margin-top: 10px;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-  }
-  
-  button:hover {
-    box-shadow: 0 0 10px var(--button-bg-color), 0 0 20px var(--button-bg-color);
-    transform: scale(1.05); /* Slight scale for effect */
-  }
-  
-  /* Loading Animation */
-  .loading-container {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    margin: 20px 0;
-  }
-  
-  /* Loading Text with Moving Gradient */
-  .loading-text {
-      font-size: 1.4rem;
-      font-weight: bold;
-      margin-bottom: 25px;
-      background: linear-gradient(90deg, #ff0000, #6366f1, #ccff00); /* Gradient colors */
-      background-size: 200%; /* Allows gradient to move */
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      animation: gradient-shift 4s linear infinite;
-  }
-  
-  /* Animation to shift the gradient */
-  @keyframes gradient-shift {
-      0% {
-          background-position: 0% 50%;
-      }
-      100% {
-          background-position: 100% 50%;
-      }
-  }
-  
-  /* Loading Dots with Bounce Animation */
-  .loading-dots {
-      display: flex;
-      gap: 8px;
-      margin-top: 10px;
-  }
-  
-  .dot {
-      width: 12px;
-      height: 12px;
-      background-color: var(--button-bg-color); /* Define this color in root or body */
-      border-radius: 50%;
-      animation: wave 0.5s infinite alternate;
-  }
-  
-  .dot:nth-child(2) { animation-delay: 0.1s; }
-  .dot:nth-child(3) { animation-delay: 0.2s; }
-  
-  /* Bounce Animation for Dots */
-  @keyframes wave {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-15px); }
-  }
-  
-  
-  .progress-bar {
-    width: 100%;
-    height: 4px;
-    background-color: var(--outline-color);
-    color: #33334e;
-  }
-  
-  .progress-fill {
-    width: 0%;
-    height: 100%;
-    background-color: var(--button-bg-color);
-    animation: fillProgress 3s linear forwards;
-  }
-  
-  @keyframes fillProgress {
-    from { width: 0%; }
-    to { width: 100%; }
-  }
-  
-  /* Media Queries */
-  @media (max-width: 768px) {
-    h1 { font-size: 2rem; }
-    #question { font-size: 1.2rem; }
-    button { font-size: 1rem; }
-  } 
-  
-  /* Dark Mode Toggle Button */
-  #toggle-dark-mode {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    padding: 10px;
-    font-size: 1.2em;
-    cursor: pointer;
-    background-color: var(--button-bg-color);
-    color: var(--button-text-color);
-    border: none;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    background-color: var(--button-bg-color); /* Define this color in root or body */
     border-radius: 50%;
-    box-shadow: 0 4px 8px var(--shadow-color);
-    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+    animation: wave 0.5s infinite alternate;
+}
+
+.dot:nth-child(2) { animation-delay: 0.1s; }
+.dot:nth-child(3) { animation-delay: 0.2s; }
+
+/* Bounce Animation for Dots */
+@keyframes wave {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+  h1 { font-size: 2rem; }
+  #question { font-size: 1.2rem; }
+  button { font-size: 1rem; }
+} 
+
+#theme-toggle-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+#question-range-info {
+  font-size: 1.4rem;
+  color: var(--highlight-color);
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin-top: 10px;
+}
+
+[data-theme="dark"] #question-range-info {
+  color: #f0f0f0;
+}
+
+
+
+#count-display, #question-number, #question {
+  color: var(--highlight-color);
+  font-size: 1.5rem;
+}
+
+/* Enhanced Slider Styles */
+input[type="range"] {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--outline-color);
+  outline: none;
+  margin: 20px 0;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--button-bg-color);
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 0 5px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 10px var(--button-bg-color);
+}
+
+
+/* Text Field Styles */
+input[type="text"], input[type="password"], textarea {
+  background-color: var(--input-bg-color);
+  color: var(--input-text-color);
+  border: 2px solid var(--box-color-light);
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 5px;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
+  outline: none;
+  border-color: var(--highlight-color);
+}
+
+
+:root {
+  --background: #ffffff;
+  --text: #1a1a1a;
+  --surface: #f5f5f5;
+  --toggle-bg: #e2e8f0;
+  --toggle-hover: #cbd5e1;
+}
+
+[data-theme='dark'] {
+  --background: #1a1a1a;
+  --text: #ffffff;
+  --surface: #2d2d2d;
+  --toggle-bg: #4b5563;
+  --toggle-hover: #374151;
+}
+
+* {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.theme-toggle {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  padding: 0.5rem;
+  border: none;
+  background: var(--toggle-bg);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+  background: var(--toggle-hover);
+}
+
+.theme-toggle:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--button-bg-color);
+}
+
+
+.icon-container {
+  position: relative;
+  width: 24px;
+  height: 24px;
+}
+
+.sun-icon,
+.moon-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: var(--text);
+  transition: transform 0.5s ease, opacity 0.3s ease;
+}
+
+[data-theme='dark'] .sun-icon {
+  transform: rotate(180deg);
+  opacity: 0;
+}
+
+[data-theme='dark'] .moon-icon {
+  transform: rotate(0);
+  opacity: 1;
+}
+
+[data-theme='light'] .sun-icon {
+  transform: rotate(0);
+  opacity: 1;
+}
+
+[data-theme='light'] .moon-icon {
+  transform: rotate(-180deg);
+  opacity: 0;
+}
+
+
+.theme-toggle.pressed {
+  transform: scale(0.95);
+}
+
+.theme-toggle.animated .icon-container {
+  animation: spin 0.5s ease;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
   }
-  
-  /* Hover effect */
-  #toggle-dark-mode:hover {
-    transform: scale(1.1) rotate(15deg); /* Slightly scale up and rotate */
-    box-shadow: 0 0 15px var(--button-bg-color); /* Glow effect */
-    background-color: var(--button-hover-bg-color); /* Change background on hover */
-    color: var(--button-hover-text-color); /* Change text color on hover */
+  100% {
+    transform: rotate(360deg);
   }
-  
-  /* Optional active effect (when clicked) */
-  #toggle-dark-mode:active {
-    transform: scale(1.05); /* Slightly shrink on click */
-    box-shadow: 0 4px 6px var(--shadow-color); /* Reduced shadow when pressed */
-  }
-  
-  
-  
-  #count-display, #question-number, #question {
-    color: var(--highlight-color);
-    font-size: 1.3rem;
-  }
-  
-  /* Enhanced Slider Styles */
-  input[type="range"] {
-    width: 100%;
-    height: 8px;
-    border-radius: 4px;
-    background: var(--outline-color);
-    outline: none;
-    margin: 20px 0;
-    cursor: pointer;
-  }
-  
-  input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: var(--button-bg-color);
-    cursor: pointer;
-    border: 2px solid white;
-    box-shadow: 0 0 5px rgba(0,0,0,0.2);
-    transition: all 0.3s ease;
-  }
-  
-  input[type="range"]::-webkit-slider-thumb:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 10px var(--button-bg-color);
-  }
-  
-  /* Show Results Button Styles */
-  #show-results-button {
-    display: none; /* Initially hidden */
-    opacity: 0;
-    transform: translateY(20px); /* Initially off-screen */
-    transition: opacity 0.5s ease, transform 0.5s ease; /* Smooth transition */
-    background: var(--button-bg-color);
-    color: var(--button-text-color);
-    padding: 15px 30px;
-    border-radius: 8px;
-    font-size: 1.2rem;
-    margin-top: 20px;
-    cursor: pointer;
-    border: none;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  #show-results-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-  }
-  
-  #show-results-button:disabled {
-    opacity: 0.7;
-    cursor: wait;
-  }
-  
-  /* Text Field Styles */
-  input[type="text"], input[type="password"], textarea {
-    background-color: var(--input-bg-color);
-    color: var(--input-text-color);
-    border: 2px solid var(--box-color-light);
-    padding: 10px;
-    font-size: 1rem;
-    border-radius: 5px;
-    width: 100%;
-    transition: all 0.3s ease;
-  }
-  
-  input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
-    outline: none;
-    border-color: var(--highlight-color);
-  }
-  
+}

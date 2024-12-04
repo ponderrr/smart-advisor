@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Advisor - Questions</title>
     <link rel="stylesheet" href="css/v-auth-style.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 </head>
 <body>
     <nav class="navbar">
@@ -23,10 +24,21 @@
         <h1>Smart Advisor</h1>
 
         <div id="question-count-section">
-            <p id="count-display">Number of Questions: 3-15</p>
+            <p id="question-range-info">Choose 3 to 15 questions</p>
+            <p id="count-display">Number of Questions: 3</p>
             <input type="range" id="question-count-slider" min="3" max="15" value="3">
             <button id="start-quiz">Start Quiz</button>
         </div>
+
+        <div id="generating-questions-container" class="loading-container" style="display: none;">
+            <p class="loading-text">Generating questions...</p>
+            <div class="loading-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+        
 
         <div id="questions-section" style="display: none;">
             <h2 id="question-number"></h2>
@@ -39,7 +51,7 @@
             <p id="success"></p>
         </div>
 
-        <div id="loading-container" class="loading-container">
+        <div id="loading-container" class="loading-container" style="display: none;">
             <p class="loading-text">Analyzing your answers...</p>
             <div class="loading-dots">
                 <div class="dot"></div>
@@ -49,7 +61,27 @@
         </div>
     </div>
 
+    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+        <div class="icon-container">
+          <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </div>
+      </button>
+
+    
+
     <script type="module" src="js/questions.js"></script>
-    <script type="module" src="js/v-auth-script.js"></script>
 </body>
 </html>
