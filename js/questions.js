@@ -106,8 +106,13 @@ async function submitAllAnswers() {
             recommendationDetails: result.recommendation,
             timestamp: new Date().toISOString()
         };
-
-        await saveUserRecommendation(recommendationData);
+        console.log('About to save:', recommendationData);
+        try {
+            await saveUserRecommendation(recommendationData);
+            console.log('Save successful');
+        } catch (err) {
+            console.error('Save failed:', err);
+        }
         window.location.href = 'results.html';
     } catch (error) {
         console.error('Error submitting answers:', error);

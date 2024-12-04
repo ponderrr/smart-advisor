@@ -26,8 +26,6 @@ export async function getQuestionsAndRecommendation({ numberOfQuestions, age, ty
       });
 
       const rawQuestions = response.data.choices[0].message.content;
-
-      console.log("here", rawQuestions);
       const questions = rawQuestions.split('\n')
         .filter(q => q.trim())
         .map(q => q.replace(/^\d+\.\s*/, '').trim());
@@ -35,18 +33,47 @@ export async function getQuestionsAndRecommendation({ numberOfQuestions, age, ty
       return { questions };
     }
 
-    const recommendationPrompt = `Based on these answers from a ${age} year old user: ${JSON.stringify(answers)}
-    Please recommend ${type === 'both' ? 'one movie and one book' : 'one ' + type} that is:
-    1. Age-appropriate (rated ${age <= 13 ? 'G or PG' : age <= 17 ? 'up to PG-13' : 'any rating'})
-    2. Matches their interests
-    3. Has good entertainment value
-    
-    Format the response as JSON with these fields:
-    - title (string)
-    - type (string: "movie", "book", or "both")
-    - rating (number 1-5)
-    - genres (array of strings)
-    - ageRating (string)`;
+    let recommendationPrompt;
+    if (type === 'both') {
+      recommendationPrompt = `Based on these answers from a ${age} year old user: ${JSON.stringify(answers)}
+      Please recommend one movie AND one book that are:
+      1. Age-appropriate (rated ${age <= 13 ? 'G or PG' : age <= 17 ? 'up to PG-13' : 'any rating'})
+      2. Match their interests
+      3. Have good entertainment value
+      
+      Format the response as JSON with this exact structure:
+      {
+        "movie": {
+          "title": string,
+          "type": "movie",
+          "rating": number 1-5,
+          "genres": array of strings,
+          "ageRating": string
+        },
+        "book": {
+          "title": string,
+          "type": "book",
+          "rating": number 1-5,
+          "genres": array of strings,
+          "ageRating": string
+        }
+      }`;
+    } else {
+      recommendationPrompt = `Based on these answers from a ${age} year old user: ${JSON.stringify(answers)}
+      Please recommend one ${type} that is:
+      1. Age-appropriate (rated ${age <= 13 ? 'G or PG' : age <= 17 ? 'up to PG-13' : 'any rating'})
+      2. Matches their interests
+      3. Has good entertainment value
+      
+      Format the response as JSON with these fields:
+      {
+        "title": string,
+        "type": "${type}",
+        "rating": number 1-5,
+        "genres": array of strings,
+        "ageRating": string
+      }`;
+    }
 
     const response = await axiosInstance.post('', {
       model: "gpt-3.5-turbo",
@@ -59,7 +86,7 @@ export async function getQuestionsAndRecommendation({ numberOfQuestions, age, ty
 
     const recommendation = JSON.parse(response.data.choices[0].message.content);
     console.log("recommendation", recommendation);
-    localStorage.setItem("recommendationDetails", JSON.stringify(recommendation))
+    localStorage.setItem("recommendationDetails", JSON.stringify(recommendation));
     return { recommendation };
 
   } catch (error) {
