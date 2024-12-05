@@ -35,50 +35,53 @@ export async function getQuestionsAndRecommendation({ numberOfQuestions, age, ty
       return { questions };
     }
 
-    const recommendationPrompt = `Based on these answers from a ${age} year old user: ${JSON.stringify(answers)}
-    Please recommend ${type === 'both' ? 'one movie and one book' : 'one ' + type} that is:
-    1. Age-appropriate (rated ${age <= 13 ? 'G or PG' : age <= 17 ? 'up to PG-13' : 'any rating'})
-    2. Matches their interests
-    3. Has good entertainment value
+    let recommendationPrompt;
+    if (type === 'both') {
+      recommendationPrompt = `Based on these answers from a ${age} year old user: ${JSON.stringify(answers)}
+      Please recommend one movie AND one book that are:
+      1. Age-appropriate (rated ${age <= 13 ? 'G or PG' : age <= 17 ? 'up to PG-13' : 'any rating'})
+      2. Match their interests
+      3. Have good entertainment value
     
-    For each recommendation, provide:
-    - title (string)
-    - type (string: "movie" or "book")
-    - rating (number between 1-5)
-    - genres (array of strings)
-    - ageRating (string)
-    - description (string of ~100 words describing the plot/content)
-    - posterPath (string URL to movie poster or book cover - for now just use "placeholder.jpg")
+      Format the response as JSON with this structure:
+      {
+        "movie": {
+          "title": "",
+          "type": "movie",
+          "rating": 0,
+          "genres": [],
+          "ageRating": "",
+          "description": "",
+          "posterPath": ""
+        },
+        "book": {
+          "title": "",
+          "type": "book",
+          "rating": 0,
+          "genres": [],
+          "ageRating": "",
+          "description": "",
+          "posterPath": ""
+        }
+      }`;
+    } else {
+      recommendationPrompt = `Based on these answers from a ${age} year old user: ${JSON.stringify(answers)}
+      Please recommend one ${type} that is:
+      1. Age-appropriate (rated ${age <= 13 ? 'G or PG' : age <= 17 ? 'up to PG-13' : 'any rating'})
+      2. Matches their interests
+      3. Has good entertainment value
     
-    Format the response as JSON with this structure:
-    {
-      ${type === 'both' ? `
-      "movie": {
+      Format the response as JSON with these fields:
+      {
         "title": "",
-        "type": "movie",
+        "type": "${type}",
         "rating": 0,
         "genres": [],
         "ageRating": "",
         "description": "",
         "posterPath": ""
-      },
-      "book": {
-        "title": "",
-        "type": "book",
-        "rating": 0,
-        "genres": [],
-        "ageRating": "",
-        "description": "",
-        "posterPath": ""
-      }` : `
-      "title": "",
-      "type": "${type}",
-      "rating": 0,
-      "genres": [],
-      "ageRating": "",
-      "description": "",
-      "posterPath": ""`}
-    }`;
+      }`;
+    }    
 
     const response = await axiosInstance.post('', {
       model: "gpt-3.5-turbo",

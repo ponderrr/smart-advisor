@@ -14,6 +14,8 @@ function handleAccountNav() {
 function displayRecommendations() {
     try {
         const recommendationData = JSON.parse(localStorage.getItem('recommendationDetails'));
+        console.log('Recommendation Data:', recommendationData);
+        console.log('Recommendation Type:', localStorage.getItem('recommendationType'));
         if (!recommendationData) {
             showError('No recommendation data found. Please try the questionnaire again.');
             return;
