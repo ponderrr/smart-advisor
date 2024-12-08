@@ -1,0 +1,222 @@
+/* Core variables and resets */
+:root {
+    --bg-color: #1c1c1e;
+    --navbar-bg: #1f1f1f;
+    --card-bg: #2c2c3e;
+    --text-color: #ffffff;
+    --accent-blue: #4682b4;
+    --border-color: #333;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --input-bg: #33334e;
+    --success-color: #4CAF50;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    min-height: 100vh;
+    padding-top: 70px;
+}
+
+/* Navbar Styling */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: var(--navbar-bg);
+    padding: 1rem 0;
+    box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+.navbar-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2rem;
+}
+
+.logo img {
+    height: 50px;
+    width: auto;
+}
+
+.navbar a {
+    color: var(--text-color);
+    text-decoration: none;
+    margin-left: 2rem;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.navbar a:hover {
+    color: var(--accent-blue);
+}
+
+/* Account Container */
+.account-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+}
+
+/* Section Styling */
+.section {
+    background-color: var(--card-bg);
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px var(--shadow-color);
+}
+
+.section h2 {
+    color: var(--text-color);
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+}
+
+/* Profile Section */
+.profile-section {
+    text-align: center;
+}
+
+.user-info h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+/* Recommendations Section */
+.recommendations-section {
+    margin-top: 2rem;
+}
+
+.recommendation-item {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+
+.recommendation-title {
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+}
+
+.recommendation-details p {
+    margin-bottom: 0.5rem;
+}
+
+.meta-label {
+    color: var(--accent-blue);
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+/* Form Sections */
+.change-password-section {
+    margin-top: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    font-size: 1rem;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 2px rgba(70, 130, 180, 0.2);
+}
+
+button {
+    background-color: var(--accent-blue);
+    color: var(--text-color);
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background-color: #5593c5;
+    transform: translateY(-2px);
+}
+
+/* Success Messages */
+.success-message {
+    color: var(--success-color);
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 2rem 0;
+    color: var(--text-color);
+    opacity: 0.8;
+    margin-top: 4rem;
+}
+
+/* Theme Toggle */
+.toggle-box {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: var(--card-bg);
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px var(--shadow-color);
+    cursor: pointer;
+    z-index: 1000;
+}
+
+#mode-icon {
+    font-size: 1.5rem;
+    color: var(--text-color);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .navbar-container {
+        padding: 0 1rem;
+    }
+
+    .section {
+        padding: 1.5rem;
+    }
+
+    .form-group input {
+        font-size: 16px; /* Prevents zoom on mobile */
+    }
+}

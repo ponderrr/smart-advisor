@@ -1,0 +1,243 @@
+/* Import theme variables */
+@import 'themes.css';
+
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    min-height: 100vh;
+    padding-top: 70px;
+}
+
+/* Navbar Styling */
+.navbar-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: var(--navbar-bg-color);
+    padding: 1rem 0;
+    box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+.navbar {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2rem;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    height: 50px;
+    width: auto;
+}
+
+.nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+}
+
+.nav-links a {
+    color: var(--navbar-text-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.nav-links a:hover {
+    color: #60a5fa;
+    text-shadow: 0 0 10px #60a5fa;
+}
+
+/* Results Container Styling */
+.results-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+}
+
+.results-container h1 {
+    color: var(--text-color);
+    text-align: center;
+    margin-bottom: 1rem;
+    font-size: 2.5rem;
+}
+
+.results-container p {
+    text-align: center;
+    color: var(--text-color);
+    margin-bottom: 2rem;
+}
+
+/* Recommendation Block Styling */
+.recommendation-block {
+    background-color: #1f2937;  /* Dark navy background */
+    border-radius: 1rem;
+    padding: 2rem;
+    margin: 2rem 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.recommendation-type {
+    color: #ffffff;
+    font-size: 1rem;
+    text-align: center;
+    margin-bottom: 0.5rem;
+    opacity: 0.8;
+}
+
+.recommendation-block h2 {
+    color: var(--text-color);
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+    text-align: center;
+}
+
+.recommendation-content {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+/* Poster Styling */
+.poster-container {
+    flex: 0 0 300px;
+}
+
+.recommendation-poster {
+    width: 100%;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px var(--shadow-color);
+}
+
+/* Details Styling */
+.recommendation-details {
+    flex: 1;
+}
+
+.recommendation-title {
+    color: #ffffff;
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.recommendation-meta {
+    margin-bottom: 1.5rem;
+}
+
+.meta-label {
+    color: #60a5fa;  /* Bright blue for labels */
+    font-weight: bold;
+}
+
+.recommendation-description {
+    line-height: 1.6;
+    color: var(--text-color);
+}
+
+/* Rating Styling */
+.rating-number {
+    font-size: 0.9em;
+    color: var(--text-color);
+    margin-left: 0.5rem;
+}
+
+/* Error Message Styling */
+.error-message {
+    background-color: var(--error-bg-color);
+    color: var(--error-text-color);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+    text-align: center;
+}
+
+/* Retake Button Styling */
+.retake-btn {
+    background-color: transparent;
+    color: #60a5fa;  /* Same blue as meta labels */
+    border: 2px solid #60a5fa;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.retake-btn:hover {
+    box-shadow: 0 0 15px #60a5fa;
+    transform: translateY(-2px);
+}
+
+/* Theme Toggle */
+.toggle-box {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: var(--card-bg-color);
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px var(--shadow-color);
+    z-index: 1000;
+    cursor: pointer;
+}
+
+#mode-icon {
+    font-size: 1.5rem;
+    color: var(--text-color);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .recommendation-content {
+        flex-direction: column;
+    }
+
+    .poster-container {
+        max-width: 250px;
+        margin: 0 auto;
+    }
+
+    .recommendation-title {
+        text-align: center;
+    }
+
+    .navbar {
+        padding: 0 1rem;
+    }
+
+    .nav-links {
+        gap: 1rem;
+    }
+}
+
+.content-wrapper {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+@media (max-width: 768px) {
+    .content-wrapper {
+        flex-direction: column;
+        align-items: center;
+    }
+}

@@ -3,74 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Advisor - Recommendations</title>
-    <link rel="stylesheet" href="css/Tstyles.css">
-    <link rel="stylesheet" href="css/Tthemes.css">
+    <title>Your Recommendations - Smart Advisor</title>
+    <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-         <nav class="navbar">
-            <div class="navbar-container">
-                <div class="logo">
-                    <img src="images/logo.png" alt="Smart Advisor Logo">
-                </div>
-                <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="account.html">Account</a></li>
-                </ul>
+    <div class="navbar-container">
+        <nav class="navbar">
+            <div class="logo">
+                <img src="images/Smart_AdvisorLogo.png" alt="Smart Advisor Logo">
             </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="account.html">Account</a></li>
+            </ul>
         </nav>
+    </div>
 
-        </div>
-        <div class="toggle-box">
-            <button id="mode-toggle" class="mode-toggle-btn">
-                <span id="mode-icon"></span>
-            </button>  <!-- Added closing button tag -->
-        </div>
-    </header>
-
-
-    <main class="results-container">
+    <div class="results-container">
         <h1>Your Recommendations</h1>
         <p>Based on your questionnaire responses</p>
-    
-        <!-- Movie Recommendation Section with Background Image -->
-        <section class="recommendation-block movie-recommendation" id="movieSection" style="display: none;">
+        
+        <div id="movieSection" class="section recommendation-block movie-recommendation">
             <h2>Movie Recommendation</h2>
-            <div class="recommendation-item">
-                <div class="recommendation-content">
-                    <p class="title" id="movieTitle"></p>
-                    <div class="recommendation-details">
-                        <p class="age-rating" id="movieAgeRating"></p>
-                        <p class="genres" id="movieGenres"></p>
-                        <p class="rating" id="movieRating"></p>
-                    </div>
-                </div>
-            </div>
-        </section>
-    
-        <!-- Book Recommendation Section with Background Image -->
-        <section class="recommendation-block book-recommendation outlined-box" id="bookSection" style="display: none;">
+            <div class="recommendation-item"></div>
+        </div>
+        
+        <div id="bookSection" class="section recommendation-block book-recommendation">
             <h2>Book Recommendation</h2>
-            <div class="recommendation-item">
-                <div class="recommendation-content">
-                    <p class="title" id="bookTitle"></p>
-                    <div class="recommendation-details">
-                        <p class="age-rating" id="bookAgeRating"></p>
-                        <p class="genres" id="bookGenres"></p>
-                        <p class="rating" id="bookRating"></p>
-                    </div>
-                </div>
-            </div>
-        </section>
+            <div class="recommendation-item"></div>
+        </div>
+        
+        <button onclick="window.location.href='questions.html'" class="retake-btn">
+            Retake Questionnaire
+        </button>
+    </div>
 
-        <!-- Retake Questionnaire Section with Background Image -->
-        <section class="retake-section outlined-box">
-            <button class="retake-btn" onclick="window.location.href='questions.html';">Retake Questionnaire</button>
-        </section>
-    </main>
+    <div class="toggle-box" onclick="toggleTheme()">
+        <span id="mode-icon">🌙</span>
+    </div>
 
-    <script src="js/Tapp.js"></script>
-    <script src="js/Tscript.js"></script>
-    <script type="module" src="js/displayResults.js"></script>
+    <script src="js/displayResults.js"></script>
+    <script>
+        // Theme toggle functionality
+        function toggleTheme() {
+            const root = document.documentElement;
+            const currentTheme = root.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            root.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('mode-icon');
+            icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+
+        // Apply saved theme on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+        });
+    </script>
 </body>
 </html>
