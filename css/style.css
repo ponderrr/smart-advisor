@@ -8,22 +8,22 @@
 
 /* Color Variables */
 :root {
-    --bg-color: #f5f2e9; /* Light beige background for home page */
-    --text-color: #b0b0b0; /* Silver text color for feature/step box text */
-    --box-color-light: #3e5a47; /* Green for feature and step boxes */
-    --button-bg-color: #f3b623; /* Yellow button for movie/book buttons */
-    --button-text-color: #3e5a47; /* Green text color on button */
-    --box-outline: #3e5a47; /* Green outline for the boxes */
-    --nav-bg-color: #333; /* Darker nav background color */
+    --bg-color: #f5f5f7;  /* Light gray with slight blue tint */
+    --text-color: #000000; /* Black text */
+    --box-color-light: #ffffff; /* White boxes */
+    --button-bg-color: #E34275;  /* Vibrant pink */
+    --button-text-color: #ffffff; 
+    --box-outline: #E34275;  /* Vibrant pink */
+    --nav-bg-color: #333; /* Keep nav color */
 }
 
 [data-theme="dark"] {
     --bg-color: #1c1c1e;
     --text-color: #eeeeee;
     --box-color-light: #2c2c3e;
-    --button-bg-color: #4682b4;
+    --button-bg-color: #BA262B;  /* Bright red */
     --button-text-color: #ffffff;
-    --box-outline: #4682b4;
+    --box-outline: #BA262B;  /* Bright red */
 }
 
 /* Body Styling */
@@ -91,7 +91,7 @@ header nav {
     box-shadow: 0 4px 10px var(--box-outline);
     background-size: cover;
     background-position: center;
-    height: 600px; /* Increased height for movie cover images */
+    height: 600px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -130,43 +130,148 @@ button:hover {
     flex-wrap: wrap;
 }
 
+/* Feature Box Light Mode */
 .feature-box, .step-box {
-    background-color: var(--box-color-light); /* Green background */
-    color: var(--text-color); /* Silver text color */
+    background: linear-gradient(
+        45deg,
+        #401F59,  /* Deep purple */
+        #61265F,  /* Purple */
+        #812D64,  /* Purple-pink */
+        #A2346A,  /* Pink */
+        #C23B6F,  /* Brighter pink */
+        #E34275   /* Vibrant pink */
+    );
+    color: #ffffff;
     padding: 30px;
     margin: 10px;
-    box-shadow: 0 4px 10px var(--box-outline);
-    border: 2px solid var(--box-outline);
+    box-shadow: 0 4px 10px rgba(227, 66, 117, 0.5);  /* #E34275 with opacity */
+    border: 2px solid #E34275;
     border-radius: 8px;
     width: 30%;
     min-width: 250px;
     text-align: center;
+    transition: transform 0.3s ease;
+}
+
+/* Feature Box Dark Mode */
+[data-theme="dark"] .feature-box,
+[data-theme="dark"] .step-box {
+    background: linear-gradient(
+        45deg,
+        #810020,  /* Deep burgundy */
+        #900A22,  /* Dark red */
+        #A41726,  /* Medium red */
+        #BA262B,  /* Bright red */
+        #CA302D   /* Light red */
+    );
+    box-shadow: 0 4px 10px rgba(186, 38, 43, 0.5);  /* #BA262B with opacity */
+    border: 2px solid #BA262B;
+}
+
+/* Dark Mode Specific Styles */
+[data-theme="dark"] .recommend-box {
+    border: 2px solid #BA262B;
+    box-shadow: 0 4px 10px #BA262B;
+}
+
+[data-theme="dark"] button:hover {
+    box-shadow: 0 0 15px #BA262B, 0 0 25px #BA262B, 0 0 35px #BA262B;
 }
 
 .feature-box h3, .step-box p {
     font-size: 2em;
     margin-bottom: 15px;
-    color: var(--text-color); /* Silver text color */
+    color: #ffffff;
 }
 
 .feature-box p, .step-box p {
     font-size: 1.6em;
     line-height: 1.6;
     margin-top: 15px;
-    color: var(--text-color); /* Silver text color */
+    color: #ffffff;
 }
 
-/* Dark Mode Toggle */
+/* Theme Toggle Button */
 #toggle-dark-mode {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    padding: 10px;
-    font-size: 1.2em;
-    cursor: pointer;
-    background-color: var(--button-bg-color);
-    color: var(--button-text-color);
+    padding: 0.5rem;
     border: none;
-    border-radius: 50%;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background: var(--toggle-bg, #e2e8f0);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+}
+
+#toggle-dark-mode:hover {
+    background: var(--toggle-hover, #cbd5e1);
+}
+
+#toggle-dark-mode:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--button-bg-color);
+}
+
+[data-theme="dark"] #toggle-dark-mode:focus {
+    box-shadow: 0 0 0 2px #BA262B;
+}
+
+/* Icon Container Styles */
+.icon-container {
+    position: relative;
+    width: 24px;
+    height: 24px;
+}
+
+.sun-icon,
+.moon-icon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: var(--text);
+    transition: transform 0.5s ease, opacity 0.3s ease;
+}
+
+[data-theme='dark'] .sun-icon {
+    transform: rotate(180deg);
+    opacity: 0;
+}
+
+[data-theme='dark'] .moon-icon {
+    transform: rotate(0);
+    opacity: 1;
+}
+
+[data-theme='light'] .sun-icon {
+    transform: rotate(0);
+    opacity: 1;
+}
+
+[data-theme='light'] .moon-icon {
+    transform: rotate(-180deg);
+    opacity: 0;
+}
+
+/* Theme Toggle Animation */
+.theme-toggle.pressed {
+    transform: scale(0.95);
+}
+
+.theme-toggle.animated .icon-container {
+    animation: spin 0.5s ease;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }

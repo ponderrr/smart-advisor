@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+console.log("api key", TMDB_API_KEY)
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
 export async function getMoviePoster(movieTitle) {
@@ -13,7 +14,7 @@ export async function getMoviePoster(movieTitle) {
             }
         });
 
-        console.log('TMDB API response:', response.data);
+        console.log('TMDB API response:', response);
         
         if (response.data.results && response.data.results.length > 0) {
             const posterPath = response.data.results[0].poster_path;
