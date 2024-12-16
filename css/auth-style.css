@@ -1,23 +1,25 @@
 /* Color Scheme Variables */
 :root {
-    --bg-color: #f5f2e9; /* Light beige background */
-    --box-color-light: #3e5a47; /* Green for the box */
-    --text-color-light: #d2d2c0; /* Light greyish text */
-    --input-bg-color-light: #ece5d9; /* Light cream for input fields */
-    --button-bg-color-light: #f3b623; /* Yellow for buttons */
-    --button-text-color-light: #3e5a47; /* Green text color on button */
-    --border-color: #3e5a47; /* Green border color for inputs */
+    --bg-color: #f5f5f7;  /* Light gray background */
+    --text-color: #000000; /* Black text */
+    --input-bg-color: #ffffff; /* White input background */
+    --button-bg-color: #E34275; /* Vibrant pink */
+    --box-color-light: #ffffff; /* White box background */
+    --button-text-color: #ffffff; /* White text on buttons */
+    --border-color: #E34275; /* Vibrant pink borders */
+    --box-shadow-color: rgba(227, 66, 117, 0.2); /* Pink shadow with opacity */
 }
 
 /* Dark Theme Variables */
 [data-theme="dark"] {
-    --bg-color: #1c1c2e;
-    --text-color-light: #eeeeee;
-    --input-bg-color-light: #33334e;
-    --button-bg-color-light: #4682b4;
-    --button-text-color-light: #ffffff;
+    --bg-color: #1c1c1e;
+    --text-color: #eeeeee;
+    --input-bg-color: #2c2c3e;
+    --button-bg-color: #BA262B;  /* Bright red */
     --box-color-light: #2c2c3e;
-    --border-color: #4682b4;
+    --button-text-color: #ffffff;
+    --border-color: #BA262B;  /* Bright red */
+    --box-shadow-color: rgba(186, 38, 43, 0.2); /* Red shadow with opacity */
 }
 
 /* General Styling */
@@ -34,84 +36,129 @@ body {
     justify-content: center;
     min-height: 100vh;
     background-color: var(--bg-color);
-    color: var(--text-color-light);
+    color: var(--text-color);
     transition: background-color 0.3s, color 0.3s;
 }
 
 /* Auth Container */
 .auth-container {
-    background-color: var(--box-color-light);
+    background: linear-gradient(
+        45deg,
+        #401F59,
+        #61265F,
+        #812D64,
+        #A2346A,
+        #C23B6F,
+        #E34275
+    );
     padding: 40px;
     border-radius: 15px;
     width: 90%;
     max-width: 400px;
     text-align: center;
     transition: background-color 0.3s;
-    color: var(--text-color-light);
+    color: #ffffff;
+    box-shadow: 0 4px 10px var(--box-shadow-color);
+}
+
+[data-theme="dark"] .auth-container {
+    background: linear-gradient(
+        45deg,
+        #810020,
+        #900A22,
+        #A41726,
+        #BA262B,
+        #CA302D
+    );
 }
 
 .auth-title {
     font-size: 2em;
     margin-bottom: 20px;
-    color: var(--text-color-light);
+    color: #ffffff;
+}
+
+/* Form Elements */
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
 }
 
 label {
     display: block;
-    margin-top: 15px;
+    margin-bottom: 8px;
     font-size: 1.1em;
     font-weight: bold;
-    color: var(--text-color-light);
+    color: #ffffff;
 }
 
 input[type="email"],
 input[type="password"],
 input[type="number"] {
     width: 100%;
-    padding: 10px;
-    margin-top: 8px;
+    padding: 12px;
     font-size: 1em;
-    border-radius: 5px;
-    border: 1px solid var(--border-color);
-    background-color: var(--input-bg-color-light);
-    color: var(--text-color-light);
-    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    border-radius: 8px;
+    border: 1px solid #444;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: all 0.3s ease;
 }
 
+[data-theme="dark"] input[type="email"],
+[data-theme="dark"] input[type="password"],
+[data-theme="dark"] input[type="number"] {
+    background-color: #1c1c1e;
+    border: 1px solid #444;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--border-color);
+    box-shadow: 0 0 10px var(--box-shadow-color);
+}
+
+/* Button Styling */
 .auth-button {
     width: 100%;
     padding: 12px;
     margin-top: 20px;
     font-size: 1.2em;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
-    background-color: var(--button-bg-color-light);
-    color: var(--button-text-color-light);
-    transition: box-shadow 0.3s ease, background-color 0.3s;
+    background-color: var(--button-bg-color);
+    color: var(--button-text-color);
+    transition: all 0.3s ease;
 }
 
 .auth-button:hover {
-    box-shadow: 0 0 10px var(--button-bg-color-light);
+    box-shadow: 0 0 15px var(--button-bg-color),
+                0 0 25px var(--button-bg-color),
+                0 0 35px var(--button-bg-color);
+    transform: translateY(-2px);
 }
 
-.auth-alternate {
-    margin-top: 20px;
-}
-
+/* Switch Auth Link */
 .switch-auth {
     margin-top: 25px;
     font-size: 0.9em;
-    color: var(--text-color-light);
+    color: #ffffff;
 }
 
 .auth-link {
-    color: var(--button-bg-color-light);
+    color: #ffffff;
     text-decoration: none;
+    font-weight: bold;
+    border: 1px solid #ffffff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
 }
 
 .auth-link:hover {
-    text-decoration: underline;
+    background-color: rgba(255, 255, 255, 0.1);
+    text-decoration: none;
 }
 
 /* Dark Mode Toggle Button */
@@ -119,17 +166,28 @@ input[type="number"] {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    padding: 10px;
-    font-size: 1.2em;
-    cursor: pointer;
-    background-color: var(--button-bg-color-light);
-    color: var(--button-text-color-light);
+    padding: 0.5rem;
     border: none;
-    border-radius: 50%;
-    box-shadow: 0 4px 8px var(--box-shadow-color);
-    transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+    background: var(--toggle-bg, #e2e8f0);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
 }
 
 #toggle-dark-mode:hover {
-    box-shadow: 0 0 10px var(--button-bg-color-light);
+    background: var(--toggle-hover, #cbd5e1);
+}
+
+#toggle-dark-mode:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--button-bg-color);
+}
+
+[data-theme="dark"] #toggle-dark-mode:focus {
+    box-shadow: 0 0 0 2px #BA262B;
 }
