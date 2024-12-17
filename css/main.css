@@ -40,7 +40,7 @@ body {
 
 
 /* Navbar Styling */
-header nav {
+.navbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
