@@ -8,6 +8,8 @@
     --button-text-color: #ffffff; 
     --border-color: #E34275; 
     --box-shadow-color: rgba(227, 66, 117, 0.2);
+    --toggle-bg: #e2e8f0;
+    --toggle-hover: #cbd5e1;
 }
 /* Dark Theme Variables */
 [data-theme="dark"] {
@@ -240,6 +242,52 @@ button:hover {
     }
   }
 
+
+
+
+/* Form Input Fields */
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    background-color: var(--input-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    color: var(--text-color);
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+    border-color: var(--button-bg-color);
+    box-shadow: 0 0 10px var(--box-shadow-color);
+    outline: none;
+    transform: scale(1.02);
+}
+
+/* Submit Button */
+.auth-link {
+    display: inline-block; /* Makes it behave like a button */
+    text-decoration: none; /* Removes underline */
+    color: var(--button-bg-color); /* Button text color */
+    background-color: transparent; /* Transparent background */
+    border: none; /* Ensures no border */
+    padding: 10px 15px;
+    font-weight: bold;
+    font-size: 1rem;
+    border-radius: 5px; /* Rounded edges for consistency */
+    transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.auth-link:hover {
+    color: var(--border-color); /* Change color on hover */
+    transform: scale(1.05);
+}
+
+.auth-link:focus,
+.auth-link:active {
+    outline: none; /* Removes any focus outline */
+    box-shadow: none; /* Ensures no shadow */
+}
 
 
 

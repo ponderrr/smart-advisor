@@ -1,5 +1,7 @@
+/* Import theme variables */
 @import 'themes.css';
 
+/* General Reset */
 * {
     margin: 0;
     padding: 0;
@@ -7,6 +9,27 @@
     transition: background-color 0.3s, color 0.3s;
 }
 
+/* Root Variables */
+:root {
+    --bg-color: #f5f5f7;
+    --text-color: #000000;
+    --navbar-bg-color: #333;
+    --button-bg-color: #E34275;
+    --button-text-color: #ffffff;
+    --box-shadow-color: rgba(227, 66, 117, 0.2);
+    --toggle-bg: #e2e8f0;
+    --toggle-hover: #cbd5e1;
+}
+
+[data-theme="dark"] {
+    --bg-color: #1c1c1e;
+    --text-color: #ffffff;
+    --button-bg-color: #BA262B;
+    --button-text-color: #ffffff;
+    --box-shadow-color: rgba(186, 38, 43, 0.2);
+}
+
+/* Body Styling */
 body {
     font-family: Arial, sans-serif;
     background-color: var(--bg-color);
@@ -15,53 +38,70 @@ body {
     padding-top: 70px;
 }
 
+
 /* Navbar Styling */
-.navbar-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    background-color: var(--navbar-bg-color);
-    padding: 1rem 0;
-    box-shadow: 0 2px 4px var(--shadow-color);
-}
-
-.navbar {
-    max-width: 1200px;
-    margin: 0 auto;
+header nav {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    align-items: center;
-    padding: 0 2rem;
+    position: fixed;
+    top: 10px; /* Margin from top */
+    left: 20px; /* Left margin */
+    right: 20px; /* Right margin */
+    z-index: 1000; /* Keeps navbar above content */
+    background-color: var(--navbar-bg-color);
+    padding: 20px 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Optional shadow */
+    transition: transform 0.3s ease-in-out; /* Smooth transition for sliding effect */
 }
 
-.logo {
-    display: flex;
-    align-items: center;
+/* Add margin to body to prevent overlap */
+body {
+    margin-top: 80px; /* Adjust based on navbar height */
 }
+
 
 .logo img {
-    height: 50px;
-    width: auto;
+    width: 150px;  /* Set the default size */
+    transition: transform 0.3s ease;  /* Smooth transition for the transform effect */
 }
 
-.nav-links {
-    display: flex;
-    gap: 2rem;
-    list-style: none;
+/* Hover effect on the logo image */
+.logo img:hover {
+    transform: scale(1.2);  /* Enlarge the image by 20% */
 }
 
+/* Navbar Links Styling */
 .nav-links a {
-    color: var(--navbar-text-color);
+    color: white;  /* White text by default */
+    font-size: 18px;  /* Bigger font size */
+    margin: 0 15px;
     text-decoration: none;
-    font-weight: 500;
-    transition: color 0.3s;
+    position: relative;  /* Needed for the pseudo-element */
+    transition: color 0.3s ease;  /* Smooth color transition */
 }
 
+/* Hover effect: Underline and color change */
 .nav-links a:hover {
-    color: #60a5fa;
-    text-shadow: 0 0 10px #60a5fa;
+    color: var(--button-bg-color);  /* Color change on hover (vibrant pink) */
+}
+
+/* Create animated underline */
+.nav-links a::before {
+    content: '';  /* Empty content for the pseudo-element */
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0%;
+    height: 2px;  /* Thickness of the underline */
+    background-color: var(--button-bg-color);  /* Color of the underline */
+    transition: width 0.3s ease;  /* Animate the width of the underline */
+}
+
+/* On hover, expand the underline */
+.nav-links a:hover::before {
+    width: 100%;  /* Full width of the link */
 }
 
 /* Results Container Styling */
@@ -72,10 +112,10 @@ body {
 }
 
 .results-container h1 {
-    color: var(--text-color);
     text-align: center;
     margin-bottom: 1rem;
     font-size: 2.5rem;
+    color: var(--text-color);
 }
 
 .results-container p {
@@ -86,135 +126,236 @@ body {
 
 /* Recommendation Block Styling */
 .recommendation-block {
-    background-color: #1f2937;  /* Dark navy background */
+    background: linear-gradient(
+        45deg,
+        #401F59,
+        #61265F,
+        #812D64,
+        #A2346A,
+        #C23B6F,
+        #E34275
+    );
     border-radius: 1rem;
     padding: 2rem;
     margin: 2rem 0;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    color: #ffffff;
+    box-shadow: 0 4px 6px var(--box-shadow-color);
 }
 
-.recommendation-type {
-    color: #ffffff;
-    font-size: 1rem;
-    text-align: center;
-    margin-bottom: 0.5rem;
-    opacity: 0.8;
+[data-theme="dark"] .recommendation-block {
+    background: linear-gradient(
+        45deg,
+        #810020,
+        #900A22,
+        #A41726,
+        #BA262B,
+        #CA302D
+    );
 }
 
 .recommendation-block h2 {
-    color: var(--text-color);
+    color: #ffffff;
     margin-bottom: 1.5rem;
     font-size: 2rem;
     text-align: center;
 }
 
+/* Recommendation Content */
 .recommendation-content {
     display: flex;
     gap: 2rem;
-    align-items: flex-start;
+    padding: 2rem;
+    border-radius: 12px;
+    margin: 1rem 0;
 }
 
-/* Poster Styling */
 .poster-container {
     flex: 0 0 300px;
+    max-width: 300px;
+    transition: transform 0.3s ease;
+}
+
+.poster-container:hover {
+    transform: scale(1.02);
 }
 
 .recommendation-poster {
     width: 100%;
-    border-radius: 0.5rem;
-    box-shadow: 0 4px 6px var(--shadow-color);
+    border-radius: 8px;
 }
 
-/* Details Styling */
 .recommendation-details {
     flex: 1;
 }
 
+/* Center the movie title */
 .recommendation-title {
+    font-size: 2rem;
     color: #ffffff;
-    font-size: 2.5rem;
-    text-align: center;
-    margin-bottom: 2rem;
-}
-
-.recommendation-meta {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
+    text-align: center; /* Center align */
 }
 
 .meta-label {
-    color: #60a5fa;  
+    color: #ffffff;
     font-weight: bold;
+    margin-right: 0.5rem;
+    font-size: 1rem;
 }
 
 .recommendation-description {
+    margin-top: 1rem;
     line-height: 1.6;
-    color: var(--text-color);
+    color: #ffffff;
+    text-align: justify; /* Ensures even spacing */
+    overflow: hidden; /* Prevents overflow */
+    flex: 1; /* Expands the description to fill available space */
+    padding-right: 0.5rem; /* Optional: Prevents content from touching the scrollbar edge */
 }
 
-/* Rating Styling */
-.rating-number {
-    font-size: 0.9em;
-    color: var(--text-color);
-    margin-left: 0.5rem;
+
+/* Retake Button */
+.retake-btn {
+    background-color: var(--button-bg-color);
+    color: var(--button-text-color);
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    display: block;
+    margin: 2rem auto;
 }
 
-/* Error Message Styling */
+.retake-btn:hover {
+    box-shadow: 0 0 15px var(--button-bg-color),
+                0 0 25px var(--button-bg-color),
+                0 0 35px var(--button-bg-color);
+    transform: translateY(-2px);
+}
+
+[data-theme="dark"] .retake-btn:hover {
+    box-shadow: 0 0 15px #BA262B,
+                0 0 25px #BA262B,
+                0 0 35px #BA262B;
+}
+
+/* Theme Toggle */
+.theme-toggle {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    padding: 0.5rem;
+    border: none;
+    background: var(--toggle-bg);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  /* Hover effect for buttons */
+button:hover {
+    box-shadow: 0 0 15px var(--button-bg-color), 0 0 25px var(--button-bg-color), 0 0 35px var(--button-bg-color);
+}
+  
+  .theme-toggle:hover {
+    background: var(--toggle-hover);
+  }
+  
+  .theme-toggle:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--button-bg-color);
+  }
+  
+  
+  .icon-container {
+    position: relative;
+    width: 24px;
+    height: 24px;
+  }
+  
+  .sun-icon,
+  .moon-icon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: var(--text);
+    transition: transform 0.5s ease, opacity 0.3s ease;
+  }
+  
+  [data-theme='dark'] .sun-icon {
+    transform: rotate(180deg);
+    opacity: 0;
+  }
+  
+  [data-theme='dark'] .moon-icon {
+    transform: rotate(0);
+    opacity: 1;
+  }
+  
+  [data-theme='light'] .sun-icon {
+    transform: rotate(0);
+    opacity: 1;
+  }
+  
+  [data-theme='light'] .moon-icon {
+    transform: rotate(-180deg);
+    opacity: 0;
+  }
+  
+  
+  .theme-toggle.pressed {
+    transform: scale(0.95);
+  }
+  
+  .theme-toggle.animated .icon-container {
+    animation: spin 0.5s ease;
+  }
+  
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+
+
+/* Error Message */
 .error-message {
-    background-color: var(--error-bg-color);
-    color: var(--error-text-color);
+    background-color: var(--error-bg-color, #ff5757);
+    color: #ffffff;
     padding: 1rem;
     border-radius: 0.5rem;
     margin: 1rem 0;
     text-align: center;
 }
 
-/* Retake Button Styling */
-.retake-btn {
-    background-color: transparent;
-    color: #60a5fa;  /* Same blue as meta labels */
-    border: 2px solid #60a5fa;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.retake-btn:hover {
-    box-shadow: 0 0 15px #60a5fa;
-    transform: translateY(-2px);
-}
-
-/* Theme Toggle */
-.toggle-box {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background-color: var(--card-bg-color);
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px var(--shadow-color);
-    z-index: 1000;
-    cursor: pointer;
-}
-
-#mode-icon {
-    font-size: 1.5rem;
-    color: var(--text-color);
-}
-
 /* Responsive Design */
 @media (max-width: 768px) {
     .recommendation-content {
         flex-direction: column;
+        align-items: center;
     }
 
     .poster-container {
+        width: 100%;
         max-width: 250px;
-        margin: 0 auto;
+        margin-bottom: 1rem;
     }
 
     .recommendation-title {
+        text-align: center;
+    }
+
+    .recommendation-meta {
+        align-items: center;
+        text-align: center;
+    }
+
+    .recommendation-description {
         text-align: center;
     }
 
@@ -224,18 +365,5 @@ body {
 
     .nav-links {
         gap: 1rem;
-    }
-}
-
-.content-wrapper {
-    display: flex;
-    gap: 2rem;
-    align-items: flex-start;
-}
-
-@media (max-width: 768px) {
-    .content-wrapper {
-        flex-direction: column;
-        align-items: center;
     }
 }
