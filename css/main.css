@@ -1,7 +1,5 @@
-/* Import theme variables */
 @import 'themes.css';
 
-/* General Reset */
 * {
     margin: 0;
     padding: 0;
@@ -144,7 +142,7 @@ body {
 }
 
 .meta-label {
-    color: #60a5fa;  /* Bright blue for labels */
+    color: #60a5fa;  
     font-weight: bold;
 }
 

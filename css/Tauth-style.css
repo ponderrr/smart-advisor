@@ -1,15 +1,14 @@
-/* Color Scheme Variables */
 :root {
     --bg-color: #ffffff;
     --text-color: #333333;
     --input-bg-color: #f1f1f1;
     --button-bg-gradient: linear-gradient(135deg, #6a5acd, #ff7f50);
-    --box-color-light: #ff7f50; /* Solid orange for light mode box */
-    --button-text-color-light: #000000; /* Black text for buttons in light mode */
+    --box-color-light: #ff7f50; 
+    --button-text-color-light: #000000; 
     --button-bg-color: #ff7f50;
     --title-color-light: #000000;
     --border-color: #4682b4;
-    --link-color: #4682b4; /* Blue color for links */
+    --link-color: #4682b4; 
 }
 
 [data-theme="dark"] {
@@ -21,10 +20,9 @@
     --button-text-color-light: #ffffff;
     --title-color-light: #ffffff;
     --border-color: #4682b4;
-    --link-color: #87ceeb; /* Lighter blue for links in dark mode */
+    --link-color: #87ceeb; 
 }
 
-/* General Styling */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -47,7 +45,7 @@ body {
     background-color: var(--box-color-light);
     padding: 40px;
     border-radius: 15px;
-    box-shadow: 0 0 15px var(--border-color); /* Blue shadow around the orange box */
+    box-shadow: 0 0 15px var(--border-color); 
     width: 90%;
     max-width: 400px;
     text-align: center;
@@ -104,12 +102,12 @@ input[type="number"] {
 }
 
 .switch-auth {
-    margin-top: 25px; /* Increased space below Google button */
+    margin-top: 25px; 
     font-size: 0.9em;
 }
 
 .auth-link {
-    color: var(--link-color); /* Blue link color */
+    color: var(--link-color); 
     text-decoration: none;
 }
 

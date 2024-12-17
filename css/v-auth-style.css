@@ -1,11 +1,10 @@
-/* Navbar Styling */
 .navbar {
   position: fixed;
   top: 10px;
   width: 90%;
   z-index: 1000;
   display: flex;
-  justify-content: center; /* Centers the navbar container */
+  justify-content: center; 
   background-color: #333;
   padding: 20px 0;
   color: #fff;
@@ -16,7 +15,7 @@
 .navbar-container {
   display: flex;
   align-items: center;
-  justify-content: space-between; /* Spaces logo and links to edges */
+  justify-content: space-between; 
   width: 90%;
   max-width: 1200px;
 }
@@ -54,7 +53,7 @@ nav ul li a:hover {
 }
 
 [data-theme='dark'] nav ul li a:hover {
-  color: #4682b4; /* Dark mode hover color */
+  color: #4682b4; 
 }
 
 
