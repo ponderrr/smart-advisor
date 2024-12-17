@@ -1,13 +1,13 @@
 /* Color Scheme Variables */
 :root {
-    --bg-color: #f5f5f7;  /* Light gray background */
-    --text-color: #000000; /* Black text */
-    --input-bg-color: #ffffff; /* White input background */
-    --button-bg-color: #E34275; /* Vibrant pink */
-    --box-color-light: #ffffff; /* White box background */
-    --button-text-color: #ffffff; /* White text on buttons */
-    --border-color: #E34275; /* Vibrant pink borders */
-    --box-shadow-color: rgba(227, 66, 117, 0.2); /* Pink shadow with opacity */
+    --bg-color: #f5f5f7;  
+    --text-color: #000000; 
+    --input-bg-color: #ffffff; 
+    --button-bg-color: #E34275; 
+    --box-color-light: #ffffff; 
+    --button-text-color: #ffffff; 
+    --border-color: #E34275; 
+    --box-shadow-color: rgba(227, 66, 117, 0.2); 
 }
 
 /* Dark Theme Variables */
@@ -15,11 +15,11 @@
     --bg-color: #1c1c1e;
     --text-color: #eeeeee;
     --input-bg-color: #2c2c3e;
-    --button-bg-color: #BA262B;  /* Bright red */
+    --button-bg-color: #BA262B;  
     --box-color-light: #2c2c3e;
     --button-text-color: #ffffff;
-    --border-color: #BA262B;  /* Bright red */
-    --box-shadow-color: rgba(186, 38, 43, 0.2); /* Red shadow with opacity */
+    --border-color: #BA262B;  
+    --box-shadow-color: rgba(186, 38, 43, 0.2); 
 }
 
 /* General Styling */

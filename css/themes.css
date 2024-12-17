@@ -1,5 +1,4 @@
 :root {
-    /* Existing variables */
     --bg-color: #f0f4f8;
     --text-color: #333;
     --navbar-bg-color: #424141;
@@ -13,8 +12,6 @@
     --recommendation-bg-color: #e8f0fe;
     --button-hover-color: #0b5ed7;
     --highlight-color: #000000;
-
-    /* Added variables for results page */
     --card-bg-color: #ffffff;
     --accent-color: #4682b4;
     --error-bg-color: #fee2e2;
@@ -26,9 +23,7 @@
     --results-button-hover-color: #155a8a;
 }
 
-/* General Dark Theme */
 [data-theme="dark"] {
-    /* Existing variables */
     --bg-color: #121212;
     --text-color: #e0e0e0;
     --navbar-bg-color: #1f1f1f;
@@ -41,8 +36,6 @@
     --recommendation-bg-color: #2a2a2a;
     --button-hover-color: #3700b3;
     --highlight-color: #ffffff;
-
-    /* Added variables for results page */
     --card-bg-color: #1f2937;
     --accent-color: #60a5fa;
     --error-bg-color: #7f1d1d;

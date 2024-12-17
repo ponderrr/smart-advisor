@@ -1,34 +1,28 @@
-/* Light Theme */
 :root {
-    --navbar-bg-color: #EAD7A4; /* Pale sand */
-    --bg-color: #F5DEB3; /* Tan/Wheat */
-    --text-color: #6B5B4D; /* Soft brown-gray */
-    --box-color-light: #FAE6C8; /* Pale cream */
-    --button-bg-color: #6B5B4D; /* Soft beige */
-    --button-text-color: #F9F3E9; /* Soft brown-gray */
-    --box-outline: #C8B28A; /* Light tan */
-    --nav-bg-color: #6B5B4D; /* Pale sand */
-    --navbar-text-color: #f9f9f9; /* Soft brown-gray */
-    --background-color: #F9F3E9; /* Cream white */
-    --button-hover-color: #D4B483; /* Soft tan */
-    --recommendation-outline-color: #C8B28A; /* Light tan */
+    --navbar-bg-color: #EAD7A4; 
+    --bg-color: #F5DEB3; 
+    --text-color: #6B5B4D; 
+    --box-color-light: #FAE6C8; 
+    --button-bg-color: #6B5B4D; 
+    --button-text-color: #F9F3E9;
+    --box-outline: #C8B28A;
+    --nav-bg-color: #6B5B4D; 
+    --navbar-text-color: #f9f9f9; 
+    --background-color: #F9F3E9; 
+    --button-hover-color: #D4B483; 
+    --recommendation-outline-color: #C8B28A; 
 }
 
-
-
-
-
-/* Dark Theme */
 [data-theme="dark"] {
     --navbar-bg-color: #424141;
-    --bg-color: #1c1c1e; /* Dark background */
-    --text-color: #eeeeee; /* Light text color */
-    --box-color-light: #2c2c3e; /* Darker green-gray for boxes */
-    --button-bg-color: #4682b4; /* Blue button */
-    --button-text-color: #ffffff; /* White text on button */
-    --box-outline: #4682b4; /* Blue outline for boxes */
-    --nav-bg-color: #333; /* Same dark nav background color */
-    --navbar-text-color: #eeeeee; /* Light text in navbar */
+    --bg-color: #1c1c1e; 
+    --text-color: #eeeeee; 
+    --box-color-light: #2c2c3e; 
+    --button-bg-color: #4682b4; 
+    --button-text-color: #ffffff; 
+    --box-outline: #4682b4; 
+    --nav-bg-color: #333; 
+    --navbar-text-color: #eeeeee; 
     --button-hover-color: #a247ae;
-    --recommendation-outline-color: #4682b4; /* Bright blue outline for recommendation box */
+    --recommendation-outline-color: #4682b4; 
 }

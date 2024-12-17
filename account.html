@@ -36,8 +36,31 @@
         <div class="section recommendations-section movies">
             <h2>Recent Movie Recommendations</h2>
             <div class="recommendation-item">
-                <div class="recommendation-details">
-                    <!-- Movie recommendations will be populated here -->
+                <div class="recommendation-content">
+                    <div class="poster-container">
+                        <img src="${movie.posterPath || '/api/placeholder/300/450'}" 
+                             alt="Movie Poster" 
+                             class="recommendation-poster"
+                             onerror="this.src='/api/placeholder/300/450'">
+                    </div>
+                    <div class="recommendation-details">
+                        <h3 class="recommendation-title"></h3>
+                        <div class="recommendation-meta">
+                            <p>
+                                <span class="meta-label">Age Rating:</span>
+                                <span class="age-rating"></span>
+                            </p>
+                            <p>
+                                <span class="meta-label">Genres:</span>
+                                <span class="genres"></span>
+                            </p>
+                            <p>
+                                <span class="meta-label">Rating:</span>
+                                <span class="rating"></span>
+                            </p>
+                        </div>
+                        <p class="recommendation-description"></p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -46,8 +69,31 @@
         <div class="section recommendations-section books">
             <h2>Recent Book Recommendations</h2>
             <div class="recommendation-item">
-                <div class="recommendation-details">
-                    <!-- Book recommendations will be populated here -->
+                <div class="recommendation-content">
+                    <div class="poster-container">
+                        <img src="${book.posterPath || '/api/placeholder/300/450'}" 
+                             alt="Book Cover" 
+                             class="recommendation-poster"
+                             onerror="this.src='/api/placeholder/300/450'">
+                    </div>
+                    <div class="recommendation-details">
+                        <h3 class="recommendation-title"></h3>
+                        <div class="recommendation-meta">
+                            <p>
+                                <span class="meta-label">Age Rating:</span>
+                                <span class="age-rating"></span>
+                            </p>
+                            <p>
+                                <span class="meta-label">Genres:</span>
+                                <span class="genres"></span>
+                            </p>
+                            <p>
+                                <span class="meta-label">Rating:</span>
+                                <span class="rating"></span>
+                            </p>
+                        </div>
+                        <p class="recommendation-description"></p>
+                    </div>
                 </div>
             </div>
         </div>
