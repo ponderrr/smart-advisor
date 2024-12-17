@@ -15,6 +15,8 @@
     --button-text-color: #ffffff; 
     --box-outline: #E34275;  /* Vibrant pink */
     --nav-bg-color: #333; /* Keep nav color */
+    --toggle-bg: #e2e8f0;
+    --toggle-hover: #cbd5e1;
 }
 
 [data-theme="dark"] {
@@ -34,7 +36,8 @@ body {
     padding: 20px;
 }
 
-/* Header Styling */
+/* Navbar Styling */
+/* Navbar Styling */
 header nav {
     display: flex;
     align-items: center;
@@ -45,18 +48,48 @@ header nav {
 }
 
 .logo img {
-    width: 150px;
+    width: 150px;  /* Set the default size */
+    transition: transform 0.3s ease;  /* Smooth transition for the transform effect */
 }
 
+/* Hover effect on the logo image */
+.logo img:hover {
+    transform: scale(1.2);  /* Enlarge the image by 20% */
+}
+
+/* Navbar Links Styling */
 .nav-links a {
-    color: white;
+    color: white;  /* White text by default */
+    font-size: 18px;  /* Bigger font size */
     margin: 0 15px;
     text-decoration: none;
+    position: relative;  /* Needed for the pseudo-element */
+    transition: color 0.3s ease;  /* Smooth color transition */
 }
 
+/* Hover effect: Underline and color change */
 .nav-links a:hover {
-    text-decoration: underline;
+    color: var(--button-bg-color);  /* Color change on hover (vibrant pink) */
 }
+
+/* Create animated underline */
+.nav-links a::before {
+    content: '';  /* Empty content for the pseudo-element */
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0%;
+    height: 2px;  /* Thickness of the underline */
+    background-color: var(--button-bg-color);  /* Color of the underline */
+    transition: width 0.3s ease;  /* Animate the width of the underline */
+}
+
+/* On hover, expand the underline */
+.nav-links a:hover::before {
+    width: 100%;  /* Full width of the link */
+}
+
+
 
 /* Hero Section */
 .hero {
@@ -191,87 +224,109 @@ button:hover {
     color: #ffffff;
 }
 
+
+
+
+/* Feature, Step, and Recommend Box Hover Effect */
+.feature-box:hover, 
+.step-box:hover, 
+.recommend-box:hover {
+    transform: translateY(-10px); /* Move up by 10px */
+    box-shadow: 0 8px 20px rgba(227, 66, 117, 0.7); /* Enhance shadow for light mode */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth animation */
+}
+
+/* Add transition to the original state */
+.feature-box, 
+.step-box, 
+.recommend-box {
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth return animation */
+}
+
+/* Dark Mode Hover Effect */
+[data-theme="dark"] .feature-box:hover, 
+[data-theme="dark"] .step-box:hover, 
+[data-theme="dark"] .recommend-box:hover {
+    transform: translateY(-10px); /* Move up by 10px */
+    box-shadow: 0 8px 20px rgba(186, 38, 43, 0.7); /* Enhance shadow for dark mode */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+
 /* Theme Toggle Button */
-#toggle-dark-mode {
+.theme-toggle {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
+    bottom: 1rem;
+    right: 1rem;
     padding: 0.5rem;
     border: none;
-    background: var(--toggle-bg, #e2e8f0);
+    background: var(--toggle-bg);
     border-radius: 0.5rem;
     cursor: pointer;
     transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-}
-
-#toggle-dark-mode:hover {
-    background: var(--toggle-hover, #cbd5e1);
-}
-
-#toggle-dark-mode:focus {
+  }
+  
+  .theme-toggle:hover {
+    background: var(--toggle-hover);
+  }
+  
+  .theme-toggle:focus {
     outline: none;
     box-shadow: 0 0 0 2px var(--button-bg-color);
-}
-
-[data-theme="dark"] #toggle-dark-mode:focus {
-    box-shadow: 0 0 0 2px #BA262B;
-}
-
-/* Icon Container Styles */
-.icon-container {
+  }
+  
+  
+  .icon-container {
     position: relative;
     width: 24px;
     height: 24px;
-}
-
-.sun-icon,
-.moon-icon {
+  }
+  
+  .sun-icon,
+  .moon-icon {
     position: absolute;
     top: 0;
     left: 0;
     color: var(--text);
     transition: transform 0.5s ease, opacity 0.3s ease;
-}
-
-[data-theme='dark'] .sun-icon {
+  }
+  
+  [data-theme='dark'] .sun-icon {
     transform: rotate(180deg);
     opacity: 0;
-}
-
-[data-theme='dark'] .moon-icon {
+  }
+  
+  [data-theme='dark'] .moon-icon {
     transform: rotate(0);
     opacity: 1;
-}
-
-[data-theme='light'] .sun-icon {
+  }
+  
+  [data-theme='light'] .sun-icon {
     transform: rotate(0);
     opacity: 1;
-}
-
-[data-theme='light'] .moon-icon {
+  }
+  
+  [data-theme='light'] .moon-icon {
     transform: rotate(-180deg);
     opacity: 0;
-}
-
-/* Theme Toggle Animation */
-.theme-toggle.pressed {
+  }
+  
+  
+  .theme-toggle.pressed {
     transform: scale(0.95);
-}
-
-.theme-toggle.animated .icon-container {
+  }
+  
+  .theme-toggle.animated .icon-container {
     animation: spin 0.5s ease;
-}
-
-@keyframes spin {
+  }
+  
+  @keyframes spin {
     0% {
-        transform: rotate(0deg);
+      transform: rotate(0deg);
     }
     100% {
-        transform: rotate(360deg);
+      transform: rotate(360deg);
     }
-}
+  }
+
+  

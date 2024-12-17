@@ -8,6 +8,9 @@
     --button-text-color: #ffffff; /* White text on buttons */
     --border-color: #E34275; /* Vibrant pink borders */
     --box-shadow-color: rgba(227, 66, 117, 0.2); /* Pink shadow with opacity */
+    --toggle-bg: #e2e8f0;
+    --toggle-hover: #cbd5e1;
+
 }
 
 /* Dark Theme Variables */
@@ -161,33 +164,148 @@ input:focus {
     text-decoration: none;
 }
 
-/* Dark Mode Toggle Button */
-#toggle-dark-mode {
+/* Theme Toggle Button */
+.theme-toggle {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
+    bottom: 1rem;
+    right: 1rem;
     padding: 0.5rem;
     border: none;
-    background: var(--toggle-bg, #e2e8f0);
+    background: var(--toggle-bg);
     border-radius: 0.5rem;
     cursor: pointer;
     transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
+  }
+  /* Hover effect for buttons */
+button:hover {
+    box-shadow: 0 0 15px var(--button-bg-color), 0 0 25px var(--button-bg-color), 0 0 35px var(--button-bg-color);
 }
-
-#toggle-dark-mode:hover {
-    background: var(--toggle-hover, #cbd5e1);
-}
-
-#toggle-dark-mode:focus {
+  
+  .theme-toggle:hover {
+    background: var(--toggle-hover);
+  }
+  
+  .theme-toggle:focus {
     outline: none;
     box-shadow: 0 0 0 2px var(--button-bg-color);
+  }
+  
+  
+  .icon-container {
+    position: relative;
+    width: 24px;
+    height: 24px;
+  }
+  
+  .sun-icon,
+  .moon-icon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: var(--text);
+    transition: transform 0.5s ease, opacity 0.3s ease;
+  }
+  
+  [data-theme='dark'] .sun-icon {
+    transform: rotate(180deg);
+    opacity: 0;
+  }
+  
+  [data-theme='dark'] .moon-icon {
+    transform: rotate(0);
+    opacity: 1;
+  }
+  
+  [data-theme='light'] .sun-icon {
+    transform: rotate(0);
+    opacity: 1;
+  }
+  
+  [data-theme='light'] .moon-icon {
+    transform: rotate(-180deg);
+    opacity: 0;
+  }
+  
+  
+  .theme-toggle.pressed {
+    transform: scale(0.95);
+  }
+  
+  .theme-toggle.animated .icon-container {
+    animation: spin 0.5s ease;
+  }
+  
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+
+
+
+/* Switch Auth Section Styling */
+.switch-auth {
+    font-size: 18px;
+    text-align: center;  /* Center the text */
+    margin-top: 20px;  /* Add some space above the text */
 }
 
-[data-theme="dark"] #toggle-dark-mode:focus {
-    box-shadow: 0 0 0 2px #BA262B;
+/* Auth Container Styling */
+.auth-container {
+    margin-top: 10px;  /* Space between the text and the link */
 }
+
+/* Auth Link Styling */
+.auth-link {
+    color: var(--button-bg-color);  /* Use the button color for the link */
+    font-size: 20px;
+    text-decoration: none;
+    display: inline-block;  /* Allow for animation */
+    margin-top: 10px;
+    position: relative;
+    transition: color 0.3s ease;  /* Smooth color change */
+}
+
+/* Hover effect on the "Log in" link */
+.auth-link:hover {
+    color: var(--button-text-color);  /* Change to white when hovered */
+}
+
+/* Animation on "Log in" link to entice users */
+.auth-link::before {
+    content: '';
+    position: absolute;
+    bottom: -5px;  /* Position the underline just below the text */
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--button-bg-color);  /* Color of the underline */
+    transition: width 0.3s ease;
+}
+
+/* On hover, animate the underline and add a scale and fade effect */
+.auth-link:hover::before {
+    width: 100%;
+    animation: scaleFade 0.5s ease-in-out;  /* Apply the scale and fade animation */
+}
+
+/* Scale and Fade Animation */
+@keyframes scaleFade {
+    0% {
+        transform: scaleX(0);  /* Start with the underline having no width */
+        opacity: 0;  /* Start with the underline invisible */
+    }
+    50% {
+        transform: scaleX(1.1);  /* Scale up the underline a bit */
+        opacity: 0.5;  /* Make it semi-transparent */
+    }
+    100% {
+        transform: scaleX(1);  /* Final width of the underline */
+        opacity: 1;  /* Fully opaque underline */
+    }
+}
+
