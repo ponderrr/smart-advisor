@@ -7,17 +7,17 @@
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-    <div class="navbar-container">
-        <nav class="navbar">
+    <header>
+        <nav class="navbar visible">
             <div class="logo">
-                <img src="images/Smart_AdvisorLogo.png" alt="Smart Advisor Logo">
+                <img src="images/logo.png" alt="Book & Movie Finder Logo">
             </div>
-            <ul class="nav-links">
+            <div class="nav-links">
                 <a href="index.html">Home</a>
                 <a href="account.html">Account</a>
-            </ul>
+            </div>
         </nav>
-    </div>
+    </header>
 
     <div class="results-container">
         <h1>Your Recommendations</h1>
@@ -57,7 +57,6 @@
         </div>
     </button>
     
-
     <script src="js/displayResults.js"></script>
     <script>
         // Dark mode toggle function
@@ -67,17 +66,36 @@
             document.body.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
         }
-    
+
         // Apply saved theme on load
         document.addEventListener('DOMContentLoaded', () => {
             const savedTheme = localStorage.getItem('theme') || 'light';
             document.body.setAttribute('data-theme', savedTheme);
-    
+
             // Attach event listener to the theme toggle button
             const themeToggleButton = document.getElementById('theme-toggle');
             if (themeToggleButton) {
                 themeToggleButton.addEventListener('click', toggleDarkMode);
             }
+        });
+
+        // Smoothly hide and show the navbar
+        const navbar = document.querySelector('.navbar');
+        const threshold = 100; // Scroll threshold to hide navbar
+
+        // Hide navbar on scroll down, show on scroll up
+        let lastScrollY = window.scrollY;
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > lastScrollY && window.scrollY > threshold) {
+                // Scroll Down
+                navbar.classList.add('hidden');
+                navbar.classList.remove('visible');
+            } else if (window.scrollY < lastScrollY || window.scrollY < threshold) {
+                // Scroll Up
+                navbar.classList.add('visible');
+                navbar.classList.remove('hidden');
+            }
+            lastScrollY = window.scrollY;
         });
     </script>
 </body>

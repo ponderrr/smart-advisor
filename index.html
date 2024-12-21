@@ -7,17 +7,18 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <header>
-        <nav class="navbar">
-            <div class="logo">
-                <img src="images/logo.png" alt="Book & Movie Finder Logo">
-            </div>
-            <div class="nav-links">
-                <a href="index.html">Home</a>
-                <a href="#" onclick="handleAccountClick()">Account</a>
-            </div>
-        </nav>
-    </header>
+    
+<header>
+    <nav class="navbar visible">
+        <div class="logo">
+            <img src="images/logo.png" alt="Book & Movie Finder Logo">
+        </div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="#" onclick="handleAccountClick()">Account</a>
+        </div>
+    </nav>
+</header>
 
     <main>
         <section class="hero">
@@ -129,4 +130,24 @@
                 themeToggleButton.addEventListener('click', toggleDarkMode);
             }
         });
+
+      // Smoothly hide and show the navbar
+      const navbar = document.querySelector('.navbar');
+        const threshold = 100; // Scroll threshold to hide navbar
+
+        // Hide navbar on scroll down, show on scroll up
+        let lastScrollY = window.scrollY;
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > lastScrollY && window.scrollY > threshold) {
+                // Scroll Down
+                navbar.classList.add('hidden');
+                navbar.classList.remove('visible');
+            } else if (window.scrollY < lastScrollY || window.scrollY < threshold) {
+                // Scroll Up
+                navbar.classList.add('visible');
+                navbar.classList.remove('hidden');
+            }
+            lastScrollY = window.scrollY;
+        });
+
     </script>

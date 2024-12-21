@@ -45,49 +45,80 @@ body {
 }
 
 /* Navbar Styling */
-.navbar {
-  position: fixed;
-  top: 10px;
-  width: 90%;
-  z-index: 1000;
-  display: flex;
-  justify-content: center;
-  background-color: #333;
-  padding: 20px 0;
-  color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-}
-
-.navbar-container {
+header nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 90%;
-  max-width: 1200px;
+  background-color: var(--navbar-bg-color);
+  padding: 30px 50px;  /* Increased padding for a bigger navbar */
+  border-radius: 8px;
+  transition: transform 0.3s ease; /* Smooth transition for sliding up/down */
+  position: fixed;
+  top: 10px;  /* Keep the navbar lower from the top */
+  right: 20px;  /* Adjust right padding if needed */
+  width: calc(100% - 40px);  /* Ensure navbar fits with padding */
+  z-index: 100;
+  max-height: 80px;  /* Increase the max-height to make the navbar taller */
 }
 
+
+
+/* Logo Styling */
 .logo img {
-  height: 50px;
-  width: 150px;
+  width: 150px;  /* Reduced the size of the logo */
+  transition: transform 0.3s ease;  /* Smooth transition for the transform effect */
 }
 
-nav ul {
-  list-style-type: none;
-  display: flex;
-  gap: 30px;
+/* Hover effect on the logo image */
+.logo img:hover {
+  transform: scale(1.2);  /* Enlarge the image by 20% */
 }
 
-nav ul li a {
-  color: #ffffff;
+/* Navbar Links Styling */
+.nav-links a {
+  color: white;  /* White text by default */
+  font-size: 1.3rem;  /* Reduced font size for smaller navbar */
+  margin: 0 10px;  /* Reduced margin between links */
   text-decoration: none;
-  font-size: 1rem;
-  font-weight: bold;
-  transition: color 0.3s ease;
+  position: relative;  /* Needed for the pseudo-element */
+  transition: color 0.3s ease;  /* Smooth color transition */
 }
 
-nav ul li a:hover {
-  color: var(--button-bg-color);
+/* Hover effect: Underline and color change */
+.nav-links a:hover {
+  color: var(--button-bg-color);  /* Color change on hover (vibrant pink) */
+}
+
+/* Create animated underline */
+.nav-links a::before {
+  content: '';  /* Empty content for the pseudo-element */
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0%;
+  height: 2px;  /* Thickness of the underline */
+  background-color: var(--button-bg-color);  /* Color of the underline */
+  transition: width 0.3s ease;  /* Animate the width of the underline */
+}
+
+/* On hover, expand the underline */
+.nav-links a:hover::before {
+  width: 100%;  /* Full width of the link */
+}
+
+/* When navbar is hidden (on scroll down), use transform to slide it up */
+.navbar.hidden {
+  transform: translateY(-100%);  /* Move navbar off-screen */
+}
+
+/* When navbar is visible (on scroll up), slide it back in */
+.navbar.visible {
+  transform: translateY(0);  /* Reset transform to its default position */
+}
+
+/* Optional: A little shadow when the navbar is visible to give depth */
+.navbar.visible {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 
@@ -289,7 +320,6 @@ button:hover {
   position: absolute;
   top: 0;
   left: 0;
-  color: var(--text);
   transition: transform 0.5s ease, opacity 0.3s ease;
 }
 

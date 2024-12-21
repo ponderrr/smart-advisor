@@ -1,5 +1,5 @@
 * {
-    margin: 0;
+    margin: 30;
     padding: 0;
     box-sizing: border-box;
     transition: background-color 0.3s, color 0.3s;
@@ -33,20 +33,28 @@ body {
     padding: 20px;
 }
 
-
-
 /* Navbar Styling */
 header nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
     background-color: var(--nav-bg-color);
-    padding: 20px 30px;
+    padding: 30px 50px;  /* Increased padding for a bigger navbar */
     border-radius: 8px;
+    transition: transform 0.3s ease; /* Smooth transition for sliding up/down */
+    position: fixed;
+    top: 10px;  /* Keep the navbar lower from the top */
+    right: 20px;  /* Adjust right padding if needed */
+    width: calc(100% - 40px);  /* Ensure navbar fits with padding */
+    z-index: 100;
+    max-height: 80px;  /* Increase the max-height to make the navbar taller */
 }
 
+
+
+/* Logo Styling */
 .logo img {
-    width: 150px;  /* Set the default size */
+    width: 150px;  /* Reduced the size of the logo */
     transition: transform 0.3s ease;  /* Smooth transition for the transform effect */
 }
 
@@ -58,8 +66,8 @@ header nav {
 /* Navbar Links Styling */
 .nav-links a {
     color: white;  /* White text by default */
-    font-size: 18px;  /* Bigger font size */
-    margin: 0 15px;
+    font-size: 1.3rem;  /* Reduced font size for smaller navbar */
+    margin: 0 10px;  /* Reduced margin between links */
     text-decoration: none;
     position: relative;  /* Needed for the pseudo-element */
     transition: color 0.3s ease;  /* Smooth color transition */
@@ -87,6 +95,23 @@ header nav {
     width: 100%;  /* Full width of the link */
 }
 
+/* When navbar is hidden (on scroll down), use transform to slide it up */
+.navbar.hidden {
+    transform: translateY(-100%);  /* Move navbar off-screen */
+}
+
+/* When navbar is visible (on scroll up), slide it back in */
+.navbar.visible {
+    transform: translateY(0);  /* Reset transform to its default position */
+}
+
+/* Optional: A little shadow when the navbar is visible to give depth */
+.navbar.visible {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+
+
 
 
 /* Hero Section */
@@ -102,7 +127,7 @@ header nav {
 }
 
 .hero p {
-    font-size: 1.2em;
+    font-size: 1.3em;
     margin-bottom: 1.5em;
 }
 

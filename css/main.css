@@ -40,69 +40,82 @@ body {
 
 
 /* Navbar Styling */
-.navbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: fixed;
-    top: 10px; /* Margin from top */
-    left: 20px; /* Left margin */
-    right: 20px; /* Right margin */
-    z-index: 1000; /* Keeps navbar above content */
-    background-color: var(--navbar-bg-color);
-    padding: 20px 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Optional shadow */
-    transition: transform 0.3s ease-in-out; /* Smooth transition for sliding effect */
-}
-
-/* Add margin to body to prevent overlap */
-body {
-    margin-top: 80px; /* Adjust based on navbar height */
+header nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--navbar-bg-color);
+  padding: 30px 50px;  /* Increased padding for a bigger navbar */
+  border-radius: 8px;
+  transition: transform 0.3s ease; /* Smooth transition for sliding up/down */
+  position: fixed;
+  top: 10px;  /* Keep the navbar lower from the top */
+  right: 20px;  /* Adjust right padding if needed */
+  width: calc(100% - 40px);  /* Ensure navbar fits with padding */
+  z-index: 100;
+  max-height: 80px;  /* Increase the max-height to make the navbar taller */
 }
 
 
+
+/* Logo Styling */
 .logo img {
-    width: 150px;  /* Set the default size */
-    transition: transform 0.3s ease;  /* Smooth transition for the transform effect */
+  width: 150px;  /* Reduced the size of the logo */
+  transition: transform 0.3s ease;  /* Smooth transition for the transform effect */
 }
 
 /* Hover effect on the logo image */
 .logo img:hover {
-    transform: scale(1.2);  /* Enlarge the image by 20% */
+  transform: scale(1.2);  /* Enlarge the image by 20% */
 }
 
 /* Navbar Links Styling */
 .nav-links a {
-    color: white;  /* White text by default */
-    font-size: 18px;  /* Bigger font size */
-    margin: 0 15px;
-    text-decoration: none;
-    position: relative;  /* Needed for the pseudo-element */
-    transition: color 0.3s ease;  /* Smooth color transition */
+  color: white;  /* White text by default */
+  font-size: 1.3rem;  /* Reduced font size for smaller navbar */
+  margin: 0 10px;  /* Reduced margin between links */
+  text-decoration: none;
+  position: relative;  /* Needed for the pseudo-element */
+  transition: color 0.3s ease;  /* Smooth color transition */
 }
 
 /* Hover effect: Underline and color change */
 .nav-links a:hover {
-    color: var(--button-bg-color);  /* Color change on hover (vibrant pink) */
+  color: var(--button-bg-color);  /* Color change on hover (vibrant pink) */
 }
 
 /* Create animated underline */
 .nav-links a::before {
-    content: '';  /* Empty content for the pseudo-element */
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0%;
-    height: 2px;  /* Thickness of the underline */
-    background-color: var(--button-bg-color);  /* Color of the underline */
-    transition: width 0.3s ease;  /* Animate the width of the underline */
+  content: '';  /* Empty content for the pseudo-element */
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0%;
+  height: 2px;  /* Thickness of the underline */
+  background-color: var(--button-bg-color);  /* Color of the underline */
+  transition: width 0.3s ease;  /* Animate the width of the underline */
 }
 
 /* On hover, expand the underline */
 .nav-links a:hover::before {
-    width: 100%;  /* Full width of the link */
+  width: 100%;  /* Full width of the link */
 }
+
+/* When navbar is hidden (on scroll down), use transform to slide it up */
+.navbar.hidden {
+  transform: translateY(-100%);  /* Move navbar off-screen */
+}
+
+/* When navbar is visible (on scroll up), slide it back in */
+.navbar.visible {
+  transform: translateY(0);  /* Reset transform to its default position */
+}
+
+/* Optional: A little shadow when the navbar is visible to give depth */
+.navbar.visible {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
 
 /* Results Container Styling */
 .results-container {
@@ -122,6 +135,7 @@ body {
     text-align: center;
     color: var(--text-color);
     margin-bottom: 2rem;
+    font-size: 1.2rem;
 }
 
 /* Recommendation Block Styling */
@@ -367,3 +381,87 @@ button:hover {
         gap: 1rem;
     }
 }
+
+.theme-toggle {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    padding: 0.5rem;
+    width: auto;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: var(--toggle-bg);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #000000;
+  }
+  
+  .theme-toggle:hover {
+    background: var(--toggle-hover);
+  }
+  
+  .theme-toggle:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--button-bg-color);
+  }
+  
+  
+  .icon-container {
+    position: relative;
+    width: 24px;
+    height: 24px;
+  }
+  
+  .sun-icon,
+  .moon-icon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: var(--text);
+    transition: transform 0.5s ease, opacity 0.3s ease;
+  }
+  
+  [data-theme='dark'] .sun-icon {
+    transform: rotate(180deg);
+    opacity: 0;
+  }
+  
+  [data-theme='dark'] .moon-icon {
+    transform: rotate(0);
+    opacity: 1;
+  }
+  
+  [data-theme='light'] .sun-icon {
+    transform: rotate(0);
+    opacity: 1;
+  }
+  
+  [data-theme='light'] .moon-icon {
+    transform: rotate(-180deg);
+    opacity: 0;
+  }
+  
+  
+  .theme-toggle.pressed {
+    transform: scale(0.95);
+  }
+  
+  .theme-toggle.animated .icon-container {
+    animation: spin 0.5s ease;
+  }
+  
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  
+  
+  
