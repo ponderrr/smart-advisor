@@ -6,14 +6,13 @@
     <title>Account - Smart Advisor</title>
     <link rel="stylesheet" href="css/account-styles.css">
     <link rel="stylesheet" href="css/dlthemes.css">
-    <script src="js/themes.js"></script>
 </head>
 <body>
     <!-- Navbar -->
     <header>
         <nav class="navbar visible">
             <div class="logo">
-                <img src="images/logo.png" alt="Book & Movie Finder Logo">
+                <img src="images/Smart Advisor logo.svg" alt="Smart Advisor Logo">
             </div>
             <div class="nav-links">
                 <a href="index.html">Home</a>
@@ -172,46 +171,46 @@
       </button>
 
       <script>
-    // Select the navbar
-    const navbar = document.querySelector('.navbar');
-    let lastScrollY = window.scrollY;  // Track last scroll position
-    const threshold = 50;  // Adjust threshold to trigger navbar hiding
-
-    window.addEventListener('scroll', () => {
-    if (window.scrollY > lastScrollY && window.scrollY > threshold) {
-        // Scroll Down: Hide navbar
-        navbar.classList.add('hidden');
-        navbar.classList.remove('visible');
-    } else {
-        // Scroll Up: Show navbar
-        navbar.classList.add('visible');
-        navbar.classList.remove('hidden');
-    }
-    lastScrollY = window.scrollY;  // Update the last scroll position
-    });
-
-
-
-  // Dark mode toggle function
-  window.toggleDarkMode = function() {
+        // Dark mode toggle function
+        window.toggleDarkMode = function() {
             const currentTheme = document.body.getAttribute('data-theme');
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
             document.body.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
         }
-    
+
         // Apply saved theme on load
         document.addEventListener('DOMContentLoaded', () => {
             const savedTheme = localStorage.getItem('theme') || 'light';
             document.body.setAttribute('data-theme', savedTheme);
-    
+
             // Attach event listener to the theme toggle button
             const themeToggleButton = document.getElementById('theme-toggle');
             if (themeToggleButton) {
                 themeToggleButton.addEventListener('click', toggleDarkMode);
             }
         });
-      </script>
+
+        // Smoothly hide and show the navbar
+        const navbar = document.querySelector('.navbar');
+        const threshold = 100; // Scroll threshold to hide navbar
+
+        // Hide navbar on scroll down, show on scroll up
+        let lastScrollY = window.scrollY;
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > lastScrollY && window.scrollY > threshold) {
+                // Scroll Down
+                navbar.classList.add('hidden');
+                navbar.classList.remove('visible');
+            } else if (window.scrollY < lastScrollY || window.scrollY < threshold) {
+                // Scroll Up
+                navbar.classList.add('visible');
+                navbar.classList.remove('hidden');
+            }
+            lastScrollY = window.scrollY;
+        });
+        
+    </script>
 
     <!-- Scripts -->
     <script type="module" src="js/account-handler.js"></script>

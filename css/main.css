@@ -128,12 +128,12 @@ header nav {
     text-align: center;
     margin-bottom: 1rem;
     font-size: 2.5rem;
-    color: var(--text-color);
+    
 }
 
 .results-container p {
     text-align: center;
-    color: var(--text-color);
+    color: #ffffff !important;
     margin-bottom: 2rem;
     font-size: 1.2rem;
 }
@@ -152,7 +152,6 @@ header nav {
     border-radius: 1rem;
     padding: 2rem;
     margin: 2rem 0;
-    color: #ffffff;
     box-shadow: 0 4px 6px var(--box-shadow-color);
 }
 
@@ -200,6 +199,7 @@ header nav {
 
 .recommendation-details {
     flex: 1;
+    
 }
 
 /* Center the movie title */
@@ -220,7 +220,7 @@ header nav {
 .recommendation-description {
     margin-top: 1rem;
     line-height: 1.6;
-    color: #ffffff;
+    color: #ffffff !important;
     text-align: justify; /* Ensures even spacing */
     overflow: hidden; /* Prevents overflow */
     flex: 1; /* Expands the description to fill available space */

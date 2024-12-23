@@ -162,89 +162,6 @@ input:focus {
     text-decoration: none;
 }
 
-/* Theme Toggle Button */
-.theme-toggle {
-    position: fixed;
-    bottom: 1rem;
-    right: 1rem;
-    padding: 0.5rem;
-    border: none;
-    background: var(--toggle-bg);
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-  /* Hover effect for buttons */
-button:hover {
-    box-shadow: 0 0 15px var(--button-bg-color), 0 0 25px var(--button-bg-color), 0 0 35px var(--button-bg-color);
-}
-  
-  .theme-toggle:hover {
-    background: var(--toggle-hover);
-  }
-  
-  .theme-toggle:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px var(--button-bg-color);
-  }
-  
-  
-  .icon-container {
-    position: relative;
-    width: 24px;
-    height: 24px;
-  }
-  
-  .sun-icon,
-  .moon-icon {
-    position: absolute;
-    top: 0;
-    left: 0;
-    color: var(--text);
-    transition: transform 0.5s ease, opacity 0.3s ease;
-  }
-  
-  [data-theme='dark'] .sun-icon {
-    transform: rotate(180deg);
-    opacity: 0;
-  }
-  
-  [data-theme='dark'] .moon-icon {
-    transform: rotate(0);
-    opacity: 1;
-  }
-  
-  [data-theme='light'] .sun-icon {
-    transform: rotate(0);
-    opacity: 1;
-  }
-  
-  [data-theme='light'] .moon-icon {
-    transform: rotate(-180deg);
-    opacity: 0;
-  }
-  
-  
-  .theme-toggle.pressed {
-    transform: scale(0.95);
-  }
-  
-  .theme-toggle.animated .icon-container {
-    animation: spin 0.5s ease;
-  }
-  
-  @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
-
-
-
-
 /* Form Input Fields */
 .form-group input {
     width: 100%;
@@ -353,3 +270,82 @@ button:hover {
     }
 }
 
+/* Theme Toggle Button */
+.theme-toggle {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    padding: 0.5rem;
+    border: none;
+    background: var(--toggle-bg);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  /* Hover effect for buttons */
+button:hover {
+    box-shadow: 0 0 15px var(--button-bg-color), 0 0 25px var(--button-bg-color), 0 0 35px var(--button-bg-color);
+}
+  
+  .theme-toggle:hover {
+    background: var(--toggle-hover);
+  }
+  
+  .theme-toggle:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--button-bg-color);
+  }
+  
+  
+  .icon-container {
+    position: relative;
+    width: 24px;
+    height: 24px;
+  }
+  
+  .sun-icon,
+  .moon-icon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: var(--text);
+    transition: transform 0.5s ease, opacity 0.3s ease;
+  }
+  
+  [data-theme='dark'] .sun-icon {
+    transform: rotate(180deg);
+    opacity: 0;
+  }
+  
+  [data-theme='dark'] .moon-icon {
+    transform: rotate(0);
+    opacity: 1;
+  }
+  
+  [data-theme='light'] .sun-icon {
+    transform: rotate(0);
+    opacity: 1;
+  }
+  
+  [data-theme='light'] .moon-icon {
+    transform: rotate(-180deg);
+    opacity: 0;
+  }
+  
+  
+  .theme-toggle.pressed {
+    transform: scale(0.95);
+  }
+  
+  .theme-toggle.animated .icon-container {
+    animation: spin 0.5s ease;
+  }
+  
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }

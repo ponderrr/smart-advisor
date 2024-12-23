@@ -394,70 +394,76 @@ button:hover {
     cursor: pointer;
     transition: all 0.3s ease;
     color: #000000;
-  }
-  
-  .theme-toggle:hover {
+}
+
+.theme-toggle:hover {
     background: var(--toggle-hover);
-  }
-  
-  .theme-toggle:focus {
+}
+
+/* Glow for light mode */
+[data-theme='light'] .theme-toggle:hover {
+    box-shadow: 0 0 15px 6px #E34275;  /* Light mode glow effect */
+}
+
+/* Glow for dark mode */
+[data-theme='dark'] .theme-toggle:hover {
+    box-shadow: 0 0 15px 6px #BA262B;  /* Dark mode glow effect */
+}
+
+.theme-toggle:focus {
     outline: none;
     box-shadow: 0 0 0 2px var(--button-bg-color);
-  }
-  
-  
-  .icon-container {
+}
+
+.icon-container {
     position: relative;
     width: 24px;
     height: 24px;
-  }
-  
-  .sun-icon,
-  .moon-icon {
+}
+
+.sun-icon,
+.moon-icon {
     position: absolute;
     top: 0;
     left: 0;
-    color: var(--text);
     transition: transform 0.5s ease, opacity 0.3s ease;
-  }
-  
-  [data-theme='dark'] .sun-icon {
+}
+
+[data-theme='dark'] .sun-icon {
     transform: rotate(180deg);
     opacity: 0;
-  }
-  
-  [data-theme='dark'] .moon-icon {
+}
+
+[data-theme='dark'] .moon-icon {
     transform: rotate(0);
     opacity: 1;
-  }
-  
-  [data-theme='light'] .sun-icon {
+}
+
+[data-theme='light'] .sun-icon {
     transform: rotate(0);
     opacity: 1;
-  }
-  
-  [data-theme='light'] .moon-icon {
+}
+
+[data-theme='light'] .moon-icon {
     transform: rotate(-180deg);
     opacity: 0;
-  }
-  
-  
-  .theme-toggle.pressed {
-    transform: scale(0.95);
-  }
-  
-  .theme-toggle.animated .icon-container {
+}
+
+/* Spinning animation when button is clicked */
+.theme-toggle.animated .sun-icon,
+.theme-toggle.animated .moon-icon {
     animation: spin 0.5s ease;
-  }
-  
-  @keyframes spin {
+}
+
+@keyframes spin {
     0% {
-      transform: rotate(0deg);
+        transform: rotate(0deg);
     }
     100% {
-      transform: rotate(360deg);
+        transform: rotate(360deg);
     }
-  }
-  
-  
-  
+}
+
+.theme-toggle.pressed {
+    transform: scale(0.95);
+}
