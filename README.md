@@ -15,6 +15,20 @@ Smart Advisor is an intelligent recommendation system that provides personalized
 - **Dark/Light Mode**: Toggle between dark and light themes for comfortable viewing
 - **Responsive Design**: Fully functional across desktop and mobile devices
 
+## Interface Preview
+
+### Landing Page - Light Mode
+![Landing Light](images/landing-light.png)
+
+### Landing Page - Dark Mode
+![Landing Dark](images/landing-dark.png)
+
+### Questionnaire Interface
+![Questionnaire](images/questionnaire.png)
+
+### Recommendations Display
+![Recommendations](images/recommendations.png)
+
 ## Tech Stack
 
 - Frontend: HTML, CSS, JavaScript
