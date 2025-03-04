@@ -26,18 +26,15 @@
             <p>AI-powered personalized recommendations tailored just for you.</p>
 
             <div class="recommend-section">
-                <div class="recommend-box movie" onclick="handleRecommendationClick('movie')" 
-                     style="background-image: url('images/movie-background.jpg')">
+                <div class="recommend-box movie" onclick="handleRecommendationClick('movie')">
                     <button>Movies</button>
                 </div>
 
-                <div class="recommend-box book" onclick="handleRecommendationClick('book')"
-                     style="background-image: url('images/book-background.jpg')">
+                <div class="recommend-box book" onclick="handleRecommendationClick('book')">
                     <button>Books</button>
                 </div>
 
-                <div class="recommend-box both" onclick="handleRecommendationClick('both')"
-                     style="background-image: url('images/both-background.jpg')">
+                <div class="recommend-box both" onclick="handleRecommendationClick('both')">
                     <button>Movie & Book</button>
                 </div>
             </div>
@@ -102,7 +99,6 @@
 
 
       <script type="module">
-        // Function to handle the recommendation clicks (already in your code)
         import { handleAuthRedirect, handleAccountClick } from './js/auth-redirect.js'
     
         window.handleRecommendationClick = function(type) {
@@ -131,7 +127,6 @@
             }
         });
 
-      // Smoothly hide and show the navbar
       const navbar = document.querySelector('.navbar');
         const threshold = 100; // Scroll threshold to hide navbar
 
@@ -151,3 +146,7 @@
         });
 
     </script>
+    
+    <script type="module" src="js/home-image-loader.js"></script>
+</body>
+</html>
