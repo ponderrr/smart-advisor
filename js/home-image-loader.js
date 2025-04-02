@@ -1,111 +1,123 @@
-import { getTrendingMoviePoster, getPopularBookCover, getCombinedRecommendationImage } from './home-images-service.js';
+import {
+  getTrendingMoviePoster,
+  getPopularBookCover,
+  getCombinedRecommendationImage,
+} from "./home-images-service.js";
 
 // Function to load dynamic images on the home page
 export async function loadHomePageImages() {
-    try {
-        // Get movie poster
-        const movieBox = document.querySelector('.recommend-box.movie');
-        if (movieBox) {
-            const movieData = await getTrendingMoviePoster();
-            movieBox.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('${movieData.posterUrl}')`;
-            
-            // Add a title attribute for accessibility
-            movieBox.setAttribute('title', `Movie recommendation featuring ${movieData.title}`);
-            
-            // Add loading animation effect
-            movieBox.classList.add('image-loaded');
-            
-            // Add info badge to show what movie is being displayed
-            const badgeElement = document.createElement('div');
-            badgeElement.className = 'movie-info-badge';
-            badgeElement.innerHTML = `<span class="movie-title">${movieData.title}</span>`;
-            
-            // Add the badge to the movie box
-            movieBox.appendChild(badgeElement);
-        }
+  try {
+    // Get movie poster
+    const movieBox = document.querySelector(".recommend-box.movie");
+    if (movieBox) {
+      const movieData = await getTrendingMoviePoster();
+      movieBox.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('${movieData.posterUrl}')`;
 
-        // Get book cover
-        const bookBox = document.querySelector('.recommend-box.book');
-        if (bookBox) {
-            const bookData = await getPopularBookCover();
-            bookBox.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('${bookData.coverUrl}')`;
-            
-            // Add a title attribute for accessibility
-            bookBox.setAttribute('title', `Book recommendation featuring ${bookData.title} by ${bookData.author}`);
-            
-            // Add loading animation effect
-            bookBox.classList.add('image-loaded');
-            
-            const badgeElement = document.createElement('div');
-            badgeElement.className = 'book-info-badge';
-            badgeElement.innerHTML = `<span class="book-title">${bookData.title}</span>
+      // Add a title attribute for accessibility
+      movieBox.setAttribute(
+        "title",
+        `Movie recommendation featuring ${movieData.title}`
+      );
+
+      // Add loading animation effect
+      movieBox.classList.add("image-loaded");
+
+      // Add info badge to show what movie is being displayed
+      const badgeElement = document.createElement("div");
+      badgeElement.className = "movie-info-badge";
+      badgeElement.innerHTML = `<span class="movie-title">${movieData.title}</span>`;
+
+      // Add the badge to the movie box
+      movieBox.appendChild(badgeElement);
+    }
+
+    // Get book cover
+    const bookBox = document.querySelector(".recommend-box.book");
+    if (bookBox) {
+      const bookData = await getPopularBookCover();
+      bookBox.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('${bookData.coverUrl}')`;
+
+      // Add a title attribute for accessibility
+      bookBox.setAttribute(
+        "title",
+        `Book recommendation featuring ${bookData.title} by ${bookData.author}`
+      );
+
+      // Add loading animation effect
+      bookBox.classList.add("image-loaded");
+
+      const badgeElement = document.createElement("div");
+      badgeElement.className = "book-info-badge";
+      badgeElement.innerHTML = `<span class="book-title">${bookData.title}</span>
                                      <span class="book-author">by ${bookData.author}</span>`;
-            
-            // Add the badge to the book box
-            bookBox.appendChild(badgeElement);
-        }
 
-        // Get combined image
-        const bothBox = document.querySelector('.recommend-box.both');
-        if (bothBox) {
-            // Create a split effect by using CSS grid on the box
-            bothBox.classList.add('split-background');
-            bothBox.innerHTML = `
+      // Add the badge to the book box
+      bookBox.appendChild(badgeElement);
+    }
+
+    // Get combined image
+    const bothBox = document.querySelector(".recommend-box.both");
+    if (bothBox) {
+      // Create a split effect by using CSS grid on the box
+      bothBox.classList.add("split-background");
+      bothBox.innerHTML = `
                 <div class="split-container">
                     <div class="split-side movie-side"></div>
                     <div class="split-side book-side"></div>
                     <button>Movie & Book</button>
                 </div>
             `;
-            
-            // Fetch both images
-            const [movieData, bookData] = await Promise.all([
-                getTrendingMoviePoster(),
-                getPopularBookCover()
-            ]);
-            
-            // Set the backgrounds for each side
-            const movieSide = bothBox.querySelector('.movie-side');
-            const bookSide = bothBox.querySelector('.book-side');
-            
-            if (movieSide && bookSide) {
-                movieSide.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('${movieData.posterUrl}')`;
-                bookSide.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('${bookData.coverUrl}')`;
-                
-                // Add info badges for each side
-                const movieBadge = document.createElement('div');
-                movieBadge.className = 'side-info-badge movie-badge';
-                movieBadge.textContent = movieData.title;
-                movieSide.appendChild(movieBadge);
-                
-                const bookBadge = document.createElement('div');
-                bookBadge.className = 'side-info-badge book-badge';
-                bookBadge.textContent = bookData.title;
-                bookSide.appendChild(bookBadge);
-            }
-            
-            // Add title attribute for accessibility
-            bothBox.setAttribute('title', `Combined recommendation featuring ${movieData.title} movie and ${bookData.title} book`);
-            
-            // Restore the click handler
-            bothBox.addEventListener('click', () => {
-                window.handleRecommendationClick('both');
-            });
-            
-            // Add loading animation effect
-            bothBox.classList.add('image-loaded');
-        }
 
-    } catch (error) {
-        console.error('Error loading home page images:', error);
-        // Fallback to default images if there's an error
+      // Fetch both images
+      const [movieData, bookData] = await Promise.all([
+        getTrendingMoviePoster(),
+        getPopularBookCover(),
+      ]);
+
+      // Set the backgrounds for each side
+      const movieSide = bothBox.querySelector(".movie-side");
+      const bookSide = bothBox.querySelector(".book-side");
+
+      if (movieSide && bookSide) {
+        movieSide.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('${movieData.posterUrl}')`;
+        bookSide.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('${bookData.coverUrl}')`;
+
+        // Add info badges for each side
+        const movieBadge = document.createElement("div");
+        movieBadge.className = "side-info-badge movie-badge";
+        movieBadge.textContent = movieData.title;
+        movieSide.appendChild(movieBadge);
+
+        const bookBadge = document.createElement("div");
+        bookBadge.className = "side-info-badge book-badge";
+        bookBadge.textContent = bookData.title;
+        bookSide.appendChild(bookBadge);
+      }
+
+      // Add title attribute for accessibility
+      bothBox.setAttribute(
+        "title",
+        `Combined recommendation featuring ${movieData.title} movie and ${bookData.title} book`
+      );
+
+      // Restore the click handler
+      bothBox.addEventListener("click", () => {
+        window.handleRecommendationClick("both");
+      });
+
+      // Add loading animation effect
+      bothBox.classList.add("image-loaded");
     }
+  } catch (error) {
+    console.error("Error loading home page images:", error);
+    // Fallback to default images if there's an error
+  }
 }
 
 // Add fadeIn animation class to the style
 function injectLoadingStyles() {
-    const styleElement = document.createElement('style');
-    styleElement.textContent = `
+  const styleElement = document.createElement("style");
+  styleElement.textContent = `
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -223,11 +235,11 @@ function injectLoadingStyles() {
             opacity: 1;
         }
     `;
-    document.head.appendChild(styleElement);
+  document.head.appendChild(styleElement);
 }
 
 // Run when the DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    injectLoadingStyles();
-    loadHomePageImages();
+document.addEventListener("DOMContentLoaded", () => {
+  injectLoadingStyles();
+  loadHomePageImages();
 });

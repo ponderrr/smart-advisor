@@ -1,154 +1,193 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Home - Smart Advisor</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-    
-<header>
-    <nav class="navbar visible">
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header>
+      <nav class="navbar visible">
         <div class="logo">
-            <a href="index.html" title="Return to homepage">
-                <img src="images/Smart Advisor logo.svg" alt="Smart Advisor Logo">
-            </a>
+          <a href="index.html" title="Return to homepage">
+            <img src="images/Smart Advisor logo.svg" alt="Smart Advisor Logo" />
+          </a>
         </div>
         <div class="nav-links">
-            <a href="index.html">Home</a>
-            <a href="#" onclick="handleAccountClick()">Account</a>
+          <a href="index.html">Home</a>
+          <a href="#" onclick="handleAccountClick()">Account</a>
         </div>
-    </nav>
-</header>
+      </nav>
+    </header>
 
     <main>
-        <section class="hero">
-            <h1>Discover Your Next Favorite Book, Movie, or Both!</h1>
-            <p>AI-powered personalized recommendations tailored just for you.</p>
+      <section class="hero">
+        <h1>Discover Your Next Favorite Book, Movie, or Both!</h1>
+        <p>AI-powered personalized recommendations tailored just for you.</p>
 
-            <div class="recommend-section">
-                <div class="recommend-box movie" onclick="handleRecommendationClick('movie')">
-                    <button>Movies</button>
-                </div>
+        <div class="recommend-section">
+          <div
+            class="recommend-box movie"
+            onclick="handleRecommendationClick('movie')"
+          >
+            <button>Movies</button>
+          </div>
 
-                <div class="recommend-box book" onclick="handleRecommendationClick('book')">
-                    <button>Books</button>
-                </div>
+          <div
+            class="recommend-box book"
+            onclick="handleRecommendationClick('book')"
+          >
+            <button>Books</button>
+          </div>
 
-                <div class="recommend-box both" onclick="handleRecommendationClick('both')">
-                    <button>Movie & Book</button>
-                </div>
-            </div>
-        </section>
+          <div
+            class="recommend-box both"
+            onclick="handleRecommendationClick('both')"
+          >
+            <button>Movie & Book</button>
+          </div>
+        </div>
+      </section>
 
-        <section class="why-choose-us">
-            <h2>Why Choose Us?</h2>
-            <div class="features">
-                <div class="feature-box">
-                    <h3>AI-Personalized</h3>
-                    <p>Recommendations crafted based on your preferences, whether you're a movie buff or a bookworm.</p>
-                </div>
+      <section class="why-choose-us">
+        <h2>Why Choose Us?</h2>
+        <div class="features">
+          <div class="feature-box">
+            <h3>AI-Personalized</h3>
+            <p>
+              Recommendations crafted based on your preferences, whether you're
+              a movie buff or a bookworm.
+            </p>
+          </div>
 
-                <div class="feature-box">
-                    <h3>Cross-Media Suggestions</h3>
-                    <p>Love the book? We'll recommend a movie based on it, or vice-versa.</p>
-                </div>
+          <div class="feature-box">
+            <h3>Cross-Media Suggestions</h3>
+            <p>
+              Love the book? We'll recommend a movie based on it, or vice-versa.
+            </p>
+          </div>
 
-                <div class="feature-box">
-                    <h3>Smart Algorithms, Real Results</h3>
-                    <p>Our advanced algorithms ensure each suggestion feels tailored, delivering options you'll love.</p>
-                </div>
-            </div>
-        </section>
+          <div class="feature-box">
+            <h3>Smart Algorithms, Real Results</h3>
+            <p>
+              Our advanced algorithms ensure each suggestion feels tailored,
+              delivering options you'll love.
+            </p>
+          </div>
+        </div>
+      </section>
 
-        <section class="how-it-works">
-            <h2>How It Works</h2>
-            <div class="steps">
-                <div class="step-box">
-                    <p>Create an account.</p>
-                </div>
+      <section class="how-it-works">
+        <h2>How It Works</h2>
+        <div class="steps">
+          <div class="step-box">
+            <p>Create an account.</p>
+          </div>
 
-                <div class="step-box">
-                    <p>Tell us your preferences.</p>
-                </div>
+          <div class="step-box">
+            <p>Tell us your preferences.</p>
+          </div>
 
-                <div class="step-box">
-                    <p>Receive personalized recommendations.</p>
-                </div>
-            </div>
-        </section>
+          <div class="step-box">
+            <p>Receive personalized recommendations.</p>
+          </div>
+        </div>
+      </section>
     </main>
 
     <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
-        <div class="icon-container">
-          <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="5"></circle>
-            <line x1="12" y1="1" x2="12" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="23"></line>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-            <line x1="1" y1="12" x2="3" y2="12"></line>
-            <line x1="21" y1="12" x2="23" y2="12"></line>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-          </svg>
-          <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-          </svg>
-        </div>
-      </button>
+      <div class="icon-container">
+        <svg
+          class="sun-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg
+          class="moon-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </div>
+    </button>
 
+    <script type="module">
+      import {
+        handleAuthRedirect,
+        handleAccountClick,
+      } from "./js/auth-redirect.js";
 
-      <script type="module">
-        import { handleAuthRedirect, handleAccountClick } from './js/auth-redirect.js'
-    
-        window.handleRecommendationClick = function(type) {
-            handleAuthRedirect(type);
+      window.handleRecommendationClick = function (type) {
+        handleAuthRedirect(type);
+      };
+
+      window.handleAccountClick = handleAccountClick;
+
+      // Dark mode toggle function
+      window.toggleDarkMode = function () {
+        const currentTheme = document.body.getAttribute("data-theme");
+        const newTheme = currentTheme === "dark" ? "light" : "dark";
+        document.body.setAttribute("data-theme", newTheme);
+        localStorage.setItem("theme", newTheme);
+      };
+
+      // Apply saved theme on load
+      document.addEventListener("DOMContentLoaded", () => {
+        const savedTheme = localStorage.getItem("theme") || "light";
+        document.body.setAttribute("data-theme", savedTheme);
+
+        // Attach event listener to the theme toggle button
+        const themeToggleButton = document.getElementById("theme-toggle");
+        if (themeToggleButton) {
+          themeToggleButton.addEventListener("click", toggleDarkMode);
         }
-    
-        window.handleAccountClick = handleAccountClick;
-    
-        // Dark mode toggle function
-        window.toggleDarkMode = function() {
-            const currentTheme = document.body.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            document.body.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
+      });
+
+      const navbar = document.querySelector(".navbar");
+      const threshold = 100; // Scroll threshold to hide navbar
+
+      // Hide navbar on scroll down, show on scroll up
+      let lastScrollY = window.scrollY;
+      window.addEventListener("scroll", () => {
+        if (window.scrollY > lastScrollY && window.scrollY > threshold) {
+          // Scroll Down
+          navbar.classList.add("hidden");
+          navbar.classList.remove("visible");
+        } else if (window.scrollY < lastScrollY || window.scrollY < threshold) {
+          // Scroll Up
+          navbar.classList.add("visible");
+          navbar.classList.remove("hidden");
         }
-    
-        // Apply saved theme on load
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.body.setAttribute('data-theme', savedTheme);
-    
-            // Attach event listener to the theme toggle button
-            const themeToggleButton = document.getElementById('theme-toggle');
-            if (themeToggleButton) {
-                themeToggleButton.addEventListener('click', toggleDarkMode);
-            }
-        });
-
-      const navbar = document.querySelector('.navbar');
-        const threshold = 100; // Scroll threshold to hide navbar
-
-        // Hide navbar on scroll down, show on scroll up
-        let lastScrollY = window.scrollY;
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > lastScrollY && window.scrollY > threshold) {
-                // Scroll Down
-                navbar.classList.add('hidden');
-                navbar.classList.remove('visible');
-            } else if (window.scrollY < lastScrollY || window.scrollY < threshold) {
-                // Scroll Up
-                navbar.classList.add('visible');
-                navbar.classList.remove('hidden');
-            }
-            lastScrollY = window.scrollY;
-        });
-
+        lastScrollY = window.scrollY;
+      });
     </script>
-    
+
     <script type="module" src="js/home-image-loader.js"></script>
-</body>
+  </body>
 </html>

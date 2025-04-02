@@ -1,351 +1,347 @@
 /* Color Scheme Variables */
 :root {
-    --bg-color: #f5f5f7;  
-    --text-color: #000000; 
-    --input-bg-color: #ffffff; 
-    --button-bg-color: #E34275; 
-    --box-color-light: #ffffff; 
-    --button-text-color: #ffffff; 
-    --border-color: #E34275; 
-    --box-shadow-color: rgba(227, 66, 117, 0.2);
-    --toggle-bg: #e2e8f0;
-    --toggle-hover: #cbd5e1;
+  --bg-color: #f5f5f7;
+  --text-color: #000000;
+  --input-bg-color: #ffffff;
+  --button-bg-color: #e34275;
+  --box-color-light: #ffffff;
+  --button-text-color: #ffffff;
+  --border-color: #e34275;
+  --box-shadow-color: rgba(227, 66, 117, 0.2);
+  --toggle-bg: #e2e8f0;
+  --toggle-hover: #cbd5e1;
 }
 /* Dark Theme Variables */
 [data-theme="dark"] {
-    --bg-color: #1c1c1e;
-    --text-color: #eeeeee;
-    --input-bg-color: #2c2c3e;
-    --button-bg-color: #BA262B;  
-    --box-color-light: #2c2c3e;
-    --button-text-color: #ffffff;
-    --border-color: #BA262B;  
-    --box-shadow-color: rgba(186, 38, 43, 0.2); 
+  --bg-color: #1c1c1e;
+  --text-color: #eeeeee;
+  --input-bg-color: #2c2c3e;
+  --button-bg-color: #ba262b;
+  --box-color-light: #2c2c3e;
+  --button-text-color: #ffffff;
+  --border-color: #ba262b;
+  --box-shadow-color: rgba(186, 38, 43, 0.2);
 }
 
 /* General Styling */
 * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
 }
 
 body {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    transition: background-color 0.3s, color 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s;
 }
 
 /* Auth Container */
 .auth-container {
-    background: linear-gradient(
-        45deg,
-        #401F59,
-        #61265F,
-        #812D64,
-        #A2346A,
-        #C23B6F,
-        #E34275
-    );
-    padding: 40px;
-    border-radius: 15px;
-    width: 90%;
-    max-width: 400px;
-    text-align: center;
-    transition: background-color 0.3s;
-    color: #ffffff;
-    box-shadow: 0 4px 10px var(--box-shadow-color);
+  background: linear-gradient(
+    45deg,
+    #401f59,
+    #61265f,
+    #812d64,
+    #a2346a,
+    #c23b6f,
+    #e34275
+  );
+  padding: 40px;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  transition: background-color 0.3s;
+  color: #ffffff;
+  box-shadow: 0 4px 10px var(--box-shadow-color);
 }
 
 [data-theme="dark"] .auth-container {
-    background: linear-gradient(
-        45deg,
-        #810020,
-        #900A22,
-        #A41726,
-        #BA262B,
-        #CA302D
-    );
+  background: linear-gradient(
+    45deg,
+    #810020,
+    #900a22,
+    #a41726,
+    #ba262b,
+    #ca302d
+  );
 }
 
 .auth-title {
-    font-size: 2em;
-    margin-bottom: 20px;
-    color: #ffffff;
+  font-size: 2em;
+  margin-bottom: 20px;
+  color: #ffffff;
 }
 
 /* Form Elements */
 .form-group {
-    margin-bottom: 20px;
-    text-align: left;
+  margin-bottom: 20px;
+  text-align: left;
 }
 
 label {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 1.1em;
-    font-weight: bold;
-    color: #ffffff;
+  display: block;
+  margin-bottom: 8px;
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #ffffff;
 }
 
 input[type="email"],
 input[type="password"],
 input[type="number"] {
-    width: 100%;
-    padding: 12px;
-    font-size: 1em;
-    border-radius: 8px;
-    border: 1px solid #444;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    transition: all 0.3s ease;
+  width: 100%;
+  padding: 12px;
+  font-size: 1em;
+  border-radius: 8px;
+  border: 1px solid #444;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: all 0.3s ease;
 }
 
 [data-theme="dark"] input[type="email"],
 [data-theme="dark"] input[type="password"],
 [data-theme="dark"] input[type="number"] {
-    background-color: #1c1c1e;
-    border: 1px solid #444;
+  background-color: #1c1c1e;
+  border: 1px solid #444;
 }
 
 input:focus {
-    outline: none;
-    border-color: var(--border-color);
-    box-shadow: 0 0 10px var(--box-shadow-color);
+  outline: none;
+  border-color: var(--border-color);
+  box-shadow: 0 0 10px var(--box-shadow-color);
 }
 
 /* Button Styling */
 .auth-button {
-    width: 100%;
-    padding: 12px;
-    margin-top: 20px;
-    font-size: 1.2em;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    background-color: var(--button-bg-color);
-    color: var(--button-text-color);
-    transition: all 0.3s ease;
+  width: 100%;
+  padding: 12px;
+  margin-top: 20px;
+  font-size: 1.2em;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background-color: var(--button-bg-color);
+  color: var(--button-text-color);
+  transition: all 0.3s ease;
 }
 
 .auth-button:hover {
-    box-shadow: 0 0 15px var(--button-bg-color),
-                0 0 25px var(--button-bg-color),
-                0 0 35px var(--button-bg-color);
-    transform: translateY(-2px);
+  box-shadow: 0 0 15px var(--button-bg-color), 0 0 25px var(--button-bg-color),
+    0 0 35px var(--button-bg-color);
+  transform: translateY(-2px);
 }
 
 /* Switch Auth Link */
 .switch-auth {
-    margin-top: 25px;
-    font-size: 0.9em;
-    color: #ffffff;
+  margin-top: 25px;
+  font-size: 0.9em;
+  color: #ffffff;
 }
 
 .auth-link {
-    color: #ffffff;
-    text-decoration: none;
-    font-weight: bold;
-    border: 1px solid #ffffff;
-    padding: 5px 10px;
-    border-radius: 4px;
-    transition: all 0.3s ease;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: bold;
+  border: 1px solid #ffffff;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
 }
 
 .auth-link:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    text-decoration: none;
+  background-color: rgba(255, 255, 255, 0.1);
+  text-decoration: none;
 }
 
 /* Form Input Fields */
 .form-group input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    background-color: var(--input-bg-color);
-    border: 1px solid var(--border-color);
-    border-radius: 5px;
-    color: var(--text-color);
-    transition: all 0.3s ease;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  background-color: var(--input-bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  color: var(--text-color);
+  transition: all 0.3s ease;
 }
 
 .form-group input:focus {
-    border-color: var(--button-bg-color);
-    box-shadow: 0 0 10px var(--box-shadow-color);
-    outline: none;
-    transform: scale(1.02);
+  border-color: var(--button-bg-color);
+  box-shadow: 0 0 10px var(--box-shadow-color);
+  outline: none;
+  transform: scale(1.02);
 }
 
 /* Submit Button */
 .auth-link {
-    display: inline-block; /* Makes it behave like a button */
-    text-decoration: none; /* Removes underline */
-    color: var(--button-bg-color); /* Button text color */
-    background-color: transparent; /* Transparent background */
-    border: none; /* Ensures no border */
-    padding: 10px 15px;
-    font-weight: bold;
-    font-size: 1rem;
-    border-radius: 5px; /* Rounded edges for consistency */
-    transition: color 0.3s ease, transform 0.2s ease;
+  display: inline-block;
+  text-decoration: none;
+  color: var(--button-bg-color);
+  background-color: transparent;
+  border: none;
+  padding: 10px 15px;
+  font-weight: bold;
+  font-size: 1rem;
+  border-radius: 5px;
+  transition: color 0.3s ease, transform 0.2s ease;
 }
 
 .auth-link:hover {
-    color: var(--border-color); /* Change color on hover */
-    transform: scale(1.05);
+  color: var(--border-color); /* Change color on hover */
+  transform: scale(1.05);
 }
 
 .auth-link:focus,
 .auth-link:active {
-    outline: none; /* Removes any focus outline */
-    box-shadow: none; /* Ensures no shadow */
+  outline: none;
+  box-shadow: none;
 }
-
-
 
 /* Switch Auth Section Styling */
 .switch-auth {
-    font-size: 18px;
-    text-align: center;  /* Center the text */
-    margin-top: 20px;  /* Add some space above the text */
+  font-size: 18px;
+  text-align: center;
+  margin-top: 20px;
 }
 
 /* Auth Container Styling */
 .auth-container {
-    margin-top: 10px;  /* Space between the text and the link */
+  margin-top: 10px;
 }
 
 /* Auth Link Styling */
 .auth-link {
-    color: var(--button-bg-color);  /* Use the button color for the link */
-    font-size: 20px;
-    text-decoration: none;
-    display: inline-block;  /* Allow for animation */
-    margin-top: 10px;
-    position: relative;
-    transition: color 0.3s ease;  /* Smooth color change */
+  color: var(--button-bg-color);
+  font-size: 20px;
+  text-decoration: none;
+  display: inline-block; /* Allow for animation */
+  margin-top: 10px;
+  position: relative;
+  transition: color 0.3s ease; /* Smooth color change */
 }
 
 /* Hover effect on the "Log in" link */
 .auth-link:hover {
-    color: var(--button-text-color);  /* Change to white when hovered */
+  color: var(--button-text-color); /* Change to white when hovered */
 }
 
 /* Animation on "Log in" link to entice users */
 .auth-link::before {
-    content: '';
-    position: absolute;
-    bottom: -5px;  /* Position the underline just below the text */
-    left: 0;
-    width: 0;
-    height: 2px;
-    background-color: var(--button-bg-color);  /* Color of the underline */
-    transition: width 0.3s ease;
+  content: "";
+  position: absolute;
+  bottom: -5px; /* Position the underline just below the text */
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--button-bg-color); /* Color of the underline */
+  transition: width 0.3s ease;
 }
 
 /* On hover, animate the underline and add a scale and fade effect */
 .auth-link:hover::before {
-    width: 100%;
-    animation: scaleFade 0.5s ease-in-out;  /* Apply the scale and fade animation */
+  width: 100%;
+  animation: scaleFade 0.5s ease-in-out; /* Apply the scale and fade animation */
 }
 
 /* Scale and Fade Animation */
 @keyframes scaleFade {
-    0% {
-        transform: scaleX(0);  /* Start with the underline having no width */
-        opacity: 0;  /* Start with the underline invisible */
-    }
-    50% {
-        transform: scaleX(1.1);  /* Scale up the underline a bit */
-        opacity: 0.5;  /* Make it semi-transparent */
-    }
-    100% {
-        transform: scaleX(1);  /* Final width of the underline */
-        opacity: 1;  /* Fully opaque underline */
-    }
+  0% {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scaleX(1.1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
 }
 
 /* Theme Toggle Button */
 .theme-toggle {
-    position: fixed;
-    bottom: 1rem;
-    right: 1rem;
-    padding: 0.5rem;
-    border: none;
-    background: var(--toggle-bg);
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-  /* Hover effect for buttons */
-button:hover {
-    box-shadow: 0 0 15px var(--button-bg-color), 0 0 25px var(--button-bg-color), 0 0 35px var(--button-bg-color);
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  padding: 0.5rem;
+  border: none;
+  background: var(--toggle-bg);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
-  
-  .theme-toggle:hover {
-    background: var(--toggle-hover);
+/* Hover effect for buttons */
+button:hover {
+  box-shadow: 0 0 15px var(--button-bg-color), 0 0 25px var(--button-bg-color),
+    0 0 35px var(--button-bg-color);
+}
+
+.theme-toggle:hover {
+  background: var(--toggle-hover);
+}
+
+.theme-toggle:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--button-bg-color);
+}
+
+.icon-container {
+  position: relative;
+  width: 24px;
+  height: 24px;
+}
+
+.sun-icon,
+.moon-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: var(--text);
+  transition: transform 0.5s ease, opacity 0.3s ease;
+}
+
+[data-theme="dark"] .sun-icon {
+  transform: rotate(180deg);
+  opacity: 0;
+}
+
+[data-theme="dark"] .moon-icon {
+  transform: rotate(0);
+  opacity: 1;
+}
+
+[data-theme="light"] .sun-icon {
+  transform: rotate(0);
+  opacity: 1;
+}
+
+[data-theme="light"] .moon-icon {
+  transform: rotate(-180deg);
+  opacity: 0;
+}
+
+.theme-toggle.pressed {
+  transform: scale(0.95);
+}
+
+.theme-toggle.animated .icon-container {
+  animation: spin 0.5s ease;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
   }
-  
-  .theme-toggle:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px var(--button-bg-color);
+  100% {
+    transform: rotate(360deg);
   }
-  
-  
-  .icon-container {
-    position: relative;
-    width: 24px;
-    height: 24px;
-  }
-  
-  .sun-icon,
-  .moon-icon {
-    position: absolute;
-    top: 0;
-    left: 0;
-    color: var(--text);
-    transition: transform 0.5s ease, opacity 0.3s ease;
-  }
-  
-  [data-theme='dark'] .sun-icon {
-    transform: rotate(180deg);
-    opacity: 0;
-  }
-  
-  [data-theme='dark'] .moon-icon {
-    transform: rotate(0);
-    opacity: 1;
-  }
-  
-  [data-theme='light'] .sun-icon {
-    transform: rotate(0);
-    opacity: 1;
-  }
-  
-  [data-theme='light'] .moon-icon {
-    transform: rotate(-180deg);
-    opacity: 0;
-  }
-  
-  
-  .theme-toggle.pressed {
-    transform: scale(0.95);
-  }
-  
-  .theme-toggle.animated .icon-container {
-    animation: spin 0.5s ease;
-  }
-  
-  @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
+}

@@ -1,78 +1,76 @@
 /* Light theme */
 :root {
-    /* Background colors */
-    --bg-color: #ffffff;
-    --navbar-bg: #f8f9fa;
-    --card-bg: #ffffff;
-    --input-bg: #f8f9fa;
-    
-    /* Text colors */
-    --text-color: #333333;
-    --text-light: #666666;
-    --text-dark: #000000;
-    
-    /* Accent colors */
-    --accent-blue: #4682b4;
-    --accent-hover: #5593c5;
-    --success-color: #28a745;
-    --error-color: #dc3545;
-    
-    /* Border and shadow */
-    --border-color: #dee2e6;
-    --shadow-color: rgba(0, 0, 0, 0.1);
+  /* Background colors */
+  --bg-color: #ffffff;
+  --navbar-bg: #f8f9fa;
+  --card-bg: #ffffff;
+  --input-bg: #f8f9fa;
+
+  /* Text colors */
+  --text-color: #333333;
+  --text-light: #666666;
+  --text-dark: #000000;
+
+  /* Accent colors */
+  --accent-blue: #4682b4;
+  --accent-hover: #5593c5;
+  --success-color: #28a745;
+  --error-color: #dc3545;
+
+  /* Border and shadow */
+  --border-color: #dee2e6;
+  --shadow-color: rgba(0, 0, 0, 0.1);
 }
 
 /* Dark theme */
 [data-theme="dark"] {
-    /* Background colors */
-    --bg-color: #1c1c1e;
-    --navbar-bg: #1f1f1f;
-    --card-bg: #2c2c3e;
-    --input-bg: #33334e;
-    
-    /* Text colors */
-    --text-color: #ffffff;
-    --text-light: #cccccc;
-    --text-dark: #ffffff;
-    
-    /* Accent colors */
-    --accent-blue: #4682b4;
-    --accent-hover: #5593c5;
-    --success-color: #4CAF50;
-    --error-color: #ff6b6b;
-    
-    /* Border and shadow */
-    --border-color: #333;
-    --shadow-color: rgba(0, 0, 0, 0.3);
+  /* Background colors */
+  --bg-color: #1c1c1e;
+  --navbar-bg: #1f1f1f;
+  --card-bg: #2c2c3e;
+  --input-bg: #33334e;
+
+  /* Text colors */
+  --text-color: #ffffff;
+  --text-light: #cccccc;
+  --text-dark: #ffffff;
+
+  /* Accent colors */
+  --accent-blue: #4682b4;
+  --accent-hover: #5593c5;
+  --success-color: #4caf50;
+  --error-color: #ff6b6b;
+
+  /* Border and shadow */
+  --border-color: #333;
+  --shadow-color: rgba(0, 0, 0, 0.3);
 }
 
 /* Theme toggle button styling */
 .toggle-box {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background-color: var(--card-bg);
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px var(--shadow-color);
-    cursor: pointer;
-    z-index: 1000;
-    transition: transform 0.2s ease;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--card-bg);
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px var(--shadow-color);
+  cursor: pointer;
+  z-index: 1000;
+  transition: transform 0.2s ease;
 }
 
 .toggle-box:hover {
-    transform: scale(1.1);
+  transform: scale(1.1);
 }
 
 #mode-icon {
-    font-size: 1.5rem;
-    color: var(--text-color);
+  font-size: 1.5rem;
+  color: var(--text-color);
 }
 
 /* Transition effects */
 * {
-    transition: background-color 0.3s ease, 
-                color 0.3s ease, 
-                border-color 0.3s ease, 
-                box-shadow 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease,
+    border-color 0.3s ease, box-shadow 0.3s ease;
 }

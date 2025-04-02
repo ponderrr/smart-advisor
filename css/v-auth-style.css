@@ -1,11 +1,10 @@
-/* Color Scheme Variables */
 :root {
   --bg-color: #f5f5f7;
   --text-color: #000000;
   --input-bg-color: #ffffff;
-  --button-bg-color: #E34275;
+  --button-bg-color: #e34275;
   --button-text-color: #ffffff;
-  --border-color: #E34275;
+  --border-color: #e34275;
   --box-shadow-color: rgba(227, 66, 117, 0.2);
   --navbar-bg-color: #333;
   --highlight-color: #ffffff;
@@ -17,9 +16,9 @@
   --bg-color: #1c1c1e;
   --text-color: #eeeeee;
   --input-bg-color: #1c1c1e;
-  --button-bg-color: #BA262B;
+  --button-bg-color: #ba262b;
   --button-text-color: #ffffff;
-  --border-color: #BA262B;
+  --border-color: #ba262b;
   --box-shadow-color: rgba(186, 38, 43, 0.2);
 }
 
@@ -33,7 +32,7 @@
 }
 
 body {
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
   background-color: var(--bg-color);
   color: var(--text-color);
   display: flex;
@@ -50,88 +49,84 @@ header nav {
   align-items: center;
   justify-content: space-between;
   background-color: var(--navbar-bg-color);
-  padding: 30px 50px;  /* Increased padding for a bigger navbar */
+  padding: 30px 50px;
   border-radius: 8px;
-  transition: transform 0.3s ease; /* Smooth transition for sliding up/down */
+  transition: transform 0.3s ease;
   position: fixed;
-  top: 10px;  /* Keep the navbar lower from the top */
-  right: 20px;  /* Adjust right padding if needed */
-  width: calc(100% - 40px);  /* Ensure navbar fits with padding */
+  top: 10px;
+  right: 20px;
+  width: calc(100% - 40px);
   z-index: 100;
-  max-height: 80px;  /* Increase the max-height to make the navbar taller */
+  max-height: 80px;
 }
-
-
 
 /* Logo Styling */
 .logo img {
-  width: 150px;  /* Reduced the size of the logo */
-  transition: transform 0.3s ease;  /* Smooth transition for the transform effect */
+  width: 150px;
+  transition: transform 0.3s ease;
 }
 
 /* Hover effect on the logo image */
 .logo img:hover {
-  transform: scale(1.2);  /* Enlarge the image by 20% */
+  transform: scale(1.2);
 }
 
 /* Navbar Links Styling */
 .nav-links a {
-  color: white;  /* White text by default */
-  font-size: 1.3rem;  /* Reduced font size for smaller navbar */
-  margin: 0 10px;  /* Reduced margin between links */
+  color: white;
+  font-size: 1.3rem;
+  /margin: 0 10px;
   text-decoration: none;
-  position: relative;  /* Needed for the pseudo-element */
-  transition: color 0.3s ease;  /* Smooth color transition */
+  position: relative;
+  transition: color 0.3s ease;
 }
 
 /* Hover effect: Underline and color change */
 .nav-links a:hover {
-  color: var(--button-bg-color);  /* Color change on hover (vibrant pink) */
+  color: var(--button-bg-color);
 }
 
 /* Create animated underline */
 .nav-links a::before {
-  content: '';  /* Empty content for the pseudo-element */
+  content: "";
   position: absolute;
   bottom: 0;
   left: 0;
   width: 0%;
-  height: 2px;  /* Thickness of the underline */
-  background-color: var(--button-bg-color);  /* Color of the underline */
-  transition: width 0.3s ease;  /* Animate the width of the underline */
+  height: 2px;
+  background-color: var(--button-bg-color);
+  transition: width 0.3s ease;
 }
 
 /* On hover, expand the underline */
 .nav-links a:hover::before {
-  width: 100%;  /* Full width of the link */
+  width: 100%;
 }
 
 /* When navbar is hidden (on scroll down), use transform to slide it up */
 .navbar.hidden {
-  transform: translateY(-100%);  /* Move navbar off-screen */
+  transform: translateY(-100%);
 }
 
 /* When navbar is visible (on scroll up), slide it back in */
 .navbar.visible {
-  transform: translateY(0);  /* Reset transform to its default position */
+  transform: translateY(0);
 }
 
-/* Optional: A little shadow when the navbar is visible to give depth */
 .navbar.visible {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-
 /* Container Styling */
 .container {
   background: linear-gradient(
-      45deg,
-      #401F59,
-      #61265F,
-      #812D64,
-      #A2346A,
-      #C23B6F,
-      #E34275
+    45deg,
+    #401f59,
+    #61265f,
+    #812d64,
+    #a2346a,
+    #c23b6f,
+    #e34275
   );
   width: 80%;
   max-width: 600px;
@@ -144,12 +139,12 @@ header nav {
 
 [data-theme="dark"] .container {
   background: linear-gradient(
-      45deg,
-      #810020,
-      #900A22,
-      #A41726,
-      #BA262B,
-      #CA302D
+    45deg,
+    #810020,
+    #900a22,
+    #a41726,
+    #ba262b,
+    #ca302d
   );
 }
 
@@ -186,14 +181,12 @@ header nav {
   margin: 10px 0;
 }
 
-
-
 #answer-input {
-  margin-top: 2rem; /* Space between input and submit button */
+  margin-top: 2rem;
 }
 
 /* Input Styling */
-input[type="text"], 
+input[type="text"],
 input[type="number"],
 input[type="range"] {
   width: 100%;
@@ -233,16 +226,13 @@ button {
 }
 
 button:hover {
-  box-shadow: 0 0 15px var(--button-bg-color),
-              0 0 25px var(--button-bg-color),
-              0 0 35px var(--button-bg-color);
+  box-shadow: 0 0 15px var(--button-bg-color), 0 0 25px var(--button-bg-color),
+    0 0 35px var(--button-bg-color);
   transform: translateY(-2px);
 }
 
 [data-theme="dark"] button:hover {
-  box-shadow: 0 0 15px #BA262B,
-              0 0 25px #BA262B,
-              0 0 35px #BA262B;
+  box-shadow: 0 0 15px #ba262b, 0 0 25px #ba262b, 0 0 35px #ba262b;
 }
 
 /* Loading Animation */
@@ -273,12 +263,21 @@ button:hover {
   animation: bounce 0.5s infinite alternate;
 }
 
-.dot:nth-child(2) { animation-delay: 0.1s; }
-.dot:nth-child(3) { animation-delay: 0.2s; }
+.dot:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.dot:nth-child(3) {
+  animation-delay: 0.2s;
+}
 
 @keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-15px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
 }
 
 .theme-toggle {
@@ -308,7 +307,6 @@ button:hover {
   box-shadow: 0 0 0 2px var(--button-bg-color);
 }
 
-
 .icon-container {
   position: relative;
   width: 24px;
@@ -323,26 +321,25 @@ button:hover {
   transition: transform 0.5s ease, opacity 0.3s ease;
 }
 
-[data-theme='dark'] .sun-icon {
+[data-theme="dark"] .sun-icon {
   transform: rotate(180deg);
   opacity: 0;
 }
 
-[data-theme='dark'] .moon-icon {
+[data-theme="dark"] .moon-icon {
   transform: rotate(0);
   opacity: 1;
 }
 
-[data-theme='light'] .sun-icon {
+[data-theme="light"] .sun-icon {
   transform: rotate(0);
   opacity: 1;
 }
 
-[data-theme='light'] .moon-icon {
+[data-theme="light"] .moon-icon {
   transform: rotate(-180deg);
   opacity: 0;
 }
-
 
 .theme-toggle.pressed {
   transform: scale(0.95);
@@ -360,4 +357,3 @@ button:hover {
     transform: rotate(360deg);
   }
 }
-

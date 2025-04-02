@@ -1,218 +1,243 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Account - Smart Advisor</title>
-    <link rel="stylesheet" href="css/account-styles.css">
-    <link rel="stylesheet" href="css/dlthemes.css">
-    <link rel="stylesheet" href="css/recommendation-modal.css">
-</head>
-<body>
+    <link rel="stylesheet" href="css/account-styles.css" />
+    <link rel="stylesheet" href="css/dlthemes.css" />
+    <link rel="stylesheet" href="css/recommendation-modal.css" />
+  </head>
+  <body>
     <!-- Navbar -->
     <header>
-        <nav class="navbar visible">
-            <div class="logo">
-                <a href="index.html" title="Return to homepage">
-                    <img src="images/Smart Advisor logo.svg" alt="Smart Advisor Logo">
-                </a>
-            </div>
-            <div class="nav-links">
-                <a href="index.html">Home</a>
-                <a href="#" id="logout-link">Log Out</a>
-            </div>
-        </nav>
+      <nav class="navbar visible">
+        <div class="logo">
+          <a href="index.html" title="Return to homepage">
+            <img src="images/Smart Advisor logo.svg" alt="Smart Advisor Logo" />
+          </a>
+        </div>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="#" id="logout-link">Log Out</a>
+        </div>
+      </nav>
     </header>
 
     <!-- Main Content -->
     <div class="account-container" role="main">
-        <!-- Profile Section -->
-        <div class="section profile-section">
-            <div class="user-info">
-                <h2>Profile Information</h2>
-                <!-- User email will be populated here -->
+      <!-- Profile Section -->
+      <div class="section profile-section">
+        <div class="user-info">
+          <h2>Profile Information</h2>
+          <!-- User email will be populated here -->
+        </div>
+      </div>
+
+      <!-- Movie Recommendations -->
+      <div class="section recommendations-section movies">
+        <h2>Recent Movie Recommendations</h2>
+        <div class="recommendation-item">
+          <div class="recommendation-content">
+            <div class="poster-container">
+              <img
+                src="${movie.posterPath || '/api/placeholder/300/450'}"
+                alt="Movie Poster"
+                class="recommendation-poster"
+                onerror="this.src='/api/placeholder/300/450'"
+              />
             </div>
-        </div>
-
-        <!-- Movie Recommendations -->
-        <div class="section recommendations-section movies">
-            <h2>Recent Movie Recommendations</h2>
-            <div class="recommendation-item">
-                <div class="recommendation-content">
-                    <div class="poster-container">
-                        <img src="${movie.posterPath || '/api/placeholder/300/450'}" 
-                             alt="Movie Poster" 
-                             class="recommendation-poster"
-                             onerror="this.src='/api/placeholder/300/450'">
-                    </div>
-                    <div class="recommendation-details">
-                        <h3 class="recommendation-title"></h3>
-                        <div class="recommendation-meta">
-                            <p>
-                                <span class="meta-label">Age Rating:</span>
-                                <span class="age-rating"></span>
-                            </p>
-                            <p>
-                                <span class="meta-label">Genres:</span>
-                                <span class="genres"></span>
-                            </p>
-                            <p>
-                                <span class="meta-label">Rating:</span>
-                                <span class="rating"></span>
-                            </p>
-                        </div>
-                        <p class="recommendation-description"></p>
-                    </div>
-                </div>
+            <div class="recommendation-details">
+              <h3 class="recommendation-title"></h3>
+              <div class="recommendation-meta">
+                <p>
+                  <span class="meta-label">Age Rating:</span>
+                  <span class="age-rating"></span>
+                </p>
+                <p>
+                  <span class="meta-label">Genres:</span>
+                  <span class="genres"></span>
+                </p>
+                <p>
+                  <span class="meta-label">Rating:</span>
+                  <span class="rating"></span>
+                </p>
+              </div>
+              <p class="recommendation-description"></p>
             </div>
+          </div>
         </div>
+      </div>
 
-        <!-- Book Recommendations -->
-        <div class="section recommendations-section books">
-            <h2>Recent Book Recommendations</h2>
-            <div class="recommendation-item">
-                <div class="recommendation-content">
-                    <div class="poster-container">
-                        <img src="${book.posterPath || '/api/placeholder/300/450'}" 
-                             alt="Book Cover" 
-                             class="recommendation-poster"
-                             onerror="this.src='/api/placeholder/300/450'">
-                    </div>
-                    <div class="recommendation-details">
-                        <h3 class="recommendation-title"></h3>
-                        <div class="recommendation-meta">
-                            <p>
-                                <span class="meta-label">Age Rating:</span>
-                                <span class="age-rating"></span>
-                            </p>
-                            <p>
-                                <span class="meta-label">Genres:</span>
-                                <span class="genres"></span>
-                            </p>
-                            <p>
-                                <span class="meta-label">Rating:</span>
-                                <span class="rating"></span>
-                            </p>
-                        </div>
-                        <p class="recommendation-description"></p>
-                    </div>
-                </div>
+      <!-- Book Recommendations -->
+      <div class="section recommendations-section books">
+        <h2>Recent Book Recommendations</h2>
+        <div class="recommendation-item">
+          <div class="recommendation-content">
+            <div class="poster-container">
+              <img
+                src="${book.posterPath || '/api/placeholder/300/450'}"
+                alt="Book Cover"
+                class="recommendation-poster"
+                onerror="this.src='/api/placeholder/300/450'"
+              />
             </div>
+            <div class="recommendation-details">
+              <h3 class="recommendation-title"></h3>
+              <div class="recommendation-meta">
+                <p>
+                  <span class="meta-label">Age Rating:</span>
+                  <span class="age-rating"></span>
+                </p>
+                <p>
+                  <span class="meta-label">Genres:</span>
+                  <span class="genres"></span>
+                </p>
+                <p>
+                  <span class="meta-label">Rating:</span>
+                  <span class="rating"></span>
+                </p>
+              </div>
+              <p class="recommendation-description"></p>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <!-- Change Email Section -->
-        <div class="section change-password-section">
-            <h2>Change Email</h2>
-            <form id="email-form" class="form-group">
-                <div class="form-group">
-                    <label for="current-email">Current Email</label>
-                    <input type="email" id="current-email" disabled>
-                </div>
-                <div class="form-group">
-                    <label for="new-email">New Email</label>
-                    <input type="email" id="new-email" required>
-                </div>
-                <div class="form-group">
-                    <label for="confirm-email">Confirm New Email</label>
-                    <input type="email" id="confirm-email" required>
-                </div>
-                <button type="submit">Update Email</button>
-            </form>
-        </div>
+      <!-- Change Email Section -->
+      <div class="section change-password-section">
+        <h2>Change Email</h2>
+        <form id="email-form" class="form-group">
+          <div class="form-group">
+            <label for="current-email">Current Email</label>
+            <input type="email" id="current-email" disabled />
+          </div>
+          <div class="form-group">
+            <label for="new-email">New Email</label>
+            <input type="email" id="new-email" required />
+          </div>
+          <div class="form-group">
+            <label for="confirm-email">Confirm New Email</label>
+            <input type="email" id="confirm-email" required />
+          </div>
+          <button type="submit">Update Email</button>
+        </form>
+      </div>
 
-        <!-- Change Password Section -->
-        <div class="section change-password-section">
-            <h2>Change Password</h2>
-            <form id="password-form" class="form-group">
-                <div class="form-group">
-                    <label for="current-password">Current Password</label>
-                    <input type="password" id="current-password" required>
-                </div>
-                <div class="form-group">
-                    <label for="new-password">New Password</label>
-                    <input type="password" id="new-password" required>
-                </div>
-                <div class="form-group">
-                    <label for="confirm-password">Confirm New Password</label>
-                    <input type="password" id="confirm-password" required>
-                </div>
-                <button type="submit">Update Password</button>
-            </form>
-        </div>
+      <!-- Change Password Section -->
+      <div class="section change-password-section">
+        <h2>Change Password</h2>
+        <form id="password-form" class="form-group">
+          <div class="form-group">
+            <label for="current-password">Current Password</label>
+            <input type="password" id="current-password" required />
+          </div>
+          <div class="form-group">
+            <label for="new-password">New Password</label>
+            <input type="password" id="new-password" required />
+          </div>
+          <div class="form-group">
+            <label for="confirm-password">Confirm New Password</label>
+            <input type="password" id="confirm-password" required />
+          </div>
+          <button type="submit">Update Password</button>
+        </form>
+      </div>
 
-        <!-- Change Age Section -->
-        <div class="section change-password-section">
-            <h2>Change Age</h2>
-            <form id="age-form" class="form-group">
-                <div class="form-group">
-                    <label for="current-age">Current Age</label>
-                    <input type="number" id="current-age" required>
-                </div>
-                <button type="submit">Update Age</button>
-            </form>
-        </div>
+      <!-- Change Age Section -->
+      <div class="section change-password-section">
+        <h2>Change Age</h2>
+        <form id="age-form" class="form-group">
+          <div class="form-group">
+            <label for="current-age">Current Age</label>
+            <input type="number" id="current-age" required />
+          </div>
+          <button type="submit">Update Age</button>
+        </form>
+      </div>
     </div>
 
-<!--Toggle Button-->
+    <!--Toggle Button-->
     <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
-        <div class="icon-container">
-          <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="5"></circle>
-            <line x1="12" y1="1" x2="12" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="23"></line>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-            <line x1="1" y1="12" x2="3" y2="12"></line>
-            <line x1="21" y1="12" x2="23" y2="12"></line>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-          </svg>
-          <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-          </svg>
-        </div>
-      </button>
+      <div class="icon-container">
+        <svg
+          class="sun-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg
+          class="moon-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </div>
+    </button>
 
-      <script>
-        // Dark mode toggle function
-        window.toggleDarkMode = function() {
-            const currentTheme = document.body.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            document.body.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
+    <script>
+      // Dark mode toggle function
+      window.toggleDarkMode = function () {
+        const currentTheme = document.body.getAttribute("data-theme");
+        const newTheme = currentTheme === "dark" ? "light" : "dark";
+        document.body.setAttribute("data-theme", newTheme);
+        localStorage.setItem("theme", newTheme);
+      };
+
+      // Apply saved theme on load
+      document.addEventListener("DOMContentLoaded", () => {
+        const savedTheme = localStorage.getItem("theme") || "light";
+        document.body.setAttribute("data-theme", savedTheme);
+
+        // Attach event listener to the theme toggle button
+        const themeToggleButton = document.getElementById("theme-toggle");
+        if (themeToggleButton) {
+          themeToggleButton.addEventListener("click", toggleDarkMode);
         }
+      });
 
-        // Apply saved theme on load
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.body.setAttribute('data-theme', savedTheme);
+      // Smoothly hide and show the navbar
+      const navbar = document.querySelector(".navbar");
+      const threshold = 100; // Scroll threshold to hide navbar
 
-            // Attach event listener to the theme toggle button
-            const themeToggleButton = document.getElementById('theme-toggle');
-            if (themeToggleButton) {
-                themeToggleButton.addEventListener('click', toggleDarkMode);
-            }
-        });
-
-        // Smoothly hide and show the navbar
-        const navbar = document.querySelector('.navbar');
-        const threshold = 100; // Scroll threshold to hide navbar
-
-        // Hide navbar on scroll down, show on scroll up
-        let lastScrollY = window.scrollY;
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > lastScrollY && window.scrollY > threshold) {
-                // Scroll Down
-                navbar.classList.add('hidden');
-                navbar.classList.remove('visible');
-            } else if (window.scrollY < lastScrollY || window.scrollY < threshold) {
-                // Scroll Up
-                navbar.classList.add('visible');
-                navbar.classList.remove('hidden');
-            }
-            lastScrollY = window.scrollY;
-        });
-        
+      // Hide navbar on scroll down, show on scroll up
+      let lastScrollY = window.scrollY;
+      window.addEventListener("scroll", () => {
+        if (window.scrollY > lastScrollY && window.scrollY > threshold) {
+          // Scroll Down
+          navbar.classList.add("hidden");
+          navbar.classList.remove("visible");
+        } else if (window.scrollY < lastScrollY || window.scrollY < threshold) {
+          // Scroll Up
+          navbar.classList.add("visible");
+          navbar.classList.remove("hidden");
+        }
+        lastScrollY = window.scrollY;
+      });
     </script>
 
     <!-- Scripts -->
@@ -220,5 +245,5 @@
     <script type="module" src="js/all-recommendations.js"></script>
     <script type="module" src="js/account-update-handler.js"></script>
     <script src="js/password-visibility.js"></script>
-</body>
+  </body>
 </html>
