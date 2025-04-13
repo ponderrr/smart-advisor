@@ -1,0 +1,135 @@
+@import "components.css";
+
+/* Results Container Styling */
+.results-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 2rem;
+}
+
+.results-container h1 {
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 2.5rem;
+}
+
+.results-container p {
+  text-align: center;
+  color: #ffffff !important;
+  margin-bottom: 2rem;
+  font-size: 1.2rem;
+}
+
+/* Recommendation Block Styling */
+.recommendation-block {
+  background: var(--recommendation-gradient-light);
+  border-radius: 1rem;
+  padding: 2rem;
+  margin: 2rem 0;
+  box-shadow: 0 4px 6px var(--shadow-color);
+}
+
+[data-theme="dark"] .recommendation-block {
+  background: var(--recommendation-gradient-dark);
+}
+
+.recommendation-block h2 {
+  color: #ffffff;
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
+  text-align: center;
+}
+
+/* Recommendation Content */
+.recommendation-content {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  border-radius: 12px;
+  margin: 1rem 0;
+}
+
+.poster-container {
+  flex: 0 0 300px;
+  max-width: 300px;
+  transition: transform 0.3s ease;
+}
+
+.poster-container:hover {
+  transform: scale(1.02);
+}
+
+.recommendation-poster {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.recommendation-details {
+  flex: 1;
+}
+
+/* Center the movie title */
+.recommendation-title {
+  font-size: 2rem;
+  color: #ffffff;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.meta-label {
+  color: #ffffff;
+  font-weight: bold;
+  margin-right: 0.5rem;
+  font-size: 1rem;
+}
+
+.recommendation-description {
+  margin-top: 1rem;
+  line-height: 1.6;
+  color: #ffffff !important;
+  text-align: justify;
+  overflow: hidden;
+  flex: 1;
+  padding-right: 0.5rem;
+}
+
+/* Retake Button */
+.retake-btn {
+  background-color: var(--button-bg-color);
+  color: var(--button-text-color);
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  display: block;
+  margin: 2rem auto;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .recommendation-content {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .poster-container {
+    width: 100%;
+    max-width: 250px;
+    margin-bottom: 1rem;
+  }
+
+  .recommendation-title {
+    text-align: center;
+  }
+
+  .recommendation-meta {
+    align-items: center;
+    text-align: center;
+  }
+
+  .recommendation-description {
+    text-align: center;
+  }
+}

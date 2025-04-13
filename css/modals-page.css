@@ -1,0 +1,276 @@
+@import "components.css";
+
+/* Modal Container */
+.recommendations-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  overflow-y: auto;
+  animation: fadeIn 0.3s ease-in-out;
+  backdrop-filter: blur(3px);
+}
+
+/* Modal Content */
+.modal-content {
+  background: var(--recommendation-gradient-light);
+  width: 90%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  animation: slideIn 0.3s ease-in-out;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .modal-content {
+  background: var(--recommendation-gradient-dark);
+}
+
+/* Modal Header */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.modal-header h2 {
+  color: #ffffff;
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.close-modal {
+  color: #ffffff;
+  font-size: 2rem;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.close-modal:hover {
+  color: #f0f0f0;
+}
+
+/* Modal Body */
+.modal-body {
+  padding: 1.5rem;
+}
+
+/* Recommendation Carousel */
+.recommendation-carousel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: relative;
+  padding-top: 40px;
+}
+
+/* Recommendation Display */
+.recommendation-display {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 0.8rem;
+  overflow: hidden;
+  min-height: 400px;
+}
+
+/* Recommendation Content */
+.recommendation-display .recommendation-content {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  border-radius: 12px;
+  position: relative;
+  z-index: 2;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Recommendation Poster */
+.recommendation-display .poster-container {
+  flex: 0 0 200px;
+  max-width: 200px;
+  transition: transform 0.3s ease;
+}
+
+.recommendation-display .poster-container:hover {
+  transform: scale(1.02);
+}
+
+.recommendation-display .recommendation-poster {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Recommendation Details */
+.recommendation-display .recommendation-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.recommendation-display .recommendation-title {
+  font-size: 1.8rem;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+}
+
+.recommendation-display .recommendation-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.recommendation-display .meta-label {
+  font-weight: bold;
+  color: #ffffff;
+  margin-right: 0.5rem;
+}
+
+.recommendation-display .recommendation-description {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #ffffff;
+  margin-top: 0.5rem;
+  flex-grow: 1;
+}
+
+.recommendation-display .recommendation-timestamp {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-style: italic;
+  margin-top: 1rem;
+}
+
+/* Carousel Counter */
+.recommendation-counter {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.7);
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  font-weight: bold;
+  z-index: 10;
+}
+
+/* Carousel Controls */
+.carousel-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 0.5rem;
+}
+
+.nav-button {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.8rem 1.2rem;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: auto;
+}
+
+.nav-button:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.nav-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  color: #ffffff;
+}
+
+.spinner {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 5px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #ffffff;
+  animation: spin 1s infinite linear;
+  margin-bottom: 1rem;
+}
+
+.loading-spinner p {
+  font-size: 1.2rem;
+  margin-top: 1rem;
+}
+
+/* Empty Recommendation Placeholder */
+.recommendation-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .recommendation-display .recommendation-content {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .recommendation-display .poster-container {
+    width: 100%;
+    max-width: 200px;
+    margin-bottom: 1rem;
+  }
+
+  .recommendation-display .recommendation-title {
+    text-align: center;
+  }
+
+  .recommendation-display .recommendation-meta {
+    text-align: center;
+  }
+
+  .recommendation-display .recommendation-description {
+    text-align: center;
+  }
+
+  .nav-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+}

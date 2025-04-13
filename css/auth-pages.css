@@ -1,0 +1,133 @@
+@import "components.css";
+
+/* Auth Container */
+.auth-container {
+  background: var(--recommendation-gradient-light);
+  padding: 40px;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  transition: background-color 0.3s;
+  color: #ffffff;
+  box-shadow: 0 4px 10px var(--shadow-color);
+  margin: 0 auto;
+}
+
+[data-theme="dark"] .auth-container {
+  background: var(--recommendation-gradient-dark);
+}
+
+.auth-title {
+  font-size: 2em;
+  margin-bottom: 20px;
+  color: #ffffff;
+}
+
+/* Auth-specific form styling */
+.auth-container .form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.auth-container label {
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.auth-container input {
+  background-color: var(--bg-color);
+}
+
+[data-theme="dark"] .auth-container input {
+  background-color: #1c1c1e;
+  border: 1px solid #444;
+}
+
+/* Auth Button Styling */
+.auth-button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 20px;
+  font-size: 1.2em;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background-color: var(--button-bg-color);
+  color: var(--button-text-color);
+  transition: all 0.3s ease;
+}
+
+/* Switch Auth Link */
+.switch-auth {
+  margin-top: 25px;
+  font-size: 0.9em;
+  color: #ffffff;
+}
+
+.auth-link {
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: bold;
+  border: 1px solid #ffffff;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  display: inline-block;
+  margin-top: 10px;
+}
+
+.auth-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+}
+
+/* Password visibility toggle */
+.password-field-wrapper {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  z-index: 10;
+}
+
+/* Auth Link Animation */
+.auth-link::before {
+  content: "";
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--button-bg-color);
+  transition: width 0.3s ease;
+}
+
+.auth-link:hover::before {
+  width: 100%;
+  animation: scaleFade 0.5s ease-in-out;
+}
+
+@keyframes scaleFade {
+  0% {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scaleX(1.1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}

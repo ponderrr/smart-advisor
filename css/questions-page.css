@@ -1,0 +1,100 @@
+@import "components.css";
+
+/* Container Styling */
+.container {
+  background: var(--recommendation-gradient-light);
+  width: 80%;
+  max-width: 600px;
+  text-align: center;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px var(--shadow-color);
+  color: #ffffff;
+  margin: 2rem auto;
+}
+
+[data-theme="dark"] .container {
+  background: var(--recommendation-gradient-dark);
+}
+
+/* Question Section Styling */
+#question-count-section {
+  margin-bottom: 30px;
+  margin-top: 20px;
+}
+
+#question {
+  font-size: 1.5rem;
+  margin-bottom: 5px;
+  margin-top: 5px;
+}
+
+#question-number {
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+
+#count-display {
+  margin-top: 20px;
+}
+
+#question-range-info {
+  font-size: 1.4rem;
+  color: #ffffff;
+  margin-bottom: 15px;
+}
+
+#count-display {
+  font-size: 1.2rem;
+  color: #ffffff;
+  margin: 10px 0;
+}
+
+#answer-input {
+  margin-top: 2rem;
+}
+
+/* Questions Section Animation */
+#questions-section.visible {
+  animation: fadeIn 0.5s ease-in;
+}
+
+/* Feedback and Success Messages */
+#feedback {
+  color: #ff6b6b;
+  margin-top: 10px;
+  font-size: 0.9rem;
+}
+
+#feedback.shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+#success {
+  color: #4bd369;
+  margin-top: 10px;
+  font-size: 0.9rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* Shake Animation */
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
+  }
+}
