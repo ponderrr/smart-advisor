@@ -90,46 +90,7 @@
       </div>
     </button>
 
-    <script src="js/displayResults.js"></script>
-    <script>
-      // Dark mode toggle function
-      window.toggleDarkMode = function () {
-        const currentTheme = document.body.getAttribute("data-theme");
-        const newTheme = currentTheme === "dark" ? "light" : "dark";
-        document.body.setAttribute("data-theme", newTheme);
-        localStorage.setItem("theme", newTheme);
-      };
-
-      // Apply saved theme on load
-      document.addEventListener("DOMContentLoaded", () => {
-        const savedTheme = localStorage.getItem("theme") || "light";
-        document.body.setAttribute("data-theme", savedTheme);
-
-        // Attach event listener to the theme toggle button
-        const themeToggleButton = document.getElementById("theme-toggle");
-        if (themeToggleButton) {
-          themeToggleButton.addEventListener("click", toggleDarkMode);
-        }
-      });
-
-      // Smoothly hide and show the navbar
-      const navbar = document.querySelector(".navbar");
-      const threshold = 100; // Scroll threshold to hide navbar
-
-      // Hide navbar on scroll down, show on scroll up
-      let lastScrollY = window.scrollY;
-      window.addEventListener("scroll", () => {
-        if (window.scrollY > lastScrollY && window.scrollY > threshold) {
-          // Scroll Down
-          navbar.classList.add("hidden");
-          navbar.classList.remove("visible");
-        } else if (window.scrollY < lastScrollY || window.scrollY < threshold) {
-          // Scroll Up
-          navbar.classList.add("visible");
-          navbar.classList.remove("hidden");
-        }
-        lastScrollY = window.scrollY;
-      });
-    </script>
+    <script type="module" src="js/app.js"></script>
+    <script type="module" src="js/results-page.js"></script>
   </body>
 </html>

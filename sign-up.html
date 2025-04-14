@@ -77,11 +77,9 @@
       </div>
     </button>
 
-    <!-- Password visibility toggle script -->
-    <script src="js/password-visibility.js"></script>
-
+    <script type="module" src="js/app.js"></script>
     <script type="module">
-      import { signup } from "./js/register.js";
+      import { signup } from "./js/auth-manager.js";
 
       // Handle form submission
       document
@@ -108,27 +106,6 @@
           document.getElementById("redirectTo").value = redirectTo;
         }
       });
-
-      // Dark mode toggle function
-      window.toggleDarkMode = function () {
-        const currentTheme = document.body.getAttribute("data-theme");
-        const newTheme = currentTheme === "dark" ? "light" : "dark";
-        document.body.setAttribute("data-theme", newTheme);
-        localStorage.setItem("theme", newTheme);
-      };
-
-      // Apply saved theme on load
-      document.addEventListener("DOMContentLoaded", () => {
-        const savedTheme = localStorage.getItem("theme") || "light";
-        document.body.setAttribute("data-theme", savedTheme);
-
-        // Attach event listener to the theme toggle button
-        const themeToggleButton = document.getElementById("theme-toggle");
-        if (themeToggleButton) {
-          themeToggleButton.addEventListener("click", toggleDarkMode);
-        }
-      });
     </script>
-    <script src="theme-toggle.js"></script>
   </body>
 </html>

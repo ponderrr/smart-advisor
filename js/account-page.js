@@ -1,8 +1,8 @@
 import { getUserProfile } from "./firebase-utils.js";
 import { auth } from "./firebase-config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getMoviePoster } from "./tmdb-service.js";
-import { getBookCover } from "./google-books-service.js";
+import { getMoviePoster } from "./services/movie-service.js";
+import { getBookCover } from "./services/book-service.js";
 
 // Global variables to store recommendation data
 let allMovieRecommendations = [];

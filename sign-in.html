@@ -72,11 +72,9 @@
       </div>
     </button>
 
-    <!-- Password visibility toggle script -->
-    <script src="js/password-visibility.js"></script>
-
+    <script type="module" src="js/app.js"></script>
     <script type="module">
-      import { login } from "./js/register.js";
+      import { login } from "./js/auth-manager.js";
 
       // Handle form submission
       document
@@ -94,30 +92,12 @@
           }
         });
 
-      // Set redirect path from URL parameters and theme toggle functionality
+      // Set redirect path from URL parameters
       document.addEventListener("DOMContentLoaded", () => {
         const urlParams = new URLSearchParams(window.location.search);
         const redirectTo = urlParams.get("redirectTo");
         if (redirectTo) {
           document.getElementById("redirectTo").value = redirectTo;
-        }
-
-        // Dark mode toggle function
-        window.toggleDarkMode = function () {
-          const currentTheme = document.body.getAttribute("data-theme");
-          const newTheme = currentTheme === "dark" ? "light" : "dark";
-          document.body.setAttribute("data-theme", newTheme);
-          localStorage.setItem("theme", newTheme);
-        };
-
-        // Apply saved theme on load
-        const savedTheme = localStorage.getItem("theme") || "light";
-        document.body.setAttribute("data-theme", savedTheme);
-
-        // Attach event listener to the theme toggle button
-        const themeToggleButton = document.getElementById("theme-toggle");
-        if (themeToggleButton) {
-          themeToggleButton.addEventListener("click", toggleDarkMode);
         }
       });
     </script>

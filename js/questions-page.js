@@ -1,5 +1,5 @@
-import { getQuestionsAndRecommendation } from "./openai-service.js";
-import { getUserAge } from "./register.js";
+import { getQuestionsAndRecommendation } from "./services/recommendation-service.js";
+import { getUserAge } from "./auth-manager.js";
 import { saveUserRecommendation } from "./firebase-utils.js";
 
 document.addEventListener("DOMContentLoaded", function () {

@@ -1,8 +1,5 @@
-import {
-  getTrendingMoviePoster,
-  getPopularBookCover,
-  getCombinedRecommendationImage,
-} from "./home-images-service.js";
+import { getTrendingMovies } from "./services/movie-service.js";
+import { getPopularBooks } from "./services/book-service.js";
 
 // Function to load dynamic images on the home page
 export async function loadHomePageImages() {
@@ -10,7 +7,12 @@ export async function loadHomePageImages() {
     // Get movie poster
     const movieBox = document.querySelector(".recommend-box.movie");
     if (movieBox) {
-      const movieData = await getTrendingMoviePoster();
+      const movies = await getTrendingMovies(1);
+      const movieData = movies[0] || {
+        title: "Movie Recommendation",
+        posterUrl: "images/movie-background.jpg",
+      };
+
       movieBox.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('${movieData.posterUrl}')`;
 
       // Add a title attribute for accessibility
@@ -34,7 +36,13 @@ export async function loadHomePageImages() {
     // Get book cover
     const bookBox = document.querySelector(".recommend-box.book");
     if (bookBox) {
-      const bookData = await getPopularBookCover();
+      const books = await getPopularBooks(1);
+      const bookData = books[0] || {
+        title: "Book Recommendation",
+        coverUrl: "images/book-background.jpg",
+        author: "Various Authors",
+      };
+
       bookBox.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('${bookData.coverUrl}')`;
 
       // Add a title attribute for accessibility
@@ -69,10 +77,20 @@ export async function loadHomePageImages() {
             `;
 
       // Fetch both images
-      const [movieData, bookData] = await Promise.all([
-        getTrendingMoviePoster(),
-        getPopularBookCover(),
+      const [movies, books] = await Promise.all([
+        getTrendingMovies(1),
+        getPopularBooks(1),
       ]);
+
+      const movieData = movies[0] || {
+        title: "Movie Recommendation",
+        posterUrl: "images/movie-background.jpg",
+      };
+
+      const bookData = books[0] || {
+        title: "Book Recommendation",
+        coverUrl: "images/book-background.jpg",
+      };
 
       // Set the backgrounds for each side
       const movieSide = bothBox.querySelector(".movie-side");
