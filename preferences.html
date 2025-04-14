@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accessibility Preferences - Smart Advisor</title>
+    <link rel="stylesheet" href="css/account-page.css" />
+    <link rel="stylesheet" href="css/preferences-page.css" />
+  </head>
+  <body>
+    <!-- Navbar -->
+    <header>
+      <nav class="navbar visible">
+        <div class="logo">
+          <a href="index.html" title="Return to homepage">
+            <img src="images/Smart Advisor logo.svg" alt="Smart Advisor Logo" />
+          </a>
+        </div>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="account.html">Account</a>
+          <a href="#" id="logout-link">Log Out</a>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div class="preferences-container" role="main">
+      <div class="section introduction-section">
+        <h1>Accessibility Preferences</h1>
+        <p>
+          Customize your recommendation experience to better suit your needs.
+        </p>
+      </div>
+
+      <!-- Accessibility Section -->
+      <div class="section accessibility-section">
+        <h2>Accessibility Options</h2>
+        <form id="accessibility-form">
+          <div class="preferences-group">
+            <h3>Media Accessibility</h3>
+
+            <div class="preference-item">
+              <div class="preference-info">
+                <label for="subtitles-toggle">Require Subtitles</label>
+                <p class="preference-description">
+                  Only recommend movies that offer subtitles
+                </p>
+              </div>
+              <div class="toggle-switch">
+                <input
+                  type="checkbox"
+                  id="subtitles-toggle"
+                  class="toggle-input"
+                />
+                <label for="subtitles-toggle" class="toggle-label"></label>
+              </div>
+            </div>
+
+            <div class="preference-item">
+              <div class="preference-info">
+                <label for="audio-description-toggle"
+                  >Require Audio Description</label
+                >
+                <p class="preference-description">
+                  Only recommend movies with audio descriptions for visually
+                  impaired viewers
+                </p>
+              </div>
+              <div class="toggle-switch">
+                <input
+                  type="checkbox"
+                  id="audio-description-toggle"
+                  class="toggle-input"
+                />
+                <label
+                  for="audio-description-toggle"
+                  class="toggle-label"
+                ></label>
+              </div>
+            </div>
+
+            <div class="preference-item">
+              <div class="preference-info">
+                <label for="closed-captions-toggle"
+                  >Require Closed Captions</label
+                >
+                <p class="preference-description">
+                  Only recommend content with closed captions (includes sound
+                  effects and speaker identification)
+                </p>
+              </div>
+              <div class="toggle-switch">
+                <input
+                  type="checkbox"
+                  id="closed-captions-toggle"
+                  class="toggle-input"
+                />
+                <label
+                  for="closed-captions-toggle"
+                  class="toggle-label"
+                ></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="preferences-group">
+            <h3>Content Filters</h3>
+
+            <div class="preference-item">
+              <div class="preference-info">
+                <label for="violent-content-toggle"
+                  >Exclude Violent Content</label
+                >
+                <p class="preference-description">
+                  Filter out movies and books with excessive violence
+                </p>
+              </div>
+              <div class="toggle-switch">
+                <input
+                  type="checkbox"
+                  id="violent-content-toggle"
+                  class="toggle-input"
+                />
+                <label
+                  for="violent-content-toggle"
+                  class="toggle-label"
+                ></label>
+              </div>
+            </div>
+
+            <div class="preference-item">
+              <div class="preference-info">
+                <label for="sexual-content-toggle"
+                  >Exclude Sexual Content</label
+                >
+                <p class="preference-description">
+                  Filter out movies and books with explicit sexual content
+                </p>
+              </div>
+              <div class="toggle-switch">
+                <input
+                  type="checkbox"
+                  id="sexual-content-toggle"
+                  class="toggle-input"
+                />
+                <label for="sexual-content-toggle" class="toggle-label"></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="preferences-group">
+            <h3>Language Options</h3>
+
+            <div class="preference-item">
+              <div class="preference-info">
+                <label for="language-select">Preferred Language</label>
+                <p class="preference-description">
+                  Choose your preferred language for subtitles and content
+                </p>
+              </div>
+              <div class="language-select-container">
+                <select id="language-select" name="preferred-language">
+                  <option value="en">English</option>
+                  <option value="es">Spanish</option>
+                  <option value="fr">French</option>
+                  <option value="de">German</option>
+                  <option value="it">Italian</option>
+                  <option value="zh">Chinese</option>
+                  <option value="ja">Japanese</option>
+                  <option value="ko">Korean</option>
+                  <option value="ru">Russian</option>
+                  <option value="pt">Portuguese</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="save-preferences-btn">
+              Save Preferences
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Premium Features Teaser - For monetization -->
+      <div class="section premium-section">
+        <h2>
+          Premium Features <span class="coming-soon-badge">Coming Soon</span>
+        </h2>
+        <div class="premium-features">
+          <div class="premium-feature">
+            <div class="feature-icon">🎬</div>
+            <h3>Advanced Filters</h3>
+            <p>
+              Get even more specific with your preferences, including runtime,
+              release date, director, and more.
+            </p>
+          </div>
+
+          <div class="premium-feature">
+            <div class="feature-icon">📋</div>
+            <h3>Custom Lists</h3>
+            <p>
+              Create and share custom reading and watching lists with friends
+              and family.
+            </p>
+          </div>
+
+          <div class="premium-feature">
+            <div class="feature-icon">📱</div>
+            <h3>Mobile App</h3>
+            <p>
+              Access your recommendations on-the-go with our dedicated mobile
+              application.
+            </p>
+          </div>
+        </div>
+        <p class="premium-teaser">
+          Stay tuned for our premium subscription options!
+        </p>
+      </div>
+    </div>
+
+    <!-- Theme Toggle Button -->
+    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+      <div class="icon-container">
+        <svg
+          class="sun-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg
+          class="moon-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </div>
+    </button>
+
+    <!-- Success message toast -->
+    <div id="success-toast" class="toast-message">
+      <div class="toast-content">
+        <span class="toast-icon">✓</span>
+        <span class="toast-text">Preferences saved successfully!</span>
+      </div>
+    </div>
+
+    <script type="module" src="js/app.js"></script>
+    <script type="module" src="js/preferences-page.js"></script>
+  </body>
+</html>

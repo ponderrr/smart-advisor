@@ -7,7 +7,8 @@ import {
   updatePassword,
   reauthenticateWithCredential,
   EmailAuthProvider,
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+} from "firebase/auth";
+import { doc, updateDoc } from "firebase/firestore";
 import { auth, db } from "./firebase-config.js";
 import { createUserProfile, getUserProfile } from "./firebase-utils.js";
 
@@ -282,6 +283,27 @@ export async function updateUserAge(age) {
     return { success: true };
   } catch (error) {
     console.error("Error updating age:", error);
+    return { success: false, error };
+  }
+}
+
+// Update user accessibility preferences
+export async function updateUserAccessibilityPreferences(preferences) {
+  try {
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error("Not authenticated");
+    }
+
+    // Update preferences in Firestore
+    const userRef = doc(db, "users", user.uid);
+    await updateDoc(userRef, {
+      "preferences.accessibility": preferences,
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating accessibility preferences:", error);
     return { success: false, error };
   }
 }

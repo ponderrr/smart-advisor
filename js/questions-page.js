@@ -1,8 +1,10 @@
 import { getQuestionsAndRecommendation } from "./services/recommendation-service.js";
 import { getUserAge } from "./auth-manager.js";
 import { saveUserRecommendation } from "./firebase-utils.js";
+import { auth } from "./firebase-config.js";
+import { getUserProfile } from "./firebase-utils.js";
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
   const questionCountSlider = document.getElementById("question-count-slider");
   const countDisplay = document.getElementById("count-display");
   const startQuizButton = document.getElementById("start-quiz");
@@ -26,6 +28,27 @@ document.addEventListener("DOMContentLoaded", function () {
   let currentAnswers = [];
   let currentQuestionIndex = 0;
 
+  // Check if user has premium subscription
+  let isPremiumUser = false;
+  let maxQuestions = 5; // Default for free users
+
+  try {
+    const userId = auth.currentUser?.uid || localStorage.getItem("userId");
+    if (userId) {
+      const userProfile = await getUserProfile(userId);
+      if (
+        userProfile &&
+        userProfile.subscription &&
+        userProfile.subscription.isActive
+      ) {
+        isPremiumUser = true;
+        maxQuestions = 15;
+      }
+    }
+  } catch (error) {
+    console.error("Error checking premium status:", error);
+  }
+
   // Set up initial state
   const savedTheme = localStorage.getItem("theme") || "light";
   rootElement.setAttribute("data-theme", savedTheme);
@@ -33,6 +56,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Initialize slider
   if (questionCountSlider) {
+    // Limit max questions for free users
+    if (!isPremiumUser) {
+      questionCountSlider.max = maxQuestions;
+
+      // Add premium message if they're not premium
+      const premiumMessage = document.createElement("div");
+      premiumMessage.className = "premium-message";
+      premiumMessage.innerHTML = `<p>Free accounts are limited to ${maxQuestions} questions. <a href="subscription.html">Upgrade to Premium</a> for unlimited questions!</p>`;
+
+      // Add styles for premium message
+      premiumMessage.style.marginTop = "1rem";
+      premiumMessage.style.padding = "0.5rem";
+      premiumMessage.style.backgroundColor = "rgba(255, 255, 255, 0.1)";
+      premiumMessage.style.borderRadius = "0.5rem";
+
+      // Add to page
+      questionCountSection.appendChild(premiumMessage);
+    }
+
     questionCountSlider.value = 3;
     updateQuestionCount(3);
   }
@@ -260,7 +302,10 @@ document.addEventListener("DOMContentLoaded", function () {
     return message;
   }
 
-  function updateToggleIcon(theme) {}
+  function updateToggleIcon(theme) {
+    // This function can be empty if you don't need to update the toggle icon
+    // or you can implement it if needed
+  }
 });
 
 export { getQuestionsAndRecommendation };

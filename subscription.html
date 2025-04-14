@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Premium Subscription - Smart Advisor</title>
+    <meta
+      name="description"
+      content="Upgrade to Smart Advisor Premium for advanced book and movie recommendations and extra features."
+    />
+    <link rel="stylesheet" href="css/subscription-page.css" />
+  </head>
+  <body>
+    <!-- Navbar -->
+    <header>
+      <nav class="navbar visible">
+        <div class="logo">
+          <a href="index.html" title="Return to homepage">
+            <img src="images/Smart Advisor logo.svg" alt="Smart Advisor Logo" />
+          </a>
+        </div>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="account.html">Account</a>
+          <a href="#" id="logout-link">Log Out</a>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div class="subscription-container" role="main">
+      <div class="section introduction-section">
+        <h1>Upgrade Your Experience</h1>
+        <p>
+          Choose the plan that works best for you and unlock premium features
+        </p>
+      </div>
+
+      <!-- Pricing Cards -->
+      <div class="pricing-section">
+        <div class="pricing-card free">
+          <div class="pricing-header">
+            <h2>Free</h2>
+            <div class="price">$0<span>/month</span></div>
+          </div>
+          <div class="pricing-features">
+            <ul>
+              <li>Basic movie & book recommendations</li>
+              <li>Up to 5 questions per recommendation</li>
+              <li>Basic accessibility options</li>
+              <li>Standard recommendation history</li>
+            </ul>
+          </div>
+          <div class="pricing-cta">
+            <button class="cta-button current">Current Plan</button>
+          </div>
+        </div>
+
+        <div class="pricing-card premium highlight">
+          <div class="pricing-badge">Most Popular</div>
+          <div class="pricing-header">
+            <h2>Premium</h2>
+            <div class="price">$4.99<span>/month</span></div>
+          </div>
+          <div class="pricing-features">
+            <ul>
+              <li>Advanced AI-powered recommendations</li>
+              <li>Unlimited questions per recommendation</li>
+              <li>Enhanced accessibility options</li>
+              <li>Ad-free experience</li>
+              <li>Create custom recommendation lists</li>
+              <li>Share recommendations with friends</li>
+              <li>Early access to new features</li>
+            </ul>
+          </div>
+          <div class="pricing-cta">
+            <button class="cta-button" id="premium-monthly-button">
+              Subscribe Now
+            </button>
+          </div>
+        </div>
+
+        <div class="pricing-card annual">
+          <div class="pricing-badge">Best Value</div>
+          <div class="pricing-header">
+            <h2>Annual</h2>
+            <div class="price">$39.99<span>/year</span></div>
+            <div class="pricing-save">Save over 30%</div>
+          </div>
+          <div class="pricing-features">
+            <ul>
+              <li>All Premium features</li>
+              <li>Priority customer support</li>
+              <li>Exclusive annual subscriber content</li>
+              <li>Two months free</li>
+            </ul>
+          </div>
+          <div class="pricing-cta">
+            <button class="cta-button" id="premium-annual-button">
+              Subscribe Now
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Features Comparison -->
+      <div class="section features-section">
+        <h2>Features Comparison</h2>
+        <div class="features-table-container">
+          <table class="features-table">
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th>Free</th>
+                <th>Premium</th>
+                <th>Annual</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Personalized Recommendations</td>
+                <td>✓</td>
+                <td>✓</td>
+                <td>✓</td>
+              </tr>
+              <tr>
+                <td>Number of Questions</td>
+                <td>Up to 5</td>
+                <td>Unlimited</td>
+                <td>Unlimited</td>
+              </tr>
+              <tr>
+                <td>Advanced AI Algorithm</td>
+                <td>-</td>
+                <td>✓</td>
+                <td>✓</td>
+              </tr>
+              <tr>
+                <td>Ad-Free Experience</td>
+                <td>-</td>
+                <td>✓</td>
+                <td>✓</td>
+              </tr>
+              <tr>
+                <td>Custom Lists</td>
+                <td>-</td>
+                <td>✓</td>
+                <td>✓</td>
+              </tr>
+              <tr>
+                <td>Social Sharing</td>
+                <td>-</td>
+                <td>✓</td>
+                <td>✓</td>
+              </tr>
+              <tr>
+                <td>Priority Support</td>
+                <td>-</td>
+                <td>-</td>
+                <td>✓</td>
+              </tr>
+              <tr>
+                <td>Exclusive Content</td>
+                <td>-</td>
+                <td>-</td>
+                <td>✓</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- FAQ Section -->
+      <div class="section faq-section">
+        <h2>Frequently Asked Questions</h2>
+        <div class="faq-container">
+          <div class="faq-item">
+            <div class="faq-question">
+              How does billing work?
+              <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-answer">
+              For monthly subscriptions, you'll be billed every month on the
+              same date you initially subscribed. For annual plans, you'll be
+              billed once per year. You can cancel your subscription at any
+              time.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question">
+              Can I switch between plans?
+              <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-answer">
+              Yes, you can switch between plans at any time. If you upgrade,
+              you'll be charged the prorated difference immediately. If you
+              downgrade, your new plan will take effect at your next billing
+              cycle.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question">
+              How do I cancel my subscription?
+              <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-answer">
+              You can cancel your subscription at any time from your account
+              settings. After cancellation, you'll still have access to premium
+              features until the end of your current billing period.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question">
+              What payment methods do you accept?
+              <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-answer">
+              We accept all major credit cards (Visa, Mastercard, American
+              Express, Discover), as well as PayPal for subscription payments.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question">
+              Do you offer refunds?
+              <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-answer">
+              We offer a 14-day money-back guarantee for new subscribers. If
+              you're not satisfied with our premium service within the first 14
+              days, contact our support team for a full refund.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Testimonials -->
+      <div class="section testimonials-section">
+        <h2>What Our Subscribers Say</h2>
+        <div class="testimonials-container">
+          <div class="testimonial">
+            <div class="testimonial-content">
+              <p>
+                "Smart Advisor Premium has transformed how I discover new books
+                and movies. The recommendations are spot-on, and I love the
+                custom lists feature!"
+              </p>
+            </div>
+            <div class="testimonial-author">
+              <div class="author-avatar">JD</div>
+              <div class="author-info">
+                <div class="author-name">Jessica D.</div>
+                <div class="author-title">Premium Member</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial">
+            <div class="testimonial-content">
+              <p>
+                "The unlimited questions feature alone is worth the
+                subscription. I get much more personalized recommendations now,
+                and I've discovered so many great books I would have otherwise
+                missed."
+              </p>
+            </div>
+            <div class="testimonial-author">
+              <div class="author-avatar">MT</div>
+              <div class="author-info">
+                <div class="author-name">Michael T.</div>
+                <div class="author-title">Annual Member</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial">
+            <div class="testimonial-content">
+              <p>
+                "As a film enthusiast, I appreciate the depth of the
+                recommendation engine. The accessibility options are also
+                fantastic - I can filter for movies with audio descriptions for
+                my visually impaired friend."
+              </p>
+            </div>
+            <div class="testimonial-author">
+              <div class="author-avatar">SL</div>
+              <div class="author-info">
+                <div class="author-name">Sarah L.</div>
+                <div class="author-title">Premium Member</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA Section -->
+      <div class="section cta-section">
+        <h2>Ready to Enhance Your Experience?</h2>
+        <p>
+          Unlock all premium features and start discovering better
+          recommendations today.
+        </p>
+        <button class="main-cta-button" id="final-cta-button">
+          Subscribe to Premium
+        </button>
+        <p class="guarantee-text">
+          14-day money-back guarantee. No questions asked.
+        </p>
+      </div>
+    </div>
+
+    <!-- Theme Toggle Button -->
+    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+      <div class="icon-container">
+        <svg
+          class="sun-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg
+          class="moon-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </div>
+    </button>
+
+    <script type="module" src="js/app.js"></script>
+    <script type="module" src="js/subscription-page.js"></script>
+  </body>
+</html>

@@ -1,0 +1,10 @@
+# Smart Advisor robots.txt
+User-agent: *
+Allow: /
+Disallow: /account.html
+Disallow: /preferences.html
+Disallow: /results.html
+Disallow: /questions.html
+
+# Sitemap location
+Sitemap: https://yourdomain.com/sitemap.xml

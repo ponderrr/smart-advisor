@@ -37,6 +37,42 @@
   margin-bottom: 1rem;
 }
 
+/* Quick Links */
+.quick-links {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.account-link {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.8rem 1.5rem;
+  border-radius: 2rem;
+  color: #ffffff;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.account-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.link-icon {
+  font-size: 1.4rem;
+  margin-right: 0.5rem;
+}
+
+.link-text {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
 /* Recommendations Section */
 .recommendations-section {
   margin-top: 2rem;

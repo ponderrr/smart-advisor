@@ -1,6 +1,8 @@
 import { openaiApi, handleApiError } from "./api-config.js";
 import { getMoviePoster } from "./movie-service.js";
 import { getBookCover } from "./book-service.js";
+import { getUserProfile } from "../firebase-utils.js";
+import { auth } from "../firebase-config.js";
 
 /**
  * Get questions or recommendations based on user preferences
@@ -44,6 +46,79 @@ export async function getQuestionsAndRecommendation({
       return { questions };
     }
 
+    // Get user accessibility preferences
+    let accessibilityPreferences = null;
+    let contentFilters = null;
+    let recommendationHistory = [];
+
+    // Try to get user preferences if logged in
+    if (auth.currentUser) {
+      try {
+        const userProfile = await getUserProfile(auth.currentUser.uid);
+        if (userProfile && userProfile.preferences) {
+          accessibilityPreferences =
+            userProfile.preferences.accessibility || null;
+          contentFilters = userProfile.preferences.contentFilters || null;
+          recommendationHistory =
+            userProfile.preferences.recommendationHistory || [];
+        }
+      } catch (error) {
+        console.warn("Error fetching user preferences:", error);
+      }
+    }
+
+    // Construct accessibility requirements string based on preferences
+    let accessibilityRequirements = "";
+    if (accessibilityPreferences) {
+      const requirements = [];
+
+      if (accessibilityPreferences.requireSubtitles) {
+        requirements.push("must have subtitles available");
+      }
+
+      if (accessibilityPreferences.requireAudioDescription) {
+        requirements.push("must have audio descriptions available");
+      }
+
+      if (accessibilityPreferences.requireClosedCaptions) {
+        requirements.push("must have closed captions available");
+      }
+
+      if (requirements.length > 0) {
+        accessibilityRequirements = `Additionally, the recommendation ${requirements.join(
+          " and "
+        )}.`;
+      }
+    }
+
+    // Construct content filter requirements
+    let contentFilterRequirements = "";
+    if (contentFilters) {
+      const filters = [];
+
+      if (contentFilters.excludeViolentContent) {
+        filters.push("should not contain excessive violence");
+      }
+
+      if (contentFilters.excludeSexualContent) {
+        filters.push("should not contain explicit sexual content");
+      }
+
+      if (filters.length > 0) {
+        contentFilterRequirements = `The recommendation ${filters.join(
+          " and "
+        )}.`;
+      }
+    }
+
+    // Construct history exclusion string
+    let historyExclusion = "";
+    if (recommendationHistory && recommendationHistory.length > 0) {
+      historyExclusion = `IMPORTANT: Do NOT recommend any of the following titles that have been previously recommended: ${recommendationHistory.join(
+        ", "
+      )}.`;
+    }
+
     // If answers are provided, generate recommendations
     let recommendationPrompt;
     if (type === "both") {
@@ -56,6 +131,9 @@ export async function getQuestionsAndRecommendation({
       })
       2. Match their interests
       3. Have good entertainment value
+      ${accessibilityRequirements}
+      ${contentFilterRequirements}
+      ${historyExclusion}
     
       Format the response as JSON with this structure:
       {
@@ -88,6 +166,9 @@ export async function getQuestionsAndRecommendation({
       })
       2. Matches their interests
       3. Has good entertainment value
+      ${accessibilityRequirements}
+      ${contentFilterRequirements}
+      ${historyExclusion}
     
       Format the response as JSON with these fields:
       {
@@ -205,6 +286,78 @@ export async function getRecommendationsByGenre(
   limit = 3
 ) {
   try {
+    // Get user accessibility preferences and recommendation history
+    let accessibilityPreferences = null;
+    let contentFilters = null;
+    let recommendationHistory = [];
+
+    if (auth.currentUser) {
+      try {
+        const userProfile = await getUserProfile(auth.currentUser.uid);
+        if (userProfile && userProfile.preferences) {
+          accessibilityPreferences =
+            userProfile.preferences.accessibility || null;
+          contentFilters = userProfile.preferences.contentFilters || null;
+          recommendationHistory =
+            userProfile.preferences.recommendationHistory || [];
+        }
+      } catch (error) {
+        console.warn("Error fetching user preferences:", error);
+      }
+    }
+
+    // Construct accessibility requirements string based on preferences
+    let accessibilityRequirements = "";
+    if (accessibilityPreferences) {
+      const requirements = [];
+
+      if (accessibilityPreferences.requireSubtitles) {
+        requirements.push("must have subtitles available");
+      }
+
+      if (accessibilityPreferences.requireAudioDescription) {
+        requirements.push("must have audio descriptions available");
+      }
+
+      if (accessibilityPreferences.requireClosedCaptions) {
+        requirements.push("must have closed captions available");
+      }
+
+      if (requirements.length > 0) {
+        accessibilityRequirements = `Additionally, the recommendations ${requirements.join(
+          " and "
+        )}.`;
+      }
+    }
+
+    // Construct content filter requirements
+    let contentFilterRequirements = "";
+    if (contentFilters) {
+      const filters = [];
+
+      if (contentFilters.excludeViolentContent) {
+        filters.push("should not contain excessive violence");
+      }
+
+      if (contentFilters.excludeSexualContent) {
+        filters.push("should not contain explicit sexual content");
+      }
+
+      if (filters.length > 0) {
+        contentFilterRequirements = `The recommendations ${filters.join(
+          " and "
+        )}.`;
+      }
+    }
+
+    // Construct history exclusion string
+    let historyExclusion = "";
+    if (recommendationHistory && recommendationHistory.length > 0) {
+      historyExclusion = `IMPORTANT: Do NOT recommend any of the following titles that have been previously recommended: ${recommendationHistory.join(
+        ", "
+      )}.`;
+    }
+
     const ageRating =
       age <= 13 ? "G or PG" : age <= 17 ? "up to PG-13" : "any rating";
 
@@ -212,6 +365,9 @@ export async function getRecommendationsByGenre(
       ", "
     )}.
     The recommendations should be age-appropriate (${ageRating}) for a ${age} year old.
+    ${accessibilityRequirements}
+    ${contentFilterRequirements}
+    ${historyExclusion}
     
     Format the response as a JSON array with this structure:
     [
@@ -261,4 +417,42 @@ export async function getRecommendationsByGenre(
     );
     return [];
   }
+}
+
+/**
+ * Check if a recommendation is a duplicate of previously recommended items
+ * @param {string} title - Title to check
+ * @returns {Promise<boolean>} True if it's a duplicate, false otherwise
+ */
+export async function isDuplicateRecommendation(title) {
+  if (!auth.currentUser) return false;
+
+  try {
+    const userProfile = await getUserProfile(auth.currentUser.uid);
+    if (
+      !userProfile ||
+      !userProfile.preferences ||
+      !userProfile.preferences.recommendationHistory
+    ) {
+      return false;
+    }
+
+    const history = userProfile.preferences.recommendationHistory;
+    return history.some((item) => item.toLowerCase() === title.toLowerCase());
+  } catch (error) {
+    console.error("Error checking for duplicate recommendation:", error);
+    return false;
+  }
+}
+
+/**
+ * Get premium recommendations with more detailed criteria
+ * This is a placeholder for the premium tier feature
+ * @param {Object} criteria - Detailed recommendation criteria
+ * @returns {Promise<Array>} List of premium recommendations
+ */
+export async function getPremiumRecommendations(criteria) {
+  // This function would be implemented for the premium tier
+  // It would allow for more specific filters and criteria
+  throw new Error("Premium recommendations are not yet available");
 }
