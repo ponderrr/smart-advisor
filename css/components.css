@@ -97,14 +97,13 @@ button {
 }
 
 button:hover {
-  box-shadow: 0 0 15px var(--button-bg-color), 0 0 25px var(--button-bg-color),
-    0 0 35px var(--button-bg-color);
+  background-image: var(--button-gradient-hover);
+  box-shadow: 0 0 15px var(--button-bg-color), 0 0 25px var(--button-bg-color);
   transform: translateY(-2px);
 }
 
 [data-theme="dark"] button:hover {
-  box-shadow: 0 0 15px var(--button-bg-color), 0 0 25px var(--button-bg-color),
-    0 0 35px var(--button-bg-color);
+  box-shadow: 0 0 15px var(--button-bg-color), 0 0 25px var(--button-bg-color);
 }
 
 /* === THEME TOGGLE === */
@@ -271,6 +270,252 @@ input:focus {
   border-radius: 0.5rem;
   margin: 1rem 0;
   text-align: center;
+}
+
+/* === CARDS AND SECTIONS === */
+.section {
+  background: var(--recommendation-gradient-light);
+  border-radius: 1rem;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px var(--shadow-color);
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .section {
+  background: var(--recommendation-gradient-dark);
+}
+
+/* Add subtle blue glow effect to sections */
+.section::before {
+  content: "";
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(26, 146, 232, 0.4) 0%,
+    rgba(26, 146, 232, 0) 70%
+  );
+  filter: blur(15px);
+  z-index: 1;
+  opacity: 0.6;
+}
+
+[data-theme="dark"] .section::before {
+  background: radial-gradient(
+    circle,
+    rgba(72, 169, 248, 0.4) 0%,
+    rgba(72, 169, 248, 0) 70%
+  );
+}
+
+.card {
+  background-color: var(--card-bg);
+  border-radius: 0.8rem;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-left: 3px solid var(--accent-color);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px var(--shadow-color);
+}
+
+/* === FEATURE BOXES === */
+.feature-box,
+.step-box {
+  background: var(--recommendation-gradient-light);
+  color: #ffffff;
+  padding: 2rem;
+  margin: 1rem;
+  border-radius: 0.8rem;
+  box-shadow: 0 4px 6px var(--shadow-color);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .feature-box,
+[data-theme="dark"] .step-box {
+  background: var(--recommendation-gradient-dark);
+}
+
+/* Add subtle blue glow to feature boxes */
+.feature-box::after,
+.step-box::after {
+  content: "";
+  position: absolute;
+  bottom: -30px;
+  left: -30px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(26, 146, 232, 0.3) 0%,
+    rgba(26, 146, 232, 0) 70%
+  );
+  filter: blur(15px);
+  z-index: 1;
+  opacity: 0.6;
+}
+
+[data-theme="dark"] .feature-box::after,
+[data-theme="dark"] .step-box::after {
+  background: radial-gradient(
+    circle,
+    rgba(72, 169, 248, 0.3) 0%,
+    rgba(72, 169, 248, 0) 70%
+  );
+}
+
+.feature-box:hover,
+.step-box:hover {
+  transform: translateY(-7px);
+  box-shadow: 0 10px 20px var(--shadow-color);
+}
+
+/* Consistent styles for recommendation blocks across all pages */
+.recommendation-block,
+.recommendations-section,
+.recommendation-item {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* Blue accent glows for all recommendation boxes */
+.recommendation-block::before,
+.recommendations-section::before,
+.recommendation-item::before {
+  content: "";
+  position: absolute;
+  top: -30px;
+  right: -30px;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(26, 146, 232, 0.4) 0%,
+    rgba(26, 146, 232, 0) 70%
+  );
+  filter: blur(20px);
+  z-index: 0;
+  opacity: 0.7;
+}
+
+[data-theme="dark"] .recommendation-block::before,
+[data-theme="dark"] .recommendations-section::before,
+[data-theme="dark"] .recommendation-item::before {
+  background: radial-gradient(
+    circle,
+    rgba(72, 169, 248, 0.4) 0%,
+    rgba(72, 169, 248, 0) 70%
+  );
+}
+
+.recommendation-block::after,
+.recommendations-section::after,
+.recommendation-item::after {
+  content: "";
+  position: absolute;
+  bottom: -40px;
+  left: -40px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(26, 146, 232, 0.3) 0%,
+    rgba(26, 146, 232, 0) 70%
+  );
+  filter: blur(25px);
+  z-index: 0;
+  opacity: 0.6;
+}
+
+[data-theme="dark"] .recommendation-block::after,
+[data-theme="dark"] .recommendations-section::after,
+[data-theme="dark"] .recommendation-item::after {
+  background: radial-gradient(
+    circle,
+    rgba(72, 169, 248, 0.3) 0%,
+    rgba(72, 169, 248, 0) 70%
+  );
+}
+
+/* Consistent poster container styling */
+.poster-container {
+  border: 3px solid var(--accent-color);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(26, 146, 232, 0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+[data-theme="dark"] .poster-container {
+  box-shadow: 0 5px 15px rgba(72, 169, 248, 0.3);
+}
+
+.poster-container:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 20px rgba(26, 146, 232, 0.5);
+}
+
+[data-theme="dark"] .poster-container:hover {
+  box-shadow: 0 8px 20px rgba(72, 169, 248, 0.5);
+}
+
+/* Consistent title styling with blue underline */
+.recommendation-title {
+  position: relative;
+  margin-bottom: 1.2rem;
+}
+
+.recommendation-title::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 40px;
+  height: 3px;
+  background-color: var(--accent-color);
+  border-radius: 3px;
+}
+
+/* Fix centering for centered layouts */
+.text-center .recommendation-title::after {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Consistent meta labels */
+.meta-label {
+  color: var(--accent-color);
+  font-weight: bold;
+}
+
+[data-theme="dark"] .meta-label {
+  color: var(--accent-color);
+}
+
+/* Ensure content is above decorative elements */
+.recommendation-content,
+.recommendation-details,
+.recommendation-meta,
+.recommendation-description {
+  position: relative;
+  z-index: 2;
 }
 
 /* === ANIMATIONS === */

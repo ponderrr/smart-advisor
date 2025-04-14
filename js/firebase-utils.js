@@ -28,6 +28,7 @@ export async function createUserProfile(userId, userData) {
   }
 }
 
+// Fix for saveUserRecommendation function to properly append recommendations
 export async function saveUserRecommendation(recommendationData) {
   console.log("Starting saveUserRecommendation");
   const user = auth.currentUser;
@@ -41,23 +42,55 @@ export async function saveUserRecommendation(recommendationData) {
   const userRef = doc(db, "users", user.uid);
 
   try {
+    // First get the current user data
     const userDoc = await getDoc(userRef);
-    if (!userDoc.exists()) {
+    let currentRecommendations = [];
+
+    // If the user exists, get their current recommendations
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      // Check if recommendations exist and is an array
+      if (
+        userData.recommendationss &&
+        Array.isArray(userData.recommendationss)
+      ) {
+        currentRecommendations = [...userData.recommendationss];
+      }
+      // If it's an object, convert to array
+      else if (
+        userData.recommendationss &&
+        typeof userData.recommendationss === "object"
+      ) {
+        currentRecommendations = Object.values(userData.recommendationss);
+      }
+      // If it doesn't exist, create an empty array
+      else {
+        currentRecommendations = [];
+      }
+    } else {
+      // Create user profile if it doesn't exist
       await createUserProfile(user.uid, {
         email: user.email,
         age: localStorage.getItem("userAge"),
       });
     }
 
-    const currentRecs = userDoc.exists()
-      ? userDoc.data().recommendationss || {}
-      : {};
-    const nextIndex = Object.keys(currentRecs).length;
+    // Add the new recommendation to the array
+    currentRecommendations.push({
+      type: recommendationData.type,
+      questionData: recommendationData.questionData,
+      answerData: recommendationData.answerData,
+      recommendationDetails: recommendationData.recommendationDetails,
+      timestamp: recommendationData.timestamp,
+    });
 
     // Add the recommendation to history to prevent duplicates
-    const userData = userDoc.data();
-    const recommendationHistory =
-      userData.preferences?.recommendationHistory || [];
+    let recommendationHistory = [];
+    if (userDoc.exists() && userDoc.data().preferences?.recommendationHistory) {
+      recommendationHistory = [
+        ...userDoc.data().preferences.recommendationHistory,
+      ];
+    }
 
     // Add the new recommendation to history
     const titleToAdd = recommendationData.recommendationDetails.title;
@@ -65,21 +98,16 @@ export async function saveUserRecommendation(recommendationData) {
       recommendationHistory.push(titleToAdd);
     }
 
-    const newRec = {
-      [`${nextIndex}`]: {
-        type: recommendationData.type,
-        questionData: recommendationData.questionData,
-        answerData: recommendationData.answerData,
-        recommendationDetails: recommendationData.recommendationDetails,
-        timestamp: recommendationData.timestamp,
-      },
-    };
-
-    // Update both recommendations and history
+    // Update with the new recommendations array and history
     await updateDoc(userRef, {
-      recommendationss: newRec,
+      recommendationss: currentRecommendations,
       "preferences.recommendationHistory": recommendationHistory,
     });
+
+    console.log(
+      "Successfully saved recommendation, new count:",
+      currentRecommendations.length
+    );
   } catch (error) {
     console.error("Error saving recommendation:", error);
     throw error;

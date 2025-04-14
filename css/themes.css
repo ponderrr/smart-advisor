@@ -2,91 +2,118 @@
 :root {
   /* Background colors */
   --bg-color: #f5f5f7;
-  --navbar-bg-color: #333;
+  --navbar-bg-color: #121212;
   --card-bg: #ffffff;
   --input-bg: #ffffff;
   --box-color-light: #ffffff;
 
   /* Text colors */
-  --text-color: #000000;
-  --text-light: #666666;
+  --text-color: #181818;
+  --text-light: #4a4a4a;
   --text-dark: #000000;
   --navbar-text-color: #ffffff;
 
   /* Accent colors */
-  --accent-color: #4682b4;
-  --button-bg-color: #e34275;
+  --accent-color: #1a92e8; /* Primary light blue */
+  --button-bg-color: #1a92e8; /* Light blue for buttons */
   --button-text-color: #ffffff;
-  --button-hover-color: #c23b6f;
-  --border-color: #e34275;
-  --box-outline: #e34275;
-  --link-color: #4682b4;
-  --accent-hover: #5593c5;
+  --button-hover-color: #0d7ad1; /* Darker blue for hover */
+  --border-color: #1a92e8;
+  --box-outline: #1a92e8;
+  --link-color: #1a92e8; /* Light blue for links */
+  --accent-hover: #0d7ad1; /* Darker blue for hover states */
   --success-color: #28a745;
   --success-text-color: #ffffff;
   --error-bg-color: #f8d7da;
   --error-text-color: #dc3545;
-  --highlight-color: #000000;
+  --highlight-color: #1a92e8; /* Light blue for highlights */
 
   /* UI elements */
   --toggle-bg: #e2e8f0;
   --toggle-hover: #cbd5e1;
 
   /* Border and shadow */
-  --shadow-color: rgba(227, 66, 117, 0.2);
+  --shadow-color: rgba(26, 146, 232, 0.2);
 
   /* Recommendation gradient */
   --recommendation-gradient-light: linear-gradient(
     45deg,
-    #401f59,
-    #61265f,
-    #812d64,
-    #a2346a,
-    #c23b6f,
-    #e34275
+    #121212,
+    #212121,
+    #323232,
+    #1a92e8
   );
+
+  /* Button hover gradient */
+  --button-gradient-hover: linear-gradient(45deg, #1a92e8, #0d7ad1);
+
+  /* Secondary accent - a lighter blue */
+  --secondary-accent: #48c2f8;
+
+  /* Scrollbar colors */
+  --scrollbar-track: #f1f1f1;
+  --scrollbar-thumb: #1a92e8;
+  --scrollbar-thumb-hover: #0d7ad1;
+
+  /* RGB values for JavaScript manipulation */
+  --button-bg-color-rgb: 26, 146, 232;
+  --accent-color-rgb: 26, 146, 232;
 }
 
 /* Dark Theme Variables */
 [data-theme="dark"] {
   /* Background colors */
-  --bg-color: #1c1c1e;
-  --navbar-bg-color: #1f1f1f;
-  --card-bg: #2c2c3e;
-  --input-bg: #1c1c1e;
-  --box-color-light: #2c2c3e;
+  --bg-color: #121212;
+  --navbar-bg-color: #1a1a1a;
+  --card-bg: #1e1e1e;
+  --input-bg: #2c2c2e;
+  --box-color-light: #2c2c2e;
 
   /* Text colors */
-  --text-color: #eeeeee;
-  --text-light: #cccccc;
+  --text-color: #f5f5f7;
+  --text-light: #b3b3b3;
   --text-dark: #ffffff;
   --navbar-text-color: #e0e0e0;
 
   /* Accent colors */
-  --accent-color: #60a5fa;
-  --button-bg-color: #ba262b;
+  --accent-color: #48a9f8; /* Brighter light blue for dark mode */
+  --button-bg-color: #48a9f8; /* Brighter blue for buttons in dark mode */
   --button-text-color: #ffffff;
-  --button-hover-color: #a41726;
-  --border-color: #ba262b;
-  --box-outline: #ba262b;
-  --link-color: #f6f6f6;
-  --accent-hover: #337ab7;
-  --success-color: #4caf50;
+  --button-hover-color: #1a92e8;
+  --border-color: #48a9f8;
+  --box-outline: #48a9f8;
+  --link-color: #48a9f8;
+  --accent-hover: #3a93dc;
+  --success-color: #2eb85c;
   --success-text-color: #ffffff;
   --error-bg-color: #422f2f;
   --error-text-color: #ff6b6b;
-  --highlight-color: #ffffff;
+  --highlight-color: #48a9f8;
 
   /* Border and shadow */
-  --shadow-color: rgba(186, 38, 43, 0.2);
+  --shadow-color: rgba(72, 169, 248, 0.3);
 
   /* Recommendation gradient */
   --recommendation-gradient-dark: linear-gradient(
     45deg,
-    #810020,
-    #900a22,
-    #a41726,
-    #ba262b,
-    #ca302d
+    #121212,
+    #181818,
+    #323232,
+    #48a9f8
   );
+
+  /* Button hover gradient */
+  --button-gradient-hover: linear-gradient(45deg, #48a9f8, #1a92e8);
+
+  /* Secondary accent - an electric blue */
+  --secondary-accent: #66d3ff;
+
+  /* Scrollbar colors */
+  --scrollbar-track: #1e1e1e;
+  --scrollbar-thumb: #48a9f8;
+  --scrollbar-thumb-hover: #3a93dc;
+
+  /* RGB values for JavaScript manipulation */
+  --button-bg-color-rgb: 72, 169, 248;
+  --accent-color-rgb: 72, 169, 248;
 }

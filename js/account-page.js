@@ -356,28 +356,34 @@ function generateStarRating(rating) {
 }
 
 // Add "View All" buttons if there are multiple recommendations
+// Add "View All" buttons if there are multiple recommendations
 function addViewAllButtons() {
   console.log("Adding view all buttons");
+  console.log("Movie recommendations count:", allMovieRecommendations.length);
+  console.log("Book recommendations count:", allBookRecommendations.length);
+
   const movieSection = document.querySelector(
     ".recommendations-section.movies"
   );
   const bookSection = document.querySelector(".recommendations-section.books");
 
-  // Add movie section button if we have multiple recommendations
-  if (allMovieRecommendations.length > 1 && movieSection) {
+  // Add movie section button if we have ANY recommendations (changed from >1)
+  if (allMovieRecommendations.length > 0 && movieSection) {
     const existingButton = movieSection.querySelector(".view-all-button");
     if (!existingButton) {
       const viewAllButton = createViewAllButton("movie");
       movieSection.appendChild(viewAllButton);
+      console.log("Added View All button for movies");
     }
   }
 
-  // Add book section button if we have multiple recommendations
-  if (allBookRecommendations.length > 1 && bookSection) {
+  // Add book section button if we have ANY recommendations (changed from >1)
+  if (allBookRecommendations.length > 0 && bookSection) {
     const existingButton = bookSection.querySelector(".view-all-button");
     if (!existingButton) {
       const viewAllButton = createViewAllButton("book");
       bookSection.appendChild(viewAllButton);
+      console.log("Added View All button for books");
     }
   }
 }
@@ -542,50 +548,24 @@ function openRecommendationsModal(type) {
   modal.setAttribute("aria-modal", "true");
   modal.setAttribute("aria-labelledby", `${type}-modal-title`);
 
-  // Modal container styles
-  modal.style.position = "fixed";
-  modal.style.top = "0";
-  modal.style.left = "0";
-  modal.style.width = "100%";
-  modal.style.height = "100%";
-  modal.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
-  modal.style.display = "flex";
-  modal.style.justifyContent = "center";
-  modal.style.alignItems = "center";
-  modal.style.zIndex = "1000";
-
-  // Create modal content
+  // Create modal content with class instead of inline styles
   const modalContent = document.createElement("div");
   modalContent.className = "modal-content";
 
-  // Modal content styles - use the theme utility function
-  modalContent.style.background =
-    getCurrentTheme() === "dark"
-      ? "linear-gradient(45deg, #810020, #900A22, #A41726, #BA262B, #CA302D)"
-      : "linear-gradient(45deg, #401F59, #61265F, #812D64, #A2346A, #C23B6F, #E34275)";
+  // Use CSS variables for theming instead of hardcoded colors
+  modalContent.style.background = "var(--recommendation-gradient-light)";
+  if (getCurrentTheme() === "dark") {
+    modalContent.style.background = "var(--recommendation-gradient-dark)";
+  }
 
-  modalContent.style.width = "90%";
-  modalContent.style.maxWidth = "900px";
-  modalContent.style.maxHeight = "90vh";
-  modalContent.style.overflowY = "auto";
-  modalContent.style.borderRadius = "1rem";
-  modalContent.style.boxShadow = "0 4px 20px rgba(0, 0, 0, 0.5)";
-
-  // Create header with close button
+  // Create header
   const header = document.createElement("div");
   header.className = "modal-header";
-  header.style.display = "flex";
-  header.style.justifyContent = "space-between";
-  header.style.alignItems = "center";
-  header.style.padding = "1.5rem";
-  header.style.borderBottom = "1px solid rgba(255, 255, 255, 0.2)";
 
   const title = document.createElement("h2");
   title.id = `${type}-modal-title`;
   title.textContent =
     type === "movie" ? "All Movie Recommendations" : "All Book Recommendations";
-  title.style.color = "#ffffff";
-  title.style.margin = "0";
 
   const closeButton = document.createElement("span");
   closeButton.className = "close-modal";
@@ -593,12 +573,8 @@ function openRecommendationsModal(type) {
   closeButton.setAttribute("aria-label", "Close");
   closeButton.setAttribute("role", "button");
   closeButton.setAttribute("tabindex", "0");
-  closeButton.style.color = "#ffffff";
-  closeButton.style.fontSize = "2rem";
-  closeButton.style.cursor = "pointer";
 
   closeButton.addEventListener("click", () => {
-    console.log("Close button clicked");
     // Add closing animation
     modal.style.animation = "fadeOut 0.3s forwards";
     modalContent.style.animation = "slideOut 0.3s forwards";
@@ -610,27 +586,20 @@ function openRecommendationsModal(type) {
   header.appendChild(title);
   header.appendChild(closeButton);
 
-  // Create body with loading state first
+  // Create body with loading state
   const body = document.createElement("div");
   body.className = "modal-body";
-  body.style.padding = "1.5rem";
 
   const loadingIndicator = document.createElement("div");
   loadingIndicator.className = "loading-spinner";
-  loadingIndicator.style.display = "flex";
-  loadingIndicator.style.flexDirection = "column";
-  loadingIndicator.style.alignItems = "center";
-  loadingIndicator.style.justifyContent = "center";
-  loadingIndicator.style.padding = "3rem";
-  loadingIndicator.style.color = "#ffffff";
 
-  // Use theme utility to get spinner color
-  const spinnerColor = getThemeColor("#E34275", "#BA262B");
+  // Use blue theme colors for spinner
+  const spinnerColor = getThemeColor("#1a92e8", "#48a9f8");
 
   loadingIndicator.innerHTML = `
-        <div class="spinner" style="width: 60px; height: 60px; border-radius: 50%; border: 5px solid rgba(255, 255, 255, 0.2); border-top-color: ${spinnerColor}; animation: spin 1s infinite linear; margin-bottom: 1rem;"></div>
-        <p style="font-size: 1.2rem; margin-top: 1rem;">Loading recommendations...</p>
-    `;
+    <div class="spinner" style="width: 60px; height: 60px; border-radius: 50%; border: 5px solid rgba(255, 255, 255, 0.2); border-top-color: ${spinnerColor}; animation: spin 1s infinite linear;"></div>
+    <p>Loading recommendations...</p>
+  `;
 
   body.appendChild(loadingIndicator);
 
@@ -650,7 +619,7 @@ function openRecommendationsModal(type) {
       return;
     }
 
-    // Handle arrow key navigation for recommendations
+    // Handle arrow key navigation
     if (event.key === "ArrowLeft") {
       const prevButton = modal.querySelector(".nav-button.prev");
       if (prevButton && !prevButton.disabled) {
@@ -666,9 +635,8 @@ function openRecommendationsModal(type) {
     }
   });
 
-  // Create the carousel after a short delay (for animation)
+  // Create the carousel after a short delay
   setTimeout(() => {
-    console.log("Creating carousel");
     loadingIndicator.remove();
     const carousel = createRecommendationCarousel(type);
     body.appendChild(carousel);
@@ -719,10 +687,9 @@ function createRecommendationCarousel(type) {
 
   // Get theme-specific button color
   const buttonBgColor = getThemeColor(
-    "rgba(227, 66, 117, 0.3)",
-    "rgba(186, 38, 43, 0.3)"
+    "rgba(26, 146, 232, 0.3)",
+    "rgba(72, 169, 248, 0.3)"
   );
-
   const prevButton = document.createElement("button");
   prevButton.className = "nav-button prev";
   prevButton.textContent = "Previous";

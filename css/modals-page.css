@@ -35,6 +35,59 @@
   background: var(--recommendation-gradient-dark);
 }
 
+/* Add decorative elements */
+.modal-content::before {
+  content: "";
+  position: absolute;
+  top: -30px;
+  right: -30px;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(26, 146, 232, 0.4) 0%,
+    rgba(26, 146, 232, 0) 70%
+  );
+  filter: blur(20px);
+  z-index: 0;
+  opacity: 0.6;
+}
+
+[data-theme="dark"] .modal-content::before {
+  background: radial-gradient(
+    circle,
+    rgba(72, 169, 248, 0.4) 0%,
+    rgba(72, 169, 248, 0) 70%
+  );
+}
+
+.modal-content::after {
+  content: "";
+  position: absolute;
+  bottom: -40px;
+  left: -40px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(26, 146, 232, 0.3) 0%,
+    rgba(26, 146, 232, 0) 70%
+  );
+  filter: blur(25px);
+  z-index: 0;
+  opacity: 0.6;
+}
+
+[data-theme="dark"] .modal-content::after {
+  background: radial-gradient(
+    circle,
+    rgba(72, 169, 248, 0.3) 0%,
+    rgba(72, 169, 248, 0) 70%
+  );
+}
+
 /* Modal Header */
 .modal-header {
   display: flex;
@@ -42,12 +95,26 @@
   align-items: center;
   padding: 1.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  z-index: 2;
 }
 
 .modal-header h2 {
   color: #ffffff;
   margin: 0;
   font-size: 1.8rem;
+  position: relative;
+}
+
+.modal-header h2::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 40px;
+  height: 3px;
+  background-color: var(--accent-color);
+  border-radius: 3px;
 }
 
 .close-modal {
@@ -55,15 +122,19 @@
   font-size: 2rem;
   cursor: pointer;
   transition: color 0.3s;
+  position: relative;
+  z-index: 3;
 }
 
 .close-modal:hover {
-  color: #f0f0f0;
+  color: var(--accent-color);
 }
 
 /* Modal Body */
 .modal-body {
   padding: 1.5rem;
+  position: relative;
+  z-index: 2;
 }
 
 /* Recommendation Carousel */
@@ -77,10 +148,12 @@
 
 /* Recommendation Display */
 .recommendation-display {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(0, 0, 0, 0.2);
   border-radius: 0.8rem;
   overflow: hidden;
   min-height: 400px;
+  position: relative;
+  z-index: 2;
 }
 
 /* Recommendation Content */
@@ -99,17 +172,34 @@
   flex: 0 0 200px;
   max-width: 200px;
   transition: transform 0.3s ease;
+  border: 3px solid var(--accent-color);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(26, 146, 232, 0.3);
+}
+
+[data-theme="dark"] .recommendation-display .poster-container {
+  box-shadow: 0 5px 15px rgba(72, 169, 248, 0.3);
 }
 
 .recommendation-display .poster-container:hover {
   transform: scale(1.02);
+  box-shadow: 0 8px 20px rgba(26, 146, 232, 0.5);
+}
+
+[data-theme="dark"] .recommendation-display .poster-container:hover {
+  box-shadow: 0 8px 20px rgba(72, 169, 248, 0.5);
 }
 
 .recommendation-display .recommendation-poster {
   width: 100%;
   height: auto;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  border-radius: 5px;
+  transition: transform 0.5s ease;
+}
+
+.recommendation-display .recommendation-poster:hover {
+  transform: scale(1.05);
 }
 
 /* Recommendation Details */
@@ -118,12 +208,26 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  position: relative;
+  z-index: 2;
 }
 
 .recommendation-display .recommendation-title {
   font-size: 1.8rem;
   color: #ffffff;
   margin-bottom: 0.5rem;
+  position: relative;
+}
+
+.recommendation-display .recommendation-title::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 40px;
+  height: 3px;
+  background-color: var(--accent-color);
+  border-radius: 3px;
 }
 
 .recommendation-display .recommendation-meta {
@@ -134,7 +238,7 @@
 
 .recommendation-display .meta-label {
   font-weight: bold;
-  color: #ffffff;
+  color: var(--accent-color);
   margin-right: 0.5rem;
 }
 
@@ -159,12 +263,16 @@
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(26, 146, 232, 0.8);
   color: #ffffff;
   padding: 0.5rem 1rem;
   border-radius: 2rem;
   font-weight: bold;
   z-index: 10;
+}
+
+[data-theme="dark"] .recommendation-counter {
+  background-color: rgba(72, 169, 248, 0.8);
 }
 
 /* Carousel Controls */
@@ -176,10 +284,12 @@
   padding: 0.5rem 1rem;
   background-color: rgba(0, 0, 0, 0.2);
   border-radius: 0.5rem;
+  position: relative;
+  z-index: 2;
 }
 
 .nav-button {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: var(--button-bg-color);
   color: #ffffff;
   border: none;
   border-radius: 0.5rem;
@@ -192,12 +302,18 @@
   align-items: center;
   gap: 0.5rem;
   width: auto;
+  position: relative;
+  z-index: 2;
 }
 
 .nav-button:hover {
-  background-color: rgba(255, 255, 255, 0.3);
+  background-color: var(--button-hover-color);
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px rgba(26, 146, 232, 0.4);
+}
+
+[data-theme="dark"] .nav-button:hover {
+  box-shadow: 0 4px 8px rgba(72, 169, 248, 0.4);
 }
 
 .nav-button.disabled {
@@ -215,6 +331,8 @@
   justify-content: center;
   padding: 3rem;
   color: #ffffff;
+  position: relative;
+  z-index: 2;
 }
 
 .spinner {
@@ -222,7 +340,7 @@
   height: 60px;
   border-radius: 50%;
   border: 5px solid rgba(255, 255, 255, 0.2);
-  border-top-color: #ffffff;
+  border-top-color: var(--accent-color);
   animation: spin 1s infinite linear;
   margin-bottom: 1rem;
 }
@@ -238,10 +356,39 @@
   align-items: center;
   justify-content: center;
   height: 400px;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(0, 0, 0, 0.2);
   border-radius: 0.8rem;
   color: rgba(255, 255, 255, 0.7);
   font-style: italic;
+  position: relative;
+  z-index: 2;
+}
+
+/* Make sure modal has higher z-index than navbar */
+.recommendations-modal {
+  z-index: 2000;
+}
+
+/* Force override for any red gradient or background that might be set elsewhere */
+#movie-recommendations-modal .modal-content,
+#book-recommendations-modal .modal-content,
+.modal-content {
+  background: var(--recommendation-gradient-light) !important;
+}
+
+[data-theme="dark"] #movie-recommendations-modal .modal-content,
+[data-theme="dark"] #book-recommendations-modal .modal-content,
+[data-theme="dark"] .modal-content {
+  background: var(--recommendation-gradient-dark) !important;
+}
+
+/* Force override for modal counter colors */
+.recommendation-counter {
+  background-color: rgba(26, 146, 232, 0.8) !important;
+}
+
+[data-theme="dark"] .recommendation-counter {
+  background-color: rgba(72, 169, 248, 0.8) !important;
 }
 
 /* Responsive Design */
@@ -261,12 +408,9 @@
     text-align: center;
   }
 
-  .recommendation-display .recommendation-meta {
-    text-align: center;
-  }
-
-  .recommendation-display .recommendation-description {
-    text-align: center;
+  .recommendation-display .recommendation-title::after {
+    left: 50%;
+    transform: translateX(-50%);
   }
 
   .nav-button {
