@@ -114,6 +114,7 @@ function setupUpdateButtons() {
 function handleEmailUpdate() {
   const newEmail = document.getElementById('new-email')?.value;
   const confirmEmail = document.getElementById('confirm-email')?.value;
+  const currentEmail = document.getElementById('current-email')?.value;
   
   // Clear previous messages
   clearSectionMessages();
@@ -121,6 +122,12 @@ function handleEmailUpdate() {
   // Validate fields
   if (!newEmail || !confirmEmail) {
     showSectionMessage('email', 'Please fill in all email fields', true);
+    return;
+  }
+  
+  // Check if new email is same as current
+  if (newEmail === currentEmail) {
+    showSectionMessage('email', 'New email must be different from your current email', true);
     return;
   }
   
@@ -170,6 +177,12 @@ function handlePasswordUpdate() {
     return;
   }
   
+  // Check password strength
+  if (newPassword.length < 6) {
+    showSectionMessage('password', 'Password must be at least 6 characters long', true);
+    return;
+  }
+  
   if (newPassword !== confirmPassword) {
     showSectionMessage('password', 'Passwords do not match', true);
     return;
@@ -189,6 +202,12 @@ function handlePasswordUpdate() {
     return;
   }
   
+  // Check if new password is same as current
+  if (newPassword === currentPassword) {
+    showSectionMessage('password', 'New password must be different from your current password', true);
+    return;
+  }
+  
   // Handle authentication and update
   updatePasswordWithConfirmation(currentPassword, newPassword);
 }
@@ -198,6 +217,7 @@ function handlePasswordUpdate() {
  */
 function handleAgeUpdate() {
   const newAge = document.getElementById('new-age')?.value;
+  const currentAge = document.getElementById('current-age')?.value;
   
   // Clear previous messages
   clearSectionMessages();
@@ -215,14 +235,19 @@ function handleAgeUpdate() {
     return;
   }
   
+  // Check if new age is same as current
+  if (parseInt(currentAge) === ageNum) {
+    showSectionMessage('age', 'New age must be different from your current age', true);
+    return;
+  }
+  
   // Confirm with user
   const confirmed = confirm(`Are you sure you want to update your age to ${ageNum}?`);
   if (!confirmed) {
     return;
   }
   
-  // For age update, we might not need a password confirmation
-  // but if you want to add it, use the same pattern as above
+  // Age update doesn't require password confirmation for better user experience
   updateAgeWithConfirmation(ageNum);
 }
 
@@ -234,18 +259,8 @@ async function updateEmailWithPassword(password, newEmail) {
     // Show processing message
     showSectionMessage('email', 'Processing...', false);
     
-    // For demo/testing: Allow a test password
-    const isTestMode = password === 'testpassword123';
-    let result = { success: false };
-    
-    if (isTestMode) {
-      // Simulate a delay for processing
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      result = { success: true };
-    } else {
-      // Use the actual update function from auth-manager.js
-      result = await updateUserEmail(password, newEmail);
-    }
+    // Use the actual update function from auth-manager.js
+    let result = await updateUserEmail(password, newEmail);
     
     if (result.success) {
       // Update UI
@@ -275,6 +290,9 @@ async function updateEmailWithPassword(password, newEmail) {
           case 'auth/email-already-in-use':
             errorMessage = 'This email address is already in use by another account.';
             break;
+          case 'auth/requires-recent-login':
+            errorMessage = 'For security reasons, please log out and log back in before making this change.';
+            break;
           default:
             errorMessage = result.error.message || 'Authentication failed';
         }
@@ -299,6 +317,9 @@ async function updateEmailWithPassword(password, newEmail) {
         case 'auth/email-already-in-use':
           errorMessage = 'This email address is already in use by another account.';
           break;
+        case 'auth/requires-recent-login':
+          errorMessage = 'For security reasons, please log out and log back in before making this change.';
+          break;
         default:
           errorMessage = error.message || 'An error occurred while updating email';
       }
@@ -316,18 +337,8 @@ async function updatePasswordWithConfirmation(currentPassword, newPassword) {
     // Show processing message
     showSectionMessage('password', 'Processing...', false);
     
-    // For demo/testing: Allow a test password
-    const isTestMode = currentPassword === 'testpassword123';
-    let result = { success: false };
-    
-    if (isTestMode) {
-      // Simulate a delay for processing
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      result = { success: true };
-    } else {
-      // Use the actual update function from auth-manager.js
-      result = await updateUserPassword(currentPassword, newPassword);
-    }
+    // Use the actual update function from auth-manager.js
+    let result = await updateUserPassword(currentPassword, newPassword);
     
     if (result.success) {
       // Clear fields
@@ -347,6 +358,9 @@ async function updatePasswordWithConfirmation(currentPassword, newPassword) {
             break;
           case 'auth/too-many-requests':
             errorMessage = 'Too many unsuccessful attempts. Please try again later.';
+            break;
+          case 'auth/requires-recent-login':
+            errorMessage = 'For security reasons, please log out and log back in before making this change.';
             break;
           default:
             errorMessage = result.error.message || 'Authentication failed';
@@ -368,6 +382,9 @@ async function updatePasswordWithConfirmation(currentPassword, newPassword) {
           break;
         case 'auth/too-many-requests':
           errorMessage = 'Too many unsuccessful attempts. Please try again later.';
+          break;
+        case 'auth/requires-recent-login':
+          errorMessage = 'For security reasons, please log out and log back in before making this change.';
           break;
         default:
           errorMessage = error.message || 'An error occurred while updating password';
@@ -472,10 +489,10 @@ function showSectionMessage(section, message, isError) {
   if (sectionContent && !sectionContent.classList.contains('active')) {
     sectionContent.classList.add('active');
     
-    // Update the icon
+    // Update the icon to rotate instead of changing text
     const toggleIcon = sectionEl.querySelector('.toggle-icon');
     if (toggleIcon) {
-      toggleIcon.textContent = '−';
+      toggleIcon.style.transform = 'rotate(45deg)';
     }
   }
   
