@@ -65,6 +65,14 @@
         </div>
 
         <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" required minlength="3" maxlength="20" pattern="[a-zA-Z0-9_-]+" />
+          <small style="color: rgba(255, 255, 255, 0.7); font-size: 0.8rem; margin-top: 4px; display: block;">
+            Username must be 3-20 characters and contain only letters, numbers, hyphens, and underscores.
+          </small>
+        </div>
+
+        <div class="form-group">
           <label for="password">Password</label>
           <input type="password" id="password" required />
         </div>
@@ -133,12 +141,13 @@
         .addEventListener("submit", async (e) => {
           e.preventDefault();
           const email = document.getElementById("email").value;
+          const username = document.getElementById("username").value;
           const password = document.getElementById("password").value;
           const age = document.getElementById("age").value;
           const redirectTo = document.getElementById("redirectTo").value;
 
           try {
-            await signup(email, password, age, redirectTo);
+            await signup(email, password, age, username, redirectTo);
           } catch (error) {
             alert(error.message);
           }
@@ -151,7 +160,23 @@
         if (redirectTo) {
           document.getElementById("redirectTo").value = redirectTo;
         }
+        
+        // Focus on email field
+        document.getElementById("email").focus();
       });
+      
+      // Add username validation feedback
+      const usernameInput = document.getElementById("username");
+      if (usernameInput) {
+        usernameInput.addEventListener("input", function() {
+          const isValid = this.checkValidity();
+          if (isValid) {
+            this.style.borderColor = "rgba(26, 146, 232, 0.7)";
+          } else {
+            this.style.borderColor = "rgba(255, 99, 71, 0.7)";
+          }
+        });
+      }
     </script>
   </body>
 </html>

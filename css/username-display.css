@@ -1,0 +1,134 @@
+/* Username Display Styling */
+
+.username-display {
+    color: var(--navbar-text-color);
+    display: flex;
+    align-items: center;
+    font-size: 1.1rem;
+    margin-left: auto;
+    margin-right: 20px;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 8px 15px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .username-display:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .username-display:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .welcome-text {
+    margin-right: 5px;
+    font-weight: normal;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  #navbar-username {
+    font-weight: bold;
+    color: var(--accent-color);
+    position: relative;
+  }
+  
+  /* Add subtle underline animation on hover */
+  #navbar-username::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--accent-color);
+    transition: width 0.3s ease;
+  }
+  
+  .username-display:hover #navbar-username::after {
+    width: 100%;
+  }
+  
+  /* Glow effect for logged-in users */
+  .username-display.logged-in::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+      circle at center,
+      var(--accent-color) 0%,
+      transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+  }
+  
+  .username-display.logged-in:hover::before {
+    opacity: 0.15;
+  }
+  
+  /* Avatar element for profile pictures (future expansion) */
+  .user-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    margin-right: 8px;
+    background-color: var(--accent-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 0.8rem;
+  }
+  
+  /* User status indicator */
+  .user-status {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-left: 8px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .user-status.online {
+    background-color: #28a745;
+  }
+  
+  .user-status.offline {
+    background-color: #dc3545;
+  }
+  
+  .user-status.guest {
+    background-color: #ffc107;
+  }
+  
+  /* Responsive adjustment */
+  @media (max-width: 768px) {
+    .username-display {
+      font-size: 0.9rem;
+      padding: 6px 12px;
+      margin-right: 10px;
+    }
+    
+    .user-avatar {
+      display: none;
+    }
+    
+    /* Hide welcome text on very small screens */
+    @media (max-width: 480px) {
+      .welcome-text {
+        display: none;
+      }
+    }
+  }

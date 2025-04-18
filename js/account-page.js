@@ -89,7 +89,8 @@ function updateUserInfoDisplay(userProfile) {
 
   const userNameElement = document.querySelector(".user-info h2");
   if (userNameElement) {
-    userNameElement.textContent = userProfile.email || "User Profile";
+    // Use username if available, otherwise use email
+    userNameElement.textContent = userProfile.username || userProfile.email || "User Profile";
   }
 
   // Update current email field if present
@@ -103,7 +104,14 @@ function updateUserInfoDisplay(userProfile) {
   if (currentAgeField && userProfile.age) {
     currentAgeField.value = userProfile.age;
   }
+  
+  // Update current username field if present
+  const currentUsernameField = document.getElementById("current-username");
+  if (currentUsernameField && userProfile.username) {
+    currentUsernameField.value = userProfile.username;
+  }
 }
+
 
 // Initialize recommendation history display
 function initializeRecommendationHistory(userProfile) {
@@ -1041,3 +1049,4 @@ async function displayRecommendationInModal(container, recommendation, type) {
   content.appendChild(details);
   container.appendChild(content);
 }
+
