@@ -1,0 +1,194 @@
+/* Account Settings Styles */
+
+/* Account Settings Container */
+.account-settings {
+    background: var(--recommendation-gradient-light);
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px var(--shadow-color);
+    color: #ffffff;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  [data-theme="dark"] .account-settings {
+    background: var(--recommendation-gradient-dark);
+  }
+  
+  .account-settings h2 {
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+    position: relative;
+    z-index: 2;
+  }
+  
+  /* Section Headers */
+  .settings-section {
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+  
+  .section-header {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .section-header:hover {
+    background-color: rgba(26, 146, 232, 0.2);
+  }
+  
+  .section-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+  
+  .section-header .toggle-icon {
+    font-size: 1.5rem;
+    transition: transform 0.3s ease;
+    display: inline-block;
+  }
+  
+  /* Section Content */
+  .section-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+  
+  .section-content.active {
+    max-height: 500px; /* Large enough for content */
+    padding: 1rem;
+  }
+  
+  /* Current Value Display */
+  .current-value {
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 0.8rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .current-value label {
+    display: block;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+  }
+  
+  .current-value input {
+    background-color: transparent;
+    border: none;
+    color: white;
+    font-weight: bold;
+    width: 100%;
+  }
+  
+  /* Form Groups */
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 0.8rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+  }
+  
+  .form-group input:focus {
+    outline: none;
+    border-color: var(--button-bg-color);
+    box-shadow: 0 0 0 2px rgba(26, 146, 232, 0.3);
+  }
+  
+  /* Update Buttons */
+  .update-button {
+    background-color: var(--button-bg-color);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.8rem 1.2rem;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    width: 100%;
+    margin-top: 1rem;
+  }
+  
+  .update-button:hover {
+    background-color: var(--button-hover-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Section-specific messages */
+  .section-message {
+    padding: 0.8rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    position: relative;
+    animation: fadeIn 0.3s ease;
+  }
+  
+  .section-message.error-message {
+    background-color: rgba(220, 53, 69, 0.2);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    color: #ff6b6b;
+  }
+  
+  .section-message.success-message {
+    background-color: rgba(40, 167, 69, 0.2);
+    border: 1px solid rgba(40, 167, 69, 0.3);
+    color: #4bd369;
+  }
+  
+  /* Messages */
+  .form-message {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+    animation: fadeIn 0.3s ease;
+  }
+  
+  .success-message {
+    background-color: rgba(40, 167, 69, 0.2);
+    border: 1px solid rgba(40, 167, 69, 0.3);
+    color: #4bd369;
+  }
+  
+  .error-message {
+    background-color: rgba(220, 53, 69, 0.2);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    color: #ff6b6b;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(10px); }
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
