@@ -6,6 +6,7 @@ export async function createUserProfile(userId, userData) {
     const userRef = doc(db, "users", userId);
     await setDoc(userRef, {
       email: userData.email,
+      username: userData.username || userData.email.split('@')[0], // Default username from email
       age: parseInt(userData.age),
       recommendationss: [],
       // Add new fields for user preferences
@@ -254,4 +255,37 @@ export async function getUserRecommendationHistory() {
     console.error("Error getting recommendation history:", error);
     throw error;
   }
+}
+
+// New function to update username
+export async function updateUsername(newUsername) {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error("No user logged in");
+  }
+
+  const userRef = doc(db, "users", user.uid);
+
+  try {
+    // Check if username is already taken
+    // Note: In a production app, you would implement a more robust username uniqueness check
+    
+    // Update username in Firestore
+    await updateDoc(userRef, { username: newUsername });
+    
+    // Update username in localStorage
+    localStorage.setItem("username", newUsername);
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating username:", error);
+    throw error;
+  }
+}
+
+// Function to check if username is available
+export async function checkUsernameAvailability(username) {
+  // This is a simplified version. In a production app, you would query the database
+  // to check if the username is already taken.
+  return { available: true };
 }

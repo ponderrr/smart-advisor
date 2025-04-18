@@ -6,6 +6,7 @@ import {
   isLoggedIn,
   initializeAuth,
 } from "./auth-manager.js";
+import { initNavbar, updateNavbarUsername } from "./navbar.js";
 
 // Export recommendation handler for global access
 window.handleRecommendationClick = function (type) {
@@ -35,6 +36,9 @@ function initApp() {
 
   // Initialize authentication system
   initializeAuth();
+  
+  // Initialize navbar with username
+  initNavbar();
 
   // Handle navbar scroll behavior
   const navbar = document.querySelector(".navbar");
@@ -55,6 +59,13 @@ function initApp() {
       lastScrollY = window.scrollY;
     });
   }
+  
+  // Update username display when login state changes
+  window.addEventListener('storage', (event) => {
+    if (event.key === 'isLoggedIn' || event.key === 'username') {
+      updateNavbarUsername();
+    }
+  });
 }
 
 // Initialize everything on DOM load

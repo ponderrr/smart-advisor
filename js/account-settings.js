@@ -3,7 +3,7 @@
  * Handles the account settings functionality with native browser authentication
  */
 
-import { updateUserEmail, updateUserPassword, updateUserAge } from "./auth-manager.js";
+import { updateUserEmail, updateUserPassword, updateUserAge, updateUserUsername } from "./auth-manager.js";
 
 // Set up section toggles
 function setupSectionToggles() {
@@ -103,6 +103,24 @@ function setupUpdateButtons() {
       if (e.key === 'Enter') {
         e.preventDefault();
         handleAgeUpdate();
+      }
+    });
+  }
+
+  // Username update setup
+  const usernameUpdateBtn = document.getElementById('username-update-btn');
+  const newUsernameInput = document.getElementById('new-username');
+  
+  if (usernameUpdateBtn) {
+    usernameUpdateBtn.addEventListener('click', handleUsernameUpdate);
+  }
+  
+  // Add enter key support for username field
+  if (newUsernameInput) {
+    newUsernameInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleUsernameUpdate();
       }
     });
   }
@@ -249,6 +267,44 @@ function handleAgeUpdate() {
   
   // Age update doesn't require password confirmation for better user experience
   updateAgeWithConfirmation(ageNum);
+}
+
+/**
+ * Handle username update request
+ */
+function handleUsernameUpdate() {
+  const newUsername = document.getElementById('new-username')?.value;
+  
+  // Clear previous messages
+  clearSectionMessages();
+  
+  // Validate field
+  if (!newUsername) {
+    showSectionMessage('username', 'Please enter your new username', true);
+    return;
+  }
+  
+  // Check username length
+  if (newUsername.length < 3 || newUsername.length > 20) {
+    showSectionMessage('username', 'Username must be between 3 and 20 characters', true);
+    return;
+  }
+  
+  // Check username format
+  const usernameRegex = /^[a-zA-Z0-9_-]+$/;
+  if (!usernameRegex.test(newUsername)) {
+    showSectionMessage('username', 'Username can only contain letters, numbers, underscores and hyphens', true);
+    return;
+  }
+  
+  // Confirm with user
+  const confirmed = confirm(`Are you sure you want to update your username to ${newUsername}?`);
+  if (!confirmed) {
+    return;
+  }
+  
+  // Update username
+  updateUsernameWithConfirmation(newUsername);
 }
 
 /**
@@ -455,8 +511,73 @@ async function updateAgeWithConfirmation(newAge) {
 }
 
 /**
+ * Update username with confirmation
+ */
+async function updateUsernameWithConfirmation(newUsername) {
+  try {
+    // Show processing message
+    showSectionMessage('username', 'Processing...', false);
+    
+    // Update username
+    let result = await updateUserUsername(newUsername);
+    
+    if (result.success) {
+      // Update UI
+      const currentUsernameField = document.getElementById('current-username');
+      if (currentUsernameField) {
+        currentUsernameField.value = newUsername;
+      }
+      
+      // Update username in header if it exists
+      const usernameDisplay = document.querySelector('.user-info h2');
+      if (usernameDisplay) {
+        usernameDisplay.textContent = newUsername;
+      }
+      
+      // Update navbar username if it exists
+      const navbarUsername = document.getElementById('navbar-username');
+      if (navbarUsername) {
+        navbarUsername.textContent = newUsername;
+      }
+      
+      // Clear field
+      document.getElementById('new-username').value = '';
+      
+      // Show success message only in the section
+      showSectionMessage('username', 'Username updated successfully!', false);
+    } else {
+      // Show user-friendly error message
+      let errorMessage = 'Failed to update username';
+      
+      if (result.error?.code) {
+        switch (result.error.code) {
+          case 'username-taken':
+            errorMessage = 'This username is already taken. Please choose another.';
+            break;
+          default:
+            errorMessage = result.error.message || 'Failed to update username';
+        }
+      }
+      
+      showSectionMessage('username', errorMessage, true);
+    }
+  } catch (error) {
+    console.error('Error updating username:', error);
+    
+    // User-friendly error message
+    let errorMessage = 'An error occurred while updating username';
+    
+    if (error?.message) {
+      errorMessage = error.message;
+    }
+    
+    showSectionMessage('username', errorMessage, true);
+  }
+}
+
+/**
  * Show message specific to a section
- * @param {string} section - Section identifier (email, password, age)
+ * @param {string} section - Section identifier (email, password, age, username)
  * @param {string} message - Message text
  * @param {boolean} isError - Whether it's an error message
  */
@@ -560,10 +681,30 @@ function clearMessages() {
 function initAccountSettings() {
   setupSectionToggles();
   setupUpdateButtons();
+  
+  // Open a section if specified in URL hash (e.g., #username)
+  const hash = window.location.hash;
+  if (hash) {
+    const sectionName = hash.substring(1); // Remove # symbol
+    const section = document.querySelector(`.settings-section[data-section="${sectionName}"]`);
+    if (section) {
+      const content = section.querySelector('.section-content');
+      const icon = section.querySelector('.toggle-icon');
+      
+      // Open the section
+      content.classList.add('active');
+      icon.style.transform = 'rotate(45deg)';
+      
+      // Scroll to the section
+      setTimeout(() => {
+        section.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  }
 }
 
 // Initialize on DOM load
 document.addEventListener('DOMContentLoaded', initAccountSettings);
 
 // Export the functions for potential external use
-export { initAccountSettings };
+export { initAccountSettings, handleUsernameUpdate };
