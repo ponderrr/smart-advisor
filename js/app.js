@@ -7,6 +7,7 @@ import {
   initializeAuth,
 } from "./auth-manager.js";
 import { initNavbar, updateNavbarUsername } from "./navbar.js";
+import { initProfilePicture, loadProfilePicture } from "./profile-picture.js";
 import { processRestrictedElements } from "./subscription-guard.js";
 
 // Export recommendation handler for global access
@@ -40,6 +41,9 @@ function initApp() {
   
   // Initialize navbar with username
   initNavbar();
+  
+  // Initialize profile picture functionality
+  initProfilePicture();
 
   // Initialize navbar with username
   initNavbar();
@@ -67,10 +71,11 @@ function initApp() {
     });
   }
   
-  // Update username display when login state changes
+  // Update username and avatar when login state changes
   window.addEventListener('storage', (event) => {
-    if (event.key === 'isLoggedIn' || event.key === 'username') {
+    if (event.key === 'isLoggedIn' || event.key === 'username' || event.key === 'profilePictureURL') {
       updateNavbarUsername();
+      loadProfilePicture();
     }
   });
 }

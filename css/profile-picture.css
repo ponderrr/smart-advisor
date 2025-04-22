@@ -1,0 +1,140 @@
+@import "components.css";
+
+/* Profile Picture Styles */
+.profile-picture {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 1.5rem;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid var(--accent-color);
+  box-shadow: 0 4px 10px var(--shadow-color);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background-color: var(--card-bg);
+}
+
+.profile-picture img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Picture message styling */
+.picture-message {
+  margin: 10px 0;
+  font-size: 14px;
+  text-align: center;
+  min-height: 20px;
+  transition: all 0.3s ease;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.picture-message.success {
+  background-color: rgba(40, 167, 69, 0.2);
+  color: #4bd369;
+}
+
+.picture-message.error {
+  background-color: rgba(220, 53, 69, 0.2);
+  color: #ff6b6b;
+}
+
+/* Profile Picture in Navbar */
+.user-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin-right: 8px;
+  background-color: var(--accent-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 0.9rem;
+  overflow: hidden;
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Profile Picture in Settings */
+.settings-picture-preview {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+.settings-picture-preview img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--accent-color);
+  box-shadow: 0 2px 10px rgba(26, 146, 232, 0.3);
+}
+
+[data-theme="dark"] .settings-picture-preview img {
+  box-shadow: 0 2px 10px rgba(72, 169, 248, 0.3);
+}
+
+.settings-picture-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.settings-picture-buttons .update-button {
+  flex: 1;
+}
+
+.update-button.secondary {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.update-button.secondary:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* File Upload Button Styling */
+.file-upload-btn {
+  background-color: var(--button-bg-color);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.8rem 1.2rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
+.file-upload-btn:hover {
+  background-color: var(--button-hover-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Make profile section flex for large screens */
+@media (min-width: 768px) {
+  .profile-section {
+    display: flex;
+    align-items: center;
+  }
+  
+  .profile-picture {
+    margin: 0 1.5rem 0 0;
+  }
+  
+  .user-info {
+    flex: 1;
+  }
+}

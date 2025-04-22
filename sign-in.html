@@ -50,11 +50,15 @@
       [data-theme="dark"] * {
         scrollbar-color: #48a9f8 #1e1e1e;
       }
+      
     </style>
   </head>
   <body>
     <div class="auth-container">
       <h2 class="auth-title">Sign In</h2>
+
+      <!-- Error/success message container -->
+      <div id="auth-message-container"></div>
 
       <form id="signInForm">
         <input type="hidden" id="redirectTo" name="redirectTo" />
@@ -69,7 +73,7 @@
           <input type="password" id="password" required />
         </div>
 
-        <button type="submit" class="auth-button">Sign In</button>
+        <button type="submit" id="submit-button" class="auth-button">Sign In</button>
       </form>
 
       <div class="switch-auth">Don't have an account?</div>
@@ -122,19 +126,65 @@
     <script type="module">
       import { login } from "./js/auth-manager.js";
 
+      // Show message function
+      function showAuthMessage(message, isError = false) {
+        const messageContainer = document.getElementById('auth-message-container');
+        if (!messageContainer) return;
+        
+        // Clear any existing messages
+        messageContainer.innerHTML = '';
+        
+        // Create message element
+        const messageElement = document.createElement('div');
+        messageElement.className = isError ? 'auth-message error' : 'auth-message success';
+        messageElement.textContent = message;
+        
+        // Add to container
+        messageContainer.appendChild(messageElement);
+        
+        // Auto-hide success messages after 5 seconds
+        if (!isError) {
+          setTimeout(() => {
+            if (messageElement.parentNode === messageContainer) {
+              messageElement.remove();
+            }
+          }, 5000);
+        }
+      }
+
       // Handle form submission
       document
         .getElementById("signInForm")
         .addEventListener("submit", async (e) => {
           e.preventDefault();
+          
+          // Get form values
           const email = document.getElementById("email").value;
           const password = document.getElementById("password").value;
           const redirectTo = document.getElementById("redirectTo").value;
 
+          // Show loading state
+          const submitButton = document.getElementById("submit-button");
+          submitButton.disabled = true;
+          submitButton.textContent = "Signing in...";
+          showAuthMessage("Signing in...", false);
+
           try {
-            await login(email, password, redirectTo);
+            // Call login function
+            const result = await login(email, password, redirectTo);
+            
+            // Check for errors
+            if (result && result.success === false) {
+              showAuthMessage(result.errorMessage, true);
+              submitButton.disabled = false;
+              submitButton.textContent = "Sign In";
+            }
+            // If no result is returned or success is true, login was successful and redirect has already happened
           } catch (error) {
-            alert(error.message);
+            console.error("Unexpected error:", error);
+            showAuthMessage("An unexpected error occurred. Please try again.", true);
+            submitButton.disabled = false;
+            submitButton.textContent = "Sign In";
           }
         });
 

@@ -9,7 +9,9 @@ export async function createUserProfile(userId, userData) {
       username: userData.username || userData.email.split('@')[0], // Default username from email
       age: parseInt(userData.age),
       recommendationss: [],
-      // Add new fields for user preferences
+      // Add new fields for user preferences and profile picture
+      profilePictureURL: null, // Default to no profile picture
+      profilePictureUpdated: null,
       preferences: {
         accessibility: {
           requireSubtitles: false,
@@ -288,4 +290,52 @@ export async function checkUsernameAvailability(username) {
   // This is a simplified version. In a production app, you would query the database
   // to check if the username is already taken.
   return { available: true };
+}
+
+// New function to update profile picture URL
+export async function updateProfilePictureURL(userId, url) {
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
+
+  const userRef = doc(db, "users", userId);
+
+  try {
+    await updateDoc(userRef, { 
+      profilePictureURL: url,
+      profilePictureUpdated: new Date().toISOString()
+    });
+    
+    // Update in localStorage
+    localStorage.setItem("profilePictureURL", url);
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating profile picture URL:", error);
+    throw error;
+  }
+}
+
+// New function to remove profile picture
+export async function removeProfilePicture(userId) {
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
+
+  const userRef = doc(db, "users", userId);
+
+  try {
+    await updateDoc(userRef, { 
+      profilePictureURL: null,
+      profilePictureUpdated: new Date().toISOString()
+    });
+    
+    // Remove from localStorage
+    localStorage.removeItem("profilePictureURL");
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Error removing profile picture:", error);
+    throw error;
+  }
 }

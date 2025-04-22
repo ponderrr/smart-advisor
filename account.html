@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/account-page.css" />
     <link rel="stylesheet" href="css/account-settings.css" />
     <link rel="stylesheet" href="css/username-display.css">
+    <link rel="stylesheet" href="css/profile-picture.css">
     
     <style>
       /* Webkit browsers (Chrome, Safari, newer Edge) */
@@ -52,6 +53,19 @@
       [data-theme="dark"] * {
         scrollbar-color: #48a9f8 #1e1e1e;
       }
+      
+      /* Hide arrows in Chrome, Safari, Edge, and Opera */
+      input[type=number]::-webkit-inner-spin-button,
+      input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
+      /* Hide arrows in Firefox */
+      input[type=number] {
+        -moz-appearance: textfield;
+      }
+
     </style>
   </head>
   <body>
@@ -82,13 +96,17 @@
     </header>
     <!-- Main Content -->
     <div class="account-container" role="main">
-      <!-- Profile Section -->
+
       <div class="section profile-section">
+        <div class="profile-picture">
+          <img id="user-profile-image" src="/images/default-avatar.svg" alt="Profile Picture">
+        </div>
         <div class="user-info">
           <h2>Profile Information</h2>
           <!-- User email will be populated here -->
+          <div id="profile-picture-message" class="picture-message"></div>
         </div>
-
+      
         <!-- Quick Links -->
         <div class="quick-links">
           <a href="preferences.html" class="account-link">
@@ -101,6 +119,7 @@
           </a>
         </div>
       </div>
+
 
       <!-- Movie Recommendations -->
       <div class="section recommendations-section movies">
@@ -178,7 +197,25 @@
         
         <!-- Messages container -->
         <div id="form-messages"></div>
-
+        
+<!-- Profile Picture Settings Section -->
+<div class="settings-section" data-section="profile-picture">
+  <div class="section-header">
+    <h3>Profile Picture</h3>
+    <span class="toggle-icon">+</span>
+  </div>
+  <div class="section-content">
+    <!-- Section-specific message will be inserted here -->
+    <div class="settings-picture-preview">
+      <img id="settings-profile-preview" src="/images/default-avatar.svg" alt="Profile Picture">
+    </div>
+    <div class="settings-picture-buttons">
+      <input type="file" id="settings-profile-picture-upload" accept="image/*" style="display: none;">
+      <button type="button" id="settings-change-picture-btn" class="update-button">Change Picture</button>
+      <button type="button" id="settings-remove-picture-btn" class="update-button secondary">Remove</button>
+    </div>
+  </div>
+</div>
         <!-- Username Settings Section to add to account.html -->
 <div class="settings-section" data-section="username">
   <div class="section-header">
@@ -310,9 +347,13 @@
       </div>
     </button>
 
-    <script type="module" src="js/app.js"></script>
-    <script type="module" src="js/account-page.js"></script>
-    <script type="module" src="js/account-settings.js"></script>
-    <script type="module" src="js/navbar.js"></script>
+    <!-- Scripts -->
+<script type="module" src="js/app.js"></script>
+<script type="module" src="js/account-page.js"></script>
+<script type="module" src="js/account-settings.js"></script>
+<script type="module" src="js/navbar.js"></script>
+<script type="module" src="js/profile-picture.js"></script>
+
+
   </body>
 </html>

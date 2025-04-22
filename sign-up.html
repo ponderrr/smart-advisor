@@ -50,11 +50,92 @@
       [data-theme="dark"] * {
         scrollbar-color: #48a9f8 #1e1e1e;
       }
+      /* Hide arrows in Chrome, Safari, Edge, and Opera */
+      input[type=number]::-webkit-inner-spin-button,
+      input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      
+      /* Hide arrows in Firefox */
+      input[type=number] {
+        -moz-appearance: textfield;
+      }
+      
+
+      /* Password Requirements Styles */
+      .password-requirements {
+        background-color: rgba(26, 146, 232, 0.1);
+        border-radius: 6px;
+        padding: 10px;
+        margin-top: 5px;
+        font-size: 0.8rem;
+        border: 1px solid rgba(26, 146, 232, 0.3);
+        display: none;
+      }
+
+      .requirement {
+        display: flex;
+        align-items: center;
+        margin: 4px 0;
+        color: rgba(255, 0, 0, 0.7);
+      }
+
+      .requirement.met {
+        color: #4bd369;
+      }
+
+      .requirement-icon {
+        margin-right: 6px;
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        line-height: 14px;
+        text-align: center;
+        border-radius: 50%;
+        font-size: 0.7rem;
+      }
+
+      .requirement-icon.fail {
+        border: 1px solid rgba(255, 0, 0, 0.4);
+      }
+
+      .requirement-icon.success {
+        background-color: #4bd369;
+        color: #121212;
+      }
+
+      /* Auth message container styling */
+      #auth-message-container {
+        margin-bottom: 1rem;
+      }
+
+      .auth-message {
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+      }
+
+      .auth-message.error {
+        background-color: rgba(220, 53, 69, 0.2);
+        border: 1px solid rgba(220, 53, 69, 0.3);
+        color: #ff6b6b;
+      }
+
+      .auth-message.success {
+        background-color: rgba(40, 167, 69, 0.2);
+        border: 1px solid rgba(40, 167, 69, 0.3);
+        color: #4bd369;
+      }
     </style>
   </head>
   <body>
     <div class="auth-container">
       <h2 class="auth-title">Sign Up</h2>
+
+      <!-- Error/success message container -->
+      <div id="auth-message-container"></div>
 
       <form id="signUpForm">
         <input type="hidden" id="redirectTo" name="redirectTo" />
@@ -75,6 +156,29 @@
         <div class="form-group">
           <label for="password">Password</label>
           <input type="password" id="password" required />
+          <!-- Password requirements section -->
+          <div class="password-requirements" id="password-requirements">
+            <div class="requirement" id="length-requirement">
+              <span class="requirement-icon fail">✕</span>
+              <span>At least 8 characters</span>
+            </div>
+            <div class="requirement" id="uppercase-requirement">
+              <span class="requirement-icon fail">✕</span>
+              <span>At least 1 uppercase letter</span>
+            </div>
+            <div class="requirement" id="lowercase-requirement">
+              <span class="requirement-icon fail">✕</span>
+              <span>At least 1 lowercase letter</span>
+            </div>
+            <div class="requirement" id="number-requirement">
+              <span class="requirement-icon fail">✕</span>
+              <span>At least 1 number</span>
+            </div>
+            <div class="requirement" id="special-requirement">
+              <span class="requirement-icon fail">✕</span>
+              <span>At least 1 special character</span>
+            </div>
+          </div>
         </div>
 
         <div class="form-group">
@@ -82,13 +186,11 @@
           <input type="number" id="age" required min="1" max="120" />
         </div>
 
-        <button type="submit" class="auth-button">Sign Up</button>
+        <button type="submit" id="submit-button" class="auth-button">Sign Up</button>
       </form>
 
       <div class="switch-auth">Already have an account?</div>
-      <a href="sign-in.html" class="auth-link" onclick="preserveDarkMode()"
-        >Sign in</a
-      >
+      <a href="sign-in.html" class="auth-link">Sign in</a>
     </div>
     <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
       <div class="icon-container">
@@ -135,21 +237,145 @@
     <script type="module">
       import { signup } from "./js/auth-manager.js";
 
+      // Show message function
+      function showAuthMessage(message, isError = false) {
+        const messageContainer = document.getElementById('auth-message-container');
+        if (!messageContainer) return;
+        
+        // Clear any existing messages
+        messageContainer.innerHTML = '';
+        
+        // Create message element
+        const messageElement = document.createElement('div');
+        messageElement.className = isError ? 'auth-message error' : 'auth-message success';
+        messageElement.textContent = message;
+        
+        // Add to container
+        messageContainer.appendChild(messageElement);
+        
+        // Auto-hide success messages after 5 seconds
+        if (!isError) {
+          setTimeout(() => {
+            if (messageElement.parentNode === messageContainer) {
+              messageElement.remove();
+            }
+          }, 5000);
+        }
+      }
+
+      // Password validation 
+      const passwordInput = document.getElementById('password');
+      const passwordRequirements = document.getElementById('password-requirements');
+      
+      // Requirements elements
+      const lengthRequirement = document.getElementById('length-requirement');
+      const uppercaseRequirement = document.getElementById('uppercase-requirement');
+      const lowercaseRequirement = document.getElementById('lowercase-requirement');
+      const numberRequirement = document.getElementById('number-requirement');
+      const specialRequirement = document.getElementById('special-requirement');
+      
+      // Show password requirements when password field is focused
+      passwordInput.addEventListener('focus', function() {
+        passwordRequirements.style.display = 'block';
+      });
+      
+      // Hide password requirements when focus is lost
+      passwordInput.addEventListener('blur', function() {
+        // Optional: Keep requirements visible if the password field has content
+        if (this.value === '') {
+          passwordRequirements.style.display = 'none';
+        }
+      });
+      
+      // Check password requirements as user types
+      passwordInput.addEventListener('input', function() {
+        const password = this.value;
+        
+        // Check length
+        const hasLength = password.length >= 8;
+        updateRequirement(lengthRequirement, hasLength);
+        
+        // Check uppercase letter
+        const hasUppercase = /[A-Z]/.test(password);
+        updateRequirement(uppercaseRequirement, hasUppercase);
+        
+        // Check lowercase letter
+        const hasLowercase = /[a-z]/.test(password);
+        updateRequirement(lowercaseRequirement, hasLowercase);
+        
+        // Check number
+        const hasNumber = /[0-9]/.test(password);
+        updateRequirement(numberRequirement, hasNumber);
+        
+        // Check special character
+        const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+        updateRequirement(specialRequirement, hasSpecial);
+      });
+      
+      // Update requirement status
+      function updateRequirement(element, isMet) {
+        if (isMet) {
+          element.classList.add('met');
+          const icon = element.querySelector('.requirement-icon');
+          icon.textContent = '✓';
+          icon.classList.remove('fail');
+          icon.classList.add('success');
+        } else {
+          element.classList.remove('met');
+          const icon = element.querySelector('.requirement-icon');
+          icon.textContent = '✕';
+          icon.classList.add('fail');
+          icon.classList.remove('success');
+        }
+      }
+
       // Handle form submission
       document
         .getElementById("signUpForm")
         .addEventListener("submit", async (e) => {
           e.preventDefault();
+          
+          // Get form values
           const email = document.getElementById("email").value;
           const username = document.getElementById("username").value;
           const password = document.getElementById("password").value;
           const age = document.getElementById("age").value;
           const redirectTo = document.getElementById("redirectTo").value;
 
+          // Validate password meets all requirements
+          const hasLength = password.length >= 8;
+          const hasUppercase = /[A-Z]/.test(password);
+          const hasLowercase = /[a-z]/.test(password);
+          const hasNumber = /[0-9]/.test(password);
+          const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+          
+          if (!hasLength || !hasUppercase || !hasLowercase || !hasNumber || !hasSpecial) {
+            showAuthMessage("Please ensure your password meets all the requirements", true);
+            return;
+          }
+
+          // Show loading state
+          const submitButton = document.getElementById("submit-button");
+          submitButton.disabled = true;
+          submitButton.textContent = "Creating account...";
+          showAuthMessage("Creating your account...", false);
+
           try {
-            await signup(email, password, age, username, redirectTo);
+            // Call signup function
+            const result = await signup(email, password, age, username, redirectTo);
+            
+            // Check for errors
+            if (result && result.success === false) {
+              showAuthMessage(result.errorMessage, true);
+              submitButton.disabled = false;
+              submitButton.textContent = "Sign Up";
+            }
+            // If no result is returned or success is true, signup was successful and redirect has already happened
           } catch (error) {
-            alert(error.message);
+            console.error("Unexpected error:", error);
+            showAuthMessage("An unexpected error occurred. Please try again.", true);
+            submitButton.disabled = false;
+            submitButton.textContent = "Sign Up";
           }
         });
 
