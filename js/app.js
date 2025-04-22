@@ -7,6 +7,7 @@ import {
   initializeAuth,
 } from "./auth-manager.js";
 import { initNavbar, updateNavbarUsername } from "./navbar.js";
+import { processRestrictedElements } from "./subscription-guard.js";
 
 // Export recommendation handler for global access
 window.handleRecommendationClick = function (type) {
@@ -39,6 +40,12 @@ function initApp() {
   
   // Initialize navbar with username
   initNavbar();
+
+  // Initialize navbar with username
+  initNavbar();
+
+  // Process subscription-restricted elements
+  processRestrictedElements();
 
   // Handle navbar scroll behavior
   const navbar = document.querySelector(".navbar");

@@ -1,0 +1,364 @@
+/* Premium Badge */
+.premium-badge {
+  background-color: var(--accent-color);
+  color: white;
+  padding: 0.3rem 0.6rem;
+  border-radius: 1rem;
+  font-size: 0.7rem;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.premium-badge .icon {
+  margin-right: 0.3rem;
+  font-size: 0.8rem;
+}
+
+/* Premium/Restricted Features */
+.premium-overlay {
+  position: relative;
+  overflow: hidden;
+}
+
+.premium-overlay::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  backdrop-filter: blur(3px);
+}
+
+.premium-overlay:hover::before {
+  opacity: 1;
+}
+
+.premium-overlay::after {
+  content: "Premium Feature";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-weight: bold;
+  z-index: 6;
+  background-color: var(--accent-color);
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.premium-overlay:hover::after {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.05);
+}
+
+/* Upgrade Button */
+.upgrade-feature-button {
+  background-color: var(--button-bg-color);
+  color: white;
+  border: none;
+  border-radius: 2rem;
+  padding: 0.7rem 1.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.upgrade-feature-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: all 0.6s ease;
+  z-index: 1;
+}
+
+.upgrade-feature-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.upgrade-feature-button:hover::before {
+  left: 100%;
+}
+
+.upgrade-feature-button:active {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Premium Message in forms and sections */
+.premium-message {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  padding: 0.8rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border-left: 3px solid var(--accent-color);
+  position: relative;
+}
+
+.premium-message p {
+  margin: 0;
+  color: var(--text-color);
+}
+
+.premium-message a {
+  color: var(--accent-color);
+  font-weight: bold;
+  text-decoration: none;
+  position: relative;
+}
+
+.premium-message a::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--accent-color);
+  transition: width 0.3s ease;
+}
+
+.premium-message a:hover::after {
+  width: 100%;
+}
+
+/* Premium Feature Info */
+.premium-feature-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+.premium-feature-info .icon {
+  color: var(--accent-color);
+  font-size: 1.2rem;
+}
+
+.premium-feature-info .text {
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+
+.premium-feature-info .upgrade-link {
+  color: var(--accent-color);
+  font-weight: bold;
+  margin-left: 0.3rem;
+  text-decoration: none;
+}
+
+/* Feature Comparison in Upgrade Modal */
+.feature-comparison {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.plan-column {
+  flex: 1;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  text-align: center;
+}
+
+.plan-column.premium {
+  background-color: rgba(26, 146, 232, 0.1);
+  border: 1px solid rgba(26, 146, 232, 0.3);
+}
+
+.plan-column h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.plan-column .value {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0.5rem 0;
+}
+
+.plan-column .label {
+  font-size: 0.9rem;
+  color: var(--text-light);
+}
+
+/* Locked content overlay */
+.locked-content {
+  position: relative;
+  filter: blur(5px);
+  pointer-events: none;
+  user-select: none;
+}
+
+.locked-content::after {
+  content: "🔒 Premium Feature";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: var(--button-bg-color);
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 2rem;
+  font-weight: bold;
+  white-space: nowrap;
+  z-index: 10;
+  filter: none;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Free vs Premium feature table */
+.feature-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.feature-table th {
+  background-color: var(--accent-color);
+  color: white;
+  padding: 1rem;
+  text-align: center;
+}
+
+.feature-table th:first-child {
+  text-align: left;
+  background-color: transparent;
+  color: var(--text-color);
+}
+
+.feature-table tr:nth-child(even) {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.feature-table td {
+  padding: 1rem;
+  text-align: center;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.feature-table td:first-child {
+  text-align: left;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.feature-table .check {
+  color: #28a745;
+  font-size: 1.2rem;
+}
+
+.feature-table .cross {
+  color: #dc3545;
+  font-size: 1.2rem;
+}
+
+/* Premium feature banner */
+.premium-banner {
+  background: linear-gradient(
+    45deg,
+    var(--button-bg-color),
+    var(--secondary-accent)
+  );
+  color: white;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.premium-banner-text {
+  flex: 1;
+}
+
+.premium-banner-text h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+}
+
+.premium-banner-text p {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.premium-banner-button {
+  background-color: white;
+  color: var(--button-bg-color);
+  border: none;
+  border-radius: 2rem;
+  padding: 0.8rem 1.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  margin-left: 1rem;
+}
+
+.premium-banner-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .premium-banner {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .premium-banner-text {
+    margin-bottom: 1rem;
+  }
+
+  .premium-banner-button {
+    margin-left: 0;
+  }
+
+  .feature-comparison {
+    flex-direction: column;
+  }
+}
