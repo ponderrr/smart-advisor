@@ -5,6 +5,21 @@
 
 import { updateUserEmail, updateUserPassword, updateUserAge, updateUserUsername } from "./auth-manager.js";
 
+import { 
+  auth, 
+  db 
+} from "./firebase-config.js"; 
+import { 
+  deleteDoc, 
+  doc 
+} from "firebase/firestore";
+
+import { 
+  reauthenticateWithCredential, 
+  EmailAuthProvider 
+} from "firebase/auth";
+
+
 // Set up section toggles
 function setupSectionToggles() {
   const sectionHeaders = document.querySelectorAll('.section-header');
@@ -675,12 +690,176 @@ function clearMessages() {
   }
 }
 
+
+/**
+ * Handle delete account functionality
+ */
+async function handleDeleteAccount() {
+  try {
+    // Get the confirmation text
+    const confirmationText = document.getElementById('delete-confirmation').value;
+    
+    // Validate confirmation text
+    if (confirmationText !== 'DELETE') {
+      showSectionMessage('delete-account', 'Please type "DELETE" to confirm account deletion', true);
+      return;
+    }
+    
+    // Use browser's built-in confirm dialog
+    const confirmDelete = confirm("Are you absolutely sure you want to delete your account? This action cannot be undone, and all your data will be permanently deleted.");
+    
+    if (confirmDelete) {
+      // Show processing state
+      const deleteButton = document.getElementById('delete-account-btn');
+      if (deleteButton) {
+        deleteButton.disabled = true;
+        deleteButton.textContent = "Deleting Account...";
+      }
+      
+      showSectionMessage('delete-account', 'Processing your request...', false);
+      
+      // Call the actual delete function
+      await deleteUserAccount();
+    }
+  } catch (error) {
+    console.error('Error in delete account process:', error);
+    showSectionMessage('delete-account', `Error: ${error.message || 'An error occurred while processing your request'}`, true);
+    
+    // Reset button state
+    const deleteButton = document.getElementById('delete-account-btn');
+    if (deleteButton) {
+      deleteButton.disabled = false;
+      deleteButton.textContent = "Delete My Account";
+    }
+  }
+}
+
+/**
+ * Delete the user's account
+ */
+async function deleteUserAccount() {
+  try {
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error("You must be logged in to delete your account");
+    }
+    
+    // Use browser's built-in prompt for password confirmation
+    const password = prompt("Please enter your password to confirm account deletion:");
+    
+    // If user cancels, abort deletion
+    if (password === null || password === "") {
+      // Reset button state
+      const deleteButton = document.getElementById('delete-account-btn');
+      if (deleteButton) {
+        deleteButton.disabled = false;
+        deleteButton.textContent = "Delete My Account";
+      }
+      
+      showSectionMessage('delete-account', 'Account deletion canceled', true);
+      return;
+    }
+    
+    // Reauthenticate
+    const credential = EmailAuthProvider.credential(user.email, password);
+    await reauthenticateWithCredential(user, credential);
+    
+    // Delete the user's data from Firestore
+    await deleteUserData(user.uid);
+    
+    // Delete the user's account
+    await user.delete();
+    
+    // Clear local storage and show success message
+    localStorage.clear();
+    
+    // Show success message
+    alert("Your account has been successfully deleted. You will now be redirected to the home page.");
+    
+    // Redirect to home page
+    window.location.href = "index.html";
+  } catch (error) {
+    console.error('Error deleting account:', error);
+    
+    // Reset button state
+    const deleteButton = document.getElementById('delete-account-btn');
+    if (deleteButton) {
+      deleteButton.disabled = false;
+      deleteButton.textContent = "Delete My Account";
+    }
+    
+    let errorMessage = "Failed to delete account";
+    
+    // Handle specific error codes
+    if (error.code === 'auth/wrong-password') {
+      errorMessage = "Incorrect password. Please try again.";
+    } else if (error.code === 'auth/too-many-requests') {
+      errorMessage = "Too many unsuccessful attempts. Please try again later.";
+    } else if (error.code === 'auth/requires-recent-login') {
+      errorMessage = "For security reasons, please log out and log back in before deleting your account.";
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    showSectionMessage('delete-account', errorMessage, true);
+  }
+}
+
+/**
+ * Delete user data from Firestore
+ * @param {string} userId - User ID to delete data for
+ */
+async function deleteUserData(userId) {
+  try {
+    // Delete the user document
+    await deleteDoc(doc(db, "users", userId));
+    
+    // If you have other collections with user data, delete them here
+    // For example:
+    // const userRecommendations = await getDocs(collection(db, "recommendations", where("userId", "==", userId)));
+    // userRecommendations.forEach(async (document) => {
+    //   await deleteDoc(doc(db, "recommendations", document.id));
+    // });
+    
+    console.log("User data deleted successfully");
+  } catch (error) {
+    console.error("Error deleting user data:", error);
+    throw new Error("Failed to delete user data");
+  }
+}
 /**
  * Initialize the account settings
  */
 function initAccountSettings() {
   setupSectionToggles();
   setupUpdateButtons();
+  
+  // Set up delete account button
+  const deleteAccountBtn = document.getElementById('delete-account-btn');
+  const deleteConfirmation = document.getElementById('delete-confirmation');
+  
+  if (deleteAccountBtn && deleteConfirmation) {
+    // Disable delete button by default
+    deleteAccountBtn.disabled = true;
+    
+    // Enable/disable delete button based on confirmation text
+    deleteConfirmation.addEventListener('input', function() {
+      deleteAccountBtn.disabled = this.value !== 'DELETE';
+    });
+    
+    // Set up delete account button click handler
+    deleteAccountBtn.addEventListener('click', handleDeleteAccount);
+  }
+  
+  // Listen for Enter key in confirmation input
+  if (deleteConfirmation) {
+    deleteConfirmation.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && this.value === 'DELETE') {
+        e.preventDefault();
+        handleDeleteAccount();
+      }
+    });
+  }
   
   // Open a section if specified in URL hash (e.g., #username)
   const hash = window.location.hash;

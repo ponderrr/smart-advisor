@@ -241,3 +241,114 @@
 .update-button.secondary:hover {
   background-color: rgba(255, 255, 255, 0.3);
 }
+/* Category Styles */
+.settings-category {
+  margin-bottom: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.8rem;
+  overflow: hidden;
+}
+
+.category-header {
+  background-color: rgba(255, 255, 255, 0.15);
+  padding: 1rem;
+  margin: 0;
+  font-size: 1.3rem;
+  color: #ffffff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Override settings section styles to work with categories */
+.settings-category .settings-section {
+  margin-bottom: 0;
+  border: none;
+  border-radius: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.settings-category .settings-section:last-child {
+  border-bottom: none;
+}
+
+/* Delete Account Specific Styles */
+.delete-account-warning {
+  background-color: rgba(220, 53, 69, 0.1);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.warning-text {
+  color: #ff6b6b;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.delete-button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.8rem 1.2rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.delete-button:hover {
+  background-color: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.delete-button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Active category sections */
+.settings-category .settings-section .section-content.active {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.settings-category .settings-section:last-child .section-content.active {
+  border-bottom: none;
+}
+
+/* Add subtle glow effect to category headers */
+.category-header {
+  position: relative;
+  overflow: hidden;
+}
+
+.category-header::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  animation: categoryHeaderGlow 8s infinite;
+}
+
+@keyframes categoryHeaderGlow {
+  0% {
+    left: -100%;
+  }
+  50% {
+    left: 100%;
+  }
+  100% {
+    left: 100%;
+  }
+}

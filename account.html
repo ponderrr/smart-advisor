@@ -191,119 +191,157 @@
         </div>
       </div>
 
-      <!-- Account Settings Section -->
       <div class="account-settings">
         <h2>Account Settings</h2>
         
         <!-- Messages container -->
         <div id="form-messages"></div>
         
-<!-- Profile Picture Settings Section -->
-<div class="settings-section" data-section="profile-picture">
-  <div class="section-header">
-    <h3>Profile Picture</h3>
-    <span class="toggle-icon">+</span>
-  </div>
-  <div class="section-content">
-    <!-- Section-specific message will be inserted here -->
-    <div class="settings-picture-preview">
-      <img id="settings-profile-preview" src="/images/default-avatar.svg" alt="Profile Picture">
-    </div>
-    <div class="settings-picture-buttons">
-      <input type="file" id="settings-profile-picture-upload" accept="image/*" style="display: none;">
-      <button type="button" id="settings-change-picture-btn" class="update-button">Change Picture</button>
-      <button type="button" id="settings-remove-picture-btn" class="update-button secondary">Remove</button>
-    </div>
-  </div>
-</div>
-        <!-- Username Settings Section to add to account.html -->
-<div class="settings-section" data-section="username">
-  <div class="section-header">
-    <h3>Change Username</h3>
-    <span class="toggle-icon">+</span>
-  </div>
-  <div class="section-content">
-    <!-- Section-specific message will be inserted here -->
-    <div class="current-value">
-      <label>Current Username</label>
-      <input type="text" id="current-username" disabled />
-    </div>
-    <div class="form-group">
-      <label for="new-username">New Username</label>
-      <input type="text" id="new-username" placeholder="Enter new username" minlength="3" maxlength="20" pattern="[a-zA-Z0-9_-]+" />
-      <small style="color: rgba(255, 255, 255, 0.7); font-size: 0.8rem; margin-top: 4px; display: block;">
-        Username must be 3-20 characters and contain only letters, numbers, hyphens, and underscores.
-      </small>
-    </div>
-    <button type="button" id="username-update-btn" class="update-button">Update Username</button>
-  </div>
-</div>
-        
-        <!-- Email Settings -->
-        <div class="settings-section" data-section="email">
-          <div class="section-header">
-            <h3>Change Email</h3>
-            <span class="toggle-icon">+</span>
+        <!-- Profile Category -->
+        <div class="settings-category">
+          <h3 class="category-header">Profile Settings</h3>
+          
+          <!-- Profile Picture Settings Section -->
+          <div class="settings-section" data-section="profile-picture">
+            <div class="section-header">
+              <h3>Profile Picture</h3>
+              <span class="toggle-icon">+</span>
+            </div>
+            <div class="section-content">
+              <!-- Section-specific message will be inserted here -->
+              <div class="settings-picture-preview">
+                <img id="settings-profile-preview" src="/images/default-avatar.svg" alt="Profile Picture">
+              </div>
+              <div class="settings-picture-buttons">
+                <input type="file" id="settings-profile-picture-upload" accept="image/*" style="display: none;">
+                <button type="button" id="settings-change-picture-btn" class="update-button">Change Picture</button>
+                <button type="button" id="settings-remove-picture-btn" class="update-button secondary">Remove</button>
+              </div>
+            </div>
           </div>
-          <div class="section-content">
-            <!-- Section-specific message will be inserted here -->
-            <div class="current-value">
-              <label>Current Email</label>
-              <input type="email" id="current-email" disabled />
+          
+          <!-- Username Settings Section -->
+          <div class="settings-section" data-section="username">
+            <div class="section-header">
+              <h3>Username</h3>
+              <span class="toggle-icon">+</span>
             </div>
-            <div class="form-group">
-              <label for="new-email">New Email</label>
-              <input type="email" id="new-email" placeholder="Enter new email address" />
+            <div class="section-content">
+              <!-- Section-specific message will be inserted here -->
+              <div class="current-value">
+                <label>Current Username</label>
+                <input type="text" id="current-username" disabled />
+              </div>
+              <div class="form-group">
+                <label for="new-username">New Username</label>
+                <input type="text" id="new-username" placeholder="Enter new username" minlength="3" maxlength="20" pattern="[a-zA-Z0-9_-]+" />
+                <small style="color: rgba(255, 255, 255, 0.7); font-size: 0.8rem; margin-top: 4px; display: block;">
+                  Username must be 3-20 characters and contain only letters, numbers, hyphens, and underscores.
+                </small>
+              </div>
+              <button type="button" id="username-update-btn" class="update-button">Update Username</button>
             </div>
-            <div class="form-group">
-              <label for="confirm-email">Confirm New Email</label>
-              <input type="email" id="confirm-email" placeholder="Confirm new email address" />
-            </div>
-            <button type="button" id="email-update-btn" class="update-button">Update Email</button>
           </div>
         </div>
         
-        <!-- Password Settings -->
-        <div class="settings-section" data-section="password">
-          <div class="section-header">
-            <h3>Change Password</h3>
-            <span class="toggle-icon">+</span>
+        <!-- Account Security Category -->
+        <div class="settings-category">
+          <h3 class="category-header">Account Security</h3>
+          
+          <!-- Email Settings -->
+          <div class="settings-section" data-section="email">
+            <div class="section-header">
+              <h3>Email Address</h3>
+              <span class="toggle-icon">+</span>
+            </div>
+            <div class="section-content">
+              <!-- Section-specific message will be inserted here -->
+              <div class="current-value">
+                <label>Current Email</label>
+                <input type="email" id="current-email" disabled />
+              </div>
+              <div class="form-group">
+                <label for="new-email">New Email</label>
+                <input type="email" id="new-email" placeholder="Enter new email address" />
+              </div>
+              <div class="form-group">
+                <label for="confirm-email">Confirm New Email</label>
+                <input type="email" id="confirm-email" placeholder="Confirm new email address" />
+              </div>
+              <button type="button" id="email-update-btn" class="update-button">Update Email</button>
+            </div>
           </div>
-          <div class="section-content">
-            <!-- Section-specific message will be inserted here -->
-            <div class="form-group">
-              <label for="new-password">New Password</label>
-              <input type="password" id="new-password" placeholder="Enter new password" />
+          
+          <!-- Password Settings -->
+          <div class="settings-section" data-section="password">
+            <div class="section-header">
+              <h3>Password</h3>
+              <span class="toggle-icon">+</span>
             </div>
-            <div class="form-group">
-              <label for="confirm-password">Confirm New Password</label>
-              <input type="password" id="confirm-password" placeholder="Confirm new password" />
+            <div class="section-content">
+              <!-- Section-specific message will be inserted here -->
+              <div class="form-group">
+                <label for="new-password">New Password</label>
+                <input type="password" id="new-password" placeholder="Enter new password" />
+              </div>
+              <div class="form-group">
+                <label for="confirm-password">Confirm New Password</label>
+                <input type="password" id="confirm-password" placeholder="Confirm new password" />
+              </div>
+              <button type="button" id="password-update-btn" class="update-button">Update Password</button>
             </div>
-            <button type="button" id="password-update-btn" class="update-button">Update Password</button>
           </div>
         </div>
         
-        <!-- Age Settings -->
-        <div class="settings-section" data-section="age">
-          <div class="section-header">
-            <h3>Change Age</h3>
-            <span class="toggle-icon">+</span>
+        <!-- Personal Information Category -->
+        <div class="settings-category">
+          <h3 class="category-header">Personal Information</h3>
+          
+          <!-- Age Settings -->
+          <div class="settings-section" data-section="age">
+            <div class="section-header">
+              <h3>Age</h3>
+              <span class="toggle-icon">+</span>
+            </div>
+            <div class="section-content">
+              <!-- Section-specific message will be inserted here -->
+              <div class="current-value">
+                <label>Current Age</label>
+                <input type="number" id="current-age" disabled />
+              </div>
+              <div class="form-group">
+                <label for="new-age">New Age</label>
+                <input type="number" id="new-age" min="1" max="120" placeholder="Enter your new age" />
+              </div>
+              <button type="button" id="age-update-btn" class="update-button">Update Age</button>
+            </div>
           </div>
-          <div class="section-content">
-            <!-- Section-specific message will be inserted here -->
-            <div class="current-value">
-              <label>Current Age</label>
-              <input type="number" id="current-age" disabled />
+        </div>
+        
+        <!-- Account Management Category -->
+        <div class="settings-category">
+          <h3 class="category-header">Account Management</h3>
+          
+          <!-- Delete Account Section -->
+          <div class="settings-section" data-section="delete-account">
+            <div class="section-header">
+              <h3>Delete Account</h3>
+              <span class="toggle-icon">+</span>
             </div>
-            <div class="form-group">
-              <label for="new-age">New Age</label>
-              <input type="number" id="new-age" min="1" max="120" placeholder="Enter your new age" />
+            <div class="section-content">
+              <!-- Section-specific message will be inserted here -->
+              <div class="delete-account-warning">
+                <p class="warning-text">Warning: Deleting your account is permanent and cannot be undone. All your data, including recommendations and preferences, will be permanently removed.</p>
+                <div class="form-group">
+                  <label for="delete-confirmation">Type "DELETE" to confirm</label>
+                  <input type="text" id="delete-confirmation" placeholder="Type DELETE to confirm" />
+                </div>
+                <button type="button" id="delete-account-btn" class="delete-button">Delete My Account</button>
+              </div>
             </div>
-            <button type="button" id="age-update-btn" class="update-button">Update Age</button>
           </div>
         </div>
       </div>
-    </div>
 
     <!-- Theme Toggle Button -->
     <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">

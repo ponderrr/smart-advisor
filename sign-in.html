@@ -50,7 +50,92 @@
       [data-theme="dark"] * {
         scrollbar-color: #48a9f8 #1e1e1e;
       }
-      
+  /* Forgot Password Link */
+  .forgot-password-link {
+    text-align: right;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .forgot-password-link a {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  
+  .forgot-password-link a:hover {
+    color: var(--accent-color);
+    text-decoration: underline;
+  }
+  
+  /* Modal Styles */
+  .auth-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    backdrop-filter: blur(3px);
+  }
+  
+  .auth-modal-content {
+    background: var(--recommendation-gradient-light);
+    padding: 2rem;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
+    margin: 10% auto;
+    position: relative;
+    animation: modalSlideIn 0.3s ease;
+  }
+  
+  [data-theme="dark"] .auth-modal-content {
+    background: var(--recommendation-gradient-dark);
+  }
+  
+  .close-modal {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.8);
+    transition: color 0.3s ease;
+  }
+  
+  .close-modal:hover {
+    color: var(--accent-color);
+  }
+  
+  @keyframes modalSlideIn {
+    from {
+      transform: translateY(-30px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes modalSlideOut {
+    from {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateY(-30px);
+      opacity: 0;
+    }
+  }
+  
+  .modal-closing {
+    animation: modalSlideOut 0.3s ease forwards;
+  }
     </style>
   </head>
   <body>
@@ -71,6 +156,9 @@
         <div class="form-group">
           <label for="password">Password</label>
           <input type="password" id="password" required />
+          <div class="forgot-password-link">
+            <a href="#" id="forgot-password-link">Forgot Password?</a>
+          </div>
         </div>
 
         <button type="submit" id="submit-button" class="auth-button">Sign In</button>
@@ -121,6 +209,28 @@
         </svg>
       </div>
     </button>
+
+
+    <div id="forgot-password-modal" class="auth-modal">
+      <div class="auth-modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Reset Password</h2>
+        <p>Enter your email address and we'll send you a link to reset your password.</p>
+        
+        <!-- Reset password form -->
+        <form id="reset-password-form">
+          <div class="form-group">
+            <label for="reset-email">Email</label>
+            <input type="email" id="reset-email" required />
+          </div>
+          
+          <div id="reset-message-container"></div>
+          
+          <button type="submit" id="reset-submit-button" class="auth-button">Send Reset Link</button>
+        </form>
+      </div>
+    </div>
+    
 
     <script type="module" src="js/app.js"></script>
     <script type="module">
@@ -197,5 +307,121 @@
         }
       });
     </script>
+
+
+
+
+<script type="module">
+  import { sendPasswordResetEmail } from "./js/auth-manager.js";
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get modal elements
+    const modal = document.getElementById('forgot-password-modal');
+    const closeBtn = modal.querySelector('.close-modal');
+    const forgotPasswordLink = document.getElementById('forgot-password-link');
+    const resetForm = document.getElementById('reset-password-form');
+    const resetEmailInput = document.getElementById('reset-email');
+    const resetButton = document.getElementById('reset-submit-button');
+    const messageContainer = document.getElementById('reset-message-container');
+    
+    // Pre-fill email if available
+    const emailInput = document.getElementById('email');
+    if (emailInput) {
+      emailInput.addEventListener('input', function() {
+        resetEmailInput.value = this.value;
+      });
+    }
+    
+    // Show modal when clicking the forgot password link
+    forgotPasswordLink.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      // Pre-fill email if it's already entered in the login form
+      if (emailInput && emailInput.value) {
+        resetEmailInput.value = emailInput.value;
+      }
+      
+      modal.style.display = 'block';
+      resetEmailInput.focus();
+    });
+    
+    // Close modal when clicking the close button
+    closeBtn.addEventListener('click', function() {
+      closeModal();
+    });
+    
+    // Close modal when clicking outside the modal content
+    window.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        closeModal();
+      }
+    });
+    
+    // Function to close modal with animation
+    function closeModal() {
+      modal.querySelector('.auth-modal-content').classList.add('modal-closing');
+      setTimeout(() => {
+        modal.style.display = 'none';
+        modal.querySelector('.auth-modal-content').classList.remove('modal-closing');
+      }, 300);
+    }
+    
+    // Show message in the reset form
+    function showResetMessage(message, isError = false) {
+      if (!messageContainer) return;
+      
+      // Clear previous messages
+      messageContainer.innerHTML = '';
+      
+      // Create message element
+      const messageElement = document.createElement('div');
+      messageElement.className = isError ? 'auth-message error' : 'auth-message success';
+      messageElement.textContent = message;
+      
+      // Add to container
+      messageContainer.appendChild(messageElement);
+    }
+    
+    // Handle form submission
+    resetForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const email = resetEmailInput.value.trim();
+      
+      if (!email) {
+        showResetMessage('Please enter your email address', true);
+        return;
+      }
+      
+      // Show loading state
+      resetButton.disabled = true;
+      resetButton.textContent = 'Sending...';
+      
+      try {
+        // Call the password reset function
+        const result = await sendPasswordResetEmail(email);
+        
+        if (result.success) {
+          showResetMessage(result.message, false);
+          
+          // Automatically close the modal after 5 seconds
+          setTimeout(() => {
+            closeModal();
+          }, 5000);
+        } else {
+          showResetMessage(result.errorMessage, true);
+        }
+      } catch (error) {
+        showResetMessage('An unexpected error occurred. Please try again.', true);
+        console.error('Error in password reset:', error);
+      } finally {
+        // Reset button state
+        resetButton.disabled = false;
+        resetButton.textContent = 'Send Reset Link';
+      }
+    });
+  });
+</script>
+
   </body>
 </html>
