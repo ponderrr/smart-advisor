@@ -91,7 +91,19 @@
     font-weight: bold;
     width: 100%;
   }
-  
+ 
+  /* Remove arrows/spinners from number inputs */
+  /* For Chrome, Safari, Edge, Opera */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+  /* For Firefox */
+  input[type="number"] {
+  -moz-appearance: textfield;
+}
   /* Form Groups */
   .form-group {
     margin-bottom: 1rem;

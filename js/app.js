@@ -8,6 +8,7 @@ import {
 } from "./auth-manager.js";
 import { initNavbar, updateNavbarUsername } from "./navbar.js";
 import { initProfilePicture, loadProfilePicture } from "./profile-picture.js";
+import { processRestrictedElements } from "./subscription-guard.js";
 
 // Export recommendation handler for global access
 window.handleRecommendationClick = function (type) {
@@ -43,6 +44,12 @@ function initApp() {
   
   // Initialize profile picture functionality
   initProfilePicture();
+
+  // Initialize navbar with username
+  initNavbar();
+
+  // Process subscription-restricted elements
+  processRestrictedElements();
 
   // Handle navbar scroll behavior
   const navbar = document.querySelector(".navbar");
