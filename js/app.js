@@ -37,6 +37,9 @@ function initApp() {
 
   // Initialize authentication system
   initializeAuth();
+  
+  // Initialize navbar with username
+  initNavbar();
 
   // Initialize navbar with username
   initNavbar();
@@ -63,10 +66,10 @@ function initApp() {
       lastScrollY = window.scrollY;
     });
   }
-
+  
   // Update username display when login state changes
-  window.addEventListener("storage", (event) => {
-    if (event.key === "isLoggedIn" || event.key === "username") {
+  window.addEventListener('storage', (event) => {
+    if (event.key === 'isLoggedIn' || event.key === 'username') {
       updateNavbarUsername();
     }
   });

@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Account - Smart Advisor</title>
     <link rel="stylesheet" href="css/account-page.css" />
-    <link rel="stylesheet" href="css/modals-page.css" />
-
+    <link rel="stylesheet" href="css/account-settings.css" />
+    <link rel="stylesheet" href="css/username-display.css">
+    
     <style>
       /* Webkit browsers (Chrome, Safari, newer Edge) */
       ::-webkit-scrollbar {
@@ -51,7 +52,7 @@
       [data-theme="dark"] * {
         scrollbar-color: #48a9f8 #1e1e1e;
       }
-      </style>
+    </style>
   </head>
   <body>
     <!-- Navbar -->
@@ -62,13 +63,23 @@
             <img src="images/Smart Advisor logo.svg" alt="Smart Advisor Logo" />
           </a>
         </div>
+        
+        <!-- Username Display Component -->
+        <div class="username-display">
+          <div class="user-avatar">
+            <!-- First letter of username will be populated by JS -->
+            <span id="avatar-initial">G</span>
+          </div>
+          <span class="welcome-text">Welcome,</span>
+          <span id="navbar-username">Guest</span>
+          <span class="user-status guest"></span>
+        </div>
+        
         <div class="nav-links">
-          <a href="index.html">Home</a>
           <a href="#" id="logout-link">Log Out</a>
         </div>
       </nav>
     </header>
-
     <!-- Main Content -->
     <div class="account-container" role="main">
       <!-- Profile Section -->
@@ -78,17 +89,18 @@
           <!-- User email will be populated here -->
         </div>
 
-<!-- Quick Links -->
-<div class="quick-links">
-  <a href="preferences.html" class="account-link">
-    <span class="link-icon">⚙️</span>
-    <span class="link-text">Accessibility Preferences</span>
-  </a>
-  <a href="subscription.html" class="account-link">
-    <span class="link-icon">⭐</span>
-    <span class="link-text">Premium Subscription</span>
-  </a>
-</div>
+        <!-- Quick Links -->
+        <div class="quick-links">
+          <a href="preferences.html" class="account-link">
+            <span class="link-icon">⚙️</span>
+            <span class="link-text">Accessibility Preferences</span>
+          </a>
+          <a href="subscription.html" class="account-link">
+            <span class="link-icon">⭐</span>
+            <span class="link-text">Premium Subscription</span>
+          </a>
+        </div>
+      </div>
 
       <!-- Movie Recommendations -->
       <div class="section recommendations-section movies">
@@ -97,7 +109,7 @@
           <div class="recommendation-content">
             <div class="poster-container">
               <img
-                src="${movie.posterPath || '/api/placeholder/300/450'}"
+                src="/api/placeholder/300/450"
                 alt="Movie Poster"
                 class="recommendation-poster"
                 onerror="this.src='/api/placeholder/300/450'"
@@ -132,7 +144,7 @@
           <div class="recommendation-content">
             <div class="poster-container">
               <img
-                src="${book.posterPath || '/api/placeholder/300/450'}"
+                src="/api/placeholder/300/450"
                 alt="Book Cover"
                 class="recommendation-poster"
                 onerror="this.src='/api/placeholder/300/450'"
@@ -160,60 +172,103 @@
         </div>
       </div>
 
-      <!-- Change Email Section -->
-      <div class="section change-password-section">
-        <h2>Change Email</h2>
-        <form id="email-form" class="form-group">
-          <div class="form-group">
-            <label for="current-email">Current Email</label>
-            <input type="email" id="current-email" disabled />
-          </div>
-          <div class="form-group">
-            <label for="new-email">New Email</label>
-            <input type="email" id="new-email" required />
-          </div>
-          <div class="form-group">
-            <label for="confirm-email">Confirm New Email</label>
-            <input type="email" id="confirm-email" required />
-          </div>
-          <button type="submit">Update Email</button>
-        </form>
-      </div>
+      <!-- Account Settings Section -->
+      <div class="account-settings">
+        <h2>Account Settings</h2>
+        
+        <!-- Messages container -->
+        <div id="form-messages"></div>
 
-      <!-- Change Password Section -->
-      <div class="section change-password-section">
-        <h2>Change Password</h2>
-        <form id="password-form" class="form-group">
-          <div class="form-group">
-            <label for="current-password">Current Password</label>
-            <input type="password" id="current-password" required />
+        <!-- Username Settings Section to add to account.html -->
+<div class="settings-section" data-section="username">
+  <div class="section-header">
+    <h3>Change Username</h3>
+    <span class="toggle-icon">+</span>
+  </div>
+  <div class="section-content">
+    <!-- Section-specific message will be inserted here -->
+    <div class="current-value">
+      <label>Current Username</label>
+      <input type="text" id="current-username" disabled />
+    </div>
+    <div class="form-group">
+      <label for="new-username">New Username</label>
+      <input type="text" id="new-username" placeholder="Enter new username" minlength="3" maxlength="20" pattern="[a-zA-Z0-9_-]+" />
+      <small style="color: rgba(255, 255, 255, 0.7); font-size: 0.8rem; margin-top: 4px; display: block;">
+        Username must be 3-20 characters and contain only letters, numbers, hyphens, and underscores.
+      </small>
+    </div>
+    <button type="button" id="username-update-btn" class="update-button">Update Username</button>
+  </div>
+</div>
+        
+        <!-- Email Settings -->
+        <div class="settings-section" data-section="email">
+          <div class="section-header">
+            <h3>Change Email</h3>
+            <span class="toggle-icon">+</span>
           </div>
-          <div class="form-group">
-            <label for="new-password">New Password</label>
-            <input type="password" id="new-password" required />
+          <div class="section-content">
+            <!-- Section-specific message will be inserted here -->
+            <div class="current-value">
+              <label>Current Email</label>
+              <input type="email" id="current-email" disabled />
+            </div>
+            <div class="form-group">
+              <label for="new-email">New Email</label>
+              <input type="email" id="new-email" placeholder="Enter new email address" />
+            </div>
+            <div class="form-group">
+              <label for="confirm-email">Confirm New Email</label>
+              <input type="email" id="confirm-email" placeholder="Confirm new email address" />
+            </div>
+            <button type="button" id="email-update-btn" class="update-button">Update Email</button>
           </div>
-          <div class="form-group">
-            <label for="confirm-password">Confirm New Password</label>
-            <input type="password" id="confirm-password" required />
+        </div>
+        
+        <!-- Password Settings -->
+        <div class="settings-section" data-section="password">
+          <div class="section-header">
+            <h3>Change Password</h3>
+            <span class="toggle-icon">+</span>
           </div>
-          <button type="submit">Update Password</button>
-        </form>
-      </div>
-
-      <!-- Change Age Section -->
-      <div class="section change-password-section">
-        <h2>Change Age</h2>
-        <form id="age-form" class="form-group">
-          <div class="form-group">
-            <label for="current-age">Current Age</label>
-            <input type="number" id="current-age" required />
+          <div class="section-content">
+            <!-- Section-specific message will be inserted here -->
+            <div class="form-group">
+              <label for="new-password">New Password</label>
+              <input type="password" id="new-password" placeholder="Enter new password" />
+            </div>
+            <div class="form-group">
+              <label for="confirm-password">Confirm New Password</label>
+              <input type="password" id="confirm-password" placeholder="Confirm new password" />
+            </div>
+            <button type="button" id="password-update-btn" class="update-button">Update Password</button>
           </div>
-          <button type="submit">Update Age</button>
-        </form>
+        </div>
+        
+        <!-- Age Settings -->
+        <div class="settings-section" data-section="age">
+          <div class="section-header">
+            <h3>Change Age</h3>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="section-content">
+            <!-- Section-specific message will be inserted here -->
+            <div class="current-value">
+              <label>Current Age</label>
+              <input type="number" id="current-age" disabled />
+            </div>
+            <div class="form-group">
+              <label for="new-age">New Age</label>
+              <input type="number" id="new-age" min="1" max="120" placeholder="Enter your new age" />
+            </div>
+            <button type="button" id="age-update-btn" class="update-button">Update Age</button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!--Toggle Button-->
+    <!-- Theme Toggle Button -->
     <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
       <div class="icon-container">
         <svg
@@ -257,5 +312,7 @@
 
     <script type="module" src="js/app.js"></script>
     <script type="module" src="js/account-page.js"></script>
+    <script type="module" src="js/account-settings.js"></script>
+    <script type="module" src="js/navbar.js"></script>
   </body>
 </html>

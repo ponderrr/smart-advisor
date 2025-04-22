@@ -37,14 +37,20 @@ export function clearRecommendationType() {
 }
 
 // Save login state and user data in localStorage
-function saveLoginState(user, age) {
-  console.log("Saving login state:", user, age);
+function saveLoginState(user, userData) {
+  console.log("Saving login state:", user, userData);
 
   localStorage.setItem("isLoggedIn", "true");
   localStorage.setItem("userId", user.uid);
   localStorage.setItem("userEmail", user.email);
-  if (age) {
-    localStorage.setItem("userAge", age.toString());
+  
+  if (userData) {
+    if (userData.age) {
+      localStorage.setItem("userAge", userData.age.toString());
+    }
+    if (userData.username) {
+      localStorage.setItem("username", userData.username);
+    }
   }
 }
 
@@ -55,6 +61,7 @@ function clearLoginState() {
   localStorage.removeItem("userEmail");
   localStorage.removeItem("recommendationType");
   localStorage.removeItem("userAge");
+  localStorage.removeItem("username");
 }
 
 // ============================
@@ -111,7 +118,7 @@ export function protectRoute(redirectTo = "sign-in.html") {
 // ============================
 
 // Sign-Up Function
-export async function signup(email, password, age, redirectTo) {
+export async function signup(email, password, age, username, redirectTo) {
   try {
     const userCredential = await createUserWithEmailAndPassword(
       auth,
@@ -121,10 +128,13 @@ export async function signup(email, password, age, redirectTo) {
     const user = userCredential.user;
 
     // Use utility function to create user profile
-    await createUserProfile(user.uid, { email, age });
+    await createUserProfile(user.uid, { email, age, username });
 
     console.log("User signed up and details saved to Firestore:", user);
-    saveLoginState(user, age);
+    
+    // Get user profile to have complete data
+    const userProfile = await getUserProfile(user.uid);
+    saveLoginState(user, userProfile);
 
     // Auto sign in after signup
     await signInWithEmailAndPassword(auth, email, password);
@@ -154,7 +164,7 @@ export async function login(email, password, redirectTo) {
     // Use utility function to get user profile
     const userProfile = await getUserProfile(user.uid);
     if (userProfile) {
-      saveLoginState(user, userProfile.age);
+      saveLoginState(user, userProfile);
     } else {
       console.error("User profile not found");
       saveLoginState(user);
@@ -203,6 +213,28 @@ export async function getUserAge() {
       }
     } catch (error) {
       console.error("Error fetching user age:", error);
+    }
+  }
+  return null;
+}
+
+// Get username
+export async function getUsername() {
+  const username = localStorage.getItem("username");
+  if (username) {
+    return username;
+  }
+
+  const user = auth.currentUser;
+  if (user) {
+    try {
+      const userProfile = await getUserProfile(user.uid);
+      if (userProfile && userProfile.username) {
+        localStorage.setItem("username", userProfile.username);
+        return userProfile.username;
+      }
+    } catch (error) {
+      console.error("Error fetching username:", error);
     }
   }
   return null;
@@ -287,6 +319,28 @@ export async function updateUserAge(age) {
   }
 }
 
+// Update username
+export async function updateUserUsername(username) {
+  try {
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error("Not authenticated");
+    }
+
+    // Update username in Firestore
+    const userRef = doc(db, "users", user.uid);
+    await updateDoc(userRef, { username: username });
+
+    // Update local storage
+    localStorage.setItem("username", username);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating username:", error);
+    return { success: false, error };
+  }
+}
+
 // Update user accessibility preferences
 export async function updateUserAccessibilityPreferences(preferences) {
   try {
@@ -312,16 +366,15 @@ export async function updateUserAccessibilityPreferences(preferences) {
 export function initializeAuthStateListener() {
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-      if (!localStorage.getItem("userAge")) {
-        try {
-          const userProfile = await getUserProfile(user.uid);
-          if (userProfile) {
-            saveLoginState(user, userProfile.age);
-          }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
+      try {
+        const userProfile = await getUserProfile(user.uid);
+        if (userProfile) {
+          saveLoginState(user, userProfile);
+        } else {
+          saveLoginState(user);
         }
-      } else {
+      } catch (error) {
+        console.error("Error fetching user data:", error);
         saveLoginState(user);
       }
     } else {
