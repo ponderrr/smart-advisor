@@ -60,29 +60,29 @@
   <body>
     <!-- Navbar -->
     <header>
-      <nav class="navbar visible">
-        <div class="logo">
-          <a href="index.html" title="Return to homepage">
-            <img src="images/Smart Advisor logo.svg" alt="Smart Advisor Logo" />
-          </a>
-        </div>
-        
-        <!-- Username Display Component -->
-        <div class="username-display">
-          <div class="user-avatar">
-            <!-- First letter of username will be populated by JS -->
-            <span id="avatar-initial">G</span>
-          </div>
-          <span class="welcome-text">Welcome,</span>
-          <span id="navbar-username">Guest</span>
-          <span class="user-status guest"></span>
-        </div>
-        
-        <div class="nav-links">
-          <a href="#" id="logout-link">Log Out</a>
-        </div>
-      </nav>
-    </header>
+      <!-- Updated Navbar HTML Structure -->
+<nav class="navbar visible">
+  <div class="logo">
+    <a href="index.html" title="Return to homepage">
+      <img src="images/Smart Advisor logo.svg" alt="Smart Advisor Logo" />
+    </a>
+  </div>
+  
+  <!-- Username Display Component with Profile Picture Support -->
+  <div class="username-display">
+    <div class="user-avatar">
+      <!-- Will be replaced with image if user has profile picture -->
+      <span id="avatar-initial">G</span>
+    </div>
+    <span class="welcome-text">Welcome,</span>
+    <span id="navbar-username">Guest</span>
+    <span class="user-status guest"></span>
+  </div>
+  
+  <div class="nav-links">
+    <a href="#" id="logout-link">Log Out</a>
+  </div>
+</nav>
 
     <!-- Main Content -->
     <div class="subscription-container" role="main">

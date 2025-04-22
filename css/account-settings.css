@@ -192,3 +192,40 @@
   @keyframes spin {
     to { transform: rotate(360deg); }
   }
+  /* Profile Picture Settings Styles */
+.settings-picture-preview {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+.settings-picture-preview img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--accent-color);
+  box-shadow: 0 2px 10px rgba(26, 146, 232, 0.3);
+}
+
+[data-theme="dark"] .settings-picture-preview img {
+  box-shadow: 0 2px 10px rgba(72, 169, 248, 0.3);
+}
+
+.settings-picture-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.settings-picture-buttons .update-button {
+  flex: 1;
+}
+
+.update-button.secondary {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.update-button.secondary:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}

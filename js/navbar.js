@@ -1,18 +1,21 @@
 /**
  * Navbar Module
- * Handles the navbar functionality including username display
+ * Handles the navbar functionality including username display and profile pictures
  */
 
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "./firebase-config.js";
+
 // Update username in navbar
-export function updateNavbarUsername() {
+export async function updateNavbarUsername() {
   const usernameElement = document.getElementById('navbar-username');
   if (!usernameElement) return;
 
   const storedUsername = localStorage.getItem('username');
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
   
-  // Update avatar initial
-  updateAvatarInitial(storedUsername);
+  // Update avatar
+  await updateNavbarAvatar(isLoggedIn);
   
   // Update username
   if (storedUsername && isLoggedIn) {
@@ -35,15 +38,65 @@ export function updateNavbarUsername() {
   }
 }
 
-// Update avatar initial
-function updateAvatarInitial(username) {
+// Update avatar in navbar
+async function updateNavbarAvatar(isLoggedIn) {
   const avatarElement = document.getElementById('avatar-initial');
-  if (!avatarElement) return;
+  const userAvatar = document.querySelector('.user-avatar');
   
-  if (username && username.length > 0) {
-    avatarElement.textContent = username.charAt(0).toUpperCase();
+  if (!avatarElement || !userAvatar) return;
+  
+  // Remove any existing avatar images
+  const existingImg = userAvatar.querySelector('img');
+  if (existingImg) {
+    existingImg.remove();
+  }
+  
+  if (!isLoggedIn) {
+    // Show guest initial
+    avatarElement.style.display = 'block';
+    avatarElement.textContent = 'G';
+    return;
+  }
+  
+  // Try to get profile picture URL from localStorage first
+  let profilePictureURL = localStorage.getItem('profilePictureURL');
+  
+  // If not in localStorage, try to fetch from database
+  if (!profilePictureURL) {
+    try {
+      const userId = auth.currentUser?.uid || localStorage.getItem('userId');
+      if (userId) {
+        const userDoc = await getDoc(doc(db, 'users', userId));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          profilePictureURL = userData.profilePictureURL;
+          
+          // Cache in localStorage for future use
+          if (profilePictureURL) {
+            localStorage.setItem('profilePictureURL', profilePictureURL);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching profile picture:', error);
+    }
+  }
+  
+  if (profilePictureURL) {
+    // Create and add image element
+    avatarElement.style.display = 'none';
+    
+    const img = document.createElement('img');
+    img.src = profilePictureURL;
+    img.alt = 'Profile';
+    
+    userAvatar.appendChild(img);
   } else {
-    avatarElement.textContent = 'G'; // G for Guest
+    // Show initial based on username
+    const username = localStorage.getItem('username') || '';
+    
+    avatarElement.style.display = 'block';
+    avatarElement.textContent = username.charAt(0).toUpperCase() || 'U';
   }
 }
 
@@ -93,7 +146,7 @@ export function initNavbar() {
   
   // Add listener for authentication changes
   window.addEventListener('storage', (event) => {
-    if (event.key === 'isLoggedIn' || event.key === 'username') {
+    if (event.key === 'isLoggedIn' || event.key === 'username' || event.key === 'profilePictureURL') {
       updateNavbarUsername();
       updateLogoutLinkVisibility();
     }

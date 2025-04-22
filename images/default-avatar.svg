@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="100" fill="#1a92e8"/>
+  
+  <!-- User Silhouette -->
+  <path d="M100 50C83.4315 50 70 63.4315 70 80C70 96.5685 83.4315 110 100 110C116.569 110 130 96.5685 130 80C130 63.4315 116.569 50 100 50Z" fill="white"/>
+  <path d="M155 160C155 131.177 130.899 108 100.965 108C71.0302 108 47 131.177 47 160" stroke="white" stroke-width="30"/>
+</svg>

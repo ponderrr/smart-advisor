@@ -11,6 +11,7 @@ import {
 import { doc, updateDoc } from "firebase/firestore";
 import { auth, db } from "./firebase-config.js";
 import { createUserProfile, getUserProfile } from "./firebase-utils.js";
+import { loadProfilePicture } from "./profile-picture.js";
 
 // ============================
 // LocalStorage Management
@@ -51,6 +52,11 @@ function saveLoginState(user, userData) {
     if (userData.username) {
       localStorage.setItem("username", userData.username);
     }
+    if (userData.profilePictureURL) {
+      localStorage.setItem("profilePictureURL", userData.profilePictureURL);
+    } else {
+      localStorage.removeItem("profilePictureURL");
+    }
   }
 }
 
@@ -62,6 +68,7 @@ function clearLoginState() {
   localStorage.removeItem("recommendationType");
   localStorage.removeItem("userAge");
   localStorage.removeItem("username");
+  localStorage.removeItem("profilePictureURL");
 }
 
 // ============================
@@ -117,6 +124,7 @@ export function protectRoute(redirectTo = "sign-in.html") {
 // Authentication Functions
 // ============================
 
+
 // Sign-Up Function
 export async function signup(email, password, age, username, redirectTo) {
   try {
@@ -138,6 +146,9 @@ export async function signup(email, password, age, username, redirectTo) {
 
     // Auto sign in after signup
     await signInWithEmailAndPassword(auth, email, password);
+    
+    // Load profile picture after sign-up (might be default)
+    loadProfilePicture();
 
     const recommendationType = localStorage.getItem("recommendationType");
     if (recommendationType) {
@@ -145,9 +156,18 @@ export async function signup(email, password, age, username, redirectTo) {
     } else {
       window.location.href = redirectTo || "index.html";
     }
+    
+    // Return success if there's no redirect
+    return { success: true };
   } catch (error) {
     console.error("Error during sign-up:", error);
-    throw error;
+    
+    // Return error details instead of throwing
+    return { 
+      success: false, 
+      errorCode: error.code,
+      errorMessage: getErrorMessage(error.code)
+    };
   }
 }
 
@@ -171,6 +191,9 @@ export async function login(email, password, redirectTo) {
     }
 
     console.log("User logged in:", user);
+    
+    // Load profile picture after login
+    loadProfilePicture();
 
     const recommendationType = localStorage.getItem("recommendationType");
     if (recommendationType) {
@@ -178,9 +201,46 @@ export async function login(email, password, redirectTo) {
     } else {
       window.location.href = redirectTo || "index.html";
     }
+    
+    // Return success if there's no redirect
+    return { success: true };
   } catch (error) {
     console.error("Error during login:", error);
-    throw error;
+    
+    // Return error details instead of throwing
+    return { 
+      success: false, 
+      errorCode: error.code,
+      errorMessage: getErrorMessage(error.code)
+    };
+  }
+}
+
+// Helper function to get user-friendly error messages
+export function getErrorMessage(errorCode) {
+  switch (errorCode) {
+    case 'auth/invalid-credential':
+      return 'Invalid email or password. Please try again.';
+    case 'auth/user-disabled':
+      return 'This account has been disabled. Please contact support.';
+    case 'auth/user-not-found':
+      return 'No account found with this email. Please check your email or sign up.';
+    case 'auth/wrong-password':
+      return 'Incorrect password. Please try again.';
+    case 'auth/invalid-email':
+      return 'Invalid email address format. Please check your email.';
+    case 'auth/too-many-requests':
+      return 'Too many unsuccessful login attempts. Please try again later or reset your password.';
+    case 'auth/network-request-failed':
+      return 'Network error. Please check your internet connection and try again.';
+    case 'auth/email-already-in-use':
+      return 'This email is already in use by another account.';
+    case 'auth/weak-password':
+      return 'Password is too weak. Please use a stronger password.';
+    case 'auth/operation-not-allowed':
+      return 'This operation is not allowed. Please contact support.';
+    default:
+      return 'Authentication error. Please try again later.';
   }
 }
 
@@ -370,6 +430,8 @@ export function initializeAuthStateListener() {
         const userProfile = await getUserProfile(user.uid);
         if (userProfile) {
           saveLoginState(user, userProfile);
+          // Load profile picture when auth state changes
+          loadProfilePicture();
         } else {
           saveLoginState(user);
         }

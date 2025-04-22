@@ -54,18 +54,30 @@
   </head>
   <body>
     <header>
-      <nav class="navbar visible">
-        <div class="logo">
-          <a href="index.html" title="Return to homepage">
-            <img src="images/Smart Advisor logo.svg" alt="Smart Advisor Logo" />
-          </a>
-        </div>
-        <div class="nav-links">
-          <a href="index.html">Home</a>
-          <a href="account.html">Account</a>
-        </div>
-      </nav>
-    </header>
+      <!-- Updated Navbar HTML Structure -->
+<nav class="navbar visible">
+  <div class="logo">
+    <a href="index.html" title="Return to homepage">
+      <img src="images/Smart Advisor logo.svg" alt="Smart Advisor Logo" />
+    </a>
+  </div>
+  
+  <!-- Username Display Component with Profile Picture Support -->
+  <div class="username-display">
+    <div class="user-avatar">
+      <!-- Will be replaced with image if user has profile picture -->
+      <span id="avatar-initial">G</span>
+    </div>
+    <span class="welcome-text">Welcome,</span>
+    <span id="navbar-username">Guest</span>
+    <span class="user-status guest"></span>
+  </div>
+  
+  <div class="nav-links">
+    <a href="account.html">Account</a>
+    <a href="#" id="logout-link">Log Out</a>
+  </div>
+</nav>
 
     <div class="results-container">
       <h1>Your Recommendations</h1>
