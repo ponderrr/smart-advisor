@@ -7,60 +7,80 @@ export async function loadHomePageImages() {
     // Get movie poster
     const movieBox = document.querySelector(".recommend-box.movie");
     if (movieBox) {
-      const movies = await getTrendingMovies(1);
-      const movieData = movies[0] || {
-        title: "Movie Recommendation",
-        posterUrl: "images/movie-background.jpg",
-      };
+      try {
+        const movies = await getTrendingMovies(1);
+        const movieData = movies[0] || {
+          title: "Movie Recommendation",
+          posterUrl: "images/default-movie-poster.jpg",
+        };
 
-      movieBox.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('${movieData.posterUrl}')`;
+        // Always use a fallback image if posterUrl is null
+        const backgroundImage =
+          movieData.posterUrl || "images/default-movie-poster.jpg";
+        movieBox.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('${backgroundImage}')`;
 
-      // Add a title attribute for accessibility
-      movieBox.setAttribute(
-        "title",
-        `Movie recommendation featuring ${movieData.title}`
-      );
+        // Add a title attribute for accessibility
+        movieBox.setAttribute(
+          "title",
+          `Movie recommendation featuring ${movieData.title}`
+        );
 
-      // Add loading animation effect
-      movieBox.classList.add("image-loaded");
+        // Add loading animation effect
+        movieBox.classList.add("image-loaded");
 
-      // Add info badge to show what movie is being displayed
-      const badgeElement = document.createElement("div");
-      badgeElement.className = "movie-info-badge";
-      badgeElement.innerHTML = `<span class="movie-title">${movieData.title}</span>`;
+        // Add info badge to show what movie is being displayed
+        const badgeElement = document.createElement("div");
+        badgeElement.className = "movie-info-badge";
+        badgeElement.innerHTML = `<span class="movie-title">${movieData.title}</span>`;
 
-      // Add the badge to the movie box
-      movieBox.appendChild(badgeElement);
+        // Add the badge to the movie box
+        movieBox.appendChild(badgeElement);
+      } catch (error) {
+        console.error("Error loading movie poster:", error);
+        // Set default background
+        movieBox.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('images/default-movie-poster.jpg')`;
+        movieBox.classList.add("image-loaded");
+      }
     }
 
-    // Get book cover
+    // Get book cover with similar error handling
     const bookBox = document.querySelector(".recommend-box.book");
     if (bookBox) {
-      const books = await getPopularBooks(1);
-      const bookData = books[0] || {
-        title: "Book Recommendation",
-        coverUrl: "images/book-background.jpg",
-        author: "Various Authors",
-      };
+      try {
+        const books = await getPopularBooks(1);
+        const bookData = books[0] || {
+          title: "Book Recommendation",
+          coverUrl: "images/default-book-cover.jpg",
+          author: "Various Authors",
+        };
 
-      bookBox.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('${bookData.coverUrl}')`;
+        // Always use a fallback image if coverUrl is null
+        const backgroundImage =
+          bookData.coverUrl || "images/default-book-cover.jpg";
+        bookBox.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('${backgroundImage}')`;
 
-      // Add a title attribute for accessibility
-      bookBox.setAttribute(
-        "title",
-        `Book recommendation featuring ${bookData.title} by ${bookData.author}`
-      );
+        // Add a title attribute for accessibility
+        bookBox.setAttribute(
+          "title",
+          `Book recommendation featuring ${bookData.title} by ${bookData.author}`
+        );
 
-      // Add loading animation effect
-      bookBox.classList.add("image-loaded");
+        // Add loading animation effect
+        bookBox.classList.add("image-loaded");
 
-      const badgeElement = document.createElement("div");
-      badgeElement.className = "book-info-badge";
-      badgeElement.innerHTML = `<span class="book-title">${bookData.title}</span>
-                                     <span class="book-author">by ${bookData.author}</span>`;
+        const badgeElement = document.createElement("div");
+        badgeElement.className = "book-info-badge";
+        badgeElement.innerHTML = `<span class="book-title">${bookData.title}</span>
+                                  <span class="book-author">by ${bookData.author}</span>`;
 
-      // Add the badge to the book box
-      bookBox.appendChild(badgeElement);
+        // Add the badge to the book box
+        bookBox.appendChild(badgeElement);
+      } catch (error) {
+        console.error("Error loading book cover:", error);
+        // Set default background
+        bookBox.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('images/default-book-cover.jpg')`;
+        bookBox.classList.add("image-loaded");
+      }
     }
 
     // Get combined image
