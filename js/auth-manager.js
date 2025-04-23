@@ -357,6 +357,159 @@ export async function updateUserPassword(currentPassword, newPassword) {
   }
 }
 
+/**
+ * Send password reset email
+ * @param {string} email - User's email address
+ * @returns {Promise<Object>} Result of reset attempt
+ */
+export async function sendPasswordResetEmail(email) {
+  try {
+    // Import the sendPasswordResetEmail function from Firebase
+    const { sendPasswordResetEmail: firebaseSendPasswordResetEmail } = await import("firebase/auth");
+    
+    // Send password reset email
+    await firebaseSendPasswordResetEmail(auth, email);
+    
+    return { 
+      success: true, 
+      message: "Password reset email sent. Please check your inbox." 
+    };
+  } catch (error) {
+    console.error("Error sending password reset email:", error);
+    
+    // Return user-friendly error message
+    let errorMessage = "Failed to send password reset email";
+    
+    if (error.code) {
+      switch (error.code) {
+        case 'auth/user-not-found':
+          errorMessage = "No account exists with this email address";
+          break;
+        case 'auth/invalid-email':
+          errorMessage = "Please enter a valid email address";
+          break;
+        case 'auth/missing-email':
+          errorMessage = "Please enter your email address";
+          break;
+        case 'auth/too-many-requests':
+          errorMessage = "Too many requests. Please try again later";
+          break;
+        default:
+          errorMessage = error.message || "Failed to send password reset email";
+      }
+    }
+    
+    return { 
+      success: false, 
+      errorCode: error.code,
+      errorMessage: errorMessage 
+    };
+  }
+}
+
+/**
+ * Confirm password reset with new password
+ * @param {string} actionCode - The action code from the reset link
+ * @param {string} newPassword - The new password
+ * @returns {Promise<Object>} Result of reset confirmation
+ */
+export async function confirmPasswordReset(actionCode, newPassword) {
+  try {
+    // Import the confirmPasswordReset function from Firebase
+    const { confirmPasswordReset: firebaseConfirmPasswordReset } = await import("firebase/auth");
+    
+    // Confirm password reset
+    await firebaseConfirmPasswordReset(auth, actionCode, newPassword);
+    
+    return { 
+      success: true, 
+      message: "Password has been reset successfully" 
+    };
+  } catch (error) {
+    console.error("Error confirming password reset:", error);
+    
+    // Return user-friendly error message
+    let errorMessage = "Failed to reset password";
+    
+    if (error.code) {
+      switch (error.code) {
+        case 'auth/expired-action-code':
+          errorMessage = "This password reset link has expired. Please request a new one.";
+          break;
+        case 'auth/invalid-action-code':
+          errorMessage = "Invalid password reset link. Please request a new one.";
+          break;
+        case 'auth/user-disabled':
+          errorMessage = "This account has been disabled. Please contact support.";
+          break;
+        case 'auth/user-not-found':
+          errorMessage = "User not found. Please check your email address.";
+          break;
+        case 'auth/weak-password':
+          errorMessage = "This password is too weak. Please choose a stronger password.";
+          break;
+        default:
+          errorMessage = error.message || "Failed to reset password";
+      }
+    }
+    
+    return { 
+      success: false, 
+      errorCode: error.code,
+      errorMessage: errorMessage 
+    };
+  }
+}
+
+/**
+ * Verify password reset code validity
+ * @param {string} actionCode - The action code from the reset link
+ * @returns {Promise<Object>} Result of code verification
+ */
+export async function verifyPasswordResetCode(actionCode) {
+  try {
+    // Import the verifyPasswordResetCode function from Firebase
+    const { verifyPasswordResetCode: firebaseVerifyPasswordResetCode } = await import("firebase/auth");
+    
+    // Verify the code
+    const email = await firebaseVerifyPasswordResetCode(auth, actionCode);
+    
+    return { 
+      success: true, 
+      email: email
+    };
+  } catch (error) {
+    console.error("Error verifying password reset code:", error);
+    
+    // Return user-friendly error message
+    let errorMessage = "Invalid or expired password reset link";
+    
+    if (error.code) {
+      switch (error.code) {
+        case 'auth/expired-action-code':
+          errorMessage = "This password reset link has expired. Please request a new one.";
+          break;
+        case 'auth/invalid-action-code':
+          errorMessage = "Invalid password reset link. Please request a new one.";
+          break;
+        case 'auth/user-disabled':
+          errorMessage = "This account has been disabled. Please contact support.";
+          break;
+        case 'auth/user-not-found':
+          errorMessage = "User not found. Please check your email address.";
+          break;
+        default:
+          errorMessage = error.message || "Invalid or expired password reset link";
+      }
+    }
+    
+    return { 
+      success: false, 
+      errorCode: error.code,
+      errorMessage: errorMessage 
+    };
+  }
+}
 // Update user age
 export async function updateUserAge(age) {
   try {
