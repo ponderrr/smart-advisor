@@ -1,4 +1,4 @@
-import { tmdbApi, handleApiError } from "./api-config.js";
+import { tmdbApiRequest } from "./api-service.js";
 
 /**
  * Get movie poster URL for a movie title
@@ -7,14 +7,12 @@ import { tmdbApi, handleApiError } from "./api-config.js";
  */
 export async function getMoviePoster(movieTitle) {
   try {
-    const response = await tmdbApi.get("/search/movie", {
-      params: {
-        query: movieTitle,
-      },
+    const response = await tmdbApiRequest("search/movie", {
+      query: movieTitle,
     });
 
-    if (response.data.results && response.data.results.length > 0) {
-      const posterPath = response.data.results[0].poster_path;
+    if (response.results && response.results.length > 0) {
+      const posterPath = response.results[0].poster_path;
       if (posterPath) {
         return `https://image.tmdb.org/t/p/w500${posterPath}`;
       }
@@ -23,7 +21,7 @@ export async function getMoviePoster(movieTitle) {
     console.warn(`No poster found for movie: ${movieTitle}`);
     return null;
   } catch (error) {
-    handleApiError(error, "TMDB", "Error fetching movie poster");
+    console.error("Error fetching movie poster:", error);
     return null;
   }
 }
@@ -35,28 +33,22 @@ export async function getMoviePoster(movieTitle) {
  */
 export async function getMovieDetails(movieTitle) {
   try {
-    const response = await tmdbApi.get("/search/movie", {
-      params: {
-        query: movieTitle,
-      },
+    const response = await tmdbApiRequest("search/movie", {
+      query: movieTitle,
     });
 
-    if (response.data.results && response.data.results.length > 0) {
-      const movie = response.data.results[0];
+    if (response.results && response.results.length > 0) {
+      const movie = response.results[0];
       const posterUrl = movie.poster_path
         ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
         : null;
 
-      // Get additional movie details
-      const detailsResponse = await tmdbApi.get(`/movie/${movie.id}`, {
-        params: {
-          append_to_response: "credits,release_dates",
-        },
+      const detailsResponse = await tmdbApiRequest(`movie/${movie.id}`, {
+        append_to_response: "credits,release_dates",
       });
 
-      // Extract US age rating if available
       let ageRating = "Not Rated";
-      const usCertification = detailsResponse.data.release_dates?.results?.find(
+      const usCertification = detailsResponse.release_dates?.results?.find(
         (country) => country.iso_3166_1 === "US"
       );
 
@@ -69,22 +61,20 @@ export async function getMovieDetails(movieTitle) {
         }
       }
 
-      // Extract genre names
-      const genres = detailsResponse.data.genres.map((genre) => genre.name);
+      const genres = detailsResponse.genres.map((genre) => genre.name);
 
-      // Extract director name
-      const director = detailsResponse.data.credits.crew.find(
+      const director = detailsResponse.credits.crew.find(
         (person) => person.job === "Director"
       );
 
       return {
         title: movie.title,
         posterUrl: posterUrl,
-        overview: movie.overview || detailsResponse.data.overview,
+        overview: movie.overview || detailsResponse.overview,
         releaseDate: movie.release_date,
-        rating: movie.vote_average / 2, // Convert to 5-star scale
+        rating: movie.vote_average / 2,
         ageRating: ageRating,
-        runtime: detailsResponse.data.runtime,
+        runtime: detailsResponse.runtime,
         genres: genres,
         director: director ? director.name : "Unknown",
         id: movie.id,
@@ -100,7 +90,7 @@ export async function getMovieDetails(movieTitle) {
       genres: [],
     };
   } catch (error) {
-    handleApiError(error, "TMDB", "Error fetching movie details");
+    console.error("Error fetching movie details:", error);
     return {
       title: movieTitle,
       posterUrl: null,
@@ -119,13 +109,11 @@ export async function getMovieDetails(movieTitle) {
  */
 export async function getTrendingMovies(limit = 5) {
   try {
-    const response = await tmdbApi.get("/trending/movie/week");
+    const response = await tmdbApiRequest("trending/movie/week");
 
-    if (response.data.results && response.data.results.length > 0) {
-      // Get top trending movies up to the limit
-      const movies = response.data.results.slice(0, limit);
+    if (response.results && response.results.length > 0) {
+      const movies = response.results.slice(0, limit);
 
-      // Get detailed information for each movie
       const moviePromises = movies.map((movie) => {
         return getMovieDetails(movie.title);
       });
@@ -135,7 +123,7 @@ export async function getTrendingMovies(limit = 5) {
 
     return [];
   } catch (error) {
-    handleApiError(error, "TMDB", "Error fetching trending movies");
+    console.error("Error fetching trending movies:", error);
     return [];
   }
 }
@@ -152,13 +140,11 @@ export async function getMovieRecommendations(movieId, limit = 5) {
       throw new Error("Movie ID is required");
     }
 
-    const response = await tmdbApi.get(`/movie/${movieId}/recommendations`);
+    const response = await tmdbApiRequest(`movie/${movieId}/recommendations`);
 
-    if (response.data.results && response.data.results.length > 0) {
-      // Get recommendations up to the limit
-      const movies = response.data.results.slice(0, limit);
+    if (response.results && response.results.length > 0) {
+      const movies = response.results.slice(0, limit);
 
-      // Get detailed information for each movie
       const moviePromises = movies.map((movie) => {
         return getMovieDetails(movie.title);
       });
@@ -168,7 +154,7 @@ export async function getMovieRecommendations(movieId, limit = 5) {
 
     return [];
   } catch (error) {
-    handleApiError(error, "TMDB", "Error fetching movie recommendations");
+    console.error("Error fetching movie recommendations:", error);
     return [];
   }
 }
