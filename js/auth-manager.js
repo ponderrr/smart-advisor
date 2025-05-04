@@ -1,50 +1,30 @@
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  onAuthStateChanged,
-  signOut,
-  updateEmail,
-  updatePassword,
-  reauthenticateWithCredential,
-  EmailAuthProvider,
-} from "firebase/auth";
-import { doc, updateDoc } from "firebase/firestore";
-import { auth, db } from "./firebase-config.js";
-import { createUserProfile, getUserProfile } from "./firebase-utils.js";
+import { supabase } from "./supabase-config.js";
+import { getUserProfile, createUserProfile } from "./supabase-utils.js";
 import { loadProfilePicture } from "./profile-picture.js";
 
-// ============================
-// LocalStorage Management
-// ============================
-
-// Store recommendation type in localStorage
 export function storeRecommendationType(type) {
   localStorage.setItem("recommendationType", type);
 }
 
-// Get stored recommendation type
 export function getStoredRecommendationType() {
   return localStorage.getItem("recommendationType");
 }
 
-// Check if user is logged in
 export function isLoggedIn() {
   return localStorage.getItem("isLoggedIn") === "true";
 }
 
-// Clear stored recommendation type
 export function clearRecommendationType() {
   localStorage.removeItem("recommendationType");
 }
 
-// Save login state and user data in localStorage
 function saveLoginState(user, userData) {
   console.log("Saving login state:", user, userData);
 
   localStorage.setItem("isLoggedIn", "true");
-  localStorage.setItem("userId", user.uid);
+  localStorage.setItem("userId", user.id);
   localStorage.setItem("userEmail", user.email);
-  
+
   if (userData) {
     if (userData.age) {
       localStorage.setItem("userAge", userData.age.toString());
@@ -60,7 +40,6 @@ function saveLoginState(user, userData) {
   }
 }
 
-// Clear login state and user data from localStorage
 function clearLoginState() {
   localStorage.removeItem("isLoggedIn");
   localStorage.removeItem("userId");
@@ -71,11 +50,6 @@ function clearLoginState() {
   localStorage.removeItem("profilePictureURL");
 }
 
-// ============================
-// Navigation and Redirects
-// ============================
-
-// Check authentication and handle redirect
 export async function handleAuthRedirect(type) {
   storeRecommendationType(type);
 
@@ -86,7 +60,6 @@ export async function handleAuthRedirect(type) {
   }
 }
 
-// Handle account button click
 export function handleAccountClick() {
   if (isLoggedIn()) {
     window.location.href = "account.html";
@@ -95,7 +68,6 @@ export function handleAccountClick() {
   }
 }
 
-// Handle redirect after authentication
 export function handleRedirectAfterAuth() {
   const redirectTo = new URLSearchParams(window.location.search).get(
     "redirectTo"
@@ -111,7 +83,6 @@ export function handleRedirectAfterAuth() {
   }
 }
 
-// Protect routes that require authentication
 export function protectRoute(redirectTo = "sign-in.html") {
   if (!isLoggedIn()) {
     window.location.href = `${redirectTo}?redirectTo=${window.location.pathname}`;
@@ -120,34 +91,32 @@ export function protectRoute(redirectTo = "sign-in.html") {
   return true;
 }
 
-// ============================
-// Authentication Functions
-// ============================
-
-
-// Sign-Up Function
 export async function signup(email, password, age, username, redirectTo) {
   try {
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-    const user = userCredential.user;
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.signUp({
+      email: email,
+      password: password,
+    });
 
-    // Use utility function to create user profile
-    await createUserProfile(user.uid, { email, age, username });
+    if (error) throw error;
 
-    console.log("User signed up and details saved to Firestore:", user);
-    
-    // Get user profile to have complete data
-    const userProfile = await getUserProfile(user.uid);
+    if (!user) {
+      return {
+        success: false,
+        errorMessage: "Registration failed. Please try again.",
+      };
+    }
+
+    await createUserProfile(user.id, { email, age, username });
+
+    console.log("User signed up and details saved to Supabase:", user);
+
+    const userProfile = await getUserProfile(user.id);
     saveLoginState(user, userProfile);
 
-    // Auto sign in after signup
-    await signInWithEmailAndPassword(auth, email, password);
-    
-    // Load profile picture after sign-up (might be default)
     loadProfilePicture();
 
     const recommendationType = localStorage.getItem("recommendationType");
@@ -156,33 +125,32 @@ export async function signup(email, password, age, username, redirectTo) {
     } else {
       window.location.href = redirectTo || "index.html";
     }
-    
-    // Return success if there's no redirect
+
     return { success: true };
   } catch (error) {
     console.error("Error during sign-up:", error);
-    
-    // Return error details instead of throwing
-    return { 
-      success: false, 
+
+    return {
+      success: false,
       errorCode: error.code,
-      errorMessage: getErrorMessage(error.code)
+      errorMessage: getErrorMessage(error.code || error.message),
     };
   }
 }
 
-// Login Function
 export async function login(email, password, redirectTo) {
   try {
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-    const user = userCredential.user;
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password,
+    });
 
-    // Use utility function to get user profile
-    const userProfile = await getUserProfile(user.uid);
+    if (error) throw error;
+
+    const userProfile = await getUserProfile(user.id);
     if (userProfile) {
       saveLoginState(user, userProfile);
     } else {
@@ -191,8 +159,7 @@ export async function login(email, password, redirectTo) {
     }
 
     console.log("User logged in:", user);
-    
-    // Load profile picture after login
+
     loadProfilePicture();
 
     const recommendationType = localStorage.getItem("recommendationType");
@@ -201,53 +168,77 @@ export async function login(email, password, redirectTo) {
     } else {
       window.location.href = redirectTo || "index.html";
     }
-    
-    // Return success if there's no redirect
+
     return { success: true };
   } catch (error) {
     console.error("Error during login:", error);
-    
-    // Return error details instead of throwing
-    return { 
-      success: false, 
-      errorCode: error.code,
-      errorMessage: getErrorMessage(error.code)
+
+    return {
+      success: false,
+      errorCode: error.code || "auth_error",
+      errorMessage: getErrorMessage(error.code || error.message),
     };
   }
 }
 
-// Helper function to get user-friendly error messages
 export function getErrorMessage(errorCode) {
   switch (errorCode) {
-    case 'auth/invalid-credential':
-      return 'Invalid email or password. Please try again.';
-    case 'auth/user-disabled':
-      return 'This account has been disabled. Please contact support.';
-    case 'auth/user-not-found':
-      return 'No account found with this email. Please check your email or sign up.';
-    case 'auth/wrong-password':
-      return 'Incorrect password. Please try again.';
-    case 'auth/invalid-email':
-      return 'Invalid email address format. Please check your email.';
-    case 'auth/too-many-requests':
-      return 'Too many unsuccessful login attempts. Please try again later or reset your password.';
-    case 'auth/network-request-failed':
-      return 'Network error. Please check your internet connection and try again.';
-    case 'auth/email-already-in-use':
-      return 'This email is already in use by another account.';
-    case 'auth/weak-password':
-      return 'Password is too weak. Please use a stronger password.';
-    case 'auth/operation-not-allowed':
-      return 'This operation is not allowed. Please contact support.';
+    case "auth/invalid-credential":
+    case "invalid-credential":
+    case "invalid_credentials":
+    case "invalid_login_credentials":
+      return "Invalid email or password. Please try again.";
+    case "auth/user-disabled":
+    case "user-disabled":
+      return "This account has been disabled. Please contact support.";
+    case "auth/user-not-found":
+    case "user-not-found":
+      return "No account found with this email. Please check your email or sign up.";
+    case "auth/wrong-password":
+    case "wrong-password":
+    case "invalid_password":
+      return "Incorrect password. Please try again.";
+    case "auth/invalid-email":
+    case "invalid-email":
+    case "invalid_email":
+      return "Invalid email address format. Please check your email.";
+    case "auth/too-many-requests":
+    case "too-many-requests":
+      return "Too many unsuccessful login attempts. Please try again later or reset your password.";
+    case "auth/network-request-failed":
+    case "network-request-failed":
+      return "Network error. Please check your internet connection and try again.";
+    case "auth/email-already-in-use":
+    case "email-already-in-use":
+    case "email-already-exists":
+    case "email_already_in_use":
+      return "This email is already in use by another account.";
+    case "auth/weak-password":
+    case "weak-password":
+    case "weak_password":
+      return "Password is too weak. Please use a stronger password.";
+    case "auth/operation-not-allowed":
+    case "operation-not-allowed":
+      return "This operation is not allowed. Please contact support.";
     default:
-      return 'Authentication error. Please try again later.';
+      if (errorCode.includes("email") && errorCode.includes("already")) {
+        return "This email is already in use by another account.";
+      }
+      if (
+        errorCode.includes("password") &&
+        (errorCode.includes("weak") || errorCode.includes("strength"))
+      ) {
+        return "Password is too weak. Please use a stronger password.";
+      }
+      return "Authentication error. Please try again later.";
   }
 }
 
-// Logout Function
 export async function logout() {
   try {
-    await signOut(auth);
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+
     clearLoginState();
     window.location.href = "index.html";
   } catch (error) {
@@ -256,17 +247,18 @@ export async function logout() {
   }
 }
 
-// Get user age
 export async function getUserAge() {
   const userAge = localStorage.getItem("userAge");
   if (userAge) {
     return Number(userAge);
   }
 
-  const user = auth.currentUser;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (user) {
     try {
-      const userProfile = await getUserProfile(user.uid);
+      const userProfile = await getUserProfile(user.id);
       if (userProfile) {
         localStorage.setItem("userAge", userProfile.age);
         return Number(userProfile.age);
@@ -278,17 +270,18 @@ export async function getUserAge() {
   return null;
 }
 
-// Get username
 export async function getUsername() {
   const username = localStorage.getItem("username");
   if (username) {
     return username;
   }
 
-  const user = auth.currentUser;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (user) {
     try {
-      const userProfile = await getUserProfile(user.uid);
+      const userProfile = await getUserProfile(user.id);
       if (userProfile && userProfile.username) {
         localStorage.setItem("username", userProfile.username);
         return userProfile.username;
@@ -300,29 +293,43 @@ export async function getUsername() {
   return null;
 }
 
-// Update email
 export async function updateUserEmail(currentPassword, newEmail) {
   try {
-    const user = auth.currentUser;
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       throw new Error("Not authenticated");
     }
 
-    // Re-authenticate user
-    const credential = EmailAuthProvider.credential(
-      user.email,
-      currentPassword
-    );
-    await reauthenticateWithCredential(user, credential);
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: currentPassword,
+    });
 
-    // Update email in Firebase Auth
-    await updateEmail(user, newEmail);
+    if (signInError) {
+      return {
+        success: false,
+        error: {
+          code: "auth/wrong-password",
+          message: "Current password is incorrect",
+        },
+      };
+    }
 
-    // Update email in Firestore
-    const userRef = doc(db, "users", user.uid);
-    await updateDoc(userRef, { email: newEmail });
+    const { error: updateError } = await supabase.auth.updateUser({
+      email: newEmail,
+    });
 
-    // Update local storage
+    if (updateError) throw updateError;
+
+    const { error: dbError } = await supabase
+      .from("users")
+      .update({ email: newEmail })
+      .eq("id", user.id);
+
+    if (dbError) throw dbError;
+
     localStorage.setItem("userEmail", newEmail);
 
     return { success: true };
@@ -332,23 +339,35 @@ export async function updateUserEmail(currentPassword, newEmail) {
   }
 }
 
-// Update password
 export async function updateUserPassword(currentPassword, newPassword) {
   try {
-    const user = auth.currentUser;
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       throw new Error("Not authenticated");
     }
 
-    // Re-authenticate user
-    const credential = EmailAuthProvider.credential(
-      user.email,
-      currentPassword
-    );
-    await reauthenticateWithCredential(user, credential);
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: currentPassword,
+    });
 
-    // Update password
-    await updatePassword(user, newPassword);
+    if (signInError) {
+      return {
+        success: false,
+        error: {
+          code: "auth/wrong-password",
+          message: "Current password is incorrect",
+        },
+      };
+    }
+
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (updateError) throw updateError;
 
     return { success: true };
   } catch (error) {
@@ -364,165 +383,104 @@ export async function updateUserPassword(currentPassword, newPassword) {
  */
 export async function sendPasswordResetEmail(email) {
   try {
-    // Import the sendPasswordResetEmail function from Firebase
-    const { sendPasswordResetEmail: firebaseSendPasswordResetEmail } = await import("firebase/auth");
-    
-    // Send password reset email
-    await firebaseSendPasswordResetEmail(auth, email);
-    
-    return { 
-      success: true, 
-      message: "Password reset email sent. Please check your inbox." 
+    if (!email || !email.trim()) {
+      return {
+        success: false,
+        errorCode: "auth/missing-email",
+        errorMessage: "Please enter your email address",
+      };
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + "/forgot-password.html",
+    });
+
+    if (error) throw error;
+
+    return {
+      success: true,
+      message: "Password reset email sent. Please check your inbox.",
     };
   } catch (error) {
     console.error("Error sending password reset email:", error);
-    
-    // Return user-friendly error message
+
     let errorMessage = "Failed to send password reset email";
-    
-    if (error.code) {
-      switch (error.code) {
-        case 'auth/user-not-found':
-          errorMessage = "No account exists with this email address";
-          break;
-        case 'auth/invalid-email':
-          errorMessage = "Please enter a valid email address";
-          break;
-        case 'auth/missing-email':
-          errorMessage = "Please enter your email address";
-          break;
-        case 'auth/too-many-requests':
-          errorMessage = "Too many requests. Please try again later";
-          break;
-        default:
-          errorMessage = error.message || "Failed to send password reset email";
+
+    if (error.message) {
+      if (error.message.includes("not found")) {
+        errorMessage = "No account exists with this email address";
+      } else if (error.message.includes("invalid email")) {
+        errorMessage = "Please enter a valid email address";
+      } else if (error.message.includes("too many requests")) {
+        errorMessage = "Too many requests. Please try again later";
+      } else {
+        errorMessage = error.message;
       }
     }
-    
-    return { 
-      success: false, 
-      errorCode: error.code,
-      errorMessage: errorMessage 
+
+    return {
+      success: false,
+      errorCode: error.code || "reset_error",
+      errorMessage: errorMessage,
     };
   }
 }
 
 /**
- * Confirm password reset with new password
- * @param {string} actionCode - The action code from the reset link
+ * Update user's password during password reset flow
  * @param {string} newPassword - The new password
- * @returns {Promise<Object>} Result of reset confirmation
+ * @returns {Promise<Object>} Result of password update
  */
-export async function confirmPasswordReset(actionCode, newPassword) {
+export async function updatePasswordAfterReset(newPassword) {
   try {
-    // Import the confirmPasswordReset function from Firebase
-    const { confirmPasswordReset: firebaseConfirmPasswordReset } = await import("firebase/auth");
-    
-    // Confirm password reset
-    await firebaseConfirmPasswordReset(auth, actionCode, newPassword);
-    
-    return { 
-      success: true, 
-      message: "Password has been reset successfully" 
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (error) throw error;
+
+    return {
+      success: true,
+      message: "Password has been reset successfully",
     };
   } catch (error) {
     console.error("Error confirming password reset:", error);
-    
-    // Return user-friendly error message
+
     let errorMessage = "Failed to reset password";
-    
-    if (error.code) {
-      switch (error.code) {
-        case 'auth/expired-action-code':
-          errorMessage = "This password reset link has expired. Please request a new one.";
-          break;
-        case 'auth/invalid-action-code':
-          errorMessage = "Invalid password reset link. Please request a new one.";
-          break;
-        case 'auth/user-disabled':
-          errorMessage = "This account has been disabled. Please contact support.";
-          break;
-        case 'auth/user-not-found':
-          errorMessage = "User not found. Please check your email address.";
-          break;
-        case 'auth/weak-password':
-          errorMessage = "This password is too weak. Please choose a stronger password.";
-          break;
-        default:
-          errorMessage = error.message || "Failed to reset password";
+
+    if (error.message) {
+      if (error.message.includes("weak")) {
+        errorMessage =
+          "This password is too weak. Please choose a stronger password.";
+      } else {
+        errorMessage = error.message;
       }
     }
-    
-    return { 
-      success: false, 
-      errorCode: error.code,
-      errorMessage: errorMessage 
+
+    return {
+      success: false,
+      errorCode: error.code || "reset_error",
+      errorMessage: errorMessage,
     };
   }
 }
 
-/**
- * Verify password reset code validity
- * @param {string} actionCode - The action code from the reset link
- * @returns {Promise<Object>} Result of code verification
- */
-export async function verifyPasswordResetCode(actionCode) {
-  try {
-    // Import the verifyPasswordResetCode function from Firebase
-    const { verifyPasswordResetCode: firebaseVerifyPasswordResetCode } = await import("firebase/auth");
-    
-    // Verify the code
-    const email = await firebaseVerifyPasswordResetCode(auth, actionCode);
-    
-    return { 
-      success: true, 
-      email: email
-    };
-  } catch (error) {
-    console.error("Error verifying password reset code:", error);
-    
-    // Return user-friendly error message
-    let errorMessage = "Invalid or expired password reset link";
-    
-    if (error.code) {
-      switch (error.code) {
-        case 'auth/expired-action-code':
-          errorMessage = "This password reset link has expired. Please request a new one.";
-          break;
-        case 'auth/invalid-action-code':
-          errorMessage = "Invalid password reset link. Please request a new one.";
-          break;
-        case 'auth/user-disabled':
-          errorMessage = "This account has been disabled. Please contact support.";
-          break;
-        case 'auth/user-not-found':
-          errorMessage = "User not found. Please check your email address.";
-          break;
-        default:
-          errorMessage = error.message || "Invalid or expired password reset link";
-      }
-    }
-    
-    return { 
-      success: false, 
-      errorCode: error.code,
-      errorMessage: errorMessage 
-    };
-  }
-}
-// Update user age
 export async function updateUserAge(age) {
   try {
-    const user = auth.currentUser;
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       throw new Error("Not authenticated");
     }
 
-    // Update age in Firestore
-    const userRef = doc(db, "users", user.uid);
-    await updateDoc(userRef, { age: parseInt(age) });
+    const { error } = await supabase
+      .from("users")
+      .update({ age: parseInt(age) })
+      .eq("id", user.id);
 
-    // Update local storage
+    if (error) throw error;
+
     localStorage.setItem("userAge", age.toString());
 
     return { success: true };
@@ -532,19 +490,22 @@ export async function updateUserAge(age) {
   }
 }
 
-// Update username
 export async function updateUserUsername(username) {
   try {
-    const user = auth.currentUser;
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       throw new Error("Not authenticated");
     }
 
-    // Update username in Firestore
-    const userRef = doc(db, "users", user.uid);
-    await updateDoc(userRef, { username: username });
+    const { error } = await supabase
+      .from("users")
+      .update({ username: username })
+      .eq("id", user.id);
 
-    // Update local storage
+    if (error) throw error;
+
     localStorage.setItem("username", username);
 
     return { success: true };
@@ -554,19 +515,34 @@ export async function updateUserUsername(username) {
   }
 }
 
-// Update user accessibility preferences
 export async function updateUserAccessibilityPreferences(preferences) {
   try {
-    const user = auth.currentUser;
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       throw new Error("Not authenticated");
     }
 
-    // Update preferences in Firestore
-    const userRef = doc(db, "users", user.uid);
-    await updateDoc(userRef, {
-      "preferences.accessibility": preferences,
-    });
+    const { data: userData, error: fetchError } = await supabase
+      .from("users")
+      .select("preferences")
+      .eq("id", user.id)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    const updatedPreferences = {
+      ...(userData.preferences || {}),
+      accessibility: preferences,
+    };
+
+    const { error } = await supabase
+      .from("users")
+      .update({ preferences: updatedPreferences })
+      .eq("id", user.id);
+
+    if (error) throw error;
 
     return { success: true };
   } catch (error) {
@@ -575,34 +551,32 @@ export async function updateUserAccessibilityPreferences(preferences) {
   }
 }
 
-// Set up auth state listener
 export function initializeAuthStateListener() {
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
+  supabase.auth.onAuthStateChange(async (event, session) => {
+    console.log("Supabase Auth event:", event);
+
+    if (event === "SIGNED_IN" && session?.user) {
       try {
-        const userProfile = await getUserProfile(user.uid);
+        const userProfile = await getUserProfile(session.user.id);
         if (userProfile) {
-          saveLoginState(user, userProfile);
-          // Load profile picture when auth state changes
+          saveLoginState(session.user, userProfile);
           loadProfilePicture();
         } else {
-          saveLoginState(user);
+          saveLoginState(session.user);
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
-        saveLoginState(user);
+        saveLoginState(session.user);
       }
-    } else {
+    } else if (event === "SIGNED_OUT") {
       clearLoginState();
     }
   });
 }
 
-// Initialize auth module
 export function initializeAuth() {
   initializeAuthStateListener();
 
-  // Set up logout handler if logout link exists
   const logoutLink = document.getElementById("logout-link");
   if (logoutLink) {
     logoutLink.addEventListener("click", async (e) => {
@@ -617,7 +591,6 @@ export function initializeAuth() {
   }
 }
 
-// Initialize on DOM content loaded
 document.addEventListener("DOMContentLoaded", () => {
   initializeAuth();
 });

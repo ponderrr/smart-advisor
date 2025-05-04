@@ -1,8 +1,8 @@
-import { openaiApi, handleApiError } from "./api-config.js";
+import { openaiApiRequest } from "./api-service.js";
 import { getMoviePoster } from "./movie-service.js";
 import { getBookCover } from "./book-service.js";
-import { getUserProfile } from "../firebase-utils.js";
-import { auth } from "../firebase-config.js";
+import { getUserProfile } from "../supabase-utils.js";
+import { supabase } from "../supabase-config.js";
 
 /**
  * Get questions or recommendations based on user preferences
@@ -20,24 +20,23 @@ export async function getQuestionsAndRecommendation({
   answers,
 }) {
   try {
-    // If answers are not provided, generate questions
     if (!answers) {
       const questionsPrompt = `Generate exactly ${numberOfQuestions} engaging questions to understand a ${age} year old's preferences for ${
         type === "both" ? "movies and books" : type + "s"
       }. Make questions age-appropriate and fun. Format: numbered list.`;
 
-      const response = await openaiApi.post("", {
-        model: "gpt-3.5-turbo",
-        messages: [
+      const response = await openaiApiRequest(
+        "gpt-3.5-turbo",
+        [
           {
             role: "user",
             content: questionsPrompt,
           },
         ],
-        temperature: 0.7,
-      });
+        { temperature: 0.7 }
+      );
 
-      const rawQuestions = response.data.choices[0].message.content;
+      const rawQuestions = response.choices[0].message.content;
       const questions = rawQuestions
         .split("\n")
         .filter((q) => q.trim())
@@ -46,15 +45,16 @@ export async function getQuestionsAndRecommendation({
       return { questions };
     }
 
-    // Get user accessibility preferences
     let accessibilityPreferences = null;
     let contentFilters = null;
     let recommendationHistory = [];
 
-    // Try to get user preferences if logged in
-    if (auth.currentUser) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
       try {
-        const userProfile = await getUserProfile(auth.currentUser.uid);
+        const userProfile = await getUserProfile(user.id);
         if (userProfile && userProfile.preferences) {
           accessibilityPreferences =
             userProfile.preferences.accessibility || null;
@@ -67,7 +67,6 @@ export async function getQuestionsAndRecommendation({
       }
     }
 
-    // Construct accessibility requirements string based on preferences
     let accessibilityRequirements = "";
     if (accessibilityPreferences) {
       const requirements = [];
@@ -91,7 +90,6 @@ export async function getQuestionsAndRecommendation({
       }
     }
 
-    // Construct content filter requirements
     let contentFilterRequirements = "";
     if (contentFilters) {
       const filters = [];
@@ -111,7 +109,6 @@ export async function getQuestionsAndRecommendation({
       }
     }
 
-    // Construct history exclusion string
     let historyExclusion = "";
     if (recommendationHistory && recommendationHistory.length > 0) {
       historyExclusion = `IMPORTANT: Do NOT recommend any of the following titles that have been previously recommended: ${recommendationHistory.join(
@@ -119,7 +116,6 @@ export async function getQuestionsAndRecommendation({
       )}.`;
     }
 
-    // If answers are provided, generate recommendations
     let recommendationPrompt;
     if (type === "both") {
       recommendationPrompt = `Based on these answers from a ${age} year old user: ${JSON.stringify(
@@ -182,33 +178,28 @@ export async function getQuestionsAndRecommendation({
       }`;
     }
 
-    const response = await openaiApi.post("", {
-      model: "gpt-3.5-turbo",
-      messages: [
+    const response = await openaiApiRequest(
+      "gpt-3.5-turbo",
+      [
         {
           role: "user",
           content: recommendationPrompt,
         },
       ],
-      temperature: 0.7,
-    });
+      { temperature: 0.7 }
+    );
 
-    // Parse the recommendation from the response
-    const recommendation = JSON.parse(response.data.choices[0].message.content);
+    const recommendation = JSON.parse(response.choices[0].message.content);
 
-    // Add poster URLs to recommendations
     if (type === "both") {
-      // Get movie poster
       const moviePosterUrl = await getMoviePoster(recommendation.movie.title);
       recommendation.movie.posterPath =
         moviePosterUrl || "/api/placeholder/300/450";
 
-      // Get book cover
       const bookCoverUrl = await getBookCover(recommendation.book.title);
       recommendation.book.posterPath =
         bookCoverUrl || "/api/placeholder/300/450";
     } else {
-      // Handle single type
       if (type === "movie") {
         const posterUrl = await getMoviePoster(recommendation.title);
         recommendation.posterPath = posterUrl || "/api/placeholder/300/450";
@@ -218,7 +209,6 @@ export async function getQuestionsAndRecommendation({
       }
     }
 
-    // Save recommendation to localStorage for results page
     localStorage.setItem(
       "recommendationDetails",
       JSON.stringify(recommendation)
@@ -226,12 +216,8 @@ export async function getQuestionsAndRecommendation({
 
     return { recommendation };
   } catch (error) {
-    const errorInfo = handleApiError(
-      error,
-      "OpenAI",
-      "Error generating recommendation"
-    );
-    throw new Error(errorInfo.message);
+    console.error("Error generating recommendation:", error);
+    throw new Error(error.message || "Error generating recommendation");
   }
 }
 
@@ -252,21 +238,23 @@ export async function getRecommendationExplanation(title, type, answers) {
     based on the user's answers. Make it sound conversational and friendly, as if talking directly
     to the user about why they might enjoy this ${type}.`;
 
-    const response = await openaiApi.post("", {
-      model: "gpt-3.5-turbo",
-      messages: [
+    const response = await openaiApiRequest(
+      "gpt-3.5-turbo",
+      [
         {
           role: "user",
           content: prompt,
         },
       ],
-      temperature: 0.7,
-      max_tokens: 150,
-    });
+      {
+        temperature: 0.7,
+        max_tokens: 150,
+      }
+    );
 
-    return response.data.choices[0].message.content.trim();
+    return response.choices[0].message.content.trim();
   } catch (error) {
-    handleApiError(error, "OpenAI", "Error generating explanation");
+    console.error("Error generating explanation:", error);
     return `We think you'll enjoy "${title}" based on your preferences!`;
   }
 }
@@ -286,14 +274,16 @@ export async function getRecommendationsByGenre(
   limit = 3
 ) {
   try {
-    // Get user accessibility preferences and recommendation history
     let accessibilityPreferences = null;
     let contentFilters = null;
     let recommendationHistory = [];
 
-    if (auth.currentUser) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
       try {
-        const userProfile = await getUserProfile(auth.currentUser.uid);
+        const userProfile = await getUserProfile(user.id);
         if (userProfile && userProfile.preferences) {
           accessibilityPreferences =
             userProfile.preferences.accessibility || null;
@@ -306,7 +296,6 @@ export async function getRecommendationsByGenre(
       }
     }
 
-    // Construct accessibility requirements string based on preferences
     let accessibilityRequirements = "";
     if (accessibilityPreferences) {
       const requirements = [];
@@ -330,7 +319,6 @@ export async function getRecommendationsByGenre(
       }
     }
 
-    // Construct content filter requirements
     let contentFilterRequirements = "";
     if (contentFilters) {
       const filters = [];
@@ -350,7 +338,6 @@ export async function getRecommendationsByGenre(
       }
     }
 
-    // Construct history exclusion string
     let historyExclusion = "";
     if (recommendationHistory && recommendationHistory.length > 0) {
       historyExclusion = `IMPORTANT: Do NOT recommend any of the following titles that have been previously recommended: ${recommendationHistory.join(
@@ -382,22 +369,19 @@ export async function getRecommendationsByGenre(
       }
     ]`;
 
-    const response = await openaiApi.post("", {
-      model: "gpt-3.5-turbo",
-      messages: [
+    const response = await openaiApiRequest(
+      "gpt-3.5-turbo",
+      [
         {
           role: "user",
           content: prompt,
         },
       ],
-      temperature: 0.7,
-    });
-
-    const recommendations = JSON.parse(
-      response.data.choices[0].message.content
+      { temperature: 0.7 }
     );
 
-    // Add poster/cover URLs to each recommendation
+    const recommendations = JSON.parse(response.choices[0].message.content);
+
     for (const rec of recommendations) {
       if (type === "movie") {
         rec.posterPath =
@@ -410,11 +394,7 @@ export async function getRecommendationsByGenre(
 
     return recommendations;
   } catch (error) {
-    handleApiError(
-      error,
-      "OpenAI",
-      "Error generating recommendations by genre"
-    );
+    console.error("Error generating recommendations by genre:", error);
     return [];
   }
 }
@@ -425,10 +405,13 @@ export async function getRecommendationsByGenre(
  * @returns {Promise<boolean>} True if it's a duplicate, false otherwise
  */
 export async function isDuplicateRecommendation(title) {
-  if (!auth.currentUser) return false;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return false;
 
   try {
-    const userProfile = await getUserProfile(auth.currentUser.uid);
+    const userProfile = await getUserProfile(user.id);
     if (
       !userProfile ||
       !userProfile.preferences ||
@@ -452,7 +435,21 @@ export async function isDuplicateRecommendation(title) {
  * @returns {Promise<Array>} List of premium recommendations
  */
 export async function getPremiumRecommendations(criteria) {
-  // This function would be implemented for the premium tier
-  // It would allow for more specific filters and criteria
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    throw new Error("You must be logged in to access premium features");
+  }
+
+  const userProfile = await getUserProfile(user.id);
+  const isPremium =
+    userProfile?.subscription?.isActive &&
+    (userProfile.subscription.tier === "premium-monthly" ||
+      userProfile.subscription.tier === "premium-annual");
+
+  if (!isPremium) {
+    throw new Error("Premium subscription required for this feature");
+  }
   throw new Error("Premium recommendations are not yet available");
 }
