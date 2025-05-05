@@ -2,20 +2,12 @@ import {
   getUserSubscription,
   SUBSCRIPTION_PLANS,
 } from "./services/subscription-service.js";
-import { auth } from "./firebase-config.js";
 
-/**
- * Check if user has access to a feature based on subscription tier
- * @param {string} feature - Feature to check ("maxQuestions", "maxRecommendations", etc.)
- * @param {number} requestedValue - Value user is trying to access
- * @returns {Promise<Object>} Access result with boolean and message
- */
 export async function checkFeatureAccess(feature, requestedValue) {
   try {
     const subscription = await getUserSubscription();
     const planLimits = SUBSCRIPTION_PLANS[subscription.tier || "free"].limits;
 
-    // Check if feature exists in plan limits
     if (!(feature in planLimits)) {
       return {
         hasAccess: false,
@@ -40,7 +32,6 @@ export async function checkFeatureAccess(feature, requestedValue) {
     };
   } catch (error) {
     console.error("Error checking feature access:", error);
-    // Default to free plan limits on error
     const planLimits = SUBSCRIPTION_PLANS.free.limits;
     const limit = feature in planLimits ? planLimits[feature] : 0;
 
@@ -69,7 +60,6 @@ export function showUpgradeModal(feature, accessCheck) {
 
     const displayName = featureDisplayNames[feature] || feature;
 
-    // Create modal
     const modal = document.createElement("div");
     modal.className = "upgrade-modal";
     modal.style.position = "fixed";
@@ -104,7 +94,6 @@ export function showUpgradeModal(feature, accessCheck) {
     message.style.marginBottom = "1.5rem";
     message.style.color = "var(--text-color)";
 
-    // Add comparison section
     const comparisonDiv = document.createElement("div");
     comparisonDiv.style.display = "flex";
     comparisonDiv.style.justifyContent = "space-around";
@@ -113,7 +102,6 @@ export function showUpgradeModal(feature, accessCheck) {
     comparisonDiv.style.padding = "1rem";
     comparisonDiv.style.borderRadius = "0.5rem";
 
-    // Create plan comparison
     const currentPlan = document.createElement("div");
     currentPlan.innerHTML = `
       <h3 style="margin-bottom: 0.5rem; font-size: 1.2rem; color: var(--text-color)">Current Plan</h3>
@@ -132,7 +120,6 @@ export function showUpgradeModal(feature, accessCheck) {
     comparisonDiv.appendChild(currentPlan);
     comparisonDiv.appendChild(premiumPlan);
 
-    // Add buttons
     const buttonContainer = document.createElement("div");
     buttonContainer.style.display = "flex";
     buttonContainer.style.gap = "1rem";
@@ -160,17 +147,14 @@ export function showUpgradeModal(feature, accessCheck) {
     buttonContainer.appendChild(cancelButton);
     buttonContainer.appendChild(upgradeButton);
 
-    // Assemble modal
     modalContent.appendChild(title);
     modalContent.appendChild(message);
     modalContent.appendChild(comparisonDiv);
     modalContent.appendChild(buttonContainer);
     modal.appendChild(modalContent);
 
-    // Add to page
     document.body.appendChild(modal);
 
-    // Button handlers
     cancelButton.addEventListener("click", () => {
       modal.remove();
       resolve(false);
@@ -179,11 +163,9 @@ export function showUpgradeModal(feature, accessCheck) {
     upgradeButton.addEventListener("click", () => {
       modal.remove();
       resolve(true);
-      // Redirect to subscription page
       window.location.href = "subscription.html";
     });
 
-    // Close on outside click
     modal.addEventListener("click", (e) => {
       if (e.target === modal) {
         modal.remove();
@@ -204,20 +186,16 @@ export async function protectPageBySubscription(
   redirectUrl = "subscription.html"
 ) {
   try {
-    // Check if user is logged in
     if (!auth.currentUser) {
       window.location.href = `sign-in.html?redirectTo=${window.location.pathname}`;
       return false;
     }
 
-    // Get user's subscription
     const subscription = await getUserSubscription();
 
-    // Check if user's subscription tier is in required tiers
     const hasAccess =
       requiredTiers.includes(subscription.tier) && subscription.isActive;
 
-    // Redirect if no access
     if (!hasAccess) {
       window.location.href = redirectUrl;
       return false;
@@ -237,14 +215,11 @@ export async function protectPageBySubscription(
  * @returns {Promise<boolean>} Whether element should be shown
  */
 export async function checkElementAccess(element) {
-  // Get required subscription tier from data attribute
   const requiredTier = element.dataset.subscriptionRequired;
-  if (!requiredTier) return true; // No restriction
+  if (!requiredTier) return true;
 
-  // Get current subscription
   const subscription = await getUserSubscription();
 
-  // Check if user has access
   const requiredTiers = requiredTier.split(",");
   const hasAccess =
     requiredTiers.includes(subscription.tier) && subscription.isActive;
@@ -257,19 +232,15 @@ export async function checkElementAccess(element) {
  * Add this to DOMContentLoaded event
  */
 export async function processRestrictedElements() {
-  // Find all elements with subscription restrictions
   const restrictedElements = document.querySelectorAll(
     "[data-subscription-required]"
   );
 
-  // Process each element
   for (const element of restrictedElements) {
     const hasAccess = await checkElementAccess(element);
 
     if (!hasAccess) {
-      // Show upgrade button or hide element
       if (element.dataset.subscriptionShowUpgradeButton === "true") {
-        // Replace with upgrade button
         const originalContent = element.innerHTML;
         element.innerHTML = "";
 
@@ -283,14 +254,12 @@ export async function processRestrictedElements() {
 
         element.appendChild(upgradeButton);
       } else {
-        // Just hide the element
         element.style.display = "none";
       }
     }
   }
 }
 
-// Initialize on DOM load
 document.addEventListener("DOMContentLoaded", () => {
   processRestrictedElements();
 });
