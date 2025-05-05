@@ -1,8 +1,8 @@
 import { getQuestionsAndRecommendation } from "./services/recommendation-service.js";
 import { getUserAge } from "./auth-manager.js";
-import { saveUserRecommendation } from "./firebase-utils.js";
-import { auth } from "./firebase-config.js";
-import { getUserProfile } from "./firebase-utils.js";
+import { saveUserRecommendation } from "./supabase-utils.js";
+import { supabase } from "./supabase-config.js";
+import { getUserProfile } from "./supabase-utils.js";
 
 document.addEventListener("DOMContentLoaded", async function () {
   const questionCountSlider = document.getElementById("question-count-slider");
@@ -23,17 +23,17 @@ document.addEventListener("DOMContentLoaded", async function () {
     "generating-questions-container"
   );
 
-  // Initialize state variables
   let currentQuestions = [];
   let currentAnswers = [];
   let currentQuestionIndex = 0;
 
-  // Check if user has premium subscription
   let isPremiumUser = false;
-  let maxQuestions = 5; // Default for free users
+  let maxQuestions = 5;
 
   try {
-    const userId = auth.currentUser?.uid || localStorage.getItem("userId");
+    const { data } = await supabase.auth.getSession();
+    const userId = data.session?.user.id || localStorage.getItem("userId");
+
     if (userId) {
       const userProfile = await getUserProfile(userId);
       if (
@@ -49,29 +49,23 @@ document.addEventListener("DOMContentLoaded", async function () {
     console.error("Error checking premium status:", error);
   }
 
-  // Set up initial state
   const savedTheme = localStorage.getItem("theme") || "light";
   rootElement.setAttribute("data-theme", savedTheme);
   updateToggleIcon(savedTheme);
 
-  // Initialize slider
   if (questionCountSlider) {
-    // Limit max questions for free users
     if (!isPremiumUser) {
       questionCountSlider.max = maxQuestions;
 
-      // Add premium message if they're not premium
       const premiumMessage = document.createElement("div");
       premiumMessage.className = "premium-message";
       premiumMessage.innerHTML = `<p>Free accounts are limited to ${maxQuestions} questions. <a href="subscription.html">Upgrade to Premium</a> for unlimited questions!</p>`;
 
-      // Add styles for premium message
       premiumMessage.style.marginTop = "1rem";
       premiumMessage.style.padding = "0.5rem";
       premiumMessage.style.backgroundColor = "rgba(255, 255, 255, 0.1)";
       premiumMessage.style.borderRadius = "0.5rem";
 
-      // Add to page
       questionCountSection.appendChild(premiumMessage);
     }
 
@@ -79,7 +73,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     updateQuestionCount(3);
   }
 
-  // Add event listeners
   if (questionCountSlider) {
     questionCountSlider.addEventListener("input", (e) => {
       updateQuestionCount(e.target.value);
@@ -96,8 +89,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
   }
 
-  // Check user authentication
-  const user = localStorage.getItem("userId");
+  const { data } = await supabase.auth.getSession();
+  const user = data.session?.user?.id || localStorage.getItem("userId");
   const recommendationType = localStorage.getItem("recommendationType");
 
   if (!user || !recommendationType) {
@@ -105,7 +98,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     return;
   }
 
-  // Start Quiz Button Handler
   if (startQuizButton) {
     startQuizButton.addEventListener("click", async () => {
       const userConfirmed = window.confirm(
@@ -121,14 +113,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         const userAge = await getUserAge();
         const type = localStorage.getItem("recommendationType");
 
-        // Show loading state
         generatingContainer.style.display = "flex";
         questionCountSection.style.display = "none";
 
-        // Set up beforeunload warning
         window.addEventListener("beforeunload", handleBeforeUnload);
 
-        // Calculate delay based on question count
         const delay = Math.min(5000, 1000 + questionCount * 100);
 
         setTimeout(async () => {
@@ -139,16 +128,13 @@ document.addEventListener("DOMContentLoaded", async function () {
               type: type,
             });
 
-            // Update questions and answers
             currentQuestions = result.questions;
             currentAnswers = new Array(currentQuestions.length).fill("");
 
-            // Update UI
             generatingContainer.style.display = "none";
             questionsSection.style.display = "block";
             questionsSection.classList.add("visible");
 
-            // Show first question
             displayCurrentQuestion();
           } catch (error) {
             handleError("Failed to generate questions. Please try again.");
@@ -160,7 +146,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
   }
 
-  // Answer Form Handler
   if (answerForm) {
     answerForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -173,7 +158,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         return;
       }
 
-      // Save answer and proceed
       currentAnswers[currentQuestionIndex] = answer;
       answerInput.value = "";
 
@@ -187,7 +171,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
   }
 
-  // Helper Functions
   function updateQuestionCount(value) {
     if (countDisplay) {
       countDisplay.textContent = `Number of Questions: ${value}`;
@@ -302,10 +285,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     return message;
   }
 
-  function updateToggleIcon(theme) {
-    // This function can be empty if you don't need to update the toggle icon
-    // or you can implement it if needed
-  }
+  function updateToggleIcon(theme) {}
 });
 
 export { getQuestionsAndRecommendation };
