@@ -1,16 +1,13 @@
-import { auth } from "./firebase-config.js";
-import { getUserProfile } from "./firebase-utils.js";
-import {
-  startSubscription,
-  cancelSubscription,
-  updateSubscriptionPlan,
-  getUserSubscription,
-  SUBSCRIPTION_PLANS,
-} from "./services/subscription-service.js";
+import { supabase } from "./supabase-config.js";
+import { getUserProfile } from "./supabase-utils.js";
+import { SUBSCRIPTION_PLANS } from "./services/subscription-service.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
   // Check if user is logged in
-  if (!auth.currentUser && !localStorage.getItem("userId")) {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session) {
     window.location.href = "sign-in.html?redirectTo=subscription.html";
     return;
   }
@@ -24,7 +21,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Check user's current subscription status
   await checkSubscriptionStatus();
 
-  // Add check for URL parameters (for Stripe redirect handling in the future)
+  // Add check for URL parameters (for Stripe redirect handling)
   handleUrlParameters();
 });
 
@@ -36,6 +33,7 @@ function initFaqToggles() {
 
   faqItems.forEach((item) => {
     const question = item.querySelector(".faq-question");
+    if (!question) return;
 
     question.addEventListener("click", () => {
       const isActive = item.classList.contains("active");
@@ -89,13 +87,25 @@ function setupSubscriptionButtons() {
 async function handleSubscriptionClick(plan) {
   try {
     // Check if user is logged in
-    if (!auth.currentUser) {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) {
       window.location.href = `sign-in.html?redirectTo=subscription.html&plan=${plan}`;
       return;
     }
 
     // Get current subscription status
-    const subscription = await getUserSubscription();
+    const { data: userData } = await supabase
+      .from("subscriptions")
+      .select("*")
+      .eq("user_id", session.user.id)
+      .single();
+
+    const subscription = {
+      isActive: userData?.status === "active",
+      tier: userData?.tier || "free",
+    };
 
     // Different handling based on subscription status
     if (subscription.isActive) {
@@ -122,14 +132,46 @@ async function handleSubscriptionClick(plan) {
           confirmText: "Change Plan",
           cancelText: "Cancel",
           onConfirm: async () => {
-            // Process plan change
-            const result = await updateSubscriptionPlan(plan);
-            if (result.success) {
-              showSuccessModal("Plan Changed", result.message, () => {
-                window.location.reload();
+            try {
+              const token = await getAuthToken();
+              const response = await fetch("/api/update-subscription", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ planId: plan }),
               });
-            } else {
-              showErrorModal("Error", result.message);
+
+              if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(
+                  errorData.error || "Failed to update subscription"
+                );
+              }
+
+              const result = await response.json();
+
+              if (result.success) {
+                showSuccessModal(
+                  "Plan Changed",
+                  result.message || "Your subscription has been updated",
+                  () => {
+                    window.location.reload();
+                  }
+                );
+              } else {
+                showErrorModal(
+                  "Error",
+                  result.message || "Failed to update subscription"
+                );
+              }
+            } catch (error) {
+              console.error("Error updating subscription:", error);
+              showErrorModal(
+                "Error",
+                error.message || "An error occurred updating your subscription"
+              );
             }
           },
         });
@@ -154,6 +196,10 @@ async function handleSubscriptionClick(plan) {
 function showPaymentModal(plan) {
   // Get plan details
   const planDetails = SUBSCRIPTION_PLANS[plan];
+  if (!planDetails) {
+    showErrorModal("Error", "Invalid subscription plan");
+    return;
+  }
 
   // Create payment modal
   const modal = document.createElement("div");
@@ -239,7 +285,7 @@ function showPaymentModal(plan) {
 
   document.body.appendChild(modal);
 
-  // Add event listeners
+  // Add event listeners for modal
   const closeButton = modal.querySelector(".close-modal");
   const cancelButton = modal.querySelector(".modal-button.cancel");
   const confirmButton = modal.querySelector(".modal-button.confirm");
@@ -279,27 +325,43 @@ function showPaymentModal(plan) {
     confirmButton.textContent = "Processing...";
 
     try {
-      // Mock payment processing delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Get authentication token
+      const token = await getAuthToken();
 
-      // Start subscription
-      const result = await startSubscription(plan);
+      // Call API to create subscription
+      const response = await fetch("/api/create-subscription", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ planId: plan }),
+      });
 
-      if (result.success) {
-        // Close payment modal
-        closeModal();
-
-        // Show success message
-        showSuccessModal(
-          "Payment Successful",
-          "Your subscription has been activated successfully!",
-          () => {
-            window.location.reload();
-          }
-        );
-      } else {
-        throw new Error(result.message || "Failed to process payment");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create subscription");
       }
+
+      const result = await response.json();
+
+      // If subscription creation was successful and we have a checkout URL
+      if (result.url) {
+        window.location.href = result.url;
+        return;
+      }
+
+      // Close payment modal
+      closeModal();
+
+      // Show success message
+      showSuccessModal(
+        "Payment Successful",
+        "Your subscription has been activated successfully!",
+        () => {
+          window.location.reload();
+        }
+      );
     } catch (error) {
       console.error("Payment error:", error);
 
@@ -359,8 +421,8 @@ function showPaymentModal(plan) {
  */
 function showSubscriptionManagementModal(subscription) {
   // Format dates
-  const startDate = new Date(subscription.startDate);
-  const endDate = new Date(subscription.endDate);
+  const startDate = new Date(subscription.current_period_start);
+  const endDate = new Date(subscription.current_period_end);
 
   const formatDate = (date) => {
     return date.toLocaleDateString(undefined, {
@@ -401,7 +463,7 @@ function showSubscriptionManagementModal(subscription) {
         <div class="detail-item">
           <span class="detail-label">Auto-Renew:</span>
           <span class="detail-value">${
-            subscription.autoRenew ? "Enabled" : "Disabled"
+            subscription.cancel_at_period_end ? "Disabled" : "Enabled"
           }</span>
         </div>
       </div>
@@ -413,9 +475,9 @@ function showSubscriptionManagementModal(subscription) {
             : ""
         }
         ${
-          subscription.autoRenew
-            ? `<button class="action-button cancel">Cancel Auto-Renewal</button>`
-            : `<button class="action-button renew">Enable Auto-Renewal</button>`
+          subscription.cancel_at_period_end
+            ? `<button class="action-button renew">Enable Auto-Renewal</button>`
+            : `<button class="action-button cancel">Cancel Auto-Renewal</button>`
         }
       </div>
     </div>
@@ -451,13 +513,46 @@ function showSubscriptionManagementModal(subscription) {
           confirmText: "Cancel Auto-Renewal",
           cancelText: "Keep Subscription",
           onConfirm: async () => {
-            const result = await cancelSubscription();
-            if (result.success) {
-              showSuccessModal("Auto-Renewal Cancelled", result.message, () => {
-                window.location.reload();
+            try {
+              const token = await getAuthToken();
+              const response = await fetch("/api/cancel-subscription", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
               });
-            } else {
-              showErrorModal("Error", result.message);
+
+              if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(
+                  errorData.error || "Failed to cancel subscription"
+                );
+              }
+
+              const result = await response.json();
+
+              if (result.success) {
+                showSuccessModal(
+                  "Auto-Renewal Cancelled",
+                  result.message ||
+                    "Your subscription will be canceled at the end of the billing period",
+                  () => {
+                    window.location.reload();
+                  }
+                );
+              } else {
+                showErrorModal(
+                  "Error",
+                  result.message || "Failed to cancel auto-renewal"
+                );
+              }
+            } catch (error) {
+              console.error("Error canceling subscription:", error);
+              showErrorModal(
+                "Error",
+                error.message || "An error occurred canceling your subscription"
+              );
             }
           },
         });
@@ -484,15 +579,50 @@ function showSubscriptionManagementModal(subscription) {
           confirmText: "Enable Auto-Renewal",
           cancelText: "Cancel",
           onConfirm: async () => {
-            // Call re-enable subscription function (needs to be implemented)
-            // For now, we'll just show a success message
-            showSuccessModal(
-              "Auto-Renewal Enabled",
-              "Your subscription will now automatically renew at the end of your billing period.",
-              () => {
-                window.location.reload();
+            try {
+              const token = await getAuthToken();
+              const response = await fetch("/api/update-subscription", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                  enableAutoRenew: true,
+                  planId: subscription.tier,
+                }),
+              });
+
+              if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(
+                  errorData.error || "Failed to enable auto-renewal"
+                );
               }
-            );
+
+              const result = await response.json();
+
+              if (result.success) {
+                showSuccessModal(
+                  "Auto-Renewal Enabled",
+                  "Your subscription will now automatically renew at the end of your billing period.",
+                  () => {
+                    window.location.reload();
+                  }
+                );
+              } else {
+                showErrorModal(
+                  "Error",
+                  result.message || "Failed to enable auto-renewal"
+                );
+              }
+            } catch (error) {
+              console.error("Error enabling auto-renewal:", error);
+              showErrorModal(
+                "Error",
+                error.message || "An error occurred enabling auto-renewal"
+              );
+            }
           },
         });
       } catch (error) {
@@ -622,10 +752,26 @@ function showModal(options) {
  */
 async function checkSubscriptionStatus() {
   try {
-    const subscription = await getUserSubscription();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const { data: subscriptionData, error } = await supabase
+      .from("subscriptions")
+      .select("*")
+      .eq("user_id", session.user.id)
+      .single();
+
+    if (error && error.code !== "PGRST116") {
+      console.error("Error fetching subscription:", error);
+      return;
+    }
 
     // Update UI based on subscription status
-    updateUIForSubscription(subscription);
+    if (subscriptionData && subscriptionData.status === "active") {
+      updateUIForSubscription(subscriptionData);
+    }
   } catch (error) {
     console.error("Error checking subscription status:", error);
   }
@@ -667,7 +813,7 @@ function updateUIForSubscription(subscription) {
   resetButtons();
 
   // If user has an active subscription, update UI accordingly
-  if (subscription.isActive) {
+  if (subscription.status === "active") {
     if (subscription.tier === "premium-monthly") {
       if (premiumMonthlyButton) {
         premiumMonthlyButton.textContent = "Current Plan";
@@ -708,7 +854,7 @@ function updateUIForSubscription(subscription) {
 
   // Add subscriber badge to the header
   const header = document.querySelector(".navbar");
-  if (header && subscription.isActive) {
+  if (header && subscription.status === "active") {
     // Remove existing badge if any
     const existingBadge = header.querySelector(".subscriber-badge");
     if (existingBadge) {
@@ -791,4 +937,18 @@ function handleUrlParameters() {
       handleSubscriptionClick(plan);
     }, 1000);
   }
+}
+
+/**
+ * Get the user's auth token from Supabase
+ * @returns {Promise<string>} The user's auth token
+ */
+async function getAuthToken() {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session) {
+    throw new Error("Not authenticated");
+  }
+  return session.access_token;
 }

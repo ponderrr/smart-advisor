@@ -1,6 +1,5 @@
-import { getUserProfile } from "./firebase-utils.js";
-import { auth } from "./firebase-config.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { supabase } from "./supabase-config.js";
+import { getUserProfile } from "./supabase-utils.js";
 import { getMoviePoster } from "./services/movie-service.js";
 import { getBookCover } from "./services/book-service.js";
 
@@ -11,12 +10,12 @@ let currentMovieIndex = 0;
 let currentBookIndex = 0;
 let isAuthCheckComplete = false;
 
-// Utility function to get current theme - prevents redeclaration issues
+// Utility function to get current theme
 function getCurrentTheme() {
   return document.body.getAttribute("data-theme") || "light";
 }
 
-// Get theme-specific color - prevents variable redeclaration issues
+// Get theme-specific color
 function getThemeColor(lightColor, darkColor) {
   return getCurrentTheme() === "dark" ? darkColor : lightColor;
 }
@@ -33,43 +32,57 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelector(".account-container")?.prepend(loadingState);
 
   // Set up auth state listener
-  onAuthStateChanged(auth, handleAuthStateChanged);
+  initializeAuthListener();
 });
 
-// Handle Firebase Auth state changes
-function handleAuthStateChanged(user) {
-  console.log("Auth state changed:", user);
-  isAuthCheckComplete = true;
+// Handle Supabase Auth state changes
+function initializeAuthListener() {
+  supabase.auth.onAuthStateChange((event, session) => {
+    console.log("Auth state changed:", event, session?.user?.id);
+    isAuthCheckComplete = true;
 
-  if (!user && !localStorage.getItem("userId")) {
-    console.log("No user logged in, redirecting to sign-in page");
-    // Remove loading state before redirect
-    document.getElementById("account-loading-state")?.remove();
-    window.location.href = "sign-in.html?redirectTo=account.html";
-    return;
-  }
+    if (!session) {
+      // No user logged in, redirect to sign-in page
+      console.log("No user logged in, redirecting to sign-in page");
+      document.getElementById("account-loading-state")?.remove();
+      window.location.href = "sign-in.html?redirectTo=account.html";
+      return;
+    }
 
-  // User is logged in - initialize the account page
-  initializeAccountPage(user);
+    // User is logged in - initialize the account page
+    initializeAccountPage(session.user);
+  });
+
+  // If auth listener doesn't trigger within 2 seconds, check session manually
+  setTimeout(async () => {
+    if (!isAuthCheckComplete) {
+      console.log("Auth listener timeout, checking session manually");
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        console.log("No user logged in, redirecting to sign-in page");
+        document.getElementById("account-loading-state")?.remove();
+        window.location.href = "sign-in.html?redirectTo=account.html";
+        return;
+      }
+
+      initializeAccountPage(session.user);
+    }
+  }, 2000);
 }
 
 // Initialize the account page after auth check
 async function initializeAccountPage(user) {
   try {
-    const userId = user?.uid || localStorage.getItem("userId");
-    console.log("Initializing account page for user:", userId);
+    console.log("Initializing account page for user:", user.id);
 
     // Remove loading state
     document.getElementById("account-loading-state")?.remove();
 
-    if (!userId) {
-      console.error("No user ID found even though auth check passed");
-      displayError("Authentication error. Please try logging in again.");
-      return;
-    }
-
     // Get user profile
-    const userProfile = await getUserProfile(userId);
+    const userProfile = await getUserProfile(user.id);
     console.log("User profile loaded:", userProfile);
 
     // Update user info display
@@ -90,7 +103,8 @@ function updateUserInfoDisplay(userProfile) {
   const userNameElement = document.querySelector(".user-info h2");
   if (userNameElement) {
     // Use username if available, otherwise use email
-    userNameElement.textContent = userProfile.username || userProfile.email || "User Profile";
+    userNameElement.textContent =
+      userProfile.username || userProfile.email || "User Profile";
   }
 
   // Update current email field if present
@@ -104,7 +118,7 @@ function updateUserInfoDisplay(userProfile) {
   if (currentAgeField && userProfile.age) {
     currentAgeField.value = userProfile.age;
   }
-  
+
   // Update current username field if present
   const currentUsernameField = document.getElementById("current-username");
   if (currentUsernameField && userProfile.username) {
@@ -112,12 +126,11 @@ function updateUserInfoDisplay(userProfile) {
   }
 }
 
-
 // Initialize recommendation history display
 function initializeRecommendationHistory(userProfile) {
   if (!userProfile) return;
 
-  const recommendations = userProfile.recommendationss || {};
+  const recommendations = userProfile.recommendations || [];
   console.log("Processing recommendations:", recommendations);
 
   // Process recommendations based on their structure
@@ -127,26 +140,15 @@ function initializeRecommendationHistory(userProfile) {
 // Process recommendations from user profile
 function processRecommendations(recommendations) {
   // Handle empty recommendations
-  if (!recommendations || Object.keys(recommendations).length === 0) {
+  if (!recommendations || !recommendations.length) {
     displayNoRecommendations();
     return;
   }
 
-  // Get all recommendation items as an array
-  let recommendationItems = [];
-
-  // Handle both object and array formats
-  if (Array.isArray(recommendations)) {
-    recommendationItems = recommendations;
-  } else {
-    // Convert object format to array
-    recommendationItems = Object.values(recommendations);
-  }
-
-  console.log("Recommendation items:", recommendationItems);
+  console.log("Recommendation items:", recommendations);
 
   // Sort by timestamp (newest first)
-  const sortedRecs = sortRecommendationsByTimestamp(recommendationItems);
+  const sortedRecs = sortRecommendationsByTimestamp(recommendations);
 
   // Extract movie and book recommendations
   extractRecommendationsByType(sortedRecs);
@@ -363,7 +365,6 @@ function generateStarRating(rating) {
     `;
 }
 
-// Add "View All" buttons if there are multiple recommendations
 // Add "View All" buttons if there are multiple recommendations
 function addViewAllButtons() {
   console.log("Adding view all buttons");
@@ -693,15 +694,14 @@ function createRecommendationCarousel(type) {
   controls.style.backgroundColor = "rgba(0, 0, 0, 0.2)";
   controls.style.borderRadius = "0.5rem";
 
-  // Get theme-specific button color
-  const buttonBgColor = getThemeColor(
-    "rgba(26, 146, 232, 0.3)",
-    "rgba(72, 169, 248, 0.3)"
-  );
+  // Create Previous button
   const prevButton = document.createElement("button");
   prevButton.className = "nav-button prev";
   prevButton.textContent = "Previous";
-  prevButton.style.backgroundColor = buttonBgColor;
+  prevButton.style.backgroundColor = getThemeColor(
+    "rgba(26, 146, 232, 0.3)",
+    "rgba(72, 169, 248, 0.3)"
+  );
   prevButton.style.color = "#ffffff";
   prevButton.style.border = "none";
   prevButton.style.borderRadius = "0.5rem";
@@ -715,10 +715,14 @@ function createRecommendationCarousel(type) {
     }
   });
 
+  // Create Next button
   const nextButton = document.createElement("button");
   nextButton.className = "nav-button next";
   nextButton.textContent = "Next";
-  nextButton.style.backgroundColor = buttonBgColor;
+  nextButton.style.backgroundColor = getThemeColor(
+    "rgba(26, 146, 232, 0.3)",
+    "rgba(72, 169, 248, 0.3)"
+  );
   nextButton.style.color = "#ffffff";
   nextButton.style.border = "none";
   nextButton.style.borderRadius = "0.5rem";
@@ -1049,4 +1053,3 @@ async function displayRecommendationInModal(container, recommendation, type) {
   content.appendChild(details);
   container.appendChild(content);
 }
-

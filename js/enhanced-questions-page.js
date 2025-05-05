@@ -1,8 +1,8 @@
 import { getQuestionsAndRecommendation } from "./services/enhanced-recommendation-service.js";
 import { getUserAge } from "./auth-manager.js";
-import { saveUserRecommendation } from "./firebase-utils.js";
-import { auth } from "./firebase-config.js";
-import { getUserProfile } from "./firebase-utils.js";
+import { saveUserRecommendation } from "./supabase-utils.js";
+import { supabase } from "./supabase-config.js";
+import { getUserProfile } from "./supabase-utils.js";
 import { checkFeatureAccess, showUpgradeModal } from "./subscription-guard.js";
 import { SUBSCRIPTION_PLANS } from "./services/subscription-service.js";
 
@@ -188,18 +188,21 @@ document.addEventListener("DOMContentLoaded", async function () {
    */
   async function checkUserSubscription() {
     try {
-      const user = auth.currentUser;
-      if (user) {
-        const userProfile = await getUserProfile(user.uid);
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session?.user) {
+        const userProfile = await getUserProfile(session.user.id);
 
         // Check if user has an active subscription
         if (
           userProfile &&
           userProfile.subscription &&
-          userProfile.subscription.isActive
+          userProfile.subscription.status === "active"
         ) {
           // Get limits from subscription plan
-          const plan = userProfile.subscription.plan;
+          const plan = userProfile.subscription.tier;
           const planLimits =
             SUBSCRIPTION_PLANS[plan] && SUBSCRIPTION_PLANS[plan].limits;
 
@@ -349,8 +352,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   function updateToggleIcon(theme) {
-    // This function can be empty if you don't need to update the toggle icon
-    // or you can implement it if needed
+    // This can be implemented based on your theme toggle design
   }
 });
 

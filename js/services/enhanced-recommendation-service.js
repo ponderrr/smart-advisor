@@ -1,17 +1,10 @@
-import { enhancedOpenaiApi, handleApiError } from "./enhanced-api-config.js";
+import { supabase } from "../supabase-config.js";
 import { getMoviePoster } from "./movie-service.js";
 import { getBookCover } from "./book-service.js";
-import { getUserProfile } from "../firebase-utils.js";
-import { auth } from "../firebase-config.js";
+import { getUserProfile } from "../supabase-utils.js";
 
 /**
  * Get questions or recommendations based on user preferences
- * @param {Object} options - Options for questions or recommendations
- * @param {number} [options.numberOfQuestions] - Number of questions to generate
- * @param {number} options.age - User age
- * @param {string} options.type - Recommendation type: "movie", "book", or "both"
- * @param {Array} [options.answers] - User answers to generated questions
- * @returns {Promise<Object>} Questions or recommendations based on inputs
  */
 export async function getQuestionsAndRecommendation({
   numberOfQuestions,
@@ -20,36 +13,53 @@ export async function getQuestionsAndRecommendation({
   answers,
 }) {
   try {
-    // If answers are not provided, generate questions
-    if (!answers) {
-      // Check if user is trying to exceed their question limit
-      const user = auth.currentUser;
-      const userProfile = user ? await getUserProfile(user.uid) : null;
-      const maxQuestions = getMaxQuestionsForUser(userProfile);
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
-      if (numberOfQuestions > maxQuestions) {
+    if (!answers) {
+      if (!session && numberOfQuestions > 5) {
         throw new Error(
-          `Free accounts are limited to ${maxQuestions} questions. Upgrade to Premium for unlimited questions!`
+          "Free accounts are limited to 5 questions. Sign in or upgrade to Premium for unlimited questions!"
         );
+      } else if (session) {
+        const userProfile = await getUserProfile(session.user.id);
+        const maxQuestions = getMaxQuestionsForUser(userProfile);
+        if (numberOfQuestions > maxQuestions) {
+          throw new Error(
+            `Free accounts are limited to ${maxQuestions} questions. Upgrade to Premium for more questions!`
+          );
+        }
       }
 
-      const questionsPrompt = `Generate exactly ${numberOfQuestions} engaging questions to understand a ${age} year old's preferences for ${
-        type === "both" ? "movies and books" : type + "s"
-      }. Make questions age-appropriate and fun. Format: numbered list.`;
-
-      const response = await enhancedOpenaiApi.post("", {
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "user",
-            content: questionsPrompt,
-          },
-        ],
-        temperature: 0.7,
+      const token = await getAuthToken();
+      const response = await fetch("/api/openai-proxy", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [
+            {
+              role: "user",
+              content: `Generate exactly ${numberOfQuestions} engaging questions to understand a ${age} year old's preferences for ${
+                type === "both" ? "movies and books" : type + "s"
+              }. Make questions age-appropriate and fun. Format: numbered list.`,
+            },
+          ],
+          temperature: 0.7,
+        }),
       });
 
-      const rawQuestions = response.choices[0].message.content;
-      const questions = rawQuestions
+      if (!response.ok)
+        throw new Error(
+          (await response.json()).error || "Failed to generate questions"
+        );
+
+      const data = await response.json();
+      const questions = data.choices[0].message.content
         .split("\n")
         .filter((q) => q.trim())
         .map((q) => q.replace(/^\d+\.\s*/, "").trim());
@@ -57,16 +67,14 @@ export async function getQuestionsAndRecommendation({
       return { questions };
     }
 
-    // Get user accessibility preferences
-    let accessibilityPreferences = null;
-    let contentFilters = null;
-    let recommendationHistory = [];
+    let accessibilityPreferences = null,
+      contentFilters = null,
+      recommendationHistory = [];
 
-    // Try to get user preferences if logged in
-    if (auth.currentUser) {
+    if (session) {
       try {
-        const userProfile = await getUserProfile(auth.currentUser.uid);
-        if (userProfile && userProfile.preferences) {
+        const userProfile = await getUserProfile(session.user.id);
+        if (userProfile?.preferences) {
           accessibilityPreferences =
             userProfile.preferences.accessibility || null;
           contentFilters = userProfile.preferences.contentFilters || null;
@@ -78,234 +86,165 @@ export async function getQuestionsAndRecommendation({
       }
     }
 
-    // Construct accessibility requirements string based on preferences
-    let accessibilityRequirements = "";
-    if (accessibilityPreferences) {
-      const requirements = [];
+    const ageRating =
+      age <= 13 ? "G or PG" : age <= 17 ? "up to PG-13" : "any rating";
+    const buildRequirements = (prefs, keys, messages) => {
+      return prefs
+        ? keys
+            .filter((k) => prefs[k])
+            .map((k) => messages[k])
+            .join(" and ")
+        : "";
+    };
 
-      if (accessibilityPreferences.requireSubtitles) {
-        requirements.push("must have subtitles available");
-      }
-
-      if (accessibilityPreferences.requireAudioDescription) {
-        requirements.push("must have audio descriptions available");
-      }
-
-      if (accessibilityPreferences.requireClosedCaptions) {
-        requirements.push("must have closed captions available");
-      }
-
-      if (requirements.length > 0) {
-        accessibilityRequirements = `Additionally, the recommendation ${requirements.join(
-          " and "
-        )}.`;
-      }
-    }
-
-    // Construct content filter requirements
-    let contentFilterRequirements = "";
-    if (contentFilters) {
-      const filters = [];
-
-      if (contentFilters.excludeViolentContent) {
-        filters.push("should not contain excessive violence");
-      }
-
-      if (contentFilters.excludeSexualContent) {
-        filters.push("should not contain explicit sexual content");
-      }
-
-      if (filters.length > 0) {
-        contentFilterRequirements = `The recommendation ${filters.join(
-          " and "
-        )}.`;
-      }
-    }
-
-    // Construct history exclusion string
-    let historyExclusion = "";
-    if (recommendationHistory && recommendationHistory.length > 0) {
-      historyExclusion = `IMPORTANT: Do NOT recommend any of the following titles that have been previously recommended: ${recommendationHistory.join(
-        ", "
-      )}.`;
-    }
-
-    // If answers are provided, generate recommendations
-    let recommendationPrompt;
-    if (type === "both") {
-      recommendationPrompt = `Based on these answers from a ${age} year old user: ${JSON.stringify(
-        answers
-      )}
-      Please recommend one movie AND one book that are:
-      1. Age-appropriate (rated ${
-        age <= 13 ? "G or PG" : age <= 17 ? "up to PG-13" : "any rating"
-      })
-      2. Match their interests
-      3. Have good entertainment value
-      ${accessibilityRequirements}
-      ${contentFilterRequirements}
-      ${historyExclusion}
-    
-      Format the response as JSON with this structure:
+    const accessibilityRequirements = buildRequirements(
+      accessibilityPreferences,
+      ["requireSubtitles", "requireAudioDescription", "requireClosedCaptions"],
       {
-        "movie": {
-          "title": "",
-          "type": "movie",
-          "rating": 0,
-          "genres": [],
-          "ageRating": "",
-          "description": "",
-          "posterPath": ""
-        },
-        "book": {
-          "title": "",
-          "type": "book",
-          "rating": 0,
-          "genres": [],
-          "ageRating": "",
-          "description": "",
-          "posterPath": ""
-        }
-      }`;
-    } else {
-      recommendationPrompt = `Based on these answers from a ${age} year old user: ${JSON.stringify(
-        answers
-      )}
-      Please recommend one ${type} that is:
-      1. Age-appropriate (rated ${
-        age <= 13 ? "G or PG" : age <= 17 ? "up to PG-13" : "any rating"
-      })
-      2. Matches their interests
-      3. Has good entertainment value
-      ${accessibilityRequirements}
-      ${contentFilterRequirements}
-      ${historyExclusion}
-    
-      Format the response as JSON with these fields:
-      {
-        "title": "",
-        "type": "${type}",
-        "rating": 0,
-        "genres": [],
-        "ageRating": "",
-        "description": "",
-        "posterPath": ""
-      }`;
-    }
+        requireSubtitles: "must have subtitles available",
+        requireAudioDescription: "must have audio descriptions available",
+        requireClosedCaptions: "must have closed captions available",
+      }
+    );
 
-    const response = await enhancedOpenaiApi.post("", {
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "user",
-          content: recommendationPrompt,
-        },
-      ],
-      temperature: 0.7,
+    const contentFilterRequirements = buildRequirements(
+      contentFilters,
+      ["excludeViolentContent", "excludeSexualContent"],
+      {
+        excludeViolentContent: "should not contain excessive violence",
+        excludeSexualContent: "should not contain explicit sexual content",
+      }
+    );
+
+    const historyExclusion =
+      recommendationHistory.length > 0
+        ? `IMPORTANT: Do NOT recommend any of the following titles that have been previously recommended: ${recommendationHistory.join(
+            ", "
+          )}.`
+        : "";
+
+    const recommendationPrompt =
+      type === "both"
+        ? `Based on these answers from a ${age} year old user: ${JSON.stringify(
+            answers
+          )}\nPlease recommend one movie AND one book that are:\n1. Age-appropriate (rated ${ageRating})\n2. Match their interests\n3. Have good entertainment value\n${
+            accessibilityRequirements
+              ? "Additionally, the recommendation " +
+                accessibilityRequirements +
+                "."
+              : ""
+          }\n${
+            contentFilterRequirements
+              ? "The recommendation " + contentFilterRequirements + "."
+              : ""
+          }\n${historyExclusion}\nFormat the response as JSON with this structure:{"movie":{"title":"","type":"movie","rating":0,"genres":[],"ageRating":"","description":"","posterPath":""},"book":{"title":"","type":"book","rating":0,"genres":[],"ageRating":"","description":"","posterPath":""}}`
+        : `Based on these answers from a ${age} year old user: ${JSON.stringify(
+            answers
+          )}\nPlease recommend one ${type} that is:\n1. Age-appropriate (rated ${ageRating})\n2. Matches their interests\n3. Has good entertainment value\n${
+            accessibilityRequirements
+              ? "Additionally, the recommendation " +
+                accessibilityRequirements +
+                "."
+              : ""
+          }\n${
+            contentFilterRequirements
+              ? "The recommendation " + contentFilterRequirements + "."
+              : ""
+          }\n${historyExclusion}\nFormat the response as JSON with these fields:{"title":"","type":"${type}","rating":0,"genres":[],"ageRating":"","description":"","posterPath":""}`;
+
+    const token = await getAuthToken();
+    const response = await fetch("/api/openai-proxy", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: recommendationPrompt }],
+        temperature: 0.7,
+      }),
     });
 
-    // Parse the recommendation from the response
-    const recommendation = JSON.parse(response.choices[0].message.content);
+    if (!response.ok)
+      throw new Error(
+        (await response.json()).error || "Failed to generate recommendation"
+      );
 
-    // Add poster URLs to recommendations
+    const data = await response.json();
+    const recommendation = JSON.parse(data.choices[0].message.content);
+
     if (type === "both") {
-      // Get movie poster
-      const moviePosterUrl = await getMoviePoster(recommendation.movie.title);
       recommendation.movie.posterPath =
-        moviePosterUrl || "/api/placeholder/300/450";
-
-      // Get book cover
-      const bookCoverUrl = await getBookCover(recommendation.book.title);
+        (await getMoviePoster(recommendation.movie.title)) ||
+        "/api/placeholder/300/450";
       recommendation.book.posterPath =
-        bookCoverUrl || "/api/placeholder/300/450";
-    } else {
-      // Handle single type
-      if (type === "movie") {
-        const posterUrl = await getMoviePoster(recommendation.title);
-        recommendation.posterPath = posterUrl || "/api/placeholder/300/450";
-      } else if (type === "book") {
-        const coverUrl = await getBookCover(recommendation.title);
-        recommendation.posterPath = coverUrl || "/api/placeholder/300/450";
-      }
+        (await getBookCover(recommendation.book.title)) ||
+        "/api/placeholder/300/450";
+    } else if (type === "movie") {
+      recommendation.posterPath =
+        (await getMoviePoster(recommendation.title)) ||
+        "/api/placeholder/300/450";
+    } else if (type === "book") {
+      recommendation.posterPath =
+        (await getBookCover(recommendation.title)) ||
+        "/api/placeholder/300/450";
     }
 
-    // Save recommendation to localStorage for results page
     localStorage.setItem(
       "recommendationDetails",
       JSON.stringify(recommendation)
     );
-
     return { recommendation };
   } catch (error) {
-    const errorInfo = handleApiError(
-      error,
-      "OpenAI",
-      "Error generating recommendation"
-    );
-    throw new Error(errorInfo.message);
+    console.error("Error generating recommendation:", error);
+    throw new Error(error.message || "Error generating recommendation");
   }
 }
 
-/**
- * Helper function to determine max questions based on subscription
- */
 function getMaxQuestionsForUser(userProfile) {
-  if (!userProfile) return 5; // Default for non-logged in users
-
-  // Check for active subscription
-  if (userProfile.subscription && userProfile.subscription.isActive) {
-    // Premium and annual have unlimited questions, but we'll set it to a high number
-    return 15;
-  }
-
-  // Free tier
-  return 5;
+  if (!userProfile) return 5;
+  return userProfile.subscription?.isActive ? 15 : 5;
 }
 
-/**
- * Generate personalized recommendation explanation
- * @param {string} title - Title of the recommended item
- * @param {string} type - Type of recommendation: "movie" or "book"
- * @param {Array} answers - User's answers to the questionnaire
- * @returns {Promise<string>} Personalized explanation for the recommendation
- */
+async function getAuthToken() {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session) throw new Error("Not authenticated");
+  return session.access_token;
+}
+
 export async function getRecommendationExplanation(title, type, answers) {
   try {
-    const prompt = `Based on these user responses: ${JSON.stringify(answers)}
-    
-    The user was recommended the ${type} "${title}".
-    
-    Please write a 2-3 sentence personalized explanation of why this ${type} was recommended
-    based on the user's answers. Make it sound conversational and friendly, as if talking directly
-    to the user about why they might enjoy this ${type}.`;
+    const token = await getAuthToken();
+    const prompt = `Based on these user responses: ${JSON.stringify(
+      answers
+    )}\nThe user was recommended the ${type} \"${title}\".\nPlease write a 2-3 sentence personalized explanation of why this ${type} was recommended based on the user's answers. Make it sound conversational and friendly.`;
 
-    const response = await enhancedOpenaiApi.post("", {
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-      temperature: 0.7,
-      max_tokens: 150,
+    const response = await fetch("/api/openai-proxy", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.7,
+        max_tokens: 150,
+      }),
     });
 
-    return response.choices[0].message.content.trim();
+    if (!response.ok) throw new Error("Failed to generate explanation");
+    const data = await response.json();
+    return data.choices[0].message.content.trim();
   } catch (error) {
-    handleApiError(error, "OpenAI", "Error generating explanation");
-    return `We think you'll enjoy "${title}" based on your preferences!`;
+    console.error("Error generating explanation:", error);
+    return `We think you'll enjoy \"${title}\" based on your preferences!`;
   }
 }
 
-/**
- * Generate recommendations based on genre preferences
- * @param {Array} preferredGenres - List of preferred genres
- * @param {string} type - Type of recommendation: "movie" or "book"
- * @param {number} age - User age
- * @param {number} limit - Number of recommendations to generate
- * @returns {Promise<Array>} List of recommendations
- */
 export async function getRecommendationsByGenre(
   preferredGenres,
   type,
@@ -313,84 +252,13 @@ export async function getRecommendationsByGenre(
   limit = 3
 ) {
   try {
-    // Check if user has premium for multiple recommendations
-    const user = auth.currentUser;
-    const userProfile = user ? await getUserProfile(user.uid) : null;
-
-    // Limit recommendations for free users
-    if (!isUserPremium(userProfile) && limit > 1) {
-      limit = 1;
-    }
-
-    // Get user accessibility preferences and recommendation history
-    let accessibilityPreferences = null;
-    let contentFilters = null;
-    let recommendationHistory = [];
-
-    if (user) {
-      try {
-        if (userProfile && userProfile.preferences) {
-          accessibilityPreferences =
-            userProfile.preferences.accessibility || null;
-          contentFilters = userProfile.preferences.contentFilters || null;
-          recommendationHistory =
-            userProfile.preferences.recommendationHistory || [];
-        }
-      } catch (error) {
-        console.warn("Error fetching user preferences:", error);
-      }
-    }
-
-    // Construct accessibility requirements string based on preferences
-    let accessibilityRequirements = "";
-    if (accessibilityPreferences) {
-      const requirements = [];
-
-      if (accessibilityPreferences.requireSubtitles) {
-        requirements.push("must have subtitles available");
-      }
-
-      if (accessibilityPreferences.requireAudioDescription) {
-        requirements.push("must have audio descriptions available");
-      }
-
-      if (accessibilityPreferences.requireClosedCaptions) {
-        requirements.push("must have closed captions available");
-      }
-
-      if (requirements.length > 0) {
-        accessibilityRequirements = `Additionally, the recommendations ${requirements.join(
-          " and "
-        )}.`;
-      }
-    }
-
-    // Construct content filter requirements
-    let contentFilterRequirements = "";
-    if (contentFilters) {
-      const filters = [];
-
-      if (contentFilters.excludeViolentContent) {
-        filters.push("should not contain excessive violence");
-      }
-
-      if (contentFilters.excludeSexualContent) {
-        filters.push("should not contain explicit sexual content");
-      }
-
-      if (filters.length > 0) {
-        contentFilterRequirements = `The recommendations ${filters.join(
-          " and "
-        )}.`;
-      }
-    }
-
-    // Construct history exclusion string
-    let historyExclusion = "";
-    if (recommendationHistory && recommendationHistory.length > 0) {
-      historyExclusion = `IMPORTANT: Do NOT recommend any of the following titles that have been previously recommended: ${recommendationHistory.join(
-        ", "
-      )}.`;
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) limit = 1;
+    else {
+      const userProfile = await getUserProfile(session.user.id);
+      if (!isUserPremium(userProfile) && limit > 1) limit = 1;
     }
 
     const ageRating =
@@ -398,94 +266,59 @@ export async function getRecommendationsByGenre(
 
     const prompt = `Recommend ${limit} ${type}s that match these genres: ${preferredGenres.join(
       ", "
-    )}.
-    The recommendations should be age-appropriate (${ageRating}) for a ${age} year old.
-    ${accessibilityRequirements}
-    ${contentFilterRequirements}
-    ${historyExclusion}
-    
-    Format the response as a JSON array with this structure:
-    [
-      {
-        "title": "",
-        "type": "${type}",
-        "genres": [],
-        "rating": 0,
-        "ageRating": "",
-        "description": "",
-        "reason": "" // Brief explanation of why it's recommended
-      }
-    ]`;
+    )}. The recommendations should be age-appropriate (${ageRating}) for a ${age} year old. Format as JSON.`;
 
-    const response = await enhancedOpenaiApi.post("", {
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-      temperature: 0.7,
+    const token = await getAuthToken();
+    const response = await fetch("/api/openai-proxy", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.7,
+      }),
     });
 
-    const recommendations = JSON.parse(response.choices[0].message.content);
+    if (!response.ok)
+      throw new Error("Failed to generate recommendations by genre");
+    const data = await response.json();
+    const recommendations = JSON.parse(data.choices[0].message.content);
 
-    // Add poster/cover URLs to each recommendation
     for (const rec of recommendations) {
-      if (type === "movie") {
-        rec.posterPath =
-          (await getMoviePoster(rec.title)) || "/api/placeholder/300/450";
-      } else {
-        rec.posterPath =
-          (await getBookCover(rec.title)) || "/api/placeholder/300/450";
-      }
+      rec.posterPath =
+        type === "movie"
+          ? (await getMoviePoster(rec.title)) || "/api/placeholder/300/450"
+          : (await getBookCover(rec.title)) || "/api/placeholder/300/450";
     }
 
     return recommendations;
   } catch (error) {
-    handleApiError(
-      error,
-      "OpenAI",
-      "Error generating recommendations by genre"
-    );
+    console.error("Error generating recommendations by genre:", error);
     return [];
   }
 }
 
-/**
- * Check if user has premium subscription
- * @param {Object} userProfile - User profile data
- * @returns {boolean} True if user has premium subscription
- */
 function isUserPremium(userProfile) {
   return (
-    userProfile &&
-    userProfile.subscription &&
-    userProfile.subscription.isActive &&
-    (userProfile.subscription.plan === "premium-monthly" ||
-      userProfile.subscription.plan === "premium-annual")
+    userProfile?.subscription?.isActive &&
+    ["premium-monthly", "premium-annual"].includes(
+      userProfile.subscription.tier
+    )
   );
 }
 
-/**
- * Check if a recommendation is a duplicate of previously recommended items
- * @param {string} title - Title to check
- * @returns {Promise<boolean>} True if it's a duplicate, false otherwise
- */
 export async function isDuplicateRecommendation(title) {
-  if (!auth.currentUser) return false;
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session) return false;
 
   try {
-    const userProfile = await getUserProfile(auth.currentUser.uid);
-    if (
-      !userProfile ||
-      !userProfile.preferences ||
-      !userProfile.preferences.recommendationHistory
-    ) {
-      return false;
-    }
-
-    const history = userProfile.preferences.recommendationHistory;
+    const userProfile = await getUserProfile(session.user.id);
+    const history = userProfile?.preferences?.recommendationHistory || [];
     return history.some((item) => item.toLowerCase() === title.toLowerCase());
   } catch (error) {
     console.error("Error checking for duplicate recommendation:", error);

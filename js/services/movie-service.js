@@ -1,5 +1,3 @@
-import { tmdbApiRequest } from "./api-service.js";
-
 /**
  * Get movie poster URL for a movie title
  * @param {string} movieTitle - The title of the movie
@@ -7,12 +5,28 @@ import { tmdbApiRequest } from "./api-service.js";
  */
 export async function getMoviePoster(movieTitle) {
   try {
-    const response = await tmdbApiRequest("search/movie", {
-      query: movieTitle,
+    const token = await getAuthToken();
+
+    const response = await fetch("/api/tmdb-proxy", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        endpoint: "search/movie",
+        params: { query: movieTitle },
+      }),
     });
 
-    if (response.results && response.results.length > 0) {
-      const posterPath = response.results[0].poster_path;
+    if (!response.ok) {
+      throw new Error("Failed to fetch movie poster");
+    }
+
+    const data = await response.json();
+
+    if (data.results && data.results.length > 0) {
+      const posterPath = data.results[0].poster_path;
       if (posterPath) {
         return `https://image.tmdb.org/t/p/w500${posterPath}`;
       }
@@ -33,22 +47,52 @@ export async function getMoviePoster(movieTitle) {
  */
 export async function getMovieDetails(movieTitle) {
   try {
-    const response = await tmdbApiRequest("search/movie", {
-      query: movieTitle,
+    const token = await getAuthToken();
+
+    const response = await fetch("/api/tmdb-proxy", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        endpoint: "search/movie",
+        params: { query: movieTitle },
+      }),
     });
 
-    if (response.results && response.results.length > 0) {
-      const movie = response.results[0];
+    if (!response.ok) {
+      throw new Error("Failed to fetch movie details");
+    }
+
+    const data = await response.json();
+
+    if (data.results && data.results.length > 0) {
+      const movie = data.results[0];
       const posterUrl = movie.poster_path
         ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
         : null;
 
-      const detailsResponse = await tmdbApiRequest(`movie/${movie.id}`, {
-        append_to_response: "credits,release_dates",
+      const detailsResponse = await fetch("/api/tmdb-proxy", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          endpoint: `movie/${movie.id}`,
+          params: { append_to_response: "credits,release_dates" },
+        }),
       });
 
+      if (!detailsResponse.ok) {
+        throw new Error("Failed to fetch movie details");
+      }
+
+      const detailsData = await detailsResponse.json();
+
       let ageRating = "Not Rated";
-      const usCertification = detailsResponse.release_dates?.results?.find(
+      const usCertification = detailsData.release_dates?.results?.find(
         (country) => country.iso_3166_1 === "US"
       );
 
@@ -61,20 +105,20 @@ export async function getMovieDetails(movieTitle) {
         }
       }
 
-      const genres = detailsResponse.genres.map((genre) => genre.name);
+      const genres = detailsData.genres.map((genre) => genre.name);
 
-      const director = detailsResponse.credits.crew.find(
+      const director = detailsData.credits.crew.find(
         (person) => person.job === "Director"
       );
 
       return {
         title: movie.title,
         posterUrl: posterUrl,
-        overview: movie.overview || detailsResponse.overview,
+        overview: movie.overview || detailsData.overview,
         releaseDate: movie.release_date,
         rating: movie.vote_average / 2,
         ageRating: ageRating,
-        runtime: detailsResponse.runtime,
+        runtime: detailsData.runtime,
         genres: genres,
         director: director ? director.name : "Unknown",
         id: movie.id,
@@ -109,10 +153,27 @@ export async function getMovieDetails(movieTitle) {
  */
 export async function getTrendingMovies(limit = 5) {
   try {
-    const response = await tmdbApiRequest("trending/movie/week");
+    const token = await getAuthToken();
 
-    if (response.results && response.results.length > 0) {
-      const movies = response.results.slice(0, limit);
+    const response = await fetch("/api/tmdb-proxy", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        endpoint: "trending/movie/week",
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch trending movies");
+    }
+
+    const data = await response.json();
+
+    if (data.results && data.results.length > 0) {
+      const movies = data.results.slice(0, limit);
 
       const moviePromises = movies.map((movie) => {
         return getMovieDetails(movie.title);
@@ -129,32 +190,18 @@ export async function getTrendingMovies(limit = 5) {
 }
 
 /**
- * Get movie recommendations based on a movie ID
- * @param {number} movieId - TMDB movie ID
- * @param {number} limit - Number of recommendations to return
- * @returns {Promise<Array>} Array of recommended movie details
+ * Get the user's auth token from Supabase
+ * @returns {Promise<string>} The user's auth token
  */
-export async function getMovieRecommendations(movieId, limit = 5) {
-  try {
-    if (!movieId) {
-      throw new Error("Movie ID is required");
-    }
-
-    const response = await tmdbApiRequest(`movie/${movieId}/recommendations`);
-
-    if (response.results && response.results.length > 0) {
-      const movies = response.results.slice(0, limit);
-
-      const moviePromises = movies.map((movie) => {
-        return getMovieDetails(movie.title);
-      });
-
-      return Promise.all(moviePromises);
-    }
-
-    return [];
-  } catch (error) {
-    console.error("Error fetching movie recommendations:", error);
-    return [];
+async function getAuthToken() {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session) {
+    throw new Error("Not authenticated");
   }
+  return session.access_token;
 }
+
+// Import at the top of the file
+import { supabase } from "../supabase-config.js";
