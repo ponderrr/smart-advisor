@@ -1,7 +1,7 @@
-import { supabase } from '../supabase-config.js';
+import { supabase } from "./supabase-config.js";
 
 const requestCache = new Map();
-const CACHE_DURATION = 24 * 60 * 60 * 1000; 
+const CACHE_DURATION = 24 * 60 * 60 * 1000;
 
 function createCacheKey(input) {
   if (typeof input === "string") {
@@ -19,14 +19,22 @@ function createCacheKey(input) {
 
 /**
  * Get the user's auth token from Supabase
- * @returns {Promise<string>} The user's auth token
+ * @returns {Promise<string|null>} The user's auth token or null if not authenticated
  */
 async function getAuthToken() {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) {
-    throw new Error('Not authenticated');
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) {
+      console.warn("No active session found");
+      return null;
+    }
+    return session.access_token;
+  } catch (error) {
+    console.error("Error getting auth token:", error);
+    return null;
   }
-  return session.access_token;
 }
 
 /**
@@ -41,45 +49,48 @@ export async function tmdbApiRequest(endpoint, params = {}, useCache = true) {
     if (useCache) {
       const cacheKey = createCacheKey({ endpoint, params });
       const cachedResponse = requestCache.get(cacheKey);
-      
+
       if (cachedResponse && Date.now() < cachedResponse.expiry) {
         console.log("Using cached TMDB response for:", cacheKey);
         return cachedResponse.data;
       }
     }
-    
+
+    // Get auth token if possible, but don't require it
+    let headers = { "Content-Type": "application/json" };
     const token = await getAuthToken();
-    
-    const response = await fetch('/api/tmdb-proxy', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
+
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    const response = await fetch("/api/tmdb-proxy", {
+      method: "POST",
+      headers,
       body: JSON.stringify({
         endpoint,
-        params
-      })
+        params,
+      }),
     });
-    
+
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || 'TMDB API request failed');
+      throw new Error(errorData.error || "TMDB API request failed");
     }
-    
+
     const data = await response.json();
-    
+
     if (useCache) {
       const cacheKey = createCacheKey({ endpoint, params });
       requestCache.set(cacheKey, {
         data,
-        expiry: Date.now() + CACHE_DURATION
+        expiry: Date.now() + CACHE_DURATION,
       });
     }
-    
+
     return data;
   } catch (error) {
-    console.error('TMDB API request error:', error);
+    console.error("TMDB API request error:", error);
     throw error;
   }
 }
@@ -93,31 +104,34 @@ export async function tmdbApiRequest(endpoint, params = {}, useCache = true) {
  */
 export async function openaiApiRequest(model, messages, options = {}) {
   try {
+    // Get auth token if possible, but don't require it
+    let headers = { "Content-Type": "application/json" };
     const token = await getAuthToken();
-    
-    const response = await fetch('/api/openai-proxy', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
+
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    const response = await fetch("/api/openai-proxy", {
+      method: "POST",
+      headers,
       body: JSON.stringify({
         model,
         messages,
-        ...options
-      })
+        ...options,
+      }),
     });
-    
+
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || 'OpenAI API request failed');
+      throw new Error(errorData.error || "OpenAI API request failed");
     }
-    
+
     const data = await response.json();
-    
+
     return data;
   } catch (error) {
-    console.error('OpenAI API request error:', error);
+    console.error("OpenAI API request error:", error);
     throw error;
   }
 }
