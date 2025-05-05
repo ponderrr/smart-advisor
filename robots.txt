@@ -5,6 +5,7 @@ Disallow: /account.html
 Disallow: /preferences.html
 Disallow: /results.html
 Disallow: /questions.html
+Disallow: /api/
 
 # Sitemap location
-Sitemap: https://yourdomain.com/sitemap.xml
+Sitemap: https://smart-advisor-ten.vercel.app/sitemap.xml
