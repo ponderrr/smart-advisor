@@ -6,20 +6,15 @@ const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 // Helper function to create a consistent cache key
 function createCacheKey(input) {
-  // Handle different input types
   if (typeof input === "string") {
-    // For simple endpoint + params format
     const [endpoint, params] = Array.isArray(input) ? input : [input, {}];
     return `${endpoint}|${JSON.stringify(params || {})}`;
   } else if (input && typeof input === "object") {
-    // For config object format
     const { url, params, data } = input;
     return `${url}|${JSON.stringify(params || {})}|${JSON.stringify(
       data || {}
     )}`;
   }
-
-  // Fallback
   return String(input);
 }
 
@@ -44,7 +39,6 @@ const createApiWithRetry = (baseConfig, options = {}) => {
       if (cachedResponse && Date.now() < cachedResponse.expiry) {
         console.log("Using cached response for:", cacheKey);
 
-        // Return a special config that will be caught by the response interceptor
         return {
           ...config,
           adapter: (config) => {
@@ -67,14 +61,12 @@ const createApiWithRetry = (baseConfig, options = {}) => {
   // Response interceptor for caching and retries
   instance.interceptors.response.use(
     (response) => {
-      // Cache successful GET responses
       if (
         cacheEnabled &&
         (response.config.method === "get" || response.config.method === "GET")
       ) {
         const cacheKey = createCacheKey(response.config);
 
-        // Don't re-cache responses we just got from the cache
         if (!response.config.__fromCache) {
           requestCache.set(cacheKey, {
             data: response.data,
@@ -88,22 +80,18 @@ const createApiWithRetry = (baseConfig, options = {}) => {
     async (error) => {
       const { config } = error;
 
-      // If no config exists or retry info exists and we've already retried maxRetries times, reject
       if (!config || config.__retryCount >= maxRetries || !shouldRetry(error)) {
         return Promise.reject(error);
       }
 
-      // Set retry count
       config.__retryCount = config.__retryCount || 0;
       config.__retryCount++;
 
-      // Exponential backoff delay
       const delay = Math.min(
         initialDelay * Math.pow(2, config.__retryCount - 1),
         maxDelay
       );
 
-      // Get retry-after header if available
       if (error.response && error.response.headers["retry-after"]) {
         const retryAfter = parseInt(error.response.headers["retry-after"], 10);
         if (!isNaN(retryAfter)) {
@@ -120,7 +108,6 @@ const createApiWithRetry = (baseConfig, options = {}) => {
         await sleep(delay);
       }
 
-      // Retry the request
       return instance(config);
     }
   );
@@ -133,49 +120,7 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// OpenAI API configuration
-export const openaiApi = createApiWithRetry(
-  {
-    baseURL: import.meta.env.VITE_OPENAI_URL || "https://api.openai.com/v1",
-    headers: {
-      Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-  },
-  { cacheEnabled: true }
-);
-
-// TMDB API configuration with retries and caching
-export const tmdbApi = createApiWithRetry(
-  {
-    baseURL: "https://api.themoviedb.org/3",
-    params: {
-      api_key: import.meta.env.VITE_TMDB_API_KEY,
-    },
-  },
-  { cacheEnabled: true }
-);
-
-// Google Books API configuration with retries and extended caching
-export const googleBooksApi = createApiWithRetry(
-  {
-    baseURL: "https://www.googleapis.com/books/v1",
-  },
-  {
-    cacheEnabled: true,
-    maxRetries: 5,
-    initialDelay: 2000,
-    maxDelay: 30000,
-  }
-);
-
-/**
- * Enhanced error handling for API errors
- * @param {Error} error - The error object
- * @param {string} serviceName - Name of the service for logging purposes
- * @param {string} defaultMessage - Default error message to return
- * @returns {object} Error info object
- */
+// Function to handle API errors
 export function handleApiError(
   error,
   serviceName,
@@ -186,11 +131,8 @@ export function handleApiError(
   let errorMessage = defaultMessage;
 
   if (error.response) {
-    // Handle rate limiting specifically
     if (error.response.status === 429) {
       errorMessage = `${serviceName} API rate limit exceeded. Please try again later.`;
-
-      // If there's a retry-after header, log it
       const retryAfter =
         error.response.headers && error.response.headers["retry-after"];
       if (retryAfter) {

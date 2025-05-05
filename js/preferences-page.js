@@ -1,11 +1,12 @@
-import { auth } from "./firebase-config.js";
-import { getUserProfile } from "./firebase-utils.js";
-import { doc, updateDoc } from "firebase/firestore";
-import { db } from "./firebase-config.js";
+import { supabase } from "./supabase-config.js";
+import { getUserProfile } from "./supabase-utils.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
   // Check if user is logged in
-  if (!auth.currentUser && !localStorage.getItem("userId")) {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session) {
     window.location.href = "sign-in.html?redirectTo=preferences.html";
     return;
   }
@@ -37,10 +38,12 @@ async function initializePreferences() {
     }
 
     // Get user profile
-    const userId = auth.currentUser?.uid || localStorage.getItem("userId");
-    if (!userId) return;
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) return;
 
-    const userProfile = await getUserProfile(userId);
+    const userProfile = await getUserProfile(session.user.id);
     if (!userProfile) {
       console.error("User profile not found");
       return;
@@ -123,6 +126,14 @@ function resetForm() {
       
       <div class="preference-item">
         <div class="preference-info">
+          <label for="violent-content-toggle">Exclude Violent Content</label>
+          <p class="preference-description">Filter out movies and books with excessive violence</p>
+        </div>
+        <div class="toggle-switch">
+          <input type="checkbox" id="violent-content-toggle" class="toggle-input">
+          <label for="violent-content-toggle" class="
+
+          <div class="preference-info">
           <label for="violent-content-toggle">Exclude Violent Content</label>
           <p class="preference-description">Filter out movies and books with excessive violence</p>
         </div>
@@ -279,25 +290,30 @@ async function handleSubmit(event) {
  * @param {Object} preferences - User preferences
  */
 async function savePreferences(preferences) {
-  const userId = auth.currentUser?.uid || localStorage.getItem("userId");
-  if (!userId) {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session) {
     throw new Error("User ID not found");
   }
 
-  const userRef = doc(db, "users", userId);
-
   // Get current user data to preserve recommendation history
-  const userDoc = await getUserProfile(userId);
+  const userProfile = await getUserProfile(session.user.id);
   const recommendationHistory =
-    userDoc?.preferences?.recommendationHistory || [];
+    userProfile?.preferences?.recommendationHistory || [];
 
-  // Update user document with new preferences
-  await updateDoc(userRef, {
-    preferences: {
-      ...preferences,
-      recommendationHistory: recommendationHistory,
-    },
-  });
+  // Update user record with new preferences
+  const { error } = await supabase
+    .from("users")
+    .update({
+      preferences: {
+        ...preferences,
+        recommendationHistory: recommendationHistory,
+      },
+    })
+    .eq("id", session.user.id);
+
+  if (error) throw error;
 }
 
 /**

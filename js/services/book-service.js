@@ -1,4 +1,4 @@
-import { googleBooksApi, handleApiError } from "./api-config.js";
+import { supabase } from "../supabase-config.js";
 
 // Default book covers for different genres
 const DEFAULT_BOOK_COVERS = {
@@ -61,45 +61,49 @@ const POPULAR_BOOKS = [
   },
 ];
 
-/**
- * Get book cover image URL for a book title with fallback and caching
- * @param {string} bookTitle - The title of the book
- * @returns {Promise<string>} The book cover URL or fallback if not found
- */
 export async function getBookCover(bookTitle) {
   try {
-    // Check cache first
     const cachedUrl = getCachedImageUrl(bookTitle);
     if (cachedUrl) {
       console.log(`Using cached cover URL for ${bookTitle}`);
       return cachedUrl;
     }
 
-    // Add "book" to the search query to improve results
+    const token = await getAuthToken();
     const searchQuery = `${bookTitle} book`;
 
-    const response = await googleBooksApi.get("/volumes", {
-      params: {
-        q: searchQuery,
-        maxResults: 3,
-        printType: "books",
-        orderBy: "relevance",
+    const response = await fetch("/api/google-books-proxy", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
+      body: JSON.stringify({
+        endpoint: "/volumes",
+        params: {
+          q: searchQuery,
+          maxResults: 3,
+          printType: "books",
+          orderBy: "relevance",
+        },
+      }),
     });
 
-    if (!response.data.items || response.data.items.length === 0) {
+    if (!response.ok) {
+      throw new Error("Failed to fetch book cover");
+    }
+
+    const data = await response.json();
+
+    if (!data.items || data.items.length === 0) {
       console.warn(`No books found for: ${bookTitle}`);
       return getDefaultBookCover(bookTitle);
     }
 
-    // Try to find the best cover from the first few results
-    for (const item of response.data.items) {
+    for (const item of data.items) {
       const imageLinks = item.volumeInfo?.imageLinks;
-
       if (imageLinks) {
-        // Google Books API provides these sizes in descending quality
         const sizes = ["extraLarge", "large", "medium", "small", "thumbnail"];
-
         for (const size of sizes) {
           if (imageLinks[size]) {
             let coverUrl = imageLinks[size]
@@ -111,11 +115,9 @@ export async function getBookCover(bookTitle) {
               coverUrl += "&edge=nocurl";
             }
 
-            // Cache the URL in localStorage for future use
             try {
-              localStorage.setItem(cacheKey, coverUrl);
+              cacheImageUrl(bookTitle, coverUrl);
             } catch (e) {
-              // Handle localStorage errors (quota exceeded, etc.)
               console.warn("Could not cache book cover:", e);
             }
 
@@ -128,24 +130,16 @@ export async function getBookCover(bookTitle) {
     console.warn(`No suitable cover found for: ${bookTitle}`);
     return getDefaultBookCover(bookTitle);
   } catch (error) {
-    handleApiError(error, "Google Books", "Error fetching book cover");
+    console.error("Error fetching book cover:", error);
     return getDefaultBookCover(bookTitle);
   }
 }
 
-/**
- * Get a default book cover based on title or genre
- * @param {string} bookTitle - The title of the book
- * @param {string} genre - Optional genre to determine the cover
- * @returns {string} Path to a default cover image
- */
 function getDefaultBookCover(bookTitle, genre) {
-  // If genre is provided, use that to determine the cover
   if (genre && DEFAULT_BOOK_COVERS[genre.toLowerCase()]) {
     return DEFAULT_BOOK_COVERS[genre.toLowerCase()];
   }
 
-  // Look for genre keywords in the title
   const title = bookTitle.toLowerCase();
 
   if (
@@ -156,7 +150,6 @@ function getDefaultBookCover(bookTitle, genre) {
   ) {
     return DEFAULT_BOOK_COVERS.fantasy;
   }
-
   if (
     title.includes("sci-fi") ||
     title.includes("science fiction") ||
@@ -165,7 +158,6 @@ function getDefaultBookCover(bookTitle, genre) {
   ) {
     return DEFAULT_BOOK_COVERS.scifi;
   }
-
   if (
     title.includes("romance") ||
     title.includes("love") ||
@@ -173,7 +165,6 @@ function getDefaultBookCover(bookTitle, genre) {
   ) {
     return DEFAULT_BOOK_COVERS.romance;
   }
-
   if (
     title.includes("thriller") ||
     title.includes("suspense") ||
@@ -181,7 +172,6 @@ function getDefaultBookCover(bookTitle, genre) {
   ) {
     return DEFAULT_BOOK_COVERS.thriller;
   }
-
   if (
     title.includes("mystery") ||
     title.includes("detective") ||
@@ -189,7 +179,6 @@ function getDefaultBookCover(bookTitle, genre) {
   ) {
     return DEFAULT_BOOK_COVERS.mystery;
   }
-
   if (
     title.includes("non-fiction") ||
     title.includes("biography") ||
@@ -199,7 +188,6 @@ function getDefaultBookCover(bookTitle, genre) {
     return DEFAULT_BOOK_COVERS.nonfiction;
   }
 
-  // Default fallback
   return DEFAULT_BOOK_COVERS.default;
 }
 
@@ -215,27 +203,40 @@ function getCachedImageUrl(title) {
   return localStorage.getItem(`book_cover_${title.replace(/\s+/g, "_")}`);
 }
 
-/**
- * Get detailed book information with fallback to local data
- * @param {string} bookTitle - The title of the book
- * @returns {Promise<object>} Book details including cover, title, and author
- */
+async function getAuthToken() {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session) {
+    throw new Error("Not authenticated");
+  }
+  return session.access_token;
+}
+
 export async function getBookDetails(bookTitle) {
   try {
-    // Try to get cover first
     const coverUrl = await getBookCover(bookTitle);
 
-    // Try to get more details from API
-    const response = await googleBooksApi.get("/volumes", {
-      params: {
-        q: bookTitle,
-        maxResults: 1,
-        printType: "books",
+    const response = await fetch("/api/google-books-proxy", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${await getAuthToken()}`,
       },
+      body: JSON.stringify({
+        endpoint: "/volumes",
+        params: {
+          q: bookTitle,
+          maxResults: 1,
+          printType: "books",
+        },
+      }),
     });
 
-    if (response.data.items && response.data.items.length > 0) {
-      const book = response.data.items[0].volumeInfo;
+    const data = await response.json();
+
+    if (data.items && data.items.length > 0) {
+      const book = data.items[0].volumeInfo;
       return {
         coverUrl: coverUrl,
         title: book.title || bookTitle,
@@ -249,7 +250,6 @@ export async function getBookDetails(bookTitle) {
       };
     }
 
-    // If API failed, check if we have this book in our local data
     const localBook = findLocalBookData(bookTitle);
     if (localBook) {
       return {
@@ -262,7 +262,6 @@ export async function getBookDetails(bookTitle) {
       };
     }
 
-    // Default fallback data
     return {
       coverUrl: coverUrl,
       title: bookTitle,
@@ -270,9 +269,7 @@ export async function getBookDetails(bookTitle) {
       description: "No description available",
     };
   } catch (error) {
-    handleApiError(error, "Google Books", "Error fetching book details");
-
-    // Try to find local data as fallback
+    console.error("Error fetching book details:", error);
     const localBook = findLocalBookData(bookTitle);
     if (localBook) {
       return {
@@ -284,7 +281,6 @@ export async function getBookDetails(bookTitle) {
         averageRating: localBook.rating,
       };
     }
-
     return {
       coverUrl: await getBookCover(bookTitle),
       title: bookTitle,
@@ -294,11 +290,6 @@ export async function getBookDetails(bookTitle) {
   }
 }
 
-/**
- * Find a book in our local data by title
- * @param {string} bookTitle - The title to search for
- * @returns {object|null} The book object or null if not found
- */
 function findLocalBookData(bookTitle) {
   const searchTitle = bookTitle.toLowerCase();
   return POPULAR_BOOKS.find((book) =>
@@ -306,20 +297,11 @@ function findLocalBookData(bookTitle) {
   );
 }
 
-/**
- * Get popular book recommendations from local data when API fails
- * @param {number} limit - Number of books to return
- * @returns {Promise<Array>} Array of popular book details
- */
 export async function getPopularBooks(limit = 5) {
   try {
-    // Shuffle the array of popular books
     const shuffledBooks = [...POPULAR_BOOKS].sort(() => 0.5 - Math.random());
-
-    // Get the requested number of books
     const selectedBooks = shuffledBooks.slice(0, limit);
 
-    // Get details for each book
     const bookPromises = selectedBooks.map(async (book) => {
       try {
         const coverUrl = await getBookCover(book.title);
@@ -350,8 +332,6 @@ export async function getPopularBooks(limit = 5) {
     return books.filter((book) => book !== null);
   } catch (error) {
     console.error("Error getting popular books:", error);
-
-    // Return fallback data from our local collection
     return POPULAR_BOOKS.slice(0, limit).map((book) => ({
       ...book,
       coverUrl: getDefaultBookCover(book.title, book.genres[0]),
