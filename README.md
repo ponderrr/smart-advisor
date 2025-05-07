@@ -1,8 +1,10 @@
 # Smart Advisor - AI-Powered Book & Movie Recommendation System
 
-Smart Advisor is an intelligent recommendation system that provides personalized book and movie suggestions based on user preferences and interests. The system uses AI to analyze user responses to dynamically generated questions and delivers tailored recommendations.
+Smart Advisor is a proprietary intelligent recommendation system that provides personalized book and movie suggestions based on user preferences and interests. The system uses AI to analyze user responses to dynamically generated questions and delivers tailored recommendations.
 
-## Features
+![Smart Advisor Logo](images/Smart%20Advisor%20logo.svg)
+
+## 🌟 Features
 
 - **Personalized Recommendations**: Get customized book and movie suggestions based on your responses
 - **Flexible Question System**: Choose between 3-15 questions for preference analysis
@@ -14,77 +16,75 @@ Smart Advisor is an intelligent recommendation system that provides personalized
 - **User Profiles**: Save recommendations and track your preference history
 - **Dark/Light Mode**: Toggle between dark and light themes for comfortable viewing
 - **Responsive Design**: Fully functional across desktop and mobile devices
+- **Accessibility Options**: Customize your experience with subtitles, audio descriptions, and content filters
 
-## Interface Preview
+## 📱 User Interface
 
-### Landing Page - Light Mode
-![Landing Light](images/landing-light.png)
+Smart Advisor features a clean, intuitive UI with responsive design that works across all devices:
 
-### Landing Page - Dark Mode
-![Landing Dark](images/landing-dark.png)
+- **Landing Page**: Introduction and recommendation type selection
+- **Authentication System**: Secure sign-up, sign-in, and password recovery
+- **Question Interface**: Dynamic questionnaire with adjustable question count
+- **Results Page**: Detailed recommendations with rich media and descriptions
+- **Account Dashboard**: View recommendation history and manage preferences
+- **Settings Page**: Customize accessibility options and content filters
+- **Subscription Management**: Free and premium tiers with enhanced features
 
-### Questionnaire Interface
-![Questionnaire](images/questionnaire.png)
+## 🔒 Authentication System
 
-### Recommendations Display
-![Recommendations](images/recommendations.png)
+Smart Advisor includes a complete user authentication system with:
 
-## Tech Stack
+- Email/password signup and login
+- Password recovery with email
+- User profile management
+- Secure data storage
+- Profile picture upload and management
 
-- Frontend: HTML, CSS, JavaScript
-- Authentication: Firebase Auth
-- Database: Firebase Firestore
-- APIs:
-  - OpenAI API for recommendation generation
-  - TMDB API for movie data
-  - Google Books API for book data
-- Additional Libraries:
-  - Axios for API requests
-  - Lodash for data manipulation
-  - PapaParse for CSV handling
+## 🌓 Theme Support
 
-## Installation
+The application supports both light and dark themes that can be toggled via the UI. The theme preference is saved for persistent experience.
 
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Create a `.env` file in the root directory with the following variables:
-   ```
-   VITE_FIREBASE_API_KEY=your_firebase_api_key
-   VITE_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
-   VITE_FIREBASE_PROJECT_ID=your_firebase_project_id
-   VITE_FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket
-   VITE_FIREBASE_MESSAGING_SENDER_ID=your_firebase_messaging_sender_id
-   VITE_FIREBASE_APP_ID=your_firebase_app_id
-   VITE_OPENAI_API_KEY=your_openai_api_key
-   VITE_TMDB_API_KEY=your_tmdb_api_key
-   ```
-4. Start the development server:
-   ```bash
-   npx vite
-   ```
+## 📱 Responsive Design
 
-## Usage
+Smart Advisor is fully responsive with:
 
-1. Sign up or log in to access the recommendation system
-2. Choose your preferred recommendation type (movies, books, or both)
-3. Select the number of questions you'd like to answer (3-15)
-4. Answer the AI-generated questions about your preferences
-5. Receive personalized recommendations based on your responses
-6. View your recommendation history in your account
+- Mobile-friendly UI components
+- Flexible layout that adapts to screen size
+- Touch-friendly interface elements
+- Optimized images for different device sizes
 
-## Project Structure
+## 💼 Subscription Model
 
-```
-smart-advisor/
-├── css/                  # Stylesheet files
-├── js/                   # JavaScript modules
-├── images/              # Image assets
-└── html/                # HTML pages
-```
+The application supports a tiered subscription model:
 
-## License
+- **Free Tier**: Basic recommendation features
+- **Premium Monthly**: $4.99/month with enhanced features
+- **Premium Annual**: $39.99/year (over 30% savings)
 
-This project is part of an academic course and is not licensed for commercial use.
+Premium features include:
+- More questions per recommendation (up to 15)
+- Multiple recommendations per query
+- Enhanced accessibility options
+- Ad-free experience
+- Exclusive content
+
+## 🔄 Future Enhancements
+
+- Mobile applications for iOS and Android
+- Social sharing capabilities
+- Enhanced recommendation algorithms
+- Integration with streaming services
+- Reading and viewing history import
+
+## 📄 License
+
+This is a proprietary project. All rights reserved. This code is not available for cloning, distribution, or modification without explicit written permission.
+
+## 👥 Contact
+
+For inquiries about Smart Advisor, please contact:
+- andrew.ponderrr@icloud.com
+
+---
+
+Copyright © 2025 Smart Advisor. All rights reserved.
