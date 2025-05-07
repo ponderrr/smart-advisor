@@ -1,6 +1,6 @@
-![Smart Advisor Logo](images/Smart%20Advisor%20logo.svg)
-
 # Smart Advisor - AI-Powered Book & Movie Recommendation System
+
+![Smart Advisor Logo](images/Smart%20Advisor%20logo.svg)
 
 Smart Advisor is a proprietary intelligent recommendation system that provides personalized book and movie suggestions based on user preferences and interests. The system uses AI to analyze user responses to dynamically generated questions and delivers tailored recommendations.
 
