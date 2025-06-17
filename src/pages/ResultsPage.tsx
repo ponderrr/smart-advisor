@@ -1,10 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { RefreshCw, Heart, User, LogOut, Star, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { enhancedRecommendationsService } from "@/services/enhancedRecommendations";
-import { toggleFavorite } from "@/services/recommendations";
+import { databaseService } from "@/services/database";
 import { Recommendation } from "@/types/Recommendation";
 
 const ResultsPage = () => {
@@ -15,7 +14,9 @@ const ResultsPage = () => {
   const [loading, setLoading] = useState(true);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [generationStep, setGenerationStep] = useState<string>("Analyzing your answers...");
+  const [generationStep, setGenerationStep] = useState<string>(
+    "Analyzing your answers..."
+  );
 
   // Get data from navigation state
   const { contentType, answers, questions } = location.state || {};
@@ -35,37 +36,39 @@ const ResultsPage = () => {
     try {
       setLoading(true);
       setError(null);
-      
-      console.log('Starting AI recommendation generation for user:', user.id);
-      
+
+      console.log("Starting AI recommendation generation for user:", user.id);
+
       // Update generation steps for better UX
       setGenerationStep("Analyzing your answers...");
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       setGenerationStep("Generating personalized recommendations...");
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       setGenerationStep("Enhancing with movie and book data...");
-      
+
       const questionnaireData = {
         answers,
         contentType,
-        userAge: user.age
+        userAge: user.age,
       };
 
       const recs = await enhancedRecommendationsService.retryRecommendation(
         questionnaireData,
         user.id
       );
-      
+
       setGenerationStep("Finalizing your recommendations...");
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      console.log('Recommendations generated successfully:', recs);
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      console.log("Recommendations generated successfully:", recs);
       setRecommendations(recs);
     } catch (error) {
       console.error("Error generating recommendations:", error);
-      setError("Failed to generate personalized recommendations. Please try again.");
+      setError(
+        "Failed to generate personalized recommendations. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -90,18 +93,18 @@ const ResultsPage = () => {
 
   const handleToggleFavorite = async (recommendationId: string) => {
     try {
-      const { error } = await toggleFavorite(recommendationId);
+      const { error } = await databaseService.toggleFavorite(recommendationId);
       if (!error) {
         // Update local state
-        setRecommendations(recs =>
-          recs.map(rec =>
+        setRecommendations((recs) =>
+          recs.map((rec) =>
             rec.id === recommendationId
               ? { ...rec, is_favorited: !rec.is_favorited }
               : rec
           )
         );
       } else {
-        console.error('Error toggling favorite:', error);
+        console.error("Error toggling favorite:", error);
       }
     } catch (error) {
       console.error("Error toggling favorite:", error);
@@ -146,12 +149,10 @@ const ResultsPage = () => {
             <h1 className="text-3xl md:text-4xl font-bold text-textPrimary mb-4">
               Creating Your Recommendations
             </h1>
-            <p className="text-lg text-textSecondary mb-4">
-              {generationStep}
-            </p>
+            <p className="text-lg text-textSecondary mb-4">{generationStep}</p>
             <div className="text-sm text-textTertiary">
               Our AI is analyzing your preferences to find the perfect{" "}
-              {contentType === 'both' ? 'movie and book' : contentType} for you
+              {contentType === "both" ? "movie and book" : contentType} for you
             </div>
           </div>
         </main>
@@ -191,9 +192,7 @@ const ResultsPage = () => {
             <h1 className="text-3xl md:text-4xl font-bold text-textPrimary mb-4">
               Recommendation Generation Failed
             </h1>
-            <p className="text-lg text-textSecondary mb-8">
-              {error}
-            </p>
+            <p className="text-lg text-textSecondary mb-8">{error}</p>
             <div className="flex gap-4 justify-center">
               <button
                 onClick={handleRetry}
@@ -203,7 +202,9 @@ const ResultsPage = () => {
                 Try Again
               </button>
               <button
-                onClick={() => navigate('/questionnaire', { state: { contentType } })}
+                onClick={() =>
+                  navigate("/questionnaire", { state: { contentType } })
+                }
                 className="bg-appSecondary border border-gray-700 text-textPrimary px-6 py-3 rounded-lg hover:bg-gray-600 transition-all duration-200"
               >
                 Retake Quiz
@@ -293,12 +294,18 @@ const ResultsPage = () => {
                     alt={rec.title}
                     className="w-full h-full object-cover rounded-lg"
                     onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                      e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                      e.currentTarget.style.display = "none";
+                      e.currentTarget.nextElementSibling?.classList.remove(
+                        "hidden"
+                      );
                     }}
                   />
                 ) : null}
-                <div className={`w-full h-full flex items-center justify-center text-textTertiary ${rec.poster_url ? 'hidden' : ''}`}>
+                <div
+                  className={`w-full h-full flex items-center justify-center text-textTertiary ${
+                    rec.poster_url ? "hidden" : ""
+                  }`}
+                >
                   No Image
                 </div>
               </div>

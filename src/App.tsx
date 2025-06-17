@@ -1,11 +1,9 @@
-
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/hooks/useAuth";
 import { validateEnvironment } from "@/utils/envValidation";
 import { useEffect } from "react";
-import { apiValidationService } from "@/services/apiValidation";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
 import Index from "@/pages/Index";
@@ -45,26 +43,35 @@ function App() {
 
     if (missingCritical.length > 0) {
       if (import.meta.env.DEV) {
-        console.error('CRITICAL: Missing required environment variables:', missingCritical);
-        console.error('The app cannot function without these variables. Please add them to your .env file:');
-        missingCritical.forEach(key => console.error(`- ${key}`));
+        console.error(
+          "CRITICAL: Missing required environment variables:",
+          missingCritical
+        );
+        console.error(
+          "The app cannot function without these variables. Please add them to your .env file:"
+        );
+        missingCritical.forEach((key) => console.error(`- ${key}`));
       }
       // Throw error for critical missing variables
-      throw new Error(`Missing critical environment variables: ${missingCritical.join(', ')}`);
+      throw new Error(
+        `Missing critical environment variables: ${missingCritical.join(", ")}`
+      );
     }
 
     if (import.meta.env.DEV) {
-      console.log('✅ All critical environment variables are configured');
+      console.log("✅ All critical environment variables are configured");
     }
 
     // Validate external API services only in development
     if (import.meta.env.DEV) {
-      apiValidationService.validateAllApis().then(results => {
+      apiValidationService.validateAllApis().then((results) => {
         apiValidationService.logValidationResults(results);
-        
-        const failedServices = results.filter(r => !r.isAvailable);
+
+        const failedServices = results.filter((r) => !r.isAvailable);
         if (failedServices.length > 0) {
-          console.warn('⚠️ Some external API services may have issues. Enhanced features may be limited.');
+          console.warn(
+            "⚠️ Some external API services may have issues. Enhanced features may be limited."
+          );
         }
       });
     }
@@ -81,14 +88,17 @@ function App() {
         .map(([key]) => key);
 
       if (missingOptional.length > 0) {
-        console.warn('⚠️ Optional environment variables missing (enhanced features may be limited):', missingOptional);
+        console.warn(
+          "⚠️ Optional environment variables missing (enhanced features may be limited):",
+          missingOptional
+        );
       }
     }
 
     // Additional comprehensive validation
     const validation = validateEnvironment();
     if (!validation.isValid && import.meta.env.DEV) {
-      console.warn('Environment validation warnings:', validation.warnings);
+      console.warn("Environment validation warnings:", validation.warnings);
     }
   }, []);
 
