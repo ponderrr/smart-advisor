@@ -1,5 +1,5 @@
 {
-  "name": "smart-advisor",
+  "name": "smart-advisor-app",
   "private": true,
   "version": "1.0.0",
   "description": "AI-powered personalized movie and book recommendation engine built with React, TypeScript, and Supabase",
