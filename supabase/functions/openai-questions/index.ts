@@ -5,54 +5,111 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response("ok", {
+      status: 200,
+      headers: corsHeaders,
+    });
   }
 
   try {
-    // Verify user authentication
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      throw new Error("No authorization header");
+    console.log("OpenAI Questions function called");
+
+    // Check if request method is POST
+    if (req.method !== "POST") {
+      throw new Error("Method not allowed. Use POST.");
     }
 
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
-    );
+    // Get and validate authorization header
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      console.log("Missing authorization header");
+      throw new Error("Missing authorization header");
+    }
 
+    console.log("Auth header present");
+
+    // Create Supabase client and verify user
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.log("Missing Supabase environment variables");
+      throw new Error("Server configuration error");
+    }
+
+    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+
+    const token = authHeader.replace("Bearer ", "");
     const {
       data: { user },
       error: authError,
-    } = await supabaseClient.auth.getUser(authHeader.replace("Bearer ", ""));
+    } = await supabaseClient.auth.getUser(token);
 
-    if (authError || !user) {
-      throw new Error("Invalid token");
+    if (authError) {
+      console.log("Auth error:", authError);
+      throw new Error("Authentication failed");
     }
 
-    const { contentType, userAge } = await req.json();
+    if (!user) {
+      console.log("No user found");
+      throw new Error("User not found");
+    }
 
-    // Validate input
+    console.log("User authenticated successfully:", user.id);
+
+    // Parse and validate request body
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch (e) {
+      console.log("Invalid JSON in request body");
+      throw new Error("Invalid JSON in request body");
+    }
+
+    const { contentType, userAge } = requestBody;
+
+    // Validate input parameters
     if (!contentType || !userAge) {
-      throw new Error("Missing required parameters");
+      console.log("Missing required parameters:", { contentType, userAge });
+      throw new Error("Missing required parameters: contentType and userAge");
     }
 
     if (!["movie", "book", "both"].includes(contentType)) {
-      throw new Error("Invalid content type");
+      console.log("Invalid content type:", contentType);
+      throw new Error(
+        "Invalid content type. Must be 'movie', 'book', or 'both'"
+      );
     }
 
-    if (userAge < 13 || userAge > 120) {
-      throw new Error("Invalid age");
+    const ageNum = Number(userAge);
+    if (isNaN(ageNum) || ageNum < 13 || ageNum > 120) {
+      console.log("Invalid age:", userAge);
+      throw new Error("Invalid age. Must be between 13 and 120");
     }
 
-    const prompt = `Generate exactly 5 personalized recommendation questions for a ${userAge}-year-old user who wants ${contentType} recommendations. 
+    console.log("Input validation passed:", { contentType, userAge: ageNum });
+
+    // Check OpenAI API key
+    const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
+    if (!openaiApiKey) {
+      console.log("Missing OpenAI API key");
+      throw new Error("OpenAI API key not configured");
+    }
+
+    console.log("OpenAI API key found");
+
+    // Create prompt for question generation
+    const prompt = `Generate exactly 5 personalized recommendation questions for a ${ageNum}-year-old user who wants ${contentType} recommendations. 
     
     Requirements:
     - Questions should be conversational and engaging
-    - Age-appropriate for ${userAge} years old
+    - Age-appropriate for ${ageNum} years old
     - Focused on ${
       contentType === "both" ? "movies and books" : contentType
     } preferences
@@ -61,17 +118,19 @@ serve(async (req) => {
     
     Generate 5 unique questions now as valid JSON object:`;
 
-    // Call OpenAI API
+    console.log("Calling OpenAI API...");
+
+    // Call OpenAI API with better error handling
     const openaiResponse = await fetch(
       "https://api.openai.com/v1/chat/completions",
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${Deno.env.get("OPENAI_API_KEY")}`,
+          Authorization: `Bearer ${openaiApiKey}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "gpt-4",
+          model: "gpt-4o-mini", // Use the more cost-effective model
           response_format: { type: "json_object" },
           messages: [
             {
@@ -90,46 +149,92 @@ serve(async (req) => {
       }
     );
 
+    console.log("OpenAI API response status:", openaiResponse.status);
+
     if (!openaiResponse.ok) {
-      throw new Error(`OpenAI API error: ${openaiResponse.status}`);
+      const errorText = await openaiResponse.text();
+      console.log("OpenAI API error:", errorText);
+      throw new Error(
+        `OpenAI API error: ${openaiResponse.status} - ${errorText}`
+      );
     }
 
     const openaiData = await openaiResponse.json();
-    const questionsText = openaiData.choices[0].message.content;
+    console.log("OpenAI API response received");
+
+    const questionsText = openaiData.choices?.[0]?.message?.content;
 
     if (!questionsText) {
-      throw new Error("No response from OpenAI");
+      console.log("No content in OpenAI response");
+      throw new Error("No response content from OpenAI");
     }
 
-    const parsedResponse = JSON.parse(questionsText);
+    console.log(
+      "Questions text received:",
+      questionsText.substring(0, 100) + "..."
+    );
+
+    // Parse and validate the response
+    let parsedResponse;
+    try {
+      parsedResponse = JSON.parse(questionsText);
+    } catch (e) {
+      console.log("Failed to parse OpenAI JSON response:", e);
+      throw new Error("Invalid JSON response from OpenAI");
+    }
+
     if (!parsedResponse.questions || !Array.isArray(parsedResponse.questions)) {
-      throw new Error("Invalid response format");
+      console.log("Invalid response format from OpenAI:", parsedResponse);
+      throw new Error("Invalid response format from OpenAI");
     }
 
+    if (parsedResponse.questions.length !== 5) {
+      console.log(
+        "Unexpected number of questions:",
+        parsedResponse.questions.length
+      );
+      throw new Error("Expected exactly 5 questions from OpenAI");
+    }
+
+    // Format questions for the frontend
     const formattedQuestions = parsedResponse.questions.map(
       (q: any, index: number) => ({
         id: q.id || `q${index + 1}`,
         text: q.text,
         content_type: contentType,
-        user_age_range: `${Math.floor(userAge / 10) * 10}-${
-          Math.floor(userAge / 10) * 10 + 9
+        user_age_range: `${Math.floor(ageNum / 10) * 10}-${
+          Math.floor(ageNum / 10) * 10 + 9
         }`,
       })
     );
 
+    console.log("Questions formatted successfully:", formattedQuestions.length);
+
     return new Response(JSON.stringify({ questions: formattedQuestions }), {
+      status: 200,
       headers: {
         ...corsHeaders,
         "Content-Type": "application/json",
       },
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 400,
-      headers: {
-        ...corsHeaders,
-        "Content-Type": "application/json",
-      },
-    });
+    console.error("Function error:", error);
+
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error occurred";
+
+    return new Response(
+      JSON.stringify({
+        error: errorMessage,
+        timestamp: new Date().toISOString(),
+      }),
+      {
+        status: 400,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+        },
+      }
+    );
   }
 });

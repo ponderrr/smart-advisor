@@ -30,6 +30,7 @@ const AuthPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -139,6 +140,7 @@ const AuthPage = () => {
 
     setIsSubmitting(true);
     setErrors({});
+    setSuccessMessage(null);
 
     try {
       const result = await signUp(
@@ -156,10 +158,10 @@ const AuthPage = () => {
           // Redirection is now handled by the useEffect hook
         } else {
           // Email confirmation required
-          setErrors({
-            general:
-              "Account created successfully! Please check your email and click the confirmation link to complete your registration.",
-          });
+          setSuccessMessage(
+            "Account created successfully! Please check your email and click the confirmation link to complete your registration."
+          );
+          setErrors({}); // Clear any errors
         }
       }
     } catch (error) {
@@ -172,6 +174,7 @@ const AuthPage = () => {
   const toggleForm = (showSignIn: boolean) => {
     setIsSignIn(showSignIn);
     setErrors({});
+    setSuccessMessage(null);
   };
 
   return (
@@ -216,8 +219,15 @@ const AuthPage = () => {
             </button>
           </div>
 
+          {/* Success Message */}
+          {successMessage && (
+            <div className="mb-6 p-4 bg-green-500 bg-opacity-10 border border-green-500 rounded-lg">
+              <p className="text-green-500 text-sm">{successMessage}</p>
+            </div>
+          )}
+
           {/* Error Message */}
-          {(errors.general || authError) && (
+          {(errors.general || authError) && !successMessage && (
             <div className="mb-6 p-4 bg-red-500 bg-opacity-10 border border-red-500 rounded-lg">
               <p className="text-red-500 text-sm">
                 {errors.general || authError}
