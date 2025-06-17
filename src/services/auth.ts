@@ -15,7 +15,7 @@ class AuthService {
     try {
       console.log("Starting signup process for:", email);
 
-      // create the auth user
+      // Create the auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -40,7 +40,18 @@ class AuthService {
 
       console.log("Auth user created successfully:", authData.user.id);
 
-      // Create profile after successful signup
+      // Check if email confirmation is required
+      if (
+        !authData.session &&
+        authData.user &&
+        !authData.user.email_confirmed_at
+      ) {
+        console.log("Email confirmation required");
+        return { error: null }; // Don't treat this as an error
+      }
+
+      // If we get here, email confirmation is not required (auto-confirm is enabled)
+      // Create profile immediately
       const { error: profileError } = await supabase.from("profiles").insert([
         {
           id: authData.user.id,
@@ -54,20 +65,9 @@ class AuthService {
 
       if (profileError) {
         console.error("Error creating profile:", profileError);
-
-        // Try to clean up the auth user if profile creation fails
-        try {
-          await fetch("/api/auth/delete-user", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ userId: authData.user.id }),
-          });
-        } catch (deleteError) {
-          console.error("Error calling delete user endpoint:", deleteError);
-        }
-        return { error: "Failed to create user profile. Please try again." };
+        return {
+          error: "Failed to create user profile. Please try signing in.",
+        };
       }
 
       console.log("Profile created successfully");

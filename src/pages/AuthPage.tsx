@@ -151,7 +151,16 @@ const AuthPage = () => {
       if (result.error) {
         setErrors({ general: result.error });
       } else {
-        // Redirection is now handled by the useEffect hook
+        // Check if we have a session (auto-confirm) or need email confirmation
+        if (user && session) {
+          // Redirection is now handled by the useEffect hook
+        } else {
+          // Email confirmation required
+          setErrors({
+            general:
+              "Account created successfully! Please check your email and click the confirmation link to complete your registration.",
+          });
+        }
       }
     } catch (error) {
       setErrors({ general: "An unexpected error occurred" });

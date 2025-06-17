@@ -14,6 +14,7 @@ import ResultsPage from "@/pages/ResultsPage";
 import AccountHistoryPage from "@/pages/AccountHistoryPage";
 import NotFound from "@/pages/NotFound";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import EmailCallback from "@/pages/EmailCallback";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -85,6 +86,7 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+                <Route path="/auth/callback" element={<EmailCallback />} />
                 <Route
                   path="/questionnaire"
                   element={
