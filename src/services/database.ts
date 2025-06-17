@@ -269,7 +269,7 @@ class DatabaseService {
   }
 
   /**
-   * Get user statistics
+   * Get user stats
    */
   async getUserStats(): Promise<{ data: UserStats | null; error: string | null }> {
     try {

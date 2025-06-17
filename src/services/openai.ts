@@ -158,7 +158,7 @@ export async function generateQuestionsWithRetry(
 }
 
 /**
- * Retry wrapper for recommendation generation with exponential backoff
+ * Retry wrapper for recommendation generation w/ exponential backoff
  */
 export async function generateRecommendationsWithRetry(
   answers: Answer[],

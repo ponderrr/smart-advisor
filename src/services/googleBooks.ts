@@ -17,7 +17,7 @@ export interface BookDetails {
 
 class GoogleBooksService {
   /**
-   * Search for a book by title and optional author using Supabase Edge Function
+   * Search for a book by title using Supabase Edge Function
    */
   async searchBook(title: string, author?: string): Promise<BookSearchResult> {
     try {

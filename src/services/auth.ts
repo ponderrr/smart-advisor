@@ -15,7 +15,7 @@ class AuthService {
     try {
       console.log("Starting signup process for:", email);
 
-      // First create the auth user
+      // create the auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,

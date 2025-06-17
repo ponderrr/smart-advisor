@@ -40,7 +40,6 @@ class TMDBService {
       return data;
     } catch (error) {
       console.error("Error searching movie:", error);
-      // Return fallback data on error
       return this.getDefaultMovieData();
     }
   }

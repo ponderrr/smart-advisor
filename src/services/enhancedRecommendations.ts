@@ -67,7 +67,7 @@ class EnhancedRecommendationsService {
       });
     }
 
-    // Generate base recommendations using OpenAI
+    // Generate recommendations using OpenAI
     const aiRecommendations = await generateRecommendations(
       answers,
       contentType,
@@ -169,7 +169,7 @@ class EnhancedRecommendationsService {
             if (import.meta.env.DEV) {
               console.error("Failed to save recommendation:", error);
             }
-            return enhancedRec; // Return enhanced but unsaved recommendation
+            return enhancedRec; 
           }
 
           return savedRec || enhancedRec;
@@ -177,7 +177,7 @@ class EnhancedRecommendationsService {
           if (import.meta.env.DEV) {
             console.error("Error enhancing recommendation:", error);
           }
-          return rec; // Return original recommendation if enhancement fails
+          return rec; 
         }
       })
     );

@@ -34,7 +34,6 @@ function App() {
     const criticalEnvVars = {
       VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
       VITE_SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY,
-      VITE_OPENAI_API_KEY: import.meta.env.VITE_OPENAI_API_KEY,
     };
 
     const missingCritical = Object.entries(criticalEnvVars)
@@ -59,43 +58,10 @@ function App() {
     }
 
     if (import.meta.env.DEV) {
-      console.log("✅ All critical environment variables are configured");
+      console.log("All critical environment variables are configured");
     }
 
-    // Validate external API services only in development
-    if (import.meta.env.DEV) {
-      apiValidationService.validateAllApis().then((results) => {
-        apiValidationService.logValidationResults(results);
-
-        const failedServices = results.filter((r) => !r.isAvailable);
-        if (failedServices.length > 0) {
-          console.warn(
-            "⚠️ Some external API services may have issues. Enhanced features may be limited."
-          );
-        }
-      });
-    }
-
-    // Check optional environment variables only in development
-    if (import.meta.env.DEV) {
-      const optionalEnvVars = {
-        VITE_TMDB_API_KEY: import.meta.env.VITE_TMDB_API_KEY,
-        VITE_GOOGLE_BOOKS_API_KEY: import.meta.env.VITE_GOOGLE_BOOKS_API_KEY,
-      };
-
-      const missingOptional = Object.entries(optionalEnvVars)
-        .filter(([_, value]) => !value)
-        .map(([key]) => key);
-
-      if (missingOptional.length > 0) {
-        console.warn(
-          "⚠️ Optional environment variables missing (enhanced features may be limited):",
-          missingOptional
-        );
-      }
-    }
-
-    // Additional comprehensive validation
+    // Additional comprehensive validation (warnings only)
     const validation = validateEnvironment();
     if (!validation.isValid && import.meta.env.DEV) {
       console.warn("Environment validation warnings:", validation.warnings);
