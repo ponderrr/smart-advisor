@@ -192,16 +192,20 @@ const AuthPage = () => {
         setShowToast(true);
       } else {
         console.log("Sign-up successful");
-        if (result.requiresEmailConfirmation) {
-          setSuccessMessage(
-            "Account created successfully! Please check your email and click the confirmation link to complete your registration."
-          );
-          setShowToast(true);
-        } else {
-          console.log(
-            "Account created and signed in, navigation will be handled by useEffect"
-          );
-        }
+        // Clear form data on successful signup
+        setSignUpData({
+          fullName: "",
+          email: "",
+          age: "",
+          password: "",
+          confirmPassword: "",
+        });
+
+        // Always show success message for signup (Supabase requires email confirmation by default)
+        setSuccessMessage(
+          "Account created successfully! Please check your email and click the confirmation link to complete your registration."
+        );
+        setShowToast(true);
       }
     } catch (error) {
       console.error("Unexpected sign-up error:", error);
