@@ -17,9 +17,7 @@ class AuthService {
 
       // Determine the correct redirect URL based on environment
       const getRedirectUrl = () => {
-        // Always use the current origin for the redirect
-        const origin = window.location.origin;
-        return `${origin}/auth/callback`;
+        return "https://smartadvisor.live/auth/callback";
       };
 
       // Create the auth user with explicit redirect URL
