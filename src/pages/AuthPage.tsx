@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { authService } from "@/services/auth";
 import {
   EnhancedInput,
   EnhancedPasswordInput,
@@ -121,22 +122,41 @@ const AuthPage = () => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateSignIn()) return;
+
+    // Validate form data
+    if (!validateSignIn()) {
+      console.log("Sign-in validation failed:", errors);
+      return;
+    }
 
     setIsSubmitting(true);
     setErrors({});
+    setShowToast(false);
 
     try {
+      console.log("Attempting sign-in with data:", {
+        email: signInData.email,
+        password: "***",
+      });
+
+      // Use the hook's signIn method which properly handles auth flow
       const result = await signIn(signInData.email, signInData.password);
 
       if (result.error) {
+        console.error("Sign-in failed:", result.error);
         setErrors({ general: result.error });
         setShowToast(true);
       } else {
-        // Redirection is now handled by the useEffect hook
+        console.log(
+          "Sign-in successful, navigation will be handled by useEffect"
+        );
+        // Navigation is handled by useEffect when user/session state changes
       }
     } catch (error) {
-      setErrors({ general: "An unexpected error occurred" });
+      console.error("Unexpected sign-in error:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
+      setErrors({ general: errorMessage });
       setShowToast(true);
     } finally {
       setIsSubmitting(false);
@@ -145,13 +165,27 @@ const AuthPage = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateSignUp()) return;
+
+    // Validate form data
+    if (!validateSignUp()) {
+      console.log("Sign-up validation failed:", errors);
+      return;
+    }
 
     setIsSubmitting(true);
     setErrors({});
     setSuccessMessage(null);
+    setShowToast(false);
 
     try {
+      console.log("Attempting sign-up with data:", {
+        email: signUpData.email,
+        name: signUpData.fullName,
+        age: signUpData.age,
+        password: "***",
+      });
+
+      // Use the hook's signUp method which properly handles auth flow
       const result = await signUp(
         signUpData.email,
         signUpData.password,
@@ -160,18 +194,29 @@ const AuthPage = () => {
       );
 
       if (result.error) {
+        console.error("Sign-up failed:", result.error);
         setErrors({ general: result.error });
         setShowToast(true);
-      } else if (result.requiresEmailConfirmation) {
-        // Email confirmation required
-        setSuccessMessage(
-          "Account created successfully! Please check your email and click the confirmation link to complete your registration."
-        );
-        setErrors({}); // Clear any errors
-        setShowToast(true);
+      } else {
+        console.log("Sign-up successful");
+        // Check if email confirmation is required
+        if (result.requiresEmailConfirmation) {
+          setSuccessMessage(
+            "Account created successfully! Please check your email and click the confirmation link to complete your registration."
+          );
+          setShowToast(true);
+        } else {
+          // Navigation will be handled by useEffect when user/session state changes
+          console.log(
+            "Account created and signed in, navigation will be handled by useEffect"
+          );
+        }
       }
     } catch (error) {
-      setErrors({ general: "An unexpected error occurred" });
+      console.error("Unexpected sign-up error:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
+      setErrors({ general: errorMessage });
       setShowToast(true);
     } finally {
       setIsSubmitting(false);
@@ -183,6 +228,22 @@ const AuthPage = () => {
     setErrors({});
     setSuccessMessage(null);
     setShowToast(false);
+
+    // Reset form data when switching
+    if (showSignIn) {
+      setSignUpData({
+        fullName: "",
+        email: "",
+        age: "",
+        password: "",
+        confirmPassword: "",
+      });
+    } else {
+      setSignInData({
+        email: "",
+        password: "",
+      });
+    }
   };
 
   return (
@@ -192,7 +253,7 @@ const AuthPage = () => {
         <Toast
           type="error"
           title="Authentication Error"
-          message={errors.general || authError}
+          message={errors.general || authError || "Authentication failed"}
           onClose={() => setShowToast(false)}
         />
       )}
@@ -255,173 +316,199 @@ const AuthPage = () => {
 
           {/* Sign In Form */}
           {isSignIn && (
-            <AnimatedForm onSubmit={handleSignIn} stagger={true}>
-              <FormField label="Email" required error={errors.email}>
-                <EnhancedInput
-                  type="email"
-                  value={signInData.email}
-                  onChange={(e) =>
-                    setSignInData({ ...signInData, email: e.target.value })
-                  }
-                  placeholder="Enter your email"
-                  disabled={isSubmitting}
-                  error={errors.email}
-                />
-              </FormField>
+            <AnimatedForm stagger={true}>
+              <form onSubmit={handleSignIn}>
+                <FormField label="Email" required error={errors.email}>
+                  <EnhancedInput
+                    type="email"
+                    name="email"
+                    id="sign-in-email"
+                    value={signInData.email}
+                    onChange={(e) =>
+                      setSignInData({ ...signInData, email: e.target.value })
+                    }
+                    placeholder="Enter your email"
+                    disabled={isSubmitting}
+                    error={errors.email}
+                    autoComplete="email"
+                  />
+                </FormField>
 
-              <FormField label="Password" required error={errors.password}>
-                <EnhancedPasswordInput
-                  value={signInData.password}
-                  onChange={(e) =>
-                    setSignInData({ ...signInData, password: e.target.value })
-                  }
-                  placeholder="Enter your password"
-                  disabled={isSubmitting}
-                  error={errors.password}
-                />
-              </FormField>
+                <FormField label="Password" required error={errors.password}>
+                  <EnhancedPasswordInput
+                    name="password"
+                    id="sign-in-password"
+                    value={signInData.password}
+                    onChange={(e) =>
+                      setSignInData({ ...signInData, password: e.target.value })
+                    }
+                    placeholder="Enter your password"
+                    disabled={isSubmitting}
+                    error={errors.password}
+                    autoComplete="current-password"
+                  />
+                </FormField>
 
-              <EnhancedButton
-                type="submit"
-                disabled={isSubmitting}
-                loading={isSubmitting}
-                variant="primary"
-                size="lg"
-                glow
-                className="w-full mt-8"
-              >
-                Sign In
-              </EnhancedButton>
-
-              <div className="mt-4 text-center">
-                <button
-                  type="button"
-                  className="text-textSecondary text-sm hover:text-textPrimary transition-colors duration-200 enhanced-button"
+                <EnhancedButton
+                  type="submit"
                   disabled={isSubmitting}
+                  loading={isSubmitting}
+                  variant="primary"
+                  size="lg"
+                  glow
+                  className="w-full mt-8"
                 >
-                  Forgot password?
-                </button>
-              </div>
+                  Sign In
+                </EnhancedButton>
 
-              <div className="mt-3 text-center">
-                <span className="text-textSecondary text-sm">
-                  Don't have an account?{" "}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => toggleForm(false)}
-                  className="text-appAccent text-sm hover:underline transition-all duration-200 enhanced-button"
-                  disabled={isSubmitting}
-                >
-                  Sign up
-                </button>
-              </div>
+                <div className="mt-4 text-center">
+                  <button
+                    type="button"
+                    className="text-textSecondary text-sm hover:text-textPrimary transition-colors duration-200 enhanced-button"
+                    disabled={isSubmitting}
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+
+                <div className="mt-3 text-center">
+                  <span className="text-textSecondary text-sm">
+                    Don't have an account?{" "}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => toggleForm(false)}
+                    className="text-appAccent text-sm hover:underline transition-all duration-200 enhanced-button"
+                    disabled={isSubmitting}
+                  >
+                    Sign up
+                  </button>
+                </div>
+              </form>
             </AnimatedForm>
           )}
 
           {/* Sign Up Form */}
           {!isSignIn && (
-            <AnimatedForm onSubmit={handleSignUp} stagger={true}>
-              <FormField label="Full Name" required error={errors.fullName}>
-                <EnhancedInput
-                  type="text"
-                  value={signUpData.fullName}
-                  onChange={(e) =>
-                    setSignUpData({ ...signUpData, fullName: e.target.value })
-                  }
-                  placeholder="Enter your full name"
-                  disabled={isSubmitting}
-                  error={errors.fullName}
-                />
-              </FormField>
+            <AnimatedForm stagger={true}>
+              <form onSubmit={handleSignUp}>
+                <FormField label="Full Name" required error={errors.fullName}>
+                  <EnhancedInput
+                    type="text"
+                    name="fullName"
+                    id="sign-up-name"
+                    value={signUpData.fullName}
+                    onChange={(e) =>
+                      setSignUpData({ ...signUpData, fullName: e.target.value })
+                    }
+                    placeholder="Enter your full name"
+                    disabled={isSubmitting}
+                    error={errors.fullName}
+                    autoComplete="name"
+                  />
+                </FormField>
 
-              <FormField label="Email" required error={errors.email}>
-                <EnhancedInput
-                  type="email"
-                  value={signUpData.email}
-                  onChange={(e) =>
-                    setSignUpData({ ...signUpData, email: e.target.value })
-                  }
-                  placeholder="Enter your email"
-                  disabled={isSubmitting}
-                  error={errors.email}
-                />
-              </FormField>
+                <FormField label="Email" required error={errors.email}>
+                  <EnhancedInput
+                    type="email"
+                    name="email"
+                    id="sign-up-email"
+                    value={signUpData.email}
+                    onChange={(e) =>
+                      setSignUpData({ ...signUpData, email: e.target.value })
+                    }
+                    placeholder="Enter your email"
+                    disabled={isSubmitting}
+                    error={errors.email}
+                    autoComplete="email"
+                  />
+                </FormField>
 
-              <FormField label="Age" required error={errors.age}>
-                <EnhancedInput
-                  type="number"
-                  value={signUpData.age}
-                  onChange={(e) =>
-                    setSignUpData({ ...signUpData, age: e.target.value })
-                  }
-                  placeholder="18"
-                  min="13"
-                  disabled={isSubmitting}
-                  error={errors.age}
-                  className="w-[120px]"
-                />
-                <p className="text-textTertiary text-xs mt-1">
-                  Required for age-appropriate recommendations
-                </p>
-              </FormField>
+                <FormField label="Age" required error={errors.age}>
+                  <EnhancedInput
+                    type="number"
+                    name="age"
+                    id="sign-up-age"
+                    value={signUpData.age}
+                    onChange={(e) =>
+                      setSignUpData({ ...signUpData, age: e.target.value })
+                    }
+                    placeholder="18"
+                    min="13"
+                    max="120"
+                    disabled={isSubmitting}
+                    error={errors.age}
+                    className="w-[120px]"
+                    autoComplete="age"
+                  />
+                  <p className="text-textTertiary text-xs mt-1">
+                    Required for age-appropriate recommendations
+                  </p>
+                </FormField>
 
-              <FormField label="Password" required error={errors.password}>
-                <EnhancedPasswordInput
-                  value={signUpData.password}
-                  onChange={(e) =>
-                    setSignUpData({ ...signUpData, password: e.target.value })
-                  }
-                  placeholder="Enter your password"
-                  disabled={isSubmitting}
-                  error={errors.password}
-                />
-              </FormField>
+                <FormField label="Password" required error={errors.password}>
+                  <EnhancedPasswordInput
+                    name="password"
+                    id="sign-up-password"
+                    value={signUpData.password}
+                    onChange={(e) =>
+                      setSignUpData({ ...signUpData, password: e.target.value })
+                    }
+                    placeholder="Enter your password"
+                    disabled={isSubmitting}
+                    error={errors.password}
+                    autoComplete="new-password"
+                  />
+                </FormField>
 
-              <FormField
-                label="Confirm Password"
-                required
-                error={errors.confirmPassword}
-              >
-                <EnhancedPasswordInput
-                  value={signUpData.confirmPassword}
-                  onChange={(e) =>
-                    setSignUpData({
-                      ...signUpData,
-                      confirmPassword: e.target.value,
-                    })
-                  }
-                  placeholder="Confirm your password"
-                  disabled={isSubmitting}
+                <FormField
+                  label="Confirm Password"
+                  required
                   error={errors.confirmPassword}
-                />
-              </FormField>
-
-              <EnhancedButton
-                type="submit"
-                disabled={isSubmitting}
-                loading={isSubmitting}
-                variant="primary"
-                size="lg"
-                glow
-                className="w-full mt-8"
-              >
-                Create Account
-              </EnhancedButton>
-
-              <div className="mt-4 text-center">
-                <span className="text-textSecondary text-sm">
-                  Already have an account?{" "}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => toggleForm(true)}
-                  className="text-appAccent text-sm hover:underline transition-all duration-200 enhanced-button"
-                  disabled={isSubmitting}
                 >
-                  Sign in
-                </button>
-              </div>
+                  <EnhancedPasswordInput
+                    name="confirmPassword"
+                    id="sign-up-confirm-password"
+                    value={signUpData.confirmPassword}
+                    onChange={(e) =>
+                      setSignUpData({
+                        ...signUpData,
+                        confirmPassword: e.target.value,
+                      })
+                    }
+                    placeholder="Confirm your password"
+                    disabled={isSubmitting}
+                    error={errors.confirmPassword}
+                    autoComplete="new-password"
+                  />
+                </FormField>
+
+                <EnhancedButton
+                  type="submit"
+                  disabled={isSubmitting}
+                  loading={isSubmitting}
+                  variant="primary"
+                  size="lg"
+                  glow
+                  className="w-full mt-8"
+                >
+                  Create Account
+                </EnhancedButton>
+
+                <div className="mt-4 text-center">
+                  <span className="text-textSecondary text-sm">
+                    Already have an account?{" "}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => toggleForm(true)}
+                    className="text-appAccent text-sm hover:underline transition-all duration-200 enhanced-button"
+                    disabled={isSubmitting}
+                  >
+                    Sign in
+                  </button>
+                </div>
+              </form>
             </AnimatedForm>
           )}
         </div>
