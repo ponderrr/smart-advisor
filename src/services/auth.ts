@@ -6,6 +6,8 @@ export interface AuthError {
 }
 
 class AuthService {
+  // Update the signUp method in src/services/auth.ts
+
   async signUp(
     email: string,
     password: string,
@@ -15,7 +17,7 @@ class AuthService {
     try {
       console.log("Starting signup process for:", email);
 
-      // Create the auth user
+      // Create the auth user with explicit redirect URL
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -24,6 +26,7 @@ class AuthService {
             name,
             age,
           },
+          // Explicitly set the redirect URL for email confirmation
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });

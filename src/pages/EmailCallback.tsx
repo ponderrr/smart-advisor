@@ -5,45 +5,54 @@ import { Loader2, CheckCircle, XCircle } from "lucide-react";
 
 const EmailCallback = () => {
   const navigate = useNavigate();
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-  const [message, setMessage] = useState('');
+  const [status, setStatus] = useState<"loading" | "success" | "error">(
+    "loading"
+  );
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     const handleEmailConfirmation = async () => {
       try {
-        // Get the URL hash parameters
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        const accessToken = hashParams.get('access_token');
-        const refreshToken = hashParams.get('refresh_token');
-        const type = hashParams.get('type');
+        // Get the URL search parameters (not hash)
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenHash = urlParams.get("token_hash");
+        const type = urlParams.get("type");
 
-        if (type === 'signup' && accessToken && refreshToken) {
-          // Set the session with the tokens from the email confirmation
-          const { data, error } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
+        console.log("URL params:", { tokenHash, type });
+
+        if (type === "email" && tokenHash) {
+          console.log("Processing email confirmation...");
+
+          // Use verifyOtp instead of setSession for email confirmation
+          const { data, error } = await supabase.auth.verifyOtp({
+            token_hash: tokenHash,
+            type: "email",
           });
 
           if (error) {
+            console.error("Email verification error:", error);
             throw error;
           }
+
+          console.log("Email verification successful:", data);
 
           if (data.user) {
             // Check if profile exists, create if it doesn't
             const { data: profile, error: profileError } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', data.user.id)
+              .from("profiles")
+              .select("*")
+              .eq("id", data.user.id)
               .single();
 
-            if (profileError && profileError.code === 'PGRST116') {
+            if (profileError && profileError.code === "PGRST116") {
+              console.log("Creating user profile...");
               // Profile doesn't exist, create it
               const { error: createError } = await supabase
-                .from('profiles')
+                .from("profiles")
                 .insert([
                   {
                     id: data.user.id,
-                    name: data.user.user_metadata?.name || 'User',
+                    name: data.user.user_metadata?.name || "User",
                     age: data.user.user_metadata?.age || 25,
                     email: data.user.email,
                     created_at: new Date().toISOString(),
@@ -52,30 +61,119 @@ const EmailCallback = () => {
                 ]);
 
               if (createError) {
+                console.error("Profile creation error:", createError);
                 throw createError;
               }
+            } else if (profileError) {
+              console.error("Profile fetch error:", profileError);
+              throw profileError;
             }
 
-            setStatus('success');
-            setMessage('Email confirmed successfully! Redirecting to your dashboard...');
-            
+            setStatus("success");
+            setMessage(
+              "Email confirmed successfully! Redirecting to your dashboard..."
+            );
+
             // Redirect after a short delay
             setTimeout(() => {
-              navigate('/content-selection');
+              navigate("/content-selection");
             }, 2000);
+          } else {
+            throw new Error("No user data returned from verification");
           }
         } else {
-          throw new Error('Invalid confirmation link');
+          // Try to handle hash fragments as fallback (old format)
+          const hashParams = new URLSearchParams(
+            window.location.hash.substring(1)
+          );
+          const accessToken = hashParams.get("access_token");
+          const refreshToken = hashParams.get("refresh_token");
+          const hashType = hashParams.get("type");
+
+          console.log("Hash params:", {
+            accessToken: !!accessToken,
+            refreshToken: !!refreshToken,
+            hashType,
+          });
+
+          if (hashType === "signup" && accessToken && refreshToken) {
+            console.log("Processing legacy hash-based confirmation...");
+
+            // Set the session with the tokens from the email confirmation
+            const { data, error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            });
+
+            if (error) {
+              throw error;
+            }
+
+            if (data.user) {
+              // Check if profile exists, create if it doesn't
+              const { data: profile, error: profileError } = await supabase
+                .from("profiles")
+                .select("*")
+                .eq("id", data.user.id)
+                .single();
+
+              if (profileError && profileError.code === "PGRST116") {
+                console.log("Creating user profile...");
+                // Profile doesn't exist, create it
+                const { error: createError } = await supabase
+                  .from("profiles")
+                  .insert([
+                    {
+                      id: data.user.id,
+                      name: data.user.user_metadata?.name || "User",
+                      age: data.user.user_metadata?.age || 25,
+                      email: data.user.email,
+                      created_at: new Date().toISOString(),
+                      updated_at: new Date().toISOString(),
+                    },
+                  ]);
+
+                if (createError) {
+                  throw createError;
+                }
+              }
+
+              setStatus("success");
+              setMessage(
+                "Email confirmed successfully! Redirecting to your dashboard..."
+              );
+
+              // Redirect after a short delay
+              setTimeout(() => {
+                navigate("/content-selection");
+              }, 2000);
+            }
+          } else {
+            throw new Error("Invalid confirmation link or missing parameters");
+          }
         }
       } catch (error) {
-        console.error('Email confirmation error:', error);
-        setStatus('error');
-        setMessage('Failed to confirm email. Please try signing in manually.');
-        
+        console.error("Email confirmation error:", error);
+        setStatus("error");
+
+        if (error.message?.includes("Token has expired")) {
+          setMessage(
+            "This confirmation link has expired. Please sign up again to get a new confirmation email."
+          );
+        } else if (error.message?.includes("already been confirmed")) {
+          setMessage(
+            "This email has already been confirmed. You can sign in normally."
+          );
+        } else {
+          setMessage(
+            "Failed to confirm email. Please try signing in manually or request a new confirmation email."
+          );
+        }
+
         // Redirect to auth page after delay
         setTimeout(() => {
-          navigate('/auth');
-        }, 3000);
+          navigate("/auth");
+        }, 4000);
       }
     };
 
@@ -95,7 +193,7 @@ const EmailCallback = () => {
 
       <main className="flex flex-col items-center justify-center px-6 pt-[120px] pb-[100px]">
         <div className="text-center max-w-md">
-          {status === 'loading' && (
+          {status === "loading" && (
             <>
               <Loader2 className="w-16 h-16 animate-spin text-appAccent mx-auto mb-8" />
               <h1 className="text-2xl font-semibold text-textPrimary mb-4">
@@ -107,7 +205,7 @@ const EmailCallback = () => {
             </>
           )}
 
-          {status === 'success' && (
+          {status === "success" && (
             <>
               <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-8" />
               <h1 className="text-2xl font-semibold text-textPrimary mb-4">
@@ -117,7 +215,7 @@ const EmailCallback = () => {
             </>
           )}
 
-          {status === 'error' && (
+          {status === "error" && (
             <>
               <XCircle className="w-16 h-16 text-red-500 mx-auto mb-8" />
               <h1 className="text-2xl font-semibold text-textPrimary mb-4">
@@ -125,7 +223,7 @@ const EmailCallback = () => {
               </h1>
               <p className="text-textSecondary mb-6">{message}</p>
               <button
-                onClick={() => navigate('/auth')}
+                onClick={() => navigate("/auth")}
                 className="bg-appAccent text-white px-6 py-3 rounded-lg hover:bg-opacity-90 transition-all duration-200"
               >
                 Go to Sign In
