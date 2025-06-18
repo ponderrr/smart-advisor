@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { authService } from "@/services/auth";
 import {
   EnhancedInput,
   EnhancedPasswordInput,
   EnhancedButton,
   FormField,
-  AnimatedForm,
   Toast,
 } from "@/components/enhanced";
 
@@ -123,7 +121,6 @@ const AuthPage = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate form data
     if (!validateSignIn()) {
       console.log("Sign-in validation failed:", errors);
       return;
@@ -139,7 +136,6 @@ const AuthPage = () => {
         password: "***",
       });
 
-      // Use the hook's signIn method which properly handles auth flow
       const result = await signIn(signInData.email, signInData.password);
 
       if (result.error) {
@@ -150,7 +146,6 @@ const AuthPage = () => {
         console.log(
           "Sign-in successful, navigation will be handled by useEffect"
         );
-        // Navigation is handled by useEffect when user/session state changes
       }
     } catch (error) {
       console.error("Unexpected sign-in error:", error);
@@ -166,7 +161,6 @@ const AuthPage = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate form data
     if (!validateSignUp()) {
       console.log("Sign-up validation failed:", errors);
       return;
@@ -185,7 +179,6 @@ const AuthPage = () => {
         password: "***",
       });
 
-      // Use the hook's signUp method which properly handles auth flow
       const result = await signUp(
         signUpData.email,
         signUpData.password,
@@ -199,14 +192,12 @@ const AuthPage = () => {
         setShowToast(true);
       } else {
         console.log("Sign-up successful");
-        // Check if email confirmation is required
         if (result.requiresEmailConfirmation) {
           setSuccessMessage(
             "Account created successfully! Please check your email and click the confirmation link to complete your registration."
           );
           setShowToast(true);
         } else {
-          // Navigation will be handled by useEffect when user/session state changes
           console.log(
             "Account created and signed in, navigation will be handled by useEffect"
           );
@@ -229,7 +220,6 @@ const AuthPage = () => {
     setSuccessMessage(null);
     setShowToast(false);
 
-    // Reset form data when switching
     if (showSignIn) {
       setSignUpData({
         fullName: "",
@@ -314,10 +304,13 @@ const AuthPage = () => {
             </div>
           )}
 
-          {/* Sign In Form */}
+          {/* Sign In Form - FIXED: Single form, no nesting */}
           {isSignIn && (
-            <AnimatedForm stagger={true}>
-              <form onSubmit={handleSignIn}>
+            <form onSubmit={handleSignIn} className="space-y-6">
+              <div
+                className="animate-in fade-in duration-700"
+                style={{ animationDelay: "0ms" }}
+              >
                 <FormField label="Email" required error={errors.email}>
                   <EnhancedInput
                     type="email"
@@ -333,7 +326,12 @@ const AuthPage = () => {
                     autoComplete="email"
                   />
                 </FormField>
+              </div>
 
+              <div
+                className="animate-in fade-in duration-700"
+                style={{ animationDelay: "100ms" }}
+              >
                 <FormField label="Password" required error={errors.password}>
                   <EnhancedPasswordInput
                     name="password"
@@ -348,7 +346,12 @@ const AuthPage = () => {
                     autoComplete="current-password"
                   />
                 </FormField>
+              </div>
 
+              <div
+                className="animate-in fade-in duration-700"
+                style={{ animationDelay: "200ms" }}
+              >
                 <EnhancedButton
                   type="submit"
                   disabled={isSubmitting}
@@ -360,38 +363,41 @@ const AuthPage = () => {
                 >
                   Sign In
                 </EnhancedButton>
+              </div>
 
-                <div className="mt-4 text-center">
-                  <button
-                    type="button"
-                    className="text-textSecondary text-sm hover:text-textPrimary transition-colors duration-200 enhanced-button"
-                    disabled={isSubmitting}
-                  >
-                    Forgot password?
-                  </button>
-                </div>
+              <div className="mt-4 text-center">
+                <button
+                  type="button"
+                  className="text-textSecondary text-sm hover:text-textPrimary transition-colors duration-200 enhanced-button"
+                  disabled={isSubmitting}
+                >
+                  Forgot password?
+                </button>
+              </div>
 
-                <div className="mt-3 text-center">
-                  <span className="text-textSecondary text-sm">
-                    Don't have an account?{" "}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => toggleForm(false)}
-                    className="text-appAccent text-sm hover:underline transition-all duration-200 enhanced-button"
-                    disabled={isSubmitting}
-                  >
-                    Sign up
-                  </button>
-                </div>
-              </form>
-            </AnimatedForm>
+              <div className="mt-3 text-center">
+                <span className="text-textSecondary text-sm">
+                  Don't have an account?{" "}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => toggleForm(false)}
+                  className="text-appAccent text-sm hover:underline transition-all duration-200 enhanced-button"
+                  disabled={isSubmitting}
+                >
+                  Sign up
+                </button>
+              </div>
+            </form>
           )}
 
-          {/* Sign Up Form */}
+          {/* Sign Up Form - FIXED: Single form, no nesting */}
           {!isSignIn && (
-            <AnimatedForm stagger={true}>
-              <form onSubmit={handleSignUp}>
+            <form onSubmit={handleSignUp} className="space-y-6">
+              <div
+                className="animate-in fade-in duration-700"
+                style={{ animationDelay: "0ms" }}
+              >
                 <FormField label="Full Name" required error={errors.fullName}>
                   <EnhancedInput
                     type="text"
@@ -407,7 +413,12 @@ const AuthPage = () => {
                     autoComplete="name"
                   />
                 </FormField>
+              </div>
 
+              <div
+                className="animate-in fade-in duration-700"
+                style={{ animationDelay: "100ms" }}
+              >
                 <FormField label="Email" required error={errors.email}>
                   <EnhancedInput
                     type="email"
@@ -423,7 +434,12 @@ const AuthPage = () => {
                     autoComplete="email"
                   />
                 </FormField>
+              </div>
 
+              <div
+                className="animate-in fade-in duration-700"
+                style={{ animationDelay: "200ms" }}
+              >
                 <FormField label="Age" required error={errors.age}>
                   <EnhancedInput
                     type="number"
@@ -445,7 +461,12 @@ const AuthPage = () => {
                     Required for age-appropriate recommendations
                   </p>
                 </FormField>
+              </div>
 
+              <div
+                className="animate-in fade-in duration-700"
+                style={{ animationDelay: "300ms" }}
+              >
                 <FormField label="Password" required error={errors.password}>
                   <EnhancedPasswordInput
                     name="password"
@@ -460,7 +481,12 @@ const AuthPage = () => {
                     autoComplete="new-password"
                   />
                 </FormField>
+              </div>
 
+              <div
+                className="animate-in fade-in duration-700"
+                style={{ animationDelay: "400ms" }}
+              >
                 <FormField
                   label="Confirm Password"
                   required
@@ -482,7 +508,12 @@ const AuthPage = () => {
                     autoComplete="new-password"
                   />
                 </FormField>
+              </div>
 
+              <div
+                className="animate-in fade-in duration-700"
+                style={{ animationDelay: "500ms" }}
+              >
                 <EnhancedButton
                   type="submit"
                   disabled={isSubmitting}
@@ -494,22 +525,22 @@ const AuthPage = () => {
                 >
                   Create Account
                 </EnhancedButton>
+              </div>
 
-                <div className="mt-4 text-center">
-                  <span className="text-textSecondary text-sm">
-                    Already have an account?{" "}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => toggleForm(true)}
-                    className="text-appAccent text-sm hover:underline transition-all duration-200 enhanced-button"
-                    disabled={isSubmitting}
-                  >
-                    Sign in
-                  </button>
-                </div>
-              </form>
-            </AnimatedForm>
+              <div className="mt-4 text-center">
+                <span className="text-textSecondary text-sm">
+                  Already have an account?{" "}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => toggleForm(true)}
+                  className="text-appAccent text-sm hover:underline transition-all duration-200 enhanced-button"
+                  disabled={isSubmitting}
+                >
+                  Sign in
+                </button>
+              </div>
+            </form>
           )}
         </div>
       </main>
