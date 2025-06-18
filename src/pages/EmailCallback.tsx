@@ -13,17 +13,23 @@ const EmailCallback = () => {
   useEffect(() => {
     const handleEmailConfirmation = async () => {
       try {
-        // Get the URL search parameters (not hash)
+        console.log("Email callback: Starting confirmation process");
+        console.log("Current URL:", window.location.href);
+        console.log("Search params:", window.location.search);
+        console.log("Hash:", window.location.hash);
+
+        // Get the URL search parameters
         const urlParams = new URLSearchParams(window.location.search);
         const tokenHash = urlParams.get("token_hash");
         const type = urlParams.get("type");
 
-        console.log("URL params:", { tokenHash, type });
+        console.log("URL params extracted:", { tokenHash, type });
 
+        // Check if we have the required parameters
         if (type === "email" && tokenHash) {
-          console.log("Processing email confirmation...");
+          console.log("Processing email confirmation with verifyOtp...");
 
-          // Use verifyOtp instead of setSession for email confirmation
+          // Use verifyOtp for email confirmation
           const { data, error } = await supabase.auth.verifyOtp({
             token_hash: tokenHash,
             type: "email",
@@ -78,97 +84,101 @@ const EmailCallback = () => {
             setTimeout(() => {
               navigate("/content-selection");
             }, 2000);
+            return;
           } else {
             throw new Error("No user data returned from verification");
           }
-        } else {
-          // Try to handle hash fragments as fallback (old format)
-          const hashParams = new URLSearchParams(
-            window.location.hash.substring(1)
-          );
-          const accessToken = hashParams.get("access_token");
-          const refreshToken = hashParams.get("refresh_token");
-          const hashType = hashParams.get("type");
+        }
 
-          console.log("Hash params:", {
-            accessToken: !!accessToken,
-            refreshToken: !!refreshToken,
-            hashType,
+        // Fallback: Try to handle hash fragments (legacy format)
+        const hashParams = new URLSearchParams(
+          window.location.hash.substring(1)
+        );
+        const accessToken = hashParams.get("access_token");
+        const refreshToken = hashParams.get("refresh_token");
+        const hashType = hashParams.get("type");
+
+        console.log("Hash params:", {
+          accessToken: !!accessToken,
+          refreshToken: !!refreshToken,
+          hashType,
+        });
+
+        if (hashType === "signup" && accessToken && refreshToken) {
+          console.log("Processing legacy hash-based confirmation...");
+
+          // Set the session with the tokens from the email confirmation
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
           });
 
-          if (hashType === "signup" && accessToken && refreshToken) {
-            console.log("Processing legacy hash-based confirmation...");
+          if (error) {
+            throw error;
+          }
 
-            // Set the session with the tokens from the email confirmation
-            const { data, error } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: refreshToken,
-            });
+          if (data.user) {
+            // Check if profile exists, create if it doesn't
+            const { data: profile, error: profileError } = await supabase
+              .from("profiles")
+              .select("*")
+              .eq("id", data.user.id)
+              .single();
 
-            if (error) {
-              throw error;
-            }
-
-            if (data.user) {
-              // Check if profile exists, create if it doesn't
-              const { data: profile, error: profileError } = await supabase
+            if (profileError && profileError.code === "PGRST116") {
+              console.log("Creating user profile...");
+              // Profile doesn't exist, create it
+              const { error: createError } = await supabase
                 .from("profiles")
-                .select("*")
-                .eq("id", data.user.id)
-                .single();
+                .insert([
+                  {
+                    id: data.user.id,
+                    name: data.user.user_metadata?.name || "User",
+                    age: data.user.user_metadata?.age || 25,
+                    email: data.user.email,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                  },
+                ]);
 
-              if (profileError && profileError.code === "PGRST116") {
-                console.log("Creating user profile...");
-                // Profile doesn't exist, create it
-                const { error: createError } = await supabase
-                  .from("profiles")
-                  .insert([
-                    {
-                      id: data.user.id,
-                      name: data.user.user_metadata?.name || "User",
-                      age: data.user.user_metadata?.age || 25,
-                      email: data.user.email,
-                      created_at: new Date().toISOString(),
-                      updated_at: new Date().toISOString(),
-                    },
-                  ]);
-
-                if (createError) {
-                  throw createError;
-                }
+              if (createError) {
+                throw createError;
               }
-
-              setStatus("success");
-              setMessage(
-                "Email confirmed successfully! Redirecting to your dashboard..."
-              );
-
-              // Redirect after a short delay
-              setTimeout(() => {
-                navigate("/content-selection");
-              }, 2000);
             }
-          } else {
-            throw new Error("Invalid confirmation link or missing parameters");
+
+            setStatus("success");
+            setMessage(
+              "Email confirmed successfully! Redirecting to your dashboard..."
+            );
+
+            // Redirect after a short delay
+            setTimeout(() => {
+              navigate("/content-selection");
+            }, 2000);
+            return;
           }
         }
+
+        // If we get here, no valid confirmation parameters were found
+        throw new Error("Invalid confirmation link or missing parameters");
       } catch (error) {
         console.error("Email confirmation error:", error);
         setStatus("error");
 
+        let errorMessage = "Failed to confirm email. Please try again.";
+
         if (error.message?.includes("Token has expired")) {
-          setMessage(
-            "This confirmation link has expired. Please sign up again to get a new confirmation email."
-          );
+          errorMessage =
+            "This confirmation link has expired. Please sign up again to get a new confirmation email.";
         } else if (error.message?.includes("already been confirmed")) {
-          setMessage(
-            "This email has already been confirmed. You can sign in normally."
-          );
-        } else {
-          setMessage(
-            "Failed to confirm email. Please try signing in manually or request a new confirmation email."
-          );
+          errorMessage =
+            "This email has already been confirmed. You can sign in normally.";
+        } else if (error.message?.includes("Invalid token")) {
+          errorMessage =
+            "This confirmation link is invalid. Please sign up again.";
         }
+
+        setMessage(errorMessage);
 
         // Redirect to auth page after delay
         setTimeout(() => {

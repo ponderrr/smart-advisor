@@ -6,8 +6,6 @@ export interface AuthError {
 }
 
 class AuthService {
-  // Update the signUp method in src/services/auth.ts
-
   async signUp(
     email: string,
     password: string,
@@ -16,6 +14,13 @@ class AuthService {
   ): Promise<{ error: string | null }> {
     try {
       console.log("Starting signup process for:", email);
+
+      // Determine the correct redirect URL based on environment
+      const getRedirectUrl = () => {
+        // Always use the current origin for the redirect
+        const origin = window.location.origin;
+        return `${origin}/auth/callback`;
+      };
 
       // Create the auth user with explicit redirect URL
       const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -26,8 +31,8 @@ class AuthService {
             name,
             age,
           },
-          // Explicitly set the redirect URL for email confirmation
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          // Use dynamic redirect URL that works for both local and production
+          emailRedirectTo: getRedirectUrl(),
         },
       });
 
