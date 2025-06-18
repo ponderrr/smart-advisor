@@ -81,9 +81,10 @@ serve(async (req) => {
         poster: movie.poster_path
           ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
           : "https://images.unsplash.com/photo-1489599731893-01139d4e6b5b?w=300&h=450&fit=crop",
-        year: movie.release_date
-          ? new Date(movie.release_date).getFullYear()
-          : new Date().getFullYear(),
+        year:
+          movie.release_date && !isNaN(new Date(movie.release_date).getTime())
+            ? new Date(movie.release_date).getFullYear()
+            : new Date().getFullYear(),
         rating: movie.vote_average
           ? Math.round(movie.vote_average * 10) / 10
           : 7.5,

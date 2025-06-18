@@ -104,3 +104,87 @@
     font-family: "Inter", sans-serif;
   }
 }
+
+/* Custom Scrollbar Styles for Smart Advisor */
+/* Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a; /* appSecondary */
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #6366f1; /* appAccent - matches Get Started button */
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #5855eb; /* Slightly darker shade on hover */
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: #4f46e5; /* Even darker when clicking/dragging */
+}
+
+::-webkit-scrollbar-corner {
+  background: #1a1a1a; /* appSecondary */
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #6366f1 #1a1a1a; /* thumb color, track color */
+}
+
+/* For specific containers that might need horizontal scrolling */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+/* Custom scrollbar for modal/dialog content */
+.modal-content::-webkit-scrollbar,
+.dialog-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-thumb,
+.dialog-content::-webkit-scrollbar-thumb {
+  background: #6366f1;
+  border-radius: 3px;
+}
+
+/* Responsive scrollbar - thinner on mobile */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  .overflow-x-auto::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .overflow-y-auto::-webkit-scrollbar {
+    width: 4px;
+  }
+}
+
+/* Additional styling for specific app areas */
+.selection-card::-webkit-scrollbar,
+.bg-appSecondary::-webkit-scrollbar {
+  width: 6px;
+}
+
+.selection-card::-webkit-scrollbar-track,
+.bg-appSecondary::-webkit-scrollbar-track {
+  background: #0a0a0a; /* appPrimary for contrast */
+}

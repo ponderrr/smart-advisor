@@ -80,6 +80,20 @@ serve(async (req) => {
       throw new Error("Answers are required and must be a non-empty array");
     }
 
+    // Validate each answer has a non-empty answer_text string
+    if (
+      !answers.every(
+        (answer) =>
+          typeof answer.answer_text === "string" &&
+          answer.answer_text.trim().length > 0
+      )
+    ) {
+      console.log("Invalid answer format:", answers);
+      throw new Error(
+        "Each answer must contain a non-empty 'answer_text' string"
+      );
+    }
+
     if (!contentType || !["movie", "book", "both"].includes(contentType)) {
       console.log("Invalid content type:", contentType);
       throw new Error(

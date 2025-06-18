@@ -26,7 +26,8 @@ serve(async (req) => {
     }
 
     // Get and validate authorization header
-    const authHeader = req.headers.get("Authorization");
+    const authHeader =
+      req.headers.get("Authorization") ?? req.headers.get("authorization");
     if (!authHeader) {
       console.log("Missing authorization header");
       throw new Error("Missing authorization header");
@@ -198,14 +199,23 @@ serve(async (req) => {
 
     // Format questions for the frontend
     const formattedQuestions = parsedResponse.questions.map(
-      (q: any, index: number) => ({
-        id: q.id || `q${index + 1}`,
-        text: q.text,
-        content_type: contentType,
-        user_age_range: `${Math.floor(ageNum / 10) * 10}-${
-          Math.floor(ageNum / 10) * 10 + 9
-        }`,
-      })
+      (q: any, index: number) => {
+        if (typeof q.text !== "string" || !q.text.trim()) {
+          throw new Error(
+            `Malformed question object from OpenAI: missing or invalid text property in question ${
+              index + 1
+            }`
+          );
+        }
+        return {
+          id: q.id || `q${index + 1}`,
+          text: q.text,
+          content_type: contentType,
+          user_age_range: `${Math.floor(ageNum / 10) * 10}-${
+            Math.floor(ageNum / 10) * 10 + 9
+          }`,
+        };
+      }
     );
 
     console.log("Questions formatted successfully:", formattedQuestions.length);
