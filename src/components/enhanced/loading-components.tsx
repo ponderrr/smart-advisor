@@ -221,7 +221,8 @@ export const HistoryLoadingShimmer: React.FC = () => {
 export const EnhancedSpinner: React.FC<{
   size?: "sm" | "md" | "lg";
   className?: string;
-}> = ({ size = "md", className = "" }) => {
+  ariaLabel?: string;
+}> = ({ size = "md", className = "", ariaLabel = "Loading" }) => {
   const sizeClasses = {
     sm: "w-6 h-6",
     md: "w-10 h-10",
@@ -229,7 +230,11 @@ export const EnhancedSpinner: React.FC<{
   };
 
   return (
-    <div className={`enhanced-spinner ${sizeClasses[size]} ${className}`} />
+    <div
+      className={`enhanced-spinner ${sizeClasses[size]} ${className}`}
+      role="status"
+      aria-label={ariaLabel}
+    />
   );
 };
 

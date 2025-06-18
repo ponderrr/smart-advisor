@@ -402,49 +402,6 @@ const ResultsPage = () => {
           </EnhancedButton>
         </div>
       </main>
-
-      <style jsx>{`
-        @keyframes fade-in {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .animate-in {
-          animation-fill-mode: both;
-        }
-
-        .fade-in {
-          animation-name: fade-in;
-        }
-
-        .duration-500 {
-          animation-duration: 0.5s;
-        }
-
-        .duration-700 {
-          animation-duration: 0.7s;
-        }
-
-        .delay-200 {
-          animation-delay: 0.2s;
-        }
-
-        .delay-1000 {
-          animation-delay: 1s;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .animate-in {
-            animation: none !important;
-          }
-        }
-      `}</style>
     </div>
   );
 };

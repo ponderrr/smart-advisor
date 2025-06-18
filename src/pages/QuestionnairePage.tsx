@@ -365,45 +365,6 @@ const QuestionnairePage = () => {
           </div>
         </div>
       </main>
-
-      <style jsx>{`
-        @keyframes fade-in {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .animate-in {
-          animation-fill-mode: both;
-        }
-
-        .fade-in {
-          animation-name: fade-in;
-        }
-
-        .duration-700 {
-          animation-duration: 0.7s;
-        }
-
-        .delay-300 {
-          animation-delay: 0.3s;
-        }
-
-        .delay-500 {
-          animation-delay: 0.5s;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .animate-in {
-            animation: none !important;
-          }
-        }
-      `}</style>
     </div>
   );
 };

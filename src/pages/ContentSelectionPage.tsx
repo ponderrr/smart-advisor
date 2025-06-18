@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Film, Book, Target, Loader2, User, LogOut } from "lucide-react";
+import { Film, Book, Target, User, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 type ContentType = "movie" | "book" | "both" | null;
@@ -213,53 +213,6 @@ const ContentSelectionPage = () => {
           {isLoading ? "Continue..." : "Continue"}
         </button>
       </main>
-
-      <style jsx>{`
-        @keyframes fade-in {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .animate-in {
-          animation-fill-mode: both;
-        }
-
-        .fade-in {
-          animation-name: fade-in;
-        }
-
-        .duration-500 {
-          animation-duration: 0.5s;
-        }
-
-        .duration-700 {
-          animation-duration: 0.7s;
-        }
-
-        .delay-200 {
-          animation-delay: 0.2s;
-        }
-
-        .delay-400 {
-          animation-delay: 0.4s;
-        }
-
-        .delay-1200 {
-          animation-delay: 1.2s;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .animate-in {
-            animation: none !important;
-          }
-        }
-      `}</style>
     </div>
   );
 };

@@ -6,7 +6,10 @@ import React from "react";
 // Animation Utilities
 export const AnimationUtils = {
   // Stagger children animations
-  staggerChildren: (children: React.ReactNode, delay = 100) => {
+  staggerChildren: (
+    children: React.ReactNode,
+    delay = 100
+  ): React.ReactElement[] => {
     return React.Children.map(children, (child, index) => (
       <div
         key={index}
@@ -152,6 +155,7 @@ export const useInViewAnimation = (options: IntersectionObserverInit = {}) => {
   React.useEffect(() => {
     if (!shouldAnimate || !ref.current) return;
 
+    const element = ref.current;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && !hasAnimated) {
@@ -166,9 +170,12 @@ export const useInViewAnimation = (options: IntersectionObserverInit = {}) => {
       }
     );
 
-    observer.observe(ref.current);
+    observer.observe(element);
 
-    return () => observer.disconnect();
+    return () => {
+      observer.unobserve(element);
+      observer.disconnect();
+    };
   }, [shouldAnimate, hasAnimated, options]);
 
   return {
@@ -198,10 +205,14 @@ export const useScrollAnimation = (threshold = 0.1) => {
     );
 
     if (ref.current) {
-      observer.observe(ref.current);
-    }
+      const element = ref.current;
+      observer.observe(element);
 
-    return () => observer.disconnect();
+      return () => {
+        observer.unobserve(element);
+        observer.disconnect();
+      };
+    }
   }, [threshold, shouldAnimate]);
 
   return { ref, isVisible, shouldAnimate };
@@ -274,7 +285,10 @@ export const createKeyframes = (
       const styleString = Object.entries(styles)
         .map(
           ([prop, value]) =>
-            `${prop.replace(/([A-Z])/g, "-$1").toLowerCase()}: ${value}`
+            `${prop
+              .replace(/([a-z])([A-Z])/g, "$1-$2")
+              .replace(/([A-Z])([A-Z][a-z])/g, "$1-$2")
+              .toLowerCase()}: ${value}`
         )
         .join("; ");
       return `${key} { ${styleString} }`;
@@ -316,6 +330,7 @@ export const AnimationPerformance = {
   monitorFPS: (callback: (fps: number) => void) => {
     let frames = 0;
     let lastTime = performance.now();
+    let animationFrameId: number | null = null;
 
     const countFrames = () => {
       frames++;
@@ -327,14 +342,22 @@ export const AnimationPerformance = {
         lastTime = currentTime;
       }
 
-      requestAnimationFrame(countFrames);
+      animationFrameId = requestAnimationFrame(countFrames);
     };
 
-    requestAnimationFrame(countFrames);
+    animationFrameId = requestAnimationFrame(countFrames);
+
+    // Return cleanup function to stop the monitoring
+    return () => {
+      if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+    };
   },
 
   // Check if device supports smooth animations
-  supportsSmootAnimations: () => {
+  supportsSmoothAnimations: () => {
     // Check for hardware acceleration support
     const canvas = document.createElement("canvas");
     const gl =

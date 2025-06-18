@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import {
   EnhancedInput,
@@ -427,41 +426,6 @@ const AuthPage = () => {
           )}
         </div>
       </main>
-
-      <style jsx>{`
-        @keyframes fade-in {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .animate-in {
-          animation-fill-mode: both;
-        }
-
-        .fade-in {
-          animation-name: fade-in;
-        }
-
-        .duration-500 {
-          animation-duration: 0.5s;
-        }
-
-        .duration-700 {
-          animation-duration: 0.7s;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .animate-in {
-            animation: none !important;
-          }
-        }
-      `}</style>
     </div>
   );
 };

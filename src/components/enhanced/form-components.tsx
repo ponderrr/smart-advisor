@@ -1,4 +1,5 @@
 import React, { forwardRef } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 
 // Enhanced Input Component
@@ -162,7 +163,7 @@ export const EnhancedProgress: React.FC<EnhancedProgressProps> = ({
       <div
         className={cn(
           "progress-fill h-full rounded-full transition-all duration-300",
-          isHigh && showGlow && "data-[progress=high]:true"
+          isHigh && showGlow
         )}
         style={{ width: `${percentage}%` }}
         data-progress={isHigh ? "high" : "normal"}
@@ -246,14 +247,14 @@ export const EnhancedPasswordInput: React.FC<EnhancedPasswordInputProps> = ({
     <div className="relative">
       <EnhancedInput
         type={showPassword ? "text" : "password"}
-        className={cn("pr-12", className)}
+        className={cn("pr-16", className)}
         {...props}
       />
       {showToggle && (
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-textTertiary hover:text-textSecondary transition-colors duration-200 enhanced-button"
+          className="absolute right-10 top-1/2 h-8 w-8 flex items-center justify-center -translate-y-1/2 text-textTertiary hover:text-textSecondary transition-colors duration-200 enhanced-button"
         >
           <svg
             className="w-5 h-5"
@@ -441,7 +442,7 @@ export const Toast: React.FC<ToastProps> = ({
     ),
   };
 
-  return (
+  return createPortal(
     <div
       className={cn(
         "toast-enter-active fixed top-4 right-4 z-50 p-4 rounded-lg border-l-4 shadow-lg max-w-md",
@@ -477,6 +478,7 @@ export const Toast: React.FC<ToastProps> = ({
           </button>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
