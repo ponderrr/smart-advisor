@@ -1,7 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import {
+  EnhancedInput,
+  EnhancedPasswordInput,
+  EnhancedButton,
+  FormField,
+  AnimatedForm,
+  Toast,
+} from "@/components/enhanced";
 
 interface SignInFormData {
   email: string;
@@ -26,12 +34,12 @@ const AuthPage = () => {
     user,
     session,
   } = useAuth();
+
   const [isSignIn, setIsSignIn] = useState(true);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
     console.log("AuthPage useEffect - user:", user);
@@ -124,11 +132,13 @@ const AuthPage = () => {
 
       if (result.error) {
         setErrors({ general: result.error });
+        setShowToast(true);
       } else {
         // Redirection is now handled by the useEffect hook
       }
     } catch (error) {
       setErrors({ general: "An unexpected error occurred" });
+      setShowToast(true);
     } finally {
       setIsSubmitting(false);
     }
@@ -152,15 +162,18 @@ const AuthPage = () => {
 
       if (result.error) {
         setErrors({ general: result.error });
+        setShowToast(true);
       } else if (result.requiresEmailConfirmation) {
         // Email confirmation required
         setSuccessMessage(
           "Account created successfully! Please check your email and click the confirmation link to complete your registration."
         );
         setErrors({}); // Clear any errors
+        setShowToast(true);
       }
     } catch (error) {
       setErrors({ general: "An unexpected error occurred" });
+      setShowToast(true);
     } finally {
       setIsSubmitting(false);
     }
@@ -170,10 +183,30 @@ const AuthPage = () => {
     setIsSignIn(showSignIn);
     setErrors({});
     setSuccessMessage(null);
+    setShowToast(false);
   };
 
   return (
     <div className="bg-appPrimary text-textPrimary font-inter min-h-screen">
+      {/* Toast Notifications */}
+      {showToast && (errors.general || authError) && !successMessage && (
+        <Toast
+          type="error"
+          title="Authentication Error"
+          message={errors.general || authError}
+          onClose={() => setShowToast(false)}
+        />
+      )}
+
+      {showToast && successMessage && (
+        <Toast
+          type="success"
+          title="Success!"
+          message={successMessage}
+          onClose={() => setShowToast(false)}
+        />
+      )}
+
       {/* Header */}
       <header className="h-[72px] flex items-center justify-between px-6 md:px-12 bg-appPrimary">
         <button
@@ -189,12 +222,12 @@ const AuthPage = () => {
 
       {/* Authentication Container */}
       <main className="flex items-center justify-center min-h-[calc(100vh-72px)] px-6">
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-md animate-in fade-in duration-700">
           {/* Form Toggle */}
           <div className="flex gap-6 mb-8">
             <button
               onClick={() => toggleForm(true)}
-              className={`text-2xl transition-all duration-200 ${
+              className={`text-2xl transition-all duration-300 ${
                 isSignIn
                   ? "font-semibold text-textPrimary"
                   : "font-normal text-textTertiary hover:text-textSecondary"
@@ -204,7 +237,7 @@ const AuthPage = () => {
             </button>
             <button
               onClick={() => toggleForm(false)}
-              className={`text-2xl transition-all duration-200 ${
+              className={`text-2xl transition-all duration-300 ${
                 !isSignIn
                   ? "font-semibold text-textPrimary"
                   : "font-normal text-textTertiary hover:text-textSecondary"
@@ -216,111 +249,61 @@ const AuthPage = () => {
 
           {/* Success Message */}
           {successMessage && (
-            <div className="mb-6 p-4 bg-green-500 bg-opacity-10 border border-green-500 rounded-lg">
+            <div className="mb-6 p-4 bg-green-500 bg-opacity-10 border border-green-500 rounded-lg animate-in fade-in duration-500">
               <p className="text-green-500 text-sm">{successMessage}</p>
-            </div>
-          )}
-
-          {/* Error Message */}
-          {(errors.general || authError) && !successMessage && (
-            <div className="mb-6 p-4 bg-red-500 bg-opacity-10 border border-red-500 rounded-lg">
-              <p className="text-red-500 text-sm">
-                {errors.general || authError}
-              </p>
             </div>
           )}
 
           {/* Sign In Form */}
           {isSignIn && (
-            <form onSubmit={handleSignIn} className="space-y-6">
-              {/* Email Field */}
-              <div>
-                <label
-                  htmlFor="signin-email"
-                  className="block text-textSecondary text-sm font-medium mb-2"
-                >
-                  Email
-                </label>
-                <input
+            <AnimatedForm onSubmit={handleSignIn} stagger={true}>
+              <FormField label="Email" required error={errors.email}>
+                <EnhancedInput
                   type="email"
-                  id="signin-email"
                   value={signInData.email}
                   onChange={(e) =>
                     setSignInData({ ...signInData, email: e.target.value })
                   }
-                  className={`w-full bg-appPrimary border text-textPrimary text-base font-normal rounded-lg p-4 focus:outline-none focus:border-appAccent transition-colors duration-200 ${
-                    errors.email ? "border-red-500" : "border-gray-700"
-                  }`}
                   placeholder="Enter your email"
                   disabled={isSubmitting}
+                  error={errors.email}
                 />
-                {errors.email && (
-                  <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-                )}
-              </div>
+              </FormField>
 
-              {/* Password Field */}
-              <div>
-                <label
-                  htmlFor="signin-password"
-                  className="block text-textSecondary text-sm font-medium mb-2"
-                >
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    id="signin-password"
-                    value={signInData.password}
-                    onChange={(e) =>
-                      setSignInData({ ...signInData, password: e.target.value })
-                    }
-                    className={`w-full bg-appPrimary border text-textPrimary text-base font-normal rounded-lg p-4 pr-12 focus:outline-none focus:border-appAccent transition-colors duration-200 ${
-                      errors.password ? "border-red-500" : "border-gray-700"
-                    }`}
-                    placeholder="Enter your password"
-                    disabled={isSubmitting}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-textTertiary hover:text-textSecondary transition-colors duration-200"
-                    disabled={isSubmitting}
-                  >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
-                {errors.password && (
-                  <p className="text-red-500 text-xs mt-1">{errors.password}</p>
-                )}
-              </div>
+              <FormField label="Password" required error={errors.password}>
+                <EnhancedPasswordInput
+                  value={signInData.password}
+                  onChange={(e) =>
+                    setSignInData({ ...signInData, password: e.target.value })
+                  }
+                  placeholder="Enter your password"
+                  disabled={isSubmitting}
+                  error={errors.password}
+                />
+              </FormField>
 
-              {/* Sign In Button */}
-              <button
+              <EnhancedButton
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-appAccent text-white text-base font-semibold rounded-lg py-4 mt-8 hover:bg-opacity-90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                loading={isSubmitting}
+                variant="primary"
+                size="lg"
+                glow
+                className="w-full mt-8"
               >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Signing In...
-                  </>
-                ) : (
-                  "Sign In"
-                )}
-              </button>
+                Sign In
+              </EnhancedButton>
 
-              {/* Secondary Actions */}
               <div className="mt-4 text-center">
                 <button
                   type="button"
-                  className="text-textSecondary text-sm hover:text-textPrimary transition-colors duration-200"
+                  className="text-textSecondary text-sm hover:text-textPrimary transition-colors duration-200 enhanced-button"
                   disabled={isSubmitting}
                 >
                   Forgot password?
                 </button>
               </div>
+
               <div className="mt-3 text-center">
                 <span className="text-textSecondary text-sm">
                   Don't have an account?{" "}
@@ -328,200 +311,105 @@ const AuthPage = () => {
                 <button
                   type="button"
                   onClick={() => toggleForm(false)}
-                  className="text-appAccent text-sm hover:underline transition-all duration-200"
+                  className="text-appAccent text-sm hover:underline transition-all duration-200 enhanced-button"
                   disabled={isSubmitting}
                 >
                   Sign up
                 </button>
               </div>
-            </form>
+            </AnimatedForm>
           )}
 
           {/* Sign Up Form */}
           {!isSignIn && (
-            <form onSubmit={handleSignUp} className="space-y-6">
-              {/* Name Field */}
-              <div>
-                <label
-                  htmlFor="signup-fullname"
-                  className="block text-textSecondary text-sm font-medium mb-2"
-                >
-                  Full Name
-                </label>
-                <input
+            <AnimatedForm onSubmit={handleSignUp} stagger={true}>
+              <FormField label="Full Name" required error={errors.fullName}>
+                <EnhancedInput
                   type="text"
-                  id="signup-fullname"
                   value={signUpData.fullName}
                   onChange={(e) =>
                     setSignUpData({ ...signUpData, fullName: e.target.value })
                   }
-                  className={`w-full bg-appPrimary border text-textPrimary text-base font-normal rounded-lg p-4 focus:outline-none focus:border-appAccent transition-colors duration-200 ${
-                    errors.fullName ? "border-red-500" : "border-gray-700"
-                  }`}
                   placeholder="Enter your full name"
                   disabled={isSubmitting}
+                  error={errors.fullName}
                 />
-                {errors.fullName && (
-                  <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>
-                )}
-              </div>
+              </FormField>
 
-              {/* Email Field */}
-              <div>
-                <label
-                  htmlFor="signup-email"
-                  className="block text-textSecondary text-sm font-medium mb-2"
-                >
-                  Email
-                </label>
-                <input
+              <FormField label="Email" required error={errors.email}>
+                <EnhancedInput
                   type="email"
-                  id="signup-email"
                   value={signUpData.email}
                   onChange={(e) =>
                     setSignUpData({ ...signUpData, email: e.target.value })
                   }
-                  className={`w-full bg-appPrimary border text-textPrimary text-base font-normal rounded-lg p-4 focus:outline-none focus:border-appAccent transition-colors duration-200 ${
-                    errors.email ? "border-red-500" : "border-gray-700"
-                  }`}
                   placeholder="Enter your email"
                   disabled={isSubmitting}
+                  error={errors.email}
                 />
-                {errors.email && (
-                  <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-                )}
-              </div>
+              </FormField>
 
-              {/* Age Field */}
-              <div>
-                <label
-                  htmlFor="signup-age"
-                  className="block text-textSecondary text-sm font-medium mb-2"
-                >
-                  Age
-                </label>
-                <input
+              <FormField label="Age" required error={errors.age}>
+                <EnhancedInput
                   type="number"
-                  id="signup-age"
                   value={signUpData.age}
                   onChange={(e) =>
                     setSignUpData({ ...signUpData, age: e.target.value })
                   }
-                  className={`w-[120px] bg-appPrimary border text-textPrimary text-base font-normal rounded-lg p-4 focus:outline-none focus:border-appAccent transition-colors duration-200 ${
-                    errors.age ? "border-red-500" : "border-gray-700"
-                  }`}
                   placeholder="18"
                   min="13"
                   disabled={isSubmitting}
+                  error={errors.age}
+                  className="w-[120px]"
                 />
                 <p className="text-textTertiary text-xs mt-1">
                   Required for age-appropriate recommendations
                 </p>
-                {errors.age && (
-                  <p className="text-red-500 text-xs mt-1">{errors.age}</p>
-                )}
-              </div>
+              </FormField>
 
-              {/* Password Field */}
-              <div>
-                <label
-                  htmlFor="signup-password"
-                  className="block text-textSecondary text-sm font-medium mb-2"
-                >
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    id="signup-password"
-                    value={signUpData.password}
-                    onChange={(e) =>
-                      setSignUpData({ ...signUpData, password: e.target.value })
-                    }
-                    className={`w-full bg-appPrimary border text-textPrimary text-base font-normal rounded-lg p-4 pr-12 focus:outline-none focus:border-appAccent transition-colors duration-200 ${
-                      errors.password ? "border-red-500" : "border-gray-700"
-                    }`}
-                    placeholder="Enter your password"
-                    disabled={isSubmitting}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-textTertiary hover:text-textSecondary transition-colors duration-200"
-                    disabled={isSubmitting}
-                  >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
-                {errors.password && (
-                  <p className="text-red-500 text-xs mt-1">{errors.password}</p>
-                )}
-              </div>
+              <FormField label="Password" required error={errors.password}>
+                <EnhancedPasswordInput
+                  value={signUpData.password}
+                  onChange={(e) =>
+                    setSignUpData({ ...signUpData, password: e.target.value })
+                  }
+                  placeholder="Enter your password"
+                  disabled={isSubmitting}
+                  error={errors.password}
+                />
+              </FormField>
 
-              {/* Confirm Password Field */}
-              <div>
-                <label
-                  htmlFor="signup-confirm-password"
-                  className="block text-textSecondary text-sm font-medium mb-2"
-                >
-                  Confirm Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showConfirmPassword ? "text" : "password"}
-                    id="signup-confirm-password"
-                    value={signUpData.confirmPassword}
-                    onChange={(e) =>
-                      setSignUpData({
-                        ...signUpData,
-                        confirmPassword: e.target.value,
-                      })
-                    }
-                    className={`w-full bg-appPrimary border text-textPrimary text-base font-normal rounded-lg p-4 pr-12 focus:outline-none focus:border-appAccent transition-colors duration-200 ${
-                      errors.confirmPassword
-                        ? "border-red-500"
-                        : "border-gray-700"
-                    }`}
-                    placeholder="Confirm your password"
-                    disabled={isSubmitting}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-textTertiary hover:text-textSecondary transition-colors duration-200"
-                    disabled={isSubmitting}
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff size={20} />
-                    ) : (
-                      <Eye size={20} />
-                    )}
-                  </button>
-                </div>
-                {errors.confirmPassword && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.confirmPassword}
-                  </p>
-                )}
-              </div>
+              <FormField
+                label="Confirm Password"
+                required
+                error={errors.confirmPassword}
+              >
+                <EnhancedPasswordInput
+                  value={signUpData.confirmPassword}
+                  onChange={(e) =>
+                    setSignUpData({
+                      ...signUpData,
+                      confirmPassword: e.target.value,
+                    })
+                  }
+                  placeholder="Confirm your password"
+                  disabled={isSubmitting}
+                  error={errors.confirmPassword}
+                />
+              </FormField>
 
-              {/* Sign Up Button */}
-              <button
+              <EnhancedButton
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-appAccent text-white text-base font-semibold rounded-lg py-4 mt-8 hover:bg-opacity-90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                loading={isSubmitting}
+                variant="primary"
+                size="lg"
+                glow
+                className="w-full mt-8"
               >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Creating Account...
-                  </>
-                ) : (
-                  "Create Account"
-                )}
-              </button>
+                Create Account
+              </EnhancedButton>
 
-              {/* Secondary Actions */}
               <div className="mt-4 text-center">
                 <span className="text-textSecondary text-sm">
                   Already have an account?{" "}
@@ -529,16 +417,51 @@ const AuthPage = () => {
                 <button
                   type="button"
                   onClick={() => toggleForm(true)}
-                  className="text-appAccent text-sm hover:underline transition-all duration-200"
+                  className="text-appAccent text-sm hover:underline transition-all duration-200 enhanced-button"
                   disabled={isSubmitting}
                 >
                   Sign in
                 </button>
               </div>
-            </form>
+            </AnimatedForm>
           )}
         </div>
       </main>
+
+      <style jsx>{`
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .animate-in {
+          animation-fill-mode: both;
+        }
+
+        .fade-in {
+          animation-name: fade-in;
+        }
+
+        .duration-500 {
+          animation-duration: 0.5s;
+        }
+
+        .duration-700 {
+          animation-duration: 0.7s;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .animate-in {
+            animation: none !important;
+          }
+        }
+      `}</style>
     </div>
   );
 };

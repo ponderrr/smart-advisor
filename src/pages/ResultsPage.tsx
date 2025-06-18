@@ -1,10 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { RefreshCw, Heart, User, LogOut, Star, Loader2 } from "lucide-react";
+import { RefreshCw, Heart, User, LogOut, Star } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { enhancedRecommendationsService } from "@/services/enhancedRecommendations";
 import { databaseService } from "@/services/database";
 import { Recommendation } from "@/types/Recommendation";
+import {
+  EnhancedButton,
+  LoadingScreen,
+  RecommendationLoadingShimmer,
+} from "@/components/enhanced";
 
 const ResultsPage = () => {
   const navigate = useNavigate();
@@ -142,20 +147,10 @@ const ResultsPage = () => {
           </div>
         </header>
 
-        {/* Loading Content */}
-        <main className="flex flex-col items-center justify-center px-6 pt-[120px] pb-[100px]">
-          <div className="text-center">
-            <Loader2 className="w-16 h-16 text-appAccent animate-spin mx-auto mb-8" />
-            <h1 className="text-3xl md:text-4xl font-bold text-textPrimary mb-4">
-              Creating Your Recommendations
-            </h1>
-            <p className="text-lg text-textSecondary mb-4">{generationStep}</p>
-            <div className="text-sm text-textTertiary">
-              Our AI is analyzing your preferences to find the perfect{" "}
-              {contentType === "both" ? "movie and book" : contentType} for you
-            </div>
-          </div>
-        </main>
+        <LoadingScreen
+          message="Creating Your Recommendations"
+          submessage={generationStep}
+        />
       </div>
     );
   }
@@ -185,7 +180,7 @@ const ResultsPage = () => {
 
         {/* Error Content */}
         <main className="flex flex-col items-center justify-center px-6 pt-[120px] pb-[100px]">
-          <div className="text-center max-w-md">
+          <div className="text-center max-w-md animate-in fade-in duration-700">
             <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-8">
               <span className="text-white text-2xl">!</span>
             </div>
@@ -194,21 +189,18 @@ const ResultsPage = () => {
             </h1>
             <p className="text-lg text-textSecondary mb-8">{error}</p>
             <div className="flex gap-4 justify-center">
-              <button
-                onClick={handleRetry}
-                className="bg-appAccent text-white px-6 py-3 rounded-lg hover:bg-opacity-90 transition-all duration-200 flex items-center gap-2"
-              >
+              <EnhancedButton onClick={handleRetry} variant="primary" glow>
                 <RefreshCw size={16} />
                 Try Again
-              </button>
-              <button
+              </EnhancedButton>
+              <EnhancedButton
                 onClick={() =>
                   navigate("/questionnaire", { state: { contentType } })
                 }
-                className="bg-appSecondary border border-gray-700 text-textPrimary px-6 py-3 rounded-lg hover:bg-gray-600 transition-all duration-200"
+                variant="secondary"
               >
                 Retake Quiz
-              </button>
+              </EnhancedButton>
             </div>
           </div>
         </main>
@@ -242,17 +234,17 @@ const ResultsPage = () => {
           </button>
 
           {showUserMenu && (
-            <div className="absolute right-0 top-full mt-2 w-48 bg-appSecondary border border-gray-700 rounded-lg shadow-lg z-50">
+            <div className="user-menu absolute right-0 top-full mt-2 w-48 bg-appSecondary border border-gray-700 rounded-lg shadow-lg z-50">
               <button
                 onClick={() => navigate("/history")}
-                className="w-full flex items-center gap-2 px-4 py-3 text-textSecondary hover:text-textPrimary hover:bg-gray-700 transition-colors duration-200"
+                className="user-menu-item w-full flex items-center gap-2 px-4 py-3 text-textSecondary hover:text-textPrimary hover:bg-gray-700 transition-colors duration-200"
               >
                 <User size={16} />
                 View History
               </button>
               <button
                 onClick={handleSignOut}
-                className="w-full flex items-center gap-2 px-4 py-3 text-textSecondary hover:text-textPrimary hover:bg-gray-700 transition-colors duration-200 border-t border-gray-700"
+                className="user-menu-item w-full flex items-center gap-2 px-4 py-3 text-textSecondary hover:text-textPrimary hover:bg-gray-700 transition-colors duration-200 border-t border-gray-700"
               >
                 <LogOut size={16} />
                 Sign Out
@@ -265,12 +257,12 @@ const ResultsPage = () => {
       {/* Main Content */}
       <main className="px-6 pt-[80px] md:pt-[120px] pb-[100px]">
         {/* Progress Indicator */}
-        <div className="text-center text-textTertiary text-sm mb-8">
+        <div className="text-center text-textTertiary text-sm mb-8 animate-in fade-in duration-500">
           Step 3 of 3
         </div>
 
         {/* Title */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-12 animate-in fade-in duration-700 delay-200">
           <h1 className="text-4xl md:text-5xl font-bold text-textPrimary mb-4">
             Your AI-Generated Recommendations
           </h1>
@@ -281,18 +273,19 @@ const ResultsPage = () => {
 
         {/* Recommendations */}
         <div className="max-w-4xl mx-auto space-y-8">
-          {recommendations.map((rec) => (
+          {recommendations.map((rec, index) => (
             <div
               key={rec.id}
-              className="bg-appSecondary border border-gray-700 rounded-2xl p-8 flex flex-col md:flex-row gap-6"
+              className="recommendation-card bg-appSecondary border border-gray-700 rounded-2xl p-8 flex flex-col md:flex-row gap-6"
+              style={{ animationDelay: `${400 + index * 200}ms` }}
             >
               {/* Poster/Cover */}
-              <div className="w-full md:w-48 h-72 bg-gray-700 rounded-lg flex-shrink-0">
+              <div className="w-full md:w-48 h-72 bg-gray-700 rounded-lg flex-shrink-0 overflow-hidden">
                 {rec.poster_url ? (
                   <img
                     src={rec.poster_url}
                     alt={rec.title}
-                    className="w-full h-full object-cover rounded-lg"
+                    className="w-full h-full object-cover rounded-lg transition-transform duration-300 hover:scale-105"
                     onError={(e) => {
                       e.currentTarget.style.display = "none";
                       e.currentTarget.nextElementSibling?.classList.remove(
@@ -331,9 +324,9 @@ const ResultsPage = () => {
                   </div>
                   <button
                     onClick={() => handleToggleFavorite(rec.id)}
-                    className={`p-2 rounded-full transition-colors duration-200 ${
+                    className={`favorite-button p-2 rounded-full transition-colors duration-200 ${
                       rec.is_favorited
-                        ? "bg-red-500 text-white"
+                        ? "bg-red-500 text-white favorited"
                         : "bg-gray-700 text-textSecondary hover:text-red-500"
                     }`}
                   >
@@ -357,10 +350,15 @@ const ResultsPage = () => {
                 {/* Genres */}
                 {rec.genres && rec.genres.length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-4">
-                    {rec.genres.map((g) => (
+                    {rec.genres.map((g, genreIndex) => (
                       <span
                         key={g}
-                        className="px-3 py-1 bg-appAccent text-white text-sm rounded-full"
+                        className="px-3 py-1 bg-appAccent text-white text-sm rounded-full animate-in fade-in duration-500"
+                        style={{
+                          animationDelay: `${
+                            800 + index * 200 + genreIndex * 100
+                          }ms`,
+                        }}
                       >
                         {g}
                       </span>
@@ -370,7 +368,10 @@ const ResultsPage = () => {
 
                 {/* AI Explanation */}
                 {rec.explanation && (
-                  <div className="bg-appPrimary border border-gray-600 rounded-lg p-4">
+                  <div
+                    className="bg-appPrimary border border-gray-600 rounded-lg p-4 animate-in fade-in duration-700"
+                    style={{ animationDelay: `${1000 + index * 200}ms` }}
+                  >
                     <h3 className="text-textPrimary font-semibold mb-2">
                       Why our AI recommends this:
                     </h3>
@@ -383,21 +384,67 @@ const ResultsPage = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mt-12">
-          <button
+        <div className="flex flex-col sm:flex-row gap-4 justify-center mt-12 animate-in fade-in duration-700 delay-1000">
+          <EnhancedButton
             onClick={handleGetAnother}
-            className="bg-appAccent text-white px-8 py-3 rounded-lg hover:bg-opacity-90 transition-all duration-200"
+            variant="primary"
+            size="lg"
+            glow
           >
             Get Another Recommendation
-          </button>
-          <button
+          </EnhancedButton>
+          <EnhancedButton
             onClick={handleViewHistory}
-            className="bg-appSecondary border border-gray-700 text-textPrimary px-8 py-3 rounded-lg hover:bg-gray-600 transition-all duration-200"
+            variant="secondary"
+            size="lg"
           >
             View My History
-          </button>
+          </EnhancedButton>
         </div>
       </main>
+
+      <style jsx>{`
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .animate-in {
+          animation-fill-mode: both;
+        }
+
+        .fade-in {
+          animation-name: fade-in;
+        }
+
+        .duration-500 {
+          animation-duration: 0.5s;
+        }
+
+        .duration-700 {
+          animation-duration: 0.7s;
+        }
+
+        .delay-200 {
+          animation-delay: 0.2s;
+        }
+
+        .delay-1000 {
+          animation-delay: 1s;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .animate-in {
+            animation: none !important;
+          }
+        }
+      `}</style>
     </div>
   );
 };

@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Film, Book, Target, Loader2, User, Settings, LogOut } from "lucide-react";
+import { Film, Book, Target, Loader2, User, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 type ContentType = "movie" | "book" | "both" | null;
@@ -28,7 +27,7 @@ const SelectionCard: React.FC<SelectionCardProps> = ({
       onClick={() => onClick(id)}
       className={`selection-card rounded-2xl p-10 h-[280px] flex flex-col items-center cursor-pointer transition-all duration-200 border-2 ${
         isSelected
-          ? "bg-indigo-900 border-appAccent"
+          ? "bg-indigo-900 border-appAccent selected"
           : "bg-appSecondary border-gray-700 hover:bg-gray-600 hover:border-appAccent"
       }`}
     >
@@ -140,19 +139,19 @@ const ContentSelectionPage = () => {
               Hi, {user?.name}
             </span>
           </button>
-          
+
           {showUserMenu && (
-            <div className="absolute right-0 top-full mt-2 w-48 bg-appSecondary border border-gray-700 rounded-lg shadow-lg z-50">
+            <div className="user-menu absolute right-0 top-full mt-2 w-48 bg-appSecondary border border-gray-700 rounded-lg shadow-lg z-50">
               <button
                 onClick={() => navigate("/history")}
-                className="w-full flex items-center gap-2 px-4 py-3 text-textSecondary hover:text-textPrimary hover:bg-gray-700 transition-colors duration-200"
+                className="user-menu-item w-full flex items-center gap-2 px-4 py-3 text-textSecondary hover:text-textPrimary hover:bg-gray-700 transition-colors duration-200"
               >
                 <User size={16} />
                 View History
               </button>
               <button
                 onClick={handleSignOut}
-                className="w-full flex items-center gap-2 px-4 py-3 text-textSecondary hover:text-textPrimary hover:bg-gray-700 transition-colors duration-200 border-t border-gray-700"
+                className="user-menu-item w-full flex items-center gap-2 px-4 py-3 text-textSecondary hover:text-textPrimary hover:bg-gray-700 transition-colors duration-200 border-t border-gray-700"
               >
                 <LogOut size={16} />
                 Sign Out
@@ -165,14 +164,16 @@ const ContentSelectionPage = () => {
       {/* Main Content */}
       <main className="flex flex-col items-center px-6 pt-[80px] md:pt-[120px] pb-[100px]">
         {/* Progress Indicator */}
-        <div className="text-textTertiary text-sm mb-8">Step 1 of 3</div>
+        <div className="text-textTertiary text-sm mb-8 animate-in fade-in duration-500">
+          Step 1 of 3
+        </div>
 
         {/* Page Title Section */}
         <div className="max-w-[800px] text-center mb-12 md:mb-20">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-textPrimary leading-tight mb-4">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-textPrimary leading-tight mb-4 animate-in fade-in duration-700 delay-200">
             What would you like a recommendation for?
           </h1>
-          <p className="text-lg text-textSecondary leading-relaxed">
+          <p className="text-lg text-textSecondary leading-relaxed animate-in fade-in duration-700 delay-400">
             Choose one option to get started with your personalized
             questionnaire
           </p>
@@ -180,16 +181,21 @@ const ContentSelectionPage = () => {
 
         {/* Selection Cards Container */}
         <div className="flex flex-col md:flex-row gap-6 md:gap-8 max-w-[800px] w-full mb-12 md:mb-16">
-          {cards.map((card) => (
-            <SelectionCard
+          {cards.map((card, index) => (
+            <div
               key={card.id}
-              id={card.id}
-              icon={card.icon}
-              title={card.title}
-              description={card.description}
-              isSelected={selectedType === card.id}
-              onClick={handleCardSelection}
-            />
+              className="animate-in fade-in duration-700"
+              style={{ animationDelay: `${600 + index * 200}ms` }}
+            >
+              <SelectionCard
+                id={card.id}
+                icon={card.icon}
+                title={card.title}
+                description={card.description}
+                isSelected={selectedType === card.id}
+                onClick={handleCardSelection}
+              />
+            </div>
           ))}
         </div>
 
@@ -197,16 +203,63 @@ const ContentSelectionPage = () => {
         <button
           onClick={handleContinue}
           disabled={!selectedType || isLoading}
-          className={`font-semibold text-base py-4 px-12 rounded-lg transition-all duration-200 flex items-center gap-2 ${
+          className={`font-semibold text-base py-4 px-12 rounded-lg transition-all duration-200 flex items-center gap-2 animate-in fade-in duration-700 delay-1200 ${
             selectedType && !isLoading
-              ? "bg-appAccent text-white hover:bg-opacity-90 cursor-pointer"
+              ? "cta-glow bg-appAccent text-white hover:bg-opacity-90 cursor-pointer"
               : "bg-gray-700 text-textTertiary cursor-not-allowed"
           }`}
         >
-          {isLoading && <Loader2 size={16} className="animate-spin" />}
+          {isLoading && <div className="enhanced-spinner w-4 h-4"></div>}
           {isLoading ? "Continue..." : "Continue"}
         </button>
       </main>
+
+      <style jsx>{`
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .animate-in {
+          animation-fill-mode: both;
+        }
+
+        .fade-in {
+          animation-name: fade-in;
+        }
+
+        .duration-500 {
+          animation-duration: 0.5s;
+        }
+
+        .duration-700 {
+          animation-duration: 0.7s;
+        }
+
+        .delay-200 {
+          animation-delay: 0.2s;
+        }
+
+        .delay-400 {
+          animation-delay: 0.4s;
+        }
+
+        .delay-1200 {
+          animation-delay: 1.2s;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .animate-in {
+            animation: none !important;
+          }
+        }
+      `}</style>
     </div>
   );
 };
