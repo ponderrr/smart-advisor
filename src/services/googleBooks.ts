@@ -2,6 +2,7 @@ export interface BookSearchResult {
   cover: string;
   year: number;
   rating: number;
+  description: string; // Add description field
 }
 
 export interface BookDetails {
@@ -16,9 +17,6 @@ export interface BookDetails {
 }
 
 class GoogleBooksService {
-  /**
-   * Search for a book by title using Supabase Edge Function
-   */
   async searchBook(title: string, author?: string): Promise<BookSearchResult> {
     try {
       const params = new URLSearchParams({ title });
@@ -45,20 +43,18 @@ class GoogleBooksService {
       return data;
     } catch (error) {
       console.error("Error searching book:", error);
-      // Return fallback data on error
       return this.getDefaultBookData();
     }
   }
 
-  /**
-   * Fallback data when API is unavailable
-   */
   private getDefaultBookData(): BookSearchResult {
     return {
       cover:
-        "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=450&fit=crop",
+        "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=600&fit=crop",
       year: new Date().getFullYear(),
       rating: 4.2,
+      description:
+        "An engaging and thought-provoking read that offers valuable insights and entertainment.",
     };
   }
 }

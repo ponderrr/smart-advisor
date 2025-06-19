@@ -367,15 +367,17 @@ const ResultsPage = () => {
                 )}
 
                 {/* AI Explanation */}
-                {rec.explanation && (
+                {rec.description && (
                   <div
                     className="bg-appPrimary border border-gray-600 rounded-lg p-4 animate-in fade-in duration-700"
                     style={{ animationDelay: `${1000 + index * 200}ms` }}
                   >
                     <h3 className="text-textPrimary font-semibold mb-2">
-                      Why our AI recommends this:
+                      {rec.type === "movie"
+                        ? "Plot Summary:"
+                        : "Book Description:"}
                     </h3>
-                    <p className="text-textSecondary">{rec.explanation}</p>
+                    <p className="text-textSecondary">{rec.description}</p>
                   </div>
                 )}
               </div>

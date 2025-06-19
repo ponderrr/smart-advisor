@@ -39,6 +39,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   // New function to handle user profile fetching
   const fetchUserProfile = async (supabaseUser: SupabaseUser) => {
@@ -72,7 +73,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    let mounted = true;
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
+    let subscription: any;
 
     const initializeAuth = async () => {
       try {
@@ -81,7 +88,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         // Set up auth state listener first
         const {
-          data: { subscription },
+          data: { subscription: sub },
         } = supabase.auth.onAuthStateChange(async (event, session) => {
           console.log("Auth state changed:", event, session?.user?.id);
 
@@ -96,6 +103,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setLoading(false);
           }
         });
+        subscription = sub;
 
         // Check for existing session
         const {
@@ -120,10 +128,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } else {
           setLoading(false);
         }
-
-        return () => {
-          subscription.unsubscribe();
-        };
       } catch (err) {
         console.error("Unexpected error during initial auth setup:", err);
         const errorMessage =
@@ -138,9 +142,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     initializeAuth();
 
     return () => {
-      mounted = false;
+      if (subscription) {
+        subscription.unsubscribe();
+      }
     };
-  }, []);
+  }, [mounted]);
 
   // useEffect to fetch user profile whenever the session user changes
   useEffect(() => {

@@ -119,6 +119,7 @@ class EnhancedRecommendationsService {
                   poster_url: tmdbData.poster || rec.poster_url,
                   rating: tmdbData.rating || rec.rating,
                   year: tmdbData.year || rec.year,
+                  description: tmdbData.description || enhancedRec.explanation, // Use TMDB description instead of AI explanation
                 };
               }
             } catch (tmdbError) {
@@ -145,6 +146,7 @@ class EnhancedRecommendationsService {
                   poster_url: bookData.cover || rec.poster_url,
                   rating: bookData.rating || rec.rating,
                   year: bookData.year || rec.year,
+                  description: bookData.description || enhancedRec.explanation, // Use Google Books description instead of AI explanation
                 };
               }
             } catch (bookError) {
@@ -169,7 +171,7 @@ class EnhancedRecommendationsService {
             if (import.meta.env.DEV) {
               console.error("Failed to save recommendation:", error);
             }
-            return enhancedRec; 
+            return enhancedRec;
           }
 
           return savedRec || enhancedRec;
@@ -177,7 +179,7 @@ class EnhancedRecommendationsService {
           if (import.meta.env.DEV) {
             console.error("Error enhancing recommendation:", error);
           }
-          return rec; 
+          return rec;
         }
       })
     );

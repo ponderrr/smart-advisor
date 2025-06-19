@@ -8,18 +8,13 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
-    return new Response("ok", {
-      status: 200,
-      headers: corsHeaders,
-    });
+    return new Response("ok", { status: 200, headers: corsHeaders });
   }
 
   try {
     console.log("TMDB Proxy function called");
 
-    // Check if request method is GET
     if (req.method !== "GET") {
       throw new Error("Method not allowed. Use GET.");
     }
@@ -28,7 +23,6 @@ serve(async (req) => {
     const title = url.searchParams.get("title");
 
     if (!title || title.trim() === "") {
-      console.log("Missing or empty title parameter");
       throw new Error("Title parameter is required and cannot be empty");
     }
 
@@ -36,14 +30,15 @@ serve(async (req) => {
 
     const tmdbApiKey = Deno.env.get("TMDB_API_KEY");
     if (!tmdbApiKey) {
-      console.log("TMDB API key not configured, returning fallback data");
-      // Return fallback data if API key not set
+      console.log("TMDB API key not configured");
       return new Response(
         JSON.stringify({
           poster:
-            "https://images.unsplash.com/photo-1489599731893-01139d4e6b5b?w=300&h=450&fit=crop",
+            "https://images.unsplash.com/photo-1489599731893-01139d4e6b5b?w=500&h=750&fit=crop",
           year: new Date().getFullYear(),
           rating: 7.5,
+          description:
+            "A captivating story that will keep you entertained from start to finish.",
         }),
         {
           status: 200,
@@ -52,78 +47,94 @@ serve(async (req) => {
       );
     }
 
-    console.log("TMDB API key found, making API call");
-
-    const tmdbUrl = `https://api.themoviedb.org/3/search/movie?api_key=${tmdbApiKey}&query=${encodeURIComponent(
+    // Search for movie
+    const searchUrl = `https://api.themoviedb.org/3/search/movie?api_key=${tmdbApiKey}&query=${encodeURIComponent(
       title.trim()
     )}&language=en-US&page=1`;
+    const searchResponse = await fetch(searchUrl);
 
-    const tmdbResponse = await fetch(tmdbUrl);
-
-    console.log("TMDB API response status:", tmdbResponse.status);
-
-    if (!tmdbResponse.ok) {
-      console.log("TMDB API error:", tmdbResponse.status);
-      throw new Error(`TMDB API error: ${tmdbResponse.status}`);
+    if (!searchResponse.ok) {
+      throw new Error(`TMDB search error: ${searchResponse.status}`);
     }
 
-    const data = await tmdbResponse.json();
-    console.log(
-      "TMDB API response received, results count:",
-      data.results?.length || 0
-    );
+    const searchData = await searchResponse.json();
 
-    if (data.results && data.results.length > 0) {
-      const movie = data.results[0];
-      console.log("Found movie:", movie.title);
-
-      const result = {
-        poster: movie.poster_path
-          ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-          : "https://images.unsplash.com/photo-1489599731893-01139d4e6b5b?w=300&h=450&fit=crop",
-        year:
-          movie.release_date && !isNaN(new Date(movie.release_date).getTime())
-            ? new Date(movie.release_date).getFullYear()
-            : new Date().getFullYear(),
-        rating: movie.vote_average
-          ? Math.round(movie.vote_average * 10) / 10
-          : 7.5,
-      };
-
-      return new Response(JSON.stringify(result), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (!searchData.results || searchData.results.length === 0) {
+      console.log("No movie results found");
+      return new Response(
+        JSON.stringify({
+          poster:
+            "https://images.unsplash.com/photo-1489599731893-01139d4e6b5b?w=500&h=750&fit=crop",
+          year: new Date().getFullYear(),
+          rating: 7.5,
+          description:
+            "A captivating story that will keep you entertained from start to finish.",
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
-    console.log("No movie results found, returning fallback");
-    // No results found, return fallback
-    return new Response(
-      JSON.stringify({
-        poster:
-          "https://images.unsplash.com/photo-1489599731893-01139d4e6b5b?w=300&h=450&fit=crop",
-        year: new Date().getFullYear(),
-        rating: 7.5,
-      }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    const movie = searchData.results[0];
+
+    // Get detailed movie info for description
+    const detailsUrl = `https://api.themoviedb.org/3/movie/${movie.id}?api_key=${tmdbApiKey}&language=en-US`;
+    const detailsResponse = await fetch(detailsUrl);
+
+    let description =
+      "A captivating story that will keep you entertained from start to finish.";
+
+    if (detailsResponse.ok) {
+      const detailsData = await detailsResponse.json();
+      if (detailsData.overview && detailsData.overview.length > 0) {
+        // Truncate to 2-3 sentences
+        const sentences = detailsData.overview
+          .split(/[.!?]+/)
+          .filter((s) => s.trim().length > 0);
+        description =
+          sentences.slice(0, 3).join(". ") + (sentences.length > 3 ? "." : "");
+        if (description.length > 200) {
+          description = description.substring(0, 197) + "...";
+        }
       }
-    );
+    }
+
+    const result = {
+      poster: movie.poster_path
+        ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+        : "https://images.unsplash.com/photo-1489599731893-01139d4e6b5b?w=500&h=750&fit=crop",
+      year: movie.release_date
+        ? parseInt(movie.release_date.split("-")[0])
+        : new Date().getFullYear(),
+      rating: movie.vote_average
+        ? Math.round(movie.vote_average * 10) / 10
+        : 7.5,
+      description: description,
+    };
+
+    console.log("Returning movie data:", result);
+
+    return new Response(JSON.stringify(result), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (error) {
     console.error("TMDB Proxy error:", error);
 
-    // Return fallback data on any error to ensure the app doesn't break
     return new Response(
       JSON.stringify({
         poster:
-          "https://images.unsplash.com/photo-1489599731893-01139d4e6b5b?w=300&h=450&fit=crop",
+          "https://images.unsplash.com/photo-1489599731893-01139d4e6b5b?w=500&h=750&fit=crop",
         year: new Date().getFullYear(),
         rating: 7.5,
+        description:
+          "A captivating story that will keep you entertained from start to finish.",
         error: error instanceof Error ? error.message : "Unknown error",
       }),
       {
-        status: 200, // Return 200 with fallback data instead of error status
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );

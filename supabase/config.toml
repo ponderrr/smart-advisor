@@ -23,7 +23,7 @@ entrypoint = "./functions/openai-recommendations/index.ts"
 
 [functions.tmdb-proxy]
 enabled = true
-verify_jwt = true
+verify_jwt = false
 import_map = "./functions/tmdb-proxy/import_map.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
@@ -34,7 +34,7 @@ entrypoint = "./functions/tmdb-proxy/index.ts"
 
 [functions.google-books-proxy]
 enabled = true
-verify_jwt = true
+verify_jwt = false
 import_map = "./functions/google-books-proxy/import_map.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
