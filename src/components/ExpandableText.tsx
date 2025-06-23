@@ -72,8 +72,7 @@ export const ExpandableText: React.FC<ExpandableTextProps> = ({
         ref={textRef}
         className={cn(
           "text-textSecondary leading-relaxed",
-          !isExpanded && "overflow-hidden",
-          !isExpanded && "line-clamp-3"
+          !isExpanded && "overflow-hidden"
         )}
         style={{
           display: !isExpanded ? "-webkit-box" : "block",

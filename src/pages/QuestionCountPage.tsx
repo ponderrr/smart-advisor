@@ -36,9 +36,9 @@ const QuestionCountPage = () => {
     try {
       // Navigate to questionnaire with question count
       navigate("/questionnaire", {
-        state: { 
+        state: {
           contentType,
-          questionCount 
+          questionCount,
         },
       });
     } catch (error) {
@@ -114,7 +114,7 @@ const QuestionCountPage = () => {
       <main className="flex flex-col items-center px-6 pt-[80px] md:pt-[120px] pb-[100px]">
         {/* Progress Indicator */}
         <div className="text-textTertiary text-sm mb-8 animate-in fade-in duration-500">
-          Step 2 of 3
+          Step 2 of 4
         </div>
 
         {/* Page Title Section */}
@@ -123,7 +123,8 @@ const QuestionCountPage = () => {
             How many questions would you like to answer?
           </h1>
           <p className="text-lg text-textSecondary leading-relaxed animate-in fade-in duration-700 delay-400">
-            Choose the number of questions for your {getContentTypeDisplay()} recommendation questionnaire
+            Choose the number of questions for your {getContentTypeDisplay()}{" "}
+            recommendation questionnaire
           </p>
         </div>
 
@@ -162,7 +163,7 @@ const QuestionCountPage = () => {
                   appearance: none;
                   height: 24px;
                   width: 24px;
-                  background: #6366F1;
+                  background: #6366f1;
                   border-radius: 50%;
                   cursor: pointer;
                   box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
@@ -175,7 +176,7 @@ const QuestionCountPage = () => {
                 .slider::-moz-range-thumb {
                   height: 24px;
                   width: 24px;
-                  background: #6366F1;
+                  background: #6366f1;
                   border-radius: 50%;
                   cursor: pointer;
                   box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
