@@ -105,6 +105,21 @@
   }
 }
 
+/* Text truncation utilities */
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.line-clamp-4 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
 /* Custom Scrollbar Styles for Smart Advisor */
 /* Webkit browsers (Chrome, Safari, Edge) */
 ::-webkit-scrollbar {
@@ -773,6 +788,57 @@
     transform: translateY(0) scale(1);
     opacity: 1;
   }
+}
+
+/* ===== CUSTOM SLIDER STYLES ===== */
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-track {
+  background: transparent;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 24px;
+  width: 24px;
+  background: #6366f1;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
+  transition: all 0.2s ease;
+}
+
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 12px rgba(99, 102, 241, 0.4);
+}
+
+.slider::-moz-range-track {
+  background: transparent;
+  border: none;
+  height: 12px;
+}
+
+.slider::-moz-range-thumb {
+  height: 24px;
+  width: 24px;
+  background: #6366f1;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.slider::-moz-range-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 12px rgba(99, 102, 241, 0.4);
 }
 
 /* ===== ACCESSIBILITY OVERRIDES ===== */

@@ -9,6 +9,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import Index from "@/pages/Index";
 import AuthPage from "@/pages/AuthPage";
 import ContentSelectionPage from "@/pages/ContentSelectionPage";
+import QuestionCountPage from "@/pages/QuestionCountPage";
 import QuestionnairePage from "@/pages/QuestionnairePage";
 import ResultsPage from "@/pages/ResultsPage";
 import AccountHistoryPage from "@/pages/AccountHistoryPage";
@@ -83,6 +84,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <ContentSelectionPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/question-count"
+                  element={
+                    <ProtectedRoute>
+                      <QuestionCountPage />
                     </ProtectedRoute>
                   }
                 />

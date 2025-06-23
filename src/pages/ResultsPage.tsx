@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { enhancedRecommendationsService } from "@/services/enhancedRecommendations";
 import { databaseService } from "@/services/database";
 import { Recommendation } from "@/types/Recommendation";
+import { ExpandableText } from "@/components/ExpandableText";
 import {
   EnhancedButton,
   LoadingScreen,
@@ -366,18 +367,21 @@ const ResultsPage = () => {
                   </div>
                 )}
 
-                {/* AI Explanation */}
+                {/* Expandable Description */}
                 {rec.description && (
                   <div
-                    className="bg-appPrimary border border-gray-600 rounded-lg p-4 animate-in fade-in duration-700"
+                    className="animate-in fade-in duration-700"
                     style={{ animationDelay: `${1000 + index * 200}ms` }}
                   >
-                    <h3 className="text-textPrimary font-semibold mb-2">
-                      {rec.type === "movie"
-                        ? "Plot Summary:"
-                        : "Book Description:"}
-                    </h3>
-                    <p className="text-textSecondary">{rec.description}</p>
+                    <ExpandableText
+                      text={rec.description}
+                      title={
+                        rec.type === "movie"
+                          ? "Plot Summary:"
+                          : "Book Description:"
+                      }
+                      maxLines={3}
+                    />
                   </div>
                 )}
               </div>

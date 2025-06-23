@@ -73,7 +73,7 @@ serve(async (req) => {
       throw new Error("Invalid JSON in request body");
     }
 
-    const { contentType, userAge } = requestBody;
+    const { contentType, userAge, questionCount } = requestBody;
 
     // Validate input parameters
     if (!contentType || !userAge) {
@@ -94,7 +94,23 @@ serve(async (req) => {
       throw new Error("Invalid age. Must be between 13 and 120");
     }
 
-    console.log("Input validation passed:", { contentType, userAge: ageNum });
+    // Validate question count (default to 5 if not provided)
+    const qCount = questionCount || 5;
+    const questionCountNum = Number(qCount);
+    if (
+      isNaN(questionCountNum) ||
+      questionCountNum < 3 ||
+      questionCountNum > 15
+    ) {
+      console.log("Invalid question count:", qCount);
+      throw new Error("Invalid question count. Must be between 3 and 15");
+    }
+
+    console.log("Input validation passed:", {
+      contentType,
+      userAge: ageNum,
+      questionCount: questionCountNum,
+    });
 
     // Check OpenAI API key
     const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
@@ -106,7 +122,7 @@ serve(async (req) => {
     console.log("OpenAI API key found");
 
     // Create prompt for question generation
-    const prompt = `Generate exactly 5 personalized recommendation questions for a ${ageNum}-year-old user who wants ${contentType} recommendations. 
+    const prompt = `Generate exactly ${questionCountNum} personalized recommendation questions for a ${ageNum}-year-old user who wants ${contentType} recommendations. 
     
     Requirements:
     - Questions should be conversational and engaging
@@ -115,9 +131,11 @@ serve(async (req) => {
       contentType === "both" ? "movies and books" : contentType
     } preferences
     - Help understand their taste, mood, and interests
+    - Each question should be unique and explore different aspects (genres, themes, mood, recent favorites, specific preferences, etc.)
+    - Questions should encourage detailed responses to improve recommendation quality
     - Return as JSON object with format: {"questions": [{"id": "1", "text": "question text"}, {"id": "2", "text": "question text"}, ...]}
     
-    Generate 5 unique questions now as valid JSON object:`;
+    Generate ${questionCountNum} unique, varied questions now as valid JSON object:`;
 
     console.log("Calling OpenAI API...");
 
@@ -137,15 +155,15 @@ serve(async (req) => {
             {
               role: "system",
               content:
-                "You are a helpful assistant that generates personalized recommendation questions. Always respond with valid JSON.",
+                "You are a helpful assistant that generates personalized recommendation questions. Always respond with valid JSON. Create diverse, engaging questions that will help understand user preferences deeply.",
             },
             {
               role: "user",
               content: prompt,
             },
           ],
-          max_tokens: 1000,
-          temperature: 0.7,
+          max_tokens: Math.min(1500, questionCountNum * 150), // Scale tokens with question count
+          temperature: 0.8, // Slightly higher for more varied questions
         }),
       }
     );
@@ -189,12 +207,16 @@ serve(async (req) => {
       throw new Error("Invalid response format from OpenAI");
     }
 
-    if (parsedResponse.questions.length !== 5) {
+    if (parsedResponse.questions.length !== questionCountNum) {
       console.log(
         "Unexpected number of questions:",
-        parsedResponse.questions.length
+        parsedResponse.questions.length,
+        "expected:",
+        questionCountNum
       );
-      throw new Error("Expected exactly 5 questions from OpenAI");
+      throw new Error(
+        `Expected exactly ${questionCountNum} questions from OpenAI`
+      );
     }
 
     // Format questions for the frontend

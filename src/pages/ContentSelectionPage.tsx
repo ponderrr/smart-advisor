@@ -76,12 +76,12 @@ const ContentSelectionPage = () => {
       // Simulate API call or processing time
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // Navigate to questionnaire page with selected type
-      navigate("/questionnaire", {
+      // Navigate to question count selection page
+      navigate("/question-count", {
         state: { contentType: selectedType },
       });
     } catch (error) {
-      console.error("Error proceeding to questionnaire:", error);
+      console.error("Error proceeding to question count:", error);
       setIsLoading(false);
     }
   };
@@ -165,7 +165,7 @@ const ContentSelectionPage = () => {
       <main className="flex flex-col items-center px-6 pt-[80px] md:pt-[120px] pb-[100px]">
         {/* Progress Indicator */}
         <div className="text-textTertiary text-sm mb-8 animate-in fade-in duration-500">
-          Step 1 of 3
+          Step 1 of 4
         </div>
 
         {/* Page Title Section */}

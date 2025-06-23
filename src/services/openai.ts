@@ -28,7 +28,8 @@ export interface RecommendationData {
  */
 export async function generateQuestions(
   contentType: "movie" | "book" | "both",
-  userAge: number
+  userAge: number,
+  questionCount: number = 5
 ): Promise<Question[]> {
   try {
     // Get user session for authentication
@@ -51,6 +52,7 @@ export async function generateQuestions(
         body: JSON.stringify({
           contentType,
           userAge,
+          questionCount,
         }),
       }
     );
@@ -137,13 +139,14 @@ export async function generateRecommendations(
 export async function generateQuestionsWithRetry(
   contentType: "movie" | "book" | "both",
   userAge: number,
+  questionCount: number = 5,
   maxRetries: number = 3
 ): Promise<Question[]> {
   let lastError;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      return await generateQuestions(contentType, userAge);
+      return await generateQuestions(contentType, userAge, questionCount);
     } catch (error) {
       lastError = error;
 

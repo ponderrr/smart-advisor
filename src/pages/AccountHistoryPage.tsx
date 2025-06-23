@@ -1,10 +1,18 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Heart, Star, User, LogOut } from "lucide-react";
+import {
+  Plus,
+  Heart,
+  Star,
+  User,
+  LogOut,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { databaseService, FilterOptions } from "@/services/database";
 import { Recommendation } from "@/types/Recommendation";
+import { ExpandableText } from "@/components/ExpandableText";
 import UserStatsCard from "@/components/account/UserStatsCard";
 import RecommendationFilters from "@/components/account/RecommendationFilters";
 
@@ -16,12 +24,13 @@ const AccountHistoryPage = () => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [filter, setFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("newest");
+  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const loadRecommendations = async () => {
       try {
         setLoading(true);
-        
+
         // Build filter options
         const filterOptions: FilterOptions = {
           sortBy: sortBy as any,
@@ -41,8 +50,10 @@ const AccountHistoryPage = () => {
           filterOptions.startDate = startOfMonth;
         }
 
-        const { data, error } = await databaseService.getUserRecommendations(filterOptions);
-        
+        const { data, error } = await databaseService.getUserRecommendations(
+          filterOptions
+        );
+
         if (error) {
           console.error("Error loading recommendations:", error);
         } else {
@@ -90,19 +101,37 @@ const AccountHistoryPage = () => {
   };
 
   const handleDeleteRecommendation = async (recommendationId: string) => {
-    if (!window.confirm("Are you sure you want to delete this recommendation?")) {
+    if (
+      !window.confirm("Are you sure you want to delete this recommendation?")
+    ) {
       return;
     }
 
     try {
-      const { error } = await databaseService.deleteRecommendation(recommendationId);
+      const { error } = await databaseService.deleteRecommendation(
+        recommendationId
+      );
       if (!error) {
         // Remove from local state
-        setRecommendations((recs) => recs.filter((rec) => rec.id !== recommendationId));
+        setRecommendations((recs) =>
+          recs.filter((rec) => rec.id !== recommendationId)
+        );
       }
     } catch (error) {
       console.error("Error deleting recommendation:", error);
     }
+  };
+
+  const toggleCardExpansion = (cardId: string) => {
+    setExpandedCards((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(cardId)) {
+        newSet.delete(cardId);
+      } else {
+        newSet.add(cardId);
+      }
+      return newSet;
+    });
   };
 
   return (
@@ -212,101 +241,158 @@ const AccountHistoryPage = () => {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {recommendations.map((rec) => (
-              <div
-                key={rec.id}
-                className="bg-appSecondary border border-gray-700 rounded-xl p-6 hover:border-appAccent transition-all duration-200"
-              >
-                {/* Poster/Cover */}
-                <div className="w-full h-48 bg-gray-700 rounded-lg mb-4">
-                  {rec.poster_url ? (
-                    <img
-                      src={rec.poster_url}
-                      alt={rec.title}
-                      className="w-full h-full object-cover rounded-lg"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-textTertiary">
-                      No Image
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {recommendations.map((rec) => {
+              const isExpanded = expandedCards.has(rec.id);
+              return (
+                <div
+                  key={rec.id}
+                  className="bg-appSecondary border border-gray-700 rounded-xl overflow-hidden hover:border-appAccent transition-all duration-200"
+                >
+                  {/* Main Card Content */}
+                  <div className="p-6">
+                    <div className="flex gap-4">
+                      {/* Poster/Cover */}
+                      <div className="w-24 h-36 bg-gray-700 rounded-lg flex-shrink-0 overflow-hidden">
+                        {rec.poster_url ? (
+                          <img
+                            src={rec.poster_url}
+                            alt={rec.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-textTertiary text-xs">
+                            No Image
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-lg font-semibold text-textPrimary mb-1 truncate">
+                              {rec.title}
+                            </h3>
+                            <div className="flex items-center gap-2 mb-2">
+                              <span
+                                className={`px-2 py-1 text-xs rounded-full ${
+                                  rec.type === "movie"
+                                    ? "bg-blue-500 text-white"
+                                    : "bg-green-500 text-white"
+                                }`}
+                              >
+                                {rec.type}
+                              </span>
+                              {rec.rating && (
+                                <div className="flex items-center gap-1">
+                                  <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                                  <span className="text-sm text-textSecondary">
+                                    {rec.rating}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            {rec.director && (
+                              <p className="text-sm text-textSecondary truncate">
+                                Directed by {rec.director}
+                              </p>
+                            )}
+                            {rec.author && (
+                              <p className="text-sm text-textSecondary truncate">
+                                By {rec.author}
+                              </p>
+                            )}
+                            {rec.year && (
+                              <p className="text-sm text-textSecondary">
+                                {rec.year}
+                              </p>
+                            )}
+                          </div>
+                          <button
+                            onClick={() => handleToggleFavorite(rec.id)}
+                            className={`p-2 rounded-full transition-colors duration-200 ml-2 ${
+                              rec.is_favorited
+                                ? "bg-red-500 text-white"
+                                : "bg-gray-700 text-textSecondary hover:text-red-500"
+                            }`}
+                          >
+                            <Heart
+                              size={16}
+                              fill={rec.is_favorited ? "currentColor" : "none"}
+                            />
+                          </button>
+                        </div>
+
+                        {/* Genres */}
+                        {rec.genres && rec.genres.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mb-3">
+                            {rec.genres.slice(0, 3).map((g) => (
+                              <span
+                                key={g}
+                                className="px-2 py-1 bg-gray-700 text-textSecondary text-xs rounded"
+                              >
+                                {g}
+                              </span>
+                            ))}
+                            {rec.genres.length > 3 && (
+                              <span className="px-2 py-1 bg-gray-700 text-textSecondary text-xs rounded">
+                                +{rec.genres.length - 3}
+                              </span>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Date and Actions */}
+                        <div className="flex items-center justify-between">
+                          <div className="text-xs text-textTertiary">
+                            Added{" "}
+                            {new Date(rec.created_at).toLocaleDateString()}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {rec.description && (
+                              <button
+                                onClick={() => toggleCardExpansion(rec.id)}
+                                className="text-xs text-appAccent hover:text-indigo-400 transition-colors duration-200 flex items-center gap-1"
+                              >
+                                {isExpanded ? "Hide Details" : "Show Details"}
+                                {isExpanded ? (
+                                  <ChevronUp size={12} />
+                                ) : (
+                                  <ChevronDown size={12} />
+                                )}
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleDeleteRecommendation(rec.id)}
+                              className="text-xs text-red-500 hover:text-red-400 transition-colors duration-200"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Expandable Description Section */}
+                  {isExpanded && rec.description && (
+                    <div className="border-t border-gray-700 p-6 animate-in fade-in duration-300">
+                      <ExpandableText
+                        text={rec.description}
+                        title={
+                          rec.type === "movie"
+                            ? "Plot Summary"
+                            : "Book Description"
+                        }
+                        maxLines={4}
+                        className="bg-appPrimary"
+                      />
                     </div>
                   )}
                 </div>
-
-                {/* Content */}
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-textPrimary mb-1 line-clamp-2">
-                      {rec.title}
-                    </h3>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span
-                        className={`px-2 py-1 text-xs rounded-full ${
-                          rec.type === "movie"
-                            ? "bg-blue-500 text-white"
-                            : "bg-green-500 text-white"
-                        }`}
-                      >
-                        {rec.type}
-                      </span>
-                      {rec.rating && (
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                          <span className="text-sm text-textSecondary">
-                            {rec.rating}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handleToggleFavorite(rec.id)}
-                    className={`p-2 rounded-full transition-colors duration-200 ${
-                      rec.is_favorited
-                        ? "bg-red-500 text-white"
-                        : "bg-gray-700 text-textSecondary hover:text-red-500"
-                    }`}
-                  >
-                    <Heart
-                      size={16}
-                      fill={rec.is_favorited ? "currentColor" : "none"}
-                    />
-                  </button>
-                </div>
-
-                {/* Genres */}
-                {rec.genres && rec.genres.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-3">
-                    {rec.genres.slice(0, 2).map((g) => (
-                      <span
-                        key={g}
-                        className="px-2 py-1 bg-gray-700 text-textSecondary text-xs rounded"
-                      >
-                        {g}
-                      </span>
-                    ))}
-                    {rec.genres.length > 2 && (
-                      <span className="px-2 py-1 bg-gray-700 text-textSecondary text-xs rounded">
-                        +{rec.genres.length - 2}
-                      </span>
-                    )}
-                  </div>
-                )}
-
-                {/* Date and Actions */}
-                <div className="flex items-center justify-between">
-                  <div className="text-xs text-textTertiary">
-                    Added {new Date(rec.created_at).toLocaleDateString()}
-                  </div>
-                  <button
-                    onClick={() => handleDeleteRecommendation(rec.id)}
-                    className="text-xs text-red-500 hover:text-red-400 transition-colors duration-200"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </main>

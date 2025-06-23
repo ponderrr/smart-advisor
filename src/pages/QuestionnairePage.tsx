@@ -35,6 +35,7 @@ const QuestionnairePage = () => {
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const contentType = location.state?.contentType as "movie" | "book" | "both";
+  const questionCount = location.state?.questionCount || 5;
 
   useEffect(() => {
     if (!contentType || !user) {
@@ -43,7 +44,7 @@ const QuestionnairePage = () => {
     }
 
     loadQuestions();
-  }, [contentType, user, navigate]);
+  }, [contentType, user, navigate, questionCount]);
 
   const loadQuestions = async () => {
     try {
@@ -53,7 +54,8 @@ const QuestionnairePage = () => {
 
       const generatedQuestions = await generateQuestionsWithRetry(
         contentType,
-        user.age
+        user.age,
+        questionCount
       );
 
       console.log("Questions loaded successfully:", generatedQuestions);
@@ -104,7 +106,7 @@ const QuestionnairePage = () => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex((prev) => prev - 1);
     } else {
-      navigate("/content-selection");
+      navigate("/question-count", { state: { contentType } });
     }
   };
 
@@ -179,7 +181,7 @@ const QuestionnairePage = () => {
         </header>
 
         <LoadingScreen
-          message="Generating Your Questions..."
+          message={`Generating Your ${questionCount} Questions...`}
           submessage="Our AI is creating personalized questions just for you based on your preferences."
         />
       </div>
@@ -247,7 +249,9 @@ const QuestionnairePage = () => {
                 Try Again
               </EnhancedButton>
               <EnhancedButton
-                onClick={() => navigate("/content-selection")}
+                onClick={() =>
+                  navigate("/question-count", { state: { contentType } })
+                }
                 variant="outline"
               >
                 Go Back
@@ -306,6 +310,11 @@ const QuestionnairePage = () => {
 
       <main className="px-6 pt-[80px] md:pt-[120px] pb-[100px]">
         <div className="max-w-2xl mx-auto">
+          {/* Progress Indicator */}
+          <div className="text-center text-textTertiary text-sm mb-8 animate-in fade-in duration-500">
+            Step 3 of 4
+          </div>
+
           <div className="mb-8 animate-in fade-in duration-700">
             <div className="flex items-center justify-between mb-4">
               <h1 className="text-2xl font-semibold text-textPrimary">
