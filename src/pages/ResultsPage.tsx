@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { RefreshCw, Heart, User, LogOut, Star } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -24,8 +24,19 @@ const ResultsPage = () => {
     "Analyzing your answers..."
   );
 
+  // Track if recommendations have been generated for this session
+  const hasGeneratedRef = useRef(false);
+  const currentSessionRef = useRef<string | null>(null);
+  const generatedRecommendationsRef = useRef<Recommendation[]>([]);
+
   // Get data from navigation state
   const { contentType, answers, questions } = location.state || {};
+
+  // Create a unique session identifier based on the answers and content type
+  const sessionId =
+    answers && contentType
+      ? JSON.stringify(answers) + contentType + user?.id
+      : null;
 
   useEffect(() => {
     // Redirect if no data
@@ -34,9 +45,30 @@ const ResultsPage = () => {
       return;
     }
 
-    // Generate recommendations
-    loadRecommendations();
-  }, [contentType, answers, user, navigate]);
+    // Check if this is the same session as before
+    const isSameSession = currentSessionRef.current === sessionId;
+
+    // If we have existing recommendations for this session, use them
+    if (isSameSession && generatedRecommendationsRef.current.length > 0) {
+      console.log("Using cached recommendations for same session");
+      setRecommendations(generatedRecommendationsRef.current);
+      setLoading(false);
+      return;
+    }
+
+    // Only generate recommendations if this is a new session
+    if (!isSameSession) {
+      console.log("Generating recommendations for new session:", sessionId);
+      currentSessionRef.current = sessionId;
+      hasGeneratedRef.current = true;
+      loadRecommendations();
+    } else {
+      console.log(
+        "Same session but no cached recommendations, using existing state"
+      );
+      setLoading(false);
+    }
+  }, [contentType, answers, user, navigate, sessionId]);
 
   const loadRecommendations = async () => {
     try {
@@ -69,6 +101,9 @@ const ResultsPage = () => {
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       console.log("Recommendations generated successfully:", recs);
+
+      // Cache the recommendations for this session
+      generatedRecommendationsRef.current = recs;
       setRecommendations(recs);
     } catch (error) {
       console.error("Error generating recommendations:", error);
@@ -90,6 +125,10 @@ const ResultsPage = () => {
   };
 
   const handleGetAnother = () => {
+    // Clear the session cache when getting another recommendation
+    currentSessionRef.current = null;
+    generatedRecommendationsRef.current = [];
+    hasGeneratedRef.current = false;
     navigate("/content-selection");
   };
 
@@ -101,14 +140,14 @@ const ResultsPage = () => {
     try {
       const { error } = await databaseService.toggleFavorite(recommendationId);
       if (!error) {
-        // Update local state
-        setRecommendations((recs) =>
-          recs.map((rec) =>
-            rec.id === recommendationId
-              ? { ...rec, is_favorited: !rec.is_favorited }
-              : rec
-          )
+        // Update both local state and cached recommendations
+        const updatedRecs = recommendations.map((rec) =>
+          rec.id === recommendationId
+            ? { ...rec, is_favorited: !rec.is_favorited }
+            : rec
         );
+        setRecommendations(updatedRecs);
+        generatedRecommendationsRef.current = updatedRecs;
       } else {
         console.error("Error toggling favorite:", error);
       }
@@ -118,6 +157,10 @@ const ResultsPage = () => {
   };
 
   const handleRetry = () => {
+    // Clear cache and regenerate
+    currentSessionRef.current = null;
+    generatedRecommendationsRef.current = [];
+    hasGeneratedRef.current = false;
     loadRecommendations();
   };
 
@@ -259,7 +302,7 @@ const ResultsPage = () => {
       <main className="px-6 pt-[80px] md:pt-[120px] pb-[100px]">
         {/* Progress Indicator */}
         <div className="text-center text-textTertiary text-sm mb-8 animate-in fade-in duration-500">
-          Step 3 of 3
+          Step 4 of 4
         </div>
 
         {/* Title */}
