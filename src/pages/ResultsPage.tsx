@@ -12,6 +12,42 @@ import {
   RecommendationLoadingShimmer,
 } from "@/components/enhanced";
 
+// Utility function to safely serialize data, handling circular references and non-serializable values
+const safeStringify = (obj: any): string => {
+  const seen = new WeakSet();
+
+  try {
+    return JSON.stringify(obj, (key, value) => {
+      // Handle circular references
+      if (typeof value === "object" && value !== null) {
+        if (seen.has(value)) {
+          return "[Circular Reference]";
+        }
+        seen.add(value);
+      }
+
+      // Handle functions and other non-serializable values
+      if (typeof value === "function") {
+        return "[Function]";
+      }
+
+      if (typeof value === "symbol") {
+        return "[Symbol]";
+      }
+
+      if (value === undefined) {
+        return "[Undefined]";
+      }
+
+      return value;
+    });
+  } catch (error) {
+    console.warn("Failed to stringify object, using fallback:", error);
+    // Fallback: create a hash based on object keys and content type
+    return `fallback-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }
+};
+
 const ResultsPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -33,10 +69,24 @@ const ResultsPage = () => {
   const { contentType, answers, questions } = location.state || {};
 
   // Create a unique session identifier based on the answers and content type
-  const sessionId =
-    answers && contentType
-      ? JSON.stringify(answers) + contentType + user?.id
-      : null;
+  // Now safely handles non-serializable values, circular references, and undefined user IDs
+  const sessionId = (() => {
+    if (!answers || !contentType) {
+      return null;
+    }
+
+    try {
+      const serializedAnswers = safeStringify(answers);
+      const userId = user?.id || "anonymous";
+      return `${serializedAnswers}-${contentType}-${userId}`;
+    } catch (error) {
+      console.warn("Failed to create session ID, using fallback:", error);
+      // Fallback session ID with timestamp and random string
+      return `fallback-session-${Date.now()}-${Math.random()
+        .toString(36)
+        .substr(2, 9)}`;
+    }
+  })();
 
   useEffect(() => {
     // Redirect if no data
