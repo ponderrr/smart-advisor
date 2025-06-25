@@ -1,17 +1,12 @@
 # Smart Advisor 🎬📚
 
-[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen.svg)](https://smartadvisor.app)
+[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen.svg)](https://smartadvisor.live)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5.3-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18.3.1-blue.svg)](https://reactjs.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-Powered-green.svg)](https://supabase.com/)
 [![AI Powered](https://img.shields.io/badge/AI-OpenAI%20GPT--4-orange.svg)](https://openai.com/)
 
 > AI-powered personalized movie and book recommendation engine that creates custom questionnaires based on user preferences and demographics.
-
-**🌟 [Try Smart Advisor Live](https://smartadvisor.app)**
-
-![Smart Advisor Demo](docs/images/demo-preview.png)
-*AI-generated questionnaires leading to personalized recommendations*
 
 ## 🎯 What It Does
 
@@ -200,12 +195,6 @@ Smart Advisor demonstrates expertise in:
 - **Advanced Analytics** for content consumption insights
 - **Multi-Language Support** for global accessibility
 
-## 📱 Live Demo
-
-**🌟 [Experience Smart Advisor](https://smartadvisor.app)**
-
-*Create an account to try the full AI-powered recommendation engine*
-
 ## 💼 About This Project
 
 Smart Advisor showcases modern web development practices with AI integration, demonstrating proficiency in:
@@ -223,6 +212,6 @@ This project represents a complete, production-ready application with real users
 ---
 
 **🚀 Ready to discover your next favorite movie or book?**  
-**[Try Smart Advisor Now](https://smartadvisor.app)**
+**[Try Smart Advisor Now](https://smartadvisor.live)**
 
 *Built with cutting-edge technology and a passion for great content discovery.*
