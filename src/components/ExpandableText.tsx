@@ -10,7 +10,7 @@ interface ExpandableTextProps {
 
 export const ExpandableText: React.FC<ExpandableTextProps> = ({
   text,
-  maxLines = 3,
+  maxLines = 5, // Increased default from 3 to 5
   className = "",
   title = "Description:",
 }) => {
@@ -63,21 +63,26 @@ export const ExpandableText: React.FC<ExpandableTextProps> = ({
   return (
     <div
       className={cn(
-        "bg-appPrimary border border-gray-600 rounded-lg p-4",
+        "bg-appPrimary border border-gray-600 rounded-lg p-6", // Increased padding from p-4 to p-6
         className
       )}
     >
-      <h3 className="text-textPrimary font-semibold mb-2">{title}</h3>
+      <h3 className="text-textPrimary font-semibold mb-3 text-lg">
+        {" "}
+        {/* Increased margin and font size */}
+        {title}
+      </h3>
       <p
         ref={textRef}
         className={cn(
-          "text-textSecondary leading-relaxed",
+          "text-textSecondary leading-relaxed text-base sm:text-lg", // Larger text size
           !isExpanded && "overflow-hidden"
         )}
         style={{
           display: !isExpanded ? "-webkit-box" : "block",
           WebkitBoxOrient: "vertical",
           WebkitLineClamp: !isExpanded ? maxLines : "unset",
+          lineHeight: "1.7", // Better line spacing
         }}
       >
         {cleanText}
@@ -86,7 +91,7 @@ export const ExpandableText: React.FC<ExpandableTextProps> = ({
       {isTruncated && (
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="mt-2 text-appAccent hover:text-indigo-400 text-sm font-medium transition-colors duration-200 enhanced-button"
+          className="mt-3 text-appAccent hover:text-indigo-400 text-sm sm:text-base font-medium transition-colors duration-200 enhanced-button" // Increased margin and font size
         >
           {isExpanded ? "Read Less" : "Read More"}
         </button>

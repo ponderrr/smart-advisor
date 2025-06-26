@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { RefreshCw, Heart, User, LogOut, Star } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -48,6 +48,44 @@ const safeStringify = (obj: any): string => {
   }
 };
 
+// Session storage key for tracking generated sessions
+const GENERATED_SESSIONS_KEY = "smart_advisor_generated_sessions";
+
+// Function to get generated sessions from localStorage
+const getGeneratedSessions = (): Set<string> => {
+  try {
+    const stored = localStorage.getItem(GENERATED_SESSIONS_KEY);
+    return stored ? new Set(JSON.parse(stored)) : new Set();
+  } catch {
+    return new Set();
+  }
+};
+
+// Function to save generated sessions to localStorage
+const saveGeneratedSession = (sessionId: string) => {
+  try {
+    const sessions = getGeneratedSessions();
+    sessions.add(sessionId);
+
+    // Keep only the last 10 sessions to prevent localStorage bloat
+    const sessionsArray = Array.from(sessions);
+    if (sessionsArray.length > 10) {
+      const recentSessions = sessionsArray.slice(-10);
+      localStorage.setItem(
+        GENERATED_SESSIONS_KEY,
+        JSON.stringify(recentSessions)
+      );
+    } else {
+      localStorage.setItem(
+        GENERATED_SESSIONS_KEY,
+        JSON.stringify(sessionsArray)
+      );
+    }
+  } catch (error) {
+    console.warn("Failed to save session to localStorage:", error);
+  }
+};
+
 const ResultsPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -59,17 +97,18 @@ const ResultsPage = () => {
   const [generationStep, setGenerationStep] = useState<string>(
     "Analyzing your answers..."
   );
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   // Track if recommendations have been generated for this session
   const hasGeneratedRef = useRef(false);
   const currentSessionRef = useRef<string | null>(null);
   const generatedRecommendationsRef = useRef<Recommendation[]>([]);
+  const isInitialLoadRef = useRef(true);
 
   // Get data from navigation state
   const { contentType, answers, questions } = location.state || {};
 
   // Create a unique session identifier based on the answers and content type
-  // Now safely handles non-serializable values, circular references, and undefined user IDs
   const sessionId = (() => {
     if (!answers || !contentType) {
       return null;
@@ -81,46 +120,16 @@ const ResultsPage = () => {
       return `${serializedAnswers}-${contentType}-${userId}`;
     } catch (error) {
       console.warn("Failed to create session ID, using fallback:", error);
-      // Fallback session ID with timestamp and random string
       return `fallback-session-${Date.now()}-${Math.random()
         .toString(36)
         .substr(2, 9)}`;
     }
   })();
 
-  useEffect(() => {
-    // Redirect if no data
-    if (!contentType || !answers || !user) {
-      navigate("/content-selection");
-      return;
-    }
+  // Function to handle generating new recommendations
+  const handleGenerateRecommendations = useCallback(async () => {
+    if (!sessionId || !user) return;
 
-    // Check if this is the same session as before
-    const isSameSession = currentSessionRef.current === sessionId;
-
-    // If we have existing recommendations for this session, use them
-    if (isSameSession && generatedRecommendationsRef.current.length > 0) {
-      console.log("Using cached recommendations for same session");
-      setRecommendations(generatedRecommendationsRef.current);
-      setLoading(false);
-      return;
-    }
-
-    // Only generate recommendations if this is a new session
-    if (!isSameSession) {
-      console.log("Generating recommendations for new session:", sessionId);
-      currentSessionRef.current = sessionId;
-      hasGeneratedRef.current = true;
-      loadRecommendations();
-    } else {
-      console.log(
-        "Same session but no cached recommendations, using existing state"
-      );
-      setLoading(false);
-    }
-  }, [contentType, answers, user, navigate, sessionId]);
-
-  const loadRecommendations = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -154,6 +163,11 @@ const ResultsPage = () => {
 
       // Cache the recommendations for this session
       generatedRecommendationsRef.current = recs;
+      currentSessionRef.current = sessionId;
+
+      // Mark this session as generated
+      saveGeneratedSession(sessionId);
+
       setRecommendations(recs);
     } catch (error) {
       console.error("Error generating recommendations:", error);
@@ -163,7 +177,93 @@ const ResultsPage = () => {
     } finally {
       setLoading(false);
     }
+  }, [sessionId, user, answers, contentType]);
+
+  // Function to check if session was already generated
+  const wasSessionGenerated = useCallback((sessionId: string): boolean => {
+    const generatedSessions = getGeneratedSessions();
+    return generatedSessions.has(sessionId);
+  }, []);
+
+  // Function to handle confirmation dialog
+  const handleConfirmGeneration = () => {
+    setShowConfirmDialog(false);
+    handleGenerateRecommendations();
   };
+
+  const handleCancelGeneration = () => {
+    setShowConfirmDialog(false);
+    navigate("/history");
+  };
+
+  useEffect(() => {
+    // Redirect if no data
+    if (!contentType || !answers || !user || !sessionId) {
+      navigate("/content-selection");
+      return;
+    }
+
+    // Check if this is the same session as before
+    const isSameSession = currentSessionRef.current === sessionId;
+    const hasExistingRecommendations =
+      generatedRecommendationsRef.current.length > 0;
+
+    // If we have cached recommendations for this session, use them
+    if (isSameSession && hasExistingRecommendations) {
+      console.log("Using cached recommendations for same session");
+      setRecommendations(generatedRecommendationsRef.current);
+      setLoading(false);
+      return;
+    }
+
+    // Check if this session was already generated (from localStorage)
+    const sessionWasGenerated = wasSessionGenerated(sessionId);
+
+    if (sessionWasGenerated && isInitialLoadRef.current) {
+      // This session was already generated before, show confirmation dialog
+      console.log("Session was already generated, showing confirmation dialog");
+      setShowConfirmDialog(true);
+      setLoading(false);
+      isInitialLoadRef.current = false;
+      return;
+    }
+
+    // Generate recommendations for new session
+    if (!sessionWasGenerated) {
+      console.log("Generating recommendations for new session:", sessionId);
+      handleGenerateRecommendations();
+    } else {
+      setLoading(false);
+    }
+
+    isInitialLoadRef.current = false;
+  }, [
+    contentType,
+    answers,
+    user,
+    sessionId,
+    navigate,
+    wasSessionGenerated,
+    handleGenerateRecommendations,
+  ]);
+
+  // Add beforeunload event listener to warn about page refresh
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (recommendations.length > 0 && !error) {
+        e.preventDefault();
+        e.returnValue =
+          "You have unsaved recommendations. Are you sure you want to leave?";
+        return "You have unsaved recommendations. Are you sure you want to leave?";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [recommendations.length, error]);
 
   const handleLogoClick = () => {
     navigate("/");
@@ -211,11 +311,69 @@ const ResultsPage = () => {
     currentSessionRef.current = null;
     generatedRecommendationsRef.current = [];
     hasGeneratedRef.current = false;
-    loadRecommendations();
+    handleGenerateRecommendations();
   };
 
   if (!contentType || !answers || !user) {
     return null; // Redirect will happen in useEffect
+  }
+
+  // Show confirmation dialog if needed
+  if (showConfirmDialog) {
+    return (
+      <div className="bg-appPrimary text-textPrimary font-inter min-h-screen">
+        {/* Header */}
+        <header className="h-[72px] flex items-center justify-between px-6 md:px-12 bg-appPrimary">
+          <button
+            onClick={handleLogoClick}
+            className="text-textPrimary text-xl font-medium cursor-pointer hover:opacity-80 transition-opacity duration-200"
+          >
+            Smart Advisor
+          </button>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-appAccent rounded-full flex items-center justify-center">
+              <span className="text-white text-sm font-medium">
+                {user?.name.charAt(0).toUpperCase()}
+              </span>
+            </div>
+            <span className="text-textSecondary text-[15px]">
+              Hi, {user?.name}
+            </span>
+          </div>
+        </header>
+
+        <main className="flex flex-col items-center justify-center px-6 pt-[120px] pb-[100px]">
+          <div className="text-center max-w-md">
+            <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-8">
+              <RefreshCw className="w-8 h-8 text-white" />
+            </div>
+            <h2 className="text-2xl font-semibold text-textPrimary mb-4">
+              Generate New Recommendations?
+            </h2>
+            <p className="text-textSecondary mb-6">
+              It looks like you've already received recommendations for these
+              answers. Generating new ones will create additional entries in
+              your history.
+            </p>
+            <div className="flex gap-4 justify-center">
+              <EnhancedButton
+                onClick={handleCancelGeneration}
+                variant="outline"
+              >
+                Go to History
+              </EnhancedButton>
+              <EnhancedButton
+                onClick={handleConfirmGeneration}
+                variant="primary"
+                glow
+              >
+                Generate New
+              </EnhancedButton>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
   }
 
   if (loading) {
@@ -349,7 +507,7 @@ const ResultsPage = () => {
       </header>
 
       {/* Main Content */}
-      <main className="px-6 pt-[80px] md:pt-[120px] pb-[100px]">
+      <main className="px-4 sm:px-6 pt-[80px] md:pt-[120px] pb-[100px]">
         {/* Progress Indicator */}
         <div className="text-center text-textTertiary text-sm mb-8 animate-in fade-in duration-500">
           Step 4 of 4
@@ -357,24 +515,24 @@ const ResultsPage = () => {
 
         {/* Title */}
         <div className="text-center mb-12 animate-in fade-in duration-700 delay-200">
-          <h1 className="text-4xl md:text-5xl font-bold text-textPrimary mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-textPrimary mb-4">
             Your AI-Generated Recommendations
           </h1>
-          <p className="text-lg text-textSecondary">
+          <p className="text-base sm:text-lg text-textSecondary">
             Based on your personalized answers, here's what our AI recommends
           </p>
         </div>
 
         {/* Recommendations */}
-        <div className="max-w-4xl mx-auto space-y-8">
+        <div className="max-w-6xl mx-auto space-y-8 sm:space-y-12">
           {recommendations.map((rec, index) => (
             <div
               key={rec.id}
-              className="recommendation-card bg-appSecondary border border-gray-700 rounded-2xl p-8 flex flex-col md:flex-row gap-6"
+              className="recommendation-card bg-appSecondary border border-gray-700 rounded-2xl p-6 sm:p-8 flex flex-col lg:flex-row gap-6 lg:gap-8"
               style={{ animationDelay: `${400 + index * 200}ms` }}
             >
-              {/* Poster/Cover */}
-              <div className="w-full md:w-48 h-72 bg-gray-700 rounded-lg flex-shrink-0 overflow-hidden">
+              {/* Poster/Cover - Larger on mobile, maintains aspect ratio */}
+              <div className="w-full sm:w-64 lg:w-72 h-80 sm:h-96 lg:h-[28rem] bg-gray-700 rounded-lg flex-shrink-0 overflow-hidden mx-auto lg:mx-0">
                 {rec.poster_url ? (
                   <img
                     src={rec.poster_url}
@@ -397,57 +555,61 @@ const ResultsPage = () => {
                 </div>
               </div>
 
-              {/* Content */}
-              <div className="flex-1">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h2 className="text-2xl font-bold text-textPrimary mb-2">
+              {/* Content - More spacious */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between mb-6">
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-textPrimary mb-3 leading-tight">
                       {rec.title}
                     </h2>
                     {rec.director && (
-                      <p className="text-textSecondary">
+                      <p className="text-base sm:text-lg text-textSecondary mb-1">
                         Directed by {rec.director}
                       </p>
                     )}
                     {rec.author && (
-                      <p className="text-textSecondary">By {rec.author}</p>
+                      <p className="text-base sm:text-lg text-textSecondary mb-1">
+                        By {rec.author}
+                      </p>
                     )}
                     {rec.year && (
-                      <p className="text-textSecondary">{rec.year}</p>
+                      <p className="text-base sm:text-lg text-textSecondary">
+                        {rec.year}
+                      </p>
                     )}
                   </div>
                   <button
                     onClick={() => handleToggleFavorite(rec.id)}
-                    className={`favorite-button p-2 rounded-full transition-colors duration-200 ${
+                    className={`favorite-button p-3 rounded-full transition-colors duration-200 ml-4 flex-shrink-0 ${
                       rec.is_favorited
                         ? "bg-red-500 text-white favorited"
                         : "bg-gray-700 text-textSecondary hover:text-red-500"
                     }`}
                   >
                     <Heart
-                      size={20}
+                      size={24}
                       fill={rec.is_favorited ? "currentColor" : "none"}
                     />
                   </button>
                 </div>
 
-                {/* Rating */}
+                {/* Rating - Larger */}
                 {rec.rating && (
-                  <div className="flex items-center gap-2 mb-4">
-                    <Star className="w-5 h-5 text-yellow-500 fill-current" />
-                    <span className="text-textPrimary font-medium">
+                  <div className="flex items-center gap-3 mb-6">
+                    <Star className="w-6 h-6 text-yellow-500 fill-current" />
+                    <span className="text-lg sm:text-xl text-textPrimary font-medium">
                       {rec.rating}
                     </span>
                   </div>
                 )}
 
-                {/* Genres */}
+                {/* Genres - Larger badges */}
                 {rec.genres && rec.genres.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-4">
+                  <div className="flex flex-wrap gap-2 sm:gap-3 mb-6">
                     {rec.genres.map((g, genreIndex) => (
                       <span
                         key={g}
-                        className="px-3 py-1 bg-appAccent text-white text-sm rounded-full animate-in fade-in duration-500"
+                        className="px-4 py-2 bg-appAccent text-white text-sm sm:text-base rounded-full animate-in fade-in duration-500"
                         style={{
                           animationDelay: `${
                             800 + index * 200 + genreIndex * 100
@@ -460,7 +622,7 @@ const ResultsPage = () => {
                   </div>
                 )}
 
-                {/* Expandable Description */}
+                {/* Expandable Description - Much larger and more prominent */}
                 {rec.description && (
                   <div
                     className="animate-in fade-in duration-700"
@@ -473,7 +635,8 @@ const ResultsPage = () => {
                           ? "Plot Summary:"
                           : "Book Description:"
                       }
-                      maxLines={3}
+                      maxLines={5} // Increased from 3 to 5
+                      className="bg-appPrimary text-base sm:text-lg leading-relaxed" // Larger text and better spacing
                     />
                   </div>
                 )}
@@ -489,6 +652,7 @@ const ResultsPage = () => {
             variant="primary"
             size="lg"
             glow
+            className="w-full sm:w-auto"
           >
             Get Another Recommendation
           </EnhancedButton>
@@ -496,6 +660,7 @@ const ResultsPage = () => {
             onClick={handleViewHistory}
             variant="secondary"
             size="lg"
+            className="w-full sm:w-auto"
           >
             View My History
           </EnhancedButton>

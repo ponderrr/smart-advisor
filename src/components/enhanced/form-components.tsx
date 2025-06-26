@@ -231,7 +231,7 @@ export const EnhancedSelect = forwardRef<
 
 EnhancedSelect.displayName = "EnhancedSelect";
 
-// Enhanced Password Input with Eye Toggle
+// Enhanced Password Input with Eye Toggle - FIXED POSITIONING
 interface EnhancedPasswordInputProps extends Omit<EnhancedInputProps, "type"> {
   showToggle?: boolean;
 }
@@ -239,22 +239,28 @@ interface EnhancedPasswordInputProps extends Omit<EnhancedInputProps, "type"> {
 export const EnhancedPasswordInput: React.FC<EnhancedPasswordInputProps> = ({
   showToggle = true,
   className,
+  error,
   ...props
 }) => {
   const [showPassword, setShowPassword] = React.useState(false);
 
   return (
     <div className="relative">
-      <EnhancedInput
+      <input
         type={showPassword ? "text" : "password"}
-        className={cn("pr-16", className)}
+        className={cn(
+          "form-input w-full bg-appPrimary border text-textPrimary text-base font-normal rounded-lg p-4 focus:outline-none transition-all duration-200",
+          showToggle ? "pr-12" : "pr-4", // Add right padding when toggle is shown
+          error ? "border-red-500" : "border-gray-700",
+          className
+        )}
         {...props}
       />
       {showToggle && (
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-10 top-1/2 h-8 w-8 flex items-center justify-center -translate-y-1/2 text-textTertiary hover:text-textSecondary transition-colors duration-200 enhanced-button"
+          className="absolute right-3 top-1/2 transform -translate-y-1/2 h-8 w-8 flex items-center justify-center text-textTertiary hover:text-textSecondary transition-colors duration-200 enhanced-button rounded-md hover:bg-gray-700"
         >
           <svg
             className="w-5 h-5"
@@ -279,6 +285,11 @@ export const EnhancedPasswordInput: React.FC<EnhancedPasswordInputProps> = ({
             )}
           </svg>
         </button>
+      )}
+      {error && (
+        <p className="text-red-500 text-xs mt-1 animate-in fade-in duration-300">
+          {error}
+        </p>
       )}
     </div>
   );
