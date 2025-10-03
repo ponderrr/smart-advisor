@@ -3,9 +3,10 @@ import { tmdbService } from "@/services/tmdb";
 import { googleBooksService } from "@/services/googleBooks";
 import { databaseService } from "@/services/database";
 import { Recommendation } from "@/types/Recommendation";
+import { Answer } from "@/types/Answer";
 
 interface QuestionnaireData {
-  answers: any[];
+  answers: Answer[];
   contentType: "movie" | "book" | "both";
   userAge: number;
 }
@@ -19,7 +20,7 @@ class EnhancedRecommendationsService {
   }
 
   async retryRecommendation(
-    questionnaireData: any,
+    questionnaireData: QuestionnaireData,
     userId: string,
     retryCount = 0
   ): Promise<Recommendation[]> {
@@ -55,7 +56,7 @@ class EnhancedRecommendationsService {
   }
 
   async generateEnhancedRecommendations(
-    questionnaireData: any,
+    questionnaireData: QuestionnaireData,
     userId: string
   ): Promise<Recommendation[]> {
     const { answers, contentType, userAge } = questionnaireData;
@@ -79,7 +80,7 @@ class EnhancedRecommendationsService {
     }
 
     // Convert RecommendationData to array of recommendations
-    const recommendationsArray: any[] = [];
+    const recommendationsArray: Partial<Recommendation>[] = [];
 
     if (contentType === "movie" || contentType === "both") {
       if (aiRecommendations.movieRecommendation) {

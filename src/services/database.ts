@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Recommendation } from "@/types/Recommendation";
 import { User } from "@/types/User";
@@ -31,10 +30,14 @@ class DatabaseService {
   /**
    * Save a recommendation to the database
    */
-  async saveRecommendation(recommendation: Omit<Recommendation, "id" | "created_at">): Promise<{ data: Recommendation | null; error: string | null }> {
+  async saveRecommendation(
+    recommendation: Omit<Recommendation, "id" | "created_at">
+  ): Promise<{ data: Recommendation | null; error: string | null }> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) {
         return { data: null, error: "User not authenticated" };
       }
@@ -47,7 +50,9 @@ class DatabaseService {
         description: recommendation.description || "",
         explanation: recommendation.explanation || "",
         poster_url: recommendation.poster_url || "",
-        genre: Array.isArray(recommendation.genres) ? recommendation.genres.join(", ") : "",
+        genre: Array.isArray(recommendation.genres)
+          ? recommendation.genres.join(", ")
+          : "",
         rating: recommendation.rating || null,
         is_favorited: recommendation.is_favorited || false,
         content_type: recommendation.content_type,
@@ -96,10 +101,14 @@ class DatabaseService {
   /**
    * Get user recommendations with filtering and sorting
    */
-  async getUserRecommendations(filters?: FilterOptions): Promise<{ data: Recommendation[]; error: string | null }> {
+  async getUserRecommendations(
+    filters?: FilterOptions
+  ): Promise<{ data: Recommendation[]; error: string | null }> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) {
         return { data: [], error: "User not authenticated" };
       }
@@ -132,7 +141,9 @@ class DatabaseService {
           query = query.order("created_at", { ascending: true });
           break;
         case "favorites_first":
-          query = query.order("is_favorited", { ascending: false }).order("created_at", { ascending: false });
+          query = query
+            .order("is_favorited", { ascending: false })
+            .order("created_at", { ascending: false });
           break;
         default: // newest
           query = query.order("created_at", { ascending: false });
@@ -144,7 +155,10 @@ class DatabaseService {
       }
 
       if (filters?.offset) {
-        query = query.range(filters.offset, (filters.offset + (filters.limit || 20)) - 1);
+        query = query.range(
+          filters.offset,
+          filters.offset + (filters.limit || 20) - 1
+        );
       }
 
       const { data, error } = await query;
@@ -155,23 +169,25 @@ class DatabaseService {
       }
 
       // Convert database records to Recommendation type
-      const recommendations: Recommendation[] = (data || []).map((rec: any) => ({
-        id: rec.id,
-        user_id: rec.user_id,
-        type: rec.type,
-        title: rec.title,
-        director: rec.director,
-        author: rec.author,
-        year: rec.year,
-        rating: rec.rating || 0,
-        genres: rec.genre ? rec.genre.split(", ").filter(Boolean) : [],
-        poster_url: rec.poster_url,
-        explanation: rec.explanation,
-        is_favorited: rec.is_favorited || false,
-        content_type: rec.content_type,
-        created_at: rec.created_at,
-        description: rec.description,
-      }));
+      const recommendations: Recommendation[] = (data || []).map(
+        (rec: Record<string, unknown>) => ({
+          id: rec.id,
+          user_id: rec.user_id,
+          type: rec.type,
+          title: rec.title,
+          director: rec.director,
+          author: rec.author,
+          year: rec.year,
+          rating: rec.rating || 0,
+          genres: rec.genre ? rec.genre.split(", ").filter(Boolean) : [],
+          poster_url: rec.poster_url,
+          explanation: rec.explanation,
+          is_favorited: rec.is_favorited || false,
+          content_type: rec.content_type,
+          created_at: rec.created_at,
+          description: rec.description,
+        })
+      );
 
       return { data: recommendations, error: null };
     } catch (err) {
@@ -183,7 +199,9 @@ class DatabaseService {
   /**
    * Toggle favorite status of a recommendation
    */
-  async toggleFavorite(recommendationId: string): Promise<{ error: string | null }> {
+  async toggleFavorite(
+    recommendationId: string
+  ): Promise<{ error: string | null }> {
     try {
       const { data: rec, error: fetchError } = await supabase
         .from("recommendations")
@@ -216,7 +234,9 @@ class DatabaseService {
   /**
    * Delete a recommendation
    */
-  async deleteRecommendation(recommendationId: string): Promise<{ error: string | null }> {
+  async deleteRecommendation(
+    recommendationId: string
+  ): Promise<{ error: string | null }> {
     try {
       const { error } = await supabase
         .from("recommendations")
@@ -238,10 +258,14 @@ class DatabaseService {
   /**
    * Update user profile information
    */
-  async updateUserProfile(updates: ProfileUpdates): Promise<{ error: string | null }> {
+  async updateUserProfile(
+    updates: ProfileUpdates
+  ): Promise<{ error: string | null }> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) {
         return { error: "User not authenticated" };
       }
@@ -271,10 +295,15 @@ class DatabaseService {
   /**
    * Get user stats
    */
-  async getUserStats(): Promise<{ data: UserStats | null; error: string | null }> {
+  async getUserStats(): Promise<{
+    data: UserStats | null;
+    error: string | null;
+  }> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) {
         return { data: null, error: "User not authenticated" };
       }
@@ -294,11 +323,11 @@ class DatabaseService {
 
       const stats: UserStats = {
         totalRecommendations: recommendations.length,
-        favoriteCount: recommendations.filter(r => r.is_favorited).length,
-        movieCount: recommendations.filter(r => r.type === "movie").length,
-        bookCount: recommendations.filter(r => r.type === "book").length,
-        thisMonthCount: recommendations.filter(r => 
-          new Date(r.created_at) >= startOfMonth
+        favoriteCount: recommendations.filter((r) => r.is_favorited).length,
+        movieCount: recommendations.filter((r) => r.type === "movie").length,
+        bookCount: recommendations.filter((r) => r.type === "book").length,
+        thisMonthCount: recommendations.filter(
+          (r) => new Date(r.created_at) >= startOfMonth
         ).length,
       };
 
@@ -312,10 +341,15 @@ class DatabaseService {
   /**
    * Get current user profile
    */
-  async getCurrentUserProfile(): Promise<{ data: User | null; error: string | null }> {
+  async getCurrentUserProfile(): Promise<{
+    data: User | null;
+    error: string | null;
+  }> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) {
         return { data: null, error: "User not authenticated" };
       }

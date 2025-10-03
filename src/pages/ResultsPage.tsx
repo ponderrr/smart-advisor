@@ -11,9 +11,10 @@ import {
   LoadingScreen,
   RecommendationLoadingShimmer,
 } from "@/components/enhanced";
+import { SafeLocalStorage } from "@/utils/localStorage";
 
 // Utility function to safely serialize data, handling circular references and non-serializable values
-const safeStringify = (obj: any): string => {
+const safeStringify = (obj: unknown): string => {
   const seen = new WeakSet();
 
   try {
@@ -53,37 +54,21 @@ const GENERATED_SESSIONS_KEY = "smart_advisor_generated_sessions";
 
 // Function to get generated sessions from localStorage
 const getGeneratedSessions = (): Set<string> => {
-  try {
-    const stored = localStorage.getItem(GENERATED_SESSIONS_KEY);
-    return stored ? new Set(JSON.parse(stored)) : new Set();
-  } catch {
-    return new Set();
-  }
+  const stored = SafeLocalStorage.getJSON<string[]>(GENERATED_SESSIONS_KEY, []);
+  return new Set(stored);
 };
 
 // Function to save generated sessions to localStorage
 const saveGeneratedSession = (sessionId: string) => {
-  try {
-    const sessions = getGeneratedSessions();
-    sessions.add(sessionId);
+  const sessions = getGeneratedSessions();
+  sessions.add(sessionId);
 
-    // Keep only the last 10 sessions to prevent localStorage bloat
-    const sessionsArray = Array.from(sessions);
-    if (sessionsArray.length > 10) {
-      const recentSessions = sessionsArray.slice(-10);
-      localStorage.setItem(
-        GENERATED_SESSIONS_KEY,
-        JSON.stringify(recentSessions)
-      );
-    } else {
-      localStorage.setItem(
-        GENERATED_SESSIONS_KEY,
-        JSON.stringify(sessionsArray)
-      );
-    }
-  } catch (error) {
-    console.warn("Failed to save session to localStorage:", error);
-  }
+  // Keep only the last 10 sessions to prevent localStorage bloat
+  const sessionsArray = Array.from(sessions);
+  const sessionsToStore =
+    sessionsArray.length > 10 ? sessionsArray.slice(-10) : sessionsArray;
+
+  SafeLocalStorage.setJSON(GENERATED_SESSIONS_KEY, sessionsToStore);
 };
 
 const ResultsPage = () => {
@@ -104,6 +89,7 @@ const ResultsPage = () => {
   const currentSessionRef = useRef<string | null>(null);
   const generatedRecommendationsRef = useRef<Recommendation[]>([]);
   const isInitialLoadRef = useRef(true);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Get data from navigation state
   const { contentType, answers, questions } = location.state || {};
@@ -130,18 +116,34 @@ const ResultsPage = () => {
   const handleGenerateRecommendations = useCallback(async () => {
     if (!sessionId || !user) return;
 
+    // Cancel any existing operation
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new AbortController for this operation
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     try {
       setLoading(true);
       setError(null);
 
       console.log("Starting AI recommendation generation for user:", user.id);
 
+      // Check if operation was aborted
+      if (abortController.signal.aborted) return;
+
       // Update generation steps for better UX
       setGenerationStep("Analyzing your answers...");
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
+      if (abortController.signal.aborted) return;
+
       setGenerationStep("Generating personalized recommendations...");
       await new Promise((resolve) => setTimeout(resolve, 500));
+
+      if (abortController.signal.aborted) return;
 
       setGenerationStep("Enhancing with movie and book data...");
 
@@ -156,8 +158,12 @@ const ResultsPage = () => {
         user.id
       );
 
+      if (abortController.signal.aborted) return;
+
       setGenerationStep("Finalizing your recommendations...");
       await new Promise((resolve) => setTimeout(resolve, 500));
+
+      if (abortController.signal.aborted) return;
 
       console.log("Recommendations generated successfully:", recs);
 
@@ -170,12 +176,24 @@ const ResultsPage = () => {
 
       setRecommendations(recs);
     } catch (error) {
+      // Don't set error if operation was aborted
+      if (abortController.signal.aborted) {
+        console.log("Recommendation generation aborted");
+        return;
+      }
       console.error("Error generating recommendations:", error);
       setError(
         "Failed to generate personalized recommendations. Please try again."
       );
     } finally {
-      setLoading(false);
+      // Only update loading state if not aborted
+      if (!abortController.signal.aborted) {
+        setLoading(false);
+      }
+      // Clear the abort controller reference
+      if (abortControllerRef.current === abortController) {
+        abortControllerRef.current = null;
+      }
     }
   }, [sessionId, user, answers, contentType]);
 
@@ -265,6 +283,23 @@ const ResultsPage = () => {
     };
   }, [recommendations.length, error]);
 
+  // Cleanup effect to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      // Abort any ongoing operations
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+
+      // Clear refs to prevent memory leaks
+      hasGeneratedRef.current = false;
+      currentSessionRef.current = null;
+      generatedRecommendationsRef.current = [];
+      isInitialLoadRef.current = true;
+    };
+  }, []);
+
   const handleLogoClick = () => {
     navigate("/");
   };
@@ -275,10 +310,17 @@ const ResultsPage = () => {
   };
 
   const handleGetAnother = () => {
+    // Abort any ongoing operations
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+
     // Clear the session cache when getting another recommendation
     currentSessionRef.current = null;
     generatedRecommendationsRef.current = [];
     hasGeneratedRef.current = false;
+    isInitialLoadRef.current = true;
     navigate("/content-selection");
   };
 
@@ -307,10 +349,17 @@ const ResultsPage = () => {
   };
 
   const handleRetry = () => {
+    // Abort any ongoing operations
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+
     // Clear cache and regenerate
     currentSessionRef.current = null;
     generatedRecommendationsRef.current = [];
     hasGeneratedRef.current = false;
+    isInitialLoadRef.current = true;
     handleGenerateRecommendations();
   };
 

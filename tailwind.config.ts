@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -71,25 +70,25 @@ export default {
         textPrimary: "#FFFFFF",
         textSecondary: "#A1A1AA",
         textTertiary: "#71717A",
-        emerald: { 
-          500: "#10B981", 
-          600: "#059669" 
+        emerald: {
+          500: "#10B981",
+          600: "#059669",
         },
-        amber: { 
-          500: "#F59E0B" 
+        amber: {
+          500: "#F59E0B",
         },
-        red: { 
-          500: "#EF4444" 
+        red: {
+          500: "#EF4444",
         },
-        indigo: { 
-          500: "#6366F1", 
-          900: "#1E1B4B" 
+        indigo: {
+          500: "#6366F1",
+          900: "#1E1B4B",
         },
-        gray: { 
-          500: "#6B7280", 
-          600: "#4B5563", 
-          700: "#374151" 
-        }
+        gray: {
+          500: "#6B7280",
+          600: "#4B5563",
+          700: "#374151",
+        },
       },
       fontFamily: {
         inter: ["Inter", "sans-serif"],
@@ -123,5 +122,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [import("tailwindcss-animate")],
 } satisfies Config;
