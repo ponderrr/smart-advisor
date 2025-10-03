@@ -1,5 +1,4 @@
-
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { Component, ErrorInfo, ReactNode, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, AlertTriangle } from "lucide-react";
 
@@ -11,11 +10,98 @@ interface Props {
 interface State {
   hasError: boolean;
   error?: Error;
+  errorInfo?: ErrorInfo;
 }
+
+// Global error handler for unhandled errors
+class GlobalErrorHandler {
+  private static instance: GlobalErrorHandler;
+  private errorBoundaryRef: ErrorBoundary | null = null;
+
+  static getInstance(): GlobalErrorHandler {
+    if (!GlobalErrorHandler.instance) {
+      GlobalErrorHandler.instance = new GlobalErrorHandler();
+    }
+    return GlobalErrorHandler.instance;
+  }
+
+  setErrorBoundaryRef(ref: ErrorBoundary | null) {
+    this.errorBoundaryRef = ref;
+  }
+
+  handleError(error: Error, errorInfo?: ErrorInfo) {
+    console.error("Global error handler caught:", error, errorInfo);
+
+    // If we have an error boundary ref, use it
+    if (this.errorBoundaryRef) {
+      this.errorBoundaryRef.setState({
+        hasError: true,
+        error,
+        errorInfo,
+      });
+    }
+  }
+}
+
+// Global error handlers
+const setupGlobalErrorHandlers = () => {
+  const errorHandler = GlobalErrorHandler.getInstance();
+
+  // Handle unhandled promise rejections
+  window.addEventListener("unhandledrejection", (event) => {
+    console.error("Unhandled promise rejection:", event.reason);
+    errorHandler.handleError(
+      new Error(`Unhandled Promise Rejection: ${event.reason}`),
+      { componentStack: "Global Promise Handler" }
+    );
+  });
+
+  // Handle general errors
+  window.addEventListener("error", (event) => {
+    console.error("Global error:", event.error);
+    errorHandler.handleError(event.error || new Error(event.message), {
+      componentStack: "Global Error Handler",
+    });
+  });
+
+  // Handle Edge Function errors specifically
+  const originalFetch = window.fetch;
+  window.fetch = async (...args) => {
+    try {
+      const response = await originalFetch(...args);
+
+      // Check for Edge Function errors
+      if (response.url.includes("/functions/v1/") && !response.ok) {
+        const errorText = await response.text();
+        let errorMessage = `Edge Function Error: ${response.status} ${response.statusText}`;
+
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch {
+          errorMessage = errorText || errorMessage;
+        }
+
+        errorHandler.handleError(new Error(errorMessage), {
+          componentStack: `Edge Function: ${response.url}`,
+        });
+      }
+
+      return response;
+    } catch (error) {
+      console.error("Fetch error:", error);
+      errorHandler.handleError(
+        error instanceof Error ? error : new Error(String(error)),
+        { componentStack: "Global Fetch Handler" }
+      );
+      throw error;
+    }
+  };
+};
 
 class ErrorBoundary extends Component<Props, State> {
   public state: State = {
-    hasError: false
+    hasError: false,
   };
 
   public static getDerivedStateFromError(error: Error): State {
@@ -25,16 +111,44 @@ class ErrorBoundary extends Component<Props, State> {
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log error in development only
     if (import.meta.env.DEV) {
-      console.error('ErrorBoundary caught an error:', error, errorInfo);
+      console.error("ErrorBoundary caught an error:", error, errorInfo);
     }
+
+    // Update state with error info
+    this.setState({ errorInfo });
+  }
+
+  public componentDidMount() {
+    // Set up global error handlers and register this boundary
+    setupGlobalErrorHandlers();
+    const errorHandler = GlobalErrorHandler.getInstance();
+    errorHandler.setErrorBoundaryRef(this);
+  }
+
+  public componentWillUnmount() {
+    // Clean up global error handler reference
+    const errorHandler = GlobalErrorHandler.getInstance();
+    errorHandler.setErrorBoundaryRef(null);
   }
 
   private handleReset = () => {
-    this.setState({ hasError: false, error: undefined });
+    this.setState({ hasError: false, error: undefined, errorInfo: undefined });
   };
 
   private handleReload = () => {
     window.location.reload();
+  };
+
+  private getErrorType = (error?: Error): string => {
+    if (!error) return "Unknown Error";
+
+    if (error.message.includes("Edge Function Error")) return "API Error";
+    if (error.message.includes("Unhandled Promise Rejection"))
+      return "Async Error";
+    if (error.message.includes("ChunkLoadError")) return "Loading Error";
+    if (error.message.includes("NetworkError")) return "Network Error";
+
+    return "Application Error";
   };
 
   public render() {
@@ -43,17 +157,26 @@ class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback;
       }
 
+      const errorType = this.getErrorType(this.state.error);
+
       return (
         <div className="min-h-screen bg-appPrimary flex items-center justify-center px-6">
-          <div className="text-center max-w-md">
+          <div className="text-center max-w-lg">
             <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-8">
               <AlertTriangle className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-textPrimary mb-4">
+            <h1 className="text-2xl font-bold text-textPrimary mb-2">
               Something went wrong
             </h1>
+            <p className="text-sm text-textTertiary mb-4">{errorType}</p>
             <p className="text-textSecondary mb-8">
-              An unexpected error occurred. Please try refreshing the page or contact support if the problem persists.
+              {errorType === "API Error"
+                ? "There was an issue connecting to our servers. Please check your internet connection and try again."
+                : errorType === "Async Error"
+                ? "An asynchronous operation failed. This might be due to a network issue or server problem."
+                : errorType === "Loading Error"
+                ? "Failed to load application resources. This might be due to a network issue or outdated cache."
+                : "An unexpected error occurred. Please try refreshing the page or contact support if the problem persists."}
             </p>
             <div className="flex gap-4 justify-center">
               <Button
@@ -73,10 +196,30 @@ class ErrorBoundary extends Component<Props, State> {
             </div>
             {import.meta.env.DEV && this.state.error && (
               <details className="mt-8 text-left">
-                <summary className="text-textTertiary cursor-pointer">Error Details</summary>
-                <pre className="mt-4 p-4 bg-gray-800 rounded text-xs text-gray-300 overflow-auto">
-                  {this.state.error.stack}
-                </pre>
+                <summary className="text-textTertiary cursor-pointer hover:text-textSecondary">
+                  Error Details (Development)
+                </summary>
+                <div className="mt-4 p-4 bg-gray-800 rounded text-xs text-gray-300 overflow-auto">
+                  <div className="mb-2">
+                    <strong>Error:</strong> {this.state.error.message}
+                  </div>
+                  {this.state.error.stack && (
+                    <div>
+                      <strong>Stack Trace:</strong>
+                      <pre className="mt-1 whitespace-pre-wrap">
+                        {this.state.error.stack}
+                      </pre>
+                    </div>
+                  )}
+                  {this.state.errorInfo && (
+                    <div className="mt-2">
+                      <strong>Component Stack:</strong>
+                      <pre className="mt-1 whitespace-pre-wrap">
+                        {this.state.errorInfo.componentStack}
+                      </pre>
+                    </div>
+                  )}
+                </div>
               </details>
             )}
           </div>

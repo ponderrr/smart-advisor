@@ -33,7 +33,7 @@ const AccountHistoryPage = () => {
 
         // Build filter options
         const filterOptions: FilterOptions = {
-          sortBy: sortBy as any,
+          sortBy: sortBy as "newest" | "oldest" | "favorites_first",
         };
 
         // Apply content type filter

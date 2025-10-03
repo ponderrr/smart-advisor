@@ -41,16 +41,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
 
-  // New function to handle user profile fetching
-  const fetchUserProfile = async (supabaseUser: SupabaseUser) => {
+  // New function to handle user profile fetching with AbortController
+  const fetchUserProfile = async (
+    supabaseUser: SupabaseUser,
+    signal?: AbortSignal
+  ) => {
     try {
       setLoading(true);
       setError(null);
       console.log(
         "useAuth: fetchUserProfile - attempting to get current user..."
       );
+
+      // Check if operation was aborted
+      if (signal?.aborted) {
+        console.log("useAuth: fetchUserProfile aborted");
+        return;
+      }
+
       const { user: profileUser, error: profileError } =
         await authService.getCurrentUser();
+
+      // Check again if operation was aborted after async call
+      if (signal?.aborted) {
+        console.log("useAuth: fetchUserProfile aborted after API call");
+        return;
+      }
 
       if (profileError) {
         console.error("useAuth: Error loading user profile:", profileError);
@@ -64,11 +80,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         );
       }
     } catch (err) {
+      // Don't set error if operation was aborted
+      if (signal?.aborted) {
+        console.log("useAuth: fetchUserProfile aborted during error handling");
+        return;
+      }
       console.error("useAuth: Unexpected error loading profile:", err);
       setUser(null);
       setError("An unexpected error occurred while loading profile.");
     } finally {
-      setLoading(false);
+      // Only update loading state if not aborted
+      if (!signal?.aborted) {
+        setLoading(false);
+      }
     }
   };
 
@@ -79,12 +103,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!mounted) return;
 
-    let subscription: any;
+    let subscription: { unsubscribe: () => void } | null = null;
+    const abortController = new AbortController();
 
     const initializeAuth = async () => {
       try {
         console.log("Initializing auth state...");
         setError(null);
+
+        // Check if operation was aborted before starting
+        if (abortController.signal.aborted) return;
 
         // Set up auth state listener first
         const {
@@ -92,7 +120,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } = supabase.auth.onAuthStateChange(async (event, session) => {
           console.log("Auth state changed:", event, session?.user?.id);
 
-          if (!mounted) return;
+          if (!mounted || abortController.signal.aborted) return;
 
           setSession(session);
 
@@ -105,13 +133,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
         subscription = sub;
 
+        // Check if operation was aborted before API call
+        if (abortController.signal.aborted) return;
+
         // Check for existing session
         const {
           data: { session: initialSession },
           error: sessionError,
         } = await supabase.auth.getSession();
 
-        if (!mounted) return;
+        if (!mounted || abortController.signal.aborted) return;
 
         if (sessionError) {
           console.error("Error getting initial session:", sessionError);
@@ -124,11 +155,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         // If there's an initial session with a user, fetch their profile immediately
         if (initialSession?.user) {
-          fetchUserProfile(initialSession.user);
+          fetchUserProfile(initialSession.user, abortController.signal);
         } else {
           setLoading(false);
         }
       } catch (err) {
+        // Don't set error if operation was aborted
+        if (abortController.signal.aborted) return;
+
         console.error("Unexpected error during initial auth setup:", err);
         const errorMessage =
           err instanceof Error
@@ -142,6 +176,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     initializeAuth();
 
     return () => {
+      abortController.abort();
       if (subscription) {
         subscription.unsubscribe();
       }
@@ -150,14 +185,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // useEffect to fetch user profile whenever the session user changes
   useEffect(() => {
-    if (session?.user) {
-      fetchUserProfile(session.user);
-    } else if (session === null) {
-      // If session becomes explicitly null, ensure user is null and loading is false
-      setUser(null);
-      setLoading(false);
-    }
-  }, [session?.user]);
+    if (!mounted) return;
+
+    const abortController = new AbortController();
+
+    const handleSessionChange = async () => {
+      if (session?.user) {
+        fetchUserProfile(session.user, abortController.signal);
+      } else if (session === null) {
+        // If session becomes explicitly null, ensure user is null and loading is false
+        setUser(null);
+        setLoading(false);
+      }
+    };
+
+    handleSessionChange();
+
+    return () => {
+      abortController.abort();
+    };
+  }, [session?.user, mounted]);
 
   const signIn = async (email: string, password: string) => {
     try {

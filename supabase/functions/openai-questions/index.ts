@@ -221,7 +221,7 @@ serve(async (req) => {
 
     // Format questions for the frontend
     const formattedQuestions = parsedResponse.questions.map(
-      (q: any, index: number) => {
+      (q: Record<string, unknown>, index: number) => {
         if (typeof q.text !== "string" || !q.text.trim()) {
           throw new Error(
             `Malformed question object from OpenAI: missing or invalid text property in question ${

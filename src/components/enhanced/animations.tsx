@@ -368,7 +368,9 @@ export const AnimationPerformance = {
   // Detect slow device and disable heavy animations
   isSlowDevice: () => {
     // Simple heuristic based on device characteristics
-    const connection = (navigator as any).connection;
+    const connection = (
+      navigator as Navigator & { connection?: { effectiveType?: string } }
+    ).connection;
     const hardwareConcurrency = navigator.hardwareConcurrency || 1;
 
     return (

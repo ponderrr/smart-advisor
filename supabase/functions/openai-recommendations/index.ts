@@ -124,7 +124,9 @@ serve(async (req) => {
 
     // Format answers for the prompt
     const answersText = answers
-      .map((a: any, i: number) => `Q${i + 1}: ${a.answer_text}`)
+      .map(
+        (a: Record<string, unknown>, i: number) => `Q${i + 1}: ${a.answer_text}`
+      )
       .join("\n");
 
     // Create prompt for recommendation generation
