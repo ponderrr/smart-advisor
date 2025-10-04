@@ -43,21 +43,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // New function to handle user profile fetching with AbortController
   const fetchUserProfile = async (
-    supabaseUser: SupabaseUser,
+    _supabaseUser: SupabaseUser,
     signal?: AbortSignal
   ) => {
+    // Check if operation was aborted before any state updates
+    if (signal?.aborted) {
+      console.log("useAuth: fetchUserProfile aborted");
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
       console.log(
         "useAuth: fetchUserProfile - attempting to get current user..."
       );
-
-      // Check if operation was aborted
-      if (signal?.aborted) {
-        console.log("useAuth: fetchUserProfile aborted");
-        return;
-      }
 
       const { user: profileUser, error: profileError } =
         await authService.getCurrentUser();

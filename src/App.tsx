@@ -4,7 +4,9 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/hooks/useAuth";
 import { validateEnvironment } from "@/utils/envValidation";
 import { useEffect } from "react";
-import ErrorBoundary from "@/components/ErrorBoundary";
+import ErrorBoundary, {
+  setupGlobalErrorHandlers,
+} from "@/components/ErrorBoundary";
 
 import Index from "@/pages/Index";
 import AuthPage from "@/pages/AuthPage";
@@ -32,6 +34,9 @@ const queryClient = new QueryClient({
 
 function App() {
   useEffect(() => {
+    // Initialize global error handlers once for the entire app
+    const cleanupGlobalErrorHandlers = setupGlobalErrorHandlers();
+
     // Validate critical environment variables for core functionality
     const criticalEnvVars = {
       VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
@@ -68,6 +73,9 @@ function App() {
     if (!validation.isValid && import.meta.env.DEV) {
       console.warn("Environment validation warnings:", validation.warnings);
     }
+
+    // Return cleanup function for global error handlers
+    return cleanupGlobalErrorHandlers;
   }, []);
 
   return (

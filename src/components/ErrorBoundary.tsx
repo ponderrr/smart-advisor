@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode, useEffect } from "react";
+import { Component, ErrorInfo, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, AlertTriangle } from "lucide-react";
 
@@ -9,14 +9,21 @@ interface Props {
 
 interface State {
   hasError: boolean;
-  error?: Error;
-  errorInfo?: ErrorInfo;
+  error?: Error | undefined;
+  errorInfo?: ErrorInfo | undefined;
+}
+
+// Custom event for global error handling
+const GLOBAL_ERROR_EVENT = "GLOBAL_ERROR_EVENT";
+
+interface GlobalErrorEventDetail {
+  error: Error;
+  errorInfo?: ErrorInfo | undefined;
 }
 
 // Global error handler for unhandled errors
 class GlobalErrorHandler {
   private static instance: GlobalErrorHandler;
-  private errorBoundaryRef: ErrorBoundary | null = null;
 
   static getInstance(): GlobalErrorHandler {
     if (!GlobalErrorHandler.instance) {
@@ -25,64 +32,67 @@ class GlobalErrorHandler {
     return GlobalErrorHandler.instance;
   }
 
-  setErrorBoundaryRef(ref: ErrorBoundary | null) {
-    this.errorBoundaryRef = ref;
-  }
-
   handleError(error: Error, errorInfo?: ErrorInfo) {
     console.error("Global error handler caught:", error, errorInfo);
 
-    // If we have an error boundary ref, use it
-    if (this.errorBoundaryRef) {
-      this.errorBoundaryRef.setState({
-        hasError: true,
-        error,
-        errorInfo,
-      });
-    }
+    // Dispatch custom event for error boundaries to handle
+    const event = new CustomEvent<GlobalErrorEventDetail>(GLOBAL_ERROR_EVENT, {
+      detail: { error, errorInfo: errorInfo || undefined },
+    });
+    window.dispatchEvent(event);
   }
 }
 
 // Global error handlers
-const setupGlobalErrorHandlers = () => {
-  const errorHandler = GlobalErrorHandler.getInstance();
+let isGlobalErrorHandlersInitialized = false;
+let originalFetch: typeof window.fetch | null = null;
+let unhandledRejectionHandler: ((event: PromiseRejectionEvent) => void) | null =
+  null;
+let errorHandler: ((event: ErrorEvent) => void) | null = null;
 
-  // Handle unhandled promise rejections
-  window.addEventListener("unhandledrejection", (event) => {
+export const setupGlobalErrorHandlers = (): (() => void) => {
+  // Guard against multiple initializations
+  if (isGlobalErrorHandlersInitialized) {
+    return () => {}; // Return no-op cleanup function
+  }
+
+  const errorHandlerInstance = GlobalErrorHandler.getInstance();
+
+  // Store original fetch if not already stored
+  if (originalFetch === null) {
+    originalFetch = window.fetch;
+  }
+
+  // Create handler functions
+  unhandledRejectionHandler = (event: PromiseRejectionEvent) => {
     console.error("Unhandled promise rejection:", event.reason);
-    errorHandler.handleError(
+    errorHandlerInstance.handleError(
       new Error(`Unhandled Promise Rejection: ${event.reason}`),
       { componentStack: "Global Promise Handler" }
     );
-  });
+  };
 
-  // Handle general errors
-  window.addEventListener("error", (event) => {
+  errorHandler = (event: ErrorEvent) => {
     console.error("Global error:", event.error);
-    errorHandler.handleError(event.error || new Error(event.message), {
+    errorHandlerInstance.handleError(event.error || new Error(event.message), {
       componentStack: "Global Error Handler",
     });
-  });
+  };
 
-  // Handle Edge Function errors specifically
-  const originalFetch = window.fetch;
+  // Add event listeners
+  window.addEventListener("unhandledrejection", unhandledRejectionHandler);
+  window.addEventListener("error", errorHandler);
+
+  // Override fetch for Edge Function error handling
   window.fetch = async (...args) => {
     try {
-      const response = await originalFetch(...args);
+      const response = await originalFetch!(...args);
 
       // Check for Edge Function errors
       if (response.url.includes("/functions/v1/") && !response.ok) {
-        const errorText = await response.text();
-        let errorMessage = `Edge Function Error: ${response.status} ${response.statusText}`;
+        const errorMessage = `Edge Function Error: ${response.status} ${response.statusText}`;
 
-        try {
-          const errorData = JSON.parse(errorText);
-          errorMessage = errorData.message || errorData.error || errorMessage;
-        } catch {
-          errorMessage = errorText || errorMessage;
-        }
-
-        errorHandler.handleError(new Error(errorMessage), {
+        errorHandlerInstance.handleError(new Error(errorMessage), {
           componentStack: `Edge Function: ${response.url}`,
         });
       }
@@ -90,12 +100,32 @@ const setupGlobalErrorHandlers = () => {
       return response;
     } catch (error) {
       console.error("Fetch error:", error);
-      errorHandler.handleError(
-        error instanceof Error ? error : new Error(String(error)),
-        { componentStack: "Global Fetch Handler" }
-      );
+      // Re-throw the error to maintain fetch behavior for callers
+      // The global error handler will catch truly unhandled errors
       throw error;
     }
+  };
+
+  isGlobalErrorHandlersInitialized = true;
+
+  // Return cleanup function
+  return () => {
+    if (unhandledRejectionHandler) {
+      window.removeEventListener(
+        "unhandledrejection",
+        unhandledRejectionHandler
+      );
+      unhandledRejectionHandler = null;
+    }
+    if (errorHandler) {
+      window.removeEventListener("error", errorHandler);
+      errorHandler = null;
+    }
+    if (originalFetch) {
+      window.fetch = originalFetch;
+      originalFetch = null;
+    }
+    isGlobalErrorHandlersInitialized = false;
   };
 };
 
@@ -119,20 +149,41 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidMount() {
-    // Set up global error handlers and register this boundary
-    setupGlobalErrorHandlers();
-    const errorHandler = GlobalErrorHandler.getInstance();
-    errorHandler.setErrorBoundaryRef(this);
+    // Listen for global error events
+    const handleGlobalError = (event: CustomEvent<GlobalErrorEventDetail>) => {
+      const { error, errorInfo } = event.detail;
+      this.setState({
+        hasError: true,
+        error,
+        errorInfo: errorInfo || undefined,
+      });
+    };
+
+    window.addEventListener(
+      GLOBAL_ERROR_EVENT,
+      handleGlobalError as EventListener
+    );
+
+    // Store the handler reference for cleanup
+    (this as any).globalErrorHandler = handleGlobalError;
   }
 
   public componentWillUnmount() {
-    // Clean up global error handler reference
-    const errorHandler = GlobalErrorHandler.getInstance();
-    errorHandler.setErrorBoundaryRef(null);
+    // Remove global error event listener
+    if ((this as any).globalErrorHandler) {
+      window.removeEventListener(
+        GLOBAL_ERROR_EVENT,
+        (this as any).globalErrorHandler as EventListener
+      );
+    }
   }
 
   private handleReset = () => {
-    this.setState({ hasError: false, error: undefined, errorInfo: undefined });
+    this.setState({
+      hasError: false,
+      error: undefined,
+      errorInfo: undefined,
+    });
   };
 
   private handleReload = () => {
