@@ -170,23 +170,40 @@ class DatabaseService {
 
       // Convert database records to Recommendation type
       const recommendations: Recommendation[] = (data || []).map(
-        (rec: Record<string, unknown>) => ({
-          id: rec.id,
-          user_id: rec.user_id,
-          type: rec.type,
-          title: rec.title,
-          director: rec.director,
-          author: rec.author,
-          year: rec.year,
-          rating: rec.rating || 0,
-          genres: rec.genre ? rec.genre.split(", ").filter(Boolean) : [],
-          poster_url: rec.poster_url,
-          explanation: rec.explanation,
-          is_favorited: rec.is_favorited || false,
-          content_type: rec.content_type,
-          created_at: rec.created_at,
-          description: rec.description,
-        })
+        (rec: Record<string, unknown>) => {
+          const recommendation: Recommendation = {
+            id: rec.id as string,
+            user_id: rec.user_id as string,
+            type: rec.type as "movie" | "book",
+            title: rec.title as string,
+            genres: (() => {
+              const genreStr = typeof rec.genre === "string" ? rec.genre : "";
+              return genreStr
+                ? genreStr
+                    .split(",")
+                    .map((s) => s.trim())
+                    .filter(Boolean)
+                : [];
+            })(),
+            is_favorited: (rec.is_favorited as boolean) || false,
+            content_type: rec.content_type as "movie" | "book" | "both",
+            created_at: rec.created_at as string,
+          };
+
+          // Add optional properties only if they exist
+          if (rec.director) recommendation.director = rec.director as string;
+          if (rec.author) recommendation.author = rec.author as string;
+          if (rec.year) recommendation.year = rec.year as number;
+          if (rec.rating) recommendation.rating = rec.rating as number;
+          if (rec.poster_url)
+            recommendation.poster_url = rec.poster_url as string;
+          if (rec.explanation)
+            recommendation.explanation = rec.explanation as string;
+          if (rec.description)
+            recommendation.description = rec.description as string;
+
+          return recommendation;
+        }
       );
 
       return { data: recommendations, error: null };
