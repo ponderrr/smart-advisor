@@ -58,34 +58,34 @@ Smart Advisor builds age-aware questionnaires, invokes OpenAI for intent underst
 ### System Architecture
 ```mermaid
 flowchart LR
-  UI[React SPA (Vite)] -->|JWT| Edge[Supabase Edge Functions]
-  UI -->|Supabase JS| Auth[Supabase Auth]
-  Edge -->|SQL/RPC| DB[(Postgres + RLS)]
-  Edge -->|GPT-4o-mini| OpenAI[OpenAI API]
-  Edge -->|Title/Author| TMDB[TMDB API]
-  Edge -->|Title/Author| GBooks[Google Books API]
-  DB <--> Realtime[Supabase Realtime]
+  UI["React SPA (Vite)"] -->|JWT| Edge["Supabase Edge Functions"]
+  UI -->|Supabase JS| Auth["Supabase Auth"]
+  Edge -->|SQL/RPC| DB["Postgres + RLS"]
+  Edge -->|GPT-4o-mini| OpenAI["OpenAI API"]
+  Edge -->|Title/Author| TMDB["TMDB API"]
+  Edge -->|Title/Author| GBooks["Google Books API"]
+  DB <--> Realtime["Supabase Realtime"]
 ```
 
 ### Component Diagram (Frontend)
 ```mermaid
 flowchart TB
-  App[App.tsx] --> Router[React Router]
-  Router --> Pages[Content/Questionnaire/Results/History]
-  Pages --> Services[openai.ts / enhancedRecommendations.ts]
-  Services --> SupabaseJS[Supabase Client]
-  Services --> Query[React Query]
-  Query --> UI[shadcn/Radix UI Components]
+  App["App.tsx"] --> Router["React Router"]
+  Router --> Pages["Content/Questionnaire/Results/History"]
+  Pages --> Services["openai.ts / enhancedRecommendations.ts"]
+  Services --> SupabaseJS["Supabase Client"]
+  Services --> Query["React Query"]
+  Query --> UI["shadcn/Radix UI Components"]
 ```
 
 ### API Lifecycle (Questions → Recommendations)
 ```mermaid
 sequenceDiagram
   participant UI as SPA
-  participant EdgeQ as edge: openai-questions
-  participant EdgeR as edge: openai-recommendations
-  participant OpenAI as OpenAI API
-  participant DB as Supabase DB
+  participant EdgeQ as "edge: openai-questions"
+  participant EdgeR as "edge: openai-recommendations"
+  participant OpenAI as "OpenAI API"
+  participant DB as "Supabase DB"
 
   UI->>EdgeQ: POST /functions/v1/openai-questions (JWT, {contentType, userAge, count})
   EdgeQ->>OpenAI: Prompt for N questions (JSON mode)
@@ -103,13 +103,13 @@ sequenceDiagram
 ### Deployment Diagram
 ```mermaid
 flowchart LR
-  Dev[Developer] --> Vercel[Vercel Deploy]
-  Dev --> SupaCLI[Supabase CLI: migrations/functions]
-  Vercel --> CDN[Edge CDN]
-  CDN --> Browser[Users]
-  Browser --> SupabaseURL[Supabase Project]
-  SupabaseURL --> Functions[Edge Functions (Deno)]
-  SupabaseURL --> Postgres[(Postgres + RLS)]
+  Dev["Developer"] --> Vercel["Vercel Deploy"]
+  Dev --> SupaCLI["Supabase CLI: migrations/functions"]
+  Vercel --> CDN["Edge CDN"]
+  CDN --> Browser["Users"]
+  Browser --> SupabaseURL["Supabase Project"]
+  SupabaseURL --> Functions["Edge Functions (Deno)"]
+  SupabaseURL --> Postgres["Postgres + RLS"]
 ```
 
 ## Documentation & Deep Examples
@@ -160,13 +160,13 @@ export const supabase = createClient<Database>(
 **Data flow (frontend)**
 ```mermaid
 flowchart LR
-  Select[Content Selection] --> QCount[Question Count]
-  QCount --> Quiz[AI Questions]
-  Quiz --> Answers[User Answers]
-  Answers --> EdgeCall[Edge: Recommendations]
-  EdgeCall --> Enrich[TMDB/Google Books]
-  Enrich --> Save[Supabase.recommendations]
-  Save --> History[History & Favorites]
+  Select["Content Selection"] --> QCount["Question Count"]
+  QCount --> Quiz["AI Questions"]
+  Quiz --> Answers["User Answers"]
+  Answers --> EdgeCall["Edge: Recommendations"]
+  EdgeCall --> Enrich["TMDB/Google Books"]
+  Enrich --> Save["Supabase.recommendations"]
+  Save --> History["History & Favorites"]
 ```
 
 ## Getting Started
