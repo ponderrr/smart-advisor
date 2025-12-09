@@ -1,217 +1,246 @@
-# Smart Advisor 🎬📚
+<div align="center">
 
-[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen.svg)](https://smartadvisor.live)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.5.3-blue.svg)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-18.3.1-blue.svg)](https://reactjs.org/)
-[![Supabase](https://img.shields.io/badge/Supabase-Powered-green.svg)](https://supabase.com/)
-[![AI Powered](https://img.shields.io/badge/AI-OpenAI%20GPT--4-orange.svg)](https://openai.com/)
+# Smart Advisor
+AI-personalized movie & book recommendations with Supabase auth, OpenAI reasoning, and live enrichment.
 
-> AI-powered personalized movie and book recommendation engine that creates custom questionnaires based on user preferences and demographics.
+![Build](https://img.shields.io/badge/Build-Vite_5-8B5CF6?style=for-the-badge&logo=vite)
+![Version](https://img.shields.io/badge/Version-1.0.0-00D9FF?style=for-the-badge&logo=semver)
+![Frontend](https://img.shields.io/badge/React-18.3-00D9FF?style=for-the-badge&logo=react)
+![Backend](https://img.shields.io/badge/Supabase-Edge_Functions-3FCF8E?style=for-the-badge&logo=supabase)
+![AI](https://img.shields.io/badge/OpenAI-GPT--4o_mini-8B5CF6?style=for-the-badge&logo=openai)
+![Deploy](https://img.shields.io/badge/Deploy-Vercel-000000?style=for-the-badge&logo=vercel)
 
-## 🎯 What It Does
+</div>
 
-Smart Advisor revolutionizes content discovery by using artificial intelligence to understand your unique preferences and deliver highly personalized movie and book recommendations. Unlike generic recommendation systems, it creates custom questionnaires tailored to your age and interests, then analyzes your responses to suggest content you'll genuinely love.
+<br/>
 
-### ✨ Key Features
+## About
+Smart Advisor builds age-aware questionnaires, invokes OpenAI for intent understanding, enriches results with TMDB/Google Books metadata, and stores user-specific histories in Supabase with Row Level Security. It is production-minded: JWT-protected Edge Functions, no client-side key exposure, and resilient fallbacks for third-party APIs.
 
-🤖 **AI-Generated Questionnaires**
-- Dynamic 5-question surveys created by OpenAI GPT-4
-- Age-appropriate questions (13-120 years)
-- Content-specific queries for movies, books, or both
+- **What it does**: Auth → personalized questions → AI recommendations → metadata enrichment → saved history/favorites.
+- **Who it’s for**: Consumer apps, media platforms, and teams needing secure AI-backed recommendations.
+- **Why it matters**: Strong security (RLS/JWT), typed contracts, resilient enrichment, and DX-focused frontend.
 
-🎯 **Intelligent Recommendations**
-- Deep analysis of user responses using advanced AI
-- Rich metadata integration from TMDB and Google Books
-- Detailed explanations for why each recommendation fits you
+## Key Features
+- **AI Questionnaire Orchestration** — Generates 3–15 dynamic, age-safe questions via Supabase Edge + GPT-4o-mini.
+- **Hybrid Recommendation Engine** — Combines OpenAI reasoning with TMDB/Google Books enrichment while preserving AI explanations.
+- **Secure-by-Default Auth** — Supabase PKCE auth, persisted sessions, RLS on profiles/recommendations, verified JWT on protected functions.
+- **Resilient Edge Functions** — Deno functions with strict validation, CORS hardening, backoff, and safe defaults when providers fail.
+- **History & Favorites** — Persistent recommendation history, filters, favorite toggles, and stats with indexed queries.
+- **UX for Retention** — Structured loading states, retry flows, cached sessions, confirm-before-regenerate safeguards.
+- **Performance-aware Frontend** — React 18 + Vite, React Query caching, guarded retries, and lazy UI composition.
+- **Observability Hooks** — Structured console logging in Edge Functions; global error boundary and env validation in the SPA.
 
-👤 **Personalized Experience**
-- Secure user accounts with recommendation history
-- Favorite management and advanced filtering
-- Personal statistics and preference tracking
+## Tech Stack
+**Languages**  
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript) ![Deno](https://img.shields.io/badge/Deno-Edge-000000?style=for-the-badge&logo=deno) ![SQL](https://img.shields.io/badge/PostgreSQL-SQL-336791?style=for-the-badge&logo=postgresql) ![CSS](https://img.shields.io/badge/Tailwind-3.x-38BDF8?style=for-the-badge&logo=tailwindcss)
 
-📱 **Modern Interface**
-- Responsive design optimized for all devices
-- Intuitive user flow from selection to results
-- Beautiful, accessible UI components
+**Frontend**  
+![React](https://img.shields.io/badge/React-18-00D9FF?style=for-the-badge&logo=react) ![Vite](https://img.shields.io/badge/Vite-5-8B5CF6?style=for-the-badge&logo=vite) ![React_Query](https://img.shields.io/badge/React_Query-5-FF4154?style=for-the-badge&logo=reactquery) ![Radix_UI](https://img.shields.io/badge/Radix_UI/shadcn-FF006E?style=for-the-badge)
 
-## 🏗️ Technical Architecture
+**Backend / Services**  
+![Supabase](https://img.shields.io/badge/Supabase-DB/Auth/Storage-3FCF8E?style=for-the-badge&logo=supabase) ![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o_mini-8B5CF6?style=for-the-badge&logo=openai) ![TMDB](https://img.shields.io/badge/TMDB-API-01B4E4?style=for-the-badge&logo=themoviedatabase) ![Google_Books](https://img.shields.io/badge/Google_Books-API-34A853?style=for-the-badge&logo=google)
 
-### Frontend Stack
-- **React 18** with TypeScript for type-safe development
-- **Vite** for lightning-fast development and builds
-- **Tailwind CSS** + **shadcn/ui** for modern, accessible design
-- **React Query** for efficient server state management
+**DevOps / Infra**  
+![Vercel](https://img.shields.io/badge/Vercel-Hosting-000000?style=for-the-badge&logo=vercel) ![Supabase_Edge](https://img.shields.io/badge/Edge_Functions-Deno-000000?style=for-the-badge&logo=deno) ![Postgres](https://img.shields.io/badge/Postgres-RLS-4169E1?style=for-the-badge&logo=postgresql) ![ESLint](https://img.shields.io/badge/ESLint-9-4B32C3?style=for-the-badge&logo=eslint)
 
-### Backend Infrastructure
-- **Supabase** as Backend-as-a-Service platform
-  - PostgreSQL database with Row Level Security
-  - Real-time authentication system
-  - Edge Functions for serverless API endpoints
-- **AI Integration** via OpenAI GPT-4 for question generation and recommendations
+**Observability / Security**  
+![RLS](https://img.shields.io/badge/Security-Row_Level_Security-FF006E?style=for-the-badge) ![JWT](https://img.shields.io/badge/Auth-JWT_PKCE-00D9FF?style=for-the-badge) ![CORS](https://img.shields.io/badge/API-CORS_Hardening-8B5CF6?style=for-the-badge) ![Validation](https://img.shields.io/badge/Validation-Zod/Runtime-FF006E?style=for-the-badge)
 
-### External API Integrations
-- **OpenAI GPT-4** - Powers the core recommendation engine
-- **TMDB API** - Enriches movie data with posters, ratings, and metadata
-- **Google Books API** - Provides book covers and publication information
+## Architecture
+- **SPA Frontend**: React 18 + Vite, React Query for server state, `ProtectedRoute`, global error boundary, env validation on boot.
+- **Auth & Data**: Supabase Auth (PKCE) + Postgres with RLS on `profiles` and `recommendations`; indexed columns for performance.
+- **Edge Functions**: Deno-based Supabase functions for GPT prompts, TMDB proxy, Google Books proxy; JWT required on AI endpoints.
+- **AI Orchestration**: GPT-4o-mini for question + recommendation JSON; exponential backoff on the frontend and defaults on functions.
+- **Enrichment**: TMDB/Google Books proxies return safe defaults when keys are absent to avoid UX failures.
+- **Deployment**: Vercel for SPA, Supabase for DB/Auth/Edge. Env validation protects against missing critical keys.
 
-### Architecture Overview
-
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   React App     │    │   Supabase       │    │  External APIs  │
-│                 │    │                  │    │                 │
-│  ┌───────────┐  │    │  ┌─────────────┐ │    │  ┌───────────┐  │
-│  │    UI     │  │    │  │ PostgreSQL  │ │    │  │  OpenAI   │  │
-│  │Components │  │◄───┤  │  Database   │ │    │  │   GPT-4   │  │
-│  └───────────┘  │    │  └─────────────┘ │    │  └───────────┘  │
-│                 │    │                  │    │                 │
-│  ┌───────────┐  │    │  ┌─────────────┐ │    │  ┌───────────┐  │
-│  │   Auth    │  │    │  │    Auth     │ │    │  │   TMDB    │  │
-│  │  System   │  │◄───┤  │   System    │ │    │  │    API    │  │
-│  └───────────┘  │    │  └─────────────┘ │    │  └───────────┘  │
-│                 │    │                  │    │                 │
-│  ┌───────────┐  │    │  ┌─────────────┐ │    │  ┌───────────┐  │
-│  │    AI     │  │    │  │    Edge     │ │◄───┤  │  Google   │  │
-│  │ Services  │  │◄───┤  │ Functions   │ │    │  │   Books   │  │
-│  └───────────┘  │    │  └─────────────┘ │    │  └───────────┘  │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
+### System Architecture
+```mermaid
+flowchart LR
+  UI[React SPA (Vite)] -->|JWT| Edge[Supabase Edge Functions]
+  UI -->|Supabase JS| Auth[Supabase Auth]
+  Edge -->|SQL/RPC| DB[(Postgres + RLS)]
+  Edge -->|GPT-4o-mini| OpenAI[OpenAI API]
+  Edge -->|Title/Author| TMDB[TMDB API]
+  Edge -->|Title/Author| GBooks[Google Books API]
+  DB <--> Realtime[Supabase Realtime]
 ```
 
-## 🚀 How It Works
-
-### 1. Content Selection
-Users choose whether they want movie recommendations, book recommendations, or both.
-
-### 2. AI Questionnaire Generation
-The system uses OpenAI GPT-4 to generate 5 personalized questions based on:
-- Selected content type (movie/book/both)
-- User's age demographic
-- Contextual preferences
-
-### 3. Intelligent Analysis
-User responses are analyzed using advanced AI to understand:
-- Genre preferences and dislikes
-- Mood and thematic interests
-- Content consumption patterns
-- Age-appropriate filtering
-
-### 4. Enhanced Recommendations
-The AI generates initial recommendations, then enhances them with:
-- High-quality posters/covers from TMDB and Google Books
-- Accurate ratings and release information
-- Director/author details and genre classifications
-
-### 5. Personal Library
-All recommendations are saved to the user's personal library with:
-- Favoriting capabilities
-- Advanced filtering and sorting
-- Usage statistics and insights
-
-## 🎨 User Experience Flow
-
-```
-Landing Page → Authentication → Content Selection → AI Questionnaire → Results → Personal Library
-     ↓              ↓                ↓                    ↓           ↓            ↓
-  Marketing    Secure Login    Choose Content     5 Custom     Enhanced    Save & Manage
-   Content     & Signup        Type & Age        Questions   Recommendations  Favorites
+### Component Diagram (Frontend)
+```mermaid
+flowchart TB
+  App[App.tsx] --> Router[React Router]
+  Router --> Pages[Content/Questionnaire/Results/History]
+  Pages --> Services[openai.ts / enhancedRecommendations.ts]
+  Services --> SupabaseJS[Supabase Client]
+  Services --> Query[React Query]
+  Query --> UI[shadcn/Radix UI Components]
 ```
 
-## 🔐 Security & Privacy
+### API Lifecycle (Questions → Recommendations)
+```mermaid
+sequenceDiagram
+  participant UI as SPA
+  participant EdgeQ as edge: openai-questions
+  participant EdgeR as edge: openai-recommendations
+  participant OpenAI as OpenAI API
+  participant DB as Supabase DB
 
-- **Row Level Security (RLS)** ensures complete data isolation between users
-- **JWT Authentication** with automatic token refresh
-- **API Key Protection** via Supabase Edge Functions (no client-side exposure)
-- **Input Validation** and sanitization at all levels
-- **Privacy-First Design** - user data never shared or sold
+  UI->>EdgeQ: POST /functions/v1/openai-questions (JWT, {contentType, userAge, count})
+  EdgeQ->>OpenAI: Prompt for N questions (JSON mode)
+  OpenAI-->>EdgeQ: Questions JSON
+  EdgeQ-->>UI: {questions[]}
 
-## 📊 Technical Highlights
+  UI->>EdgeR: POST /functions/v1/openai-recommendations (JWT, answers, age)
+  EdgeR->>OpenAI: Prompt for movie/book JSON
+  OpenAI-->>EdgeR: Recommendation JSON
+  EdgeR-->>UI: {movieRecommendation?, bookRecommendation?}
+  UI->>DB: saveRecommendation (with enrichment)
+  DB-->>UI: persisted rows
+```
 
-### AI Implementation
-- **Custom Prompt Engineering** for consistent, high-quality question generation
-- **Context-Aware Analysis** that adapts to user demographics
-- **Fallback Systems** for API reliability and error handling
-- **Response Validation** to ensure recommendation quality
+### Deployment Diagram
+```mermaid
+flowchart LR
+  Dev[Developer] --> Vercel[Vercel Deploy]
+  Dev --> SupaCLI[Supabase CLI: migrations/functions]
+  Vercel --> CDN[Edge CDN]
+  CDN --> Browser[Users]
+  Browser --> SupabaseURL[Supabase Project]
+  SupabaseURL --> Functions[Edge Functions (Deno)]
+  SupabaseURL --> Postgres[(Postgres + RLS)]
+```
 
-### Database Design
-- **Normalized Schema** for efficient data storage and retrieval
-- **Optimized Indexes** for fast query performance
-- **Audit Trails** for recommendation tracking and analytics
-- **Scalable Architecture** supporting thousands of concurrent users
+## Documentation & Deep Examples
+**Generate questions (frontend → Edge)**
+```ts
+import { generateQuestionsWithRetry } from "@/services/openai";
 
-### Performance Optimizations
-- **Code Splitting** and lazy loading for fast initial page loads
-- **Image Optimization** with responsive loading and caching
-- **API Response Caching** to minimize external API calls
-- **Efficient State Management** with React Query
+const questions = await generateQuestionsWithRetry("movie", 28, 5);
+// -> [{ id, text, content_type, user_age_range }, ...]
+```
 
-## 🛠️ Development Approach
+**Generate and enrich recommendations**
+```ts
+const recs = await enhancedRecommendationsService.retryRecommendation(
+  { answers, contentType: "both", userAge: user.age },
+  user.id
+);
+// AI JSON -> TMDB/Google Books enrichment -> persisted to Supabase
+```
 
-### Code Quality
-- **TypeScript** throughout for type safety and developer experience
-- **ESLint** and **Prettier** for consistent code style
-- **Component-Based Architecture** for maintainability
-- **Custom Hooks** for reusable business logic
+**Supabase client bootstrap**
+```ts
+export const supabase = createClient<Database>(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY,
+  { auth: { persistSession: true, flowType: "pkce" } }
+);
+```
 
-### Testing Strategy
-- Unit tests for utility functions and business logic
-- Integration tests for API endpoints
-- User flow testing for critical paths
-- Performance monitoring and optimization
+**Edge Function contracts**
+- `POST /functions/v1/openai-questions` (JWT) → `{questions[]}`  
+  Body: `{ contentType: "movie"|"book"|"both", userAge: 13-120, questionCount: 3-15 }`
+- `POST /functions/v1/openai-recommendations` (JWT) → `{ movieRecommendation?, bookRecommendation? }`
+- `GET /functions/v1/tmdb-proxy?title=Inception` (public) → `{ poster, year, rating, description }` with safe defaults
+- `GET /functions/v1/google-books-proxy?title=Dune&author=Herbert` (public) → `{ cover, year, rating, description }` with safe defaults
 
-### Deployment Pipeline
-- **Automated Builds** with environment-specific configurations
-- **Edge Function Deployment** for serverless scalability
-- **Database Migrations** with version control
-- **Monitoring & Alerting** for production reliability
+**Environment configuration**
+| Name | Scope | Description |
+| --- | --- | --- |
+| VITE_SUPABASE_URL | frontend | Supabase project URL (required) |
+| VITE_SUPABASE_ANON_KEY | frontend | Supabase anon key (required) |
+| SUPABASE_URL | edge | Supabase project URL |
+| SUPABASE_ANON_KEY | edge | Supabase anon key |
+| OPENAI_API_KEY | edge | GPT-4o-mini access |
+| TMDB_API_KEY | edge | Movie enrichment (optional; defaults exist) |
+| GOOGLE_BOOKS_API_KEY | edge | Book enrichment (optional; defaults exist) |
 
-## 📈 Project Impact
+**Data flow (frontend)**
+```mermaid
+flowchart LR
+  Select[Content Selection] --> QCount[Question Count]
+  QCount --> Quiz[AI Questions]
+  Quiz --> Answers[User Answers]
+  Answers --> EdgeCall[Edge: Recommendations]
+  EdgeCall --> Enrich[TMDB/Google Books]
+  Enrich --> Save[Supabase.recommendations]
+  Save --> History[History & Favorites]
+```
 
-### User Engagement
-- Average session duration: 8+ minutes
-- Recommendation acceptance rate: 85%+
-- User return rate: 70%+ within 7 days
-- Cross-platform compatibility: 100%
+## Getting Started
+**Prerequisites**
+- Node 18+ (or Bun)
+- Supabase project (DB/Auth) + CLI for migrations
+- OpenAI API key; optional TMDB/Google Books keys
+- Vercel (or static host) for SPA deploy
 
-### Technical Achievement
-- Sub-2 second page load times
-- 99.9% uptime reliability
-- Supports 1000+ concurrent users
-- Zero client-side API key exposure
+**Install**
+```bash
+npm install
+# or
+bun install
+```
 
-## 🎯 Business Value
+**Environment**
+```bash
+cp .env.example .env.local  # create and populate required keys
+# Required (frontend): VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY
+# Required (edge): SUPABASE_URL, SUPABASE_ANON_KEY, OPENAI_API_KEY
+```
 
-Smart Advisor demonstrates expertise in:
-- **AI Integration** - Practical implementation of GPT-4 for real-world applications
-- **Full-Stack Development** - End-to-end TypeScript/React application
-- **Modern Architecture** - Serverless, scalable, and secure design
-- **User Experience** - Intuitive interface with complex backend logic
-- **API Integration** - Multiple third-party services working seamlessly
+**Local development**
+```bash
+npm run dev
+# http://localhost:5173
+```
 
-## 🔮 Future Enhancements
+**Supabase migrations (via CLI)**
+```bash
+supabase db reset            # applies /supabase/migrations/*
+supabase functions serve     # local edge testing
+```
 
-- **Machine Learning Models** for improved recommendation accuracy
-- **Social Features** for sharing and discovering recommendations
-- **Mobile Applications** for iOS and Android
-- **Advanced Analytics** for content consumption insights
-- **Multi-Language Support** for global accessibility
+**Production build**
+```bash
+npm run build
+npm run preview
+```
 
-## 💼 About This Project
+**Deploy**
+- SPA: `npm run build` → deploy `dist/` to Vercel (see `vercel.json`).
+- Edge Functions: `supabase functions deploy openai-questions openai-recommendations tmdb-proxy google-books-proxy`.
+- Env: set all required keys in Vercel + Supabase dashboard.
 
-Smart Advisor showcases modern web development practices with AI integration, demonstrating proficiency in:
+## API Documentation
+| Endpoint | Method | Auth | Purpose |
+| --- | --- | --- | --- |
+| `/functions/v1/openai-questions` | POST | Bearer (Supabase session) | Generate N personalized questions |
+| `/functions/v1/openai-recommendations` | POST | Bearer (Supabase session) | Generate AI recommendations JSON |
+| `/functions/v1/tmdb-proxy` | GET | Public | TMDB search with safe fallbacks |
+| `/functions/v1/google-books-proxy` | GET | Public | Google Books lookup with safe fallbacks |
 
-- **React/TypeScript Development**
-- **AI/ML Integration (OpenAI GPT-4)**
-- **Backend Architecture (Supabase)**
-- **Database Design & Security**
-- **API Integration & Management**
-- **User Experience Design**
-- **Performance Optimization**
+**Error handling**
+- 400 with `{ error, timestamp }` on validation failures.
+- Default media payloads (200) returned when TMDB/Google Books keys are absent to avoid CORS/UX breaks.
 
-This project represents a complete, production-ready application with real users and ongoing development.
+**Rate limits**
+- Provider limits (OpenAI/TMDB/Google Books) + Supabase org limits. Add gateway-level rate limiting if exposed publicly.
 
----
+## Project Structure
+```
+/src
+├── pages/                  # Auth, questionnaire, results, history
+├── services/               # openai, enrichment, tmdb, googleBooks, database, auth
+├── components/             # UI (shadcn/radix), layout, error boundary, protected route
+├── hooks/                  # Auth hook, toasts, mobile detection
+├── integrations/supabase/  # Supabase client + typed DB
+├── utils/                  # Env validation, local storage, helpers
+└── types/                  # Shared TypeScript types (DB, domain models)
+/supabase
+├── functions/              # Deno edge functions (OpenAI, TMDB, Books)
+└── migrations/             # Postgres schema, RLS, constraints, indexes
+dist/                       # Production build output
+```
 
-**🚀 Ready to discover your next favorite movie or book?**  
-**[Try Smart Advisor Now](https://smartadvisor.live)**
-
-*Built with cutting-edge technology and a passion for great content discovery.*
