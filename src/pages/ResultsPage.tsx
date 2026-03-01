@@ -43,7 +43,7 @@ const safeStringify = (obj: unknown): string => {
       return value;
     });
   } catch (error) {
-    console.warn("Failed to stringify object, using fallback:", error);
+    if (import.meta.env.DEV) console.warn("Failed to stringify object, using fallback:", error);
     // Fallback: create a hash based on object keys and content type
     return `fallback-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
@@ -84,8 +84,7 @@ const ResultsPage = () => {
   );
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
-  // Track if recommendations have been generated for this session
-  const hasGeneratedRef = useRef(false);
+  // Track recommendation session state
   const currentSessionRef = useRef<string | null>(null);
   const generatedRecommendationsRef = useRef<Recommendation[]>([]);
   const isInitialLoadRef = useRef(true);
@@ -105,7 +104,7 @@ const ResultsPage = () => {
       const userId = user?.id || "anonymous";
       return `${serializedAnswers}-${contentType}-${userId}`;
     } catch (error) {
-      console.warn("Failed to create session ID, using fallback:", error);
+      if (import.meta.env.DEV) console.warn("Failed to create session ID, using fallback:", error);
       return `fallback-session-${Date.now()}-${Math.random()
         .toString(36)
         .substr(2, 9)}`;
@@ -129,7 +128,7 @@ const ResultsPage = () => {
       setLoading(true);
       setError(null);
 
-      console.log("Starting AI recommendation generation for user:", user.id);
+      if (import.meta.env.DEV) console.log("Starting AI recommendation generation for user:", user.id);
 
       // Check if operation was aborted
       if (abortController.signal.aborted) return;
@@ -165,7 +164,7 @@ const ResultsPage = () => {
 
       if (abortController.signal.aborted) return;
 
-      console.log("Recommendations generated successfully:", recs);
+      if (import.meta.env.DEV) console.log("Recommendations generated successfully:", recs);
 
       // Cache the recommendations for this session
       generatedRecommendationsRef.current = recs;
@@ -178,7 +177,7 @@ const ResultsPage = () => {
     } catch (error) {
       // Don't set error if operation was aborted
       if (abortController.signal.aborted) {
-        console.log("Recommendation generation aborted");
+        if (import.meta.env.DEV) console.log("Recommendation generation aborted");
         return;
       }
       console.error("Error generating recommendations:", error);
@@ -228,7 +227,7 @@ const ResultsPage = () => {
 
     // If we have cached recommendations for this session, use them
     if (isSameSession && hasExistingRecommendations) {
-      console.log("Using cached recommendations for same session");
+      if (import.meta.env.DEV) console.log("Using cached recommendations for same session");
       setRecommendations(generatedRecommendationsRef.current);
       setLoading(false);
       return;
@@ -239,7 +238,7 @@ const ResultsPage = () => {
 
     if (sessionWasGenerated && isInitialLoadRef.current) {
       // This session was already generated before, show confirmation dialog
-      console.log("Session was already generated, showing confirmation dialog");
+      if (import.meta.env.DEV) console.log("Session was already generated, showing confirmation dialog");
       setShowConfirmDialog(true);
       setLoading(false);
       isInitialLoadRef.current = false;
@@ -248,7 +247,7 @@ const ResultsPage = () => {
 
     // Generate recommendations for new session
     if (!sessionWasGenerated) {
-      console.log("Generating recommendations for new session:", sessionId);
+      if (import.meta.env.DEV) console.log("Generating recommendations for new session:", sessionId);
       handleGenerateRecommendations();
     } else {
       setLoading(false);
@@ -293,7 +292,6 @@ const ResultsPage = () => {
       }
 
       // Clear refs to prevent memory leaks
-      hasGeneratedRef.current = false;
       currentSessionRef.current = null;
       generatedRecommendationsRef.current = [];
       isInitialLoadRef.current = true;
@@ -319,7 +317,6 @@ const ResultsPage = () => {
     // Clear the session cache when getting another recommendation
     currentSessionRef.current = null;
     generatedRecommendationsRef.current = [];
-    hasGeneratedRef.current = false;
     isInitialLoadRef.current = true;
     navigate("/content-selection");
   };
@@ -358,7 +355,6 @@ const ResultsPage = () => {
     // Clear cache and regenerate
     currentSessionRef.current = null;
     generatedRecommendationsRef.current = [];
-    hasGeneratedRef.current = false;
     isInitialLoadRef.current = true;
     handleGenerateRecommendations();
   };

@@ -1,4 +1,4 @@
-import { generateRecommendations } from "@/services/openai";
+import { generateRecommendations } from "@/services/ai";
 import { tmdbService } from "@/services/tmdb";
 import { googleBooksService } from "@/services/googleBooks";
 import { databaseService } from "@/services/database";
