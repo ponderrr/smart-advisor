@@ -40,11 +40,11 @@ const AuthPage = () => {
   const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
-    console.log("AuthPage useEffect - user:", user);
-    console.log("AuthPage useEffect - session:", session);
-    console.log("AuthPage useEffect - loading:", loading);
+    if (import.meta.env.DEV) console.log("AuthPage useEffect - user:", user);
+    if (import.meta.env.DEV) console.log("AuthPage useEffect - session:", session);
+    if (import.meta.env.DEV) console.log("AuthPage useEffect - loading:", loading);
     if (user && session && !loading) {
-      console.log("AuthPage: User, session, and not loading. Navigating...");
+      if (import.meta.env.DEV) console.log("AuthPage: User, session, and not loading. Navigating...");
       navigate("/content-selection");
     }
   }, [user, session, loading, navigate]);
@@ -122,7 +122,7 @@ const AuthPage = () => {
     e.preventDefault();
 
     if (!validateSignIn()) {
-      console.log("Sign-in validation failed:", errors);
+      if (import.meta.env.DEV) console.log("Sign-in validation failed:", errors);
       return;
     }
 
@@ -131,10 +131,12 @@ const AuthPage = () => {
     setShowToast(false);
 
     try {
-      console.log("Attempting sign-in with data:", {
-        email: signInData.email,
-        password: "***",
-      });
+      if (import.meta.env.DEV) {
+        console.log("Attempting sign-in with data:", {
+          email: signInData.email,
+          password: "***",
+        });
+      }
 
       const result = await signIn(signInData.email, signInData.password);
 
@@ -143,9 +145,11 @@ const AuthPage = () => {
         setErrors({ general: result.error });
         setShowToast(true);
       } else {
-        console.log(
-          "Sign-in successful, navigation will be handled by useEffect"
-        );
+        if (import.meta.env.DEV) {
+          console.log(
+            "Sign-in successful, navigation will be handled by useEffect"
+          );
+        }
       }
     } catch (error) {
       console.error("Unexpected sign-in error:", error);
@@ -162,7 +166,7 @@ const AuthPage = () => {
     e.preventDefault();
 
     if (!validateSignUp()) {
-      console.log("Sign-up validation failed:", errors);
+      if (import.meta.env.DEV) console.log("Sign-up validation failed:", errors);
       return;
     }
 
@@ -172,12 +176,14 @@ const AuthPage = () => {
     setShowToast(false);
 
     try {
-      console.log("Attempting sign-up with data:", {
-        email: signUpData.email,
-        name: signUpData.fullName,
-        age: signUpData.age,
-        password: "***",
-      });
+      if (import.meta.env.DEV) {
+        console.log("Attempting sign-up with data:", {
+          email: signUpData.email,
+          name: signUpData.fullName,
+          age: signUpData.age,
+          password: "***",
+        });
+      }
 
       const result = await signUp(
         signUpData.email,
@@ -191,7 +197,7 @@ const AuthPage = () => {
         setErrors({ general: result.error });
         setShowToast(true);
       } else {
-        console.log("Sign-up successful");
+        if (import.meta.env.DEV) console.log("Sign-up successful");
         // Clear form data on successful signup
         setSignUpData({
           fullName: "",

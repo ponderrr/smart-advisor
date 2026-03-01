@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { ArrowLeft, ArrowRight, User, LogOut, RefreshCw } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { generateQuestionsWithRetry } from "@/services/openai";
+import { generateQuestionsWithRetry } from "@/services/ai";
 import { Question } from "@/types/Question";
 import { Answer } from "@/types/Answer";
 import { v4 as uuidv4 } from "uuid";
@@ -50,7 +50,7 @@ const QuestionnairePage = () => {
     try {
       setIsLoading(true);
       setError(null);
-      console.log("Loading AI-generated questions...");
+      if (import.meta.env.DEV) console.log("Loading AI-generated questions...");
 
       const generatedQuestions = await generateQuestionsWithRetry(
         contentType,
@@ -58,7 +58,7 @@ const QuestionnairePage = () => {
         questionCount
       );
 
-      console.log("Questions loaded successfully:", generatedQuestions);
+      if (import.meta.env.DEV) console.log("Questions loaded successfully:", generatedQuestions);
       setQuestions(generatedQuestions);
     } catch (err) {
       console.error("Failed to load questions:", err);

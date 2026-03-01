@@ -41,7 +41,7 @@ export async function generateQuestions(
     }
 
     const response = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/openai-questions`,
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/anthropic-questions`,
       {
         method: "POST",
         headers: {
@@ -97,7 +97,7 @@ export async function generateRecommendations(
     const response = await fetch(
       `${
         import.meta.env.VITE_SUPABASE_URL
-      }/functions/v1/openai-recommendations`,
+      }/functions/v1/anthropic-recommendations`,
       {
         method: "POST",
         headers: {

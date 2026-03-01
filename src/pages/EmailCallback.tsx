@@ -13,19 +13,19 @@ const EmailCallback = () => {
   useEffect(() => {
     const handleEmailConfirmation = async () => {
       try {
-        console.log("Email callback: Starting confirmation process");
-        console.log("Current URL:", window.location.href);
+        if (import.meta.env.DEV) console.log("Email callback: Starting confirmation process");
+        if (import.meta.env.DEV) console.log("Current URL:", window.location.href);
 
         // Get the URL search parameters
         const urlParams = new URLSearchParams(window.location.search);
         const tokenHash = urlParams.get("token_hash");
         const type = urlParams.get("type");
 
-        console.log("URL params extracted:", { tokenHash: !!tokenHash, type });
+        if (import.meta.env.DEV) console.log("URL params extracted:", { tokenHash: !!tokenHash, type });
 
         // Check if we have the required parameters
         if (type === "email" && tokenHash) {
-          console.log("Processing email confirmation with verifyOtp...");
+          if (import.meta.env.DEV) console.log("Processing email confirmation with verifyOtp...");
 
           // Use verifyOtp for email confirmation
           const { data, error } = await supabase.auth.verifyOtp({
@@ -38,7 +38,7 @@ const EmailCallback = () => {
             throw error;
           }
 
-          console.log("Email verification successful:", data);
+          if (import.meta.env.DEV) console.log("Email verification successful:", data);
 
           setStatus("success");
           setMessage("Email confirmed successfully! Redirecting to sign in...");
