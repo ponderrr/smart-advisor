@@ -694,13 +694,12 @@
 
 /* Enhanced loading spinner */
 .enhanced-spinner {
-  width: 40px;
-  height: 40px;
   border: 3px solid rgba(99, 102, 241, 0.2);
   border-top: 3px solid #6366f1;
   border-radius: 50%;
   animation: enhanced-spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
   position: relative;
+  display: inline-block;
 }
 
 .enhanced-spinner::after {

@@ -158,36 +158,6 @@ const QuestionCountPage = () => {
                   }%, #374151 100%)`,
                 }}
               />
-              <style jsx>{`
-                .slider::-webkit-slider-thumb {
-                  appearance: none;
-                  height: 24px;
-                  width: 24px;
-                  background: #6366f1;
-                  border-radius: 50%;
-                  cursor: pointer;
-                  box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
-                  transition: all 0.2s ease;
-                }
-                .slider::-webkit-slider-thumb:hover {
-                  transform: scale(1.1);
-                  box-shadow: 0 6px 12px rgba(99, 102, 241, 0.4);
-                }
-                .slider::-moz-range-thumb {
-                  height: 24px;
-                  width: 24px;
-                  background: #6366f1;
-                  border-radius: 50%;
-                  cursor: pointer;
-                  box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
-                  border: none;
-                  transition: all 0.2s ease;
-                }
-                .slider::-moz-range-thumb:hover {
-                  transform: scale(1.1);
-                  box-shadow: 0 6px 12px rgba(99, 102, 241, 0.4);
-                }
-              `}</style>
             </div>
 
             {/* Range Labels */}
