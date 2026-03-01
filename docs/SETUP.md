@@ -55,10 +55,16 @@ npm run dev
 # http://localhost:5173
 ```
 
-## 8. Deploy to Vercel
-1. Push to GitHub
-2. Import repo in Vercel
-3. Set environment variables:
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_ANON_KEY`
-4. Deploy — `vercel.json` handles SPA routing automatically
+## Deploying to Vercel
+
+1. Push your repository to GitHub
+2. Go to vercel.com → Add New Project → Import your repo
+3. Vercel will auto-detect Vite — no framework config needed
+4. Set these environment variables in Vercel dashboard:
+   - VITE_SUPABASE_URL
+   - VITE_SUPABASE_ANON_KEY
+5. Deploy
+
+Note: ANTHROPIC_API_KEY, TMDB_API_KEY, and GOOGLE_BOOKS_API_KEY are
+Supabase Edge Function secrets. Set them in Supabase Dashboard →
+Edge Functions → Manage secrets. Do not add them to Vercel.
