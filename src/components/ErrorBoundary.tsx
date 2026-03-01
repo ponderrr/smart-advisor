@@ -45,7 +45,6 @@ class GlobalErrorHandler {
 
 // Global error handlers
 let isGlobalErrorHandlersInitialized = false;
-let originalFetch: typeof window.fetch | null = null;
 let unhandledRejectionHandler: ((event: PromiseRejectionEvent) => void) | null =
   null;
 let errorHandler: ((event: ErrorEvent) => void) | null = null;
@@ -57,11 +56,6 @@ export const setupGlobalErrorHandlers = (): (() => void) => {
   }
 
   const errorHandlerInstance = GlobalErrorHandler.getInstance();
-
-  // Store original fetch if not already stored
-  if (originalFetch === null) {
-    originalFetch = window.fetch;
-  }
 
   // Create handler functions
   unhandledRejectionHandler = (event: PromiseRejectionEvent) => {
@@ -83,29 +77,6 @@ export const setupGlobalErrorHandlers = (): (() => void) => {
   window.addEventListener("unhandledrejection", unhandledRejectionHandler);
   window.addEventListener("error", errorHandler);
 
-  // Override fetch for Edge Function error handling
-  window.fetch = async (...args) => {
-    try {
-      const response = await originalFetch!(...args);
-
-      // Check for Edge Function errors
-      if (response.url.includes("/functions/v1/") && !response.ok) {
-        const errorMessage = `Edge Function Error: ${response.status} ${response.statusText}`;
-
-        errorHandlerInstance.handleError(new Error(errorMessage), {
-          componentStack: `Edge Function: ${response.url}`,
-        });
-      }
-
-      return response;
-    } catch (error) {
-      console.error("Fetch error:", error);
-      // Re-throw the error to maintain fetch behavior for callers
-      // The global error handler will catch truly unhandled errors
-      throw error;
-    }
-  };
-
   isGlobalErrorHandlersInitialized = true;
 
   // Return cleanup function
@@ -120,10 +91,6 @@ export const setupGlobalErrorHandlers = (): (() => void) => {
     if (errorHandler) {
       window.removeEventListener("error", errorHandler);
       errorHandler = null;
-    }
-    if (originalFetch) {
-      window.fetch = originalFetch;
-      originalFetch = null;
     }
     isGlobalErrorHandlersInitialized = false;
   };
