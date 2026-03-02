@@ -7,7 +7,7 @@
 AI-powered movie & book recommendations tailored to who you actually are.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![React](https://img.shields.io/badge/react-18-61DAFB?logo=react&logoColor=white)
+![Next.js](https://img.shields.io/badge/next.js-15-000000?logo=next.js&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/typescript-strict-3178C6?logo=typescript&logoColor=white)
 ![Supabase](https://img.shields.io/badge/supabase-postgres%20%2B%20edge%20functions-3ECF8E?logo=supabase&logoColor=white)
 ![Claude](https://img.shields.io/badge/claude-sonnet%204-D97757?logo=anthropic&logoColor=white)
@@ -34,7 +34,7 @@ Smart Advisor is a full-stack recommendation engine that builds a taste profile 
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                     Browser (React SPA)                      │
+│                   Browser (Next.js App Router)                 │
 │  Auth → Quiz → Questions → Answers → Results → History       │
 └──────────────────┬──────────────────────┬───────────────────┘
                    │ PKCE / JWT           │ JWT
@@ -72,7 +72,7 @@ Smart Advisor is a full-stack recommendation engine that builds a taste profile 
 
 | Layer | Technology | Why |
 |-------|-----------|-----|
-| Frontend | React 18 + Vite + TypeScript | Fast dev, strict types, instant HMR |
+| Frontend | Next.js 15 + React 18 + TypeScript | App Router, SSR-ready auth, file-based routing |
 | Styling | Tailwind CSS + Radix UI | Utility-first CSS, accessible primitives |
 | Auth | Supabase Auth (PKCE) | Magic links, JWT, RLS integration built-in |
 | Database | Supabase Postgres | RLS enforced at DB level, not app level |
@@ -80,12 +80,27 @@ Smart Advisor is a full-stack recommendation engine that builds a taste profile 
 | AI | Anthropic Claude Sonnet 4 | Better nuanced reasoning for taste-based recommendations |
 | Movie data | TMDB API | Industry-standard movie metadata and poster images |
 | Book data | Google Books API | Cover art and metadata for millions of titles |
-| Hosting | Vercel | Zero-config Vite deploys, SPA routing via vercel.json |
+| Hosting | Vercel | Zero-config Next.js deploys with automatic routing |
 
 ## Project Structure
 
 ```
 smart-advisor/
+├── app/                          # Next.js App Router pages
+│   ├── layout.tsx                # Root layout with metadata
+│   ├── providers.tsx             # Client providers (QueryClient, Auth, Toaster)
+│   ├── globals.css               # Global styles (Tailwind + custom)
+│   ├── page.tsx                  # Landing page (/)
+│   ├── not-found.tsx             # 404 page
+│   ├── auth/
+│   │   ├── page.tsx              # Sign up / sign in (/auth)
+│   │   └── callback/route.ts    # OAuth + email verification handler
+│   ├── content-selection/page.tsx    # Movie, book, or both
+│   ├── question-count/page.tsx       # 5 / 10 / 15 questions
+│   ├── questionnaire/page.tsx        # Dynamic AI-generated quiz
+│   ├── results/page.tsx              # AI recommendation display + favorites
+│   └── history/page.tsx              # Saved picks and favorites
+│
 ├── public/
 │   ├── smartadvisor.svg          # App favicon and logo
 │   ├── smart-advisor-preview.png # og:image for social sharing
@@ -99,21 +114,15 @@ smart-advisor/
 │   │   ├── enhanced/             # Shimmer loaders, animated spinners, progress bars
 │   │   ├── ui/                   # Base design system (shadcn — buttons, cards, inputs)
 │   │   ├── ErrorBoundary.tsx     # Global error boundary with recovery
-│   │   ├── ExpandableText.tsx    # Truncated text with expand toggle
-│   │   └── ProtectedRoute.tsx    # Auth guard for protected pages
+│   │   └── ExpandableText.tsx    # Truncated text with expand toggle
 │   ├── hooks/
 │   │   ├── useAuth.tsx           # Session management, profile fetch, auth state
 │   │   └── use-mobile.tsx        # Responsive breakpoint detection
-│   ├── pages/                    # One component per route
-│   │   ├── Index.tsx             # Landing page
-│   │   ├── AuthPage.tsx          # Sign up / sign in
-│   │   ├── ContentSelectionPage.tsx  # Movie, book, or both
-│   │   ├── QuestionCountPage.tsx # 5 / 10 / 15 questions
-│   │   ├── QuestionnairePage.tsx # Dynamic AI-generated quiz
-│   │   ├── ResultsPage.tsx       # AI recommendation display + favorites
-│   │   ├── AccountHistoryPage.tsx # Saved picks and favorites
-│   │   ├── EmailCallback.tsx     # Email confirmation handler
-│   │   └── NotFound.tsx          # 404 page
+│   ├── lib/supabase/
+│   │   ├── client.ts             # Browser Supabase client (@supabase/ssr)
+│   │   └── server.ts             # Server Supabase client (cookie-based)
+│   ├── store/
+│   │   └── quizStore.ts          # Zustand store for quiz flow state
 │   ├── services/
 │   │   ├── ai.ts                 # Calls anthropic-questions + anthropic-recommendations
 │   │   ├── auth.ts               # Supabase auth wrappers (sign up, sign in, profile)
@@ -131,6 +140,8 @@ smart-advisor/
 │       ├── envValidation.ts      # Validates required env vars on startup
 │       └── localStorage.ts       # Safe localStorage wrapper with JSON helpers
 │
+├── middleware.ts                  # Next.js auth middleware (replaces ProtectedRoute)
+│
 ├── supabase/
 │   ├── functions/
 │   │   ├── anthropic-questions/  # Claude generates personality quiz (JWT required)
@@ -143,7 +154,6 @@ smart-advisor/
 │
 ├── docs/
 │   └── SETUP.md                  # Full local + Vercel + Supabase setup guide
-├── vercel.json                   # SPA rewrite rule
 └── .env.example                  # All required variables documented
 ```
 
@@ -154,9 +164,9 @@ git clone https://github.com/ponderrr/smart-advisor
 cd smart-advisor
 npm install
 cp .env.example .env.local
-# Fill in VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
+# Fill in NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY
 npm run dev
-# http://localhost:5173
+# http://localhost:3000
 ```
 
 For the full guide — including Supabase project setup, database migrations, edge function deployment, and production secrets — see **[docs/SETUP.md](docs/SETUP.md)**.
@@ -165,8 +175,8 @@ For the full guide — including Supabase project setup, database migrations, ed
 
 | Variable | Where to set | Required | Description |
 |----------|-------------|----------|-------------|
-| `VITE_SUPABASE_URL` | Vercel + `.env.local` | Yes | Your Supabase project URL |
-| `VITE_SUPABASE_ANON_KEY` | Vercel + `.env.local` | Yes | Supabase anon/public key |
+| `NEXT_PUBLIC_SUPABASE_URL` | Vercel + `.env.local` | Yes | Your Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Vercel + `.env.local` | Yes | Supabase anon/public key |
 | `ANTHROPIC_API_KEY` | Supabase secrets | Yes | Powers all AI question and recommendation generation |
 | `TMDB_API_KEY` | Supabase secrets | No | Movie posters and metadata. Falls back to placeholder if absent |
 | `GOOGLE_BOOKS_API_KEY` | Supabase secrets | No | Book covers and metadata. Falls back to placeholder if absent |
@@ -175,15 +185,14 @@ For the full guide — including Supabase project setup, database migrations, ed
 
 ## Security Model
 
-All API keys (Anthropic, TMDB, Google Books) are server-side only — they live in Supabase Edge Function secrets and are never bundled into the frontend. Row Level Security is enforced at the Postgres level: every `SELECT`, `INSERT`, `UPDATE`, and `DELETE` on `profiles` and `recommendations` is scoped to `auth.uid()`, so even a compromised client cannot access another user's data. Authentication uses the PKCE flow with JWT tokens — no session cookies. The `VITE_SUPABASE_ANON_KEY` exposed in the frontend is intentionally public; it can only access data that RLS policies explicitly allow for the authenticated user.
+All API keys (Anthropic, TMDB, Google Books) are server-side only — they live in Supabase Edge Function secrets and are never bundled into the frontend. Row Level Security is enforced at the Postgres level: every `SELECT`, `INSERT`, `UPDATE`, and `DELETE` on `profiles` and `recommendations` is scoped to `auth.uid()`, so even a compromised client cannot access another user's data. Authentication uses the PKCE flow with cookie-based sessions managed by `@supabase/ssr` and Next.js middleware. The `NEXT_PUBLIC_SUPABASE_ANON_KEY` exposed in the frontend is intentionally public; it can only access data that RLS policies explicitly allow for the authenticated user.
 
 ## Deployment
 
-Vercel handles the frontend — it auto-detects Vite, and `vercel.json` provides the SPA rewrite rule for client-side routing. Only two env vars go in Vercel: `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. Everything else (database, auth, edge functions, secrets) lives in Supabase. See **[docs/SETUP.md](docs/SETUP.md)** for step-by-step instructions.
+Vercel handles the frontend — it auto-detects Next.js and handles routing automatically via the App Router. Only two env vars go in Vercel: `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Everything else (database, auth, edge functions, secrets) lives in Supabase. See **[docs/SETUP.md](docs/SETUP.md)** for step-by-step instructions.
 
 ## Roadmap
 
-- [ ] Code splitting and lazy routes to reduce the 350 KB main bundle
 - [ ] Social sharing — let users share a recommendation card with friends
 - [ ] More content types — podcasts, TV shows, video games
 - [ ] Recommendation comparison — side-by-side view of past picks

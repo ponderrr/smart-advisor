@@ -107,7 +107,7 @@ class ErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log error in development only
-    if (import.meta.env.DEV) {
+    if (process.env.NODE_ENV === 'development') {
       console.error("ErrorBoundary caught an error:", error, errorInfo);
     }
 
@@ -212,7 +212,7 @@ class ErrorBoundary extends Component<Props, State> {
                 Reload Page
               </Button>
             </div>
-            {import.meta.env.DEV && this.state.error && (
+            {process.env.NODE_ENV === 'development' && this.state.error && (
               <details className="mt-8 text-left">
                 <summary className="text-textTertiary cursor-pointer hover:text-textSecondary">
                   Error Details (Development)
