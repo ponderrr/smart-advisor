@@ -1,7 +1,10 @@
-'use client';
+"use client";
 import { useState, useEffect } from "react";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { motion } from "motion/react";
+import { cn } from "@/lib/utils";
 import {
   EnhancedInput,
   EnhancedPasswordInput,
@@ -9,6 +12,7 @@ import {
   FormField,
   Toast,
 } from "@/components/enhanced";
+import * as Label from "@radix-ui/react-label";
 
 interface SignInFormData {
   email: string;
@@ -41,11 +45,15 @@ const AuthPage = () => {
   const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') console.log("AuthPage useEffect - user:", user);
-    if (process.env.NODE_ENV === 'development') console.log("AuthPage useEffect - session:", session);
-    if (process.env.NODE_ENV === 'development') console.log("AuthPage useEffect - loading:", loading);
+    if (process.env.NODE_ENV === "development")
+      console.log("AuthPage useEffect - user:", user);
+    if (process.env.NODE_ENV === "development")
+      console.log("AuthPage useEffect - session:", session);
+    if (process.env.NODE_ENV === "development")
+      console.log("AuthPage useEffect - loading:", loading);
     if (user && session && !loading) {
-      if (process.env.NODE_ENV === 'development') console.log("AuthPage: User, session, and not loading. Navigating...");
+      if (process.env.NODE_ENV === "development")
+        console.log("AuthPage: User, session, and not loading. Navigating...");
       router.push("/content-selection");
     }
   }, [user, session, loading, router]);
@@ -123,7 +131,8 @@ const AuthPage = () => {
     e.preventDefault();
 
     if (!validateSignIn()) {
-      if (process.env.NODE_ENV === 'development') console.log("Sign-in validation failed:", errors);
+      if (process.env.NODE_ENV === "development")
+        console.log("Sign-in validation failed:", errors);
       return;
     }
 
@@ -132,7 +141,7 @@ const AuthPage = () => {
     setShowToast(false);
 
     try {
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === "development") {
         console.log("Attempting sign-in with data:", {
           email: signInData.email,
           password: "***",
@@ -146,9 +155,9 @@ const AuthPage = () => {
         setErrors({ general: result.error });
         setShowToast(true);
       } else {
-        if (process.env.NODE_ENV === 'development') {
+        if (process.env.NODE_ENV === "development") {
           console.log(
-            "Sign-in successful, navigation will be handled by useEffect"
+            "Sign-in successful, navigation will be handled by useEffect",
           );
         }
       }
@@ -167,7 +176,8 @@ const AuthPage = () => {
     e.preventDefault();
 
     if (!validateSignUp()) {
-      if (process.env.NODE_ENV === 'development') console.log("Sign-up validation failed:", errors);
+      if (process.env.NODE_ENV === "development")
+        console.log("Sign-up validation failed:", errors);
       return;
     }
 
@@ -177,7 +187,7 @@ const AuthPage = () => {
     setShowToast(false);
 
     try {
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === "development") {
         console.log("Attempting sign-up with data:", {
           email: signUpData.email,
           name: signUpData.fullName,
@@ -190,7 +200,7 @@ const AuthPage = () => {
         signUpData.email,
         signUpData.password,
         signUpData.fullName,
-        parseInt(signUpData.age)
+        parseInt(signUpData.age),
       );
 
       if (result.error) {
@@ -198,7 +208,8 @@ const AuthPage = () => {
         setErrors({ general: result.error });
         setShowToast(true);
       } else {
-        if (process.env.NODE_ENV === 'development') console.log("Sign-up successful");
+        if (process.env.NODE_ENV === "development")
+          console.log("Sign-up successful");
         // Clear form data on successful signup
         setSignUpData({
           fullName: "",
@@ -210,7 +221,7 @@ const AuthPage = () => {
 
         // Always show success message for signup (Supabase requires email confirmation by default)
         setSuccessMessage(
-          "Account created successfully! Please check your email and click the confirmation link to complete your registration."
+          "Account created successfully! Please check your email and click the confirmation link to complete your registration.",
         );
         setShowToast(true);
       }
