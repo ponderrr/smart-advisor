@@ -150,6 +150,7 @@ const ResultsPage = () => {
         answers,
         contentType,
         userAge: user.age,
+        userName: user.name,
       };
 
       const recs = await enhancedRecommendationsService.retryRecommendation(

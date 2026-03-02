@@ -9,6 +9,7 @@ interface QuestionnaireData {
   answers: Answer[];
   contentType: "movie" | "book" | "both";
   userAge: number;
+  userName: string;
 }
 
 class EnhancedRecommendationsService {
@@ -59,7 +60,7 @@ class EnhancedRecommendationsService {
     questionnaireData: QuestionnaireData,
     userId: string
   ): Promise<Recommendation[]> {
-    const { answers, contentType, userAge } = questionnaireData;
+    const { answers, contentType, userAge, userName } = questionnaireData;
 
     if (import.meta.env.DEV) {
       console.log("Starting enhanced recommendation generation:", {
@@ -68,11 +69,12 @@ class EnhancedRecommendationsService {
       });
     }
 
-    // Generate recommendations using OpenAI
+    // Generate recommendations using Anthropic
     const aiRecommendations = await generateRecommendations(
       answers,
       contentType,
-      userAge
+      userAge,
+      userName
     );
 
     if (import.meta.env.DEV) {

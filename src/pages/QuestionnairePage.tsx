@@ -55,7 +55,8 @@ const QuestionnairePage = () => {
       const generatedQuestions = await generateQuestionsWithRetry(
         contentType,
         user.age,
-        questionCount
+        questionCount,
+        user.name
       );
 
       if (import.meta.env.DEV) console.log("Questions loaded successfully:", generatedQuestions);

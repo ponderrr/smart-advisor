@@ -29,7 +29,8 @@ export interface RecommendationData {
 export async function generateQuestions(
   contentType: "movie" | "book" | "both",
   userAge: number,
-  questionCount: number = 5
+  questionCount: number = 5,
+  userName: string = "User"
 ): Promise<Question[]> {
   try {
     // Get user session for authentication
@@ -51,7 +52,8 @@ export async function generateQuestions(
         },
         body: JSON.stringify({
           contentType,
-          userAge,
+          name: userName,
+          age: userAge,
           questionCount,
         }),
       }
@@ -83,7 +85,8 @@ export async function generateQuestions(
 export async function generateRecommendations(
   answers: Answer[],
   contentType: "movie" | "book" | "both",
-  userAge: number
+  userAge: number,
+  userName: string = "User"
 ): Promise<RecommendationData> {
   try {
     // Get user session for authentication
@@ -108,7 +111,8 @@ export async function generateRecommendations(
         body: JSON.stringify({
           answers,
           contentType,
-          userAge,
+          name: userName,
+          age: userAge,
         }),
       }
     );
@@ -126,6 +130,18 @@ export async function generateRecommendations(
     }
 
     const data = await response.json();
+
+    // Transform edge function response shape into the expected RecommendationData shape
+    const result: RecommendationData = {};
+    if (data.recommendations) {
+      for (const rec of data.recommendations) {
+        if (rec.type === "movie") result.movieRecommendation = rec;
+        if (rec.type === "book") result.bookRecommendation = rec;
+      }
+      return result;
+    }
+
+    // Fallback: if response already matches expected shape
     return data;
   } catch (error) {
     console.error("Error generating recommendations:", error);
@@ -140,13 +156,14 @@ export async function generateQuestionsWithRetry(
   contentType: "movie" | "book" | "both",
   userAge: number,
   questionCount: number = 5,
+  userName: string = "User",
   maxRetries: number = 3
 ): Promise<Question[]> {
   let lastError;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      return await generateQuestions(contentType, userAge, questionCount);
+      return await generateQuestions(contentType, userAge, questionCount, userName);
     } catch (error) {
       lastError = error;
 
@@ -167,13 +184,14 @@ export async function generateRecommendationsWithRetry(
   answers: Answer[],
   contentType: "movie" | "book" | "both",
   userAge: number,
+  userName: string = "User",
   maxRetries: number = 3
 ): Promise<RecommendationData> {
   let lastError;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      return await generateRecommendations(answers, contentType, userAge);
+      return await generateRecommendations(answers, contentType, userAge, userName);
     } catch (error) {
       lastError = error;
 
