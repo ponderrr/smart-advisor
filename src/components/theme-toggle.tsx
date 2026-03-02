@@ -2,7 +2,9 @@
 
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, Monitor } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 export function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
@@ -12,22 +14,74 @@ export function ThemeToggle() {
     setMounted(true);
   }, []);
 
-  if (!mounted) {
-    return null;
-  }
+  if (!mounted) return null;
 
-  const isDark = theme === "dark";
+  const handleThemeToggle = () => {
+    if (theme === "light") setTheme("dark");
+    else if (theme === "dark") setTheme("system");
+    else setTheme("light");
+  };
+
+  const config = {
+    light: {
+      bg: "bg-orange-50",
+      iconColor: "text-orange-600",
+      icon: <Sun className="h-5 w-5" />,
+    },
+    dark: {
+      bg: "bg-indigo-950",
+      iconColor: "text-indigo-400",
+      icon: <Moon className="h-5 w-5" />,
+    },
+    system: {
+      // Background fill is a soft blue, icon is a sharp blue
+      bg: "bg-blue-50 dark:bg-blue-950/40",
+      iconColor: "text-blue-500",
+      icon: <Monitor className="h-5 w-5" />,
+    },
+  };
+
+  const current = config[theme as keyof typeof config] || config.system;
 
   return (
     <button
-      onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="relative inline-flex items-center justify-center w-10 h-10 rounded-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-300 hover:scale-110"
-      aria-label="Toggle theme"
-      title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      onClick={handleThemeToggle}
+      className={cn(
+        "relative group flex items-center justify-center w-10 h-10 rounded-full",
+        "border border-slate-200 dark:border-slate-800",
+        "bg-white dark:bg-slate-900 overflow-hidden transition-colors duration-500",
+        "hover:border-slate-300 dark:hover:border-slate-700"
+      )}
     >
-      <Sun className="h-5 w-5 scale-100 transition-all rotate-0 text-yellow-500 dark:scale-0 dark:rotate-90" />
-      <Moon className="absolute h-5 w-5 scale-0 transition-all rotate-90 text-purple-600 dark:scale-100 dark:rotate-0" />
-      <span className="sr-only">Toggle theme</span>
+      {/* Liquid Background Fill - Fades and Slides Up */}
+      <AnimatePresence initial={false}>
+        <motion.div
+          key={`bg-${theme}`}
+          initial={{ y: 40, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: -40, opacity: 0 }}
+          transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+          className={cn("absolute inset-0 z-0", current.bg)}
+        />
+      </AnimatePresence>
+
+      {/* Icon Fade Up & Materialize */}
+      <div className="relative z-10">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={theme}
+            initial={{ y: 12, opacity: 0, filter: "blur(4px)" }}
+            animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+            exit={{ y: -12, opacity: 0, filter: "blur(4px)" }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className={current.iconColor}
+          >
+            {current.icon}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      <span className="sr-only">Toggle theme to {theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light'}</span>
     </button>
   );
 }
