@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
-import { Sun, Moon, Monitor } from 'lucide-react';
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
+import { Sun, Moon, Monitor } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 
 export function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
@@ -35,21 +35,33 @@ export function ThemeToggle() {
           <span className="sr-only">Toggle theme</span>
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48 dark:bg-slate-900 dark:border-slate-700">
-        <DropdownMenuItem onClick={() => setTheme('light')} className="cursor-pointer dark:hover:bg-slate-800">
+      <DropdownMenuContent
+        align="end"
+        className="w-48 dark:bg-slate-900 dark:border-slate-700"
+      >
+        <DropdownMenuItem
+          onClick={() => setTheme("light")}
+          className="cursor-pointer dark:hover:bg-slate-800"
+        >
           <Sun className="mr-2 h-4 w-4" />
           <span>Light</span>
-          {theme === 'light' && <span className="ml-auto">✓</span>}
+          {theme === "light" && <span className="ml-auto">✓</span>}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('dark')} className="cursor-pointer dark:hover:bg-slate-800">
+        <DropdownMenuItem
+          onClick={() => setTheme("dark")}
+          className="cursor-pointer dark:hover:bg-slate-800"
+        >
           <Moon className="mr-2 h-4 w-4" />
           <span>Dark</span>
-          {theme === 'dark' && <span className="ml-auto">✓</span>}
+          {theme === "dark" && <span className="ml-auto">✓</span>}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('system')} className="cursor-pointer dark:hover:bg-slate-800">
+        <DropdownMenuItem
+          onClick={() => setTheme("system")}
+          className="cursor-pointer dark:hover:bg-slate-800"
+        >
           <Monitor className="mr-2 h-4 w-4" />
           <span>System</span>
-          {theme === 'system' && <span className="ml-auto">✓</span>}
+          {theme === "system" && <span className="ml-auto">✓</span>}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
