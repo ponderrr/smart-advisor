@@ -26,11 +26,11 @@ class GoogleBooksService {
 
       const response = await fetch(
         `${
-          import.meta.env.VITE_SUPABASE_URL
+          process.env.NEXT_PUBLIC_SUPABASE_URL
         }/functions/v1/google-books-proxy?${params}`,
         {
           headers: {
-            apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+            apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
           },
         }
       );

@@ -42,13 +42,13 @@ export async function generateQuestions(
     }
 
     const response = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/anthropic-questions`,
+      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/anthropic-questions`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${session.access_token}`,
-          apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+          apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
         },
         body: JSON.stringify({
           contentType,
@@ -99,14 +99,14 @@ export async function generateRecommendations(
 
     const response = await fetch(
       `${
-        import.meta.env.VITE_SUPABASE_URL
+        process.env.NEXT_PUBLIC_SUPABASE_URL
       }/functions/v1/anthropic-recommendations`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${session.access_token}`,
-          apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+          apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
         },
         body: JSON.stringify({
           answers,

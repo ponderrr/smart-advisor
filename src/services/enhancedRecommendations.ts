@@ -32,7 +32,7 @@ class EnhancedRecommendationsService {
       );
       return recommendations;
     } catch (error) {
-      if (import.meta.env.DEV) {
+      if (process.env.NODE_ENV === 'development') {
         console.error(
           `Recommendation generation attempt ${retryCount + 1} failed:`,
           error
@@ -62,7 +62,7 @@ class EnhancedRecommendationsService {
   ): Promise<Recommendation[]> {
     const { answers, contentType, userAge, userName } = questionnaireData;
 
-    if (import.meta.env.DEV) {
+    if (process.env.NODE_ENV === 'development') {
       console.log("Starting enhanced recommendation generation:", {
         contentType,
         userAge,
@@ -77,7 +77,7 @@ class EnhancedRecommendationsService {
       userName
     );
 
-    if (import.meta.env.DEV) {
+    if (process.env.NODE_ENV === 'development') {
       console.log("AI recommendations generated:", aiRecommendations);
     }
 
@@ -127,7 +127,7 @@ class EnhancedRecommendationsService {
                 };
               }
             } catch (tmdbError) {
-              if (import.meta.env.DEV) {
+              if (process.env.NODE_ENV === 'development') {
                 console.warn(
                   "TMDB enhancement failed for:",
                   rec.title,
@@ -155,7 +155,7 @@ class EnhancedRecommendationsService {
                 };
               }
             } catch (bookError) {
-              if (import.meta.env.DEV) {
+              if (process.env.NODE_ENV === 'development') {
                 console.warn(
                   "Google Books enhancement failed for:",
                   rec.title,
@@ -170,10 +170,10 @@ class EnhancedRecommendationsService {
             await databaseService.saveRecommendation({
               ...enhancedRec,
               user_id: userId,
-            });
+            } as any);
 
           if (error) {
-            if (import.meta.env.DEV) {
+            if (process.env.NODE_ENV === 'development') {
               console.error("Failed to save recommendation:", error);
             }
             return enhancedRec;
@@ -181,7 +181,7 @@ class EnhancedRecommendationsService {
 
           return savedRec || enhancedRec;
         } catch (error) {
-          if (import.meta.env.DEV) {
+          if (process.env.NODE_ENV === 'development') {
             console.error("Error enhancing recommendation:", error);
           }
           return rec;
@@ -189,14 +189,14 @@ class EnhancedRecommendationsService {
       })
     );
 
-    if (import.meta.env.DEV) {
+    if (process.env.NODE_ENV === 'development') {
       console.log(
         "Enhanced recommendations completed:",
         enhancedRecommendations.length
       );
     }
 
-    return enhancedRecommendations;
+    return enhancedRecommendations as Recommendation[];
   }
 }
 

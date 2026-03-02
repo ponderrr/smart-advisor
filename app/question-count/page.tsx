@@ -1,46 +1,43 @@
-import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+'use client';
+import { useState, useEffect } from "react";
+import { useRouter } from 'next/navigation';
 import { User, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { EnhancedButton } from "@/components/enhanced";
+import { useQuizStore } from '@/store/quizStore';
 
 type ContentType = "movie" | "book" | "both";
 
 const QuestionCountPage = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const router = useRouter();
   const { user, signOut } = useAuth();
+  const { contentType, setQuestionCount: setStoreQuestionCount } = useQuizStore();
   const [questionCount, setQuestionCount] = useState(5);
   const [isLoading, setIsLoading] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
-  const contentType = location.state?.contentType as ContentType;
-
-  // Redirect if no content type
-  if (!contentType) {
-    navigate("/content-selection");
-    return null;
-  }
+  // Guard: redirect if no content type
+  useEffect(() => {
+    if (!contentType) {
+      router.push("/content-selection");
+    }
+  }, [contentType, router]);
 
   const handleLogoClick = () => {
-    navigate("/");
+    router.push("/");
   };
 
   const handleSignOut = async () => {
     await signOut();
-    navigate("/");
+    router.push("/");
   };
 
   const handleContinue = async () => {
     setIsLoading(true);
     try {
-      // Navigate to questionnaire with question count
-      navigate("/questionnaire", {
-        state: {
-          contentType,
-          questionCount,
-        },
-      });
+      // Store question count in Zustand and navigate
+      setStoreQuestionCount(questionCount);
+      router.push("/questionnaire");
     } catch (error) {
       console.error("Error proceeding to questionnaire:", error);
       setIsLoading(false);
@@ -63,6 +60,10 @@ const QuestionCountPage = () => {
         return contentType;
     }
   };
+
+  if (!contentType) {
+    return null;
+  }
 
   return (
     <div className="bg-appPrimary text-textPrimary font-inter min-h-screen">
@@ -92,7 +93,7 @@ const QuestionCountPage = () => {
           {showUserMenu && (
             <div className="user-menu absolute right-0 top-full mt-2 w-48 bg-appSecondary border border-gray-700 rounded-lg shadow-lg z-50">
               <button
-                onClick={() => navigate("/history")}
+                onClick={() => router.push("/history")}
                 className="user-menu-item w-full flex items-center gap-2 px-4 py-3 text-textSecondary hover:text-textPrimary hover:bg-gray-700 transition-colors duration-200"
               >
                 <User size={16} />
@@ -182,7 +183,7 @@ const QuestionCountPage = () => {
         {/* Navigation Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 animate-in fade-in duration-700 delay-800">
           <EnhancedButton
-            onClick={() => navigate("/content-selection")}
+            onClick={() => router.push("/content-selection")}
             variant="outline"
             size="lg"
             className="min-w-32"

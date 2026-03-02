@@ -1,4 +1,5 @@
-import { useNavigate } from "react-router-dom";
+'use client';
+import { useRouter } from 'next/navigation';
 import { useAuth } from "@/hooks/useAuth";
 import {
   AnimationUtils,
@@ -6,7 +7,7 @@ import {
 } from "@/components/enhanced/animations";
 
 const Index = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { user } = useAuth();
 
   // Set up staggered animation for features section
@@ -14,17 +15,17 @@ const Index = () => {
 
   const handleGetStarted = () => {
     if (user) {
-      navigate("/history");
+      router.push("/history");
     } else {
-      navigate("/auth");
+      router.push("/auth");
     }
   };
 
   const handleSignIn = () => {
     if (user) {
-      navigate("/history");
+      router.push("/history");
     } else {
-      navigate("/auth");
+      router.push("/auth");
     }
   };
 
