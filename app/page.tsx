@@ -25,9 +25,11 @@ import {
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-// --- Sub-component: HeroSection ---
+// --- Sub-component: HeroSection (DETAILED VERSION) ---
 const HeroSection = () => {
   const router = useRouter();
+  const { user } = useAuth();
+
   const heroImages = [
     "https://images.unsplash.com/photo-1489599849228-13632ca16442?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
     "https://images.unsplash.com/photo-1495446815901-a7297e01a5ad?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
@@ -38,28 +40,67 @@ const HeroSection = () => {
 
   const words = ["Movie", "Book", "Story", "Adventure", "Classic"];
 
+  const handleGetStarted = () => {
+    user ? router.push("/content-selection") : router.push("/auth");
+  };
+
   return (
     <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 transition-colors duration-300">
       <ParallaxHeroImages images={heroImages} />
-      <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center gap-6 px-4 text-center">
-        <div className="text-4xl md:text-6xl font-bold tracking-tight text-slate-900 dark:text-slate-50 transition-colors duration-300">
+
+      <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center gap-8 px-4 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-5xl md:text-7xl font-black tracking-tight text-slate-900 dark:text-slate-50"
+        >
           Discover Your Next Favorite
           <br />
           <FlipWords words={words} className="text-indigo-600 dark:text-indigo-400" />
-        </div>
+        </motion.div>
 
-        <p className="max-w-md text-lg text-slate-700 dark:text-slate-200 transition-colors duration-300">
-          AI-powered recommendations for movies and books tailored to your taste.
-        </p>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="max-w-xl text-xl text-slate-700 dark:text-slate-300"
+        >
+          AI-powered recommendations for movies and books tailored to your unique taste.
+        </motion.p>
 
-        <div className="flex flex-col sm:flex-row gap-4 mt-4">
+        {/* THE BIG CTA BUTTON */}
+        <div className="mt-6">
           <HoverBorderGradient
-            onClick={() => router.push("/content-selection")}
-            containerClassName="rounded-full"
+            onClick={handleGetStarted}
+            containerClassName="rounded-full shadow-[0_0_40px_-10px_rgba(79,70,229,0.4)]"
             as="button"
-            className="dark:bg-black bg-white text-black dark:text-white flex items-center space-x-2 px-8 py-3"
+            className={cn(
+              "dark:bg-black bg-white text-black dark:text-white",
+              "flex items-center space-x-3",
+              "px-12 py-6 text-2xl font-black tracking-tighter"
+            )}
           >
-            <span>Get Started</span>
+            <motion.div className="flex items-center gap-3" whileHover="hover">
+              <span>Get Started</span>
+              <motion.svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                variants={{ hover: { x: 5, scale: 1.2 } }}
+                className="text-indigo-500"
+              >
+                <path
+                  d="M5 12H19M19 12L13 6M19 12L13 18"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </motion.svg>
+            </motion.div>
           </HoverBorderGradient>
         </div>
       </div>
@@ -152,7 +193,7 @@ const Index = () => {
 
       <HeroSection />
 
-      {/* --- How It Works with Glowing Effect --- */}
+      {/* --- Rest of the sections --- */}
       <section id="how-it-works" className="py-20 md:py-32 px-4 md:px-6 bg-gradient-to-b from-white to-slate-50 dark:from-slate-950 dark:to-slate-900/50 border-t border-slate-200 dark:border-slate-800 transition-colors duration-300">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
@@ -162,24 +203,14 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {cards.map((card, index) => (
               <div key={index} className="group relative h-full min-h-[250px] rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-1">
-                {/* The Glowing Effect Background */}
-                <GlowingEffect
-                  spread={40}
-                  glow={true}
-                  disabled={false}
-                  proximity={64}
-                  inactiveZone={0.01}
-                />
-
+                <GlowingEffect spread={40} glow={true} disabled={false} proximity={64} inactiveZone={0.01} />
                 <div className="relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-2xl p-6 transition-all duration-500 group-hover:bg-slate-50/50 dark:group-hover:bg-slate-800/50">
                   <div className="relative z-10">
                     <div className={cn("inline-flex items-center justify-center w-12 h-12 rounded-lg mb-4 text-white font-bold bg-gradient-to-br shadow-lg", card.gradient)}>
                       {String(index + 1).padStart(2, "0")}
                     </div>
                     <h3 className="text-xl font-bold mb-3 tracking-tight text-slate-900 dark:text-slate-100">{card.title}</h3>
-                    <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                      {card.description}
-                    </p>
+                    <p className="text-slate-600 dark:text-slate-400 leading-relaxed">{card.description}</p>
                   </div>
                 </div>
               </div>
@@ -188,7 +219,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* --- Powered By --- */}
       <section id="powered-by" className="py-20 md:py-32 px-4 md:px-6 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
@@ -198,12 +228,10 @@ const Index = () => {
         </div>
       </section>
 
-      {/* --- Meet the Team --- */}
       <section id="meet-the-team" className="py-20 md:py-32 px-4 md:px-6 bg-gradient-to-b from-slate-50 to-white dark:from-slate-900/50 dark:to-slate-950 border-t border-slate-200 dark:border-slate-800">
         <div className="max-w-6xl mx-auto text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">Meet the Team</h2>
-          <p className="text-slate-600 dark:text-slate-400 text-lg mb-20">The essential services behind our intelligence</p>
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center mt-20">
             <div className="w-full flex justify-center relative h-40">
               <AnimatedTooltip items={teamMembers} />
             </div>
@@ -213,8 +241,7 @@ const Index = () => {
 
       <footer className="py-20 px-4 md:px-6 border-t border-slate-200 dark:border-slate-800 text-center">
         <p className="text-slate-600 dark:text-slate-400 mb-4">
-          Built with
-          <LinkPreview url="#" className="mx-1 font-semibold text-blue-600">React</LinkPreview>,
+          Built with <LinkPreview url="#" className="mx-1 font-semibold text-blue-600">React</LinkPreview>,
           <LinkPreview url="#" className="mx-1 font-semibold text-slate-900 dark:text-white">Next.js</LinkPreview>, and
           <LinkPreview url="#" className="mx-1 font-semibold text-blue-500">TypeScript</LinkPreview>
         </p>
