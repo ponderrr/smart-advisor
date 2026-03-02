@@ -21,12 +21,10 @@ const HeroSection = () => {
     "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=400&q=80",
   ];
 
-  const handleGetStarted = () => {
-    user ? router.push("/content-selection") : router.push("/auth");
-  };
+  const handleGetStarted = () => user ? router.push("/content-selection") : router.push("/auth");
 
   return (
-    <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 transition-colors duration-300">
+    <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
       <ParallaxHeroImages images={heroImages} />
 
       <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center gap-8 px-4 text-center">
@@ -50,22 +48,14 @@ const HeroSection = () => {
           AI-powered recommendations for movies and books tailored to your unique taste.
         </motion.p>
 
-        {/* THE BIG CTA BUTTON - WITHOUT ARROW */}
         <div className="mt-6">
           <HoverBorderGradient
             onClick={handleGetStarted}
             containerClassName="rounded-full shadow-[0_0_40px_-10px_rgba(79,70,229,0.4)]"
             as="button"
-            className={cn(
-              "dark:bg-black bg-white text-black dark:text-white",
-              "px-14 py-6 text-2xl font-black tracking-tighter" // Slightly wider padding (px-14) since arrow is gone
-            )}
+            className="dark:bg-black bg-white text-black dark:text-white px-14 py-6 text-2xl font-black tracking-tighter"
           >
-            <motion.span
-              initial={{ scale: 1 }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
+            <motion.span whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               Get Started
             </motion.span>
           </HoverBorderGradient>
