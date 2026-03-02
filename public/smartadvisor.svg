@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80" fill="none">
+  <rect width="80" height="80" rx="18" fill="#131316"/>
+  <rect x="0" y="0" width="80" height="80" rx="18" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <!-- Left book page -->
+  <rect x="18" y="22" width="20" height="36" rx="3" fill="#6366F1" opacity="0.9"/>
+  <!-- Right book page -->
+  <rect x="42" y="22" width="20" height="36" rx="3" fill="#6366F1" opacity="0.6"/>
+  <!-- Spine line -->
+  <line x1="40" y1="22" x2="40" y2="58" stroke="white" stroke-width="1.5" opacity="0.4"/>
+  <!-- Orange spark dot -->
+  <circle cx="57" cy="24" r="6" fill="#E87722"/>
+  <circle cx="57" cy="24" r="3" fill="white"/>
+</svg>
