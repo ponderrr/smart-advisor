@@ -4,136 +4,126 @@ import React, { useEffect, useMemo } from "react";
 import { motion, useAnimation } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-interface LogoItem {
+interface TechItem {
   name: string;
-  icon: React.ReactNode;
-  color: string;
+  glowColor: string;
 }
 
 const PoweredByLogos = () => {
   const controls = useAnimation();
 
-  const logos: LogoItem[] = [
+  const technologies: TechItem[] = [
     {
-      name: "Claude",
-      icon: <span className="text-2xl">🧠</span>,
-      color: "from-amber-500/20 to-amber-600/20",
+      name: "CLAUDE",
+      glowColor: "rgba(245, 158, 11, 0.5)", // Amber
     },
     {
-      name: "Google Books",
-      icon: <span className="text-2xl">📚</span>,
-      color: "from-blue-500/20 to-blue-600/20",
+      name: "GOOGLE BOOKS",
+      glowColor: "rgba(59, 130, 246, 0.5)", // Blue
     },
     {
       name: "TMDB",
-      icon: <span className="text-2xl">🎬</span>,
-      color: "from-green-500/20 to-green-600/20",
+      glowColor: "rgba(34, 197, 94, 0.5)", // Green
     },
     {
-      name: "Supabase",
-      icon: <span className="text-2xl">⚡</span>,
-      color: "from-emerald-500/20 to-emerald-600/20",
+      name: "SUPABASE",
+      glowColor: "rgba(16, 185, 129, 0.5)", // Emerald
     },
   ];
 
-  const logoSequence = async () => {
+  const animationSequence = async () => {
     while (true) {
-      for (let i = 0; i < logos.length; i++) {
+      for (let i = 0; i < technologies.length; i++) {
         await controls.start((custom) =>
           custom === i
             ? {
-              scale: [1, 1.2, 1],
-              y: [0, -10, 0],
-              transition: { duration: 0.5, ease: "easeInOut" },
+              opacity: [0.4, 1, 0.4],
+              filter: [
+                "drop-shadow(0 0 0px transparent)",
+                `drop-shadow(0 0 8px ${technologies[i].glowColor})`,
+                "drop-shadow(0 0 0px transparent)",
+              ],
+              transition: { duration: 0.8, ease: "easeInOut" },
             }
             : {}
         );
       }
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
   };
 
   useEffect(() => {
-    logoSequence();
+    animationSequence();
   }, []);
 
   const sparkles = useMemo(() =>
-    Array.from({ length: 12 }).map((_, i) => ({
+    Array.from({ length: 15 }).map((_, i) => ({
       id: i,
       x: Math.random() * 100 - 50,
       y: Math.random() * 100 - 50,
-      scale: Math.random() * 0.5 + 0.5,
-      duration: Math.random() * 3 + 2,
-      delay: Math.random() * 2,
+      duration: Math.random() * 2 + 1,
+      delay: Math.random() * 5,
     })), []);
 
   return (
-    <div className="relative w-full max-w-4xl mx-auto py-20 overflow-hidden rounded-3xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] transition-colors duration-300">
-      {/* Radial Mask for edges */}
-      <div className="absolute inset-0 z-0 pointer-events-none [mask-image:radial-gradient(ellipse_at_center,black_70%,transparent_100%)]" />
+    <div className="relative w-full max-w-5xl mx-auto py-24 overflow-hidden transition-colors duration-300">
+      {/* Background Grid for futuristic feel */}
+      <div className="absolute inset-0 [background-image:linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] [background-size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
 
-      {/* Vertical Glowing Beam */}
-      <div className="absolute left-1/2 top-0 -translate-x-1/2 w-[2px] h-full overflow-hidden z-0">
-        <div className="w-full h-1/2 bg-gradient-to-b from-transparent via-indigo-500 to-transparent animate-beam" />
+      {/* Scanning Beam */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="w-full h-[1px] bg-indigo-500/20 shadow-[0_0_15px_rgba(99,102,241,0.3)] animate-scan" />
       </div>
 
-      {/* Sparkles */}
+      {/* Data Sparkles */}
       <div className="absolute inset-0 pointer-events-none">
         {sparkles.map((sparkle) => (
           <motion.div
             key={sparkle.id}
-            initial={{ opacity: 0, x: sparkle.x, y: sparkle.y }}
-            animate={{
-              opacity: [0, 1, 0],
-              x: sparkle.x + (Math.random() * 20 - 10),
-              y: sparkle.y + (Math.random() * 20 - 10),
-            }}
+            initial={{ opacity: 0, x: `${sparkle.x}%`, y: `${sparkle.y}%` }}
+            animate={{ opacity: [0, 0.3, 0] }}
             transition={{
               duration: sparkle.duration,
               repeat: Infinity,
               delay: sparkle.delay,
-              ease: "linear",
             }}
-            className="absolute left-1/2 top-1/2 w-1 h-1 bg-indigo-400 rounded-full blur-[1px]"
+            className="absolute left-1/2 top-1/2 w-[1px] h-[1px] bg-white rounded-full"
           />
         ))}
       </div>
 
-      <div className="relative z-10 flex flex-wrap items-center justify-center gap-8 md:gap-16 px-4">
-        {logos.map((logo, index) => (
-          <div key={logo.name} className="flex flex-col items-center gap-4">
-            <motion.div
-              custom={index}
-              animate={controls}
+      <div className="relative z-10 flex flex-wrap items-center justify-center gap-x-12 gap-y-8 px-6">
+        {technologies.map((tech, index) => (
+          <motion.div
+            key={tech.name}
+            custom={index}
+            animate={controls}
+            className="relative"
+          >
+            <span
               className={cn(
-                "relative flex items-center justify-center w-20 h-20 md:w-24 md:h-24 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl",
-                "after:absolute after:inset-0 after:rounded-full after:bg-gradient-to-br after:opacity-50",
-                logo.color
+                "text-lg md:text-2xl font-black tracking-[0.2em] transition-colors duration-300",
+                "text-slate-400/40 dark:text-slate-600/40", // Dimmed state
+                "font-mono" // Use monospace for the 'tech' look
               )}
+              style={{
+                fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace'
+              }}
             >
-              <div className="relative z-10">{logo.icon}</div>
-
-              {/* Inner glow */}
-              <div className="absolute inset-0 rounded-full shadow-[inset_0_0_15px_rgba(99,102,241,0.1)] dark:shadow-[inset_0_0_15px_rgba(255,255,255,0.05)]" />
-            </motion.div>
-            <span className="text-sm font-semibold text-slate-600 dark:text-slate-400 tracking-wide uppercase">
-              {logo.name}
+              {tech.name}
             </span>
-          </div>
+          </motion.div>
         ))}
       </div>
 
       <style jsx global>{`
-        @keyframes beam {
-          0% {
-            transform: translateY(-100%);
-          }
-          100% {
-            transform: translateY(200%);
-          }
+        @keyframes scan {
+          0% { transform: translateY(0vh); opacity: 0; }
+          50% { opacity: 1; }
+          100% { transform: translateY(20vh); opacity: 0; }
         }
-        .animate-beam {
-          animation: beam 3s infinite linear;
+        .animate-scan {
+          animation: scan 4s infinite ease-in-out;
         }
       `}</style>
     </div>
