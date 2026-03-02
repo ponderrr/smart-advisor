@@ -1,131 +1,42 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { ParallaxHeroImages } from "@/components/ui/parallax-hero-images";
+
+// UI Components
 import { AnimatedTooltip } from "@/components/ui/animated-tooltip";
 import { LinkPreview } from "@/components/ui/link-preview";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { motion } from "framer-motion";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
-import { FlipWords } from "@/components/ui/flip-words";
-import PoweredByLogos from "@/components/powered-by-logos";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import {
-  Navbar,
-  NavBody,
-  NavItems,
-  MobileNav,
-  NavbarLogo,
-  NavbarButton,
-  MobileNavHeader,
-  MobileNavToggle,
-  MobileNavMenu,
+  Navbar, NavBody, NavItems, MobileNav, NavbarLogo,
+  MobileNavHeader, MobileNavToggle, MobileNavMenu,
 } from "@/components/ui/resizable-navbar";
-import { useState } from "react";
+
+// Custom Components
+import HeroSection from "@/components/hero-section";
+import PoweredByLogos from "@/components/powered-by-logos";
 import { cn } from "@/lib/utils";
 
-// --- Sub-component: HeroSection (DETAILED VERSION) ---
-const HeroSection = () => {
-  const router = useRouter();
-  const { user } = useAuth();
-
-  const heroImages = [
-    "https://images.unsplash.com/photo-1489599849228-13632ca16442?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-    "https://images.unsplash.com/photo-1495446815901-a7297e01a5ad?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-    "https://images.unsplash.com/photo-1507842298343-583f20981122?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-    "https://images.unsplash.com/photo-1532012197267-da84d127e765?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-    "https://images.unsplash.com/photo-1485846234645-a62644f84728?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-  ];
-
-  const words = ["Movie", "Book", "Story", "Adventure", "Classic"];
-
-  const handleGetStarted = () => {
-    user ? router.push("/content-selection") : router.push("/auth");
-  };
-
-  return (
-    <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 transition-colors duration-300">
-      <ParallaxHeroImages images={heroImages} />
-
-      <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center gap-8 px-4 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-5xl md:text-7xl font-black tracking-tight text-slate-900 dark:text-slate-50"
-        >
-          Discover Your Next Favorite
-          <br />
-          <FlipWords words={words} className="text-indigo-600 dark:text-indigo-400" />
-        </motion.div>
-
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="max-w-xl text-xl text-slate-700 dark:text-slate-300"
-        >
-          AI-powered recommendations for movies and books tailored to your unique taste.
-        </motion.p>
-
-        {/* THE BIG CTA BUTTON */}
-        <div className="mt-6">
-          <HoverBorderGradient
-            onClick={handleGetStarted}
-            containerClassName="rounded-full shadow-[0_0_40px_-10px_rgba(79,70,229,0.4)]"
-            as="button"
-            className={cn(
-              "dark:bg-black bg-white text-black dark:text-white",
-              "flex items-center space-x-3",
-              "px-12 py-6 text-2xl font-black tracking-tighter"
-            )}
-          >
-            <motion.div className="flex items-center gap-3" whileHover="hover">
-              <span>Get Started</span>
-              <motion.svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                variants={{ hover: { x: 5, scale: 1.2 } }}
-                className="text-indigo-500"
-              >
-                <path
-                  d="M5 12H19M19 12L13 6M19 12L13 18"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </motion.svg>
-            </motion.div>
-          </HoverBorderGradient>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-// --- Main Component: Index ---
 const Index = () => {
   const router = useRouter();
   const { user } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const handleGetStarted = () => {
-    user ? router.push("/content-selection") : router.push("/auth");
-  };
-
-  const handleSignIn = () => {
-    user ? router.push("/history") : router.push("/auth");
-  };
+  const handleGetStarted = () => user ? router.push("/content-selection") : router.push("/auth");
 
   const navItems = [
     { name: "How It Works", link: "#how-it-works" },
     { name: "Powered By", link: "#powered-by" },
     { name: "Our Team", link: "#meet-the-team" },
+  ];
+
+  const cards = [
+    { title: "Smart Questionnaire", description: "AI generates 5 personalized questions tailored to you", gradient: "from-red-500 to-pink-500" },
+    { title: "Tailored Recommendations", description: "Get book and movie picks that match your taste perfectly", gradient: "from-purple-500 to-blue-500" },
+    { title: "Instant Results", description: "Discover your next favorite in seconds with smart filtering", gradient: "from-cyan-500 to-green-500" },
   ];
 
   const teamMembers = [
@@ -135,28 +46,21 @@ const Index = () => {
     { id: 4, name: "Supabase", designation: "Data Storage", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=300&q=80" },
   ];
 
-  const cards = [
-    { title: "Smart Questionnaire", description: "AI generates 5 personalized questions tailored to you", gradient: "from-red-500 to-pink-500" },
-    { title: "Tailored Recommendations", description: "Get book and movie picks that match your taste perfectly", gradient: "from-purple-500 to-blue-500" },
-    { title: "Instant Results", description: "Discover your next favorite in seconds with smart filtering", gradient: "from-cyan-500 to-green-500" },
-  ];
-
   return (
     <div className="w-full bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen transition-colors duration-300 antialiased">
       <Navbar>
         <NavBody>
           <NavbarLogo />
-          <NavItems items={navItems} />
-          <div className="flex items-center gap-4">
-            <ThemeToggle />
-            <NavbarButton variant="secondary" onClick={handleSignIn}>
-              {user ? "Dashboard" : "Sign In"}
-            </NavbarButton>
 
+          <NavItems items={navItems} />
+
+          <div className="flex items-center gap-6">
+            <ThemeToggle />
+            {/* MATCHED CTA: No purple shadow, smaller, same font weight as Hero */}
             <HoverBorderGradient
               onClick={handleGetStarted}
               containerClassName="rounded-full"
-              className="dark:bg-slate-900 bg-white text-black dark:text-white px-4 py-1.5"
+              className="dark:bg-black bg-white text-black dark:text-white px-6 py-2 text-sm font-black tracking-tighter"
             >
               Get Started
             </HoverBorderGradient>
@@ -171,47 +75,38 @@ const Index = () => {
               <MobileNavToggle isOpen={isMobileMenuOpen} onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} />
             </div>
           </MobileNavHeader>
-          <MobileNavMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)}>
-            {navItems.map((item, idx) => (
-              <a key={idx} href={item.link} onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors duration-300">
+          <MobileNavMenu isOpen={isMobileMenuOpen}>
+            {navItems.map((item) => (
+              <a key={item.name} href={item.link} onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black tracking-tighter">
                 {item.name}
               </a>
             ))}
-            <div className="flex w-full flex-col gap-4 mt-4">
-              <NavbarButton onClick={handleSignIn} variant="secondary" className="w-full">{user ? "Dashboard" : "Sign In"}</NavbarButton>
-              <HoverBorderGradient
-                onClick={handleGetStarted}
-                containerClassName="rounded-full w-full"
-                className="dark:bg-slate-900 bg-white text-black dark:text-white w-full py-2"
-              >
-                Get Started
-              </HoverBorderGradient>
-            </div>
+            <HoverBorderGradient onClick={handleGetStarted} containerClassName="rounded-full w-full mt-4" className="w-full py-4 text-center font-black uppercase tracking-widest text-xs">
+              Get Started
+            </HoverBorderGradient>
           </MobileNavMenu>
         </MobileNav>
       </Navbar>
 
       <HeroSection />
 
-      {/* --- Rest of the sections --- */}
-      <section id="how-it-works" className="py-20 md:py-32 px-4 md:px-6 bg-gradient-to-b from-white to-slate-50 dark:from-slate-950 dark:to-slate-900/50 border-t border-slate-200 dark:border-slate-800 transition-colors duration-300">
+      {/* Sections remain the same but cleaner spacing */}
+      <section id="how-it-works" className="py-32 px-6 bg-gradient-to-b from-white to-slate-50 dark:from-slate-950 dark:to-slate-900/50 border-t dark:border-slate-800">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-slate-900 dark:text-white">How It Works</h2>
-            <p className="text-slate-600 dark:text-slate-400 text-lg">Simple, smart, and personalized for you</p>
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-4">How It Works</h2>
+            <p className="text-slate-600 dark:text-slate-400 text-lg">Simple, smart, and personalized for you.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {cards.map((card, index) => (
-              <div key={index} className="group relative h-full min-h-[250px] rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-1">
-                <GlowingEffect spread={40} glow={true} disabled={false} proximity={64} inactiveZone={0.01} />
-                <div className="relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-2xl p-6 transition-all duration-500 group-hover:bg-slate-50/50 dark:group-hover:bg-slate-800/50">
-                  <div className="relative z-10">
-                    <div className={cn("inline-flex items-center justify-center w-12 h-12 rounded-lg mb-4 text-white font-bold bg-gradient-to-br shadow-lg", card.gradient)}>
-                      {String(index + 1).padStart(2, "0")}
-                    </div>
-                    <h3 className="text-xl font-bold mb-3 tracking-tight text-slate-900 dark:text-slate-100">{card.title}</h3>
-                    <p className="text-slate-600 dark:text-slate-400 leading-relaxed">{card.description}</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            {cards.map((card, idx) => (
+              <div key={idx} className="group relative rounded-3xl border dark:border-slate-800 bg-white dark:bg-slate-900/50 p-1 transition-transform hover:-translate-y-1">
+                <GlowingEffect spread={40} glow />
+                <div className="relative h-full rounded-[calc(1.5rem-1px)] p-8 transition-all group-hover:bg-slate-50/50 dark:group-hover:bg-slate-800/50">
+                  <div className={cn("inline-flex items-center justify-center w-12 h-12 rounded-xl mb-6 text-white font-black bg-gradient-to-br", card.gradient)}>
+                    {idx + 1}
                   </div>
+                  <h3 className="text-2xl font-bold mb-4 tracking-tight">{card.title}</h3>
+                  <p className="text-slate-600 dark:text-slate-400 leading-relaxed">{card.description}</p>
                 </div>
               </div>
             ))}
@@ -219,33 +114,29 @@ const Index = () => {
         </div>
       </section>
 
-      <section id="powered-by" className="py-20 md:py-32 px-4 md:px-6 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">Powered By</h2>
-          </div>
+      <section id="powered-by" className="py-32 border-t dark:border-slate-800">
+        <div className="max-w-6xl mx-auto text-center px-6">
+          <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-20">Powered By</h2>
           <PoweredByLogos />
         </div>
       </section>
 
-      <section id="meet-the-team" className="py-20 md:py-32 px-4 md:px-6 bg-gradient-to-b from-slate-50 to-white dark:from-slate-900/50 dark:to-slate-950 border-t border-slate-200 dark:border-slate-800">
-        <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">Meet the Team</h2>
-          <div className="flex items-center justify-center mt-20">
-            <div className="w-full flex justify-center relative h-40">
-              <AnimatedTooltip items={teamMembers} />
-            </div>
+      <section id="meet-the-team" className="py-32 border-t dark:border-slate-800">
+        <div className="max-w-6xl mx-auto text-center px-6">
+          <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-24">Meet the Team</h2>
+          <div className="flex justify-center h-32">
+            <AnimatedTooltip items={teamMembers} />
           </div>
         </div>
       </section>
 
-      <footer className="py-20 px-4 md:px-6 border-t border-slate-200 dark:border-slate-800 text-center">
-        <p className="text-slate-600 dark:text-slate-400 mb-4">
-          Built with <LinkPreview url="#" className="mx-1 font-semibold text-blue-600">React</LinkPreview>,
-          <LinkPreview url="#" className="mx-1 font-semibold text-slate-900 dark:text-white">Next.js</LinkPreview>, and
-          <LinkPreview url="#" className="mx-1 font-semibold text-blue-500">TypeScript</LinkPreview>
+      <footer className="py-20 border-t dark:border-slate-800 text-center text-slate-500 dark:text-slate-400 px-6">
+        <p className="mb-4">
+          Built with <LinkPreview url="#" className="font-bold text-indigo-600">React</LinkPreview>,
+          <LinkPreview url="#" className="font-bold text-slate-900 dark:text-white">Next.js</LinkPreview>, and
+          <LinkPreview url="#" className="font-bold text-blue-500">TypeScript</LinkPreview>
         </p>
-        <p className="text-slate-600 dark:text-slate-400">© 2026 Smart Advisor. AI-powered entertainment recommendations.</p>
+        <p className="text-sm">© 2026 Smart Advisor. All rights reserved.</p>
       </footer>
     </div>
   );
