@@ -1,16 +1,16 @@
-
-import { useNavigate } from "react-router-dom";
+'use client';
+import { useRouter } from 'next/navigation';
 import { Home, ArrowLeft } from "lucide-react";
 
 const NotFound = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleGoHome = () => {
-    navigate("/");
+    router.push("/");
   };
 
   const handleGoBack = () => {
-    navigate(-1);
+    router.back();
   };
 
   return (
@@ -37,7 +37,7 @@ const NotFound = () => {
           <p className="text-lg text-textSecondary mb-12 leading-relaxed">
             Sorry, the page you're looking for doesn't exist. It might have been moved, deleted, or you entered the wrong URL.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={handleGoBack}

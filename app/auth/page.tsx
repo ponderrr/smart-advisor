@@ -1,5 +1,6 @@
+'use client';
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from 'next/navigation';
 import { useAuth } from "@/hooks/useAuth";
 import {
   EnhancedInput,
@@ -23,7 +24,7 @@ interface SignUpFormData {
 }
 
 const AuthPage = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const {
     signIn,
     signUp,
@@ -40,14 +41,14 @@ const AuthPage = () => {
   const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
-    if (import.meta.env.DEV) console.log("AuthPage useEffect - user:", user);
-    if (import.meta.env.DEV) console.log("AuthPage useEffect - session:", session);
-    if (import.meta.env.DEV) console.log("AuthPage useEffect - loading:", loading);
+    if (process.env.NODE_ENV === 'development') console.log("AuthPage useEffect - user:", user);
+    if (process.env.NODE_ENV === 'development') console.log("AuthPage useEffect - session:", session);
+    if (process.env.NODE_ENV === 'development') console.log("AuthPage useEffect - loading:", loading);
     if (user && session && !loading) {
-      if (import.meta.env.DEV) console.log("AuthPage: User, session, and not loading. Navigating...");
-      navigate("/content-selection");
+      if (process.env.NODE_ENV === 'development') console.log("AuthPage: User, session, and not loading. Navigating...");
+      router.push("/content-selection");
     }
-  }, [user, session, loading, navigate]);
+  }, [user, session, loading, router]);
 
   const [signInData, setSignInData] = useState<SignInFormData>({
     email: "",
@@ -63,7 +64,7 @@ const AuthPage = () => {
   });
 
   const handleLogoClick = () => {
-    navigate("/");
+    router.push("/");
   };
 
   const validateSignIn = (): boolean => {
@@ -122,7 +123,7 @@ const AuthPage = () => {
     e.preventDefault();
 
     if (!validateSignIn()) {
-      if (import.meta.env.DEV) console.log("Sign-in validation failed:", errors);
+      if (process.env.NODE_ENV === 'development') console.log("Sign-in validation failed:", errors);
       return;
     }
 
@@ -131,7 +132,7 @@ const AuthPage = () => {
     setShowToast(false);
 
     try {
-      if (import.meta.env.DEV) {
+      if (process.env.NODE_ENV === 'development') {
         console.log("Attempting sign-in with data:", {
           email: signInData.email,
           password: "***",
@@ -145,7 +146,7 @@ const AuthPage = () => {
         setErrors({ general: result.error });
         setShowToast(true);
       } else {
-        if (import.meta.env.DEV) {
+        if (process.env.NODE_ENV === 'development') {
           console.log(
             "Sign-in successful, navigation will be handled by useEffect"
           );
@@ -166,7 +167,7 @@ const AuthPage = () => {
     e.preventDefault();
 
     if (!validateSignUp()) {
-      if (import.meta.env.DEV) console.log("Sign-up validation failed:", errors);
+      if (process.env.NODE_ENV === 'development') console.log("Sign-up validation failed:", errors);
       return;
     }
 
@@ -176,7 +177,7 @@ const AuthPage = () => {
     setShowToast(false);
 
     try {
-      if (import.meta.env.DEV) {
+      if (process.env.NODE_ENV === 'development') {
         console.log("Attempting sign-up with data:", {
           email: signUpData.email,
           name: signUpData.fullName,
@@ -197,7 +198,7 @@ const AuthPage = () => {
         setErrors({ general: result.error });
         setShowToast(true);
       } else {
-        if (import.meta.env.DEV) console.log("Sign-up successful");
+        if (process.env.NODE_ENV === 'development') console.log("Sign-up successful");
         // Clear form data on successful signup
         setSignUpData({
           fullName: "",

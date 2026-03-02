@@ -1,5 +1,6 @@
+'use client';
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useRouter } from 'next/navigation';
 import { RefreshCw, Heart, User, LogOut, Star } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { enhancedRecommendationsService } from "@/services/enhancedRecommendations";
@@ -12,6 +13,7 @@ import {
   RecommendationLoadingShimmer,
 } from "@/components/enhanced";
 import { SafeLocalStorage } from "@/utils/localStorage";
+import { useQuizStore } from '@/store/quizStore';
 
 // Utility function to safely serialize data, handling circular references and non-serializable values
 const safeStringify = (obj: unknown): string => {
@@ -43,7 +45,7 @@ const safeStringify = (obj: unknown): string => {
       return value;
     });
   } catch (error) {
-    if (import.meta.env.DEV) console.warn("Failed to stringify object, using fallback:", error);
+    if (process.env.NODE_ENV === 'development') console.warn("Failed to stringify object, using fallback:", error);
     // Fallback: create a hash based on object keys and content type
     return `fallback-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
@@ -72,9 +74,9 @@ const saveGeneratedSession = (sessionId: string) => {
 };
 
 const ResultsPage = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const router = useRouter();
   const { user, signOut } = useAuth();
+  const { contentType, answers, reset } = useQuizStore();
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(true);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -90,9 +92,6 @@ const ResultsPage = () => {
   const isInitialLoadRef = useRef(true);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Get data from navigation state
-  const { contentType, answers, questions } = location.state || {};
-
   // Create a unique session identifier based on the answers and content type
   const sessionId = (() => {
     if (!answers || !contentType) {
@@ -104,7 +103,7 @@ const ResultsPage = () => {
       const userId = user?.id || "anonymous";
       return `${serializedAnswers}-${contentType}-${userId}`;
     } catch (error) {
-      if (import.meta.env.DEV) console.warn("Failed to create session ID, using fallback:", error);
+      if (process.env.NODE_ENV === 'development') console.warn("Failed to create session ID, using fallback:", error);
       return `fallback-session-${Date.now()}-${Math.random()
         .toString(36)
         .substr(2, 9)}`;
@@ -128,7 +127,7 @@ const ResultsPage = () => {
       setLoading(true);
       setError(null);
 
-      if (import.meta.env.DEV) console.log("Starting AI recommendation generation for user:", user.id);
+      if (process.env.NODE_ENV === 'development') console.log("Starting AI recommendation generation for user:", user.id);
 
       // Check if operation was aborted
       if (abortController.signal.aborted) return;
@@ -165,7 +164,7 @@ const ResultsPage = () => {
 
       if (abortController.signal.aborted) return;
 
-      if (import.meta.env.DEV) console.log("Recommendations generated successfully:", recs);
+      if (process.env.NODE_ENV === 'development') console.log("Recommendations generated successfully:", recs);
 
       // Cache the recommendations for this session
       generatedRecommendationsRef.current = recs;
@@ -178,7 +177,7 @@ const ResultsPage = () => {
     } catch (error) {
       // Don't set error if operation was aborted
       if (abortController.signal.aborted) {
-        if (import.meta.env.DEV) console.log("Recommendation generation aborted");
+        if (process.env.NODE_ENV === 'development') console.log("Recommendation generation aborted");
         return;
       }
       console.error("Error generating recommendations:", error);
@@ -211,13 +210,13 @@ const ResultsPage = () => {
 
   const handleCancelGeneration = () => {
     setShowConfirmDialog(false);
-    navigate("/history");
+    router.push("/history");
   };
 
   useEffect(() => {
     // Redirect if no data
-    if (!contentType || !answers || !user || !sessionId) {
-      navigate("/content-selection");
+    if (!contentType || !answers?.length || !user || !sessionId) {
+      router.push("/content-selection");
       return;
     }
 
@@ -228,7 +227,7 @@ const ResultsPage = () => {
 
     // If we have cached recommendations for this session, use them
     if (isSameSession && hasExistingRecommendations) {
-      if (import.meta.env.DEV) console.log("Using cached recommendations for same session");
+      if (process.env.NODE_ENV === 'development') console.log("Using cached recommendations for same session");
       setRecommendations(generatedRecommendationsRef.current);
       setLoading(false);
       return;
@@ -239,7 +238,7 @@ const ResultsPage = () => {
 
     if (sessionWasGenerated && isInitialLoadRef.current) {
       // This session was already generated before, show confirmation dialog
-      if (import.meta.env.DEV) console.log("Session was already generated, showing confirmation dialog");
+      if (process.env.NODE_ENV === 'development') console.log("Session was already generated, showing confirmation dialog");
       setShowConfirmDialog(true);
       setLoading(false);
       isInitialLoadRef.current = false;
@@ -248,7 +247,7 @@ const ResultsPage = () => {
 
     // Generate recommendations for new session
     if (!sessionWasGenerated) {
-      if (import.meta.env.DEV) console.log("Generating recommendations for new session:", sessionId);
+      if (process.env.NODE_ENV === 'development') console.log("Generating recommendations for new session:", sessionId);
       handleGenerateRecommendations();
     } else {
       setLoading(false);
@@ -260,7 +259,7 @@ const ResultsPage = () => {
     answers,
     user,
     sessionId,
-    navigate,
+    router,
     wasSessionGenerated,
     handleGenerateRecommendations,
   ]);
@@ -300,12 +299,12 @@ const ResultsPage = () => {
   }, []);
 
   const handleLogoClick = () => {
-    navigate("/");
+    router.push("/");
   };
 
   const handleSignOut = async () => {
     await signOut();
-    navigate("/");
+    router.push("/");
   };
 
   const handleGetAnother = () => {
@@ -319,11 +318,12 @@ const ResultsPage = () => {
     currentSessionRef.current = null;
     generatedRecommendationsRef.current = [];
     isInitialLoadRef.current = true;
-    navigate("/content-selection");
+    reset();
+    router.push("/content-selection");
   };
 
   const handleViewHistory = () => {
-    navigate("/history");
+    router.push("/history");
   };
 
   const handleToggleFavorite = async (recommendationId: string) => {
@@ -360,7 +360,7 @@ const ResultsPage = () => {
     handleGenerateRecommendations();
   };
 
-  if (!contentType || !answers || !user) {
+  if (!contentType || !answers?.length || !user) {
     return null; // Redirect will happen in useEffect
   }
 
@@ -492,9 +492,7 @@ const ResultsPage = () => {
                 Try Again
               </EnhancedButton>
               <EnhancedButton
-                onClick={() =>
-                  navigate("/questionnaire", { state: { contentType } })
-                }
+                onClick={() => router.push("/questionnaire")}
                 variant="secondary"
               >
                 Retake Quiz
@@ -534,7 +532,7 @@ const ResultsPage = () => {
           {showUserMenu && (
             <div className="user-menu absolute right-0 top-full mt-2 w-48 bg-appSecondary border border-gray-700 rounded-lg shadow-lg z-50">
               <button
-                onClick={() => navigate("/history")}
+                onClick={() => router.push("/history")}
                 className="user-menu-item w-full flex items-center gap-2 px-4 py-3 text-textSecondary hover:text-textPrimary hover:bg-gray-700 transition-colors duration-200"
               >
                 <User size={16} />

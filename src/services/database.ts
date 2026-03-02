@@ -76,7 +76,7 @@ class DatabaseService {
       const savedRecommendation: Recommendation = {
         id: data.id,
         user_id: data.user_id,
-        type: data.type,
+        type: data.type as "movie" | "book",
         title: data.title,
         director: data.director,
         author: data.author,
@@ -86,7 +86,7 @@ class DatabaseService {
         poster_url: data.poster_url,
         explanation: data.explanation,
         is_favorited: data.is_favorited || false,
-        content_type: data.content_type,
+        content_type: data.content_type as "movie" | "book" | "both",
         created_at: data.created_at,
         description: data.description,
       };
