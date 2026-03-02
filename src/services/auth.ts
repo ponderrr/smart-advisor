@@ -58,7 +58,7 @@ class AuthService {
 
       // If we get here, email confirmation is not required (auto-confirm is enabled)
       // Create profile immediately
-      const { error: profileError } = await supabase.from("profiles").insert([
+      const { error: profileError } = await supabase.from("profiles").upsert([
         {
           id: authData.user.id,
           name,
@@ -67,7 +67,7 @@ class AuthService {
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         },
-      ]);
+      ], { onConflict: "id" });
 
       if (profileError) {
         console.error("Error creating profile:", profileError);
@@ -153,7 +153,7 @@ class AuthService {
           // Profile doesn't exist, create one
           const { error: createError } = await supabase
             .from("profiles")
-            .insert([
+            .upsert([
               {
                 id: data.user.id,
                 name: data.user.user_metadata?.name || "User",
@@ -162,7 +162,7 @@ class AuthService {
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
               },
-            ]);
+            ], { onConflict: "id" });
 
           if (createError) {
             console.error("Error creating missing profile:", createError);
@@ -292,7 +292,7 @@ class AuthService {
           // Profile doesn't exist, create one
           const { error: createError } = await supabase
             .from("profiles")
-            .insert([
+            .upsert([
               {
                 id: user.id,
                 name: user.user_metadata?.name || "User",
@@ -301,7 +301,7 @@ class AuthService {
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
               },
-            ]);
+            ], { onConflict: "id" });
 
           if (createError) {
             console.error(
