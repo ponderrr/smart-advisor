@@ -1,0 +1,41 @@
+# Smart Advisor
+
+> AI-powered movie and book recommendation engine that builds a personalized
+> taste profile through a short personality quiz and returns curated picks
+> with detailed explanations tailored to each user.
+
+## What it does
+
+Smart Advisor asks users a series of personality-driven questions — including
+preferences around tone, themes, emotional depth, and content maturity — then
+uses Claude (Anthropic) to generate a single highly-personalized movie and/or
+book recommendation with a detailed explanation of why it fits that specific person.
+
+## Tech stack
+
+- Frontend: React 18, Vite, TypeScript, Tailwind CSS
+- Backend: Supabase (Postgres, Auth, Edge Functions)
+- AI: Anthropic Claude Sonnet (claude-sonnet-4-20250514)
+- Enrichment: TMDB API (movie metadata), Google Books API (book metadata)
+- Hosting: Vercel
+
+## Age-aware recommendations
+
+The system adapts its question style and recommendation content based on
+user age. Users under 18 receive family-appropriate recommendations.
+Users 18 and older may receive recommendations involving mature themes
+including dark content, moral complexity, and adult subject matter.
+
+## Key pages
+
+- /               Landing page
+- /auth           Sign up / sign in
+- /select-content Choose movies, books, or both
+- /question-count Choose quiz length (5, 10, or 15 questions)
+- /questionnaire  Personality quiz
+- /results        AI-generated recommendation
+- /account        Saved recommendations and account history
+
+## Source
+
+https://github.com/ponderrr/smart-advisor
