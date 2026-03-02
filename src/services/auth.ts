@@ -13,7 +13,7 @@ class AuthService {
     age: number
   ): Promise<{ error: string | null }> {
     try {
-      if (import.meta.env.DEV) console.log("Starting signup process for:", email);
+      if (process.env.NODE_ENV === 'development') console.log("Starting signup process for:", email);
 
       // Determine the correct redirect URL based on environment
       const getRedirectUrl = () => {
@@ -44,7 +44,7 @@ class AuthService {
         return { error: "Failed to create user account" };
       }
 
-      if (import.meta.env.DEV) console.log("Auth user created successfully:", authData.user.id);
+      if (process.env.NODE_ENV === 'development') console.log("Auth user created successfully:", authData.user.id);
 
       // Check if email confirmation is required
       if (
@@ -52,7 +52,7 @@ class AuthService {
         authData.user &&
         !authData.user.email_confirmed_at
       ) {
-        if (import.meta.env.DEV) console.log("Email confirmation required");
+        if (process.env.NODE_ENV === 'development') console.log("Email confirmation required");
         return { error: null }; // Don't treat this as an error
       }
 
@@ -76,7 +76,7 @@ class AuthService {
         };
       }
 
-      if (import.meta.env.DEV) console.log("Profile created successfully");
+      if (process.env.NODE_ENV === 'development') console.log("Profile created successfully");
       return { error: null };
     } catch (err) {
       console.error("Unexpected error during signup:", err);
@@ -91,7 +91,7 @@ class AuthService {
     password: string
   ): Promise<{ error: string | null }> {
     try {
-      if (import.meta.env.DEV) console.log("Starting signin process for:", email);
+      if (process.env.NODE_ENV === 'development') console.log("Starting signin process for:", email);
 
       // Validate inputs
       if (!email || !password) {
@@ -138,7 +138,7 @@ class AuthService {
         return { error: "Sign in failed. Please try again." };
       }
 
-      if (import.meta.env.DEV) console.log("User signed in successfully:", data.user.id);
+      if (process.env.NODE_ENV === 'development') console.log("User signed in successfully:", data.user.id);
 
       // Verify profile exists
       const { data: profile, error: profileError } = await supabase
@@ -177,7 +177,7 @@ class AuthService {
         }
       }
 
-      if (import.meta.env.DEV) console.log("Profile verified successfully");
+      if (process.env.NODE_ENV === 'development') console.log("Profile verified successfully");
       return { error: null };
     } catch (err) {
       console.error("Unexpected error during signin:", err);
@@ -189,13 +189,13 @@ class AuthService {
 
   async signOut(): Promise<{ error: string | null }> {
     try {
-      if (import.meta.env.DEV) console.log("Starting signout process");
+      if (process.env.NODE_ENV === 'development') console.log("Starting signout process");
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error("Sign out error:", error);
         return { error: error.message };
       }
-      if (import.meta.env.DEV) console.log("User signed out successfully");
+      if (process.env.NODE_ENV === 'development') console.log("User signed out successfully");
       return { error: null };
     } catch (err) {
       console.error("Unexpected error during signout:", err);
@@ -205,7 +205,7 @@ class AuthService {
 
   async getCurrentUser(): Promise<{ user: User | null; error: string | null }> {
     try {
-      if (import.meta.env.DEV) console.log("authService.getCurrentUser: Attempting to get user...");
+      if (process.env.NODE_ENV === 'development') console.log("authService.getCurrentUser: Attempting to get user...");
       let user = null;
       let userError = null;
 
@@ -225,13 +225,13 @@ class AuthService {
         };
       }
 
-      if (import.meta.env.DEV) {
+      if (process.env.NODE_ENV === 'development') {
         console.log(
           "authService.getCurrentUser: Result of supabase.auth.getUser() - user:",
           user
         );
       }
-      if (import.meta.env.DEV) {
+      if (process.env.NODE_ENV === 'development') {
         console.log(
           "authService.getCurrentUser: Result of supabase.auth.getUser() - error:",
           userError
@@ -247,7 +247,7 @@ class AuthService {
       }
 
       if (!user) {
-        if (import.meta.env.DEV) {
+        if (process.env.NODE_ENV === 'development') {
           console.log(
             "authService.getCurrentUser: No user found after getUser()."
           );
@@ -255,7 +255,7 @@ class AuthService {
         return { user: null, error: null };
       }
 
-      if (import.meta.env.DEV) console.log("authService.getCurrentUser: User found:", user.id);
+      if (process.env.NODE_ENV === 'development') console.log("authService.getCurrentUser: User found:", user.id);
 
       // Get user profile
       const { data: profile, error: profileError } = await supabase
@@ -264,13 +264,13 @@ class AuthService {
         .eq("id", user.id)
         .single();
 
-      if (import.meta.env.DEV) {
+      if (process.env.NODE_ENV === 'development') {
         console.log(
           "authService.getCurrentUser: Result of profile fetch - profile:",
           profile
         );
       }
-      if (import.meta.env.DEV) {
+      if (process.env.NODE_ENV === 'development') {
         console.log(
           "authService.getCurrentUser: Result of profile fetch - error:",
           profileError
@@ -284,7 +284,7 @@ class AuthService {
         );
 
         if (profileError.code === "PGRST116") {
-          if (import.meta.env.DEV) {
+          if (process.env.NODE_ENV === 'development') {
             console.log(
               "authService.getCurrentUser: Profile not found, attempting to create..."
             );
@@ -310,7 +310,7 @@ class AuthService {
             );
             return { user: null, error: "Failed to create user profile" };
           }
-          if (import.meta.env.DEV) {
+          if (process.env.NODE_ENV === 'development') {
             console.log(
               "authService.getCurrentUser: Profile created successfully."
             );
@@ -333,7 +333,7 @@ class AuthService {
       }
 
       if (!profile) {
-        if (import.meta.env.DEV) {
+        if (process.env.NODE_ENV === 'development') {
           console.log(
             "authService.getCurrentUser: User profile is null after fetch."
           );
@@ -341,7 +341,7 @@ class AuthService {
         return { user: null, error: "User profile not found" };
       }
 
-      if (import.meta.env.DEV) {
+      if (process.env.NODE_ENV === 'development') {
         console.log(
           "authService.getCurrentUser: Profile fetched successfully.",
           profile.id

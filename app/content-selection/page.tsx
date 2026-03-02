@@ -1,7 +1,9 @@
+'use client';
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from 'next/navigation';
 import { Film, Book, Target, User, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuizStore } from '@/store/quizStore';
 
 type ContentType = "movie" | "book" | "both" | null;
 
@@ -53,14 +55,15 @@ const SelectionCard: React.FC<SelectionCardProps> = ({
 };
 
 const ContentSelectionPage = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { user, signOut } = useAuth();
+  const { setContentType } = useQuizStore();
   const [selectedType, setSelectedType] = useState<ContentType>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const handleLogoClick = () => {
-    navigate("/");
+    router.push("/");
   };
 
   const handleCardSelection = (type: ContentType) => {
@@ -76,10 +79,9 @@ const ContentSelectionPage = () => {
       // Simulate API call or processing time
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // Navigate to question count selection page
-      navigate("/question-count", {
-        state: { contentType: selectedType },
-      });
+      // Store content type in Zustand and navigate
+      setContentType(selectedType);
+      router.push("/question-count");
     } catch (error) {
       console.error("Error proceeding to question count:", error);
       setIsLoading(false);
@@ -88,7 +90,7 @@ const ContentSelectionPage = () => {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate("/");
+    router.push("/");
   };
 
   const cards = [
@@ -143,7 +145,7 @@ const ContentSelectionPage = () => {
           {showUserMenu && (
             <div className="user-menu absolute right-0 top-full mt-2 w-48 bg-appSecondary border border-gray-700 rounded-lg shadow-lg z-50">
               <button
-                onClick={() => navigate("/history")}
+                onClick={() => router.push("/history")}
                 className="user-menu-item w-full flex items-center gap-2 px-4 py-3 text-textSecondary hover:text-textPrimary hover:bg-gray-700 transition-colors duration-200"
               >
                 <User size={16} />

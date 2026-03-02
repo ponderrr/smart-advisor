@@ -1,5 +1,6 @@
+'use client';
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from 'next/navigation';
 import {
   Plus,
   Heart,
@@ -17,7 +18,7 @@ import UserStatsCard from "@/components/account/UserStatsCard";
 import RecommendationFilters from "@/components/account/RecommendationFilters";
 
 const AccountHistoryPage = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { user, signOut } = useAuth();
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,16 +71,16 @@ const AccountHistoryPage = () => {
   }, [filter, sortBy]);
 
   const handleLogoClick = () => {
-    navigate("/");
+    router.push("/");
   };
 
   const handleSignOut = async () => {
     await signOut();
-    navigate("/");
+    router.push("/");
   };
 
   const handleGetNewRecommendation = () => {
-    navigate("/content-selection");
+    router.push("/content-selection");
   };
 
   const handleToggleFavorite = async (recommendationId: string) => {

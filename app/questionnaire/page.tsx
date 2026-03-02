@@ -1,5 +1,6 @@
+'use client';
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useRouter } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -20,11 +21,12 @@ import {
   LoadingScreen,
   QuestionLoadingShimmer,
 } from "@/components/enhanced";
+import { useQuizStore } from '@/store/quizStore';
 
 const QuestionnairePage = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const router = useRouter();
   const { user, signOut } = useAuth();
+  const { contentType, questionCount, setAnswers: setStoreAnswers } = useQuizStore();
 
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -34,23 +36,20 @@ const QuestionnairePage = () => {
   const [error, setError] = useState<string | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
-  const contentType = location.state?.contentType as "movie" | "book" | "both";
-  const questionCount = location.state?.questionCount || 5;
-
   useEffect(() => {
     if (!contentType || !user) {
-      navigate("/content-selection");
+      router.push("/content-selection");
       return;
     }
 
     loadQuestions();
-  }, [contentType, user, navigate, questionCount]);
+  }, [contentType, user, router, questionCount]);
 
   const loadQuestions = async () => {
     try {
       setIsLoading(true);
       setError(null);
-      if (import.meta.env.DEV) console.log("Loading AI-generated questions...");
+      if (process.env.NODE_ENV === 'development') console.log("Loading AI-generated questions...");
 
       const generatedQuestions = await generateQuestionsWithRetry(
         contentType,
@@ -59,7 +58,7 @@ const QuestionnairePage = () => {
         user.name
       );
 
-      if (import.meta.env.DEV) console.log("Questions loaded successfully:", generatedQuestions);
+      if (process.env.NODE_ENV === 'development') console.log("Questions loaded successfully:", generatedQuestions);
       setQuestions(generatedQuestions);
     } catch (err) {
       console.error("Failed to load questions:", err);
@@ -70,12 +69,12 @@ const QuestionnairePage = () => {
   };
 
   const handleLogoClick = () => {
-    navigate("/");
+    router.push("/");
   };
 
   const handleSignOut = async () => {
     await signOut();
-    navigate("/");
+    router.push("/");
   };
 
   const handleRetry = () => {
@@ -107,7 +106,7 @@ const QuestionnairePage = () => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex((prev) => prev - 1);
     } else {
-      navigate("/question-count", { state: { contentType } });
+      router.push("/question-count");
     }
   };
 
@@ -123,13 +122,8 @@ const QuestionnairePage = () => {
       created_at: new Date().toISOString(),
     }));
 
-    navigate("/results", {
-      state: {
-        answers: formattedAnswers,
-        contentType,
-        userAge: user.age,
-      },
-    });
+    setStoreAnswers(formattedAnswers);
+    router.push("/results");
   };
 
   const canProceed =
@@ -163,7 +157,7 @@ const QuestionnairePage = () => {
             {showUserMenu && (
               <div className="user-menu absolute right-0 top-full mt-2 w-48 bg-appSecondary border border-gray-700 rounded-lg shadow-lg z-50">
                 <button
-                  onClick={() => navigate("/history")}
+                  onClick={() => router.push("/history")}
                   className="user-menu-item w-full flex items-center gap-2 px-4 py-3 text-textSecondary hover:text-textPrimary hover:bg-gray-700 transition-colors duration-200"
                 >
                   <User size={16} />
@@ -217,7 +211,7 @@ const QuestionnairePage = () => {
             {showUserMenu && (
               <div className="user-menu absolute right-0 top-full mt-2 w-48 bg-appSecondary border border-gray-700 rounded-lg shadow-lg z-50">
                 <button
-                  onClick={() => navigate("/history")}
+                  onClick={() => router.push("/history")}
                   className="user-menu-item w-full flex items-center gap-2 px-4 py-3 text-textSecondary hover:text-textPrimary hover:bg-gray-700 transition-colors duration-200"
                 >
                   <User size={16} />
@@ -250,9 +244,7 @@ const QuestionnairePage = () => {
                 Try Again
               </EnhancedButton>
               <EnhancedButton
-                onClick={() =>
-                  navigate("/question-count", { state: { contentType } })
-                }
+                onClick={() => router.push("/question-count")}
                 variant="outline"
               >
                 Go Back
@@ -291,7 +283,7 @@ const QuestionnairePage = () => {
           {showUserMenu && (
             <div className="user-menu absolute right-0 top-full mt-2 w-48 bg-appSecondary border border-gray-700 rounded-lg shadow-lg z-50">
               <button
-                onClick={() => navigate("/history")}
+                onClick={() => router.push("/history")}
                 className="user-menu-item w-full flex items-center gap-2 px-4 py-3 text-textSecondary hover:text-textPrimary hover:bg-gray-700 transition-colors duration-200"
               >
                 <User size={16} />

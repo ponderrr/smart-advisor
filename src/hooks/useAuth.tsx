@@ -48,14 +48,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   ) => {
     // Check if operation was aborted before any state updates
     if (signal?.aborted) {
-      if (import.meta.env.DEV) console.log("useAuth: fetchUserProfile aborted");
+      if (process.env.NODE_ENV === 'development') console.log("useAuth: fetchUserProfile aborted");
       return;
     }
 
     try {
       setLoading(true);
       setError(null);
-      if (import.meta.env.DEV) {
+      if (process.env.NODE_ENV === 'development') {
         console.log(
           "useAuth: fetchUserProfile - attempting to get current user..."
         );
@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       // Check again if operation was aborted after async call
       if (signal?.aborted) {
-        if (import.meta.env.DEV) console.log("useAuth: fetchUserProfile aborted after API call");
+        if (process.env.NODE_ENV === 'development') console.log("useAuth: fetchUserProfile aborted after API call");
         return;
       }
 
@@ -76,7 +76,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(null);
       } else {
         setUser(profileUser);
-        if (import.meta.env.DEV) {
+        if (process.env.NODE_ENV === 'development') {
           console.log(
             "useAuth: User profile loaded successfully.",
             profileUser?.id
@@ -86,7 +86,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (err) {
       // Don't set error if operation was aborted
       if (signal?.aborted) {
-        if (import.meta.env.DEV) console.log("useAuth: fetchUserProfile aborted during error handling");
+        if (process.env.NODE_ENV === 'development') console.log("useAuth: fetchUserProfile aborted during error handling");
         return;
       }
       console.error("useAuth: Unexpected error loading profile:", err);
@@ -112,7 +112,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const initializeAuth = async () => {
       try {
-        if (import.meta.env.DEV) console.log("Initializing auth state...");
+        if (process.env.NODE_ENV === 'development') console.log("Initializing auth state...");
         setError(null);
 
         // Check if operation was aborted before starting
@@ -122,7 +122,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const {
           data: { subscription: sub },
         } = supabase.auth.onAuthStateChange(async (event, session) => {
-          if (import.meta.env.DEV) console.log("Auth state changed:", event, session?.user?.id);
+          if (process.env.NODE_ENV === 'development') console.log("Auth state changed:", event, session?.user?.id);
 
           if (!mounted || abortController.signal.aborted) return;
 
@@ -155,7 +155,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           return;
         }
 
-        if (import.meta.env.DEV) console.log("Initial session:", initialSession?.user?.id || "none");
+        if (process.env.NODE_ENV === 'development') console.log("Initial session:", initialSession?.user?.id || "none");
 
         // If there's an initial session with a user, fetch their profile immediately
         if (initialSession?.user) {
@@ -191,7 +191,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
       setError(null);
-      if (import.meta.env.DEV) console.log("Attempting signin...");
+      if (process.env.NODE_ENV === 'development') console.log("Attempting signin...");
 
       const result = await authService.signIn(email, password);
 
@@ -199,7 +199,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setError(result.error);
         console.error("Signin failed:", result.error);
       } else {
-        if (import.meta.env.DEV) console.log("Signin successful");
+        if (process.env.NODE_ENV === 'development') console.log("Signin successful");
         // Auth state change will be handled by the listener and subsequent useEffect for profile fetch
       }
 
@@ -222,7 +222,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
       setError(null);
-      if (import.meta.env.DEV) console.log("Attempting signup...");
+      if (process.env.NODE_ENV === 'development') console.log("Attempting signup...");
 
       const result = await authService.signUp(email, password, name, age);
 
@@ -230,7 +230,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setError(result.error);
         console.error("Signup failed:", result.error);
       } else {
-        if (import.meta.env.DEV) console.log("Signup successful");
+        if (process.env.NODE_ENV === 'development') console.log("Signup successful");
         // Auth state change will be handled by the listener and subsequent useEffect for profile fetch
       }
 
@@ -248,7 +248,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
       setError(null);
-      if (import.meta.env.DEV) console.log("Attempting signout...");
+      if (process.env.NODE_ENV === 'development') console.log("Attempting signout...");
 
       const result = await authService.signOut();
 
@@ -256,7 +256,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setError(result.error);
         console.error("Signout failed:", result.error);
       } else {
-        if (import.meta.env.DEV) console.log("Signout successful");
+        if (process.env.NODE_ENV === 'development') console.log("Signout successful");
         setUser(null);
         setSession(null);
         setLoading(false); // Explicitly set loading to false on sign out
