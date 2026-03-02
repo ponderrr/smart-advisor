@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { Answer } from '@/types/Answer';
 
 export type ContentType = 'movie' | 'book' | 'both';
 
@@ -9,8 +10,8 @@ interface QuizStore {
   questionCount: number;
   setQuestionCount: (count: number) => void;
 
-  answers: any[];
-  setAnswers: (answers: any[]) => void;
+  answers: Answer[];
+  setAnswers: (answers: Answer[]) => void;
 
   userAge: number | null;
   setUserAge: (age: number) => void;
@@ -24,7 +25,7 @@ interface QuizStore {
 const defaultState = {
   contentType: null as ContentType | null,
   questionCount: 5,
-  answers: [] as any[],
+  answers: [] as Answer[],
   userAge: null as number | null,
   filters: { genres: [] as string[], moods: [] as string[] },
 };
