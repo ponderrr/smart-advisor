@@ -1,72 +1,72 @@
 "use client";
 import { cn } from "@/lib/utils";
 import React from "react";
-import { motion, AnimatePresence, useAnimate } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
+
+export type StatefulStatus = "idle" | "loading" | "success" | "error";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   className?: string;
   children: React.ReactNode;
+  state?: StatefulStatus;
+  resetDelayMs?: number;
 }
 
-export const Button = ({ className, children, ...props }: ButtonProps) => {
-  const [scope, animate] = useAnimate();
+const isErrorResult = (value: unknown): value is { error: string | null } => {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "error" in value &&
+    typeof (value as { error: unknown }).error === "string"
+  );
+};
 
-  const animateLoading = async () => {
-    await animate(
-      ".loader",
-      {
-        width: "20px",
-        scale: 1,
-        display: "block",
-      },
-      {
-        duration: 0.2,
-      },
-    );
-  };
+export const Button = ({
+  className,
+  children,
+  state,
+  resetDelayMs = 1600,
+  ...props
+}: ButtonProps) => {
+  const [internalState, setInternalState] = React.useState<StatefulStatus>("idle");
+  const controlled = typeof state !== "undefined";
+  const currentState = controlled ? state : internalState;
 
-  const animateSuccess = async () => {
-    await animate(
-      ".loader",
-      {
-        width: "0px",
-        scale: 0,
-        display: "none",
-      },
-      {
-        duration: 0.2,
-      },
-    );
-    await animate(
-      ".check",
-      {
-        width: "20px",
-        scale: 1,
-        display: "block",
-      },
-      {
-        duration: 0.2,
-      },
-    );
+  React.useEffect(() => {
+    if (controlled || currentState === "idle" || currentState === "loading") {
+      return;
+    }
 
-    await animate(
-      ".check",
-      {
-        width: "0px",
-        scale: 0,
-        display: "none",
-      },
-      {
-        delay: 2,
-        duration: 0.2,
-      },
-    );
-  };
+    const timer = setTimeout(() => {
+      setInternalState("idle");
+    }, resetDelayMs);
+
+    return () => clearTimeout(timer);
+  }, [controlled, currentState, resetDelayMs]);
 
   const handleClick = async (event: React.MouseEvent<HTMLButtonElement>) => {
-    await animateLoading();
-    await props.onClick?.(event);
-    await animateSuccess();
+    if (controlled) {
+      await props.onClick?.(event);
+      return;
+    }
+
+    if (!props.onClick) {
+      return;
+    }
+
+    setInternalState("loading");
+
+    try {
+      const result = await props.onClick(event);
+
+      if (isErrorResult(result) && result.error) {
+        setInternalState("error");
+      } else {
+        setInternalState("success");
+      }
+    } catch (_error) {
+      setInternalState("error");
+    }
   };
 
   const {
@@ -82,54 +82,59 @@ export const Button = ({ className, children, ...props }: ButtonProps) => {
   return (
     <motion.button
       layout
-      layoutId="button"
-      ref={scope}
+      layoutId="stateful-button"
+      type={buttonProps.type ?? "button"}
       className={cn(
-        "flex min-w-[120px] cursor-pointer items-center justify-center gap-2 rounded-full bg-green-500 px-4 py-2 font-medium text-white ring-offset-2 transition duration-200 hover:ring-2 hover:ring-green-500 dark:ring-offset-black",
+        "flex h-11 w-full items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-70",
+        currentState === "error"
+          ? "bg-rose-600 text-white"
+          : "bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white",
         className,
       )}
       {...buttonProps}
       onClick={handleClick}
     >
-      <motion.div layout className="flex items-center gap-2">
-        <Loader />
-        <CheckIcon />
-        <motion.span layout>{children}</motion.span>
-      </motion.div>
+      <AnimatePresence mode="wait" initial={false}>
+        {currentState === "loading" && <Loader key="loader" />}
+        {currentState === "success" && <CheckIcon key="check" />}
+        {currentState === "error" && <ErrorIcon key="error" />}
+      </AnimatePresence>
+      <span>
+        {currentState === "loading"
+          ? "Please wait..."
+          : currentState === "success"
+            ? "Success"
+            : currentState === "error"
+              ? "Try again"
+              : children}
+      </span>
     </motion.button>
   );
+};
+
+const iconMotion = {
+  initial: { opacity: 0, scale: 0.6 },
+  animate: { opacity: 1, scale: 1 },
+  exit: { opacity: 0, scale: 0.6 },
+  transition: { duration: 0.16 },
 };
 
 const Loader = () => {
   return (
     <motion.svg
-      animate={{
-        rotate: [0, 360],
-      }}
-      initial={{
-        scale: 0,
-        width: 0,
-        display: "none",
-      }}
-      style={{
-        scale: 0.5,
-        display: "none",
-      }}
-      transition={{
-        duration: 0.3,
-        repeat: Infinity,
-        ease: "linear",
-      }}
+      {...iconMotion}
+      animate={{ rotate: 360, opacity: 1, scale: 1 }}
+      transition={{ rotate: { duration: 0.6, repeat: Infinity, ease: "linear" }, opacity: { duration: 0.16 }, scale: { duration: 0.16 } }}
       xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
+      width="16"
+      height="16"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="loader text-white"
+      className="text-white dark:text-slate-900"
     >
       <path stroke="none" d="M0 0h24v24H0z" fill="none" />
       <path d="M12 3a9 9 0 1 0 9 9" />
@@ -140,29 +145,44 @@ const Loader = () => {
 const CheckIcon = () => {
   return (
     <motion.svg
-      initial={{
-        scale: 0,
-        width: 0,
-        display: "none",
-      }}
-      style={{
-        scale: 0.5,
-        display: "none",
-      }}
+      {...iconMotion}
       xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
+      width="16"
+      height="16"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="check text-white"
+      className="text-white dark:text-slate-900"
     >
       <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-      <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
       <path d="M9 12l2 2l4 -4" />
+      <path d="M12 3a9 9 0 1 1 -9 9" />
+    </motion.svg>
+  );
+};
+
+const ErrorIcon = () => {
+  return (
+    <motion.svg
+      {...iconMotion}
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="text-white"
+    >
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 8v4" />
+      <path d="M12 16h.01" />
+      <path d="M12 3a9 9 0 1 1 -9 9" />
     </motion.svg>
   );
 };

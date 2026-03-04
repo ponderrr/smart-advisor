@@ -203,6 +203,43 @@ class AuthService {
     }
   }
 
+  async resetPassword(email: string): Promise<{ error: string | null }> {
+    try {
+      if (!email) {
+        return { error: "Email is required" };
+      }
+
+      if (!/\S+@\S+\.\S+/.test(email)) {
+        return { error: "Please enter a valid email address" };
+      }
+
+      const origin =
+        typeof window !== "undefined"
+          ? window.location.origin
+          : "https://smartadvisor.live";
+
+      const { error } = await supabase.auth.resetPasswordForEmail(
+        email.trim().toLowerCase(),
+        {
+          redirectTo: `${origin}/auth/callback`,
+        },
+      );
+
+      if (error) {
+        console.error("Reset password error:", error);
+        return { error: error.message };
+      }
+
+      return { error: null };
+    } catch (err) {
+      console.error("Unexpected error during password reset:", err);
+      return {
+        error:
+          "An unexpected error occurred while sending reset email. Please try again.",
+      };
+    }
+  }
+
   async getCurrentUser(): Promise<{ user: User | null; error: string | null }> {
     try {
       if (process.env.NODE_ENV === 'development') console.log("authService.getCurrentUser: Attempting to get user...");
