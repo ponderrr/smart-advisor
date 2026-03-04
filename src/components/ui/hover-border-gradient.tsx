@@ -15,6 +15,7 @@ export function HoverBorderGradient({
   clockwise = true,
   idleColor = "255, 255, 255",
   highlightColor = "139, 92, 246",
+  darkHighlightColor,
   ...props
 }: React.PropsWithChildren<
   {
@@ -25,6 +26,7 @@ export function HoverBorderGradient({
     clockwise?: boolean;
     idleColor?: string;
     highlightColor?: string;
+    darkHighlightColor?: string;
   } & React.HTMLAttributes<HTMLElement>
 >) {
   const [hovered, setHovered] = useState<boolean>(false);
@@ -49,8 +51,24 @@ export function HoverBorderGradient({
       `radial-gradient(16.2% 41.199999999999996% at 100% 50%, ${idle} 0%, rgba(255, 255, 255, 0) 100%)`,
   };
 
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const update = () =>
+      setIsDark(document.documentElement.classList.contains("dark"));
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  const effectiveHighlight = isDark && darkHighlightColor ? darkHighlightColor : highlightColor;
   const highlight =
-    `radial-gradient(75% 181.15942028985506% at 50% 50%, rgb(${highlightColor}) 0%, rgba(255, 255, 255, 0) 100%)`;
+    `radial-gradient(75% 181.15942028985506% at 50% 50%, rgb(${effectiveHighlight}) 0%, rgba(255, 255, 255, 0) 100%)`;
 
   useEffect(() => {
     if (!hovered) {

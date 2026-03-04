@@ -3,7 +3,7 @@
 import { ThemeToggle } from "@/components/theme-toggle";
 import { BrandWordmark } from "@/components/brand-wordmark";
 import { motion } from "framer-motion";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -38,8 +38,46 @@ export const AuthLayout = ({ children, onLogoClick }: AuthLayoutProps) => {
 };
 
 const AnimatedVisual = () => {
+  const [media, setMedia] = useState<string[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    const loadMedia = async () => {
+      try {
+        const response = await fetch("/api/hero-media", { cache: "no-store" });
+        if (!response.ok) return;
+        const data = await response.json();
+        const mixed = [...(data.books || []), ...(data.movies || [])]
+          .filter(Boolean)
+          .slice(0, 8);
+        if (active) setMedia(mixed);
+      } catch {
+        if (active) setMedia([]);
+      }
+    };
+    loadMedia();
+    return () => {
+      active = false;
+    };
+  }, []);
+
   return (
     <div className="relative h-full w-full bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+      {media.length > 0 ? (
+        <div className="pointer-events-none absolute inset-0 grid grid-cols-2 gap-3 p-4 opacity-25">
+          {media.map((src, idx) => (
+            <motion.img
+              key={`${src}-${idx}`}
+              src={src}
+              alt=""
+              className="h-full w-full rounded-2xl object-cover"
+              initial={{ opacity: 0, filter: "blur(10px)" }}
+              animate={{ opacity: 1, filter: "blur(0px)" }}
+              transition={{ duration: 0.5, delay: idx * 0.06 }}
+            />
+          ))}
+        </div>
+      ) : null}
       <div className="absolute -left-16 top-8 h-56 w-56 rounded-full bg-teal-400/25 blur-3xl" />
       <div className="absolute bottom-4 right-0 h-72 w-72 rounded-full bg-blue-500/30 blur-3xl" />
       <div className="absolute left-1/3 top-1/3 h-40 w-40 rounded-full bg-cyan-300/20 blur-2xl" />
