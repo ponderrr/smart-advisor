@@ -2,9 +2,9 @@
 import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import { User, LogOut } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/features/auth/hooks/use-auth";
 import { EnhancedButton } from "@/components/enhanced";
-import { useQuizStore } from '@/store/quizStore';
+import { useQuizStore } from '@/features/quiz/store/quiz-store';
 import { BrandWordmark } from "@/components/brand-wordmark";
 
 type ContentType = "movie" | "book" | "both";

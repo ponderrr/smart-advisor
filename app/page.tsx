@@ -8,7 +8,7 @@ import {
   IconChevronDown,
 } from "@tabler/icons-react";
 
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/features/auth/hooks/use-auth";
 import { AnimatedTestimonials } from "@/components/ui/animated-testimonials";
 import { LinkPreview } from "@/components/ui/link-preview";
 import { BrandWordmark } from "@/components/brand-wordmark";
@@ -24,7 +24,7 @@ import {
   MobileNavToggle,
   MobileNavMenu,
 } from "@/components/ui/resizable-navbar";
-import HeroSection from "@/components/hero-section";
+import { HeroSection } from "@/features/home/components";
 import { cn } from "@/lib/utils";
 import {
   faqItems,
@@ -32,7 +32,7 @@ import {
   logoSets,
   navItems,
   teamMembers,
-} from "@/data/homepage";
+} from "@/features/home/data";
 
 export default function Index() {
   const router = useRouter();

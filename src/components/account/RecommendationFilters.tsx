@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FilterOptions } from "@/services/database";
+import { FilterOptions } from "@/features/recommendations/services/database-service";
 
 interface RecommendationFiltersProps {
   currentFilter: string;

@@ -10,9 +10,9 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import { databaseService, FilterOptions } from "@/services/database";
-import { Recommendation } from "@/types/Recommendation";
+import { useAuth } from "@/features/auth/hooks/use-auth";
+import { databaseService, FilterOptions } from "@/features/recommendations/services/database-service";
+import { Recommendation } from "@/features/recommendations/types/recommendation";
 import { ExpandableText } from "@/components/ExpandableText";
 import UserStatsCard from "@/components/account/UserStatsCard";
 import RecommendationFilters from "@/components/account/RecommendationFilters";

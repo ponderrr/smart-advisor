@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { IconArrowLeft, IconArrowRight, IconCheck } from "@tabler/icons-react";
 
-import { useQuizStore, type ContentType } from "@/store/quizStore";
+import { useQuizStore, type ContentType } from "@/features/quiz/store/quiz-store";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
