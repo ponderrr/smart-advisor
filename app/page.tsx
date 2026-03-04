@@ -11,6 +11,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { AnimatedTestimonials } from "@/components/ui/animated-testimonials";
 import { LinkPreview } from "@/components/ui/link-preview";
+import { BrandWordmark } from "@/components/brand-wordmark";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import {
@@ -266,11 +267,8 @@ export default function Index() {
       <footer className="px-6 py-14">
         <div className="mx-auto max-w-7xl">
           <div className="flex justify-center">
-            <a href="/" className="group flex items-center gap-2">
-              <div className="h-9 w-9 rounded-lg bg-indigo-600 transition-transform group-hover:rotate-12" />
-              <span className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100">
-                Smart Advisor
-              </span>
+            <a href="/" className="group inline-flex items-center transition-opacity hover:opacity-85">
+              <BrandWordmark imageClassName="h-10 md:h-11" />
             </a>
           </div>
 
@@ -350,7 +348,10 @@ const RotatingLogoSets = () => {
                 <img
                   src={logo.src}
                   alt={logo.name}
-                  className="h-10 w-auto grayscale brightness-0 transition dark:invert"
+                  className={cn(
+                    "w-auto grayscale brightness-0 transition dark:invert",
+                    logo.name === "Google Books" ? "h-14 md:h-16" : "h-10 md:h-11",
+                  )}
                   loading="lazy"
                   decoding="async"
                 />

@@ -105,7 +105,7 @@ export const teamMembers = [
   },
   {
     quote:
-      "Focused on creating a clean interface that keeps the experience smooth on desktop and mobile.",
+      "Focused on creating a clean interface that keeps the experience smooth on desktop.",
     name: "Vladimir Fiffie Jr",
     designation: "Web Designer",
     src: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=900&q=80",

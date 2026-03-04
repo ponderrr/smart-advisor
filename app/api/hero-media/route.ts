@@ -4,24 +4,10 @@ type HeroMediaResponse = {
   books: string[];
   movies: string[];
   status: {
-    books: "ok" | "fallback";
-    movies: "ok" | "fallback";
+    books: "ok" | "error";
+    movies: "ok" | "error";
   };
 };
-
-const BOOK_FALLBACKS = [
-  "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1476275466078-4007374efbbe?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1513001900722-370f803f498d?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=900&q=80",
-];
-
-const MOVIE_FALLBACKS = [
-  "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1489599735734-79b4eece7e5f?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=900&q=80",
-];
 
 const BOOK_QUERIES = [
   "subject:fiction",
@@ -48,6 +34,8 @@ const shuffle = <T,>(items: T[]) => {
   return arr;
 };
 
+const uniqueUrls = (items: string[]) => Array.from(new Set(items.filter(Boolean)));
+
 const normalizeBookCover = (url: string) =>
   url.replace("http://", "https://").replace("zoom=1", "zoom=2");
 
@@ -72,7 +60,7 @@ async function fetchBookCovers(apiKey: string): Promise<string[]> {
     .filter((cover): cover is string => Boolean(cover))
     .map(normalizeBookCover);
 
-  return shuffle(covers).slice(0, 6);
+  return shuffle(uniqueUrls(covers)).slice(0, 6);
 }
 
 async function fetchMoviePosters(apiKey: string): Promise<string[]> {
@@ -90,7 +78,7 @@ async function fetchMoviePosters(apiKey: string): Promise<string[]> {
 
   const posters = results.map((item: any) => pickPoster(item?.poster_path)).filter(Boolean) as string[];
 
-  return shuffle(posters).slice(0, 6);
+  return shuffle(uniqueUrls(posters)).slice(0, 6);
 }
 
 export async function GET() {
@@ -98,8 +86,8 @@ export async function GET() {
   const googleBooksKey = process.env.GOOGLE_BOOKS_API_KEY;
 
   const status: HeroMediaResponse["status"] = {
-    books: "fallback",
-    movies: "fallback",
+    books: "error",
+    movies: "error",
   };
 
   const [booksResult, moviesResult] = await Promise.allSettled([
@@ -109,13 +97,13 @@ export async function GET() {
 
   const books =
     booksResult.status === "fulfilled" && booksResult.value.length > 0
-      ? booksResult.value
-      : BOOK_FALLBACKS;
+      ? uniqueUrls(booksResult.value)
+      : [];
 
   const movies =
     moviesResult.status === "fulfilled" && moviesResult.value.length > 0
-      ? moviesResult.value
-      : MOVIE_FALLBACKS;
+      ? uniqueUrls(moviesResult.value)
+      : [];
 
   if (booksResult.status === "fulfilled" && booksResult.value.length > 0) {
     status.books = "ok";
@@ -126,8 +114,8 @@ export async function GET() {
   }
 
   const payload: HeroMediaResponse = {
-    books: shuffle(books).slice(0, 6),
-    movies: shuffle(movies).slice(0, 6),
+    books: shuffle(books).slice(0, 8),
+    movies: shuffle(movies).slice(0, 8),
     status,
   };
 

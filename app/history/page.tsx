@@ -16,6 +16,7 @@ import { Recommendation } from "@/types/Recommendation";
 import { ExpandableText } from "@/components/ExpandableText";
 import UserStatsCard from "@/components/account/UserStatsCard";
 import RecommendationFilters from "@/components/account/RecommendationFilters";
+import { BrandWordmark } from "@/components/brand-wordmark";
 
 const AccountHistoryPage = () => {
   const router = useRouter();
@@ -141,9 +142,9 @@ const AccountHistoryPage = () => {
       <header className="h-[72px] flex items-center justify-between px-6 md:px-12 bg-appPrimary">
         <button
           onClick={handleLogoClick}
-          className="text-textPrimary text-xl font-medium cursor-pointer hover:opacity-80 transition-opacity duration-200"
+          className="inline-flex items-center cursor-pointer hover:opacity-80 transition-opacity duration-200"
         >
-          Smart Advisor
+          <BrandWordmark imageClassName="h-8" />
         </button>
         <div className="relative">
           <button
@@ -225,8 +226,8 @@ const AccountHistoryPage = () => {
                 {filter === "favorites"
                   ? "No favorites yet"
                   : filter === "thisMonth"
-                  ? "No recommendations this month"
-                  : "No recommendations yet"}
+                    ? "No recommendations this month"
+                    : "No recommendations yet"}
               </h2>
               <p className="text-textSecondary mb-6">
                 {filter === "favorites"
@@ -277,11 +278,10 @@ const AccountHistoryPage = () => {
                             </h3>
                             <div className="flex items-center gap-2 mb-2">
                               <span
-                                className={`px-2 py-1 text-xs rounded-full ${
-                                  rec.type === "movie"
+                                className={`px-2 py-1 text-xs rounded-full ${rec.type === "movie"
                                     ? "bg-blue-500 text-white"
                                     : "bg-green-500 text-white"
-                                }`}
+                                  }`}
                               >
                                 {rec.type}
                               </span>
@@ -312,11 +312,10 @@ const AccountHistoryPage = () => {
                           </div>
                           <button
                             onClick={() => handleToggleFavorite(rec.id)}
-                            className={`p-2 rounded-full transition-colors duration-200 ml-2 ${
-                              rec.is_favorited
+                            className={`p-2 rounded-full transition-colors duration-200 ml-2 ${rec.is_favorited
                                 ? "bg-red-500 text-white"
                                 : "bg-gray-700 text-textSecondary hover:text-red-500"
-                            }`}
+                              }`}
                           >
                             <Heart
                               size={16}

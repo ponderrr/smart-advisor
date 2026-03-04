@@ -5,6 +5,7 @@ import { User, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { EnhancedButton } from "@/components/enhanced";
 import { useQuizStore } from '@/store/quizStore';
+import { BrandWordmark } from "@/components/brand-wordmark";
 
 type ContentType = "movie" | "book" | "both";
 
@@ -71,9 +72,9 @@ const QuestionCountPage = () => {
       <header className="h-[72px] flex items-center justify-between px-6 md:px-12 bg-appPrimary">
         <button
           onClick={handleLogoClick}
-          className="text-textPrimary text-xl font-medium cursor-pointer hover:opacity-80 transition-opacity duration-200"
+          className="inline-flex items-center cursor-pointer hover:opacity-80 transition-opacity duration-200"
         >
-          Smart Advisor
+          <BrandWordmark imageClassName="h-8" />
         </button>
         <div className="relative">
           <button
@@ -152,11 +153,9 @@ const QuestionCountPage = () => {
                 onChange={handleSliderChange}
                 className="w-full h-3 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
                 style={{
-                  background: `linear-gradient(to right, #6366F1 0%, #6366F1 ${
-                    ((questionCount - 3) / (15 - 3)) * 100
-                  }%, #374151 ${
-                    ((questionCount - 3) / (15 - 3)) * 100
-                  }%, #374151 100%)`,
+                  background: `linear-gradient(to right, #6366F1 0%, #6366F1 ${((questionCount - 3) / (15 - 3)) * 100
+                    }%, #374151 ${((questionCount - 3) / (15 - 3)) * 100
+                    }%, #374151 100%)`,
                 }}
               />
             </div>
@@ -173,8 +172,8 @@ const QuestionCountPage = () => {
                 {questionCount <= 5
                   ? "Quick and focused questions"
                   : questionCount <= 10
-                  ? "Balanced depth and specificity"
-                  : "Comprehensive and detailed questions"}
+                    ? "Balanced depth and specificity"
+                    : "Comprehensive and detailed questions"}
               </p>
             </div>
           </div>

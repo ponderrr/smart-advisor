@@ -1,6 +1,7 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import { Home, ArrowLeft } from "lucide-react";
+import { BrandWordmark } from "@/components/brand-wordmark";
 
 const NotFound = () => {
   const router = useRouter();
@@ -19,9 +20,9 @@ const NotFound = () => {
       <header className="h-[72px] flex items-center justify-between px-6 md:px-12 bg-appPrimary">
         <button
           onClick={handleGoHome}
-          className="text-textPrimary text-xl font-medium cursor-pointer hover:opacity-80 transition-opacity duration-200"
+          className="inline-flex items-center cursor-pointer hover:opacity-80 transition-opacity duration-200"
         >
-          Smart Advisor
+          <BrandWordmark imageClassName="h-8" />
         </button>
       </header>
 
