@@ -51,6 +51,18 @@ const AnimatedVisual = () => {
       title: "Less scrolling, better recommendations",
       description: "Skip decision fatigue with clear, context-aware suggestions every time.",
     },
+    {
+      title: "Private by design",
+      description: "Your account preferences stay personal and focused on improving your picks.",
+    },
+    {
+      title: "Fast and easy to use",
+      description: "Get to your next movie or book choice quickly without overthinking.",
+    },
+    {
+      title: "Recommendations you can trust",
+      description: "See clear reasons behind each suggestion so choosing feels simple.",
+    },
   ];
   const [copyIndex, setCopyIndex] = useState(0);
 

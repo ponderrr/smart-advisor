@@ -19,15 +19,15 @@ export const howItWorksCards = [
       "The short flow is designed for your current mood, not stale profile assumptions from months ago.",
   },
   {
-    title: "We Rank Options With Context",
+    title: "We Narrow Down Your Best Options",
     description:
-      "Smart Advisor blends your answers with trusted movie and book metadata to score each option for fit and quality.",
+      "Smart Advisor combines your answers with trusted movie and book details to find options that fit your mood.",
     image:
       "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=80",
     hoverImage:
       "https://images.unsplash.com/photo-1616530940355-351fabd9524b?auto=format&fit=crop&w=1200&q=80",
     detail:
-      "Ranking weights pacing, tone, popularity, and match confidence so your top results are worth opening first.",
+      "We prioritize tone, pacing, and fit so your top results feel right from the start.",
   },
   {
     title: "Get Picks You Can Trust",
@@ -47,7 +47,7 @@ export const logoSets = [
     { name: "Next.js", src: "https://cdn.simpleicons.org/nextdotjs/111111" },
     { name: "Supabase", src: "https://cdn.simpleicons.org/supabase/111111" },
     { name: "TMDB", src: "https://cdn.simpleicons.org/themoviedatabase/111111" },
-    { name: "Google Books", src: "https://cdn.simpleicons.org/googlebooks/111111" },
+    { name: "Google Books", src: "" },
   ],
   [
     { name: "TypeScript", src: "https://cdn.simpleicons.org/typescript/111111" },
@@ -82,7 +82,7 @@ export const faqItems = [
   {
     question: "How is my personal data handled?",
     answer:
-      "Account data is stored in Supabase with authentication controls. We use your profile information only to improve recommendation relevance and core app functionality.",
+      "Your account information is protected, and we only use your preferences to improve your recommendations.",
   },
   {
     question: "Can I request deletion of my account data?",
@@ -92,7 +92,12 @@ export const faqItems = [
   {
     question: "What if recommendations feel off for me?",
     answer:
-      "You can rerun the questionnaire and adjust answers. The engine is designed to quickly adapt to changing preferences and contexts.",
+      "You can rerun the questionnaire anytime and adjust answers until the recommendations feel right.",
+  },
+  {
+    question: "Is Smart Advisor open source?",
+    answer:
+      "Yes. Smart Advisor is open source, and you can review the codebase and follow project updates on GitHub.",
   },
 ];
 

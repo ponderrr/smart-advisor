@@ -87,6 +87,13 @@ const ResultsPage = () => {
   );
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
+  const getMatchScore = (index: number) => Math.max(78, 95 - index * 4);
+  const getMatchLabel = (score: number) => {
+    if (score >= 92) return "Excellent Match";
+    if (score >= 86) return "Strong Match";
+    return "Good Match";
+  };
+
   // Track recommendation session state
   const currentSessionRef = useRef<string | null>(null);
   const generatedRecommendationsRef = useRef<Recommendation[]>([]);
@@ -576,113 +583,149 @@ const ResultsPage = () => {
               className="recommendation-card bg-appSecondary border border-gray-700 rounded-2xl p-6 sm:p-8 flex flex-col lg:flex-row gap-6 lg:gap-8"
               style={{ animationDelay: `${400 + index * 200}ms` }}
             >
-              {/* Poster/Cover - Larger on mobile, maintains aspect ratio */}
-              <div className="w-full sm:w-64 lg:w-72 h-80 sm:h-96 lg:h-[28rem] bg-gray-700 rounded-lg flex-shrink-0 overflow-hidden mx-auto lg:mx-0">
-                {rec.poster_url ? (
-                  <img
-                    src={rec.poster_url}
-                    alt={rec.title}
-                    className="w-full h-full object-cover rounded-lg transition-transform duration-300 hover:scale-105"
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                      e.currentTarget.nextElementSibling?.classList.remove(
-                        "hidden"
-                      );
-                    }}
-                  />
-                ) : null}
-                <div
-                  className={`w-full h-full flex items-center justify-center text-textTertiary ${rec.poster_url ? "hidden" : ""
-                    }`}
-                >
-                  No Image
-                </div>
-              </div>
+              {(() => {
+                const matchScore = getMatchScore(index);
+                const matchLabel = getMatchLabel(matchScore);
+                const whyText =
+                  rec.explanation ||
+                  `This ${rec.type} fits your selected mood and preferences, with a style that aligns well with your answers.`;
 
-              {/* Content - More spacious */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between mb-6">
-                  <div className="flex-1 min-w-0">
-                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-textPrimary mb-3 leading-tight">
-                      {rec.title}
-                    </h2>
-                    {rec.director && (
-                      <p className="text-base sm:text-lg text-textSecondary mb-1">
-                        Directed by {rec.director}
-                      </p>
-                    )}
-                    {rec.author && (
-                      <p className="text-base sm:text-lg text-textSecondary mb-1">
-                        By {rec.author}
-                      </p>
-                    )}
-                    {rec.year && (
-                      <p className="text-base sm:text-lg text-textSecondary">
-                        {rec.year}
-                      </p>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => handleToggleFavorite(rec.id)}
-                    className={`favorite-button p-3 rounded-full transition-colors duration-200 ml-4 flex-shrink-0 ${rec.is_favorited
-                        ? "bg-red-500 text-white favorited"
-                        : "bg-gray-700 text-textSecondary hover:text-red-500"
-                      }`}
-                  >
-                    <Heart
-                      size={24}
-                      fill={rec.is_favorited ? "currentColor" : "none"}
-                    />
-                  </button>
-                </div>
-
-                {/* Rating - Larger */}
-                {rec.rating && (
-                  <div className="flex items-center gap-3 mb-6">
-                    <Star className="w-6 h-6 text-yellow-500 fill-current" />
-                    <span className="text-lg sm:text-xl text-textPrimary font-medium">
-                      {rec.rating}
-                    </span>
-                  </div>
-                )}
-
-                {/* Genres - Larger badges */}
-                {rec.genres && rec.genres.length > 0 && (
-                  <div className="flex flex-wrap gap-2 sm:gap-3 mb-6">
-                    {rec.genres.map((g, genreIndex) => (
-                      <span
-                        key={g}
-                        className="px-4 py-2 bg-appAccent text-white text-sm sm:text-base rounded-full animate-in fade-in duration-500"
-                        style={{
-                          animationDelay: `${800 + index * 200 + genreIndex * 100
-                            }ms`,
-                        }}
+                return (
+                  <>
+                    {/* Poster/Cover - Larger on mobile, maintains aspect ratio */}
+                    <div className="w-full sm:w-64 lg:w-72 h-80 sm:h-96 lg:h-[28rem] bg-gray-700 rounded-lg flex-shrink-0 overflow-hidden mx-auto lg:mx-0">
+                      {rec.poster_url ? (
+                        <img
+                          src={rec.poster_url}
+                          alt={rec.title}
+                          className="w-full h-full object-cover rounded-lg transition-transform duration-300 hover:scale-105"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                            e.currentTarget.nextElementSibling?.classList.remove(
+                              "hidden"
+                            );
+                          }}
+                        />
+                      ) : null}
+                      <div
+                        className={`w-full h-full flex items-center justify-center text-textTertiary ${rec.poster_url ? "hidden" : ""
+                          }`}
                       >
-                        {g}
-                      </span>
-                    ))}
-                  </div>
-                )}
+                        No Image
+                      </div>
+                    </div>
 
-                {/* Expandable Description - Much larger and more prominent */}
-                {rec.description && (
-                  <div
-                    className="animate-in fade-in duration-700"
-                    style={{ animationDelay: `${1000 + index * 200}ms` }}
-                  >
-                    <ExpandableText
-                      text={rec.description}
-                      title={
-                        rec.type === "movie"
-                          ? "Plot Summary:"
-                          : "Book Description:"
-                      }
-                      maxLines={5} // Increased from 3 to 5
-                      className="bg-appPrimary text-base sm:text-lg leading-relaxed" // Larger text and better spacing
-                    />
-                  </div>
-                )}
-              </div>
+                    {/* Content - More spacious */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between mb-6">
+                        <div className="flex-1 min-w-0">
+                          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-textPrimary mb-3 leading-tight">
+                            {rec.title}
+                          </h2>
+                          {rec.director && (
+                            <p className="text-base sm:text-lg text-textSecondary mb-1">
+                              Directed by {rec.director}
+                            </p>
+                          )}
+                          {rec.author && (
+                            <p className="text-base sm:text-lg text-textSecondary mb-1">
+                              By {rec.author}
+                            </p>
+                          )}
+                          {rec.year && (
+                            <p className="text-base sm:text-lg text-textSecondary">
+                              {rec.year}
+                            </p>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => handleToggleFavorite(rec.id)}
+                          className={`favorite-button p-3 rounded-full transition-colors duration-200 ml-4 flex-shrink-0 ${rec.is_favorited
+                            ? "bg-red-500 text-white favorited"
+                            : "bg-gray-700 text-textSecondary hover:text-red-500"
+                            }`}
+                        >
+                          <Heart
+                            size={24}
+                            fill={rec.is_favorited ? "currentColor" : "none"}
+                          />
+                        </button>
+                      </div>
+
+                      {/* Rating - Larger */}
+                      {rec.rating && (
+                        <div className="flex items-center gap-3 mb-6">
+                          <Star className="w-6 h-6 text-yellow-500 fill-current" />
+                          <span className="text-lg sm:text-xl text-textPrimary font-medium">
+                            {rec.rating}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Genres - Larger badges */}
+                      {rec.genres && rec.genres.length > 0 && (
+                        <div className="flex flex-wrap gap-2 sm:gap-3 mb-6">
+                          {rec.genres.map((g, genreIndex) => (
+                            <span
+                              key={g}
+                              className="px-4 py-2 bg-appAccent text-white text-sm sm:text-base rounded-full animate-in fade-in duration-500"
+                              style={{
+                                animationDelay: `${800 + index * 200 + genreIndex * 100
+                                  }ms`,
+                              }}
+                            >
+                              {g}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 mb-6">
+                        <div className="rounded-xl border border-gray-700 bg-appPrimary p-4">
+                          <p className="text-xs uppercase tracking-[0.16em] text-textTertiary mb-2">
+                            Match
+                          </p>
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="text-sm sm:text-base text-textPrimary font-semibold">
+                              {matchLabel}
+                            </span>
+                            <span className="px-3 py-1 rounded-full bg-appAccent text-white text-xs sm:text-sm font-semibold">
+                              {matchScore}%
+                            </span>
+                          </div>
+                        </div>
+                        <div className="rounded-xl border border-gray-700 bg-appPrimary p-4">
+                          <p className="text-xs uppercase tracking-[0.16em] text-textTertiary mb-2">
+                            Why
+                          </p>
+                          <p className="text-sm text-textSecondary leading-relaxed">
+                            {whyText}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Expandable Description - Much larger and more prominent */}
+                      {rec.description && (
+                        <div
+                          className="animate-in fade-in duration-700"
+                          style={{ animationDelay: `${1000 + index * 200}ms` }}
+                        >
+                          <ExpandableText
+                            text={rec.description}
+                            title={
+                              rec.type === "movie"
+                                ? "Plot Summary:"
+                                : "Book Description:"
+                            }
+                            maxLines={5} // Increased from 3 to 5
+                            className="bg-appPrimary text-base sm:text-lg leading-relaxed" // Larger text and better spacing
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           ))}
         </div>

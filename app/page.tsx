@@ -35,98 +35,32 @@ import {
   teamMembers,
 } from "@/features/home/data";
 
-/**
- * Animated SVGs for the How It Works section
- */
-const StepVisual = ({ index }: { index: number }) => {
-  if (index === 0) {
-    // Step 1: Search/Analysis (Magnifying glass & pulses)
-    return (
-      <div className="flex h-full items-center justify-center">
-        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" className="text-indigo-500">
-          <motion.circle
-            cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2"
-            animate={{ r: [6.5, 7.5, 6.5] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.path
-            d="M21 21L16.65 16.65" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-            animate={{ x: [0, 1, 0], y: [0, 1, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.circle cx="11" cy="11" r="3" fill="currentColor"
-            animate={{ opacity: [0.1, 0.4, 0.1], scale: [0.8, 1.2, 0.8] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          />
-        </svg>
-      </div>
-    );
-  }
-
-  if (index === 1) {
-    // Step 2: Comparison (Moving cards/data blocks)
-    return (
-      <div className="flex h-full items-center justify-center gap-3">
-        <motion.div
-          className="h-12 w-9 rounded-lg border-2 border-violet-400 bg-violet-400/10"
-          animate={{ y: [0, -10, 0], rotate: [-5, 0, -5] }}
-          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="h-16 w-11 rounded-lg border-2 border-violet-500 bg-violet-500/20"
-          animate={{ scale: [1, 1.1, 1] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="h-12 w-9 rounded-lg border-2 border-violet-400 bg-violet-400/10"
-          animate={{ y: [0, 10, 0], rotate: [5, 0, 5] }}
-          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-        />
-      </div>
-    );
-  }
-
-  // Step 3: Result (Checkmark & floating sparkles)
-  return (
-    <div className="relative flex h-full items-center justify-center">
-      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" className="text-cyan-500">
-        <motion.path
-          d="M20 6L9 17L4 12"
-          stroke="currentColor"
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1.2 }}
-          transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 1 }}
-        />
-      </svg>
-      {[...Array(3)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute h-1.5 w-1.5 rounded-full bg-cyan-400"
-          animate={{
-            y: [0, -20],
-            x: [0, (i - 1) * 15],
-            opacity: [0, 1, 0],
-            scale: [0, 1, 0],
-          }}
-          transition={{
-            duration: 1.5,
-            repeat: Infinity,
-            delay: i * 0.4,
-          }}
-        />
-      ))}
-    </div>
-  );
-};
+const howItWorksInteractive = [
+  {
+    title: "Share Your Mood",
+    description: "Pick what you want right now in a few quick taps.",
+    detail: "Choose genres, tone, and discovery level so recommendations feel personal from the start.",
+  },
+  {
+    title: "Get Movie + Book Matches",
+    description: "We surface both movie and book options together.",
+    detail: "See two formats side by side so you can choose what fits your time and attention.",
+  },
+  {
+    title: "Pick With Confidence",
+    description: "Each result is clear, focused, and easy to compare.",
+    detail: "No endless scrolling. You get context-aware picks you can act on immediately.",
+  },
+];
+const moodLabels = ["Calm", "Easy", "Balanced", "Excited", "Intense"];
 
 export default function Index() {
   const router = useRouter();
   const { user } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [activeHowItWorks, setActiveHowItWorks] = useState(0);
+  const [moodValue, setMoodValue] = useState(55);
 
   const handleGetStarted = () =>
     user ? router.push("/content-selection") : router.push("/auth");
@@ -140,17 +74,22 @@ export default function Index() {
     window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
   };
 
+  const moodIndex = Math.min(4, Math.max(0, Math.round(moodValue / 25)));
+  const moodLabel = moodLabels[moodIndex];
+  const demoBook = moodValue > 60 ? "Dark Matter" : "Project Hail Mary";
+  const demoMovie = moodValue > 60 ? "Inception" : "The Martian";
+
   return (
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
       <Navbar>
         <NavBody>
-          <div className="flex flex-1 items-center">
+          <div className="flex min-w-[220px] shrink-0 items-center">
             <NavbarLogo />
           </div>
 
-          <NavItems items={navItems} className="justify-center" />
+          <NavItems items={navItems} className="justify-center px-2" />
 
-          <div className="flex flex-1 items-center justify-end gap-6 pl-8">
+          <div className="flex min-w-[220px] flex-1 items-center justify-end gap-6 pl-8">
             <ThemeToggle />
             <HoverBorderGradient
               onClick={handleGetStarted}
@@ -208,51 +147,164 @@ export default function Index() {
 
       <HeroSection />
 
+      {/* HOW IT WORKS SECTION */}
       <section id="how-it-works" className="scroll-mt-32 px-6 py-24 md:py-32">
-        <div className="mx-auto max-w-6xl">
+        <div className="mx-auto max-w-7xl">
           <div className="mb-12 text-center md:mb-16">
             <h2 className="mb-4 mt-5 text-4xl font-black tracking-tighter md:text-5xl">
               How It Works
             </h2>
             <p className="mx-auto max-w-2xl text-base text-slate-600 dark:text-slate-400 md:text-lg">
-              A focused, three-step flow designed to turn uncertainty into confident picks.
+              A faster way to go from indecision to a great watch or read.
             </p>
           </div>
 
-          <div className="relative grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.1fr_1fr]">
+            <div className="space-y-3">
+              {howItWorksInteractive.map((step, idx) => {
+                const isActive = idx === activeHowItWorks;
+                return (
+                  <button
+                    key={step.title}
+                    type="button"
+                    onClick={() => setActiveHowItWorks(idx)}
+                    onMouseEnter={() => setActiveHowItWorks(idx)}
+                    className={cn(
+                      "w-full rounded-2xl border p-5 text-left transition-all duration-300",
+                      isActive
+                        ? "border-slate-300 bg-white shadow-md dark:border-slate-600 dark:bg-slate-900/70"
+                        : "border-slate-200/80 bg-white/70 hover:border-slate-300 dark:border-slate-700/70 dark:bg-slate-900/45 dark:hover:border-slate-600",
+                    )}
+                    aria-pressed={isActive}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-black text-white dark:bg-slate-100 dark:text-slate-900">
+                        {idx + 1}
+                      </span>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                        Step 0{idx + 1}
+                      </p>
+                    </div>
+                    <h3 className="mt-3 text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100">
+                      {step.title}
+                    </h3>
+                    <p className="mt-2 text-sm text-slate-700 dark:text-slate-300 md:text-base">
+                      {step.description}
+                    </p>
+                    <p className="mt-2 text-xs text-slate-600 dark:text-slate-400 md:text-sm">
+                      {step.detail}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+
+            <motion.div
+              key={activeHowItWorks}
+              initial={{ opacity: 0, y: 14, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.35, ease: "easeOut" }}
+              className={cn(
+                "relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 p-6 shadow-sm backdrop-blur-md",
+                "dark:border-slate-700/70 dark:bg-slate-900/65",
+              )}
+            >
+              <div className="mb-4">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                  Live Preview
+                </p>
+                <h3 className="mt-2 text-3xl font-black tracking-tight text-slate-900 dark:text-slate-100">
+                  {howItWorksInteractive[activeHowItWorks].title}
+                </h3>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4 dark:border-slate-700/70 dark:bg-slate-950/40">
+                {activeHowItWorks === 0 && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between text-sm font-semibold text-slate-700 dark:text-slate-300">
+                      <span>Mood</span>
+                      <span className="rounded-full bg-slate-900 px-3 py-1 text-xs text-white dark:bg-slate-200 dark:text-slate-900">
+                        {moodLabel}
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      step={1}
+                      value={moodValue}
+                      onChange={(e) => setMoodValue(Number(e.target.value))}
+                      className="w-full accent-indigo-500"
+                      aria-label="Mood slider demo"
+                    />
+                    <div className="grid grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-400">
+                      <span className="rounded-lg border border-slate-200 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900/70">
+                        Prefer: Character-driven
+                      </span>
+                      <span className="rounded-lg border border-slate-200 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900/70">
+                        Pace: {moodValue > 60 ? "Fast" : "Steady"}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {activeHowItWorks === 1 && (
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900/70">
+                      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                        Book Pick
+                      </p>
+                      <p className="mt-2 text-lg font-black text-slate-900 dark:text-slate-100">{demoBook}</p>
+                      <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">Matched to your {moodLabel.toLowerCase()} mood.</p>
+                    </div>
+                    <div className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900/70">
+                      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                        Movie Pick
+                      </p>
+                      <p className="mt-2 text-lg font-black text-slate-900 dark:text-slate-100">{demoMovie}</p>
+                      <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">Balanced with tone + pacing preferences.</p>
+                    </div>
+                  </div>
+                )}
+
+                {activeHowItWorks === 2 && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900/70">
+                      <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Recommendation confidence</p>
+                      <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                        High Match
+                      </span>
+                    </div>
+                    <p className="rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-400">
+                      Why this works: tone, pacing, and theme all align with your current mood selection.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <p className="mt-4 text-sm leading-relaxed text-slate-700 dark:text-slate-300 md:text-base">
+                {howItWorksInteractive[activeHowItWorks].description}
+              </p>
+              <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400 md:text-sm">
+                {howItWorksInteractive[activeHowItWorks].detail}
+              </p>
+            </motion.div>
+          </div>
+
+          <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-3">
             {howItWorksCards.map((card, idx) => (
-              <article
+              <motion.div
                 key={card.title}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.45, delay: idx * 0.08 }}
                 className={cn(
-                  "group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 p-6 shadow-sm backdrop-blur-md transition-all duration-500 hover:-translate-y-1 hover:shadow-xl",
-                  "dark:border-slate-700/70 dark:bg-slate-900/65",
+                  "rounded-2xl border border-slate-200/80 bg-white/80 p-4 text-sm text-slate-700 shadow-sm dark:border-slate-700/70 dark:bg-slate-900/65 dark:text-slate-300",
                 )}
               >
-                <div className="mb-4 flex items-center gap-3">
-                  <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-900 text-sm font-black text-white dark:bg-slate-100 dark:text-slate-900">
-                    {idx + 1}
-                  </span>
-                  <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                    Step 0{idx + 1}
-                  </p>
-                </div>
-
-                <div className="mb-5 flex h-28 items-center justify-center p-1">
-                  <StepVisual index={idx} />
-                </div>
-
-                <div className="relative z-10">
-                  <h3 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100">
-                    {card.title}
-                  </h3>
-                  <p className="mt-3 text-sm leading-relaxed text-slate-700 dark:text-slate-300 md:text-base">
-                    {card.description}
-                  </p>
-                  <p className="mt-3 text-xs leading-relaxed text-slate-600 dark:text-slate-400 md:text-sm">
-                    {card.detail}
-                  </p>
-                </div>
-              </article>
+                {card.detail}
+              </motion.div>
             ))}
           </div>
         </div>
@@ -267,7 +319,7 @@ export default function Index() {
               Powered By
             </h2>
             <p className="mx-auto max-w-3xl text-base text-slate-600 dark:text-slate-400 md:whitespace-nowrap md:text-lg">
-              Trusted tools and APIs that keep Smart Advisor fast, reliable, and context aware.
+              Trusted services that help Smart Advisor stay fast, dependable, and helpful.
             </p>
           </div>
           <RotatingLogoSets />
@@ -279,7 +331,7 @@ export default function Index() {
           <h2 className="mb-24 text-4xl font-black tracking-tighter md:text-5xl">
             Meet the Team
           </h2>
-          <AnimatedTestimonials testimonials={teamMembers} autoplay />
+          <AnimatedTestimonials testimonials={teamMembers} autoplay showArrows={false} />
         </div>
       </section>
 
@@ -304,7 +356,7 @@ export default function Index() {
               >
                 GitHub
               </a>
-              .
+              . Smart Advisor is open source, so you can review and contribute anytime.
             </p>
           </div>
 
@@ -399,7 +451,7 @@ export default function Index() {
 
           <div className="mt-10 grid grid-cols-1 items-center gap-5 text-xs text-slate-500 dark:text-slate-400 md:grid-cols-3">
             <p className="text-center md:text-left">© 2026 Smart Advisor. All rights reserved.</p>
-            <p className="text-center text-sm text-slate-700 dark:text-slate-300">
+            <div className="text-center text-sm text-slate-700 dark:text-slate-300">
               Built with{" "}
               <LinkPreview url="https://react.dev" className="font-semibold text-slate-900 dark:text-slate-100">
                 React
@@ -412,7 +464,8 @@ export default function Index() {
               <LinkPreview url="https://www.typescriptlang.org" className="font-semibold text-slate-900 dark:text-slate-100">
                 TypeScript
               </LinkPreview>
-            </p>
+              {" "}as an open-source project.
+            </div>
             <div className="flex items-center justify-center gap-4 md:justify-end">
               <a
                 href="https://github.com/ponderrr/smart-advisor"

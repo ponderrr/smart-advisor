@@ -62,16 +62,17 @@ export const NavBody = ({ children, className, scrolled = false }: NavBodyProps)
       data-main-navbar="true"
       initial={false}
       animate={{
-        width: scrolled ? "min(1040px, calc(100% - 2rem))" : "min(1280px, calc(100% - 2rem))",
+        width: "min(1180px, calc(100% - 2rem))",
         borderRadius: scrolled ? 999 : 24,
+        y: scrolled ? 6 : 0,
       }}
-      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
         "mx-auto hidden md:flex items-center justify-between px-10 py-4",
         "border border-transparent",
         scrolled
-          ? "bg-white/65 shadow-[0_14px_40px_-22px_rgba(15,23,42,0.42)] backdrop-blur-xl border-slate-200/50 dark:bg-slate-900/60 dark:border-slate-700/60 dark:shadow-[0_14px_40px_-20px_rgba(2,6,23,0.7)]"
-          : "bg-white/0 dark:bg-transparent",
+          ? "bg-white/65 border-slate-200/50 shadow-[0_14px_40px_-22px_rgba(15,23,42,0.42)] backdrop-blur-xl dark:bg-slate-900/60 dark:border-slate-700/60 dark:shadow-[0_14px_40px_-20px_rgba(2,6,23,0.7)]"
+          : "bg-white/0 shadow-none dark:bg-transparent",
         className,
       )}
     >
@@ -110,8 +111,10 @@ export const NavItems = ({ items, className, scrolled = false }: NavItemsProps) 
       className={cn("hidden lg:flex items-center gap-10", className)}
     >
       {items.map((item, idx) => {
-        const linkClassName =
-          "text-lg font-bold tracking-tight text-slate-700 transition-colors hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400";
+        const linkClassName = cn(
+          "shrink-0 whitespace-nowrap font-bold tracking-tight text-slate-700 transition-colors hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400",
+          "text-base",
+        );
         const motionProps = {
           initial: false,
           animate: { opacity: scrolled ? 0.95 : 1 },
@@ -150,15 +153,16 @@ export const MobileNav = ({ children, className, scrolled = false }: any) => (
   <motion.div
     initial={false}
     animate={{
-      width: scrolled ? "calc(100% - 1rem)" : "calc(100% - 1.5rem)",
+      width: "calc(100% - 1rem)",
       borderRadius: scrolled ? 999 : 16,
+      y: scrolled ? 4 : 0,
     }}
-    transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+    transition={{ duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
     className={cn(
       "mx-auto md:hidden px-5 py-3 border border-transparent",
       scrolled
-        ? "bg-white/70 backdrop-blur-xl border-slate-200/60 shadow-[0_12px_30px_-20px_rgba(15,23,42,0.45)] dark:bg-slate-900/70 dark:border-slate-700/60"
-        : "bg-white/0 dark:bg-transparent",
+        ? "bg-white/70 border-slate-200/60 shadow-[0_12px_30px_-20px_rgba(15,23,42,0.45)] backdrop-blur-xl dark:bg-slate-900/70 dark:border-slate-700/60"
+        : "bg-white/0 shadow-none dark:bg-transparent",
       className,
     )}
   >
@@ -207,7 +211,7 @@ export const NavbarLogo = () => (
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
     }}
-    className="group inline-flex items-center transition-opacity hover:opacity-85"
+    className="group inline-flex shrink-0 items-center pr-3 transition-opacity hover:opacity-85"
   >
     <BrandWordmark imageClassName="h-8 md:h-9" />
   </a>

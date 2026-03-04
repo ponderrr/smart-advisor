@@ -181,7 +181,11 @@ export const AuthForm = ({
   };
 
   return (
-    <div className="mx-auto w-full max-w-md rounded-2xl border border-slate-200/70 bg-white/85 p-5 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-6">
+    <motion.div
+      layout
+      transition={{ layout: { duration: 0.32, ease: [0.22, 1, 0.36, 1] } }}
+      className="mx-auto w-full max-w-md overflow-hidden rounded-2xl border border-slate-200/70 bg-white/85 p-5 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-6"
+    >
       <motion.div
         key={mode}
         initial={{ opacity: 0, y: 6 }}
@@ -200,7 +204,12 @@ export const AuthForm = ({
         </p>
       </motion.div>
 
-      <form onSubmit={(event) => event.preventDefault()} className="mt-6 space-y-4" noValidate>
+      <motion.form
+        layout
+        onSubmit={(event) => event.preventDefault()}
+        className="mt-6 space-y-4"
+        noValidate
+      >
         <FormField label="Email" htmlFor="auth-email" error={errors.email}>
           <Input
             id="auth-email"
@@ -219,6 +228,7 @@ export const AuthForm = ({
           {(mode === "signin" || mode === "signup") && (
             <motion.div
               key="password"
+              layout
               initial={{ opacity: 0, height: 0, y: -4 }}
               animate={{ opacity: 1, height: "auto", y: 0 }}
               exit={{ opacity: 0, height: 0, y: -4 }}
@@ -245,6 +255,7 @@ export const AuthForm = ({
           {mode === "signup" && (
             <motion.div
               key="signup-extra"
+              layout
               initial={{ opacity: 0, height: 0, y: -4 }}
               animate={{ opacity: 1, height: "auto", y: 0 }}
               exit={{ opacity: 0, height: 0, y: -4 }}
@@ -395,8 +406,8 @@ export const AuthForm = ({
             {mode === "forgot" ? "Sign in" : mode === "signup" ? "Sign in" : "Sign up"}
           </button>
         </p>
-      </form>
-    </div>
+      </motion.form>
+    </motion.div>
   );
 };
 

@@ -190,7 +190,7 @@ const ParallaxImage = memo(function ParallaxImage({
 
   return (
     <motion.div
-      className="absolute aspect-[2/3] h-28 w-20 sm:h-44 sm:w-32 md:h-56 md:w-40"
+      className="absolute aspect-[2/3] h-36 w-24 sm:h-52 sm:w-36 md:h-64 md:w-44"
       style={{
         top: posStyle.top,
         left: posStyle.left,
