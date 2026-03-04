@@ -2,8 +2,8 @@
 import { useState } from "react";
 import { useRouter } from 'next/navigation';
 import { Film, Book, Target, User, LogOut } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import { useQuizStore } from '@/store/quizStore';
+import { useAuth } from "@/features/auth/hooks/use-auth";
+import { useQuizStore } from '@/features/quiz/store/quiz-store';
 import { BrandWordmark } from "@/components/brand-wordmark";
 
 type ContentType = "movie" | "book" | "both" | null;

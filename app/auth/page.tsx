@@ -2,9 +2,8 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
-import { AuthLayout } from "@/components/auth/auth-layout";
-import { AuthForm } from "@/components/auth/auth-form";
+import { useAuth } from "@/features/auth/hooks/use-auth";
+import { AuthForm, AuthLayout } from "@/features/auth/components";
 
 const AuthPage = () => {
   const router = useRouter();

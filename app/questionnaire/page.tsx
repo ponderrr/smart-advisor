@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from 'next/navigation';
 import {
   Card,
@@ -9,10 +9,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ArrowLeft, ArrowRight, User, LogOut, RefreshCw } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import { generateQuestionsWithRetry } from "@/services/ai";
-import { Question } from "@/types/Question";
-import { Answer } from "@/types/Answer";
+import { useAuth } from "@/features/auth/hooks/use-auth";
+import { generateQuestionsWithRetry } from "@/features/recommendations/services/ai-service";
+import { Question } from "@/features/quiz/types/question";
+import { Answer } from "@/features/quiz/types/answer";
 import { v4 as uuidv4 } from "uuid";
 import {
   EnhancedButton,
@@ -21,7 +21,7 @@ import {
   LoadingScreen,
   QuestionLoadingShimmer,
 } from "@/components/enhanced";
-import { useQuizStore } from '@/store/quizStore';
+import { useQuizStore } from '@/features/quiz/store/quiz-store';
 import { BrandWordmark } from "@/components/brand-wordmark";
 
 const QuestionnairePage = () => {
@@ -37,16 +37,8 @@ const QuestionnairePage = () => {
   const [error, setError] = useState<string | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
-  useEffect(() => {
-    if (!contentType || !user) {
-      router.push("/content-selection");
-      return;
-    }
-
-    loadQuestions();
-  }, [contentType, user, router, questionCount]);
-
-  const loadQuestions = async () => {
+  const loadQuestions = useCallback(async () => {
+    if (!contentType || !user) return;
     try {
       setIsLoading(true);
       setError(null);
@@ -67,7 +59,16 @@ const QuestionnairePage = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [contentType, user, questionCount]);
+
+  useEffect(() => {
+    if (!contentType || !user) {
+      router.push("/content-selection");
+      return;
+    }
+
+    loadQuestions();
+  }, [contentType, user, router, loadQuestions]);
 
   const handleLogoClick = () => {
     router.push("/");

@@ -2,10 +2,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from 'next/navigation';
 import { RefreshCw, Heart, User, LogOut, Star } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import { enhancedRecommendationsService } from "@/services/enhancedRecommendations";
-import { databaseService } from "@/services/database";
-import { Recommendation } from "@/types/Recommendation";
+import { useAuth } from "@/features/auth/hooks/use-auth";
+import { enhancedRecommendationsService } from "@/features/recommendations/services/enhanced-recommendations-service";
+import { databaseService } from "@/features/recommendations/services/database-service";
+import { Recommendation } from "@/features/recommendations/types/recommendation";
 import { ExpandableText } from "@/components/ExpandableText";
 import {
   EnhancedButton,
@@ -13,7 +13,7 @@ import {
   RecommendationLoadingShimmer,
 } from "@/components/enhanced";
 import { SafeLocalStorage } from "@/utils/localStorage";
-import { useQuizStore } from '@/store/quizStore';
+import { useQuizStore } from '@/features/quiz/store/quiz-store';
 import { BrandWordmark } from "@/components/brand-wordmark";
 
 // Utility function to safely serialize data, handling circular references and non-serializable values
