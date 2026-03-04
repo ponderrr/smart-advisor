@@ -128,7 +128,7 @@ const HeroSection = () => {
   const handleTryDemo = () => router.push("/demo");
 
   return (
-    <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-950">
+    <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-slate-50 transition-colors duration-300 dark:bg-slate-950">
       <ParallaxHeroImages images={heroImages} />
 
       <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center gap-8 px-4 text-center">
