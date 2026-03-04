@@ -21,9 +21,9 @@ type LinkPreviewProps = {
   quality?: number;
   layout?: string;
 } & (
-  | { isStatic: true; imageSrc: string }
-  | { isStatic?: false; imageSrc?: never }
-);
+    | { isStatic: true; imageSrc: string }
+    | { isStatic?: false; imageSrc?: never }
+  );
 
 export const LinkPreview = ({
   children,
@@ -36,7 +36,7 @@ export const LinkPreview = ({
   isStatic = false,
   imageSrc = "",
 }: LinkPreviewProps) => {
-  let src;
+  let src: string | null = null;
   if (!isStatic) {
     const params = encode({
       url,
@@ -51,7 +51,7 @@ export const LinkPreview = ({
     });
     src = `https://api.microlink.io/?${params}`;
   } else {
-    src = imageSrc;
+    src = imageSrc || null;
   }
 
   const [isOpen, setOpen] = React.useState(false);
@@ -76,7 +76,7 @@ export const LinkPreview = ({
 
   return (
     <>
-      {isMounted ? (
+      {isMounted && src ? (
         <div className="hidden">
           <img
             src={src}
@@ -133,13 +133,15 @@ export const LinkPreview = ({
                   className="block p-1 bg-white border-2 border-transparent shadow rounded-xl hover:border-neutral-200 dark:hover:border-neutral-800"
                   style={{ fontSize: 0 }}
                 >
-                  <img
-                    src={isStatic ? imageSrc : src}
-                    width={width}
-                    height={height}
-                    className="rounded-lg"
-                    alt="preview image"
-                  />
+                  {src ? (
+                    <img
+                      src={src}
+                      width={width}
+                      height={height}
+                      className="rounded-lg"
+                      alt="preview image"
+                    />
+                  ) : null}
                 </a>
               </motion.div>
             )}

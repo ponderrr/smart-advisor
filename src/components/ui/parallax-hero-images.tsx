@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useMemo, memo } from "react";
+import React, { useEffect, useMemo, memo, useState } from "react";
 import {
   motion,
   useMotionValue,
@@ -162,7 +162,12 @@ const ParallaxImage = memo(function ParallaxImage({
   smoothMouseY,
   isLoading,
 }: ParallaxImageProps) {
+  const [isLoaded, setIsLoaded] = useState(false);
   const maxOffset = 40;
+
+  useEffect(() => {
+    setIsLoaded(false);
+  }, [src]);
 
   const translateX = useTransform(
     smoothMouseX,
@@ -189,29 +194,25 @@ const ParallaxImage = memo(function ParallaxImage({
         y: translateY,
         zIndex: Math.round(depth * 10),
       }}
-      initial={{ opacity: 0, filter: "blur(20px)", scale: 0.9 }}
-      animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
+      initial={{ opacity: 0, scale: 0.95, filter: "blur(14px)" }}
+      animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
       transition={{
         duration: 0.7,
         delay,
         ease: [0.25, 0.1, 0.25, 1],
       }}
     >
-      {isLoading || !src ? (
-        <div
-          className={cn(
-            "aspect-[2/3] h-28 w-20 rounded-lg bg-slate-200/60 shadow-sm ring-1 ring-black/5 animate-pulse sm:h-44 sm:w-32 md:h-56 md:w-40 dark:bg-slate-700/40 dark:ring-white/10",
-            imageClassName,
-          )}
-        />
-      ) : (
+      {!!src && (
         <img
           src={src}
           alt=""
           loading="lazy"
           decoding="async"
+          onLoad={() => setIsLoaded(true)}
+          onError={() => setIsLoaded(true)}
           className={cn(
-            "aspect-[2/3] h-28 w-20 rounded-lg object-cover shadow-sm ring-1 ring-black/10 sm:h-44 sm:w-32 md:h-56 md:w-40 dark:ring-white/10",
+            "absolute inset-0 aspect-[2/3] h-28 w-20 rounded-lg object-cover shadow-sm ring-1 ring-black/10 transition-all duration-500 sm:h-44 sm:w-32 md:h-56 md:w-40 dark:ring-white/10",
+            isLoading || !isLoaded ? "opacity-0 blur-md" : "opacity-100 blur-0",
             imageClassName,
           )}
         />

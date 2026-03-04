@@ -46,13 +46,13 @@ export const logoSets = [
     { name: "Next.js", src: "https://cdn.simpleicons.org/nextdotjs/111111" },
     { name: "Supabase", src: "https://cdn.simpleicons.org/supabase/111111" },
     { name: "TMDB", src: "https://cdn.simpleicons.org/themoviedatabase/111111" },
-    { name: "Google Books", src: "" },
+    { name: "Google Books", src: "https://cdn.simpleicons.org/googlebooks/111111" },
   ],
   [
     { name: "TypeScript", src: "https://cdn.simpleicons.org/typescript/111111" },
     { name: "React", src: "https://cdn.simpleicons.org/react/111111" },
     { name: "Framer", src: "https://cdn.simpleicons.org/framer/111111" },
-    { name: "OpenAI", src: "https://cdn.simpleicons.org/openai/111111" },
+    { name: "Node.js", src: "https://cdn.simpleicons.org/nodedotjs/111111" },
   ],
   [
     { name: "Tailwind", src: "https://cdn.simpleicons.org/tailwindcss/111111" },
