@@ -147,7 +147,8 @@ const HeroSection = () => {
           <HoverBorderGradient
             onClick={handleGetStarted}
             idleColor="17, 24, 39"
-            highlightColor="17, 24, 39"
+            highlightColor="139, 92, 246"
+            darkHighlightColor="167, 139, 250"
             containerClassName="rounded-full"
             as="button"
             className="dark:bg-black bg-white text-black dark:text-white px-14 py-6 text-2xl font-black tracking-tighter"

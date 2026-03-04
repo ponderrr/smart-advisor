@@ -130,7 +130,7 @@ export const ParallaxHeroImages = ({
     >
       {positions.map((pos, index) => (
         <ParallaxImage
-          key={`${pos.position}-${index}`}
+          key={`${pos.position}-${pos.src}-${index}`}
           src={pos.src}
           position={pos.position}
           depth={pos.depth}

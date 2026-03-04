@@ -58,7 +58,8 @@ export default function Index() {
             <HoverBorderGradient
               onClick={handleGetStarted}
               idleColor="17, 24, 39"
-              highlightColor="17, 24, 39"
+              highlightColor="139, 92, 246"
+              darkHighlightColor="167, 139, 250"
               containerClassName="rounded-full"
               className="whitespace-nowrap bg-white px-6 py-2.5 text-base font-black leading-none tracking-tighter text-black dark:bg-black dark:text-white"
             >
@@ -110,7 +111,8 @@ export default function Index() {
             <HoverBorderGradient
               onClick={handleGetStarted}
               idleColor="17, 24, 39"
-              highlightColor="17, 24, 39"
+              highlightColor="139, 92, 246"
+              darkHighlightColor="167, 139, 250"
               containerClassName="mt-2 w-full rounded-full"
               className="w-full py-4 text-center text-xs font-black uppercase tracking-widest"
             >
@@ -222,7 +224,7 @@ export default function Index() {
               >
                 support@smartadvisor.live
               </a>{" "}
-              or open an issue on{" "}
+              or report bugs on{" "}
               <a
                 href="https://github.com/ponderrr/smart-advisor/issues"
                 target="_blank"
@@ -314,10 +316,10 @@ export default function Index() {
           <nav className="mt-8">
             <ul className="flex flex-col items-center justify-center gap-4 text-sm font-medium text-slate-700 dark:text-slate-300 md:flex-row md:gap-8">
               {[
-                { label: "Products", href: "/content-selection" },
-                { label: "Studio", href: "/demo" },
-                { label: "Clients", href: "#powered-by" },
-                { label: "Pricing", href: "#faq" },
+                { label: "How It Works", href: "#how-it-works" },
+                { label: "Powered By", href: "#powered-by" },
+                { label: "FAQ", href: "#faq" },
+                { label: "Our Team", href: "#meet-the-team" },
                 { label: "Blog", href: "https://github.com/ponderrr/smart-advisor" },
                 { label: "Privacy", href: "#faq" },
                 { label: "Terms", href: "#faq" },
