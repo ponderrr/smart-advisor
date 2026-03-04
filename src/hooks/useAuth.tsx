@@ -27,6 +27,7 @@ interface AuthContextType {
   ) => Promise<{ error: string | null }>;
   signOut: () => Promise<{ error: string | null }>;
   resetPassword: (email: string) => Promise<{ error: string | null }>;
+  clearError: () => void;
   updateProfile: (
     name: string,
     age: number
@@ -211,6 +212,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         error instanceof Error ? error.message : "An unexpected error occurred";
       setError(errorMessage);
       return { error: errorMessage };
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -242,6 +245,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         error instanceof Error ? error.message : "An unexpected error occurred";
       setError(errorMessage);
       return { error: errorMessage };
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -322,6 +327,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const clearError = () => {
+    setError(null);
+  };
+
   const value = {
     user,
     session,
@@ -331,6 +340,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     signUp,
     signOut,
     resetPassword,
+    clearError,
     updateProfile,
   };
 

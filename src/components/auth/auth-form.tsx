@@ -6,6 +6,8 @@ import {
   IconBrandApple,
   IconBrandFacebook,
   IconBrandGoogle,
+  IconEye,
+  IconEyeOff,
 } from "@tabler/icons-react";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +19,7 @@ export type AuthMode = "signin" | "signup" | "forgot";
 interface AuthFormProps {
   loading: boolean;
   authError?: string | null;
+  onClearError: () => void;
   onSignIn: (email: string, password: string) => Promise<{ error: string | null }>;
   onSignUp: (
     email: string,
@@ -36,6 +39,7 @@ const socialButtons = [
 export const AuthForm = ({
   loading,
   authError,
+  onClearError,
   onSignIn,
   onSignUp,
   onResetPassword,
@@ -45,6 +49,8 @@ export const AuthForm = ({
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [age, setAge] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -72,12 +78,15 @@ export const AuthForm = ({
   const resetFeedback = () => {
     setErrors({});
     setSuccessMessage(null);
+    onClearError();
   };
 
   const toggleMode = (nextMode: AuthMode) => {
     setMode(nextMode);
     setPassword("");
     setConfirmPassword("");
+    setShowPassword(false);
+    setShowConfirmPassword(false);
     if (nextMode !== "signup") {
       setAge("");
     }
@@ -219,16 +228,16 @@ export const AuthForm = ({
               transition={{ duration: 0.2, ease: "easeOut" }}
             >
               <FormField label="Password" htmlFor="auth-password" error={errors.password}>
-                <Input
+                <PasswordInput
                   id="auth-password"
-                  type="password"
                   autoComplete={mode === "signin" ? "current-password" : "new-password"}
                   placeholder="••••••••"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   disabled={disabled}
                   aria-invalid={Boolean(errors.password)}
-                  className="focus-visible:ring-neutral-300 dark:focus-visible:ring-neutral-600"
+                  showPassword={showPassword}
+                  onTogglePassword={() => setShowPassword((prev) => !prev)}
                 />
               </FormField>
             </motion.div>
@@ -267,16 +276,16 @@ export const AuthForm = ({
                 htmlFor="auth-confirm-password"
                 error={errors.confirmPassword}
               >
-                <Input
+                <PasswordInput
                   id="auth-confirm-password"
-                  type="password"
                   autoComplete="new-password"
                   placeholder="••••••••"
                   value={confirmPassword}
                   onChange={(event) => setConfirmPassword(event.target.value)}
                   disabled={disabled}
                   aria-invalid={Boolean(errors.confirmPassword)}
-                  className="focus-visible:ring-neutral-300 dark:focus-visible:ring-neutral-600"
+                  showPassword={showConfirmPassword}
+                  onTogglePassword={() => setShowConfirmPassword((prev) => !prev)}
                 />
               </FormField>
             </motion.div>
@@ -289,6 +298,7 @@ export const AuthForm = ({
         )}
 
         <StatefulButton
+          key={`stateful-${mode}`}
           type="submit"
           onClick={handleAction}
           disabled={disabled}
@@ -365,6 +375,45 @@ interface FormFieldProps {
   error?: string;
   children: React.ReactNode;
 }
+
+interface PasswordInputProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {
+  showPassword: boolean;
+  onTogglePassword: () => void;
+}
+
+const PasswordInput = ({
+  showPassword,
+  onTogglePassword,
+  className,
+  ...props
+}: PasswordInputProps) => {
+  return (
+    <div className="relative">
+      <input
+        type={showPassword ? "text" : "password"}
+        className={cn(
+          "shadow-input flex h-10 w-full rounded-md border-none bg-gray-50 px-3 py-2 pr-10 text-sm text-black transition duration-300 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-300 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-800 dark:text-white dark:focus-visible:ring-neutral-600",
+          className,
+        )}
+        {...props}
+      />
+      <button
+        type="button"
+        aria-label={showPassword ? "Hide password" : "Show password"}
+        onClick={onTogglePassword}
+        className="absolute inset-y-0 right-1 inline-flex items-center justify-center rounded-md px-2 text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+        disabled={props.disabled}
+      >
+        {showPassword ? (
+          <IconEyeOff className="h-4 w-4" />
+        ) : (
+          <IconEye className="h-4 w-4" />
+        )}
+      </button>
+    </div>
+  );
+};
 
 const FormField = ({ label, htmlFor, error, children }: FormFieldProps) => {
   return (

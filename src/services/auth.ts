@@ -14,15 +14,19 @@ class AuthService {
   ): Promise<{ error: string | null }> {
     try {
       if (process.env.NODE_ENV === 'development') console.log("Starting signup process for:", email);
+      const normalizedEmail = email.trim().toLowerCase();
 
       // Determine the correct redirect URL based on environment
       const getRedirectUrl = () => {
+        if (typeof window !== "undefined") {
+          return `${window.location.origin}/auth/callback`;
+        }
         return "https://smartadvisor.live/auth/callback";
       };
 
       // Create the auth user with explicit redirect URL
       const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
+        email: normalizedEmail,
         password,
         options: {
           data: {
@@ -44,6 +48,19 @@ class AuthService {
         return { error: "Failed to create user account" };
       }
 
+      // Supabase anti-enumeration behavior for existing confirmed users:
+      // user is returned but identities array can be empty and no new email is sent.
+      if (
+        !authData.session &&
+        Array.isArray(authData.user.identities) &&
+        authData.user.identities.length === 0
+      ) {
+        return {
+          error:
+            "An account with this email already exists in authentication. Please sign in or use Forgot Password.",
+        };
+      }
+
       if (process.env.NODE_ENV === 'development') console.log("Auth user created successfully:", authData.user.id);
 
       // Check if email confirmation is required
@@ -63,7 +80,7 @@ class AuthService {
           id: authData.user.id,
           name,
           age,
-          email,
+          email: normalizedEmail,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         },
@@ -217,9 +234,25 @@ class AuthService {
         typeof window !== "undefined"
           ? window.location.origin
           : "https://smartadvisor.live";
+      const normalizedEmail = email.trim().toLowerCase();
+
+      // Best-effort database existence check.
+      // If blocked by RLS, continue with reset flow to avoid false negatives.
+      const { data: profileRows, error: profileLookupError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("email", normalizedEmail)
+        .limit(1);
+
+      if (!profileLookupError && (!profileRows || profileRows.length === 0)) {
+        return {
+          error:
+            "No account found for this email. Please check your email address or sign up.",
+        };
+      }
 
       const { error } = await supabase.auth.resetPasswordForEmail(
-        email.trim().toLowerCase(),
+        normalizedEmail,
         {
           redirectTo: `${origin}/auth/callback`,
         },

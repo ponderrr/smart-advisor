@@ -81,9 +81,9 @@ export const Button = ({
 
   return (
     <motion.button
-      layout
-      layoutId="stateful-button"
       type={buttonProps.type ?? "button"}
+      whileTap={{ scale: 0.99 }}
+      transition={{ duration: 0.15, ease: "easeOut" }}
       className={cn(
         "flex h-11 w-full items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-70",
         currentState === "error"

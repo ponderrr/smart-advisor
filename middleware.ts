@@ -28,8 +28,13 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
+  const isApiRoute = pathname.startsWith('/api/');
   const publicRoutes = ['/', '/auth', '/auth/callback'];
   const isPublic = publicRoutes.some(route => pathname === route || pathname.startsWith('/auth/'));
+
+  if (isApiRoute) {
+    return supabaseResponse;
+  }
 
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();
@@ -42,6 +47,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };

@@ -74,12 +74,23 @@ export const NavBody = ({ children, className, scrolled = false }: NavBodyProps)
 };
 
 export const NavItems = ({ items, className }: NavItemsProps) => {
+  const handleAnchorClick = (
+    event: React.MouseEvent<HTMLAnchorElement>,
+    link: string,
+  ) => {
+    if (!link.startsWith("#")) return;
+    event.preventDefault();
+    const section = document.querySelector(link);
+    section?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <div className={cn("hidden lg:flex items-center gap-10", className)}>
       {items.map((item, idx) => (
         <a
           key={idx}
           href={item.link}
+          onClick={(event) => handleAnchorClick(event, item.link)}
           className="text-lg font-bold tracking-tight text-slate-700 transition-colors hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400"
         >
           {item.name}
