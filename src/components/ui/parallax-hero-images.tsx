@@ -130,7 +130,7 @@ export const ParallaxHeroImages = ({
     >
       {positions.map((pos, index) => (
         <ParallaxImage
-          key={`${pos.position}-${pos.src}-${index}`}
+          key={`${pos.position}-${index}`}
           src={pos.src}
           position={pos.position}
           depth={pos.depth}
@@ -162,12 +162,17 @@ const ParallaxImage = memo(function ParallaxImage({
   smoothMouseY,
   isLoading,
 }: ParallaxImageProps) {
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [displaySrc, setDisplaySrc] = useState(src);
+  const [incomingSrc, setIncomingSrc] = useState<string | null>(null);
   const maxOffset = 40;
 
   useEffect(() => {
-    setIsLoaded(false);
-  }, [src]);
+    if (!src || src === displaySrc || src === incomingSrc) return;
+    const loader = new Image();
+    loader.src = src;
+    loader.onload = () => setIncomingSrc(src);
+    loader.onerror = () => setIncomingSrc(src);
+  }, [src, displaySrc, incomingSrc]);
 
   const translateX = useTransform(
     smoothMouseX,
@@ -202,17 +207,34 @@ const ParallaxImage = memo(function ParallaxImage({
         ease: [0.25, 0.1, 0.25, 1],
       }}
     >
-      {!!src && (
+      {!!displaySrc && (
         <img
-          src={src}
+          src={displaySrc}
           alt=""
           loading="eager"
           decoding="async"
-          onLoad={() => setIsLoaded(true)}
-          onError={() => setIsLoaded(true)}
           className={cn(
             "absolute inset-0 h-full w-full rounded-lg object-cover shadow-sm ring-1 ring-black/10 transition-all duration-500 dark:ring-white/10",
-            isLoading || !isLoaded ? "opacity-0 blur-md" : "opacity-100 blur-0",
+            isLoading ? "opacity-0 blur-md" : "opacity-100 blur-0",
+            imageClassName,
+          )}
+        />
+      )}
+      {incomingSrc && (
+        <motion.img
+          src={incomingSrc}
+          alt=""
+          loading="eager"
+          decoding="async"
+          initial={{ opacity: 0, filter: "blur(12px)" }}
+          animate={{ opacity: 1, filter: "blur(0px)" }}
+          transition={{ duration: 0.52, ease: "easeOut" }}
+          onAnimationComplete={() => {
+            setDisplaySrc(incomingSrc);
+            setIncomingSrc(null);
+          }}
+          className={cn(
+            "absolute inset-0 h-full w-full rounded-lg object-cover shadow-sm ring-1 ring-black/10 dark:ring-white/10",
             imageClassName,
           )}
         />

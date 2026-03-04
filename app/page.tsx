@@ -43,6 +43,15 @@ export default function Index() {
   const handleGetStarted = () =>
     user ? router.push("/content-selection") : router.push("/auth");
 
+  const smoothScrollToSection = (selector: string) => {
+    const section = document.querySelector(selector) as HTMLElement | null;
+    if (!section) return;
+    const navbar = document.querySelector("[data-main-navbar='true']") as HTMLElement | null;
+    const offset = (navbar?.offsetHeight ?? 96) + 16;
+    const top = section.getBoundingClientRect().top + window.scrollY - offset;
+    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  };
+
   return (
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
       <Navbar>
@@ -58,6 +67,7 @@ export default function Index() {
             <HoverBorderGradient
               onClick={handleGetStarted}
               idleColor="17, 24, 39"
+              darkIdleColor="255, 255, 255"
               highlightColor="139, 92, 246"
               darkHighlightColor="167, 139, 250"
               containerClassName="rounded-full"
@@ -81,36 +91,22 @@ export default function Index() {
           </MobileNavHeader>
           <MobileNavMenu isOpen={isMobileMenuOpen}>
             {navItems.map((item) => (
-              <a
+              <button
                 key={item.name}
-                href={item.link}
-                onClick={(event) => {
-                  if (item.link.startsWith("#")) {
-                    event.preventDefault();
-                    const section = document.querySelector(item.link) as HTMLElement | null;
-                    if (section) {
-                      const navbar = document.querySelector(
-                        "[data-main-navbar='true']",
-                      ) as HTMLElement | null;
-                      const offset = (navbar?.offsetHeight ?? 96) + 16;
-                      const top =
-                        section.getBoundingClientRect().top + window.scrollY - offset;
-                      window.scrollTo({
-                        top: Math.max(0, top),
-                        behavior: "smooth",
-                      });
-                    }
-                  }
+                type="button"
+                onClick={() => {
+                  if (item.link.startsWith("#")) smoothScrollToSection(item.link);
                   setIsMobileMenuOpen(false);
                 }}
-                className="text-xl font-black tracking-tight text-slate-800 dark:text-slate-100"
+                className="text-left text-xl font-black tracking-tight text-slate-800 dark:text-slate-100"
               >
                 {item.name}
-              </a>
+              </button>
             ))}
             <HoverBorderGradient
               onClick={handleGetStarted}
               idleColor="17, 24, 39"
+              darkIdleColor="255, 255, 255"
               highlightColor="139, 92, 246"
               darkHighlightColor="167, 139, 250"
               containerClassName="mt-2 w-full rounded-full"
@@ -156,27 +152,79 @@ export default function Index() {
                 <div className="mb-5 rounded-2xl border border-slate-200/80 bg-slate-100/80 p-4 dark:border-slate-700 dark:bg-slate-800/60">
                   {idx === 0 ? (
                     <div className="space-y-3">
-                      <div className="h-3 w-2/3 rounded-full bg-slate-300 dark:bg-slate-600" />
-                      <div className="h-3 w-1/2 rounded-full bg-slate-300 dark:bg-slate-600" />
+                      <motion.div
+                        className="h-3 w-2/3 rounded-full bg-slate-300 dark:bg-slate-600"
+                        animate={{ opacity: [0.55, 1, 0.55] }}
+                        transition={{ duration: 1.8, repeat: Infinity }}
+                      />
+                      <motion.div
+                        className="h-3 w-1/2 rounded-full bg-slate-300 dark:bg-slate-600"
+                        animate={{ opacity: [0.45, 0.9, 0.45] }}
+                        transition={{ duration: 1.9, repeat: Infinity, delay: 0.12 }}
+                      />
                       <div className="flex items-center gap-2 pt-2">
-                        <div className="h-8 w-8 rounded-full bg-indigo-400/70" />
-                        <div className="h-8 w-8 rounded-full bg-violet-400/70" />
-                        <div className="h-8 w-8 rounded-full bg-cyan-400/70" />
+                        <motion.div
+                          className="h-8 w-8 rounded-full bg-indigo-400/70"
+                          animate={{ y: [0, -2, 0] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                        />
+                        <motion.div
+                          className="h-8 w-8 rounded-full bg-violet-400/70"
+                          animate={{ y: [0, -2, 0] }}
+                          transition={{ duration: 2, repeat: Infinity, delay: 0.2 }}
+                        />
+                        <motion.div
+                          className="h-8 w-8 rounded-full bg-cyan-400/70"
+                          animate={{ y: [0, -2, 0] }}
+                          transition={{ duration: 2, repeat: Infinity, delay: 0.4 }}
+                        />
                       </div>
                     </div>
                   ) : idx === 1 ? (
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="h-16 rounded-lg bg-slate-300/90 dark:bg-slate-600/90" />
-                      <div className="h-16 rounded-lg bg-slate-300/90 dark:bg-slate-600/90" />
-                      <div className="col-span-2 h-3 rounded-full bg-slate-300 dark:bg-slate-600" />
-                      <div className="col-span-2 h-3 w-4/5 rounded-full bg-slate-300 dark:bg-slate-600" />
+                      <motion.div
+                        className="h-16 rounded-lg bg-slate-300/90 dark:bg-slate-600/90"
+                        animate={{ opacity: [0.6, 1, 0.6] }}
+                        transition={{ duration: 1.6, repeat: Infinity }}
+                      />
+                      <motion.div
+                        className="h-16 rounded-lg bg-slate-300/90 dark:bg-slate-600/90"
+                        animate={{ opacity: [0.6, 1, 0.6] }}
+                        transition={{ duration: 1.6, repeat: Infinity, delay: 0.2 }}
+                      />
+                      <motion.div
+                        className="col-span-2 h-3 rounded-full bg-slate-300 dark:bg-slate-600"
+                        animate={{ opacity: [0.45, 0.9, 0.45] }}
+                        transition={{ duration: 1.7, repeat: Infinity }}
+                      />
+                      <motion.div
+                        className="col-span-2 h-3 w-4/5 rounded-full bg-slate-300 dark:bg-slate-600"
+                        animate={{ opacity: [0.45, 0.9, 0.45] }}
+                        transition={{ duration: 1.7, repeat: Infinity, delay: 0.1 }}
+                      />
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      <div className="h-10 w-full rounded-lg bg-slate-300/90 dark:bg-slate-600/90" />
-                      <div className="h-3 w-full rounded-full bg-slate-300 dark:bg-slate-600" />
-                      <div className="h-3 w-3/4 rounded-full bg-slate-300 dark:bg-slate-600" />
-                      <div className="h-3 w-2/3 rounded-full bg-slate-300 dark:bg-slate-600" />
+                      <motion.div
+                        className="h-10 w-full rounded-lg bg-slate-300/90 dark:bg-slate-600/90"
+                        animate={{ opacity: [0.6, 1, 0.6] }}
+                        transition={{ duration: 1.8, repeat: Infinity }}
+                      />
+                      <motion.div
+                        className="h-3 w-full rounded-full bg-slate-300 dark:bg-slate-600"
+                        animate={{ opacity: [0.4, 0.85, 0.4] }}
+                        transition={{ duration: 1.7, repeat: Infinity, delay: 0.12 }}
+                      />
+                      <motion.div
+                        className="h-3 w-3/4 rounded-full bg-slate-300 dark:bg-slate-600"
+                        animate={{ opacity: [0.4, 0.85, 0.4] }}
+                        transition={{ duration: 1.7, repeat: Infinity, delay: 0.22 }}
+                      />
+                      <motion.div
+                        className="h-3 w-2/3 rounded-full bg-slate-300 dark:bg-slate-600"
+                        animate={{ opacity: [0.4, 0.85, 0.4] }}
+                        transition={{ duration: 1.7, repeat: Infinity, delay: 0.32 }}
+                      />
                     </div>
                   )}
                 </div>
@@ -320,14 +368,15 @@ export default function Index() {
                 { label: "Powered By", href: "#powered-by" },
                 { label: "FAQ", href: "#faq" },
                 { label: "Our Team", href: "#meet-the-team" },
-                { label: "Blog", href: "https://github.com/ponderrr/smart-advisor" },
-                { label: "Privacy", href: "#faq" },
-                { label: "Terms", href: "#faq" },
               ].map((item) => (
                 <li key={item.label}>
-                  <a href={item.href} className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400">
+                  <button
+                    type="button"
+                    onClick={() => smoothScrollToSection(item.href)}
+                    className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400"
+                  >
                     {item.label}
-                  </a>
+                  </button>
                 </li>
               ))}
             </ul>
