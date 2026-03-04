@@ -9,6 +9,7 @@ import {
 } from "@tabler/icons-react";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { useMemo, useState } from "react";
 
@@ -45,6 +46,7 @@ export const AuthForm = ({
   const [age, setAge] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [rememberFor30Days, setRememberFor30Days] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -84,6 +86,7 @@ export const AuthForm = ({
     if (nextMode !== "signup") {
       setAge("");
     }
+    setRememberFor30Days(false);
     resetFeedback();
   };
 
@@ -296,10 +299,41 @@ export const AuthForm = ({
           type="submit"
           onClick={handleAction}
           disabled={disabled}
-          className="mt-1"
+          className="mt-1 hover:bg-violet-600 dark:hover:bg-violet-400 dark:hover:text-slate-950"
         >
           {actionLabel}
         </StatefulButton>
+
+        {(mode === "signin" || mode === "signup") && (
+          <motion.label
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+            className="flex items-center gap-2 rounded-lg px-1 py-1"
+          >
+            <motion.div
+              animate={rememberFor30Days ? { scale: [1, 1.08, 1] } : { scale: 1 }}
+              transition={{ duration: 0.25 }}
+            >
+              <Checkbox
+                id="remember-for-30-days"
+                checked={rememberFor30Days}
+                onCheckedChange={(checked) => setRememberFor30Days(Boolean(checked))}
+                className={cn(
+                  "h-4 w-4 rounded border-slate-300 text-white transition-colors data-[state=checked]:bg-violet-600 data-[state=checked]:border-violet-600",
+                  "dark:border-slate-600 dark:data-[state=checked]:bg-violet-400 dark:data-[state=checked]:border-violet-400",
+                )}
+                disabled={disabled}
+              />
+            </motion.div>
+            <Label.Root
+              htmlFor="remember-for-30-days"
+              className="cursor-pointer select-none text-xs font-medium text-slate-600 dark:text-slate-400"
+            >
+              Keep me signed in for 30 days
+            </Label.Root>
+          </motion.label>
+        )}
 
         {(mode === "signin" || mode === "signup") && (
           <div className="pt-1 text-right">
@@ -332,7 +366,7 @@ export const AuthForm = ({
                   setErrors({ general: result.error });
                 }
               }}
-              className="shadow-input inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+              className="shadow-input inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 transition-all hover:-translate-y-0.5 hover:border-violet-400 hover:bg-violet-50 hover:text-violet-700 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-violet-400 dark:hover:bg-violet-500/20 dark:hover:text-violet-200"
               aria-label="Continue with Google"
               disabled={disabled}
             >

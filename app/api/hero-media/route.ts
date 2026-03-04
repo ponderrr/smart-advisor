@@ -23,7 +23,16 @@ const TMDB_ENDPOINTS = [
   "discover/tv?include_adult=false&include_null_first_air_dates=false&language=en-US&sort_by=popularity.desc",
 ];
 
-const randomItem = <T,>(items: T[]) => items[Math.floor(Math.random() * items.length)];
+const pickRandomUnique = <T,>(items: T[], count: number) => {
+  const copy = [...items];
+  const picked: T[] = [];
+  while (copy.length > 0 && picked.length < count) {
+    const index = Math.floor(Math.random() * copy.length);
+    const [value] = copy.splice(index, 1);
+    picked.push(value);
+  }
+  return picked;
+};
 
 const shuffle = <T,>(items: T[]) => {
   const arr = [...items];
@@ -43,42 +52,52 @@ const pickPoster = (posterPath: string | null | undefined) =>
   posterPath ? `https://image.tmdb.org/t/p/w500${posterPath}` : null;
 
 async function fetchBookCovers(apiKey: string): Promise<string[]> {
-  const query = encodeURIComponent(randomItem(BOOK_QUERIES));
-  const startIndex = Math.floor(Math.random() * 30);
-  const url = `https://www.googleapis.com/books/v1/volumes?q=${query}&printType=books&orderBy=relevance&maxResults=20&startIndex=${startIndex}&key=${apiKey}`;
+  const selectedQueries = pickRandomUnique(BOOK_QUERIES, 2);
+  const responses = await Promise.all(
+    selectedQueries.map(async (query) => {
+      const encodedQuery = encodeURIComponent(query);
+      const startIndex = Math.floor(Math.random() * 35);
+      const url = `https://www.googleapis.com/books/v1/volumes?q=${encodedQuery}&printType=books&orderBy=relevance&maxResults=20&startIndex=${startIndex}&key=${apiKey}`;
 
-  const response = await fetch(url, { next: { revalidate: 0 } });
-  if (!response.ok) {
-    throw new Error(`Google Books error: ${response.status}`);
-  }
+      const response = await fetch(url, { next: { revalidate: 0 } });
+      if (!response.ok) {
+        throw new Error(`Google Books error: ${response.status}`);
+      }
+      const data = (await response.json()) as { items?: any[] };
+      return Array.isArray(data.items) ? data.items : [];
+    }),
+  );
 
-  const data = (await response.json()) as { items?: any[] };
-  const items = Array.isArray(data.items) ? data.items : [];
-
-  const covers = items
+  const covers = responses
+    .flat()
     .map((item: any) => item?.volumeInfo?.imageLinks?.thumbnail || item?.volumeInfo?.imageLinks?.smallThumbnail)
     .filter((cover): cover is string => Boolean(cover))
     .map(normalizeBookCover);
 
-  return shuffle(uniqueUrls(covers)).slice(0, 6);
+  return shuffle(uniqueUrls(covers)).slice(0, 10);
 }
 
 async function fetchMoviePosters(apiKey: string): Promise<string[]> {
-  const endpoint = randomItem(TMDB_ENDPOINTS);
-  const page = Math.floor(Math.random() * 4) + 1;
-  const url = `https://api.themoviedb.org/3/${endpoint}&page=${page}&api_key=${apiKey}`;
+  const selectedEndpoints = pickRandomUnique(TMDB_ENDPOINTS, 2);
+  const responses = await Promise.all(
+    selectedEndpoints.map(async (endpoint) => {
+      const page = Math.floor(Math.random() * 18) + 1;
+      const url = `https://api.themoviedb.org/3/${endpoint}&page=${page}&api_key=${apiKey}`;
+      const response = await fetch(url, { next: { revalidate: 0 } });
+      if (!response.ok) {
+        throw new Error(`TMDB error: ${response.status}`);
+      }
+      const data = await response.json();
+      return Array.isArray(data.results) ? data.results : [];
+    }),
+  );
 
-  const response = await fetch(url, { next: { revalidate: 0 } });
-  if (!response.ok) {
-    throw new Error(`TMDB error: ${response.status}`);
-  }
+  const posters = responses
+    .flat()
+    .map((item: any) => pickPoster(item?.poster_path))
+    .filter(Boolean) as string[];
 
-  const data = await response.json();
-  const results = Array.isArray(data.results) ? data.results : [];
-
-  const posters = results.map((item: any) => pickPoster(item?.poster_path)).filter(Boolean) as string[];
-
-  return shuffle(uniqueUrls(posters)).slice(0, 6);
+  return shuffle(uniqueUrls(posters)).slice(0, 10);
 }
 
 export async function GET() {
@@ -114,8 +133,8 @@ export async function GET() {
   }
 
   const payload: HeroMediaResponse = {
-    books: shuffle(books).slice(0, 8),
-    movies: shuffle(movies).slice(0, 8),
+    books: shuffle(books).slice(0, 12),
+    movies: shuffle(movies).slice(0, 12),
     status,
   };
 

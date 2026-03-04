@@ -7,7 +7,7 @@ import { IconChevronsDown } from "@tabler/icons-react";
 import { FlipWords } from "@/components/ui/flip-words";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { ParallaxHeroImages } from "@/components/ui/parallax-hero-images";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type HeroMediaResponse = {
   books: string[];
@@ -29,11 +29,19 @@ const shuffle = <T,>(items: T[]) => {
 
 const uniqueUrls = (items: string[]) => Array.from(new Set(items.filter(Boolean)));
 
+const pickFrame = (pool: string[], current: string[], size: number) => {
+  const shuffled = shuffle(pool);
+  const fresh = shuffled.filter((item) => !current.includes(item));
+  const blended = [...fresh, ...shuffled];
+  return uniqueUrls(blended).slice(0, size);
+};
+
 const HeroSection = () => {
   const router = useRouter();
   const { user } = useAuth();
   const [heroImages, setHeroImages] = useState<string[]>([]);
   const [mediaPool, setMediaPool] = useState<string[]>([]);
+  const recentRef = useRef<string[]>([]);
 
   const words = useMemo(
     () => ["Movie", "Book", "Story", "Adventure", "Classic", "Masterpiece", "Cult Favorite"],
@@ -58,7 +66,9 @@ const HeroSection = () => {
         const mixed = uniqueUrls(shuffle([...(data.books || []), ...(data.movies || [])]));
 
         if (active && mixed.length > 0) {
-          const nextImages = mixed.slice(0, 14);
+          const unseen = mixed.filter((item) => !recentRef.current.includes(item));
+          const prioritized = unseen.length > 0 ? [...unseen, ...mixed] : mixed;
+          const nextImages = uniqueUrls(prioritized).slice(0, 14);
           await Promise.allSettled(
             nextImages.map(
               (src) =>
@@ -71,7 +81,8 @@ const HeroSection = () => {
             ),
           );
           if (active) {
-            setMediaPool(mixed);
+            recentRef.current = uniqueUrls([...recentRef.current, ...nextImages]).slice(-120);
+            setMediaPool((prev) => uniqueUrls([...prev, ...mixed]).slice(0, 60));
             setHeroImages(nextImages);
           }
         }
@@ -81,19 +92,19 @@ const HeroSection = () => {
     };
 
     loadHeroMedia();
+    const refreshTimer = setInterval(loadHeroMedia, 75000);
 
     return () => {
       active = false;
+      clearInterval(refreshTimer);
     };
   }, []);
 
   useEffect(() => {
     if (mediaPool.length < 2) return;
-    let startIndex = 0;
     const timer = setInterval(async () => {
-      startIndex = (startIndex + 3) % mediaPool.length;
-      const rotated = [...mediaPool.slice(startIndex), ...mediaPool.slice(0, startIndex)];
-      const nextImages = rotated.slice(0, 14);
+      const nextImages = pickFrame(mediaPool, heroImages, 14);
+      if (nextImages.length === 0) return;
       await Promise.allSettled(
         nextImages.map(
           (src) =>
@@ -105,11 +116,12 @@ const HeroSection = () => {
             }),
         ),
       );
+      recentRef.current = uniqueUrls([...recentRef.current, ...nextImages]).slice(-120);
       setHeroImages(nextImages);
     }, 9000);
 
     return () => clearInterval(timer);
-  }, [mediaPool]);
+  }, [mediaPool, heroImages]);
 
   const handleGetStarted = () =>
     user ? router.push("/content-selection") : router.push("/auth");
@@ -147,6 +159,7 @@ const HeroSection = () => {
           <HoverBorderGradient
             onClick={handleGetStarted}
             idleColor="17, 24, 39"
+            darkIdleColor="255, 255, 255"
             highlightColor="139, 92, 246"
             darkHighlightColor="167, 139, 250"
             containerClassName="rounded-full"
