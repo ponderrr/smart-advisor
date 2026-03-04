@@ -14,6 +14,7 @@ export function HoverBorderGradient({
   duration = 1,
   clockwise = true,
   idleColor = "255, 255, 255",
+  highlightColor = "139, 92, 246",
   ...props
 }: React.PropsWithChildren<
   {
@@ -23,6 +24,7 @@ export function HoverBorderGradient({
     duration?: number;
     clockwise?: boolean;
     idleColor?: string;
+    highlightColor?: string;
   } & React.HTMLAttributes<HTMLElement>
 >) {
   const [hovered, setHovered] = useState<boolean>(false);
@@ -48,7 +50,7 @@ export function HoverBorderGradient({
   };
 
   const highlight =
-    "radial-gradient(75% 181.15942028985506% at 50% 50%, #8B5CF6 0%, rgba(255, 255, 255, 0) 100%)";
+    `radial-gradient(75% 181.15942028985506% at 50% 50%, rgb(${highlightColor}) 0%, rgba(255, 255, 255, 0) 100%)`;
 
   useEffect(() => {
     if (!hovered) {

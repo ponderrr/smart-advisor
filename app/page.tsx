@@ -58,6 +58,7 @@ export default function Index() {
             <HoverBorderGradient
               onClick={handleGetStarted}
               idleColor="17, 24, 39"
+              highlightColor="17, 24, 39"
               containerClassName="rounded-full"
               className="whitespace-nowrap bg-white px-6 py-2.5 text-base font-black leading-none tracking-tighter text-black dark:bg-black dark:text-white"
             >
@@ -109,6 +110,7 @@ export default function Index() {
             <HoverBorderGradient
               onClick={handleGetStarted}
               idleColor="17, 24, 39"
+              highlightColor="17, 24, 39"
               containerClassName="mt-2 w-full rounded-full"
               className="w-full py-4 text-center text-xs font-black uppercase tracking-widest"
             >
@@ -219,6 +221,15 @@ export default function Index() {
                 className="text-blue-600 underline underline-offset-2 dark:text-blue-400"
               >
                 support@smartadvisor.live
+              </a>{" "}
+              or open an issue on{" "}
+              <a
+                href="https://github.com/ponderrr/smart-advisor/issues"
+                target="_blank"
+                rel="noreferrer"
+                className="text-blue-600 underline underline-offset-2 dark:text-blue-400"
+              >
+                GitHub
               </a>
               .
             </p>
@@ -286,17 +297,34 @@ export default function Index() {
       <footer className="px-6 py-14">
         <div className="mx-auto max-w-7xl">
           <div className="flex justify-center">
-            <a href="/" className="group inline-flex items-center transition-opacity hover:opacity-85">
+            <a
+              href="/"
+              onClick={(event) => {
+                if (typeof window !== "undefined" && window.location.pathname === "/") {
+                  event.preventDefault();
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }
+              }}
+              className="group inline-flex items-center transition-opacity hover:opacity-85"
+            >
               <BrandWordmark imageClassName="h-10 md:h-11" />
             </a>
           </div>
 
           <nav className="mt-8">
             <ul className="flex flex-col items-center justify-center gap-4 text-sm font-medium text-slate-700 dark:text-slate-300 md:flex-row md:gap-8">
-              {["Products", "Studio", "Clients", "Pricing", "Blog", "Privacy", "Terms"].map((item) => (
-                <li key={item}>
-                  <a href="#" className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400">
-                    {item}
+              {[
+                { label: "Products", href: "/content-selection" },
+                { label: "Studio", href: "/demo" },
+                { label: "Clients", href: "#powered-by" },
+                { label: "Pricing", href: "#faq" },
+                { label: "Blog", href: "https://github.com/ponderrr/smart-advisor" },
+                { label: "Privacy", href: "#faq" },
+                { label: "Terms", href: "#faq" },
+              ].map((item) => (
+                <li key={item.label}>
+                  <a href={item.href} className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400">
+                    {item.label}
                   </a>
                 </li>
               ))}

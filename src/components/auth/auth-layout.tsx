@@ -39,10 +39,10 @@ export const AuthLayout = ({ children, onLogoClick }: AuthLayoutProps) => {
 
 const AnimatedVisual = () => {
   return (
-    <div className="relative h-full w-full bg-gradient-to-br from-slate-900 via-indigo-950/70 to-slate-950">
-      <div className="absolute -left-16 top-8 h-56 w-56 rounded-full bg-cyan-400/30 blur-3xl" />
-      <div className="absolute bottom-4 right-0 h-72 w-72 rounded-full bg-indigo-500/35 blur-3xl" />
-      <div className="absolute left-1/3 top-1/3 h-40 w-40 rounded-full bg-blue-300/20 blur-2xl" />
+    <div className="relative h-full w-full bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+      <div className="absolute -left-16 top-8 h-56 w-56 rounded-full bg-teal-400/25 blur-3xl" />
+      <div className="absolute bottom-4 right-0 h-72 w-72 rounded-full bg-blue-500/30 blur-3xl" />
+      <div className="absolute left-1/3 top-1/3 h-40 w-40 rounded-full bg-cyan-300/20 blur-2xl" />
 
       <svg
         viewBox="0 0 700 820"

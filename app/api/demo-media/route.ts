@@ -12,10 +12,10 @@ type DemoItem = {
 
 const sanitize = (text: string) => text.replace(/<[^>]*>/g, "").trim();
 
-async function fetchBooks(query: string, apiKey: string): Promise<DemoItem[]> {
+async function fetchBooks(query: string, apiKey: string, limit: number): Promise<DemoItem[]> {
   const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(
     query,
-  )}&printType=books&orderBy=relevance&maxResults=6&key=${apiKey}`;
+  )}&printType=books&orderBy=relevance&maxResults=${Math.max(limit, 6)}&key=${apiKey}`;
   const response = await fetch(url, { cache: "no-store" });
   if (!response.ok) throw new Error(`Books error ${response.status}`);
   const data = await response.json();
@@ -36,10 +36,10 @@ async function fetchBooks(query: string, apiKey: string): Promise<DemoItem[]> {
       };
     })
     .filter((item: DemoItem | null): item is DemoItem => Boolean(item))
-    .slice(0, 4);
+    .slice(0, limit);
 }
 
-async function fetchMovies(query: string, apiKey: string): Promise<DemoItem[]> {
+async function fetchMovies(query: string, apiKey: string, limit: number): Promise<DemoItem[]> {
   const searchUrl = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(
     query,
   )}&include_adult=false&language=en-US&page=1&api_key=${apiKey}`;
@@ -74,7 +74,7 @@ async function fetchMovies(query: string, apiKey: string): Promise<DemoItem[]> {
       };
     })
     .filter((item: DemoItem | null): item is DemoItem => Boolean(item))
-    .slice(0, 4);
+    .slice(0, limit);
 }
 
 export async function GET(request: NextRequest) {
@@ -85,12 +85,13 @@ export async function GET(request: NextRequest) {
   const tmdbKey = process.env.TMDB_API_KEY;
 
   try {
+    const targetPerType = contentType === "both" ? 3 : 6;
     const tasks: Promise<DemoItem[]>[] = [];
     if (contentType === "book" || contentType === "both") {
-      if (booksKey) tasks.push(fetchBooks(query, booksKey));
+      if (booksKey) tasks.push(fetchBooks(query, booksKey, targetPerType));
     }
     if (contentType === "movie" || contentType === "both") {
-      if (tmdbKey) tasks.push(fetchMovies(query, tmdbKey));
+      if (tmdbKey) tasks.push(fetchMovies(query, tmdbKey, targetPerType));
     }
 
     const results = await Promise.allSettled(tasks);
@@ -99,16 +100,16 @@ export async function GET(request: NextRequest) {
       .map((result) => result.value);
 
     const merged = (() => {
-      if (contentType !== "both") return fulfilled.flat().slice(0, 8);
+      if (contentType !== "both") return fulfilled.flat().slice(0, 6);
       const books = fulfilled.find((set) => set[0]?.type === "book") || [];
       const movies = fulfilled.find((set) => set[0]?.type === "movie") || [];
       const interleaved: DemoItem[] = [];
-      const max = Math.max(books.length, movies.length);
+      const max = Math.max(Math.min(books.length, 3), Math.min(movies.length, 3));
       for (let i = 0; i < max; i += 1) {
         if (movies[i]) interleaved.push(movies[i]);
         if (books[i]) interleaved.push(books[i]);
       }
-      return interleaved.slice(0, 8);
+      return interleaved.slice(0, 6);
     })();
 
     return NextResponse.json({ items: merged }, { status: 200 });
