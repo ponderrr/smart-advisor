@@ -25,122 +25,13 @@ import {
 } from "@/components/ui/resizable-navbar";
 import HeroSection from "@/components/hero-section";
 import { cn } from "@/lib/utils";
-
-const howItWorksCards = [
-  {
-    title: "Share Your Taste",
-    description:
-      "Tell Smart Advisor what mood, genre, and pacing you want in under a minute.",
-    image:
-      "https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=1200&q=80",
-    hoverImage:
-      "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=1200&q=80",
-    detail:
-      "Adaptive prompts tune recommendations to your current intent, not generic history.",
-  },
-  {
-    title: "AI Refines Context",
-    description:
-      "Our engine combines your answers with trusted book and movie metadata in real time.",
-    image:
-      "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=80",
-    hoverImage:
-      "https://images.unsplash.com/photo-1616530940355-351fabd9524b?auto=format&fit=crop&w=1200&q=80",
-    detail:
-      "Context-aware ranking boosts relevance so your first picks feel immediately right.",
-  },
-  {
-    title: "Get Curated Picks",
-    description:
-      "Receive ranked books and movies with plain-language reasons for every recommendation.",
-    image:
-      "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=1200&q=80",
-    hoverImage:
-      "https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&w=1200&q=80",
-    detail:
-      "Save favorites, compare options fast, and discover your next obsession without scrolling for hours.",
-  },
-];
-
-const logoSets = [
-  [
-    { name: "Next.js", src: "https://cdn.simpleicons.org/nextdotjs/111111" },
-    { name: "Supabase", src: "https://cdn.simpleicons.org/supabase/111111" },
-    { name: "TMDB", src: "https://cdn.simpleicons.org/themoviedatabase/111111" },
-    { name: "Google Books", src: "https://cdn.simpleicons.org/googlebooks/111111" },
-  ],
-  [
-    { name: "TypeScript", src: "https://cdn.simpleicons.org/typescript/111111" },
-    { name: "React", src: "https://cdn.simpleicons.org/react/111111" },
-    { name: "Framer", src: "https://cdn.simpleicons.org/framer/111111" },
-    { name: "OpenAI", src: "https://cdn.simpleicons.org/openai/111111" },
-  ],
-  [
-    { name: "Tailwind", src: "https://cdn.simpleicons.org/tailwindcss/111111" },
-    { name: "Vercel", src: "https://cdn.simpleicons.org/vercel/111111" },
-    { name: "GitHub", src: "https://cdn.simpleicons.org/github/111111" },
-    { name: "Anthropic", src: "https://cdn.simpleicons.org/anthropic/111111" },
-  ],
-];
-
-const faqItems = [
-  {
-    question: "How does Smart Advisor personalize recommendations?",
-    answer:
-      "We combine your answers with trusted metadata from movie and book providers, then rank results to match your mood, genre preferences, and discovery intent.",
-  },
-  {
-    question: "Do I need to complete a long onboarding flow?",
-    answer:
-      "No. The flow is intentionally short. You can answer quickly and still get high-quality recommendations with clear reasoning behind each pick.",
-  },
-  {
-    question: "Can I use Smart Advisor for both movies and books?",
-    answer:
-      "Yes. You can discover movies, books, or both in the same experience, and your recommendation history is saved for future sessions.",
-  },
-  {
-    question: "Is my account required to use the app?",
-    answer:
-      "You can explore the landing page without an account, but signing in unlocks saved history, favorites, and a consistent recommendation profile.",
-  },
-  {
-    question: "What if recommendations feel off for me?",
-    answer:
-      "You can rerun the questionnaire and adjust answers. The engine is designed to quickly adapt to changing preferences and contexts.",
-  },
-];
-
-const teamMembers = [
-  {
-    quote:
-      "The question flow feels personal and fast. I got movie picks I actually wanted to watch tonight.",
-    name: "AI Engine",
-    designation: "Smart Questionnaire Layer",
-    src: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    quote:
-      "Metadata enrichment from TMDB makes recommendations feel complete, not generic placeholders.",
-    name: "TMDB API",
-    designation: "Movie Intelligence",
-    src: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    quote:
-      "Google Books data fills in strong context so users can discover their next read with confidence.",
-    name: "Google Books",
-    designation: "Book Intelligence",
-    src: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    quote:
-      "Persistent user history and favorites make the experience feel like a real product from day one.",
-    name: "Supabase",
-    designation: "Data & Auth Backbone",
-    src: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=900&q=80",
-  },
-];
+import {
+  faqItems,
+  howItWorksCards,
+  logoSets,
+  navItems,
+  teamMembers,
+} from "@/data/homepage";
 
 export default function Index() {
   const router = useRouter();
@@ -150,13 +41,6 @@ export default function Index() {
 
   const handleGetStarted = () =>
     user ? router.push("/content-selection") : router.push("/auth");
-
-  const navItems = [
-    { name: "How It Works", link: "#how-it-works" },
-    { name: "Powered By", link: "#powered-by" },
-    { name: "FAQ", link: "#faq" },
-    { name: "Our Team", link: "#meet-the-team" },
-  ];
 
   return (
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
@@ -168,12 +52,12 @@ export default function Index() {
 
           <NavItems items={navItems} className="justify-center" />
 
-          <div className="flex flex-1 items-center justify-end gap-6">
+          <div className="flex flex-1 items-center justify-end gap-6 pl-8">
             <ThemeToggle />
             <HoverBorderGradient
               onClick={handleGetStarted}
               containerClassName="rounded-full"
-              className="whitespace-nowrap bg-white px-5 py-2 text-sm font-black leading-none tracking-tighter text-black transition-colors hover:bg-indigo-600 hover:text-white dark:bg-black dark:text-white"
+              className="whitespace-nowrap bg-white px-6 py-2.5 text-base font-black leading-none tracking-tighter text-black dark:bg-black dark:text-white"
             >
               Get Started
             </HoverBorderGradient>
@@ -213,7 +97,7 @@ export default function Index() {
             <HoverBorderGradient
               onClick={handleGetStarted}
               containerClassName="mt-2 w-full rounded-full"
-              className="w-full py-4 text-center text-xs font-black uppercase tracking-widest transition-colors hover:bg-indigo-600 hover:text-white"
+              className="w-full py-4 text-center text-xs font-black uppercase tracking-widest"
             >
               Get Started
             </HoverBorderGradient>
@@ -390,7 +274,7 @@ export default function Index() {
             <p className="text-center md:text-left">© 2026 Smart Advisor. All rights reserved.</p>
             <p className="text-center text-sm text-slate-700 dark:text-slate-300">
               Built with{" "}
-              <LinkPreview url="https://react.dev" className="font-semibold text-indigo-600">
+              <LinkPreview url="https://react.dev" className="font-semibold text-slate-900 dark:text-slate-100">
                 React
               </LinkPreview>
               ,{" "}
@@ -398,7 +282,7 @@ export default function Index() {
                 Next.js
               </LinkPreview>
               , and{" "}
-              <LinkPreview url="https://www.typescriptlang.org" className="font-semibold text-blue-500">
+              <LinkPreview url="https://www.typescriptlang.org" className="font-semibold text-slate-900 dark:text-slate-100">
                 TypeScript
               </LinkPreview>
             </p>
@@ -425,7 +309,7 @@ const RotatingLogoSets = () => {
   }, []);
 
   return (
-    <div className="mx-auto max-w-5xl rounded-2xl border border-slate-200/80 bg-white/70 p-8 shadow-sm dark:border-slate-700/70 dark:bg-slate-900/60">
+    <div className="mx-auto max-w-5xl p-2">
       <AnimatePresence mode="popLayout">
         <motion.div
           key={`logo-set-${activeSet}`}
@@ -440,13 +324,19 @@ const RotatingLogoSets = () => {
               transition={{ duration: 0.45, delay: index * 0.1, ease: "easeOut" }}
               className="flex min-w-[140px] items-center justify-center"
             >
-              <img
-                src={logo.src}
-                alt={logo.name}
-                className="h-10 w-auto dark:invert"
-                loading="lazy"
-                decoding="async"
-              />
+              {logo.src ? (
+                <img
+                  src={logo.src}
+                  alt={logo.name}
+                  className="h-10 w-auto dark:invert"
+                  loading="lazy"
+                  decoding="async"
+                />
+              ) : (
+                <span className="text-sm font-bold uppercase tracking-[0.18em] text-slate-900 dark:text-slate-100">
+                  {logo.name}
+                </span>
+              )}
             </motion.div>
           ))}
         </motion.div>
