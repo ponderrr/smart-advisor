@@ -9,6 +9,7 @@ import {
   useScroll,
 } from "framer-motion";
 import React, { useState } from "react";
+import { BrandWordmark } from "@/components/brand-wordmark";
 
 interface NavbarProps {
   children: React.ReactNode;
@@ -194,11 +195,8 @@ export const MobileNavToggle = ({ isOpen, onClick }: any) => (
 );
 
 export const NavbarLogo = () => (
-  <a href="/" className="group flex items-center gap-2">
-    <div className="h-8 w-8 rounded-lg bg-indigo-600 transition-transform group-hover:rotate-12" />
-    <span className="text-xl font-black tracking-tighter uppercase dark:text-white">
-      Advisor
-    </span>
+  <a href="/" className="group inline-flex items-center transition-opacity hover:opacity-85">
+    <BrandWordmark imageClassName="h-8 md:h-9" />
   </a>
 );
 

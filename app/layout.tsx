@@ -27,8 +27,8 @@ export const metadata: Metadata = {
   },
   robots: "index, follow",
   icons: {
-    icon: "/smartadvisor.svg",
-    apple: "/smartadvisor.svg",
+    icon: "/SmartAdvisor-LM.svg",
+    apple: "/SmartAdvisor-LM.svg",
   },
 };
 

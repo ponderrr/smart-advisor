@@ -22,6 +22,7 @@ import {
   QuestionLoadingShimmer,
 } from "@/components/enhanced";
 import { useQuizStore } from '@/store/quizStore';
+import { BrandWordmark } from "@/components/brand-wordmark";
 
 const QuestionnairePage = () => {
   const router = useRouter();
@@ -135,9 +136,9 @@ const QuestionnairePage = () => {
         <header className="h-[72px] flex items-center justify-between px-6 md:px-12">
           <button
             onClick={handleLogoClick}
-            className="text-textPrimary text-xl font-medium"
+            className="inline-flex items-center"
           >
-            Smart Advisor
+            <BrandWordmark imageClassName="h-8" />
           </button>
           <div className="relative">
             <button
@@ -189,9 +190,9 @@ const QuestionnairePage = () => {
         <header className="h-[72px] flex items-center justify-between px-6 md:px-12">
           <button
             onClick={handleLogoClick}
-            className="text-textPrimary text-xl font-medium"
+            className="inline-flex items-center"
           >
-            Smart Advisor
+            <BrandWordmark imageClassName="h-8" />
           </button>
           <div className="relative">
             <button
@@ -261,9 +262,9 @@ const QuestionnairePage = () => {
       <header className="h-[72px] flex items-center justify-between px-6 md:px-12">
         <button
           onClick={handleLogoClick}
-          className="text-textPrimary text-xl font-medium"
+          className="inline-flex items-center"
         >
-          Smart Advisor
+          <BrandWordmark imageClassName="h-8" />
         </button>
         <div className="relative">
           <button

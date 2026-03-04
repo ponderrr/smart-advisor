@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { Film, Book, Target, User, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuizStore } from '@/store/quizStore';
+import { BrandWordmark } from "@/components/brand-wordmark";
 
 type ContentType = "movie" | "book" | "both" | null;
 
@@ -27,21 +28,18 @@ const SelectionCard: React.FC<SelectionCardProps> = ({
   return (
     <div
       onClick={() => onClick(id)}
-      className={`selection-card rounded-2xl p-10 h-[280px] flex flex-col items-center cursor-pointer transition-all duration-200 border-2 ${
-        isSelected
+      className={`selection-card rounded-2xl p-10 h-[280px] flex flex-col items-center cursor-pointer transition-all duration-200 border-2 ${isSelected
           ? "bg-indigo-900 border-appAccent selected"
           : "bg-appSecondary border-gray-700 hover:bg-gray-600 hover:border-appAccent"
-      }`}
+        }`}
     >
       <div
-        className={`w-16 h-16 rounded-full flex items-center justify-center mb-6 transition-all duration-200 ${
-          isSelected ? "bg-appAccent" : "bg-gray-700"
-        }`}
+        className={`w-16 h-16 rounded-full flex items-center justify-center mb-6 transition-all duration-200 ${isSelected ? "bg-appAccent" : "bg-gray-700"
+          }`}
       >
         <div
-          className={`text-2xl transition-colors duration-200 ${
-            isSelected ? "text-white" : "text-textSecondary"
-          }`}
+          className={`text-2xl transition-colors duration-200 ${isSelected ? "text-white" : "text-textSecondary"
+            }`}
         >
           {icon}
         </div>
@@ -123,9 +121,9 @@ const ContentSelectionPage = () => {
       <header className="h-[72px] flex items-center justify-between px-6 md:px-12 bg-appPrimary">
         <button
           onClick={handleLogoClick}
-          className="text-textPrimary text-xl font-medium cursor-pointer hover:opacity-80 transition-opacity duration-200"
+          className="inline-flex items-center cursor-pointer hover:opacity-80 transition-opacity duration-200"
         >
-          Smart Advisor
+          <BrandWordmark imageClassName="h-8" />
         </button>
         <div className="relative">
           <button
@@ -205,11 +203,10 @@ const ContentSelectionPage = () => {
         <button
           onClick={handleContinue}
           disabled={!selectedType || isLoading}
-          className={`font-semibold text-base py-4 px-12 rounded-lg transition-all duration-200 flex items-center gap-2 animate-in fade-in duration-700 delay-1200 ${
-            selectedType && !isLoading
+          className={`font-semibold text-base py-4 px-12 rounded-lg transition-all duration-200 flex items-center gap-2 animate-in fade-in duration-700 delay-1200 ${selectedType && !isLoading
               ? "cta-glow bg-appAccent text-white hover:bg-opacity-90 cursor-pointer"
               : "bg-gray-700 text-textTertiary cursor-not-allowed"
-          }`}
+            }`}
         >
           {isLoading && <div className="enhanced-spinner w-4 h-4"></div>}
           {isLoading ? "Continue..." : "Continue"}

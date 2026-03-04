@@ -1,6 +1,7 @@
 "use client";
 
 import { ThemeToggle } from "@/components/theme-toggle";
+import { BrandWordmark } from "@/components/brand-wordmark";
 import { motion } from "framer-motion";
 import React from "react";
 
@@ -17,13 +18,10 @@ export const AuthLayout = ({ children, onLogoClick }: AuthLayoutProps) => {
           <div className="mb-7 flex items-center justify-between">
             <button
               onClick={onLogoClick}
-              className="inline-flex items-center gap-2 rounded-full px-1 py-1 transition-opacity hover:opacity-80"
+              className="inline-flex items-center rounded-full px-1 py-1 transition-opacity hover:opacity-80"
               aria-label="Go to home"
             >
-              <div className="h-8 w-8 rounded-lg bg-indigo-600" />
-              <span className="text-xl font-black tracking-tight text-slate-900 dark:text-slate-100">
-                Smart Advisor
-              </span>
+              <BrandWordmark imageClassName="h-8 md:h-9" />
             </button>
             <ThemeToggle />
           </div>

@@ -9,36 +9,6 @@ type DemoBook = {
   infoLink: string;
 };
 
-const FALLBACK_BOOKS: DemoBook[] = [
-  {
-    id: "fallback-1",
-    title: "Project Hail Mary",
-    authors: "Andy Weir",
-    description:
-      "A science-driven survival story with humor, pace, and high-stakes problem solving.",
-    cover: "https://books.google.com/books/content?id=ZkAqEAAAQBAJ&printsec=frontcover&img=1&zoom=2&source=gbs_api",
-    infoLink: "https://books.google.com",
-  },
-  {
-    id: "fallback-2",
-    title: "The Night Circus",
-    authors: "Erin Morgenstern",
-    description:
-      "A dreamy, atmospheric fantasy centered on rivalry, magic, and wonder.",
-    cover: "https://books.google.com/books/content?id=7Qf6mAEACAAJ&printsec=frontcover&img=1&zoom=2&source=gbs_api",
-    infoLink: "https://books.google.com",
-  },
-  {
-    id: "fallback-3",
-    title: "The Silent Patient",
-    authors: "Alex Michaelides",
-    description:
-      "A psychological thriller with a tight structure and escalating tension.",
-    cover: "https://books.google.com/books/content?id=2ONrDwAAQBAJ&printsec=frontcover&img=1&zoom=2&source=gbs_api",
-    infoLink: "https://books.google.com",
-  },
-];
-
 const normalizeDescription = (description: string) => {
   return description.replace(/<[^>]*>/g, "").trim();
 };
@@ -48,7 +18,7 @@ export async function GET(request: NextRequest) {
   const apiKey = process.env.GOOGLE_BOOKS_API_KEY;
 
   if (!apiKey) {
-    return NextResponse.json({ books: FALLBACK_BOOKS }, { status: 200 });
+    return NextResponse.json({ books: [] }, { status: 200 });
   }
 
   try {
@@ -84,12 +54,9 @@ export async function GET(request: NextRequest) {
       .filter((book: DemoBook | null): book is DemoBook => Boolean(book))
       .slice(0, 6);
 
-    return NextResponse.json(
-      { books: books.length > 0 ? books : FALLBACK_BOOKS },
-      { status: 200 },
-    );
+    return NextResponse.json({ books }, { status: 200 });
   } catch (error) {
     console.error("Demo books API failed:", error);
-    return NextResponse.json({ books: FALLBACK_BOOKS }, { status: 200 });
+    return NextResponse.json({ books: [] }, { status: 200 });
   }
 }

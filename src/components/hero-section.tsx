@@ -13,25 +13,10 @@ type HeroMediaResponse = {
   books: string[];
   movies: string[];
   status: {
-    books: "ok" | "fallback";
-    movies: "ok" | "fallback";
+    books: "ok" | "error";
+    movies: "ok" | "error";
   };
 };
-
-const FALLBACK_IMAGES = [
-  "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1476275466078-4007374efbbe?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1513001900722-370f803f498d?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1489599735734-79b4eece7e5f?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1542204165-65bf26472b9b?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1535398089889-dd807df1dfaa?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1528459105426-b9548367069b?auto=format&fit=crop&w=900&q=80",
-];
 
 const shuffle = <T,>(items: T[]) => {
   const arr = [...items];
@@ -42,10 +27,12 @@ const shuffle = <T,>(items: T[]) => {
   return arr;
 };
 
+const uniqueUrls = (items: string[]) => Array.from(new Set(items.filter(Boolean)));
+
 const HeroSection = () => {
   const router = useRouter();
   const { user } = useAuth();
-  const [heroImages, setHeroImages] = useState<string[]>(FALLBACK_IMAGES);
+  const [heroImages, setHeroImages] = useState<string[]>([]);
 
   const words = useMemo(
     () => ["Movie", "Book", "Story", "Adventure", "Classic"],
@@ -67,10 +54,10 @@ const HeroSection = () => {
         }
 
         const data: HeroMediaResponse = await response.json();
-        const mixed = shuffle([...(data.books || []), ...(data.movies || [])]);
+        const mixed = uniqueUrls(shuffle([...(data.books || []), ...(data.movies || [])]));
 
         if (active && mixed.length > 0) {
-          const nextImages = mixed.slice(0, 12);
+          const nextImages = mixed.slice(0, 14);
           await Promise.allSettled(
             nextImages.map(
               (src) =>
@@ -88,9 +75,6 @@ const HeroSection = () => {
         }
       } catch (error) {
         console.error("Hero media fetch failed:", error);
-        if (active) {
-          setHeroImages(FALLBACK_IMAGES);
-        }
       }
     };
 

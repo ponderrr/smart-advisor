@@ -14,6 +14,7 @@ import {
 } from "@/components/enhanced";
 import { SafeLocalStorage } from "@/utils/localStorage";
 import { useQuizStore } from '@/store/quizStore';
+import { BrandWordmark } from "@/components/brand-wordmark";
 
 // Utility function to safely serialize data, handling circular references and non-serializable values
 const safeStringify = (obj: unknown): string => {
@@ -372,9 +373,9 @@ const ResultsPage = () => {
         <header className="h-[72px] flex items-center justify-between px-6 md:px-12 bg-appPrimary">
           <button
             onClick={handleLogoClick}
-            className="text-textPrimary text-xl font-medium cursor-pointer hover:opacity-80 transition-opacity duration-200"
+            className="inline-flex items-center cursor-pointer hover:opacity-80 transition-opacity duration-200"
           >
-            Smart Advisor
+            <BrandWordmark imageClassName="h-8" />
           </button>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-appAccent rounded-full flex items-center justify-center">
@@ -429,9 +430,9 @@ const ResultsPage = () => {
         <header className="h-[72px] flex items-center justify-between px-6 md:px-12 bg-appPrimary">
           <button
             onClick={handleLogoClick}
-            className="text-textPrimary text-xl font-medium cursor-pointer hover:opacity-80 transition-opacity duration-200"
+            className="inline-flex items-center cursor-pointer hover:opacity-80 transition-opacity duration-200"
           >
-            Smart Advisor
+            <BrandWordmark imageClassName="h-8" />
           </button>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-appAccent rounded-full flex items-center justify-center">
@@ -460,9 +461,9 @@ const ResultsPage = () => {
         <header className="h-[72px] flex items-center justify-between px-6 md:px-12 bg-appPrimary">
           <button
             onClick={handleLogoClick}
-            className="text-textPrimary text-xl font-medium cursor-pointer hover:opacity-80 transition-opacity duration-200"
+            className="inline-flex items-center cursor-pointer hover:opacity-80 transition-opacity duration-200"
           >
-            Smart Advisor
+            <BrandWordmark imageClassName="h-8" />
           </button>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-appAccent rounded-full flex items-center justify-center">
@@ -510,9 +511,9 @@ const ResultsPage = () => {
       <header className="h-[72px] flex items-center justify-between px-6 md:px-12 bg-appPrimary">
         <button
           onClick={handleLogoClick}
-          className="text-textPrimary text-xl font-medium cursor-pointer hover:opacity-80 transition-opacity duration-200"
+          className="inline-flex items-center cursor-pointer hover:opacity-80 transition-opacity duration-200"
         >
-          Smart Advisor
+          <BrandWordmark imageClassName="h-8" />
         </button>
         <div className="relative">
           <button
@@ -591,9 +592,8 @@ const ResultsPage = () => {
                   />
                 ) : null}
                 <div
-                  className={`w-full h-full flex items-center justify-center text-textTertiary ${
-                    rec.poster_url ? "hidden" : ""
-                  }`}
+                  className={`w-full h-full flex items-center justify-center text-textTertiary ${rec.poster_url ? "hidden" : ""
+                    }`}
                 >
                   No Image
                 </div>
@@ -624,11 +624,10 @@ const ResultsPage = () => {
                   </div>
                   <button
                     onClick={() => handleToggleFavorite(rec.id)}
-                    className={`favorite-button p-3 rounded-full transition-colors duration-200 ml-4 flex-shrink-0 ${
-                      rec.is_favorited
+                    className={`favorite-button p-3 rounded-full transition-colors duration-200 ml-4 flex-shrink-0 ${rec.is_favorited
                         ? "bg-red-500 text-white favorited"
                         : "bg-gray-700 text-textSecondary hover:text-red-500"
-                    }`}
+                      }`}
                   >
                     <Heart
                       size={24}
@@ -655,9 +654,8 @@ const ResultsPage = () => {
                         key={g}
                         className="px-4 py-2 bg-appAccent text-white text-sm sm:text-base rounded-full animate-in fade-in duration-500"
                         style={{
-                          animationDelay: `${
-                            800 + index * 200 + genreIndex * 100
-                          }ms`,
+                          animationDelay: `${800 + index * 200 + genreIndex * 100
+                            }ms`,
                         }}
                       >
                         {g}
