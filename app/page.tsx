@@ -119,7 +119,7 @@ export default function Index() {
 
       <section id="how-it-works" className="scroll-mt-32 px-6 py-24 md:py-32">
         <div className="mx-auto max-w-6xl">
-          <div className="mb-14 text-center md:mb-18">
+          <div className="mb-12 text-center md:mb-16">
             <h2 className="mb-4 mt-5 text-4xl font-black tracking-tighter md:text-5xl">
               How It Works
             </h2>
@@ -128,38 +128,43 @@ export default function Index() {
             </p>
           </div>
 
-          <div className="relative grid grid-cols-1 items-stretch gap-7 lg:grid-cols-3">
-            <div className="pointer-events-none absolute left-1/2 top-9 hidden h-[2px] w-[65%] -translate-x-1/2 bg-gradient-to-r from-transparent via-slate-300 to-transparent dark:via-slate-700 lg:block" />
+          <div className="relative grid grid-cols-1 gap-6 md:grid-cols-3">
             {howItWorksCards.map((card, idx) => (
               <article
                 key={card.title}
                 className={cn(
-                  "group relative h-[27rem] w-full overflow-hidden rounded-3xl border border-slate-200/70 p-5 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-xl",
-                  "dark:border-slate-700/70",
+                  "group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 p-6 shadow-sm backdrop-blur-md transition-all duration-500 hover:-translate-y-1 hover:shadow-xl",
+                  "dark:border-slate-700/70 dark:bg-slate-900/65",
                 )}
               >
-                <div
-                  className="absolute inset-0 bg-cover bg-center transition-opacity duration-500"
-                  style={{ backgroundImage: `url(${card.image})` }}
-                />
-                <div
-                  className="absolute inset-0 bg-cover bg-center opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-                  style={{ backgroundImage: `url(${card.hoverImage})` }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
-                <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/25 to-cyan-400/20 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-
-                <div className="relative z-10 flex h-full flex-col justify-end">
-                  <span className="mb-4 inline-flex w-fit rounded-full bg-white/90 px-3 py-1 text-xs font-black tracking-[0.16em] text-slate-900 shadow-sm">
-                    STEP 0{idx + 1}
+                <div className="mb-4 flex items-center gap-3">
+                  <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-900 text-sm font-black text-white dark:bg-slate-100 dark:text-slate-900">
+                    {idx + 1}
                   </span>
-                  <h3 className="text-2xl font-black tracking-tight text-white md:text-[1.75rem]">
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                    Step 0{idx + 1}
+                  </p>
+                </div>
+
+                <div className="relative mb-5 overflow-hidden rounded-2xl">
+                  <img
+                    src={card.image}
+                    alt={card.title}
+                    className="h-40 w-full object-cover transition-all duration-500 group-hover:scale-105"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+                </div>
+
+                <div className="relative z-10">
+                  <h3 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100">
                     {card.title}
                   </h3>
-                  <p className="mt-3 text-sm leading-relaxed text-slate-100 md:text-base">
+                  <p className="mt-3 text-sm leading-relaxed text-slate-700 dark:text-slate-300 md:text-base">
                     {card.description}
                   </p>
-                  <p className="mt-3 text-xs leading-relaxed text-slate-200/95 md:text-sm">
+                  <p className="mt-3 text-xs leading-relaxed text-slate-600 dark:text-slate-400 md:text-sm">
                     {card.detail}
                   </p>
                 </div>
@@ -172,7 +177,7 @@ export default function Index() {
       <section id="powered-by" className="scroll-mt-32 px-6 py-24 md:py-32">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12 text-center md:mb-16">
-            <h2 className="mb-4 mt-5 inline-flex items-center rounded-full border border-slate-300/80 bg-white px-6 py-2 text-2xl font-black tracking-tight text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 md:text-3xl">
+            <h2 className="mb-4 mt-5 text-4xl font-black tracking-tighter text-slate-900 dark:text-slate-100 md:text-5xl">
               Powered By
             </h2>
             <p className="mx-auto max-w-3xl text-base text-slate-600 dark:text-slate-400 md:whitespace-nowrap md:text-lg">

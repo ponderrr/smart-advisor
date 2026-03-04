@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { IconArrowLeft, IconExternalLink } from "@tabler/icons-react";
+import { IconArrowLeft } from "@tabler/icons-react";
 
 type DemoBook = {
   id: string;
@@ -117,44 +117,74 @@ export default function DemoResultsPage() {
         </div>
 
         {loading ? (
-          <ShimmerLoader />
+          <div className="space-y-5">
+            <div className="rounded-2xl border border-slate-200/80 bg-white/80 p-5 dark:border-slate-700 dark:bg-slate-900/60">
+              <div className="flex items-center gap-3">
+                <motion.div
+                  className="h-3 w-3 rounded-full bg-indigo-500"
+                  animate={{ scale: [1, 1.35, 1], opacity: [0.6, 1, 0.6] }}
+                  transition={{ duration: 0.9, repeat: Infinity }}
+                />
+                <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
+                  Generating your personalized book results...
+                </p>
+              </div>
+            </div>
+            <ShimmerLoader />
+          </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2">
-            {books.map((book, idx) => (
-              <motion.article
-                key={book.id}
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.28, delay: idx * 0.06 }}
-                className="rounded-2xl border border-slate-200/80 bg-white/85 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/65"
-              >
-                <div className="flex gap-4">
-                  <img
-                    src={book.cover}
-                    alt={book.title}
-                    className="h-28 w-20 rounded-lg object-cover ring-1 ring-black/10 dark:ring-white/10"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <h2 className="line-clamp-2 text-lg font-black tracking-tight">{book.title}</h2>
-                    <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
-                      {book.authors}
-                    </p>
-                    <p className="mt-2 line-clamp-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                      {book.description}
-                    </p>
-                    <a
-                      href={book.infoLink}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
-                    >
-                      View details
-                      <IconExternalLink className="h-4 w-4" />
-                    </a>
+          <div className="space-y-8">
+            <div className="grid gap-4 md:grid-cols-2">
+              {books.map((book, idx) => (
+                <motion.article
+                  key={book.id}
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.28, delay: idx * 0.06 }}
+                  className="rounded-2xl border border-slate-200/80 bg-white/85 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/65"
+                >
+                  <div className="flex gap-4">
+                    <img
+                      src={book.cover}
+                      alt={book.title}
+                      className="h-28 w-20 rounded-lg object-cover ring-1 ring-black/10 dark:ring-white/10"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <h2 className="line-clamp-2 text-lg font-black tracking-tight">{book.title}</h2>
+                      <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
+                        {book.authors}
+                      </p>
+                      <p className="mt-2 line-clamp-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                        {book.description}
+                      </p>
+                      <a
+                        href={book.infoLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-3 inline-flex items-center text-sm font-bold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+                      >
+                        View details
+                      </a>
+                    </div>
                   </div>
-                </div>
-              </motion.article>
-            ))}
+                </motion.article>
+              ))}
+            </div>
+
+            <div className="rounded-3xl border border-indigo-200/70 bg-gradient-to-r from-indigo-50 to-violet-50 p-6 dark:border-indigo-700/40 dark:from-slate-900 dark:to-slate-900">
+              <h3 className="text-xl font-black tracking-tight text-slate-900 dark:text-slate-100">
+                Save your picks and get better recommendations
+              </h3>
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                Create a free account to keep your history, rerun recommendations, and refine results over time.
+              </p>
+              <button
+                onClick={() => router.push("/auth")}
+                className="mt-4 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-black text-white transition hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
+              >
+                Sign up to continue
+              </button>
+            </div>
           </div>
         )}
       </div>
