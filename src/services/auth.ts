@@ -220,6 +220,30 @@ class AuthService {
     }
   }
 
+  async signInWithGoogle(): Promise<{ error: string | null }> {
+    try {
+      const redirectTo =
+        typeof window !== "undefined"
+          ? `${window.location.origin}/auth/callback`
+          : "https://smartadvisor.live/auth/callback";
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo },
+      });
+
+      if (error) {
+        console.error("Google sign-in error:", error);
+        return { error: error.message };
+      }
+
+      return { error: null };
+    } catch (err) {
+      console.error("Unexpected error during Google sign-in:", err);
+      return { error: "Unable to continue with Google sign-in." };
+    }
+  }
+
   async resetPassword(email: string): Promise<{ error: string | null }> {
     try {
       if (!email) {

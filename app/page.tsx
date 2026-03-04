@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   IconBrandGithub,
-  IconBrandInstagram,
-  IconBrandLinkedin,
   IconChevronDown,
 } from "@tabler/icons-react";
 
@@ -64,44 +62,26 @@ const howItWorksCards = [
   },
 ];
 
-const poweredCards = [
-  {
-    title: "AI Conversation Engine",
-    description:
-      "Live recommendation dialogue inspired by your current intent and feedback.",
-    skeleton: "chat",
-  },
-  {
-    title: "Poster + Cover Review",
-    description:
-      "Side-by-side media previews with focus indicators for faster decisions.",
-    skeleton: "video",
-  },
-  {
-    title: "Community Taste Clusters",
-    description:
-      "Floating profile groups surface what similar users are loving right now.",
-    skeleton: "avatars",
-  },
-  {
-    title: "Recommendation Mentor Loop",
-    description:
-      "Guided tips and explainers that move continuously with your session context.",
-    skeleton: "marquee",
-  },
-  {
-    title: "Metadata Sync Layer",
-    description:
-      "Realtime enrichment from TMDB and Google Books keeps picks sharp.",
-    skeleton: "chat",
-  },
-  {
-    title: "Collaborative Ranking",
-    description:
-      "Signals from user actions continuously rebalance what appears first.",
-    skeleton: "video",
-  },
-] as const;
+const logoSets = [
+  [
+    { name: "Next.js", src: "https://cdn.simpleicons.org/nextdotjs/111111" },
+    { name: "Supabase", src: "https://cdn.simpleicons.org/supabase/111111" },
+    { name: "TMDB", src: "https://cdn.simpleicons.org/themoviedatabase/111111" },
+    { name: "Google Books", src: "https://cdn.simpleicons.org/googlebooks/111111" },
+  ],
+  [
+    { name: "TypeScript", src: "https://cdn.simpleicons.org/typescript/111111" },
+    { name: "React", src: "https://cdn.simpleicons.org/react/111111" },
+    { name: "Framer", src: "https://cdn.simpleicons.org/framer/111111" },
+    { name: "OpenAI", src: "https://cdn.simpleicons.org/openai/111111" },
+  ],
+  [
+    { name: "Tailwind", src: "https://cdn.simpleicons.org/tailwindcss/111111" },
+    { name: "Vercel", src: "https://cdn.simpleicons.org/vercel/111111" },
+    { name: "GitHub", src: "https://cdn.simpleicons.org/github/111111" },
+    { name: "Anthropic", src: "https://cdn.simpleicons.org/anthropic/111111" },
+  ],
+];
 
 const faqItems = [
   {
@@ -193,7 +173,7 @@ export default function Index() {
             <HoverBorderGradient
               onClick={handleGetStarted}
               containerClassName="rounded-full"
-              className="bg-white px-6 py-2 text-sm font-black tracking-tighter text-black transition-colors hover:bg-indigo-600 hover:text-white dark:bg-black dark:text-white"
+              className="whitespace-nowrap bg-white px-5 py-2 text-sm font-black leading-none tracking-tighter text-black transition-colors hover:bg-indigo-600 hover:text-white dark:bg-black dark:text-white"
             >
               Get Started
             </HoverBorderGradient>
@@ -297,35 +277,14 @@ export default function Index() {
       <section id="powered-by" className="scroll-mt-32 px-6 py-24 md:py-32">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12 text-center md:mb-16">
-            <h2 className="mb-4 mt-5 text-4xl font-black tracking-tighter md:text-5xl">
+            <h2 className="mb-4 mt-5 bg-gradient-to-r from-indigo-500 via-violet-500 to-cyan-500 bg-clip-text text-4xl font-black tracking-tighter text-transparent md:text-5xl">
               Powered By
             </h2>
             <p className="mx-auto max-w-2xl text-base text-slate-600 dark:text-slate-400 md:text-lg">
-              Interactive infrastructure previews of the systems that keep Smart Advisor fast and personalized.
+              Trusted tools and APIs that keep Smart Advisor fast, reliable, and context aware.
             </p>
           </div>
-
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {poweredCards.map((card) => (
-              <article
-                key={`${card.title}-${card.skeleton}`}
-                className="rounded-2xl border border-slate-200/80 bg-white/80 p-5 shadow-sm dark:border-slate-700/70 dark:bg-slate-900/70"
-              >
-                <div className="relative h-52 overflow-hidden rounded-xl bg-slate-100/80 p-3 [mask-image:linear-gradient(to_bottom,transparent,black_14%,black_86%,transparent)] dark:bg-slate-800/70">
-                  {card.skeleton === "chat" && <ChatSkeleton />}
-                  {card.skeleton === "video" && <VideoSkeleton />}
-                  {card.skeleton === "avatars" && <AvatarDriftSkeleton />}
-                  {card.skeleton === "marquee" && <MarqueeSkeleton />}
-                </div>
-                <h3 className="mt-5 text-lg font-black tracking-tight text-slate-900 dark:text-slate-100">
-                  {card.title}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                  {card.description}
-                </p>
-              </article>
-            ))}
-          </div>
+          <RotatingLogoSets />
         </div>
       </section>
 
@@ -427,31 +386,25 @@ export default function Index() {
             </ul>
           </nav>
 
-          <div className="mt-10 flex flex-col items-center justify-between gap-5 text-xs text-slate-500 dark:text-slate-400 md:flex-row">
-            <p>© 2026 Smart Advisor. All rights reserved.</p>
-            <p className="text-sm text-slate-700 dark:text-slate-300">
+          <div className="mt-10 grid grid-cols-1 items-center gap-5 text-xs text-slate-500 dark:text-slate-400 md:grid-cols-3">
+            <p className="text-center md:text-left">© 2026 Smart Advisor. All rights reserved.</p>
+            <p className="text-center text-sm text-slate-700 dark:text-slate-300">
               Built with{" "}
-              <LinkPreview url="#" className="font-semibold text-indigo-600">
+              <LinkPreview url="https://react.dev" className="font-semibold text-indigo-600">
                 React
               </LinkPreview>
               ,{" "}
-              <LinkPreview url="#" className="font-semibold text-slate-900 dark:text-white">
+              <LinkPreview url="https://nextjs.org" className="font-semibold text-slate-900 dark:text-white">
                 Next.js
               </LinkPreview>
               , and{" "}
-              <LinkPreview url="#" className="font-semibold text-blue-500">
+              <LinkPreview url="https://www.typescriptlang.org" className="font-semibold text-blue-500">
                 TypeScript
               </LinkPreview>
             </p>
-            <div className="flex items-center gap-4">
-              <a href="#" aria-label="LinkedIn" className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400">
-                <IconBrandLinkedin className="h-5 w-5" />
-              </a>
+            <div className="flex items-center justify-center gap-4 md:justify-end">
               <a href="#" aria-label="GitHub" className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400">
                 <IconBrandGithub className="h-5 w-5" />
-              </a>
-              <a href="#" aria-label="Instagram" className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400">
-                <IconBrandInstagram className="h-5 w-5" />
               </a>
             </div>
           </div>
@@ -461,123 +414,43 @@ export default function Index() {
   );
 }
 
-const ChatSkeleton = () => {
-  const messages = ["Need a sci-fi thriller", "Try Arrival + Dune", "Also add a mind-bender", "Perfect, saved"];
-
-  return (
-    <div className="flex h-full flex-col gap-2">
-      {messages.map((message, index) => (
-        <motion.div
-          key={message}
-          initial={{ opacity: 0, x: index % 2 === 0 ? -12 : 12 }}
-          animate={{ opacity: [0.45, 1, 0.45], x: 0 }}
-          transition={{
-            delay: index * 0.22,
-            duration: 2.2,
-            repeat: Infinity,
-            repeatDelay: 0.2,
-          }}
-          className={cn(
-            "max-w-[82%] rounded-lg px-3 py-2 text-xs",
-            index % 2 === 0
-              ? "self-start bg-white text-slate-700 dark:bg-slate-700 dark:text-slate-100"
-              : "self-end bg-indigo-600 text-white",
-          )}
-        >
-          {message}
-        </motion.div>
-      ))}
-    </div>
-  );
-};
-
-const VideoSkeleton = () => {
-  const tiles = [0, 1, 2, 3];
-  return (
-    <div className="grid h-full grid-cols-2 gap-2">
-      {tiles.map((tile) => (
-        <motion.div
-          key={tile}
-          initial={{ opacity: 0.45, scale: 0.96 }}
-          animate={{ opacity: [0.45, 0.95, 0.45], scale: [0.96, 1, 0.96] }}
-          transition={{ duration: 2.4, repeat: Infinity, delay: tile * 0.12 }}
-          className="relative overflow-hidden rounded-lg bg-slate-200 dark:bg-slate-700"
-        >
-          <div className="absolute left-2 top-2 h-2.5 w-2.5 rounded-full bg-emerald-400" />
-          <div className="absolute bottom-2 left-2 right-2 h-1.5 rounded bg-slate-300 dark:bg-slate-600" />
-        </motion.div>
-      ))}
-    </div>
-  );
-};
-
-const AvatarDriftSkeleton = () => {
-  const avatars = [
-    "AB",
-    "CD",
-    "EF",
-    "GH",
-    "IJ",
-    "KL",
-    "MN",
-    "OP",
-  ];
-  const [active, setActive] = useState(0);
+const RotatingLogoSets = () => {
+  const [activeSet, setActiveSet] = useState(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setActive((prev) => (prev + 1) % avatars.length);
+      setActiveSet((prev) => (prev + 1) % logoSets.length);
     }, 3000);
     return () => clearInterval(timer);
-  }, [avatars.length]);
+  }, []);
 
   return (
-    <div className="relative h-full w-full">
-      {avatars.map((avatar, index) => {
-        const angle = (index / avatars.length) * Math.PI * 2;
-        const x = 42 + Math.cos(angle) * 32;
-        const y = 42 + Math.sin(angle) * 30;
-
-        return (
-          <motion.div
-            key={avatar}
-            className={cn(
-              "absolute flex h-10 w-10 items-center justify-center rounded-full text-[10px] font-bold",
-              active === index
-                ? "bg-indigo-600 text-white"
-                : "bg-white text-slate-700 dark:bg-slate-700 dark:text-slate-100",
-            )}
-            style={{ left: `${x}%`, top: `${y}%` }}
-            animate={{ y: [0, -6, 0], x: [0, 3, 0] }}
-            transition={{ duration: 4 + (index % 3), repeat: Infinity, ease: "easeInOut" }}
-          >
-            {avatar}
-          </motion.div>
-        );
-      })}
-    </div>
-  );
-};
-
-const MarqueeSkeleton = () => {
-  const mentors = ["Taste Coach", "Genre Scout", "Mood Curator", "Story Guide", "Pacing Mentor"];
-
-  return (
-    <div className="relative h-full overflow-hidden">
-      <motion.div
-        className="absolute inset-y-0 flex items-center gap-3"
-        animate={{ x: ["0%", "-50%"] }}
-        transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-      >
-        {[...mentors, ...mentors].map((mentor, index) => (
-          <div
-            key={`${mentor}-${index}`}
-            className="whitespace-nowrap rounded-lg bg-white px-3 py-2 text-xs font-semibold text-slate-700 dark:bg-slate-700 dark:text-slate-100"
-          >
-            {mentor}
-          </div>
-        ))}
-      </motion.div>
+    <div className="mx-auto max-w-5xl rounded-2xl border border-slate-200/80 bg-white/70 p-8 shadow-sm dark:border-slate-700/70 dark:bg-slate-900/60">
+      <AnimatePresence mode="popLayout">
+        <motion.div
+          key={`logo-set-${activeSet}`}
+          className="flex flex-wrap items-center justify-center gap-8"
+        >
+          {logoSets[activeSet].map((logo, index) => (
+            <motion.div
+              key={logo.name}
+              initial={{ y: 40, opacity: 0, filter: "blur(10px)" }}
+              animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+              exit={{ y: -40, opacity: 0, filter: "blur(10px)" }}
+              transition={{ duration: 0.45, delay: index * 0.1, ease: "easeOut" }}
+              className="flex min-w-[140px] items-center justify-center"
+            >
+              <img
+                src={logo.src}
+                alt={logo.name}
+                className="h-10 w-auto dark:invert"
+                loading="lazy"
+                decoding="async"
+              />
+            </motion.div>
+          ))}
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 };

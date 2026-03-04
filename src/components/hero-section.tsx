@@ -98,7 +98,7 @@ const HeroSection = () => {
     user ? router.push("/content-selection") : router.push("/auth");
 
   return (
-    <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
+    <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-950">
       <ParallaxHeroImages images={heroImages} isLoading={isLoadingImages} />
 
       <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center gap-8 px-4 text-center">

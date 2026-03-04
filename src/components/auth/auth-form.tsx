@@ -3,8 +3,6 @@
 import * as Label from "@radix-ui/react-label";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  IconBrandApple,
-  IconBrandFacebook,
   IconBrandGoogle,
   IconEye,
   IconEyeOff,
@@ -21,6 +19,7 @@ interface AuthFormProps {
   authError?: string | null;
   onClearError: () => void;
   onSignIn: (email: string, password: string) => Promise<{ error: string | null }>;
+  onGoogleSignIn: () => Promise<{ error: string | null }>;
   onSignUp: (
     email: string,
     password: string,
@@ -30,17 +29,12 @@ interface AuthFormProps {
   onResetPassword: (email: string) => Promise<{ error: string | null }>;
 }
 
-const socialButtons = [
-  { label: "Google", icon: IconBrandGoogle },
-  { label: "Facebook", icon: IconBrandFacebook },
-  { label: "Apple", icon: IconBrandApple },
-];
-
 export const AuthForm = ({
   loading,
   authError,
   onClearError,
   onSignIn,
+  onGoogleSignIn,
   onSignUp,
   onResetPassword,
 }: AuthFormProps) => {
@@ -329,19 +323,22 @@ export const AuthForm = ({
               </span>
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
-              {socialButtons.map(({ label, icon: Icon }) => (
-                <button
-                  key={label}
-                  type="button"
-                  className="shadow-input inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium text-slate-700 transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-                  aria-label={`Continue with ${label}`}
-                >
-                  <Icon className="h-4 w-4" />
-                  <span className="hidden lg:inline">{label}</span>
-                </button>
-              ))}
-            </div>
+            <button
+              type="button"
+              onClick={async () => {
+                resetFeedback();
+                const result = await onGoogleSignIn();
+                if (result.error) {
+                  setErrors({ general: result.error });
+                }
+              }}
+              className="shadow-input inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+              aria-label="Continue with Google"
+              disabled={disabled}
+            >
+              <IconBrandGoogle className="h-4 w-4" />
+              <span>Continue with Google</span>
+            </button>
           </>
         )}
 

@@ -11,7 +11,7 @@ interface AuthLayoutProps {
 
 export const AuthLayout = ({ children, onLogoClick }: AuthLayoutProps) => {
   return (
-    <main className="relative flex min-h-screen items-center overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100 px-4 py-4 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 md:px-8 md:py-8">
+    <main className="relative flex min-h-screen items-center overflow-hidden bg-slate-50 px-4 py-4 dark:bg-slate-950 md:px-8 md:py-8">
       <div className="mx-auto grid w-full max-w-6xl grid-cols-1 overflow-hidden rounded-3xl border border-slate-200/70 bg-white/80 shadow-[0_25px_80px_-40px_rgba(15,23,42,0.35)] backdrop-blur-xl dark:border-slate-700/60 dark:bg-slate-900/70 md:grid-cols-2">
         <section className="relative flex min-h-[540px] flex-col p-5 sm:p-7 md:min-h-[620px] md:p-8">
           <div className="mb-7 flex items-center justify-between">
