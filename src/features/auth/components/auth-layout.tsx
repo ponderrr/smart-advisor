@@ -91,88 +91,80 @@ const AnimatedVisual = () => {
             animate={{ y: [0, -3, 0], opacity: [0.9, 1, 0.9] }}
             transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
           >
-            <div className="mb-4 flex items-center justify-between">
-              <motion.div
-                className="h-2.5 w-24 rounded-full bg-slate-300 dark:bg-slate-700"
-                animate={{ opacity: [0.5, 1, 0.5] }}
-                transition={{ duration: 1.8, repeat: Infinity }}
-              />
-              <motion.div
-                className="h-2.5 w-14 rounded-full bg-slate-200 dark:bg-slate-800"
-                animate={{ opacity: [0.45, 0.9, 0.45] }}
-                transition={{ duration: 1.8, repeat: Infinity, delay: 0.15 }}
-              />
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              {[0, 1, 2].map((idx) => (
-                <motion.div
-                  key={idx}
-                  className="aspect-[2/3] rounded-xl border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800"
-                  animate={{ opacity: [0.55, 1, 0.55] }}
-                  transition={{ duration: 1.9, repeat: Infinity, delay: idx * 0.12 }}
-                />
-              ))}
-            </div>
-          </motion.div>
-
-          <motion.div
-            className="rounded-3xl border border-slate-300/80 bg-white/80 p-5 shadow-sm backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-900/80"
-            animate={{ y: [0, -3, 0], opacity: [0.88, 1, 0.88] }}
-            transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut", delay: 0.15 }}
-          >
-            <motion.div
-              className="mb-4 h-2.5 w-28 rounded-full bg-slate-300 dark:bg-slate-700"
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 1.9, repeat: Infinity }}
-            />
-            <div className="space-y-3">
-              <motion.div
-                className="h-2.5 w-full rounded-full bg-slate-200 dark:bg-slate-800"
-                animate={{ opacity: [0.45, 0.9, 0.45] }}
-                transition={{ duration: 1.9, repeat: Infinity }}
-              />
-              <motion.div
-                className="h-2.5 w-11/12 rounded-full bg-slate-200 dark:bg-slate-800"
-                animate={{ opacity: [0.45, 0.9, 0.45] }}
-                transition={{ duration: 1.9, repeat: Infinity, delay: 0.1 }}
-              />
-              <motion.div
-                className="h-2.5 w-3/4 rounded-full bg-slate-200 dark:bg-slate-800"
-                animate={{ opacity: [0.45, 0.9, 0.45] }}
-                transition={{ duration: 1.9, repeat: Infinity, delay: 0.2 }}
-              />
-            </div>
-          </motion.div>
-
-          <motion.div
-            className="rounded-3xl border border-slate-300/80 bg-white/80 p-5 shadow-sm backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-900/80"
-            animate={{ y: [0, -3, 0], opacity: [0.88, 1, 0.88] }}
-            transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
-          >
-            <motion.div
-              className="mb-4 h-2.5 w-32 rounded-full bg-slate-300 dark:bg-slate-700"
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 1.8, repeat: Infinity }}
-            />
-            <div className="space-y-3">
-              <motion.div
-                className="h-2.5 w-full rounded-full bg-slate-200 dark:bg-slate-800"
-                animate={{ opacity: [0.45, 0.9, 0.45] }}
-                transition={{ duration: 1.85, repeat: Infinity }}
-              />
-              <motion.div
-                className="h-2.5 w-10/12 rounded-full bg-slate-200 dark:bg-slate-800"
-                animate={{ opacity: [0.45, 0.9, 0.45] }}
-                transition={{ duration: 1.85, repeat: Infinity, delay: 0.1 }}
-              />
-              <motion.div
-                className="h-2.5 w-4/5 rounded-full bg-slate-200 dark:bg-slate-800"
-                animate={{ opacity: [0.45, 0.9, 0.45] }}
-                transition={{ duration: 1.85, repeat: Infinity, delay: 0.2 }}
-              />
+            <div className="space-y-4">
+              <AuthSignalArc />
+              <AuthRoutePulse />
+              <AuthTrustRadar />
             </div>
           </motion.div>
         </div>
+      </div>
+    </div>
+  );
+};
+
+const AuthSignalArc = () => {
+  return (
+    <div className="rounded-2xl border border-slate-200/80 bg-slate-100/80 p-3 dark:border-slate-700 dark:bg-slate-800/70">
+      <svg viewBox="0 0 320 72" className="h-14 w-full">
+        <motion.path
+          d="M16 54 C78 12, 140 62, 202 24 C238 4, 278 24, 304 12"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="4"
+          className="text-cyan-500"
+          strokeLinecap="round"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: 1 }}
+          transition={{ duration: 2.3, repeat: Infinity, repeatType: "loop", ease: "easeInOut" }}
+        />
+        {[56, 116, 176, 244, 292].map((x, idx) => (
+          <motion.circle
+            key={x}
+            cx={x}
+            cy={idx % 2 === 0 ? 40 : 28}
+            r="4"
+            className="fill-indigo-500"
+            animate={{ scale: [0.8, 1.35, 0.8], opacity: [0.35, 1, 0.35] }}
+            transition={{ duration: 1.4, repeat: Infinity, delay: idx * 0.15, ease: "easeInOut" }}
+          />
+        ))}
+      </svg>
+    </div>
+  );
+};
+
+const AuthRoutePulse = () => {
+  return (
+    <div className="rounded-2xl border border-slate-200/80 bg-slate-100/80 p-3 dark:border-slate-700 dark:bg-slate-800/70">
+      <div className="relative h-12 overflow-hidden rounded-xl border border-slate-200 bg-white/90 dark:border-slate-700 dark:bg-slate-900/85">
+        <div className="absolute inset-0 grid grid-cols-8">
+          {Array.from({ length: 8 }).map((_, idx) => (
+            <div key={idx} className="border-r border-slate-100 dark:border-slate-800" />
+          ))}
+        </div>
+        <motion.div
+          className="absolute top-1/2 h-3 w-10 -translate-y-1/2 rounded-full bg-emerald-500/85"
+          animate={{ x: [0, 208, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
+    </div>
+  );
+};
+
+const AuthTrustRadar = () => {
+  return (
+    <div className="rounded-2xl border border-slate-200/80 bg-slate-100/80 p-3 dark:border-slate-700 dark:bg-slate-800/70">
+      <div className="flex items-center justify-between">
+        {[0, 1, 2, 3].map((idx) => (
+          <motion.div
+            key={idx}
+            className="h-8 w-8 rounded-full border-2 border-violet-500/70"
+            animate={{ scale: [0.85, 1.15, 0.85], opacity: [0.4, 1, 0.4] }}
+            transition={{ duration: 1.7, repeat: Infinity, delay: idx * 0.2, ease: "easeInOut" }}
+          />
+        ))}
       </div>
     </div>
   );

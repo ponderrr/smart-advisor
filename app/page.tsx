@@ -13,6 +13,7 @@ import { AnimatedTestimonials } from "@/components/ui/animated-testimonials";
 import { LinkPreview } from "@/components/ui/link-preview";
 import { BrandWordmark } from "@/components/brand-wordmark";
 import { ThemeToggle } from "@/components/theme-toggle";
+import FeaturesSectionDemo from "@/components/features-section-demo-3";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import {
   Navbar,
@@ -33,6 +34,93 @@ import {
   navItems,
   teamMembers,
 } from "@/features/home/data";
+
+/**
+ * Animated SVGs for the How It Works section
+ */
+const StepVisual = ({ index }: { index: number }) => {
+  if (index === 0) {
+    // Step 1: Search/Analysis (Magnifying glass & pulses)
+    return (
+      <div className="flex h-full items-center justify-center">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" className="text-indigo-500">
+          <motion.circle
+            cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2"
+            animate={{ r: [6.5, 7.5, 6.5] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.path
+            d="M21 21L16.65 16.65" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+            animate={{ x: [0, 1, 0], y: [0, 1, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.circle cx="11" cy="11" r="3" fill="currentColor"
+            animate={{ opacity: [0.1, 0.4, 0.1], scale: [0.8, 1.2, 0.8] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          />
+        </svg>
+      </div>
+    );
+  }
+
+  if (index === 1) {
+    // Step 2: Comparison (Moving cards/data blocks)
+    return (
+      <div className="flex h-full items-center justify-center gap-3">
+        <motion.div
+          className="h-12 w-9 rounded-lg border-2 border-violet-400 bg-violet-400/10"
+          animate={{ y: [0, -10, 0], rotate: [-5, 0, -5] }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="h-16 w-11 rounded-lg border-2 border-violet-500 bg-violet-500/20"
+          animate={{ scale: [1, 1.1, 1] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="h-12 w-9 rounded-lg border-2 border-violet-400 bg-violet-400/10"
+          animate={{ y: [0, 10, 0], rotate: [5, 0, 5] }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
+    );
+  }
+
+  // Step 3: Result (Checkmark & floating sparkles)
+  return (
+    <div className="relative flex h-full items-center justify-center">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" className="text-cyan-500">
+        <motion.path
+          d="M20 6L9 17L4 12"
+          stroke="currentColor"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: 1.2 }}
+          transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 1 }}
+        />
+      </svg>
+      {[...Array(3)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute h-1.5 w-1.5 rounded-full bg-cyan-400"
+          animate={{
+            y: [0, -20],
+            x: [0, (i - 1) * 15],
+            opacity: [0, 1, 0],
+            scale: [0, 1, 0],
+          }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            delay: i * 0.4,
+          }}
+        />
+      ))}
+    </div>
+  );
+};
 
 export default function Index() {
   const router = useRouter();
@@ -149,84 +237,8 @@ export default function Index() {
                   </p>
                 </div>
 
-                <div className="mb-5 rounded-2xl border border-slate-200/80 bg-slate-100/80 p-4 dark:border-slate-700 dark:bg-slate-800/60">
-                  {idx === 0 ? (
-                    <div className="space-y-3">
-                      <motion.div
-                        className="h-3 w-2/3 rounded-full bg-slate-300 dark:bg-slate-600"
-                        animate={{ opacity: [0.55, 1, 0.55] }}
-                        transition={{ duration: 1.8, repeat: Infinity }}
-                      />
-                      <motion.div
-                        className="h-3 w-1/2 rounded-full bg-slate-300 dark:bg-slate-600"
-                        animate={{ opacity: [0.45, 0.9, 0.45] }}
-                        transition={{ duration: 1.9, repeat: Infinity, delay: 0.12 }}
-                      />
-                      <div className="flex items-center gap-2 pt-2">
-                        <motion.div
-                          className="h-8 w-8 rounded-full bg-indigo-400/70"
-                          animate={{ y: [0, -2, 0] }}
-                          transition={{ duration: 2, repeat: Infinity }}
-                        />
-                        <motion.div
-                          className="h-8 w-8 rounded-full bg-violet-400/70"
-                          animate={{ y: [0, -2, 0] }}
-                          transition={{ duration: 2, repeat: Infinity, delay: 0.2 }}
-                        />
-                        <motion.div
-                          className="h-8 w-8 rounded-full bg-cyan-400/70"
-                          animate={{ y: [0, -2, 0] }}
-                          transition={{ duration: 2, repeat: Infinity, delay: 0.4 }}
-                        />
-                      </div>
-                    </div>
-                  ) : idx === 1 ? (
-                    <div className="grid grid-cols-2 gap-2">
-                      <motion.div
-                        className="h-16 rounded-lg bg-slate-300/90 dark:bg-slate-600/90"
-                        animate={{ opacity: [0.6, 1, 0.6] }}
-                        transition={{ duration: 1.6, repeat: Infinity }}
-                      />
-                      <motion.div
-                        className="h-16 rounded-lg bg-slate-300/90 dark:bg-slate-600/90"
-                        animate={{ opacity: [0.6, 1, 0.6] }}
-                        transition={{ duration: 1.6, repeat: Infinity, delay: 0.2 }}
-                      />
-                      <motion.div
-                        className="col-span-2 h-3 rounded-full bg-slate-300 dark:bg-slate-600"
-                        animate={{ opacity: [0.45, 0.9, 0.45] }}
-                        transition={{ duration: 1.7, repeat: Infinity }}
-                      />
-                      <motion.div
-                        className="col-span-2 h-3 w-4/5 rounded-full bg-slate-300 dark:bg-slate-600"
-                        animate={{ opacity: [0.45, 0.9, 0.45] }}
-                        transition={{ duration: 1.7, repeat: Infinity, delay: 0.1 }}
-                      />
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <motion.div
-                        className="h-10 w-full rounded-lg bg-slate-300/90 dark:bg-slate-600/90"
-                        animate={{ opacity: [0.6, 1, 0.6] }}
-                        transition={{ duration: 1.8, repeat: Infinity }}
-                      />
-                      <motion.div
-                        className="h-3 w-full rounded-full bg-slate-300 dark:bg-slate-600"
-                        animate={{ opacity: [0.4, 0.85, 0.4] }}
-                        transition={{ duration: 1.7, repeat: Infinity, delay: 0.12 }}
-                      />
-                      <motion.div
-                        className="h-3 w-3/4 rounded-full bg-slate-300 dark:bg-slate-600"
-                        animate={{ opacity: [0.4, 0.85, 0.4] }}
-                        transition={{ duration: 1.7, repeat: Infinity, delay: 0.22 }}
-                      />
-                      <motion.div
-                        className="h-3 w-2/3 rounded-full bg-slate-300 dark:bg-slate-600"
-                        animate={{ opacity: [0.4, 0.85, 0.4] }}
-                        transition={{ duration: 1.7, repeat: Infinity, delay: 0.32 }}
-                      />
-                    </div>
-                  )}
+                <div className="mb-5 flex h-28 items-center justify-center p-1">
+                  <StepVisual index={idx} />
                 </div>
 
                 <div className="relative z-10">
@@ -246,6 +258,8 @@ export default function Index() {
         </div>
       </section>
 
+      <FeaturesSectionDemo />
+
       <section id="powered-by" className="scroll-mt-32 px-6 py-24 md:py-32">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12 text-center md:mb-16">
@@ -257,6 +271,15 @@ export default function Index() {
             </p>
           </div>
           <RotatingLogoSets />
+        </div>
+      </section>
+
+      <section id="meet-the-team" className="scroll-mt-32 px-6 py-24 md:py-32">
+        <div className="mx-auto max-w-6xl text-center">
+          <h2 className="mb-24 text-4xl font-black tracking-tighter md:text-5xl">
+            Meet the Team
+          </h2>
+          <AnimatedTestimonials testimonials={teamMembers} autoplay />
         </div>
       </section>
 
@@ -335,15 +358,6 @@ export default function Index() {
         </div>
       </section>
 
-      <section id="meet-the-team" className="scroll-mt-32 px-6 py-24 md:py-32">
-        <div className="mx-auto max-w-6xl text-center">
-          <h2 className="mb-24 text-4xl font-black tracking-tighter md:text-5xl">
-            Meet the Team
-          </h2>
-          <AnimatedTestimonials testimonials={teamMembers} autoplay />
-        </div>
-      </section>
-
       <footer className="px-6 py-14">
         <div className="mx-auto max-w-7xl">
           <div className="flex justify-center">
@@ -365,9 +379,10 @@ export default function Index() {
             <ul className="flex flex-col items-center justify-center gap-4 text-sm font-medium text-slate-700 dark:text-slate-300 md:flex-row md:gap-8">
               {[
                 { label: "How It Works", href: "#how-it-works" },
+                { label: "Why Smart Advisor", href: "#why-smart-advisor" },
                 { label: "Powered By", href: "#powered-by" },
-                { label: "FAQ", href: "#faq" },
                 { label: "Our Team", href: "#meet-the-team" },
+                { label: "FAQ", href: "#faq" },
               ].map((item) => (
                 <li key={item.label}>
                   <button

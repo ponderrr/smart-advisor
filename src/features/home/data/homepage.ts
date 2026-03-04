@@ -1,43 +1,44 @@
 export const navItems = [
   { name: "How It Works", link: "#how-it-works" },
+  { name: "Why Smart Advisor", link: "#why-smart-advisor" },
   { name: "Powered By", link: "#powered-by" },
-  { name: "FAQ", link: "#faq" },
   { name: "Our Team", link: "#meet-the-team" },
+  { name: "FAQ", link: "#faq" },
 ];
 
 export const howItWorksCards = [
   {
-    title: "Share Your Taste",
+    title: "Tell Us What You Are In The Mood For",
     description:
-      "Tell Smart Advisor what mood, genre, and pacing you want in under a minute.",
+      "Pick what you feel like right now, genres you want (or want to avoid), and how adventurous you want recommendations to be.",
     image:
       "https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=1200&q=80",
     hoverImage:
       "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=1200&q=80",
     detail:
-      "Adaptive prompts tune recommendations to your current intent, not generic history.",
+      "The short flow is designed for your current mood, not stale profile assumptions from months ago.",
   },
   {
-    title: "AI Refines Context",
+    title: "We Rank Options With Context",
     description:
-      "Our engine combines your answers with trusted book and movie metadata in real time.",
+      "Smart Advisor blends your answers with trusted movie and book metadata to score each option for fit and quality.",
     image:
       "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=80",
     hoverImage:
       "https://images.unsplash.com/photo-1616530940355-351fabd9524b?auto=format&fit=crop&w=1200&q=80",
     detail:
-      "Context-aware ranking boosts relevance so your first picks feel immediately right.",
+      "Ranking weights pacing, tone, popularity, and match confidence so your top results are worth opening first.",
   },
   {
-    title: "Get Curated Picks",
+    title: "Get Picks You Can Trust",
     description:
-      "Receive ranked books and movies with plain-language reasons for every recommendation.",
+      "You get curated movies and books with plain-language reasoning instead of random lists with no explanation.",
     image:
       "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=1200&q=80",
     hoverImage:
       "https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&w=1200&q=80",
     detail:
-      "Save favorites, compare options fast, and discover your next obsession without scrolling for hours.",
+      "Save favorites, compare quickly, and move from indecision to your next watch or read in minutes.",
   },
 ];
 
