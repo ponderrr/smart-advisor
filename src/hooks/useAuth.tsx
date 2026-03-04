@@ -26,6 +26,7 @@ interface AuthContextType {
     age: number
   ) => Promise<{ error: string | null }>;
   signOut: () => Promise<{ error: string | null }>;
+  resetPassword: (email: string) => Promise<{ error: string | null }>;
   updateProfile: (
     name: string,
     age: number
@@ -272,6 +273,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const resetPassword = async (email: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await authService.resetPassword(email);
+
+      if (result.error) {
+        setError(result.error);
+      }
+
+      return result;
+    } catch (error) {
+      console.error("Error resetting password:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
+      setError(errorMessage);
+      return { error: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const updateProfile = async (name: string, age: number) => {
     try {
       setLoading(true);
@@ -307,6 +330,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     signIn,
     signUp,
     signOut,
+    resetPassword,
     updateProfile,
   };
 

@@ -1,12 +1,12 @@
 "use client";
-import React, { useEffect, useState, useMemo, useCallback, memo } from "react";
+import React, { useEffect, useMemo, memo } from "react";
 import {
   motion,
   useMotionValue,
   useSpring,
   useTransform,
   MotionValue,
-} from "motion/react";
+} from "framer-motion";
 import { cn } from "@/lib/utils";
 
 type ImagePosition = {
@@ -63,6 +63,7 @@ export interface ParallaxHeroImagesProps {
   className?: string;
   imageClassName?: string;
   variant?: DepthVariant;
+  isLoading?: boolean;
 }
 
 export const ParallaxHeroImages = ({
@@ -70,6 +71,7 @@ export const ParallaxHeroImages = ({
   className,
   imageClassName,
   variant = "default",
+  isLoading = false,
 }: ParallaxHeroImagesProps) => {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -80,11 +82,12 @@ export const ParallaxHeroImages = ({
   const positions = useMemo(() => {
     const limitedImages = images.slice(0, 8);
     const depthValues = depthValuesByVariant[variant];
-    return limitedImages.map((src, index) => ({
-      src,
-      position: positionOrder[index],
+
+    return positionOrder.map((position, index) => ({
+      src: limitedImages[index] || limitedImages[index % Math.max(1, limitedImages.length)] || "",
+      position,
       depth: depthValues[index],
-      delay: index * 0.12,
+      delay: index * 0.1,
     }));
   }, [images, variant]);
 
@@ -96,7 +99,7 @@ export const ParallaxHeroImages = ({
       mouseY.set(y);
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [mouseX, mouseY]);
 
@@ -109,7 +112,7 @@ export const ParallaxHeroImages = ({
     >
       {positions.map((pos, index) => (
         <ParallaxImage
-          key={`${pos.src}-${index}`}
+          key={`${pos.position}-${index}`}
           src={pos.src}
           position={pos.position}
           depth={pos.depth}
@@ -117,6 +120,7 @@ export const ParallaxHeroImages = ({
           imageClassName={imageClassName}
           smoothMouseX={smoothMouseX}
           smoothMouseY={smoothMouseY}
+          isLoading={isLoading}
         />
       ))}
     </div>
@@ -127,6 +131,7 @@ interface ParallaxImageProps extends ImagePosition {
   imageClassName?: string;
   smoothMouseX: MotionValue<number>;
   smoothMouseY: MotionValue<number>;
+  isLoading: boolean;
 }
 
 const ParallaxImage = memo(function ParallaxImage({
@@ -137,6 +142,7 @@ const ParallaxImage = memo(function ParallaxImage({
   imageClassName,
   smoothMouseX,
   smoothMouseY,
+  isLoading,
 }: ParallaxImageProps) {
   const maxOffset = 40;
 
@@ -168,21 +174,30 @@ const ParallaxImage = memo(function ParallaxImage({
       initial={{ opacity: 0, filter: "blur(20px)", scale: 0.9 }}
       animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
       transition={{
-        duration: 0.8,
-        delay: delay,
+        duration: 0.7,
+        delay,
         ease: [0.25, 0.1, 0.25, 1],
       }}
     >
-      <img
-        src={src}
-        alt=""
-        loading="lazy"
-        decoding="async"
-        className={cn(
-          "aspect-4/3 h-20 w-32 rounded-lg object-cover shadow-sm ring-1 ring-black/10 sm:h-40 sm:w-56 md:h-52 md:w-80 dark:ring-white/10",
-          imageClassName,
-        )}
-      />
+      {isLoading || !src ? (
+        <div
+          className={cn(
+            "aspect-4/3 h-20 w-32 rounded-lg bg-slate-200/60 shadow-sm ring-1 ring-black/5 animate-pulse sm:h-40 sm:w-56 md:h-52 md:w-80 dark:bg-slate-700/40 dark:ring-white/10",
+            imageClassName,
+          )}
+        />
+      ) : (
+        <img
+          src={src}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className={cn(
+            "aspect-4/3 h-20 w-32 rounded-lg object-cover shadow-sm ring-1 ring-black/10 sm:h-40 sm:w-56 md:h-52 md:w-80 dark:ring-white/10",
+            imageClassName,
+          )}
+        />
+      )}
     </motion.div>
   );
 });

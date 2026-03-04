@@ -6,26 +6,95 @@ import { motion } from "framer-motion";
 import { FlipWords } from "@/components/ui/flip-words";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { ParallaxHeroImages } from "@/components/ui/parallax-hero-images";
-import { cn } from "@/lib/utils";
+import { useEffect, useMemo, useState } from "react";
+
+type HeroMediaResponse = {
+  books: string[];
+  movies: string[];
+  status: {
+    books: "ok" | "fallback";
+    movies: "ok" | "fallback";
+  };
+};
+
+const FALLBACK_IMAGES = [
+  "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1476275466078-4007374efbbe?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1513001900722-370f803f498d?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1489599735734-79b4eece7e5f?auto=format&fit=crop&w=900&q=80",
+];
+
+const shuffle = <T,>(items: T[]) => {
+  const arr = [...items];
+  for (let i = arr.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+};
 
 const HeroSection = () => {
   const router = useRouter();
   const { user } = useAuth();
+  const [isLoadingImages, setIsLoadingImages] = useState(true);
+  const [heroImages, setHeroImages] = useState<string[]>(FALLBACK_IMAGES);
 
-  const words = ["Movie", "Book", "Story", "Adventure", "Classic"];
-  const heroImages = [
-    "https://images.unsplash.com/photo-1489599849228-13632ca16442?auto=format&fit=crop&w=400&q=80",
-    "https://images.unsplash.com/photo-1495446815901-a7297e01a5ad?auto=format&fit=crop&w=400&q=80",
-    "https://images.unsplash.com/photo-1507842298343-583f20981122?auto=format&fit=crop&w=400&q=80",
-    "https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&w=400&q=80",
-    "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=400&q=80",
-  ];
+  const words = useMemo(
+    () => ["Movie", "Book", "Story", "Adventure", "Classic"],
+    [],
+  );
 
-  const handleGetStarted = () => user ? router.push("/content-selection") : router.push("/auth");
+  useEffect(() => {
+    let active = true;
+
+    const loadHeroMedia = async () => {
+      try {
+        setIsLoadingImages(true);
+
+        const response = await fetch("/api/hero-media", {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to load hero media: ${response.status}`);
+        }
+
+        const data: HeroMediaResponse = await response.json();
+        const mixed = shuffle([...(data.books || []), ...(data.movies || [])]);
+
+        if (active && mixed.length > 0) {
+          setHeroImages(mixed.slice(0, 8));
+        }
+      } catch (error) {
+        console.error("Hero media fetch failed:", error);
+        if (active) {
+          setHeroImages(FALLBACK_IMAGES);
+        }
+      } finally {
+        if (active) {
+          setIsLoadingImages(false);
+        }
+      }
+    };
+
+    loadHeroMedia();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const handleGetStarted = () =>
+    user ? router.push("/content-selection") : router.push("/auth");
 
   return (
     <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
-      <ParallaxHeroImages images={heroImages} />
+      <ParallaxHeroImages images={heroImages} isLoading={isLoadingImages} />
 
       <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center gap-8 px-4 text-center">
         <motion.div
@@ -45,7 +114,8 @@ const HeroSection = () => {
           transition={{ delay: 0.4 }}
           className="max-w-xl text-xl text-slate-700 dark:text-slate-300"
         >
-          AI-powered recommendations for movies and books tailored to your unique taste.
+          AI-powered recommendations for movies and books tailored to your unique
+          taste.
         </motion.p>
 
         <div className="mt-6">

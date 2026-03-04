@@ -1,7 +1,13 @@
 "use client";
+
 import { cn } from "@/lib/utils";
 import { IconMenu2, IconX } from "@tabler/icons-react";
-import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useMotionValueEvent,
+  useScroll,
+} from "framer-motion";
 import React, { useState } from "react";
 
 interface NavbarProps {
@@ -12,7 +18,7 @@ interface NavbarProps {
 interface NavBodyProps {
   children: React.ReactNode;
   className?: string;
-  visible?: boolean;
+  scrolled?: boolean;
 }
 
 interface NavItemsProps {
@@ -21,41 +27,45 @@ interface NavItemsProps {
 }
 
 export const Navbar = ({ children, className }: NavbarProps) => {
-  const [visible, setVisible] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { scrollY } = useScroll();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
-    setVisible(latest > 50);
+    setScrolled(latest > 32);
   });
 
   return (
     <motion.div
-      className={cn(
-        "fixed inset-x-0 top-0 z-50 w-full transition-all duration-300",
-        visible ? "py-0" : "py-4",
-        className
-      )}
+      className={cn("fixed inset-x-0 top-0 z-50 w-full py-4", className)}
+      initial={false}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
     >
       {React.Children.map(children, (child) =>
         React.isValidElement(child)
-          ? React.cloneElement(child as React.ReactElement<any>, { visible })
-          : child
+          ? React.cloneElement(child as React.ReactElement<any>, { scrolled })
+          : child,
       )}
     </motion.div>
   );
 };
 
-export const NavBody = ({ children, className, visible }: NavBodyProps) => {
+export const NavBody = ({ children, className, scrolled = false }: NavBodyProps) => {
   return (
     <motion.div
+      initial={false}
       animate={{
-        backgroundColor: visible ? "rgba(255, 255, 255, 0.85)" : "rgba(255, 255, 255, 0)",
-        backdropFilter: visible ? "blur(16px)" : "blur(0px)",
-        borderBottom: visible ? "1px solid rgba(0,0,0,0.08)" : "1px solid rgba(0,0,0,0)",
+        width: scrolled ? "min(900px, calc(100% - 2rem))" : "min(1280px, calc(100% - 2rem))",
+        borderRadius: scrolled ? 999 : 24,
       }}
+      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "mx-auto flex w-full max-w-7xl items-center justify-between px-8 py-4 dark:bg-neutral-950/80",
-        className
+        "mx-auto hidden md:flex items-center justify-between px-8 py-3",
+        "border border-transparent",
+        scrolled
+          ? "bg-white/65 shadow-[0_14px_40px_-22px_rgba(15,23,42,0.42)] backdrop-blur-xl border-slate-200/50 dark:bg-slate-900/60 dark:border-slate-700/60 dark:shadow-[0_14px_40px_-20px_rgba(2,6,23,0.7)]"
+          : "bg-white/0 dark:bg-transparent",
+        className,
       )}
     >
       {children}
@@ -70,7 +80,7 @@ export const NavItems = ({ items, className }: NavItemsProps) => {
         <a
           key={idx}
           href={item.link}
-          className="text-lg font-bold tracking-tight text-slate-700 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400 transition-colors"
+          className="text-lg font-bold tracking-tight text-slate-700 transition-colors hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400"
         >
           {item.name}
         </a>
@@ -79,41 +89,64 @@ export const NavItems = ({ items, className }: NavItemsProps) => {
   );
 };
 
-export const MobileNav = ({ children, className, visible }: any) => (
-  <div className={cn("lg:hidden w-full px-6 py-4", visible && "bg-white/90 dark:bg-neutral-950/90", className)}>
+export const MobileNav = ({ children, className, scrolled = false }: any) => (
+  <motion.div
+    initial={false}
+    animate={{
+      width: scrolled ? "calc(100% - 1rem)" : "calc(100% - 1.5rem)",
+      borderRadius: scrolled ? 999 : 16,
+    }}
+    transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+    className={cn(
+      "mx-auto md:hidden px-5 py-3 border border-transparent",
+      scrolled
+        ? "bg-white/70 backdrop-blur-xl border-slate-200/60 shadow-[0_12px_30px_-20px_rgba(15,23,42,0.45)] dark:bg-slate-900/70 dark:border-slate-700/60"
+        : "bg-white/0 dark:bg-transparent",
+      className,
+    )}
+  >
     {children}
-  </div>
+  </motion.div>
 );
 
 export const MobileNavHeader = ({ children, className }: any) => (
-  <div className={cn("flex w-full items-center justify-between", className)}>{children}</div>
+  <div className={cn("flex w-full items-center justify-between", className)}>
+    {children}
+  </div>
 );
 
 export const MobileNavMenu = ({ children, isOpen }: any) => (
   <AnimatePresence>
     {isOpen && (
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        className="absolute inset-x-0 top-full bg-white dark:bg-neutral-950 px-6 py-8 border-b dark:border-neutral-800 flex flex-col gap-4"
+        exit={{ opacity: 0, y: -12 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
+        className="absolute inset-x-2 top-[calc(100%+0.5rem)] rounded-3xl border border-slate-200/80 bg-white/90 px-6 py-6 shadow-2xl backdrop-blur-xl dark:border-slate-700/70 dark:bg-slate-900/90"
       >
-        {children}
+        <div className="flex flex-col gap-4">{children}</div>
       </motion.div>
     )}
   </AnimatePresence>
 );
 
 export const MobileNavToggle = ({ isOpen, onClick }: any) => (
-  <button onClick={onClick} className="p-2">
+  <button
+    onClick={onClick}
+    className="rounded-full p-2 text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+    aria-label={isOpen ? "Close menu" : "Open menu"}
+  >
     {isOpen ? <IconX /> : <IconMenu2 />}
   </button>
 );
 
 export const NavbarLogo = () => (
-  <a href="/" className="flex items-center gap-2 group">
-    <div className="w-8 h-8 bg-indigo-600 rounded-lg group-hover:rotate-12 transition-transform" />
-    <span className="text-xl font-black tracking-tighter dark:text-white uppercase">Advisor</span>
+  <a href="/" className="group flex items-center gap-2">
+    <div className="h-8 w-8 rounded-lg bg-indigo-600 transition-transform group-hover:rotate-12" />
+    <span className="text-xl font-black tracking-tighter uppercase dark:text-white">
+      Advisor
+    </span>
   </a>
 );
 
