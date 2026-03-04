@@ -10,6 +10,7 @@ const AuthPage = () => {
   const router = useRouter();
   const {
     signIn,
+    signInWithGoogle,
     signUp,
     resetPassword,
     clearError,
@@ -31,6 +32,7 @@ const AuthPage = () => {
         loading={loading}
         authError={authError}
         onSignIn={signIn}
+        onGoogleSignIn={signInWithGoogle}
         onSignUp={signUp}
         onResetPassword={resetPassword}
         onClearError={clearError}
