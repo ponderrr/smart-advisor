@@ -7,6 +7,7 @@ import { IconArrowLeft, IconArrowRight, IconCheck } from "@tabler/icons-react";
 
 import { useQuizStore, type ContentType } from "@/store/quizStore";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 
 type DemoQuestion = {
@@ -55,6 +56,7 @@ export default function DemoPage() {
 
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [validationMessage, setValidationMessage] = useState<string | null>(null);
 
   const current = DEMO_QUESTIONS[step];
   const progress = ((step + 1) / DEMO_QUESTIONS.length) * 100;
@@ -76,7 +78,9 @@ export default function DemoPage() {
   const handleNext = () => {
     if (!hasAnswer) {
       setShowValidationFlash(true);
+      setValidationMessage("Please select an option before continuing.");
       window.setTimeout(() => setShowValidationFlash(false), 650);
+      window.setTimeout(() => setValidationMessage(null), 1600);
       return;
     }
     if (step < DEMO_QUESTIONS.length - 1) {
@@ -110,7 +114,7 @@ export default function DemoPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-10 text-slate-900 dark:bg-slate-950 dark:text-slate-100 sm:px-6">
-      <div className="mx-auto w-full max-w-3xl">
+      <div className="mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-3xl flex-col justify-center">
         <div className="mb-8 flex items-center justify-between">
           <button
             onClick={handleBack}
@@ -122,9 +126,12 @@ export default function DemoPage() {
           <p className="text-sm font-black tracking-wide text-slate-700 dark:text-slate-200">
             {step + 1} out of {DEMO_QUESTIONS.length} questions
           </p>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-            Demo Survey
-          </p>
+          <div className="flex items-center gap-3">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+              Demo Survey
+            </p>
+            <ThemeToggle />
+          </div>
         </div>
 
         <div className="mb-8 h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
@@ -192,13 +199,9 @@ export default function DemoPage() {
               <HoverBorderGradient
                 as="button"
                 onClick={handleNext}
-                containerClassName={cn(
-                  "rounded-full",
-                  !hasAnswer && "bg-red-500/20 hover:bg-red-500/20",
-                )}
+                containerClassName="rounded-full"
                 className={cn(
-                  "inline-flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-black tracking-tight",
-                  hasAnswer ? "text-white" : "bg-red-600 text-white",
+                  "inline-flex items-center justify-center gap-2 bg-black px-6 py-2.5 text-sm font-black tracking-tight text-white dark:bg-black",
                 )}
               >
                 {step === DEMO_QUESTIONS.length - 1 ? "Continue" : "Next"}
@@ -206,6 +209,11 @@ export default function DemoPage() {
               </HoverBorderGradient>
             </motion.div>
           </div>
+          {validationMessage ? (
+            <p className="mt-3 text-right text-xs font-semibold text-red-500 dark:text-red-400">
+              {validationMessage}
+            </p>
+          ) : null}
         </div>
       </div>
     </main>
