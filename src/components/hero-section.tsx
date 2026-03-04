@@ -36,7 +36,7 @@ const HeroSection = () => {
   const [mediaPool, setMediaPool] = useState<string[]>([]);
 
   const words = useMemo(
-    () => ["Movie", "Book", "Story", "Adventure", "Classic"],
+    () => ["Movie", "Book", "Story", "Adventure", "Classic", "Masterpiece", "Cult Favorite"],
     [],
   );
 
@@ -88,12 +88,24 @@ const HeroSection = () => {
   }, []);
 
   useEffect(() => {
-    if (mediaPool.length <= 14) return;
+    if (mediaPool.length < 2) return;
     let startIndex = 0;
-    const timer = setInterval(() => {
+    const timer = setInterval(async () => {
       startIndex = (startIndex + 3) % mediaPool.length;
       const rotated = [...mediaPool.slice(startIndex), ...mediaPool.slice(0, startIndex)];
-      setHeroImages(rotated.slice(0, 14));
+      const nextImages = rotated.slice(0, 14);
+      await Promise.allSettled(
+        nextImages.map(
+          (src) =>
+            new Promise<void>((resolve) => {
+              const img = new Image();
+              img.src = src;
+              img.onload = () => resolve();
+              img.onerror = () => resolve();
+            }),
+        ),
+      );
+      setHeroImages(nextImages);
     }, 9000);
 
     return () => clearInterval(timer);
@@ -135,6 +147,7 @@ const HeroSection = () => {
           <HoverBorderGradient
             onClick={handleGetStarted}
             idleColor="17, 24, 39"
+            highlightColor="17, 24, 39"
             containerClassName="rounded-full"
             as="button"
             className="dark:bg-black bg-white text-black dark:text-white px-14 py-6 text-2xl font-black tracking-tighter"

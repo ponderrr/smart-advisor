@@ -199,7 +199,16 @@ export const MobileNavToggle = ({ isOpen, onClick }: any) => (
 );
 
 export const NavbarLogo = () => (
-  <a href="/" className="group inline-flex items-center transition-opacity hover:opacity-85">
+  <a
+    href="/"
+    onClick={(event) => {
+      if (typeof window !== "undefined" && window.location.pathname === "/") {
+        event.preventDefault();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }}
+    className="group inline-flex items-center transition-opacity hover:opacity-85"
+  >
     <BrandWordmark imageClassName="h-8 md:h-9" />
   </a>
 );
