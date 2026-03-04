@@ -77,7 +77,7 @@ export const NavBody = ({ children, className, scrolled = false }: NavBodyProps)
 
 export const NavItems = ({ items, className, scrolled = false }: NavItemsProps) => {
   const handleAnchorClick = (
-    event: React.MouseEvent<HTMLAnchorElement>,
+    event: React.MouseEvent<HTMLElement>,
     link: string,
   ) => {
     if (!link.startsWith("#")) return;
@@ -100,30 +100,43 @@ export const NavItems = ({ items, className, scrolled = false }: NavItemsProps) 
   return (
     <motion.div
       initial={false}
-      animate={{ opacity: scrolled ? 0.92 : 1, y: scrolled ? -2 : 0 }}
-      transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+      animate={{ opacity: scrolled ? 0.95 : 1 }}
+      transition={{ type: "spring", stiffness: 220, damping: 24, mass: 0.8 }}
       className={cn("hidden lg:flex items-center gap-10", className)}
     >
-      {items.map((item, idx) => (
-        <motion.a
-          key={idx}
-          href={item.link}
-          onClick={(event) => handleAnchorClick(event, item.link)}
-          initial={false}
-          animate={{
-            y: scrolled ? -1 : 0,
-            opacity: scrolled ? 0.95 : 1,
-          }}
-          transition={{
-            duration: 0.28,
+      {items.map((item, idx) => {
+        const linkClassName =
+          "text-lg font-bold tracking-tight text-slate-700 transition-colors hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400";
+        const motionProps = {
+          initial: false,
+          animate: { opacity: scrolled ? 0.95 : 1 },
+          transition: {
+            duration: 0.25,
             delay: scrolled ? 0 : idx * 0.03,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-          className="text-lg font-bold tracking-tight text-slate-700 transition-colors hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400"
-        >
-          {item.name}
-        </motion.a>
-      ))}
+            ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
+          },
+          className: linkClassName,
+        };
+
+        if (item.link.startsWith("#")) {
+          return (
+            <motion.button
+              key={idx}
+              type="button"
+              onClick={(event) => handleAnchorClick(event, item.link)}
+              {...motionProps}
+            >
+              {item.name}
+            </motion.button>
+          );
+        }
+
+        return (
+          <motion.a key={idx} href={item.link} {...motionProps}>
+            {item.name}
+          </motion.a>
+        );
+      })}
     </motion.div>
   );
 };

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { IconArrowLeft, IconArrowRight, IconCheck } from "@tabler/icons-react";
 
 import { useQuizStore, type ContentType } from "@/store/quizStore";
+import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { cn } from "@/lib/utils";
 
 type DemoQuestion = {
@@ -109,7 +110,7 @@ export default function DemoPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-10 text-slate-900 dark:bg-slate-950 dark:text-slate-100 sm:px-6">
-      <div className="mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-3xl flex-col justify-center">
+      <div className="mx-auto w-full max-w-3xl">
         <div className="mb-8 flex items-center justify-between">
           <button
             onClick={handleBack}
@@ -179,25 +180,31 @@ export default function DemoPage() {
           </AnimatePresence>
 
           <div className="mt-8 flex items-center justify-end">
-            <motion.button
-              onClick={handleNext}
-              whileTap={{ scale: 0.98 }}
+            <motion.div
               animate={
                 showValidationFlash
-                  ? { scale: [1, 1.02, 0.99, 1], x: [0, -3, 3, 0] }
+                  ? { scale: [1, 1.03, 0.99, 1], x: [0, -4, 4, 0] }
                   : { scale: 1, x: 0 }
               }
               transition={{ duration: 0.45 }}
-              className={cn(
-                "inline-flex items-center justify-center gap-2 rounded-full px-6 py-2.5 text-sm font-black tracking-tight text-white transition-all",
-                hasAnswer
-                  ? "bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500"
-                  : "bg-gradient-to-r from-red-500 to-rose-500",
-              )}
+              className={cn(showValidationFlash && "rounded-full ring-2 ring-red-400/80")}
             >
-              {step === DEMO_QUESTIONS.length - 1 ? "Continue" : "Next"}
-              <IconArrowRight className="h-4 w-4" />
-            </motion.button>
+              <HoverBorderGradient
+                as="button"
+                onClick={handleNext}
+                containerClassName={cn(
+                  "rounded-full",
+                  !hasAnswer && "bg-red-500/20 hover:bg-red-500/20",
+                )}
+                className={cn(
+                  "inline-flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-black tracking-tight",
+                  hasAnswer ? "text-white" : "bg-red-600 text-white",
+                )}
+              >
+                {step === DEMO_QUESTIONS.length - 1 ? "Continue" : "Next"}
+                <IconArrowRight className="h-4 w-4" />
+              </HoverBorderGradient>
+            </motion.div>
           </div>
         </div>
       </div>

@@ -203,19 +203,30 @@ const ParallaxImage = memo(function ParallaxImage({
       }}
     >
       {!!src && (
-        <img
-          src={src}
-          alt=""
-          loading="lazy"
-          decoding="async"
-          onLoad={() => setIsLoaded(true)}
-          onError={() => setIsLoaded(true)}
-          className={cn(
-            "absolute inset-0 aspect-[2/3] h-28 w-20 rounded-lg object-cover shadow-sm ring-1 ring-black/10 transition-all duration-500 sm:h-44 sm:w-32 md:h-56 md:w-40 dark:ring-white/10",
-            isLoading || !isLoaded ? "opacity-0 blur-md" : "opacity-100 blur-0",
-            imageClassName,
-          )}
-        />
+        <>
+          <img
+            src={src}
+            alt=""
+            loading="eager"
+            decoding="async"
+            onLoad={() => setIsLoaded(true)}
+            onError={() => setIsLoaded(true)}
+            className={cn(
+              "absolute inset-0 aspect-[2/3] h-28 w-20 rounded-lg object-cover shadow-sm ring-1 ring-black/10 transition-all duration-500 sm:h-44 sm:w-32 md:h-56 md:w-40 dark:ring-white/10",
+              isLoading || !isLoaded ? "opacity-0 blur-md" : "opacity-100 blur-0",
+              imageClassName,
+            )}
+          />
+          <img
+            src={src}
+            alt=""
+            loading="eager"
+            decoding="async"
+            onLoad={() => setIsLoaded(true)}
+            onError={() => setIsLoaded(true)}
+            className="hidden"
+          />
+        </>
       )}
     </motion.div>
   );
