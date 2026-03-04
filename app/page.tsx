@@ -37,7 +37,7 @@ export default function Index() {
   const router = useRouter();
   const { user } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const handleGetStarted = () =>
     user ? router.push("/content-selection") : router.push("/auth");
@@ -83,9 +83,19 @@ export default function Index() {
                 onClick={(event) => {
                   if (item.link.startsWith("#")) {
                     event.preventDefault();
-                    document
-                      .querySelector(item.link)
-                      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    const section = document.querySelector(item.link) as HTMLElement | null;
+                    if (section) {
+                      const navbar = document.querySelector(
+                        "[data-main-navbar='true']",
+                      ) as HTMLElement | null;
+                      const offset = (navbar?.offsetHeight ?? 96) + 16;
+                      const top =
+                        section.getBoundingClientRect().top + window.scrollY - offset;
+                      window.scrollTo({
+                        top: Math.max(0, top),
+                        behavior: "smooth",
+                      });
+                    }
                   }
                   setIsMobileMenuOpen(false);
                 }}
@@ -109,7 +119,7 @@ export default function Index() {
 
       <section id="how-it-works" className="scroll-mt-32 px-6 py-24 md:py-32">
         <div className="mx-auto max-w-6xl">
-          <div className="mb-12 text-center md:mb-16">
+          <div className="mb-14 text-center md:mb-18">
             <h2 className="mb-4 mt-5 text-4xl font-black tracking-tighter md:text-5xl">
               How It Works
             </h2>
@@ -118,12 +128,13 @@ export default function Index() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-3">
+          <div className="relative grid grid-cols-1 items-stretch gap-7 lg:grid-cols-3">
+            <div className="pointer-events-none absolute left-1/2 top-9 hidden h-[2px] w-[65%] -translate-x-1/2 bg-gradient-to-r from-transparent via-slate-300 to-transparent dark:via-slate-700 lg:block" />
             {howItWorksCards.map((card, idx) => (
               <article
                 key={card.title}
                 className={cn(
-                  "group relative h-[26rem] w-full overflow-hidden rounded-3xl border border-slate-200/70 p-5 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-xl",
+                  "group relative h-[27rem] w-full overflow-hidden rounded-3xl border border-slate-200/70 p-5 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-xl",
                   "dark:border-slate-700/70",
                 )}
               >
@@ -161,10 +172,10 @@ export default function Index() {
       <section id="powered-by" className="scroll-mt-32 px-6 py-24 md:py-32">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12 text-center md:mb-16">
-            <h2 className="mb-4 mt-5 bg-gradient-to-r from-indigo-500 via-violet-500 to-cyan-500 bg-clip-text text-4xl font-black tracking-tighter text-transparent md:text-5xl">
+            <h2 className="mb-4 mt-5 inline-flex items-center rounded-full border border-slate-300/80 bg-white px-6 py-2 text-2xl font-black tracking-tight text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 md:text-3xl">
               Powered By
             </h2>
-            <p className="mx-auto max-w-2xl text-base text-slate-600 dark:text-slate-400 md:text-lg">
+            <p className="mx-auto max-w-3xl text-base text-slate-600 dark:text-slate-400 md:whitespace-nowrap md:text-lg">
               Trusted tools and APIs that keep Smart Advisor fast, reliable, and context aware.
             </p>
           </div>
@@ -287,7 +298,13 @@ export default function Index() {
               </LinkPreview>
             </p>
             <div className="flex items-center justify-center gap-4 md:justify-end">
-              <a href="#" aria-label="GitHub" className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400">
+              <a
+                href="https://github.com/ponderrr/smart-advisor"
+                aria-label="GitHub"
+                target="_blank"
+                rel="noreferrer"
+                className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400"
+              >
                 <IconBrandGithub className="h-5 w-5" />
               </a>
             </div>
@@ -328,7 +345,7 @@ const RotatingLogoSets = () => {
                 <img
                   src={logo.src}
                   alt={logo.name}
-                  className="h-10 w-auto dark:invert"
+                  className="h-10 w-auto grayscale brightness-0 transition dark:invert"
                   loading="lazy"
                   decoding="async"
                 />

@@ -5,7 +5,8 @@
   "description": "AI-powered personalized movie and book recommendation engine built with React, TypeScript, and Supabase",
   "type": "module",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack",
+    "dev:turbo": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

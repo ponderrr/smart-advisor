@@ -45,7 +45,6 @@ const shuffle = <T,>(items: T[]) => {
 const HeroSection = () => {
   const router = useRouter();
   const { user } = useAuth();
-  const [isLoadingImages, setIsLoadingImages] = useState(true);
   const [heroImages, setHeroImages] = useState<string[]>(FALLBACK_IMAGES);
 
   const words = useMemo(
@@ -58,8 +57,6 @@ const HeroSection = () => {
 
     const loadHeroMedia = async () => {
       try {
-        setIsLoadingImages(true);
-
         const response = await fetch("/api/hero-media", {
           method: "GET",
           cache: "no-store",
@@ -73,16 +70,26 @@ const HeroSection = () => {
         const mixed = shuffle([...(data.books || []), ...(data.movies || [])]);
 
         if (active && mixed.length > 0) {
-          setHeroImages(mixed.slice(0, 12));
+          const nextImages = mixed.slice(0, 12);
+          await Promise.allSettled(
+            nextImages.map(
+              (src) =>
+                new Promise<void>((resolve) => {
+                  const img = new Image();
+                  img.src = src;
+                  img.onload = () => resolve();
+                  img.onerror = () => resolve();
+                }),
+            ),
+          );
+          if (active) {
+            setHeroImages(nextImages);
+          }
         }
       } catch (error) {
         console.error("Hero media fetch failed:", error);
         if (active) {
           setHeroImages(FALLBACK_IMAGES);
-        }
-      } finally {
-        if (active) {
-          setIsLoadingImages(false);
         }
       }
     };
@@ -96,10 +103,11 @@ const HeroSection = () => {
 
   const handleGetStarted = () =>
     user ? router.push("/content-selection") : router.push("/auth");
+  const handleTryDemo = () => router.push("/demo");
 
   return (
     <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-950">
-      <ParallaxHeroImages images={heroImages} isLoading={isLoadingImages} />
+      <ParallaxHeroImages images={heroImages} />
 
       <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center gap-8 px-4 text-center">
         <motion.div
@@ -125,7 +133,7 @@ const HeroSection = () => {
           taste.
         </motion.p>
 
-        <div className="mt-6">
+        <div className="mt-6 flex flex-col items-center gap-3">
           <HoverBorderGradient
             onClick={handleGetStarted}
             containerClassName="rounded-full"
@@ -136,6 +144,12 @@ const HeroSection = () => {
               Get Started
             </motion.span>
           </HoverBorderGradient>
+          <button
+            onClick={handleTryDemo}
+            className="rounded-full border border-slate-300/80 bg-white/70 px-7 py-3 text-sm font-bold tracking-wide text-slate-700 transition-colors hover:bg-white dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200 dark:hover:bg-slate-900"
+          >
+            Try a Demo
+          </button>
         </div>
       </div>
 

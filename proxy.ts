@@ -29,8 +29,13 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
   const isApiRoute = pathname.startsWith('/api/');
-  const publicRoutes = ['/', '/auth', '/auth/callback'];
-  const isPublic = publicRoutes.some(route => pathname === route || pathname.startsWith('/auth/'));
+  const publicRoutes = ['/', '/auth', '/auth/callback', '/demo'];
+  const isPublic = publicRoutes.some(
+    route =>
+      pathname === route ||
+      pathname.startsWith('/auth/') ||
+      pathname.startsWith('/demo')
+  );
 
   if (isApiRoute) {
     return supabaseResponse;

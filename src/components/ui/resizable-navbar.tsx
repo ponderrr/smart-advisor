@@ -24,6 +24,7 @@ interface NavBodyProps {
 interface NavItemsProps {
   items: { name: string; link: string }[];
   className?: string;
+  scrolled?: boolean;
 }
 
 export const Navbar = ({ children, className }: NavbarProps) => {
@@ -53,6 +54,7 @@ export const Navbar = ({ children, className }: NavbarProps) => {
 export const NavBody = ({ children, className, scrolled = false }: NavBodyProps) => {
   return (
     <motion.div
+      data-main-navbar="true"
       initial={false}
       animate={{
         width: scrolled ? "min(900px, calc(100% - 2rem))" : "min(1280px, calc(100% - 2rem))",
@@ -73,30 +75,56 @@ export const NavBody = ({ children, className, scrolled = false }: NavBodyProps)
   );
 };
 
-export const NavItems = ({ items, className }: NavItemsProps) => {
+export const NavItems = ({ items, className, scrolled = false }: NavItemsProps) => {
   const handleAnchorClick = (
     event: React.MouseEvent<HTMLAnchorElement>,
     link: string,
   ) => {
     if (!link.startsWith("#")) return;
     event.preventDefault();
-    const section = document.querySelector(link);
-    section?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const section = document.querySelector(link) as HTMLElement | null;
+    if (!section) return;
+
+    const navbar = document.querySelector(
+      "[data-main-navbar='true']",
+    ) as HTMLElement | null;
+    const offset = (navbar?.offsetHeight ?? 96) + 16;
+    const top = section.getBoundingClientRect().top + window.scrollY - offset;
+
+    window.scrollTo({
+      top: Math.max(0, top),
+      behavior: "smooth",
+    });
   };
 
   return (
-    <div className={cn("hidden lg:flex items-center gap-10", className)}>
+    <motion.div
+      initial={false}
+      animate={{ opacity: scrolled ? 0.92 : 1, y: scrolled ? -2 : 0 }}
+      transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+      className={cn("hidden lg:flex items-center gap-10", className)}
+    >
       {items.map((item, idx) => (
-        <a
+        <motion.a
           key={idx}
           href={item.link}
           onClick={(event) => handleAnchorClick(event, item.link)}
+          initial={false}
+          animate={{
+            y: scrolled ? -1 : 0,
+            opacity: scrolled ? 0.95 : 1,
+          }}
+          transition={{
+            duration: 0.28,
+            delay: scrolled ? 0 : idx * 0.03,
+            ease: [0.22, 1, 0.36, 1],
+          }}
           className="text-lg font-bold tracking-tight text-slate-700 transition-colors hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400"
         >
           {item.name}
-        </a>
+        </motion.a>
       ))}
-    </div>
+    </motion.div>
   );
 };
 
