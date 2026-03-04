@@ -33,7 +33,11 @@ export const Navbar = ({ children, className }: NavbarProps) => {
   const { scrollY } = useScroll();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
-    setScrolled(latest > 32);
+    setScrolled((prev) => {
+      if (latest > 72) return true;
+      if (latest < 20) return false;
+      return prev;
+    });
   });
 
   return (
@@ -58,12 +62,12 @@ export const NavBody = ({ children, className, scrolled = false }: NavBodyProps)
       data-main-navbar="true"
       initial={false}
       animate={{
-        width: scrolled ? "min(900px, calc(100% - 2rem))" : "min(1280px, calc(100% - 2rem))",
+        width: scrolled ? "min(1040px, calc(100% - 2rem))" : "min(1280px, calc(100% - 2rem))",
         borderRadius: scrolled ? 999 : 24,
       }}
       transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "mx-auto hidden md:flex items-center justify-between px-8 py-3",
+        "mx-auto hidden md:flex items-center justify-between px-10 py-4",
         "border border-transparent",
         scrolled
           ? "bg-white/65 shadow-[0_14px_40px_-22px_rgba(15,23,42,0.42)] backdrop-blur-xl border-slate-200/50 dark:bg-slate-900/60 dark:border-slate-700/60 dark:shadow-[0_14px_40px_-20px_rgba(2,6,23,0.7)]"

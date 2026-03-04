@@ -40,13 +40,23 @@ async function fetchBooks(query: string, apiKey: string): Promise<DemoItem[]> {
 }
 
 async function fetchMovies(query: string, apiKey: string): Promise<DemoItem[]> {
-  const url = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(
+  const searchUrl = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(
     query,
   )}&include_adult=false&language=en-US&page=1&api_key=${apiKey}`;
-  const response = await fetch(url, { cache: "no-store" });
+  const response = await fetch(searchUrl, { cache: "no-store" });
   if (!response.ok) throw new Error(`TMDB error ${response.status}`);
   const data = await response.json();
-  const items = Array.isArray(data.results) ? data.results : [];
+  let items = Array.isArray(data.results) ? data.results : [];
+
+  if (items.length === 0) {
+    const discoverUrl = `https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=en-US&sort_by=popularity.desc&page=1&api_key=${apiKey}`;
+    const discoverResponse = await fetch(discoverUrl, { cache: "no-store" });
+    if (discoverResponse.ok) {
+      const discoverData = await discoverResponse.json();
+      items = Array.isArray(discoverData.results) ? discoverData.results : [];
+    }
+  }
+
   return items
     .map((item: any): DemoItem | null => {
       const poster = item?.poster_path
@@ -84,9 +94,22 @@ export async function GET(request: NextRequest) {
     }
 
     const results = await Promise.allSettled(tasks);
-    const merged = results
-      .flatMap((result) => (result.status === "fulfilled" ? result.value : []))
-      .slice(0, 8);
+    const fulfilled = results
+      .filter((result): result is PromiseFulfilledResult<DemoItem[]> => result.status === "fulfilled")
+      .map((result) => result.value);
+
+    const merged = (() => {
+      if (contentType !== "both") return fulfilled.flat().slice(0, 8);
+      const books = fulfilled.find((set) => set[0]?.type === "book") || [];
+      const movies = fulfilled.find((set) => set[0]?.type === "movie") || [];
+      const interleaved: DemoItem[] = [];
+      const max = Math.max(books.length, movies.length);
+      for (let i = 0; i < max; i += 1) {
+        if (movies[i]) interleaved.push(movies[i]);
+        if (books[i]) interleaved.push(books[i]);
+      }
+      return interleaved.slice(0, 8);
+    })();
 
     return NextResponse.json({ items: merged }, { status: 200 });
   } catch (error) {
