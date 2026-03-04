@@ -98,30 +98,16 @@ export const faqItems = [
 export const teamMembers = [
   {
     quote:
-      "The question flow feels personal and fast. I got movie picks I actually wanted to watch tonight.",
-    name: "AI Engine",
-    designation: "Smart Questionnaire Layer",
-    src: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=900&q=80",
+      "Built Smart Advisor to make recommendations feel personal, fast, and genuinely useful.",
+    name: "Andrew Ponder",
+    designation: "Creator",
+    src: "/Andrew.jpg",
   },
   {
     quote:
-      "Metadata enrichment from TMDB makes recommendations feel complete, not generic placeholders.",
-    name: "TMDB API",
-    designation: "Movie Intelligence",
-    src: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    quote:
-      "Google Books data fills in strong context so users can discover their next read with confidence.",
-    name: "Google Books",
-    designation: "Book Intelligence",
+      "Focused on creating a clean interface that keeps the experience smooth on desktop and mobile.",
+    name: "Vladimir Fiffie Jr",
+    designation: "Web Designer",
     src: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    quote:
-      "Persistent user history and favorites make the experience feel like a real product from day one.",
-    name: "Supabase",
-    designation: "Data & Auth Backbone",
-    src: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=900&q=80",
   },
 ];
