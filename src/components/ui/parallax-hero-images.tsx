@@ -12,14 +12,20 @@ import { cn } from "@/lib/utils";
 type ImagePosition = {
   src: string;
   position:
-    | "top-left"
-    | "top-right"
-    | "mid-left"
-    | "mid-right"
-    | "bottom-left"
-    | "bottom-right"
-    | "far-left"
-    | "far-right";
+  | "top-left"
+  | "top-right"
+  | "top-center-left"
+  | "top-center-right"
+  | "mid-left"
+  | "mid-right"
+  | "center-left"
+  | "center-right"
+  | "bottom-left"
+  | "bottom-right"
+  | "bottom-center-left"
+  | "bottom-center-right"
+  | "far-left"
+  | "far-right";
   depth: number;
   delay: number;
 };
@@ -30,10 +36,16 @@ const positionStyles: Record<
 > = {
   "top-left": { top: "8%", left: "4%" },
   "top-right": { top: "8%", right: "4%" },
+  "top-center-left": { top: "10%", left: "28%" },
+  "top-center-right": { top: "10%", right: "28%" },
   "mid-left": { top: "38%", left: "6%" },
   "mid-right": { top: "38%", right: "6%" },
+  "center-left": { top: "48%", left: "24%" },
+  "center-right": { top: "48%", right: "24%" },
   "bottom-left": { top: "68%", left: "4%" },
   "bottom-right": { top: "68%", right: "4%" },
+  "bottom-center-left": { top: "72%", left: "30%" },
+  "bottom-center-right": { top: "72%", right: "30%" },
   "far-left": { top: "52%", left: "2%" },
   "far-right": { top: "52%", right: "2%" },
 };
@@ -41,10 +53,16 @@ const positionStyles: Record<
 const positionOrder: ImagePosition["position"][] = [
   "top-left",
   "top-right",
+  "top-center-left",
+  "top-center-right",
   "mid-left",
   "mid-right",
+  "center-left",
+  "center-right",
   "bottom-left",
   "bottom-right",
+  "bottom-center-left",
+  "bottom-center-right",
   "far-left",
   "far-right",
 ];
@@ -52,8 +70,8 @@ const positionOrder: ImagePosition["position"][] = [
 type DepthVariant = "default" | "edge-focus";
 
 const depthValuesByVariant: Record<DepthVariant, number[]> = {
-  default: [0.3, 0.35, 0.9, 0.85, 0.4, 0.45, 0.25, 0.2],
-  "edge-focus": [0.85, 0.9, 0.3, 0.35, 0.8, 0.85, 0.4, 0.45],
+  default: [0.3, 0.35, 0.5, 0.55, 0.9, 0.85, 0.6, 0.65, 0.4, 0.45, 0.5, 0.45, 0.25, 0.2],
+  "edge-focus": [0.85, 0.9, 0.55, 0.6, 0.3, 0.35, 0.45, 0.5, 0.8, 0.85, 0.5, 0.55, 0.4, 0.45],
 };
 
 const SPRING_CONFIG = { damping: 25, stiffness: 120 };
@@ -80,7 +98,7 @@ export const ParallaxHeroImages = ({
   const smoothMouseY = useSpring(mouseY, SPRING_CONFIG);
 
   const positions = useMemo(() => {
-    const limitedImages = images.slice(0, 8);
+    const limitedImages = images.slice(0, 14);
     const depthValues = depthValuesByVariant[variant];
 
     return positionOrder.map((position, index) => ({
@@ -182,7 +200,7 @@ const ParallaxImage = memo(function ParallaxImage({
       {isLoading || !src ? (
         <div
           className={cn(
-            "aspect-4/3 h-20 w-32 rounded-lg bg-slate-200/60 shadow-sm ring-1 ring-black/5 animate-pulse sm:h-40 sm:w-56 md:h-52 md:w-80 dark:bg-slate-700/40 dark:ring-white/10",
+            "aspect-[2/3] h-28 w-20 rounded-lg bg-slate-200/60 shadow-sm ring-1 ring-black/5 animate-pulse sm:h-44 sm:w-32 md:h-56 md:w-40 dark:bg-slate-700/40 dark:ring-white/10",
             imageClassName,
           )}
         />
@@ -193,7 +211,7 @@ const ParallaxImage = memo(function ParallaxImage({
           loading="lazy"
           decoding="async"
           className={cn(
-            "aspect-4/3 h-20 w-32 rounded-lg object-cover shadow-sm ring-1 ring-black/10 sm:h-40 sm:w-56 md:h-52 md:w-80 dark:ring-white/10",
+            "aspect-[2/3] h-28 w-20 rounded-lg object-cover shadow-sm ring-1 ring-black/10 sm:h-44 sm:w-32 md:h-56 md:w-40 dark:ring-white/10",
             imageClassName,
           )}
         />

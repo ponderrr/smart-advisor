@@ -34,13 +34,16 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Handle email verification via token_hash
-  if (type === 'email' && tokenHash) {
+  // Handle email verification / password recovery via token_hash
+  if ((type === 'email' || type === 'recovery') && tokenHash) {
     const { error } = await supabase.auth.verifyOtp({
       token_hash: tokenHash,
-      type: 'email',
+      type: type as 'email' | 'recovery',
     });
     if (!error) {
+      if (type === 'recovery') {
+        return NextResponse.redirect(`${origin}/auth?recovery=true`);
+      }
       return NextResponse.redirect(`${origin}/auth?verified=true`);
     }
   }

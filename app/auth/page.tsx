@@ -12,6 +12,7 @@ const AuthPage = () => {
     signIn,
     signUp,
     resetPassword,
+    clearError,
     loading,
     error: authError,
     user,
@@ -32,6 +33,7 @@ const AuthPage = () => {
         onSignIn={signIn}
         onSignUp={signUp}
         onResetPassword={resetPassword}
+        onClearError={clearError}
       />
     </AuthLayout>
   );

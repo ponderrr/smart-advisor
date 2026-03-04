@@ -72,7 +72,7 @@ async function fetchBookCovers(apiKey: string): Promise<string[]> {
     .filter((cover): cover is string => Boolean(cover))
     .map(normalizeBookCover);
 
-  return shuffle(covers).slice(0, 4);
+  return shuffle(covers).slice(0, 6);
 }
 
 async function fetchMoviePosters(apiKey: string): Promise<string[]> {
@@ -90,7 +90,7 @@ async function fetchMoviePosters(apiKey: string): Promise<string[]> {
 
   const posters = results.map((item: any) => pickPoster(item?.poster_path)).filter(Boolean) as string[];
 
-  return shuffle(posters).slice(0, 4);
+  return shuffle(posters).slice(0, 6);
 }
 
 export async function GET() {
@@ -126,8 +126,8 @@ export async function GET() {
   }
 
   const payload: HeroMediaResponse = {
-    books: shuffle(books).slice(0, 4),
-    movies: shuffle(movies).slice(0, 4),
+    books: shuffle(books).slice(0, 6),
+    movies: shuffle(movies).slice(0, 6),
     status,
   };
 

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
+import { IconChevronsDown } from "@tabler/icons-react";
 import { FlipWords } from "@/components/ui/flip-words";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { ParallaxHeroImages } from "@/components/ui/parallax-hero-images";
@@ -26,6 +27,10 @@ const FALLBACK_IMAGES = [
   "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=900&q=80",
   "https://images.unsplash.com/photo-1513001900722-370f803f498d?auto=format&fit=crop&w=900&q=80",
   "https://images.unsplash.com/photo-1489599735734-79b4eece7e5f?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1542204165-65bf26472b9b?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1535398089889-dd807df1dfaa?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1528459105426-b9548367069b?auto=format&fit=crop&w=900&q=80",
 ];
 
 const shuffle = <T,>(items: T[]) => {
@@ -68,7 +73,7 @@ const HeroSection = () => {
         const mixed = shuffle([...(data.books || []), ...(data.movies || [])]);
 
         if (active && mixed.length > 0) {
-          setHeroImages(mixed.slice(0, 8));
+          setHeroImages(mixed.slice(0, 12));
         }
       } catch (error) {
         console.error("Hero media fetch failed:", error);
@@ -105,6 +110,8 @@ const HeroSection = () => {
         >
           Discover Your Next Favorite
           <br />
+          Obsession Across Every
+          <br />
           <FlipWords words={words} className="text-indigo-600 dark:text-indigo-400" />
         </motion.div>
 
@@ -121,9 +128,9 @@ const HeroSection = () => {
         <div className="mt-6">
           <HoverBorderGradient
             onClick={handleGetStarted}
-            containerClassName="rounded-full shadow-[0_0_40px_-10px_rgba(79,70,229,0.4)]"
+            containerClassName="rounded-full"
             as="button"
-            className="dark:bg-black bg-white text-black dark:text-white px-14 py-6 text-2xl font-black tracking-tighter"
+            className="dark:bg-black bg-white text-black dark:text-white px-14 py-6 text-2xl font-black tracking-tighter transition-colors hover:bg-indigo-600 hover:text-white"
           >
             <motion.span whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               Get Started
@@ -131,6 +138,23 @@ const HeroSection = () => {
           </HoverBorderGradient>
         </div>
       </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.8, duration: 0.5 }}
+        className="absolute inset-x-0 bottom-8 z-20 flex justify-center"
+      >
+        <div className="flex flex-col items-center gap-2 text-slate-500 dark:text-slate-400">
+          <span className="text-xs uppercase tracking-[0.2em]">Scroll to Explore</span>
+          <motion.div
+            animate={{ y: [0, 6, 0], opacity: [0.65, 1, 0.65] }}
+            transition={{ duration: 1.35, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <IconChevronsDown className="h-5 w-5" />
+          </motion.div>
+        </div>
+      </motion.div>
     </section>
   );
 };
