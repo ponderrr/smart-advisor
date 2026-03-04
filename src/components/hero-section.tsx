@@ -130,7 +130,7 @@ const HeroSection = () => {
             onClick={handleGetStarted}
             containerClassName="rounded-full"
             as="button"
-            className="dark:bg-black bg-white text-black dark:text-white px-14 py-6 text-2xl font-black tracking-tighter transition-colors hover:bg-indigo-600 hover:text-white"
+            className="dark:bg-black bg-white text-black dark:text-white px-14 py-6 text-2xl font-black tracking-tighter"
           >
             <motion.span whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               Get Started

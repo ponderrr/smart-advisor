@@ -261,7 +261,7 @@ export const AuthForm = ({
                   onChange={(event) => setAge(event.target.value)}
                   disabled={disabled}
                   aria-invalid={Boolean(errors.age)}
-                  className="focus-visible:ring-neutral-300 dark:focus-visible:ring-neutral-600"
+                  className="[appearance:textfield] focus-visible:ring-neutral-300 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none dark:focus-visible:ring-neutral-600"
                 />
               </FormField>
 
