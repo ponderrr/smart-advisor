@@ -13,6 +13,7 @@ export function HoverBorderGradient({
   as: Tag = "button",
   duration = 1,
   clockwise = true,
+  idleColor = "255, 255, 255",
   ...props
 }: React.PropsWithChildren<
   {
@@ -21,6 +22,7 @@ export function HoverBorderGradient({
     className?: string;
     duration?: number;
     clockwise?: boolean;
+    idleColor?: string;
   } & React.HTMLAttributes<HTMLElement>
 >) {
   const [hovered, setHovered] = useState<boolean>(false);
@@ -35,13 +37,14 @@ export function HoverBorderGradient({
     return directions[nextIndex];
   };
 
+  const idle = `rgb(${idleColor})`;
   const movingMap: Record<Direction, string> = {
-    TOP: "radial-gradient(20.7% 50% at 50% 0%, hsl(0, 0%, 100%) 0%, rgba(255, 255, 255, 0) 100%)",
-    LEFT: "radial-gradient(16.6% 43.1% at 0% 50%, hsl(0, 0%, 100%) 0%, rgba(255, 255, 255, 0) 100%)",
+    TOP: `radial-gradient(20.7% 50% at 50% 0%, ${idle} 0%, rgba(255, 255, 255, 0) 100%)`,
+    LEFT: `radial-gradient(16.6% 43.1% at 0% 50%, ${idle} 0%, rgba(255, 255, 255, 0) 100%)`,
     BOTTOM:
-      "radial-gradient(20.7% 50% at 50% 100%, hsl(0, 0%, 100%) 0%, rgba(255, 255, 255, 0) 100%)",
+      `radial-gradient(20.7% 50% at 50% 100%, ${idle} 0%, rgba(255, 255, 255, 0) 100%)`,
     RIGHT:
-      "radial-gradient(16.2% 41.199999999999996% at 100% 50%, hsl(0, 0%, 100%) 0%, rgba(255, 255, 255, 0) 100%)",
+      `radial-gradient(16.2% 41.199999999999996% at 100% 50%, ${idle} 0%, rgba(255, 255, 255, 0) 100%)`,
   };
 
   const highlight =

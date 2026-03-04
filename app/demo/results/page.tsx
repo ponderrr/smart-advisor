@@ -63,7 +63,7 @@ export default function DemoResultsPage() {
             : "both";
       setContentType(mappedType);
       setQuery(
-        `${parsed.contentType || "books"} ${parsed.mood || ""} ${parsed.pace || ""} recommended books`,
+        `${parsed.contentType || "media"} ${parsed.mood || ""} ${parsed.pace || ""} recommendations`,
       );
     } catch {
       setQuery("best fiction books");

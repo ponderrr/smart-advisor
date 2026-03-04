@@ -80,7 +80,7 @@ export default function DemoPage() {
       setShowValidationFlash(true);
       setValidationMessage("Please select an option before continuing.");
       window.setTimeout(() => setShowValidationFlash(false), 650);
-      window.setTimeout(() => setValidationMessage(null), 1600);
+      window.setTimeout(() => setValidationMessage(null), 3200);
       return;
     }
     if (step < DEMO_QUESTIONS.length - 1) {
@@ -123,7 +123,7 @@ export default function DemoPage() {
             <IconArrowLeft className="h-4 w-4" />
             Back
           </button>
-          <p className="text-sm font-black tracking-wide text-slate-700 dark:text-slate-200">
+          <p className="text-base font-extrabold tracking-wide text-slate-800 dark:text-slate-100 md:text-lg">
             {step + 1} out of {DEMO_QUESTIONS.length} questions
           </p>
           <div className="flex items-center gap-3">
@@ -194,7 +194,6 @@ export default function DemoPage() {
                   : { scale: 1, x: 0 }
               }
               transition={{ duration: 0.45 }}
-              className={cn(showValidationFlash && "rounded-full ring-2 ring-red-400/80")}
             >
               <HoverBorderGradient
                 as="button"

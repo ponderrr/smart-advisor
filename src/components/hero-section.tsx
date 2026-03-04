@@ -33,6 +33,7 @@ const HeroSection = () => {
   const router = useRouter();
   const { user } = useAuth();
   const [heroImages, setHeroImages] = useState<string[]>([]);
+  const [mediaPool, setMediaPool] = useState<string[]>([]);
 
   const words = useMemo(
     () => ["Movie", "Book", "Story", "Adventure", "Classic"],
@@ -70,6 +71,7 @@ const HeroSection = () => {
             ),
           );
           if (active) {
+            setMediaPool(mixed);
             setHeroImages(nextImages);
           }
         }
@@ -84,6 +86,18 @@ const HeroSection = () => {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (mediaPool.length <= 14) return;
+    let startIndex = 0;
+    const timer = setInterval(() => {
+      startIndex = (startIndex + 3) % mediaPool.length;
+      const rotated = [...mediaPool.slice(startIndex), ...mediaPool.slice(0, startIndex)];
+      setHeroImages(rotated.slice(0, 14));
+    }, 9000);
+
+    return () => clearInterval(timer);
+  }, [mediaPool]);
 
   const handleGetStarted = () =>
     user ? router.push("/content-selection") : router.push("/auth");
@@ -120,6 +134,7 @@ const HeroSection = () => {
         <div className="mt-6 flex flex-col items-center gap-3">
           <HoverBorderGradient
             onClick={handleGetStarted}
+            idleColor="17, 24, 39"
             containerClassName="rounded-full"
             as="button"
             className="dark:bg-black bg-white text-black dark:text-white px-14 py-6 text-2xl font-black tracking-tighter"

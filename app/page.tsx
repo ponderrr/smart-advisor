@@ -57,6 +57,7 @@ export default function Index() {
             <ThemeToggle />
             <HoverBorderGradient
               onClick={handleGetStarted}
+              idleColor="17, 24, 39"
               containerClassName="rounded-full"
               className="whitespace-nowrap bg-white px-6 py-2.5 text-base font-black leading-none tracking-tighter text-black dark:bg-black dark:text-white"
             >
@@ -107,6 +108,7 @@ export default function Index() {
             ))}
             <HoverBorderGradient
               onClick={handleGetStarted}
+              idleColor="17, 24, 39"
               containerClassName="mt-2 w-full rounded-full"
               className="w-full py-4 text-center text-xs font-black uppercase tracking-widest"
             >
@@ -147,15 +149,32 @@ export default function Index() {
                   </p>
                 </div>
 
-                <div className="relative mb-5 overflow-hidden rounded-2xl">
-                  <img
-                    src={card.image}
-                    alt={card.title}
-                    className="h-40 w-full object-cover transition-all duration-500 group-hover:scale-105"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+                <div className="mb-5 rounded-2xl border border-slate-200/80 bg-slate-100/80 p-4 dark:border-slate-700 dark:bg-slate-800/60">
+                  {idx === 0 ? (
+                    <div className="space-y-3">
+                      <div className="h-3 w-2/3 rounded-full bg-slate-300 dark:bg-slate-600" />
+                      <div className="h-3 w-1/2 rounded-full bg-slate-300 dark:bg-slate-600" />
+                      <div className="flex items-center gap-2 pt-2">
+                        <div className="h-8 w-8 rounded-full bg-indigo-400/70" />
+                        <div className="h-8 w-8 rounded-full bg-violet-400/70" />
+                        <div className="h-8 w-8 rounded-full bg-cyan-400/70" />
+                      </div>
+                    </div>
+                  ) : idx === 1 ? (
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="h-16 rounded-lg bg-slate-300/90 dark:bg-slate-600/90" />
+                      <div className="h-16 rounded-lg bg-slate-300/90 dark:bg-slate-600/90" />
+                      <div className="col-span-2 h-3 rounded-full bg-slate-300 dark:bg-slate-600" />
+                      <div className="col-span-2 h-3 w-4/5 rounded-full bg-slate-300 dark:bg-slate-600" />
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="h-10 w-full rounded-lg bg-slate-300/90 dark:bg-slate-600/90" />
+                      <div className="h-3 w-full rounded-full bg-slate-300 dark:bg-slate-600" />
+                      <div className="h-3 w-3/4 rounded-full bg-slate-300 dark:bg-slate-600" />
+                      <div className="h-3 w-2/3 rounded-full bg-slate-300 dark:bg-slate-600" />
+                    </div>
+                  )}
                 </div>
 
                 <div className="relative z-10">
@@ -333,7 +352,7 @@ const RotatingLogoSets = () => {
       <AnimatePresence mode="popLayout">
         <motion.div
           key={`logo-set-${activeSet}`}
-          className="flex flex-wrap items-center justify-center gap-8"
+          className="flex min-h-20 flex-wrap items-center justify-center gap-8"
         >
           {logoSets[activeSet].map((logo, index) => (
             <motion.div
@@ -342,15 +361,15 @@ const RotatingLogoSets = () => {
               animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
               exit={{ y: -40, opacity: 0, filter: "blur(10px)" }}
               transition={{ duration: 0.45, delay: index * 0.1, ease: "easeOut" }}
-              className="flex min-w-[140px] items-center justify-center"
+              className="flex h-16 min-w-[150px] items-center justify-center"
             >
               {logo.src ? (
                 <img
                   src={logo.src}
                   alt={logo.name}
                   className={cn(
-                    "w-auto grayscale brightness-0 transition dark:invert",
-                    logo.name === "Google Books" ? "h-14 md:h-16" : "h-10 md:h-11",
+                    "w-auto object-contain grayscale brightness-0 transition dark:invert",
+                    logo.name === "Google Books" ? "h-12 md:h-[3.25rem]" : "h-10 md:h-11",
                   )}
                   loading="lazy"
                   decoding="async"
