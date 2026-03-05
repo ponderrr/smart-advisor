@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from 'next/navigation';
-import { RefreshCw, Heart, LogOut, Star, BookOpen, Film } from "lucide-react";
+import { RefreshCw, Heart, Star, BookOpen, Film } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { enhancedRecommendationsService } from "@/features/recommendations/services/enhanced-recommendations-service";
@@ -70,9 +70,9 @@ const ResultsShimmerLoader = ({ step }: { step: string }) => {
     <main className="px-6 pb-20 pt-32 md:pt-36">
       <div className="mx-auto max-w-6xl">
         <div className="mb-6">
-          <div className="h-4 w-28 animate-pulse rounded-full bg-slate-200 dark:bg-slate-800" />
-          <div className="mt-4 h-12 w-72 animate-pulse rounded-full bg-slate-200 dark:bg-slate-800" />
-          <div className="mt-3 h-4 w-96 max-w-full animate-pulse rounded-full bg-slate-200 dark:bg-slate-800" />
+          <div className="shimmer-container h-4 w-28 rounded-full" />
+          <div className="shimmer-container mt-4 h-12 w-72 rounded-full" />
+          <div className="shimmer-container mt-3 h-4 w-96 max-w-full rounded-full" />
         </div>
 
         <div className="mb-6 overflow-hidden rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-sm dark:border-slate-700/70 dark:bg-slate-900/65">
@@ -83,18 +83,18 @@ const ResultsShimmerLoader = ({ step }: { step: string }) => {
         </div>
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-          {[...Array(2)].map((_, i) => (
+          {[...Array(4)].map((_, i) => (
             <div
               key={i}
               className="rounded-3xl border border-slate-200/80 bg-white/80 p-5 shadow-sm dark:border-slate-700/70 dark:bg-slate-900/65"
             >
               <div className="grid grid-cols-[130px_1fr] gap-4">
-                <div className="aspect-[2/3] animate-pulse rounded-2xl bg-slate-200 dark:bg-slate-800" />
+                <div className="shimmer-container aspect-[2/3] rounded-2xl" />
                 <div className="space-y-3">
-                  <div className="h-7 w-3/4 animate-pulse rounded-full bg-slate-200 dark:bg-slate-800" />
-                  <div className="h-4 w-1/2 animate-pulse rounded-full bg-slate-200 dark:bg-slate-800" />
-                  <div className="h-20 animate-pulse rounded-2xl bg-slate-200 dark:bg-slate-800" />
-                  <div className="h-20 animate-pulse rounded-2xl bg-slate-200 dark:bg-slate-800" />
+                  <div className="shimmer-container h-7 w-3/4 rounded-full" />
+                  <div className="shimmer-container h-4 w-1/2 rounded-full" />
+                  <div className="shimmer-container h-20 rounded-2xl" />
+                  <div className="shimmer-container h-20 rounded-2xl" />
                 </div>
               </div>
             </div>
@@ -364,9 +364,8 @@ const ResultsPage = () => {
           <button
             type="button"
             onClick={handleSignOut}
-            className="inline-flex items-center gap-2 text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400"
+            className="text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400"
           >
-            <LogOut size={14} />
             Sign Out
           </button>
         </div>
@@ -471,7 +470,7 @@ const ResultsPage = () => {
               <button
                 type="button"
                 onClick={handleRetry}
-                className="rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-500"
+                className="rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-indigo-500 dark:text-white"
               >
                 Try Again
               </button>

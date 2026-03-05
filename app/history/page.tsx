@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from 'next/navigation';
-import { BookOpen, Film, Heart, LogOut, Plus, Trash2 } from "lucide-react";
+import { BookOpen, Film, Heart, Plus, Trash2 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { databaseService, FilterOptions } from "@/features/recommendations/services/database-service";
 import { Recommendation } from "@/features/recommendations/types/recommendation";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { GlowPillButton } from "@/components/ui/glow-pill-button";
 import {
   Navbar,
   NavBody,
@@ -34,6 +35,30 @@ const sortOptions: { value: SortMode; label: string }[] = [
   { value: "oldest", label: "Oldest" },
   { value: "favorites_first", label: "Favorites First" },
 ];
+
+const HistoryShimmerLoader = () => {
+  return (
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
+      {[...Array(10)].map((_, i) => (
+        <div
+          key={i}
+          className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 p-3 shadow-sm backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/65"
+        >
+          <div className="shimmer-container aspect-[2/3] rounded-2xl" />
+          <div className="mt-3 space-y-2">
+            <div className="shimmer-container h-4 w-4/5 rounded-full" />
+            <div className="shimmer-container h-3 w-3/5 rounded-full" />
+            <div className="shimmer-container h-8 rounded-xl" />
+            <div className="flex gap-2">
+              <div className="shimmer-container h-7 w-1/2 rounded-full" />
+              <div className="shimmer-container h-7 w-1/2 rounded-full" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const AccountHistoryPage = () => {
   const router = useRouter();
@@ -136,9 +161,8 @@ const AccountHistoryPage = () => {
             <button
               type="button"
               onClick={handleSignOut}
-              className="inline-flex items-center gap-2 text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400"
+              className="text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400"
             >
-              <LogOut size={14} />
               Sign Out
             </button>
           </div>
@@ -190,20 +214,20 @@ const AccountHistoryPage = () => {
               <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
                 History
               </p>
-              <h1 className="mt-3 text-4xl font-black tracking-tighter md:text-5xl">
+              <h1 className="mt-3 text-5xl font-black tracking-tighter md:text-6xl">
                 Your Recommendation Library
               </h1>
               <p className="mt-3 max-w-2xl text-base text-slate-600 dark:text-slate-400 md:text-lg">
                 Browse everything you have saved and refine what you keep.
               </p>
             </div>
-            <button
+            <GlowPillButton
               onClick={() => router.push('/content-selection')}
-              className="inline-flex items-center gap-2 rounded-2xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-800"
+              className="inline-flex items-center gap-2 border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
             >
               <Plus size={16} />
               Get New Recommendation
-            </button>
+            </GlowPillButton>
           </div>
 
           <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -226,19 +250,14 @@ const AccountHistoryPage = () => {
           <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-wrap gap-2">
               {filterOptions.map((opt) => (
-                <button
+                <GlowPillButton
                   key={opt.value}
-                  type="button"
                   onClick={() => setFilter(opt.value)}
-                  className={cn(
-                    "rounded-full border px-4 py-2 text-sm font-semibold transition-colors",
-                    filter === opt.value
-                      ? "border-indigo-500 bg-indigo-500 text-white"
-                      : "border-slate-300 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-800",
-                  )}
+                  active={filter === opt.value}
+                  className="px-4 py-2 text-sm font-semibold"
                 >
                   {opt.label}
-                </button>
+                </GlowPillButton>
               ))}
             </div>
 
@@ -259,9 +278,7 @@ const AccountHistoryPage = () => {
           </div>
 
           {loading ? (
-            <div className="rounded-3xl border border-slate-200/80 bg-white/80 p-6 text-slate-600 shadow-sm backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/65 dark:text-slate-300">
-              Loading your recommendations...
-            </div>
+            <HistoryShimmerLoader />
           ) : recommendations.length === 0 ? (
             <div className="rounded-3xl border border-slate-200/80 bg-white/80 p-10 text-center shadow-sm backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/65">
               <h2 className="text-2xl font-black tracking-tight">
@@ -270,12 +287,12 @@ const AccountHistoryPage = () => {
               <p className="mx-auto mt-2 max-w-xl text-sm text-slate-600 dark:text-slate-400">
                 Try a different filter or generate a fresh recommendation set.
               </p>
-              <button
+              <GlowPillButton
                 onClick={() => router.push('/content-selection')}
-                className="mt-5 rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-500"
+                className="mt-5 bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-black dark:text-white"
               >
                 Start New Quiz
-              </button>
+              </GlowPillButton>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
@@ -317,26 +334,26 @@ const AccountHistoryPage = () => {
                     </p>
 
                     <div className="mt-4 flex items-center justify-between">
-                      <button
+                      <GlowPillButton
                         onClick={() => handleToggleFavorite(rec.id)}
                         className={cn(
-                          "inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",
+                          "inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold",
                           rec.is_favorited
                             ? "bg-rose-500 text-white"
-                            : "bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700",
+                            : "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
                         )}
                       >
                         <Heart size={12} fill={rec.is_favorited ? "currentColor" : "none"} />
                         Favorite
-                      </button>
+                      </GlowPillButton>
 
-                      <button
+                      <GlowPillButton
                         onClick={() => handleDeleteRecommendation(rec.id)}
-                        className="inline-flex items-center gap-1 rounded-full bg-red-500/10 px-3 py-1.5 text-xs font-semibold text-red-600 transition-colors hover:bg-red-500/20 dark:text-red-400"
+                        className="inline-flex items-center gap-1 bg-red-500/10 px-3 py-1.5 text-xs font-semibold text-red-600 dark:text-red-400"
                       >
                         <Trash2 size={12} />
                         Delete
-                      </button>
+                      </GlowPillButton>
                     </div>
                   </div>
                 </article>

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, BookOpen, Film, LogOut } from "lucide-react";
+import { ArrowRight, BookOpen, Film } from "lucide-react";
 import { motion } from "framer-motion";
 import {
   Bar,
@@ -124,9 +124,8 @@ const DashboardPage = () => {
             <button
               type="button"
               onClick={handleSignOut}
-              className="inline-flex items-center gap-2 text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400"
+              className="text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400"
             >
-              <LogOut size={14} />
               Sign Out
             </button>
           </div>

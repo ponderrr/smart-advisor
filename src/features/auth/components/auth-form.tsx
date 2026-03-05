@@ -61,6 +61,7 @@ export const AuthForm = ({
   const searchParams = useSearchParams();
   const [mode, setMode] = useState<AuthMode>("signin");
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [age, setAge] = useState("");
@@ -146,6 +147,7 @@ export const AuthForm = ({
     setShowConfirmPassword(false);
     if (nextMode !== "signup") {
       setAge("");
+      setUsername("");
     }
     setRememberFor30Days(false);
     setHeadingChoice((prev) => ({
@@ -173,6 +175,17 @@ export const AuthForm = ({
     }
 
     if (mode === "signup") {
+      const trimmedUsername = username.trim();
+      if (!trimmedUsername) {
+        nextErrors.username = "Username is required";
+      } else if (trimmedUsername.length < 2) {
+        nextErrors.username = "Use at least 2 characters";
+      } else if (trimmedUsername.length > 24) {
+        nextErrors.username = "Use 24 characters or fewer";
+      } else if (!/^[a-zA-Z0-9._-]+$/.test(trimmedUsername)) {
+        nextErrors.username = "Use letters, numbers, dots, dashes, or underscores";
+      }
+
       const parsedAge = Number(age);
       if (!age.trim()) {
         nextErrors.age = "Age is required";
@@ -228,15 +241,7 @@ export const AuthForm = ({
       return result;
     }
 
-    const inferredName =
-      email.split("@")[0]?.replace(/[._-]+/g, " ").trim() || "New User";
-    const name = inferredName
-      .split(" ")
-      .filter(Boolean)
-      .map((part) => part[0]?.toUpperCase() + part.slice(1))
-      .join(" ");
-
-    const result = await onSignUp(email, password, name, Number(age));
+    const result = await onSignUp(email, password, username.trim(), Number(age));
 
     if (result.error) {
       setErrors({ general: result.error });
@@ -249,6 +254,7 @@ export const AuthForm = ({
     setPassword("");
     setConfirmPassword("");
     setAge("");
+    setUsername("");
     return { error: null };
   };
 
@@ -256,7 +262,7 @@ export const AuthForm = ({
     <div
       className={cn(
         "mx-auto w-full max-w-md overflow-hidden rounded-2xl border border-slate-200/70 bg-white/85 p-5 shadow-sm backdrop-blur-md transition-[min-height] duration-300 dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-6",
-        mode === "signup" && "min-h-[560px]",
+        mode === "signup" && "min-h-[620px]",
         mode === "signin" && "min-h-[500px]",
         mode === "forgot" && "min-h-[430px]",
       )}
@@ -339,6 +345,20 @@ export const AuthForm = ({
               transition={{ duration: 0.2, ease: "easeOut" }}
               className="space-y-4"
             >
+              <FormField label="Username" htmlFor="auth-username" error={errors.username}>
+                <Input
+                  id="auth-username"
+                  type="text"
+                  autoComplete="username"
+                  placeholder="yourname"
+                  value={username}
+                  onChange={(event) => setUsername(event.target.value)}
+                  disabled={disabled}
+                  aria-invalid={Boolean(errors.username)}
+                  className="focus-visible:ring-slate-400 dark:focus-visible:ring-slate-500"
+                />
+              </FormField>
+
               <FormField label="Age" htmlFor="auth-age" error={errors.age}>
                 <Input
                   id="auth-age"
@@ -496,7 +516,7 @@ export const AuthForm = ({
                       setErrors({ general: result.error });
                     }
                   }}
-                  className="shadow-input inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 transition-all hover:-translate-y-0.5 hover:border-violet-400 hover:bg-violet-50 hover:text-violet-700 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-violet-400 dark:hover:bg-violet-500/20 dark:hover:text-violet-200"
+                  className="shadow-input inline-flex h-10 w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 transition-all hover:-translate-y-0.5 hover:border-violet-400 hover:bg-violet-50 hover:text-violet-700 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-violet-400 dark:hover:bg-violet-500/20 dark:hover:text-violet-200"
                   aria-label="Continue with Google"
                   disabled={disabled}
                 >

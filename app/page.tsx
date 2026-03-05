@@ -15,6 +15,7 @@ import { BrandWordmark } from "@/components/brand-wordmark";
 import { ThemeToggle } from "@/components/theme-toggle";
 import FeaturesSectionDemo from "@/components/features-section-demo-3";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
+import { GlowPillButton } from "@/components/ui/glow-pill-button";
 import {
   Navbar,
   NavBody,
@@ -110,6 +111,19 @@ export default function Index() {
           <div className="flex min-w-0 flex-1 items-center justify-end gap-4">
             <ThemeToggle />
             {user && (
+              <HoverBorderGradient
+                onClick={() => router.push("/dashboard")}
+                idleColor="17, 24, 39"
+                darkIdleColor="255, 255, 255"
+                highlightColor="139, 92, 246"
+                darkHighlightColor="167, 139, 250"
+                containerClassName="rounded-full"
+                className="whitespace-nowrap bg-white px-6 py-2.5 text-base font-black leading-none tracking-tighter text-black dark:bg-black dark:text-white"
+              >
+                Dashboard
+              </HoverBorderGradient>
+            )}
+            {user && (
               <button
                 type="button"
                 onClick={handleSignOut}
@@ -177,6 +191,22 @@ export default function Index() {
               </HoverBorderGradient>
             )}
             {user && (
+              <HoverBorderGradient
+                onClick={() => {
+                  router.push("/dashboard");
+                  setIsMobileMenuOpen(false);
+                }}
+                idleColor="17, 24, 39"
+                darkIdleColor="255, 255, 255"
+                highlightColor="139, 92, 246"
+                darkHighlightColor="167, 139, 250"
+                containerClassName="mt-2 w-full rounded-full"
+                className="w-full py-4 text-center text-xs font-black uppercase tracking-widest"
+              >
+                Dashboard
+              </HoverBorderGradient>
+            )}
+            {user && (
               <button
                 type="button"
                 onClick={async () => {
@@ -206,11 +236,7 @@ export default function Index() {
             </p>
           </div>
 
-          <motion.div
-            key={activeHowItWorks}
-            initial={{ opacity: 0, y: 14, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.35, ease: "easeOut" }}
+          <div
             className={cn(
               "relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 p-4 shadow-sm backdrop-blur-md md:p-6",
               "dark:border-slate-700/70 dark:bg-slate-900/65",
@@ -231,11 +257,14 @@ export default function Index() {
               <video
                 key={`how-step-${activeHowItWorks}`}
                 className="aspect-video w-full"
-                controls
+                autoPlay
                 muted
                 playsInline
-                preload="metadata"
+                preload="auto"
                 src={howItWorksVideos[activeHowItWorks] ?? howItWorksVideos[0]}
+                onEnded={() =>
+                  setActiveHowItWorks((prev) => (prev + 1) % howItWorksInteractive.length)
+                }
               />
             </div>
 
@@ -243,19 +272,13 @@ export default function Index() {
               {howItWorksInteractive.map((step, idx) => {
                 const isActive = idx === activeHowItWorks;
                 return (
-                  <button
+                  <GlowPillButton
                     key={step.title}
-                    type="button"
                     onClick={() => setActiveHowItWorks(idx)}
-                    className={cn(
-                      "rounded-full border px-4 py-2 text-sm font-bold transition-colors",
-                      isActive
-                        ? "border-indigo-500 bg-indigo-500 text-white"
-                        : "border-slate-300 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-800",
-                    )}
+                    active={isActive}
                   >
                     Step {idx + 1}
-                  </button>
+                  </GlowPillButton>
                 );
               })}
             </div>
@@ -266,7 +289,7 @@ export default function Index() {
             <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400 md:text-sm">
               {howItWorksInteractive[activeHowItWorks].detail}
             </p>
-          </motion.div>
+          </div>
 
           <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-3">
             {howItWorksCards.map((card, idx) => (
