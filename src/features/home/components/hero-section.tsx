@@ -123,9 +123,10 @@ const HeroSection = () => {
     return () => clearInterval(timer);
   }, [mediaPool, heroImages]);
 
-  const handleGetStarted = () =>
+  const handlePrimaryCta = () =>
     user ? router.push("/dashboard") : router.push("/auth");
-  const handleTryDemo = () => router.push("/demo");
+  const handleSecondaryCta = () =>
+    user ? router.push("/history") : router.push("/demo");
 
   return (
     <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-slate-50 transition-colors duration-300 dark:bg-slate-950">
@@ -157,7 +158,7 @@ const HeroSection = () => {
 
         <div className="mt-6 flex flex-col items-center gap-3">
           <HoverBorderGradient
-            onClick={handleGetStarted}
+            onClick={handlePrimaryCta}
             idleColor="17, 24, 39"
             darkIdleColor="255, 255, 255"
             highlightColor="139, 92, 246"
@@ -167,14 +168,14 @@ const HeroSection = () => {
             className="dark:bg-black bg-white text-black dark:text-white px-14 py-6 text-2xl font-black tracking-tighter"
           >
             <motion.span whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              Get Started
+              {user ? "Go to Dashboard" : "Get Started"}
             </motion.span>
           </HoverBorderGradient>
           <button
-            onClick={handleTryDemo}
+            onClick={handleSecondaryCta}
             className="rounded-full border border-slate-300/80 bg-white/70 px-7 py-3 text-sm font-bold tracking-wide text-slate-700 transition-colors hover:bg-white dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200 dark:hover:bg-slate-900"
           >
-            Try a Demo
+            {user ? "View History" : "Try a Demo"}
           </button>
         </div>
       </div>

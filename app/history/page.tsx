@@ -7,7 +7,6 @@ import { useAuth } from "@/features/auth/hooks/use-auth";
 import { databaseService, FilterOptions } from "@/features/recommendations/services/database-service";
 import { Recommendation } from "@/features/recommendations/types/recommendation";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import {
   Navbar,
   NavBody,
@@ -47,8 +46,8 @@ const AccountHistoryPage = () => {
 
   const historyNavItems = [
     { name: "Dashboard", link: "/dashboard" },
-    { name: "Start Quiz", link: "/content-selection" },
     { name: "History", link: "/history" },
+    { name: "Settings", link: "/settings" },
   ];
 
   useEffect(() => {
@@ -137,22 +136,11 @@ const AccountHistoryPage = () => {
             <button
               type="button"
               onClick={handleSignOut}
-              className="inline-flex items-center gap-2 text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400"
+              className="inline-flex items-center gap-2 text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400"
             >
               <LogOut size={14} />
               Sign Out
             </button>
-            <HoverBorderGradient
-              onClick={() => router.push("/content-selection")}
-              idleColor="17, 24, 39"
-              darkIdleColor="255, 255, 255"
-              highlightColor="139, 92, 246"
-              darkHighlightColor="167, 139, 250"
-              containerClassName="rounded-full"
-              className="whitespace-nowrap bg-white px-6 py-2.5 text-base font-black leading-none tracking-tighter text-black dark:bg-black dark:text-white"
-            >
-              Start Quiz
-            </HoverBorderGradient>
           </div>
         </NavBody>
 
@@ -181,27 +169,13 @@ const AccountHistoryPage = () => {
                 {item.name}
               </button>
             ))}
-            <HoverBorderGradient
-              onClick={() => {
-                router.push("/content-selection");
-                setIsMobileMenuOpen(false);
-              }}
-              idleColor="17, 24, 39"
-              darkIdleColor="255, 255, 255"
-              highlightColor="139, 92, 246"
-              darkHighlightColor="167, 139, 250"
-              containerClassName="mt-2 w-full rounded-full"
-              className="w-full py-4 text-center text-xs font-black uppercase tracking-widest"
-            >
-              Start Quiz
-            </HoverBorderGradient>
             <button
               type="button"
               onClick={async () => {
                 await handleSignOut();
                 setIsMobileMenuOpen(false);
               }}
-              className="text-left text-xl font-black tracking-tight text-slate-800 dark:text-slate-100"
+              className="text-left text-xl font-black tracking-tight text-rose-600 dark:text-rose-400"
             >
               Sign Out
             </button>
@@ -298,7 +272,7 @@ const AccountHistoryPage = () => {
               </p>
               <button
                 onClick={() => router.push('/content-selection')}
-                className="mt-5 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-500"
+                className="mt-5 rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-500"
               >
                 Start New Quiz
               </button>

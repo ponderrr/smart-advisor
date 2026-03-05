@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from 'next/navigation';
-import { Book, Film, LogOut, Target } from "lucide-react";
+import { LogOut } from "lucide-react";
+import { motion } from "framer-motion";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useQuizStore } from '@/features/quiz/store/quiz-store';
 import { ThemeToggle } from "@/components/theme-toggle";
-import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
+import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import {
   Navbar,
   NavBody,
@@ -23,43 +24,75 @@ type ContentType = "movie" | "book" | "both" | null;
 
 interface SelectionCardProps {
   id: ContentType;
-  icon: React.ReactNode;
   title: string;
   description: string;
+  mediaSrc: string;
+  secondaryMediaSrc?: string;
   isSelected: boolean;
   onClick: (type: ContentType) => void;
 }
 
 const SelectionCard: React.FC<SelectionCardProps> = ({
   id,
-  icon,
   title,
   description,
+  mediaSrc,
+  secondaryMediaSrc,
   isSelected,
   onClick,
 }) => {
   return (
-    <button
+    <motion.button
       type="button"
       onClick={() => onClick(id)}
+      whileHover={{ y: -4 }}
       className={cn(
-        "w-full rounded-3xl border p-6 text-left shadow-sm backdrop-blur-md transition-all duration-300",
+        "w-full overflow-hidden rounded-3xl border p-0 text-left shadow-sm backdrop-blur-md transition-all duration-300",
         isSelected
           ? "border-indigo-500 bg-white shadow-lg dark:border-indigo-400 dark:bg-slate-900/70"
           : "border-slate-200/80 bg-white/80 hover:-translate-y-1 hover:border-indigo-300 hover:shadow-md dark:border-slate-700/70 dark:bg-slate-900/65 dark:hover:border-indigo-500/60",
       )}
     >
-      <div className={cn(
-        "mb-4 inline-flex h-11 w-11 items-center justify-center rounded-full",
-        isSelected
-          ? "bg-indigo-600 text-white dark:bg-indigo-400 dark:text-slate-900"
-          : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200",
-      )}>
-        {icon}
+      <div className="relative aspect-[16/9] overflow-hidden bg-slate-200 dark:bg-slate-800">
+        {secondaryMediaSrc ? (
+          <div className="grid h-full w-full grid-cols-2 gap-1 p-1">
+            <video
+              src={mediaSrc}
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="auto"
+              className="h-full w-full rounded-lg object-cover"
+            />
+            <video
+              src={secondaryMediaSrc}
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="auto"
+              className="h-full w-full rounded-lg object-cover"
+            />
+          </div>
+        ) : (
+          <video
+            src={mediaSrc}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            className="h-full w-full object-contain p-2"
+          />
+        )}
       </div>
-      <h3 className="text-2xl font-black tracking-tight">{title}</h3>
-      <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{description}</p>
-    </button>
+
+      <div className="p-5">
+        <h3 className="text-2xl font-black tracking-tight">{title}</h3>
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{description}</p>
+      </div>
+    </motion.button>
   );
 };
 
@@ -73,8 +106,8 @@ const ContentSelectionPage = () => {
 
   const navItems = [
     { name: "Dashboard", link: "/dashboard" },
-    { name: "Start Quiz", link: "/content-selection" },
     { name: "History", link: "/history" },
+    { name: "Settings", link: "/settings" },
   ];
 
   const handleContinue = async () => {
@@ -100,21 +133,22 @@ const ContentSelectionPage = () => {
   const cards = [
     {
       id: "movie" as ContentType,
-      icon: <Film size={22} />,
       title: "Movie",
       description: "Find a movie recommendation that fits your current mood and pace.",
+      mediaSrc: "/animations/Popcorn.webm",
     },
     {
       id: "book" as ContentType,
-      icon: <Book size={22} />,
       title: "Book",
       description: "Get a reading recommendation tailored to your style and interests.",
+      mediaSrc: "/animations/Books.webm",
     },
     {
       id: "both" as ContentType,
-      icon: <Target size={22} />,
       title: "Both",
       description: "Get one movie and one book recommendation in the same flow.",
+      mediaSrc: "/animations/Popcorn.webm",
+      secondaryMediaSrc: "/animations/Books.webm",
     },
   ];
 
@@ -135,22 +169,11 @@ const ContentSelectionPage = () => {
             <button
               type="button"
               onClick={handleSignOut}
-              className="inline-flex items-center gap-2 text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400"
+              className="inline-flex items-center gap-2 text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400"
             >
               <LogOut size={14} />
               Sign Out
             </button>
-            <HoverBorderGradient
-              onClick={handleContinue}
-              idleColor="17, 24, 39"
-              darkIdleColor="255, 255, 255"
-              highlightColor="139, 92, 246"
-              darkHighlightColor="167, 139, 250"
-              containerClassName="rounded-full"
-              className="whitespace-nowrap bg-white px-6 py-2.5 text-base font-black leading-none tracking-tighter text-black dark:bg-black dark:text-white"
-            >
-              Continue
-            </HoverBorderGradient>
           </div>
         </NavBody>
 
@@ -179,27 +202,13 @@ const ContentSelectionPage = () => {
                 {item.name}
               </button>
             ))}
-            <HoverBorderGradient
-              onClick={() => {
-                handleContinue();
-                setIsMobileMenuOpen(false);
-              }}
-              idleColor="17, 24, 39"
-              darkIdleColor="255, 255, 255"
-              highlightColor="139, 92, 246"
-              darkHighlightColor="167, 139, 250"
-              containerClassName="mt-2 w-full rounded-full"
-              className="w-full py-4 text-center text-xs font-black uppercase tracking-widest"
-            >
-              Continue
-            </HoverBorderGradient>
             <button
               type="button"
               onClick={async () => {
                 await handleSignOut();
                 setIsMobileMenuOpen(false);
               }}
-              className="text-left text-xl font-black tracking-tight text-slate-800 dark:text-slate-100"
+              className="text-left text-xl font-black tracking-tight text-rose-600 dark:text-rose-400"
             >
               Sign Out
             </button>
@@ -222,9 +231,10 @@ const ContentSelectionPage = () => {
               <SelectionCard
                 key={card.id}
                 id={card.id}
-                icon={card.icon}
                 title={card.title}
                 description={card.description}
+                mediaSrc={card.mediaSrc}
+                secondaryMediaSrc={card.secondaryMediaSrc}
                 isSelected={selectedType === card.id}
                 onClick={setSelectedType}
               />
@@ -232,19 +242,14 @@ const ContentSelectionPage = () => {
           </div>
 
           <div className="mt-8 flex justify-center">
-            <button
-              type="button"
+            <StatefulButton
               onClick={handleContinue}
               disabled={!selectedType || isLoading}
-              className={cn(
-                "rounded-xl px-8 py-3 text-sm font-semibold transition-colors",
-                selectedType && !isLoading
-                  ? "bg-indigo-600 text-white hover:bg-indigo-500"
-                  : "cursor-not-allowed bg-slate-300 text-slate-500 dark:bg-slate-800 dark:text-slate-500",
-              )}
+              state={isLoading ? "loading" : "idle"}
+              className="h-11 w-auto rounded-full px-8 text-sm font-semibold"
             >
-              {isLoading ? "Continuing..." : "Continue"}
-            </button>
+              Continue
+            </StatefulButton>
           </div>
         </div>
       </main>

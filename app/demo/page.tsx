@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { IconArrowLeft, IconArrowRight, IconCheck } from "@tabler/icons-react";
 
 import { useQuizStore, type ContentType } from "@/features/quiz/store/quiz-store";
-import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 
@@ -114,8 +113,8 @@ export default function DemoPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-10 text-slate-900 dark:bg-slate-950 dark:text-slate-100 sm:px-6">
-      <div className="mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-3xl flex-col justify-center">
-        <div className="mb-8 flex items-center justify-between">
+      <div className="mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-4xl flex-col justify-center">
+        <div className="mb-8 flex items-center justify-between gap-3">
           <button
             onClick={handleBack}
             className="inline-flex items-center gap-2 rounded-full border border-slate-300/80 bg-white/80 px-4 py-2 text-sm font-semibold transition hover:bg-white dark:border-slate-700 dark:bg-slate-900/70 dark:hover:bg-slate-900"
@@ -195,17 +194,15 @@ export default function DemoPage() {
               }
               transition={{ duration: 0.45 }}
             >
-              <HoverBorderGradient
-                as="button"
+              <button
                 onClick={handleNext}
-                containerClassName="rounded-full"
                 className={cn(
-                  "inline-flex items-center justify-center gap-2 bg-black px-6 py-2.5 text-sm font-black tracking-tight text-white dark:bg-black",
+                  "inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-6 py-2.5 text-sm font-black tracking-tight text-white transition-colors hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white",
                 )}
               >
                 {step === DEMO_QUESTIONS.length - 1 ? "Continue" : "Next"}
                 <IconArrowRight className="h-4 w-4" />
-              </HoverBorderGradient>
+              </button>
             </motion.div>
           </div>
           {validationMessage ? (
