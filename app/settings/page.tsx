@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CircleOff, Shield, SlidersHorizontal, UserRound, Sparkles } from "lucide-react";
+import { CircleOff, Shield, SlidersHorizontal, UserRound, Sparkles, Link2, UserMinus, Trash2 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -25,14 +25,14 @@ import {
 } from "@/components/ui/resizable-navbar";
 import { cn } from "@/lib/utils";
 
-type SettingsSection = "profile" | "security" | "content";
+type SettingsSection = "profile" | "security" | "content" | "integrations";
 const PREF_CONTENT_KEY = "smart_advisor_pref_content_focus";
 const PREF_DISCOVERY_KEY = "smart_advisor_pref_discovery";
 const PREF_QUESTION_COUNT_KEY = "smart_advisor_pref_question_count";
 
 const SettingsPage = () => {
   const router = useRouter();
-  const { user, signOut, updateProfile, updateEmail, updatePassword } = useAuth();
+  const { user, session, signOut, updateProfile, updateEmail, updatePassword } = useAuth();
 
   const [activeSection, setActiveSection] = useState<SettingsSection>("profile");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -109,7 +109,18 @@ const SettingsPage = () => {
       label: "Content",
       icon: <SlidersHorizontal className="h-4 w-4 text-slate-700 dark:text-slate-300" />,
     },
+    {
+      id: "integrations" as SettingsSection,
+      label: "Integrations",
+      icon: <Link2 className="h-4 w-4 text-slate-700 dark:text-slate-300" />,
+    },
   ];
+
+  const isGoogleConnected = (() => {
+    const provider = session?.user?.app_metadata?.provider;
+    const providers = (session?.user?.app_metadata?.providers || []) as string[];
+    return provider === "google" || providers.includes("google");
+  })();
 
   const handleSignOut = async () => {
     await signOut();
@@ -208,6 +219,23 @@ const SettingsPage = () => {
       String(preferredQuestionCount),
     );
     setMessage("Content preferences saved.");
+  };
+
+  const handleDisableAccount = async () => {
+    const confirmed = window.confirm(
+      "Disable account is not fully wired yet. Continue and sign out on this device?",
+    );
+    if (!confirmed) return;
+    await signOut();
+    router.push("/");
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirmed = window.confirm(
+      "Delete account requires backend setup. We have not deleted anything yet. Continue?",
+    );
+    if (!confirmed) return;
+    setMessage("Delete account flow is ready in UI and pending backend wiring.");
   };
 
   useEffect(() => {
@@ -532,7 +560,15 @@ const SettingsPage = () => {
                         <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                           Default question count
                         </p>
-                        <div className="mt-3 max-w-lg">
+                        <div className="mt-3 max-w-xl rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-900/60">
+                          <div className="mb-3 flex items-center justify-between">
+                            <span className="text-sm font-semibold text-slate-600 dark:text-slate-300">
+                              Questions per quiz
+                            </span>
+                            <span className="inline-flex min-w-[84px] items-center justify-center rounded-full bg-indigo-600 px-3 py-1 text-sm font-black text-white">
+                              {preferredQuestionCount}
+                            </span>
+                          </div>
                           <input
                             type="range"
                             min={3}
@@ -543,9 +579,10 @@ const SettingsPage = () => {
                             }
                             className="w-full cursor-pointer accent-indigo-500"
                           />
-                          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-                            {preferredQuestionCount} questions
-                          </p>
+                          <div className="mt-2 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
+                            <span>3 min</span>
+                            <span>15 max</span>
+                          </div>
                         </div>
                       </div>
 
@@ -559,6 +596,61 @@ const SettingsPage = () => {
                       <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
                         <Sparkles size={13} />
                         Preferences apply on your next quiz session
+                      </div>
+                    </div>
+                  )}
+
+                  {activeSection === "integrations" && (
+                    <div className="space-y-6">
+                      <div>
+                        <h2 className="text-2xl font-black tracking-tight">Integrations</h2>
+                        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                          Manage connected providers and account access controls.
+                        </p>
+                      </div>
+
+                      <div className="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-900/60">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                          <div>
+                            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Google Sign-In</p>
+                            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                              {isGoogleConnected ? "Connected to your account" : "Not connected"}
+                            </p>
+                          </div>
+                          <span
+                            className={cn(
+                              "inline-flex items-center rounded-full px-3 py-1 text-xs font-black uppercase tracking-[0.12em]",
+                              isGoogleConnected
+                                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300"
+                                : "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
+                            )}
+                          >
+                            {isGoogleConnected ? "Connected" : "Inactive"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="rounded-2xl border border-rose-200/80 bg-rose-50/70 p-4 dark:border-rose-900/50 dark:bg-rose-950/30">
+                        <p className="text-sm font-semibold text-rose-700 dark:text-rose-300">Danger Zone</p>
+                        <p className="mt-1 text-sm text-rose-600/90 dark:text-rose-300/80">
+                          These actions are sensitive. Confirm carefully before continuing.
+                        </p>
+                        <div className="mt-4 flex flex-wrap gap-3">
+                          <GlowPillButton
+                            onClick={handleDisableAccount}
+                            className="inline-flex items-center gap-2 border-rose-300 bg-white px-4 py-2 text-sm font-semibold text-rose-700 dark:border-rose-700 dark:bg-slate-900 dark:text-rose-300"
+                          >
+                            <UserMinus size={14} />
+                            Disable Account
+                          </GlowPillButton>
+                          <GlowPillButton
+                            onClick={handleDeleteAccount}
+                            className="inline-flex items-center gap-2 bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-500 dark:bg-rose-600 dark:text-white"
+                          >
+                            <Trash2 size={14} />
+                            Delete Account
+                          </GlowPillButton>
+                        </div>
                       </div>
                     </div>
                   )}
