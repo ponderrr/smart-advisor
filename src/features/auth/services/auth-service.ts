@@ -30,6 +30,9 @@ class AuthService {
     if (message.includes("too many requests") || message.includes("rate limit")) {
       return "Too many attempts right now. Please wait a moment and try again.";
     }
+    if (message.includes("for security purposes") && message.includes("after")) {
+      return "Please wait about a minute before requesting another email.";
+    }
 
     return fallback;
   }

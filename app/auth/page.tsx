@@ -22,7 +22,7 @@ const AuthPage = () => {
 
   useEffect(() => {
     if ((session || user) && !loading) {
-      router.push("/content-selection");
+      router.push("/dashboard");
     }
   }, [session, user, loading, router]);
 

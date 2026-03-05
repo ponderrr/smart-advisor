@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export type AuthMode = "signin" | "signup" | "forgot";
 
@@ -57,6 +57,7 @@ export const AuthForm = ({
   onResetPassword,
   onResendVerificationEmail,
 }: AuthFormProps) => {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [mode, setMode] = useState<AuthMode>("signin");
   const [email, setEmail] = useState("");
@@ -216,6 +217,13 @@ export const AuthForm = ({
       const result = await onSignIn(email, password, rememberFor30Days);
       if (result.error) {
         setErrors({ general: result.error });
+      } else {
+        router.replace("/dashboard");
+        setTimeout(() => {
+          if (typeof window !== "undefined" && window.location.pathname === "/auth") {
+            window.location.assign("/dashboard");
+          }
+        }, 350);
       }
       return result;
     }
@@ -236,7 +244,7 @@ export const AuthForm = ({
     }
 
     setSuccessMessage(
-      "Account created successfully. Please check your email to confirm your account.",
+      "Account created. Please verify your email before signing in.",
     );
     setPassword("");
     setConfirmPassword("");
