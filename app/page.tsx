@@ -52,6 +52,12 @@ const howItWorksInteractive = [
   },
 ];
 
+const howItWorksVideos = [
+  "/animations/security-status-safe.webm",
+  "/animations/Popcorn.webm",
+  "/animations/Books.webm",
+];
+
 export default function Index() {
   const router = useRouter();
   const { user, signOut } = useAuth();
@@ -229,7 +235,7 @@ export default function Index() {
                 muted
                 playsInline
                 preload="metadata"
-                src={`/videos/how-it-works-step-${activeHowItWorks + 1}.mp4`}
+                src={howItWorksVideos[activeHowItWorks] ?? howItWorksVideos[0]}
               />
             </div>
 
