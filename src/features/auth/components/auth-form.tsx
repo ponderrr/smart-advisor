@@ -11,10 +11,16 @@ import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 export type AuthMode = "signin" | "signup" | "forgot";
+
+const MODE_HEADINGS = {
+  signin: ["Welcome back", "Great to see you again", "Ready for your next pick?"],
+  signup: ["Create your account", "Join Smart Advisor", "Let’s set up your profile"],
+  forgot: ["Reset your password", "Recover access", "Get back into your account"],
+} as const;
 
 interface AuthFormProps {
   loading: boolean;
@@ -59,16 +65,18 @@ export const AuthForm = ({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isResendingVerification, setIsResendingVerification] = useState(false);
   const [headingChoice, setHeadingChoice] = useState<Record<AuthMode, number>>({
-    signin: Math.floor(Math.random() * 3),
-    signup: Math.floor(Math.random() * 3),
-    forgot: Math.floor(Math.random() * 3),
+    signin: 0,
+    signup: 0,
+    forgot: 0,
   });
 
-  const modeHeadings = {
-    signin: ["Welcome back", "Great to see you again", "Ready for your next pick?"],
-    signup: ["Create your account", "Join Smart Advisor", "Let’s set up your profile"],
-    forgot: ["Reset your password", "Recover access", "Get back into your account"],
-  } as const;
+  useEffect(() => {
+    setHeadingChoice({
+      signin: Math.floor(Math.random() * MODE_HEADINGS.signin.length),
+      signup: Math.floor(Math.random() * MODE_HEADINGS.signup.length),
+      forgot: Math.floor(Math.random() * MODE_HEADINGS.forgot.length),
+    });
+  }, []);
 
 
   const callbackError = searchParams.get("error");
@@ -95,7 +103,7 @@ export const AuthForm = ({
     return null;
   }, [searchParams, isExpiredVerificationLink, callbackErrorDescription]);
 
-  const headingPool = modeHeadings[mode];
+  const headingPool = MODE_HEADINGS[mode];
   const heading = headingPool[headingChoice[mode] % headingPool.length];
 
   const actionLabel =
@@ -136,7 +144,7 @@ export const AuthForm = ({
     setRememberFor30Days(false);
     setHeadingChoice((prev) => ({
       ...prev,
-      [nextMode]: Math.floor(Math.random() * modeHeadings[nextMode].length),
+      [nextMode]: Math.floor(Math.random() * MODE_HEADINGS[nextMode].length),
     }));
     resetFeedback();
   };
@@ -232,12 +240,7 @@ export const AuthForm = ({
   };
 
   return (
-    <motion.div
-      layout
-      transition={{ layout: { duration: 0.42, ease: [0.22, 1, 0.36, 1] } }}
-      whileHover={{ y: -2 }}
-      className="mx-auto w-full max-w-md overflow-hidden rounded-2xl border border-slate-200/70 bg-white/85 p-5 shadow-sm backdrop-blur-md transition-[border-color,background-color] duration-300 hover:border-slate-300 dark:border-slate-700/60 dark:bg-slate-900/65 dark:hover:border-slate-600 sm:p-6"
-    >
+    <div className="mx-auto w-full max-w-md min-h-[560px] overflow-hidden rounded-2xl border border-slate-200/70 bg-white/85 p-5 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-6">
       <motion.div
         key={mode}
         initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
@@ -256,9 +259,7 @@ export const AuthForm = ({
         </p>
       </motion.div>
 
-      <motion.form
-        layout
-        transition={{ layout: { duration: 0.36, ease: [0.22, 1, 0.36, 1] } }}
+      <form
         onSubmit={(event) => event.preventDefault()}
         className="mt-6 space-y-4"
         noValidate
@@ -273,7 +274,7 @@ export const AuthForm = ({
             onChange={(event) => setEmail(event.target.value)}
             disabled={disabled}
             aria-invalid={Boolean(errors.email)}
-            className="focus-visible:ring-neutral-300 dark:focus-visible:ring-neutral-600"
+            className="focus-visible:ring-violet-400 dark:focus-visible:ring-violet-500"
           />
         </FormField>
 
@@ -281,7 +282,6 @@ export const AuthForm = ({
           {(mode === "signin" || mode === "signup") && (
             <motion.div
               key="password"
-              layout
               initial={{ opacity: 0, height: 0, y: -4 }}
               animate={{ opacity: 1, height: "auto", y: 0 }}
               exit={{ opacity: 0, height: 0, y: -4 }}
@@ -308,7 +308,6 @@ export const AuthForm = ({
           {mode === "signup" && (
             <motion.div
               key="signup-extra"
-              layout
               initial={{ opacity: 0, height: 0, y: -4 }}
               animate={{ opacity: 1, height: "auto", y: 0 }}
               exit={{ opacity: 0, height: 0, y: -4 }}
@@ -328,7 +327,7 @@ export const AuthForm = ({
                   onChange={(event) => setAge(event.target.value)}
                   disabled={disabled}
                   aria-invalid={Boolean(errors.age)}
-                  className="[appearance:textfield] focus-visible:ring-neutral-300 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none dark:focus-visible:ring-neutral-600"
+                  className="[appearance:textfield] focus-visible:ring-violet-400 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none dark:focus-visible:ring-violet-500"
                 />
               </FormField>
 
@@ -404,78 +403,84 @@ export const AuthForm = ({
           {actionLabel}
         </StatefulButton>
 
-        {(mode === "signin" || mode === "signup") && (
-          <motion.label
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2 }}
-            className="flex items-center gap-2 rounded-lg px-1 py-1"
-          >
+        <AnimatePresence initial={false}>
+          {(mode === "signin" || mode === "signup") && (
             <motion.div
-              animate={rememberFor30Days ? { scale: [1, 1.08, 1] } : { scale: 1 }}
-              transition={{ duration: 0.25 }}
+              key="auth-extra-controls"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="overflow-hidden"
             >
-              <Checkbox
-                id="remember-for-30-days"
-                checked={rememberFor30Days}
-                onCheckedChange={(checked) => setRememberFor30Days(Boolean(checked))}
-                className={cn(
-                  "h-4 w-4 rounded border-slate-300 text-white transition-colors data-[state=checked]:bg-violet-600 data-[state=checked]:border-violet-600",
-                  "dark:border-slate-600 dark:data-[state=checked]:bg-violet-400 dark:data-[state=checked]:border-violet-400",
-                )}
-                disabled={disabled}
-              />
+              <div className="space-y-4 pt-1">
+                <motion.label
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex items-center gap-2 rounded-lg px-1 py-1"
+                >
+                  <motion.div
+                    animate={rememberFor30Days ? { scale: [1, 1.08, 1] } : { scale: 1 }}
+                    transition={{ duration: 0.25 }}
+                  >
+                    <Checkbox
+                      id="remember-for-30-days"
+                      checked={rememberFor30Days}
+                      onCheckedChange={(checked) => setRememberFor30Days(Boolean(checked))}
+                      className={cn(
+                        "h-4 w-4 rounded border-slate-300 text-white transition-colors data-[state=checked]:bg-violet-600 data-[state=checked]:border-violet-600",
+                        "dark:border-slate-600 dark:data-[state=checked]:bg-violet-400 dark:data-[state=checked]:border-violet-400",
+                      )}
+                      disabled={disabled}
+                    />
+                  </motion.div>
+                  <Label.Root
+                    htmlFor="remember-for-30-days"
+                    className="cursor-pointer select-none text-xs font-medium text-slate-600 dark:text-slate-400"
+                  >
+                    Keep me signed in for 30 days
+                  </Label.Root>
+                </motion.label>
+
+                <div className="text-right">
+                  <button
+                    type="button"
+                    onClick={() => toggleMode("forgot")}
+                    className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
+                    disabled={disabled}
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
+
+                <div className="relative py-1">
+                  <div className="h-px w-full bg-gradient-to-r from-transparent via-slate-300 to-transparent dark:via-slate-700" />
+                  <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white px-3 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-900 dark:text-slate-400">
+                    or
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={async () => {
+                    resetFeedback();
+                    const result = await onGoogleSignIn();
+                    if (result.error) {
+                      setErrors({ general: result.error });
+                    }
+                  }}
+                  className="shadow-input inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 transition-all hover:-translate-y-0.5 hover:border-violet-400 hover:bg-violet-50 hover:text-violet-700 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-violet-400 dark:hover:bg-violet-500/20 dark:hover:text-violet-200"
+                  aria-label="Continue with Google"
+                  disabled={disabled}
+                >
+                  <IconBrandGoogle className="h-4 w-4" />
+                  <span>Continue with Google</span>
+                </button>
+              </div>
             </motion.div>
-            <Label.Root
-              htmlFor="remember-for-30-days"
-              className="cursor-pointer select-none text-xs font-medium text-slate-600 dark:text-slate-400"
-            >
-              Keep me signed in for 30 days
-            </Label.Root>
-          </motion.label>
-        )}
-
-        {(mode === "signin" || mode === "signup") && (
-          <div className="pt-1 text-right">
-            <button
-              type="button"
-              onClick={() => toggleMode("forgot")}
-              className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
-              disabled={disabled}
-            >
-              Forgot Password?
-            </button>
-          </div>
-        )}
-
-        {(mode === "signin" || mode === "signup") && (
-          <>
-            <div className="relative py-1">
-              <div className="h-px w-full bg-gradient-to-r from-transparent via-slate-300 to-transparent dark:via-slate-700" />
-              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white px-3 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-900 dark:text-slate-400">
-                or
-              </span>
-            </div>
-
-            <button
-              type="button"
-              onClick={async () => {
-                resetFeedback();
-                const result = await onGoogleSignIn();
-                if (result.error) {
-                  setErrors({ general: result.error });
-                }
-              }}
-              className="shadow-input inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 transition-all hover:-translate-y-0.5 hover:border-violet-400 hover:bg-violet-50 hover:text-violet-700 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-violet-400 dark:hover:bg-violet-500/20 dark:hover:text-violet-200"
-              aria-label="Continue with Google"
-              disabled={disabled}
-            >
-              <IconBrandGoogle className="h-4 w-4" />
-              <span>Continue with Google</span>
-            </button>
-
-          </>
-        )}
+          )}
+        </AnimatePresence>
 
         <p className="pt-1 text-center text-sm text-slate-600 dark:text-slate-400">
           {mode === "forgot" ? "Remembered your password?" : mode === "signup" ? "Already have an account?" : "Don't have an account?"}{" "}
@@ -490,14 +495,14 @@ export const AuthForm = ({
                     : "signup",
               )
             }
-            className="font-semibold text-indigo-600 transition-colors hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+            className="font-semibold text-violet-600 transition-colors hover:text-violet-500 dark:text-violet-400 dark:hover:text-violet-300"
             disabled={disabled}
           >
             {mode === "forgot" ? "Sign in" : mode === "signup" ? "Sign in" : "Sign up"}
           </button>
         </p>
-      </motion.form>
-    </motion.div>
+      </form>
+    </div>
   );
 };
 
@@ -525,7 +530,7 @@ const PasswordInput = ({
       <input
         type={showPassword ? "text" : "password"}
         className={cn(
-          "shadow-input flex h-10 w-full rounded-md border-none bg-gray-50 px-3 py-2 pr-10 text-sm text-black transition duration-300 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-300 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-800 dark:text-white dark:focus-visible:ring-neutral-600",
+          "shadow-input flex h-10 w-full rounded-md border-none bg-gray-50 px-3 py-2 pr-10 text-sm text-black transition duration-300 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-800 dark:text-white dark:focus-visible:ring-violet-500",
           className,
         )}
         {...props}

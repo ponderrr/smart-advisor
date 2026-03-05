@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from 'next/navigation';
-import { LogOut } from "lucide-react";
+import { ArrowLeft, ArrowRight, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useQuizStore } from '@/features/quiz/store/quiz-store';
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import {
   Navbar,
   NavBody,
@@ -129,39 +128,60 @@ const QuestionCountPage = () => {
         </MobileNav>
       </Navbar>
 
-      <main className="px-6 pb-20 pt-32 md:pt-36">
-        <div className="mx-auto max-w-3xl">
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, ease: "easeOut" }}
-            className="mb-10 text-center"
-          >
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Step 2 of 4</p>
-            <h1 className="mt-4 text-4xl font-black tracking-tighter md:text-5xl md:whitespace-nowrap">
-              How many questions should we ask?
-            </h1>
-            <p className="mx-auto mt-3 max-w-2xl text-base text-slate-600 dark:text-slate-400 md:text-lg">
-              Choose the depth for your {getContentTypeDisplay(contentType as ContentType)} recommendation flow.
+      <main className="px-4 pb-20 pt-32 md:pt-36 sm:px-6">
+        <div className="mx-auto flex min-h-[calc(100vh-14rem)] w-full max-w-4xl flex-col justify-center">
+          <div className="mb-8 flex items-center justify-between gap-3">
+            <button
+              onClick={() => router.push('/content-selection')}
+              className="inline-flex items-center gap-2 rounded-full border border-slate-300/80 bg-white/80 px-4 py-2 text-sm font-semibold transition hover:bg-white dark:border-slate-700 dark:bg-slate-900/70 dark:hover:bg-slate-900"
+            >
+              <ArrowLeft size={16} />
+              Back
+            </button>
+            <p className="text-base font-extrabold tracking-wide text-slate-800 dark:text-slate-100 md:text-lg">
+              Step 2 of 4
             </p>
-          </motion.div>
-
-          <motion.section
-            initial={{ opacity: 0, y: 18, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.4, ease: "easeOut", delay: 0.08 }}
-            className="rounded-3xl border border-slate-200/70 bg-white/85 p-6 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 md:p-8"
-          >
-            <div className="mb-6 text-center">
-              <div className="text-7xl font-black tracking-tight text-indigo-600 dark:text-indigo-400">
-                {questionCount}
-              </div>
-              <p className="mt-2 text-base font-semibold text-slate-600 dark:text-slate-300">
-                {questionCount === 1 ? "Question" : "Questions"}
+            <div className="flex items-center gap-3">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                Quiz Setup
               </p>
+              <ThemeToggle />
             </div>
+          </div>
 
-            <div className="relative mb-6 rounded-2xl border border-slate-200/80 bg-slate-50/70 px-4 py-5 dark:border-slate-700 dark:bg-slate-950/40">
+          <div className="mb-8 h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
+            <motion.div
+              className="h-full rounded-full bg-indigo-500"
+              initial={false}
+              animate={{ width: "50%" }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            />
+          </div>
+
+          <div className="rounded-3xl border border-slate-200/70 bg-white/85 p-6 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.22 }}
+            >
+              <h1 className="text-2xl font-black tracking-tight sm:text-3xl">
+                How many questions should we ask?
+              </h1>
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 sm:text-base">
+                Choose the depth for your {getContentTypeDisplay(contentType as ContentType)} recommendation flow.
+              </p>
+            </motion.div>
+
+            <div className="mt-7 rounded-2xl border border-slate-200/80 bg-slate-50/70 px-4 py-5 dark:border-slate-700 dark:bg-slate-950/40">
+              <div className="mb-4 text-center">
+                <div className="text-6xl font-black tracking-tight text-indigo-600 dark:text-indigo-400">
+                  {questionCount}
+                </div>
+                <p className="mt-1 text-sm font-semibold text-slate-600 dark:text-slate-300">
+                  {questionCount === 1 ? "Question" : "Questions"}
+                </p>
+              </div>
+
               <input
                 type="range"
                 min={3}
@@ -170,7 +190,8 @@ const QuestionCountPage = () => {
                 onChange={(e) => setQuestionCount(parseInt(e.target.value, 10))}
                 className="w-full cursor-pointer accent-indigo-500"
               />
-              <motion.div
+
+              <motion.p
                 key={questionCount}
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -182,10 +203,10 @@ const QuestionCountPage = () => {
                   : questionCount <= 10
                     ? "Balanced depth"
                     : "Comprehensive detail"}
-              </motion.div>
+              </motion.p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 text-xs font-semibold text-slate-600 dark:text-slate-300">
+            <div className="mt-4 grid grid-cols-2 gap-3 text-xs font-semibold text-slate-600 dark:text-slate-300">
               <div className="rounded-xl border border-slate-200/80 bg-white px-3 py-2 text-center dark:border-slate-700 dark:bg-slate-900/60">
                 3 minimum
               </div>
@@ -193,30 +214,20 @@ const QuestionCountPage = () => {
                 15 maximum
               </div>
             </div>
-          </motion.section>
 
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, ease: "easeOut", delay: 0.16 }}
-            className="mt-8 flex items-center justify-center gap-3"
-          >
-            <button
-              type="button"
-              onClick={() => router.push('/content-selection')}
-              className="rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-800"
-            >
-              Back
-            </button>
-            <StatefulButton
-              onClick={handleContinue}
-              disabled={isLoading}
-              state={isLoading ? "loading" : "idle"}
-              className="h-11 w-auto rounded-full px-6 text-sm font-semibold"
-            >
-              Continue
-            </StatefulButton>
-          </motion.div>
+            <div className="mt-8 flex items-center justify-end">
+              <button
+                onClick={handleContinue}
+                disabled={isLoading}
+                className={cn(
+                  "inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-6 py-2.5 text-sm font-black tracking-tight text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white",
+                )}
+              >
+                {isLoading ? "Continuing..." : "Continue"}
+                <ArrowRight size={16} />
+              </button>
+            </div>
+          </div>
         </div>
       </main>
     </div>

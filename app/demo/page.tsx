@@ -16,6 +16,84 @@ type DemoQuestion = {
   options: string[];
 };
 
+interface DemoContentCardProps {
+  title: string;
+  description: string;
+  mediaSrc: string;
+  secondaryMediaSrc?: string;
+  isSelected: boolean;
+  onClick: () => void;
+}
+
+const DemoContentCard = ({
+  title,
+  description,
+  mediaSrc,
+  secondaryMediaSrc,
+  isSelected,
+  onClick,
+}: DemoContentCardProps) => {
+  return (
+    <motion.button
+      type="button"
+      onClick={onClick}
+      whileHover={{ y: -4 }}
+      className={cn(
+        "relative w-full overflow-hidden rounded-3xl border p-0 text-left shadow-sm backdrop-blur-md transition-all duration-300",
+        isSelected
+          ? "border-indigo-500 bg-white shadow-lg dark:border-indigo-400 dark:bg-slate-900/70"
+          : "border-slate-200/80 bg-white/80 hover:-translate-y-1 hover:border-indigo-300 hover:shadow-md dark:border-slate-700/70 dark:bg-slate-900/65 dark:hover:border-indigo-500/60",
+      )}
+    >
+      {isSelected && (
+        <div className="absolute right-3 top-3 z-10 inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-500 text-white shadow-md">
+          <IconCheck className="h-4 w-4" />
+        </div>
+      )}
+
+      <div className="relative aspect-[16/9] overflow-hidden bg-slate-200 dark:bg-slate-800">
+        {secondaryMediaSrc ? (
+          <div className="grid h-full w-full grid-cols-2 gap-1 p-1">
+            <video
+              src={mediaSrc}
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="auto"
+              className="h-full w-full rounded-lg object-cover"
+            />
+            <video
+              src={secondaryMediaSrc}
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="auto"
+              className="h-full w-full rounded-lg object-cover"
+            />
+          </div>
+        ) : (
+          <video
+            src={mediaSrc}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            className="h-full w-full object-contain p-2"
+          />
+        )}
+      </div>
+
+      <div className="p-4 sm:p-5">
+        <h3 className="text-xl font-black tracking-tight sm:text-2xl">{title}</h3>
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{description}</p>
+      </div>
+    </motion.button>
+  );
+};
+
 const DEMO_QUESTIONS: DemoQuestion[] = [
   {
     id: "contentType",
@@ -41,7 +119,35 @@ const DEMO_QUESTIONS: DemoQuestion[] = [
     subtitle: "This helps us avoid overlong picks.",
     options: ["Under 2 hours", "2 to 4 hours", "Weekend binge"],
   },
+  {
+    id: "vibe",
+    title: "Which vibe sounds best tonight?",
+    subtitle: "We use this to fine-tune the final recommendation mix.",
+    options: ["Easy and fun", "Thought-provoking", "Emotional", "High energy"],
+  },
 ];
+
+const DEMO_CONTENT_CARDS = [
+  {
+    option: "Movies",
+    title: "Movie",
+    description: "Find a movie recommendation that fits your current mood and pace.",
+    mediaSrc: "/animations/Popcorn.webm",
+  },
+  {
+    option: "Books",
+    title: "Book",
+    description: "Get a reading recommendation tailored to your style and interests.",
+    mediaSrc: "/animations/Books.webm",
+  },
+  {
+    option: "Both",
+    title: "Both",
+    description: "Get one movie and one book recommendation in the same flow.",
+    mediaSrc: "/animations/Popcorn.webm",
+    secondaryMediaSrc: "/animations/Books.webm",
+  },
+] as const;
 
 const mapContentType = (value: string): ContentType => {
   if (value === "Movies") return "movie";
@@ -158,30 +264,46 @@ export default function DemoPage() {
                 {current.subtitle}
               </p>
 
-              <div className="mt-7 grid gap-3 sm:grid-cols-2">
-                {current.options.map((option) => {
-                  const selected = answers[current.id] === option;
-                  return (
-                    <button
-                      key={option}
-                      onClick={() => handleChoose(option)}
-                      className={cn(
-                        "group flex items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all",
-                        selected
-                          ? "border-indigo-400 bg-indigo-50 text-indigo-700 dark:border-indigo-500/70 dark:bg-indigo-500/15 dark:text-indigo-300"
-                          : "border-slate-200/80 bg-white text-slate-800 hover:border-indigo-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:border-slate-500 dark:hover:bg-slate-900",
-                      )}
-                    >
-                      <span className="text-sm font-semibold sm:text-base">{option}</span>
-                      {selected ? (
-                        <IconCheck className="h-5 w-5" />
-                      ) : (
-                        <span className="h-5 w-5 rounded-full border border-slate-300 transition group-hover:border-indigo-300 dark:border-slate-600" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
+              {current.id === "contentType" ? (
+                <div className="mt-7 grid grid-cols-1 gap-4 md:grid-cols-3">
+                  {DEMO_CONTENT_CARDS.map((card) => (
+                    <DemoContentCard
+                      key={card.option}
+                      title={card.title}
+                      description={card.description}
+                      mediaSrc={card.mediaSrc}
+                      secondaryMediaSrc={card.secondaryMediaSrc}
+                      isSelected={answers[current.id] === card.option}
+                      onClick={() => handleChoose(card.option)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="mt-7 grid gap-3 sm:grid-cols-2">
+                  {current.options.map((option) => {
+                    const selected = answers[current.id] === option;
+                    return (
+                      <button
+                        key={option}
+                        onClick={() => handleChoose(option)}
+                        className={cn(
+                          "group flex items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all",
+                          selected
+                            ? "border-indigo-400 bg-indigo-50 text-indigo-700 dark:border-indigo-500/70 dark:bg-indigo-500/15 dark:text-indigo-300"
+                            : "border-slate-200/80 bg-white text-slate-800 hover:border-indigo-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:border-slate-500 dark:hover:bg-slate-900",
+                        )}
+                      >
+                        <span className="text-sm font-semibold sm:text-base">{option}</span>
+                        {selected ? (
+                          <IconCheck className="h-5 w-5" />
+                        ) : (
+                          <span className="h-5 w-5 rounded-full border border-slate-300 transition group-hover:border-indigo-300 dark:border-slate-600" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </motion.div>
           </AnimatePresence>
 
