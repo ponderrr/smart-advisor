@@ -315,21 +315,6 @@ class AuthService {
           : "https://smartadvisor.live";
       const normalizedEmail = email.trim().toLowerCase();
 
-      // Best-effort database existence check.
-      // If blocked by RLS, continue with reset flow to avoid false negatives.
-      const { data: profileRows, error: profileLookupError } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("email", normalizedEmail)
-        .limit(1);
-
-      if (!profileLookupError && (!profileRows || profileRows.length === 0)) {
-        return {
-          error:
-            "No account found for this email. Please check your email address or sign up.",
-        };
-      }
-
       const { error } = await supabase.auth.resetPasswordForEmail(
         normalizedEmail,
         {
