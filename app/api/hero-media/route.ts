@@ -51,15 +51,21 @@ const normalizeBookCover = (url: string) =>
 const pickPoster = (posterPath: string | null | undefined) =>
   posterPath ? `https://image.tmdb.org/t/p/w500${posterPath}` : null;
 
-async function fetchBookCovers(apiKey: string): Promise<string[]> {
+async function fetchBookCovers(apiKey?: string): Promise<string[]> {
   const selectedQueries = pickRandomUnique(BOOK_QUERIES, 2);
   const responses = await Promise.all(
     selectedQueries.map(async (query) => {
       const encodedQuery = encodeURIComponent(query);
       const startIndex = Math.floor(Math.random() * 35);
-      const url = `https://www.googleapis.com/books/v1/volumes?q=${encodedQuery}&printType=books&orderBy=relevance&maxResults=20&startIndex=${startIndex}&key=${apiKey}`;
+      const keyParam = apiKey ? `&key=${encodeURIComponent(apiKey)}` : "";
+      const url = `https://www.googleapis.com/books/v1/volumes?q=${encodedQuery}&printType=books&orderBy=relevance&maxResults=20&startIndex=${startIndex}${keyParam}`;
 
-      const response = await fetch(url, { next: { revalidate: 0 } });
+      let response = await fetch(url, { next: { revalidate: 0 } });
+      if (!response.ok && apiKey) {
+        // Retry without key in case key restrictions block local calls.
+        const fallbackUrl = `https://www.googleapis.com/books/v1/volumes?q=${encodedQuery}&printType=books&orderBy=relevance&maxResults=20&startIndex=${startIndex}`;
+        response = await fetch(fallbackUrl, { next: { revalidate: 0 } });
+      }
       if (!response.ok) {
         throw new Error(`Google Books error: ${response.status}`);
       }
@@ -110,7 +116,7 @@ export async function GET() {
   };
 
   const [booksResult, moviesResult] = await Promise.allSettled([
-    googleBooksKey ? fetchBookCovers(googleBooksKey) : Promise.resolve([]),
+    fetchBookCovers(googleBooksKey),
     tmdbKey ? fetchMoviePosters(tmdbKey) : Promise.resolve([]),
   ]);
 

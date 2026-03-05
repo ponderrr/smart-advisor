@@ -51,7 +51,6 @@ const howItWorksInteractive = [
     detail: "No endless scrolling. You get context-aware picks you can act on immediately.",
   },
 ];
-const moodLabels = ["Calm", "Easy", "Balanced", "Excited", "Intense"];
 
 export default function Index() {
   const router = useRouter();
@@ -59,7 +58,6 @@ export default function Index() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [activeHowItWorks, setActiveHowItWorks] = useState(0);
-  const [moodValue, setMoodValue] = useState(55);
 
   const handleGetStarted = () =>
     user ? router.push("/dashboard") : router.push("/auth");
@@ -90,11 +88,6 @@ export default function Index() {
     const top = section.getBoundingClientRect().top + window.scrollY - offset;
     window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
   };
-
-  const moodIndex = Math.min(4, Math.max(0, Math.round(moodValue / 25)));
-  const moodLabel = moodLabels[moodIndex];
-  const demoBook = moodValue > 60 ? "Dark Matter" : "Project Hail Mary";
-  const demoMovie = moodValue > 60 ? "Inception" : "The Martian";
 
   return (
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
@@ -207,8 +200,40 @@ export default function Index() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.1fr_1fr]">
-            <div className="space-y-3">
+          <motion.div
+            key={activeHowItWorks}
+            initial={{ opacity: 0, y: 14, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className={cn(
+              "relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 p-4 shadow-sm backdrop-blur-md md:p-6",
+              "dark:border-slate-700/70 dark:bg-slate-900/65",
+            )}
+          >
+            <div className="mb-4 flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                  Video Walkthrough
+                </p>
+                <h3 className="mt-2 text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100 md:text-3xl">
+                  {howItWorksInteractive[activeHowItWorks].title}
+                </h3>
+              </div>
+            </div>
+
+            <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-black dark:border-slate-700/70">
+              <video
+                key={`how-step-${activeHowItWorks}`}
+                className="aspect-video w-full"
+                controls
+                muted
+                playsInline
+                preload="metadata"
+                src={`/videos/how-it-works-step-${activeHowItWorks + 1}.mp4`}
+              />
+            </div>
+
+            <div className="mt-4 grid grid-cols-1 gap-2 md:grid-cols-3">
               {howItWorksInteractive.map((step, idx) => {
                 const isActive = idx === activeHowItWorks;
                 return (
@@ -216,128 +241,26 @@ export default function Index() {
                     key={step.title}
                     type="button"
                     onClick={() => setActiveHowItWorks(idx)}
-                    onMouseEnter={() => setActiveHowItWorks(idx)}
                     className={cn(
-                      "w-full rounded-2xl border p-5 text-left transition-all duration-300",
+                      "rounded-full border px-4 py-2 text-sm font-bold transition-colors",
                       isActive
-                        ? "border-slate-300 bg-white shadow-md dark:border-slate-600 dark:bg-slate-900/70"
-                        : "border-slate-200/80 bg-white/70 hover:border-slate-300 dark:border-slate-700/70 dark:bg-slate-900/45 dark:hover:border-slate-600",
+                        ? "border-indigo-500 bg-indigo-500 text-white"
+                        : "border-slate-300 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-800",
                     )}
-                    aria-pressed={isActive}
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-black text-white dark:bg-slate-100 dark:text-slate-900">
-                        {idx + 1}
-                      </span>
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-                        Step 0{idx + 1}
-                      </p>
-                    </div>
-                    <h3 className="mt-3 text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100">
-                      {step.title}
-                    </h3>
-                    <p className="mt-2 text-sm text-slate-700 dark:text-slate-300 md:text-base">
-                      {step.description}
-                    </p>
-                    <p className="mt-2 text-xs text-slate-600 dark:text-slate-400 md:text-sm">
-                      {step.detail}
-                    </p>
+                    Step {idx + 1}
                   </button>
                 );
               })}
             </div>
 
-            <motion.div
-              key={activeHowItWorks}
-              initial={{ opacity: 0, y: 14, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.35, ease: "easeOut" }}
-              className={cn(
-                "relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 p-6 shadow-sm backdrop-blur-md",
-                "dark:border-slate-700/70 dark:bg-slate-900/65",
-              )}
-            >
-              <div className="mb-4">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-                  Live Preview
-                </p>
-                <h3 className="mt-2 text-3xl font-black tracking-tight text-slate-900 dark:text-slate-100">
-                  {howItWorksInteractive[activeHowItWorks].title}
-                </h3>
-              </div>
-
-              <div className="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4 dark:border-slate-700/70 dark:bg-slate-950/40">
-                {activeHowItWorks === 0 && (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between text-sm font-semibold text-slate-700 dark:text-slate-300">
-                      <span>Mood</span>
-                      <span className="rounded-full bg-slate-900 px-3 py-1 text-xs text-white dark:bg-slate-200 dark:text-slate-900">
-                        {moodLabel}
-                      </span>
-                    </div>
-                    <input
-                      type="range"
-                      min={0}
-                      max={100}
-                      step={1}
-                      value={moodValue}
-                      onChange={(e) => setMoodValue(Number(e.target.value))}
-                      className="w-full accent-indigo-500"
-                      aria-label="Mood slider demo"
-                    />
-                    <div className="grid grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-400">
-                      <span className="rounded-lg border border-slate-200 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900/70">
-                        Prefer: Character-driven
-                      </span>
-                      <span className="rounded-lg border border-slate-200 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900/70">
-                        Pace: {moodValue > 60 ? "Fast" : "Steady"}
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {activeHowItWorks === 1 && (
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <div className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900/70">
-                      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-                        Book Pick
-                      </p>
-                      <p className="mt-2 text-lg font-black text-slate-900 dark:text-slate-100">{demoBook}</p>
-                      <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">Matched to your {moodLabel.toLowerCase()} mood.</p>
-                    </div>
-                    <div className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900/70">
-                      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-                        Movie Pick
-                      </p>
-                      <p className="mt-2 text-lg font-black text-slate-900 dark:text-slate-100">{demoMovie}</p>
-                      <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">Balanced with tone + pacing preferences.</p>
-                    </div>
-                  </div>
-                )}
-
-                {activeHowItWorks === 2 && (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900/70">
-                      <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Recommendation confidence</p>
-                      <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
-                        High Match
-                      </span>
-                    </div>
-                    <p className="rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-400">
-                      Why this works: tone, pacing, and theme all align with your current mood selection.
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              <p className="mt-4 text-sm leading-relaxed text-slate-700 dark:text-slate-300 md:text-base">
-                {howItWorksInteractive[activeHowItWorks].description}
-              </p>
-              <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400 md:text-sm">
-                {howItWorksInteractive[activeHowItWorks].detail}
-              </p>
-            </motion.div>
-          </div>
+            <p className="mt-4 text-sm leading-relaxed text-slate-700 dark:text-slate-300 md:text-base">
+              {howItWorksInteractive[activeHowItWorks].description}
+            </p>
+            <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400 md:text-sm">
+              {howItWorksInteractive[activeHowItWorks].detail}
+            </p>
+          </motion.div>
 
           <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-3">
             {howItWorksCards.map((card, idx) => (
@@ -499,7 +422,7 @@ export default function Index() {
 
           <div className="mt-10 grid grid-cols-1 items-center gap-5 text-xs text-slate-500 dark:text-slate-400 md:grid-cols-3">
             <p className="text-center md:text-left">© 2026 Smart Advisor. All rights reserved.</p>
-            <div className="text-center text-sm text-slate-700 dark:text-slate-300">
+            <div className="whitespace-nowrap text-center text-sm text-slate-700 dark:text-slate-300">
               Built with{" "}
               <LinkPreview url="https://react.dev" className="font-semibold text-slate-900 dark:text-slate-100">
                 React

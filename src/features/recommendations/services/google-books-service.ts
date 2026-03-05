@@ -24,16 +24,10 @@ class GoogleBooksService {
         params.append("author", author);
       }
 
-      const response = await fetch(
-        `${
-          process.env.NEXT_PUBLIC_SUPABASE_URL
-        }/functions/v1/google-books-proxy?${params}`,
-        {
-          headers: {
-            apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-          },
-        }
-      );
+      const response = await fetch(`/api/google-books?${params.toString()}`, {
+        method: "GET",
+        cache: "no-store",
+      });
 
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);

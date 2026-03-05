@@ -10,12 +10,8 @@ import { generateQuestionsWithRetry } from "@/features/recommendations/services/
 import { Question } from "@/features/quiz/types/question";
 import { Answer } from "@/features/quiz/types/answer";
 import { v4 as uuidv4 } from "uuid";
-import {
-  EnhancedProgress,
-} from "@/components/enhanced";
 import { useQuizStore } from '@/features/quiz/store/quiz-store';
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Navbar,
@@ -320,96 +316,90 @@ const QuestionnairePage = () => {
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
       {topBar}
 
-      <main className="px-6 pb-20 pt-32 md:pt-36">
-        <div className="mx-auto max-w-4xl">
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, ease: "easeOut" }}
-            className="mb-8"
-          >
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-                Step 3 of 4
-              </p>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
-                Question {currentQuestionIndex + 1} / {questions.length}
-              </p>
-            </div>
-            <EnhancedProgress value={progress} className="h-2.5" showGlow />
-          </motion.div>
-
-          <AnimatePresence mode="wait" initial={false}>
-            {currentQuestion && (
-              <motion.section
-                key={currentQuestion.id}
-                initial={{ opacity: 0, y: 14, filter: "blur(4px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                exit={{ opacity: 0, y: -10, filter: "blur(4px)" }}
-                transition={{ duration: 0.28, ease: "easeOut" }}
-                className="rounded-3xl border border-slate-200/70 bg-white/85 p-6 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 md:p-8"
-              >
-                <h1 className="text-2xl font-black tracking-tight md:text-3xl">
-                  {currentQuestion.text}
-                </h1>
-                <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
-                  Pick one option so we can tune your recommendations.
-                </p>
-
-                <div className="mt-7 grid gap-3 sm:grid-cols-2">
-                  {getQuestionOptions(contentType, currentQuestionIndex).map((option) => {
-                    const selected = answers[currentQuestion.id] === option;
-                    return (
-                      <button
-                        key={option}
-                        type="button"
-                        onClick={() => handleAnswer(option)}
-                        className={cn(
-                          "group flex items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all",
-                          selected
-                            ? "border-indigo-400 bg-indigo-50 text-indigo-700 dark:border-indigo-500/70 dark:bg-indigo-500/15 dark:text-indigo-300"
-                            : "border-slate-200/80 bg-white text-slate-800 hover:border-indigo-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:border-slate-500 dark:hover:bg-slate-900",
-                        )}
-                      >
-                        <span className="text-sm font-semibold sm:text-base">{option}</span>
-                        {selected ? (
-                          <IconCheck className="h-5 w-5" />
-                        ) : (
-                          <span className="h-5 w-5 rounded-full border border-slate-300 transition group-hover:border-indigo-300 dark:border-slate-600" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </motion.section>
-            )}
-          </AnimatePresence>
-
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.08 }}
-            className="mt-6 flex items-center justify-between"
-          >
+      <main className="px-4 pb-20 pt-32 md:pt-36 sm:px-6">
+        <div className="mx-auto flex min-h-[calc(100vh-14rem)] w-full max-w-4xl flex-col justify-center">
+          <div className="mb-8 flex items-center justify-between gap-3">
             <button
-              type="button"
               onClick={handlePrevious}
-              className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-800"
+              className="inline-flex items-center gap-2 rounded-full border border-slate-300/80 bg-white/80 px-4 py-2 text-sm font-semibold transition hover:bg-white dark:border-slate-700 dark:bg-slate-900/70 dark:hover:bg-slate-900"
             >
               <ArrowLeft size={16} />
-              Previous
+              Back
             </button>
+            <p className="text-base font-extrabold tracking-wide text-slate-800 dark:text-slate-100 md:text-lg">
+              {currentQuestionIndex + 1} out of {questions.length} questions
+            </p>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+              Live Quiz
+            </p>
+          </div>
 
-            <StatefulButton
-              onClick={handleNext}
-              disabled={!canProceed || isSubmitting}
-              state={isSubmitting ? "loading" : "idle"}
-              className={cn("inline-flex h-11 w-auto items-center gap-2 rounded-full px-6 text-sm font-semibold")}
-            >
-              {currentQuestionIndex === questions.length - 1 ? "Get Recommendations" : "Next"}
-              <ArrowRight size={16} />
-            </StatefulButton>
-          </motion.div>
+          <div className="mb-8 h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
+            <motion.div
+              className="h-full rounded-full bg-indigo-500"
+              initial={false}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            />
+          </div>
+
+          <div className="rounded-3xl border border-slate-200/70 bg-white/85 p-6 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
+            <AnimatePresence mode="wait" initial={false}>
+              {currentQuestion && (
+                <motion.section
+                  key={currentQuestion.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.22 }}
+                >
+                  <h1 className="text-2xl font-black tracking-tight sm:text-3xl">
+                    {currentQuestion.text}
+                  </h1>
+                  <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 sm:text-base">
+                    Pick one so we can tune your recommendations.
+                  </p>
+
+                  <div className="mt-7 grid gap-3 sm:grid-cols-2">
+                    {getQuestionOptions(contentType, currentQuestionIndex).map((option) => {
+                      const selected = answers[currentQuestion.id] === option;
+                      return (
+                        <button
+                          key={option}
+                          type="button"
+                          onClick={() => handleAnswer(option)}
+                          className={cn(
+                            "group flex items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all",
+                            selected
+                              ? "border-indigo-400 bg-indigo-50 text-indigo-700 dark:border-indigo-500/70 dark:bg-indigo-500/15 dark:text-indigo-300"
+                              : "border-slate-200/80 bg-white text-slate-800 hover:border-indigo-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:border-slate-500 dark:hover:bg-slate-900",
+                          )}
+                        >
+                          <span className="text-sm font-semibold sm:text-base">{option}</span>
+                          {selected ? (
+                            <IconCheck className="h-5 w-5" />
+                          ) : (
+                            <span className="h-5 w-5 rounded-full border border-slate-300 transition group-hover:border-indigo-300 dark:border-slate-600" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </motion.section>
+              )}
+            </AnimatePresence>
+
+            <div className="mt-8 flex items-center justify-end">
+              <button
+                onClick={handleNext}
+                disabled={!canProceed || isSubmitting}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-6 py-2.5 text-sm font-black tracking-tight text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
+              >
+                {currentQuestionIndex === questions.length - 1 ? "Get Recommendations" : "Next"}
+                <ArrowRight size={16} />
+              </button>
+            </div>
+          </div>
         </div>
       </main>
     </div>
