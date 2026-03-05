@@ -124,7 +124,7 @@ const HeroSection = () => {
   }, [mediaPool, heroImages]);
 
   const handleGetStarted = () =>
-    user ? router.push("/content-selection") : router.push("/auth");
+    user ? router.push("/dashboard") : router.push("/auth");
   const handleTryDemo = () => router.push("/demo");
 
   return (

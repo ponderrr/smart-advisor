@@ -31,7 +31,6 @@ import {
   faqItems,
   howItWorksCards,
   logoSets,
-  navItems,
   teamMembers,
 } from "@/features/home/data";
 
@@ -56,14 +55,32 @@ const moodLabels = ["Calm", "Easy", "Balanced", "Excited", "Intense"];
 
 export default function Index() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [activeHowItWorks, setActiveHowItWorks] = useState(0);
   const [moodValue, setMoodValue] = useState(55);
 
   const handleGetStarted = () =>
-    user ? router.push("/content-selection") : router.push("/auth");
+    user ? router.push("/dashboard") : router.push("/auth");
+  const handleSignOut = async () => {
+    await signOut();
+    router.push("/");
+  };
+
+  const homeNavItems = user
+    ? [
+      { name: "Dashboard", link: "/dashboard" },
+      { name: "Start Quiz", link: "/content-selection" },
+      { name: "History", link: "/history" },
+    ]
+    : [
+      { name: "How It Works", link: "#how-it-works" },
+      { name: "Why Smart Advisor", link: "#why-smart-advisor" },
+      { name: "Powered By", link: "#powered-by" },
+      { name: "Our Team", link: "#meet-the-team" },
+      { name: "FAQ", link: "#faq" },
+    ];
 
   const smoothScrollToSection = (selector: string) => {
     const section = document.querySelector(selector) as HTMLElement | null;
@@ -79,18 +96,35 @@ export default function Index() {
   const demoBook = moodValue > 60 ? "Dark Matter" : "Project Hail Mary";
   const demoMovie = moodValue > 60 ? "Inception" : "The Martian";
 
+  useEffect(() => {
+    if (user) {
+      router.replace("/dashboard");
+    }
+  }, [user, router]);
+
   return (
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
       <Navbar>
         <NavBody>
-          <div className="flex min-w-[220px] shrink-0 items-center">
+          <div className="flex w-[320px] shrink-0 items-center">
             <NavbarLogo />
           </div>
 
-          <NavItems items={navItems} className="justify-center px-2" />
+          <div className="flex flex-1 justify-center">
+            <NavItems items={homeNavItems} className="justify-center px-2" />
+          </div>
 
-          <div className="flex min-w-[220px] flex-1 items-center justify-end gap-6 pl-8">
+          <div className="flex w-[320px] shrink-0 items-center justify-end gap-4">
             <ThemeToggle />
+            {user && (
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400"
+              >
+                Sign Out
+              </button>
+            )}
             <HoverBorderGradient
               onClick={handleGetStarted}
               idleColor="17, 24, 39"
@@ -100,7 +134,7 @@ export default function Index() {
               containerClassName="rounded-full"
               className="whitespace-nowrap bg-white px-6 py-2.5 text-base font-black leading-none tracking-tighter text-black dark:bg-black dark:text-white"
             >
-              Get Started
+              {user ? "Dashboard" : "Get Started"}
             </HoverBorderGradient>
           </div>
         </NavBody>
@@ -117,12 +151,16 @@ export default function Index() {
             </div>
           </MobileNavHeader>
           <MobileNavMenu isOpen={isMobileMenuOpen}>
-            {navItems.map((item) => (
+            {homeNavItems.map((item) => (
               <button
                 key={item.name}
                 type="button"
                 onClick={() => {
-                  if (item.link.startsWith("#")) smoothScrollToSection(item.link);
+                  if (item.link.startsWith("#")) {
+                    smoothScrollToSection(item.link);
+                  } else {
+                    router.push(item.link);
+                  }
                   setIsMobileMenuOpen(false);
                 }}
                 className="text-left text-xl font-black tracking-tight text-slate-800 dark:text-slate-100"
@@ -139,8 +177,20 @@ export default function Index() {
               containerClassName="mt-2 w-full rounded-full"
               className="w-full py-4 text-center text-xs font-black uppercase tracking-widest"
             >
-              Get Started
+              {user ? "Dashboard" : "Get Started"}
             </HoverBorderGradient>
+            {user && (
+              <button
+                type="button"
+                onClick={async () => {
+                  await handleSignOut();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="text-left text-xl font-black tracking-tight text-slate-800 dark:text-slate-100"
+              >
+                Sign Out
+              </button>
+            )}
           </MobileNavMenu>
         </MobileNav>
       </Navbar>

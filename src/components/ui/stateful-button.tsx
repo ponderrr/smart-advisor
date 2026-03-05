@@ -1,7 +1,7 @@
 "use client";
 import { cn } from "@/lib/utils";
 import React from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion } from "framer-motion";
 
 export type StatefulStatus = "idle" | "loading" | "success" | "error";
 
@@ -85,10 +85,10 @@ export const Button = ({
       whileTap={{ scale: 0.99 }}
       transition={{ duration: 0.15, ease: "easeOut" }}
       className={cn(
-        "flex h-11 w-full items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-70",
+        "group flex h-11 w-full items-center justify-center gap-2 rounded-xl border px-4 text-sm font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-70",
         currentState === "error"
-          ? "bg-rose-600 text-white"
-          : "bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white",
+          ? "border-rose-500 bg-rose-600 text-white"
+          : "border-slate-200 bg-slate-50 text-slate-700 hover:-translate-y-0.5 hover:border-violet-400 hover:bg-violet-50 hover:text-violet-700 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-violet-400 dark:hover:bg-violet-500/20 dark:hover:text-violet-200",
         className,
       )}
       {...buttonProps}
@@ -121,68 +121,58 @@ const iconMotion = {
 
 const Loader = () => {
   return (
-    <motion.svg
+    <motion.span
       {...iconMotion}
-      animate={{ rotate: 360, opacity: 1, scale: 1 }}
-      transition={{ rotate: { duration: 0.6, repeat: Infinity, ease: "linear" }, opacity: { duration: 0.16 }, scale: { duration: 0.16 } }}
-      xmlns="http://www.w3.org/2000/svg"
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="text-white dark:text-slate-900"
+      className="inline-flex"
     >
-      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-      <path d="M12 3a9 9 0 1 0 9 9" />
-    </motion.svg>
+      <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+    </motion.span>
   );
 };
 
 const CheckIcon = () => {
   return (
-    <motion.svg
+    <motion.span
       {...iconMotion}
-      xmlns="http://www.w3.org/2000/svg"
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="text-white dark:text-slate-900"
+      className="inline-flex"
     >
-      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-      <path d="M9 12l2 2l4 -4" />
-      <path d="M12 3a9 9 0 1 1 -9 9" />
-    </motion.svg>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M20 6L9 17l-5-5" />
+      </svg>
+    </motion.span>
   );
 };
 
 const ErrorIcon = () => {
   return (
-    <motion.svg
+    <motion.span
       {...iconMotion}
-      xmlns="http://www.w3.org/2000/svg"
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="text-white"
+      className="inline-flex"
     >
-      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-      <path d="M12 8v4" />
-      <path d="M12 16h.01" />
-      <path d="M12 3a9 9 0 1 1 -9 9" />
-    </motion.svg>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M18 6L6 18" />
+        <path d="M6 6l12 12" />
+      </svg>
+    </motion.span>
   );
 };
