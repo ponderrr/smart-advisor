@@ -41,37 +41,24 @@ export async function generateQuestions(
       throw new Error("User not authenticated");
     }
 
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/anthropic-questions`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-          apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-        },
-        body: JSON.stringify({
-          contentType,
-          name: userName,
-          age: userAge,
-          questionCount,
-        }),
-      }
-    );
+    const { data, error } = await supabase.functions.invoke("anthropic-questions", {
+      body: {
+        contentType,
+        name: userName,
+        age: userAge,
+        questionCount,
+      },
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    });
 
-    if (!response.ok) {
-      const responseText = await response.text();
-      let errorMessage = "Failed to generate questions";
-      try {
-        const errorData = JSON.parse(responseText);
-        errorMessage = errorData.error || errorMessage;
-      } catch (e) {
-        errorMessage = `Failed to generate questions: ${responseText}`;
+    if (error) {
+      if (error.message?.includes("401")) {
+        throw new Error("Your session is not authorized for question generation.");
       }
-      throw new Error(errorMessage);
+      throw new Error(error.message || "Failed to generate questions");
     }
-
-    const data = await response.json();
     return data.questions;
   } catch (error) {
     console.error("Error generating questions:", error);
@@ -97,38 +84,24 @@ export async function generateRecommendations(
       throw new Error("User not authenticated");
     }
 
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_SUPABASE_URL
-      }/functions/v1/anthropic-recommendations`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-          apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-        },
-        body: JSON.stringify({
-          answers,
-          contentType,
-          name: userName,
-          age: userAge,
-        }),
-      }
-    );
+    const { data, error } = await supabase.functions.invoke("anthropic-recommendations", {
+      body: {
+        answers,
+        contentType,
+        name: userName,
+        age: userAge,
+      },
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    });
 
-    if (!response.ok) {
-      const responseText = await response.text();
-      let errorMessage = "Failed to generate recommendations";
-      try {
-        const errorData = JSON.parse(responseText);
-        errorMessage = errorData.error || errorMessage;
-      } catch (e) {
-        errorMessage = `Failed to generate recommendations: ${responseText}`;
+    if (error) {
+      if (error.message?.includes("401")) {
+        throw new Error("Your session is not authorized for recommendations.");
       }
-      throw new Error(errorMessage);
+      throw new Error(error.message || "Failed to generate recommendations");
     }
-
-    const data = await response.json();
 
     // Transform edge function response shape into the expected RecommendationData shape
     const result: RecommendationData = {};

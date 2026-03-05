@@ -27,7 +27,7 @@ export const Button = ({
   children,
   state,
   resetDelayMs = 1600,
-  hoverGlow = false,
+  hoverGlow = true,
   ...props
 }: ButtonProps) => {
   const [internalState, setInternalState] = React.useState<StatefulStatus>("idle");
@@ -122,7 +122,7 @@ export const Button = ({
         ...(hoverGlow ? { backgroundImage: hoverGlowBackground } : {}),
       }}
       className={cn(
-        "group flex h-11 w-full items-center justify-center gap-2 rounded-xl border px-4 text-sm font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-70",
+        "group flex h-11 w-full items-center justify-center gap-2 rounded-full border px-4 text-sm font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-70",
         currentState === "error"
           ? "border-rose-500 bg-rose-600 text-white"
           : "border-slate-200 bg-slate-50 text-slate-700 hover:-translate-y-0.5 hover:border-violet-400 hover:bg-violet-50 hover:text-violet-700 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-violet-400 dark:hover:bg-violet-500/20 dark:hover:text-violet-200",

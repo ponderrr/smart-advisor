@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, LogOut, RefreshCw } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { IconCheck } from "@tabler/icons-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/features/auth/hooks/use-auth";
@@ -12,6 +12,7 @@ import { Answer } from "@/features/quiz/types/answer";
 import { v4 as uuidv4 } from "uuid";
 import { useQuizStore } from '@/features/quiz/store/quiz-store';
 import { ThemeToggle } from "@/components/theme-toggle";
+import { GlowPillButton } from "@/components/ui/glow-pill-button";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Navbar,
@@ -181,8 +182,6 @@ const QuestionnairePage = () => {
 
   const canProceed = Boolean(currentQuestion && answers[currentQuestion.id]?.trim().length > 0);
 
-  if (!contentType || !user) return null;
-
   const topBar = (
     <Navbar>
       <NavBody>
@@ -199,9 +198,8 @@ const QuestionnairePage = () => {
           <button
             type="button"
             onClick={handleSignOut}
-            className="inline-flex items-center gap-2 text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400"
+            className="text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400"
           >
-            <LogOut size={14} />
             Sign Out
           </button>
         </div>
@@ -251,11 +249,49 @@ const QuestionnairePage = () => {
     return (
       <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
         {topBar}
-        <main className="px-6 pb-20 pt-32 md:pt-36">
-          <div className="mx-auto max-w-2xl rounded-3xl border border-slate-200/70 bg-white/85 p-8 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
+        <main className="px-4 pb-20 pt-32 md:pt-36 sm:px-6">
+          <div className="mx-auto flex min-h-[420px] w-full max-w-4xl flex-col justify-center rounded-3xl border border-slate-200/70 bg-white/85 p-6 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
               Step 3 of 4
             </p>
+            <div className="mx-auto mt-5 flex h-20 w-20 items-center justify-center rounded-full border border-indigo-300/70 bg-indigo-50 dark:border-indigo-500/40 dark:bg-indigo-500/10">
+              <motion.svg
+                width="40"
+                height="40"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                {/* Book/Screen Outline */}
+                <rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" strokeWidth="2" className="text-indigo-500/20" />
+
+                {/* Scanning Beam */}
+                <motion.path
+                  d="M4 8H20"
+                  stroke="#6366f1"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  animate={{
+                    y: [0, 8, 0],
+                    opacity: [0.5, 1, 0.5]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                />
+
+                {/* AI Sparkle */}
+                <motion.path
+                  d="M12 12L12 12"
+                  stroke="#6366f1"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  animate={{
+                    scale: [1, 1.5, 1],
+                    opacity: [0, 1, 0]
+                  }}
+                  transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
+                />
+              </motion.svg>
+            </div>
             <h1 className="mt-4 text-3xl font-black tracking-tighter md:text-4xl">
               Generating your questions
             </h1>
@@ -283,28 +319,34 @@ const QuestionnairePage = () => {
     return (
       <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
         {topBar}
-        <main className="px-6 pb-20 pt-32 md:pt-36">
-          <div className="mx-auto max-w-xl rounded-3xl border border-slate-200/70 bg-white/85 p-8 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
-            <div className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-red-500 text-white">
-              <RefreshCw size={20} />
+        <main className="px-4 pb-20 pt-32 md:pt-36 sm:px-6">
+          <div className="mx-auto flex min-h-[420px] w-full max-w-4xl flex-col justify-center rounded-3xl border border-slate-200/70 bg-white/85 p-6 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
+            <div className="mx-auto mb-5 flex h-24 w-24 items-center justify-center overflow-hidden">
+              <video
+                src="/animations/error-animation.webm"
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="auto"
+                className="h-full w-full object-contain"
+              />
             </div>
             <h2 className="text-2xl font-black tracking-tight">Unable to load questions</h2>
             <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{error}</p>
             <div className="mt-6 flex items-center justify-center gap-3">
-              <button
-                type="button"
+              <GlowPillButton
                 onClick={loadQuestions}
-                className="rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-500"
+                className="bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-black dark:text-white"
               >
                 Try Again
-              </button>
-              <button
-                type="button"
+              </GlowPillButton>
+              <GlowPillButton
                 onClick={() => router.push('/question-count')}
-                className="rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-800"
+                className="border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
               >
                 Back
-              </button>
+              </GlowPillButton>
             </div>
           </div>
         </main>
@@ -317,15 +359,15 @@ const QuestionnairePage = () => {
       {topBar}
 
       <main className="px-4 pb-20 pt-32 md:pt-36 sm:px-6">
-        <div className="mx-auto flex min-h-[calc(100vh-14rem)] w-full max-w-4xl flex-col justify-center">
+        <div className="mx-auto w-full max-w-4xl">
           <div className="mb-8 flex items-center justify-between gap-3">
-            <button
+            <GlowPillButton
               onClick={handlePrevious}
-              className="inline-flex items-center gap-2 rounded-full border border-slate-300/80 bg-white/80 px-4 py-2 text-sm font-semibold transition hover:bg-white dark:border-slate-700 dark:bg-slate-900/70 dark:hover:bg-slate-900"
+              className="inline-flex items-center gap-2 border-slate-300/80 bg-white/80 px-4 py-2 text-sm font-semibold dark:border-slate-700 dark:bg-slate-900/70"
             >
               <ArrowLeft size={16} />
               Back
-            </button>
+            </GlowPillButton>
             <p className="text-base font-extrabold tracking-wide text-slate-800 dark:text-slate-100 md:text-lg">
               {currentQuestionIndex + 1} out of {questions.length} questions
             </p>
@@ -364,15 +406,15 @@ const QuestionnairePage = () => {
                     {getQuestionOptions(contentType, currentQuestionIndex).map((option) => {
                       const selected = answers[currentQuestion.id] === option;
                       return (
-                        <button
+                        <GlowPillButton
                           key={option}
-                          type="button"
                           onClick={() => handleAnswer(option)}
+                          active={selected}
                           className={cn(
-                            "group flex items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all",
+                            "group flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all",
                             selected
                               ? "border-indigo-400 bg-indigo-50 text-indigo-700 dark:border-indigo-500/70 dark:bg-indigo-500/15 dark:text-indigo-300"
-                              : "border-slate-200/80 bg-white text-slate-800 hover:border-indigo-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:border-slate-500 dark:hover:bg-slate-900",
+                              : "border-slate-200/80 bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200",
                           )}
                         >
                           <span className="text-sm font-semibold sm:text-base">{option}</span>
@@ -381,7 +423,7 @@ const QuestionnairePage = () => {
                           ) : (
                             <span className="h-5 w-5 rounded-full border border-slate-300 transition group-hover:border-indigo-300 dark:border-slate-600" />
                           )}
-                        </button>
+                        </GlowPillButton>
                       );
                     })}
                   </div>
@@ -390,14 +432,14 @@ const QuestionnairePage = () => {
             </AnimatePresence>
 
             <div className="mt-8 flex items-center justify-end">
-              <button
+              <GlowPillButton
                 onClick={handleNext}
                 disabled={!canProceed || isSubmitting}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-6 py-2.5 text-sm font-black tracking-tight text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
+                className="inline-flex items-center justify-center gap-2 bg-slate-900 px-6 py-2.5 text-sm font-black tracking-tight text-white disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-100 dark:text-slate-900"
               >
                 {currentQuestionIndex === questions.length - 1 ? "Get Recommendations" : "Next"}
                 <ArrowRight size={16} />
-              </button>
+              </GlowPillButton>
             </div>
           </div>
         </div>

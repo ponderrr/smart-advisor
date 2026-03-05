@@ -1,8 +1,7 @@
 'use client';
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from 'next/navigation';
-import { LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useQuizStore } from '@/features/quiz/store/quiz-store';
@@ -21,6 +20,7 @@ import {
 import { cn } from "@/lib/utils";
 
 type ContentType = "movie" | "book" | "both" | null;
+const PREF_CONTENT_KEY = "smart_advisor_pref_content_focus";
 
 interface SelectionCardProps {
   id: ContentType;
@@ -152,6 +152,14 @@ const ContentSelectionPage = () => {
     },
   ];
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const storedContent = window.localStorage.getItem(PREF_CONTENT_KEY);
+    if (storedContent && ["movie", "book", "both"].includes(storedContent)) {
+      setSelectedType(storedContent as ContentType);
+    }
+  }, []);
+
   return (
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
       <Navbar>
@@ -169,9 +177,8 @@ const ContentSelectionPage = () => {
             <button
               type="button"
               onClick={handleSignOut}
-              className="inline-flex items-center gap-2 text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400"
+              className="text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400"
             >
-              <LogOut size={14} />
               Sign Out
             </button>
           </div>
@@ -246,7 +253,7 @@ const ContentSelectionPage = () => {
               onClick={handleContinue}
               disabled={!selectedType || isLoading}
               state={isLoading ? "loading" : "idle"}
-              className="h-11 w-auto rounded-full px-8 text-sm font-semibold"
+              className="h-14 w-auto rounded-full px-12 text-base font-black tracking-tight sm:text-lg"
             >
               Continue
             </StatefulButton>

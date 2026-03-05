@@ -163,12 +163,13 @@ export const SidebarLink = ({
   className?: string;
 }) => {
   const { open, animate } = useSidebar();
+  const isCollapsed = animate && !open;
   const renderedIcon = React.isValidElement(link.icon)
     ? React.cloneElement(link.icon as React.ReactElement<{ className?: string }>, {
       className: cn(
         (link.icon as React.ReactElement<{ className?: string }>).props.className,
-        "transition-all duration-200",
-        animate && !open ? "h-6 w-6" : "h-4 w-4",
+        "transition-colors duration-150",
+        isCollapsed ? "h-5 w-5" : "h-4 w-4",
       ),
     })
     : link.icon;
@@ -177,12 +178,14 @@ export const SidebarLink = ({
     <a
       href={link.href}
       className={cn(
-        "flex items-center justify-start gap-2  group/sidebar py-2",
+        "flex items-center justify-start gap-2 group/sidebar py-2",
         className
       )}
       {...props}
     >
-      {renderedIcon}
+      <span className="flex h-6 w-6 shrink-0 items-center justify-center">
+        {renderedIcon}
+      </span>
 
       <motion.span
         animate={{

@@ -7,6 +7,7 @@ import { IconArrowLeft, IconArrowRight, IconCheck } from "@tabler/icons-react";
 
 import { useQuizStore, type ContentType } from "@/features/quiz/store/quiz-store";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { GlowPillButton } from "@/components/ui/glow-pill-button";
 import { cn } from "@/lib/utils";
 
 type DemoQuestion = {
@@ -34,15 +35,14 @@ const DemoContentCard = ({
   onClick,
 }: DemoContentCardProps) => {
   return (
-    <motion.button
-      type="button"
+    <GlowPillButton
       onClick={onClick}
-      whileHover={{ y: -4 }}
+      active={isSelected}
       className={cn(
-        "relative w-full overflow-hidden rounded-3xl border p-0 text-left shadow-sm backdrop-blur-md transition-all duration-300",
+        "relative w-full overflow-hidden rounded-3xl border p-0 text-left shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-1",
         isSelected
           ? "border-indigo-500 bg-white shadow-lg dark:border-indigo-400 dark:bg-slate-900/70"
-          : "border-slate-200/80 bg-white/80 hover:-translate-y-1 hover:border-indigo-300 hover:shadow-md dark:border-slate-700/70 dark:bg-slate-900/65 dark:hover:border-indigo-500/60",
+          : "border-slate-200/80 bg-white/80 hover:border-indigo-300 hover:shadow-md dark:border-slate-700/70 dark:bg-slate-900/65 dark:hover:border-indigo-500/60",
       )}
     >
       {isSelected && (
@@ -90,7 +90,7 @@ const DemoContentCard = ({
         <h3 className="text-xl font-black tracking-tight sm:text-2xl">{title}</h3>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{description}</p>
       </div>
-    </motion.button>
+    </GlowPillButton>
   );
 };
 
@@ -221,13 +221,13 @@ export default function DemoPage() {
     <main className="min-h-screen bg-slate-50 px-4 py-10 text-slate-900 dark:bg-slate-950 dark:text-slate-100 sm:px-6">
       <div className="mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-4xl flex-col justify-center">
         <div className="mb-8 flex items-center justify-between gap-3">
-          <button
+          <GlowPillButton
             onClick={handleBack}
-            className="inline-flex items-center gap-2 rounded-full border border-slate-300/80 bg-white/80 px-4 py-2 text-sm font-semibold transition hover:bg-white dark:border-slate-700 dark:bg-slate-900/70 dark:hover:bg-slate-900"
+            className="inline-flex items-center gap-2 border-slate-300/80 bg-white/80 px-4 py-2 text-sm font-semibold dark:border-slate-700 dark:bg-slate-900/70"
           >
             <IconArrowLeft className="h-4 w-4" />
             Back
-          </button>
+          </GlowPillButton>
           <p className="text-base font-extrabold tracking-wide text-slate-800 dark:text-slate-100 md:text-lg">
             {step + 1} out of {DEMO_QUESTIONS.length} questions
           </p>
@@ -283,14 +283,15 @@ export default function DemoPage() {
                   {current.options.map((option) => {
                     const selected = answers[current.id] === option;
                     return (
-                      <button
+                      <GlowPillButton
                         key={option}
                         onClick={() => handleChoose(option)}
+                        active={selected}
                         className={cn(
-                          "group flex items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all",
+                          "group flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all",
                           selected
                             ? "border-indigo-400 bg-indigo-50 text-indigo-700 dark:border-indigo-500/70 dark:bg-indigo-500/15 dark:text-indigo-300"
-                            : "border-slate-200/80 bg-white text-slate-800 hover:border-indigo-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:border-slate-500 dark:hover:bg-slate-900",
+                            : "border-slate-200/80 bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200",
                         )}
                       >
                         <span className="text-sm font-semibold sm:text-base">{option}</span>
@@ -299,7 +300,7 @@ export default function DemoPage() {
                         ) : (
                           <span className="h-5 w-5 rounded-full border border-slate-300 transition group-hover:border-indigo-300 dark:border-slate-600" />
                         )}
-                      </button>
+                      </GlowPillButton>
                     );
                   })}
                 </div>
@@ -316,15 +317,15 @@ export default function DemoPage() {
               }
               transition={{ duration: 0.45 }}
             >
-              <button
+              <GlowPillButton
                 onClick={handleNext}
                 className={cn(
-                  "inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-6 py-2.5 text-sm font-black tracking-tight text-white transition-colors hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white",
+                  "inline-flex items-center justify-center gap-2 bg-slate-900 px-6 py-2.5 text-sm font-black tracking-tight text-white dark:bg-slate-100 dark:text-slate-900",
                 )}
               >
                 {step === DEMO_QUESTIONS.length - 1 ? "Continue" : "Next"}
                 <IconArrowRight className="h-4 w-4" />
-              </button>
+              </GlowPillButton>
             </motion.div>
           </div>
           {validationMessage ? (
