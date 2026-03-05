@@ -1,7 +1,12 @@
 "use client";
 
 import * as Label from "@radix-ui/react-label";
-import { AnimatePresence, motion } from "framer-motion";
+import {
+  AnimatePresence,
+  motion,
+  useMotionTemplate,
+  useMotionValue,
+} from "framer-motion";
 import {
   IconBrandGoogle,
   IconEye,
@@ -240,14 +245,26 @@ export const AuthForm = ({
   };
 
   return (
-    <div className="mx-auto w-full max-w-md min-h-[560px] overflow-hidden rounded-2xl border border-slate-200/70 bg-white/85 p-5 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-6">
+    <div
+      className={cn(
+        "mx-auto w-full max-w-md overflow-hidden rounded-2xl border border-slate-200/70 bg-white/85 p-5 shadow-sm backdrop-blur-md transition-[min-height] duration-300 dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-6",
+        mode === "signup" && "min-h-[560px]",
+        mode === "signin" && "min-h-[500px]",
+        mode === "forgot" && "min-h-[430px]",
+      )}
+    >
       <motion.div
         key={mode}
         initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
         animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
         transition={{ duration: 0.28, ease: "easeOut" }}
       >
-        <h1 className="text-3xl font-black tracking-tight text-slate-900 dark:text-slate-100">
+        <h1
+          className={cn(
+            "text-3xl font-black tracking-tight text-slate-900 dark:text-slate-100",
+            mode === "forgot" && "whitespace-nowrap text-2xl sm:text-3xl",
+          )}
+        >
           {heading}
         </h1>
         <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-400">
@@ -274,7 +291,7 @@ export const AuthForm = ({
             onChange={(event) => setEmail(event.target.value)}
             disabled={disabled}
             aria-invalid={Boolean(errors.email)}
-            className="focus-visible:ring-violet-400 dark:focus-visible:ring-violet-500"
+            className="focus-visible:ring-slate-400 dark:focus-visible:ring-slate-500"
           />
         </FormField>
 
@@ -327,7 +344,7 @@ export const AuthForm = ({
                   onChange={(event) => setAge(event.target.value)}
                   disabled={disabled}
                   aria-invalid={Boolean(errors.age)}
-                  className="[appearance:textfield] focus-visible:ring-violet-400 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none dark:focus-visible:ring-violet-500"
+                  className="[appearance:textfield] focus-visible:ring-slate-400 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none dark:focus-visible:ring-slate-500"
                 />
               </FormField>
 
@@ -370,7 +387,7 @@ export const AuthForm = ({
         )}
 
         {showResendVerification && (
-          <button
+          <AuthHoverButton
             type="button"
             disabled={disabled || isResendingVerification}
             onClick={async () => {
@@ -387,10 +404,10 @@ export const AuthForm = ({
                 "Verification email sent. Please check your inbox and spam folder.",
               );
             }}
-            className="inline-flex items-center justify-center rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
+            className="inline-flex items-center justify-center rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition-colors hover:border-violet-400 hover:bg-slate-100 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-600 dark:text-slate-200 dark:hover:border-violet-400 dark:hover:bg-slate-800 dark:hover:text-violet-300"
           >
             {isResendingVerification ? "Resending..." : "Resend verification link"}
-          </button>
+          </AuthHoverButton>
         )}
 
         <StatefulButton
@@ -398,6 +415,7 @@ export const AuthForm = ({
           type="submit"
           onClick={handleAction}
           disabled={disabled}
+          hoverGlow
           className="mt-1"
         >
           {actionLabel}
@@ -461,7 +479,7 @@ export const AuthForm = ({
                   </span>
                 </div>
 
-                <button
+                <AuthHoverButton
                   type="button"
                   onClick={async () => {
                     resetFeedback();
@@ -476,7 +494,7 @@ export const AuthForm = ({
                 >
                   <IconBrandGoogle className="h-4 w-4" />
                   <span>Continue with Google</span>
-                </button>
+                </AuthHoverButton>
               </div>
             </motion.div>
           )}
@@ -525,12 +543,41 @@ const PasswordInput = ({
   className,
   ...props
 }: PasswordInputProps) => {
+  const radius = 100;
+  const [visible, setVisible] = useState(false);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const handleMouseMove = ({
+    currentTarget,
+    clientX,
+    clientY,
+  }: React.MouseEvent<HTMLDivElement>) => {
+    const { left, top } = currentTarget.getBoundingClientRect();
+    mouseX.set(clientX - left);
+    mouseY.set(clientY - top);
+  };
+
   return (
-    <div className="relative">
+    <motion.div
+      style={{
+        background: useMotionTemplate`
+          radial-gradient(
+            ${visible ? radius + "px" : "0px"} circle at ${mouseX}px ${mouseY}px,
+            #8b5cf6,
+            transparent 80%
+          )
+        `,
+      }}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setVisible(true)}
+      onMouseLeave={() => setVisible(false)}
+      className="group/input relative rounded-lg p-[2px] transition duration-300"
+    >
       <input
         type={showPassword ? "text" : "password"}
         className={cn(
-          "shadow-input flex h-10 w-full rounded-md border-none bg-gray-50 px-3 py-2 pr-10 text-sm text-black transition duration-300 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-800 dark:text-white dark:focus-visible:ring-violet-500",
+          "shadow-input flex h-10 w-full rounded-md border-none bg-gray-50 px-3 py-2 pr-10 text-sm text-black transition duration-400 group-hover/input:shadow-none placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-800 dark:text-white dark:focus-visible:ring-slate-500",
           className,
         )}
         {...props}
@@ -548,7 +595,7 @@ const PasswordInput = ({
           <IconEye className="h-4 w-4" />
         )}
       </button>
-    </div>
+    </motion.div>
   );
 };
 
@@ -571,5 +618,52 @@ const FormField = ({ label, htmlFor, error, children }: FormFieldProps) => {
         </p>
       )}
     </div>
+  );
+};
+
+const AuthHoverButton = ({
+  className,
+  children,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement>) => {
+  const radius = 110;
+  const [visible, setVisible] = useState(false);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const background = useMotionTemplate`
+    radial-gradient(
+      ${visible ? radius + "px" : "0px"} circle at ${mouseX}px ${mouseY}px,
+      rgba(139,92,246,0.5),
+      transparent 80%
+    )
+  `;
+
+  const handleMouseMove = (event: React.MouseEvent<HTMLButtonElement>) => {
+    props.onMouseMove?.(event);
+    const { left, top } = event.currentTarget.getBoundingClientRect();
+    mouseX.set(event.clientX - left);
+    mouseY.set(event.clientY - top);
+  };
+
+  return (
+    <motion.button
+      {...props}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={(event) => {
+        props.onMouseEnter?.(event);
+        setVisible(true);
+      }}
+      onMouseLeave={(event) => {
+        props.onMouseLeave?.(event);
+        setVisible(false);
+      }}
+      style={{
+        ...(props.style ?? {}),
+        backgroundImage: background,
+      }}
+      className={className}
+    >
+      {children}
+    </motion.button>
   );
 };

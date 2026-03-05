@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/features/auth/hooks/use-auth";
-import { motion } from "framer-motion";
+import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 import { IconChevronsDown } from "@tabler/icons-react";
 import { FlipWords } from "@/components/ui/flip-words";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
@@ -171,12 +171,9 @@ const HeroSection = () => {
               {user ? "Go to Dashboard" : "Get Started"}
             </motion.span>
           </HoverBorderGradient>
-          <button
-            onClick={handleSecondaryCta}
-            className="rounded-full border border-slate-300/80 bg-white/70 px-7 py-3 text-sm font-bold tracking-wide text-slate-700 transition-colors hover:bg-white dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200 dark:hover:bg-slate-900"
-          >
+          <HoverGlowButton onClick={handleSecondaryCta}>
             {user ? "View History" : "Try a Demo"}
-          </button>
+          </HoverGlowButton>
         </div>
       </div>
 
@@ -197,6 +194,50 @@ const HeroSection = () => {
         </div>
       </motion.div>
     </section>
+  );
+};
+
+const HoverGlowButton = ({
+  children,
+  onClick,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+}) => {
+  const radius = 110;
+  const [visible, setVisible] = useState(false);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const handleMouseMove = ({
+    currentTarget,
+    clientX,
+    clientY,
+  }: React.MouseEvent<HTMLButtonElement>) => {
+    const { left, top } = currentTarget.getBoundingClientRect();
+    mouseX.set(clientX - left);
+    mouseY.set(clientY - top);
+  };
+
+  return (
+    <motion.button
+      onClick={onClick}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setVisible(true)}
+      onMouseLeave={() => setVisible(false)}
+      style={{
+        background: useMotionTemplate`
+          radial-gradient(
+            ${visible ? radius + "px" : "0px"} circle at ${mouseX}px ${mouseY}px,
+            rgba(139,92,246,0.5),
+            transparent 80%
+          )
+        `,
+      }}
+      className="rounded-full border border-slate-300/80 bg-white/70 px-7 py-3 text-sm font-bold tracking-wide text-slate-700 transition-all duration-300 hover:border-violet-400 hover:bg-white hover:text-violet-700 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200 dark:hover:border-violet-400 dark:hover:bg-slate-900 dark:hover:text-violet-300"
+    >
+      {children}
+    </motion.button>
   );
 };
 
