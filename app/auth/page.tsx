@@ -10,8 +10,10 @@ const AuthPage = () => {
   const {
     signIn,
     signInWithGoogle,
+    signInAsMockUser,
     signUp,
     resetPassword,
+    resendVerificationEmail,
     clearError,
     loading,
     error: authError,
@@ -19,11 +21,19 @@ const AuthPage = () => {
     session,
   } = useAuth();
 
+  const handleMockSignIn = async () => {
+    const result = await signInAsMockUser();
+    if (!result.error) {
+      router.push("/dashboard");
+    }
+    return result;
+  };
+
   useEffect(() => {
-    if (user && session && !loading) {
+    if ((session || user) && !loading) {
       router.push("/content-selection");
     }
-  }, [user, session, loading, router]);
+  }, [session, user, loading, router]);
 
   return (
     <AuthLayout onLogoClick={() => router.push("/")}>
@@ -32,8 +42,10 @@ const AuthPage = () => {
         authError={authError}
         onSignIn={signIn}
         onGoogleSignIn={signInWithGoogle}
+        onSignInAsMockUser={handleMockSignIn}
         onSignUp={signUp}
         onResetPassword={resetPassword}
+        onResendVerificationEmail={resendVerificationEmail}
         onClearError={clearError}
       />
     </AuthLayout>

@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 export type AuthMode = "signin" | "signup" | "forgot";
 
@@ -19,8 +20,13 @@ interface AuthFormProps {
   loading: boolean;
   authError?: string | null;
   onClearError: () => void;
-  onSignIn: (email: string, password: string) => Promise<{ error: string | null }>;
+  onSignIn: (
+    email: string,
+    password: string,
+    rememberFor30Days: boolean
+  ) => Promise<{ error: string | null }>;
   onGoogleSignIn: () => Promise<{ error: string | null }>;
+  onSignInAsMockUser: () => Promise<{ error: string | null }>;
   onSignUp: (
     email: string,
     password: string,
@@ -28,6 +34,7 @@ interface AuthFormProps {
     age: number,
   ) => Promise<{ error: string | null }>;
   onResetPassword: (email: string) => Promise<{ error: string | null }>;
+  onResendVerificationEmail: (email: string) => Promise<{ error: string | null }>;
 }
 
 export const AuthForm = ({
@@ -36,9 +43,12 @@ export const AuthForm = ({
   onClearError,
   onSignIn,
   onGoogleSignIn,
+  onSignInAsMockUser,
   onSignUp,
   onResetPassword,
+  onResendVerificationEmail,
 }: AuthFormProps) => {
+  const searchParams = useSearchParams();
   const [mode, setMode] = useState<AuthMode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -49,13 +59,46 @@ export const AuthForm = ({
   const [rememberFor30Days, setRememberFor30Days] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [isResendingVerification, setIsResendingVerification] = useState(false);
+  const [headingChoice, setHeadingChoice] = useState<Record<AuthMode, number>>({
+    signin: Math.floor(Math.random() * 3),
+    signup: Math.floor(Math.random() * 3),
+    forgot: Math.floor(Math.random() * 3),
+  });
 
-  const heading =
-    mode === "signin"
-      ? "Welcome back"
-      : mode === "signup"
-        ? "Create your account"
-        : "Reset your password";
+  const modeHeadings = {
+    signin: ["Welcome back", "Great to see you again", "Ready for your next pick?"],
+    signup: ["Create your account", "Join Smart Advisor", "Let’s set up your profile"],
+    forgot: ["Reset your password", "Recover access", "Get back into your account"],
+  } as const;
+
+
+  const callbackError = searchParams.get("error");
+  const callbackErrorDescription = searchParams.get("error_description");
+  const isExpiredVerificationLink =
+    callbackError === "otp_expired" || callbackError === "verification_failed";
+  const callbackMessage = useMemo(() => {
+    if (searchParams.get("verified") === "true") {
+      return {
+        text: "Email verified successfully. You can sign in now.",
+        tone: "success" as const,
+      };
+    }
+
+    if (isExpiredVerificationLink) {
+      return {
+        text:
+          callbackErrorDescription ||
+          "This verification link expired. Enter your email below to resend a new one.",
+        tone: "error" as const,
+      };
+    }
+
+    return null;
+  }, [searchParams, isExpiredVerificationLink, callbackErrorDescription]);
+
+  const headingPool = modeHeadings[mode];
+  const heading = headingPool[headingChoice[mode] % headingPool.length];
 
   const actionLabel =
     mode === "signin"
@@ -70,6 +113,12 @@ export const AuthForm = ({
     () => errors.general || authError || null,
     [errors.general, authError],
   );
+
+  const showResendVerification =
+    mode === "signin" &&
+    (isExpiredVerificationLink ||
+      formError?.toLowerCase().includes("confirm your email") ||
+      formError?.toLowerCase().includes("email not confirmed"));
 
   const resetFeedback = () => {
     setErrors({});
@@ -87,6 +136,10 @@ export const AuthForm = ({
       setAge("");
     }
     setRememberFor30Days(false);
+    setHeadingChoice((prev) => ({
+      ...prev,
+      [nextMode]: Math.floor(Math.random() * modeHeadings[nextMode].length),
+    }));
     resetFeedback();
   };
 
@@ -149,7 +202,7 @@ export const AuthForm = ({
     }
 
     if (mode === "signin") {
-      const result = await onSignIn(email, password);
+      const result = await onSignIn(email, password, rememberFor30Days);
       if (result.error) {
         setErrors({ general: result.error });
       }
@@ -183,14 +236,15 @@ export const AuthForm = ({
   return (
     <motion.div
       layout
-      transition={{ layout: { duration: 0.32, ease: [0.22, 1, 0.36, 1] } }}
-      className="mx-auto w-full max-w-md overflow-hidden rounded-2xl border border-slate-200/70 bg-white/85 p-5 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-6"
+      transition={{ layout: { duration: 0.42, ease: [0.22, 1, 0.36, 1] } }}
+      whileHover={{ y: -2 }}
+      className="mx-auto w-full max-w-md overflow-hidden rounded-2xl border border-slate-200/70 bg-white/85 p-5 shadow-sm backdrop-blur-md transition-[border-color,background-color] duration-300 hover:border-slate-300 dark:border-slate-700/60 dark:bg-slate-900/65 dark:hover:border-slate-600 sm:p-6"
     >
       <motion.div
         key={mode}
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.22, ease: "easeOut" }}
+        initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
+        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+        transition={{ duration: 0.28, ease: "easeOut" }}
       >
         <h1 className="text-3xl font-black tracking-tight text-slate-900 dark:text-slate-100">
           {heading}
@@ -206,6 +260,7 @@ export const AuthForm = ({
 
       <motion.form
         layout
+        transition={{ layout: { duration: 0.36, ease: [0.22, 1, 0.36, 1] } }}
         onSubmit={(event) => event.preventDefault()}
         className="mt-6 space-y-4"
         noValidate
@@ -301,8 +356,44 @@ export const AuthForm = ({
         </AnimatePresence>
 
         {formError && <p className="text-sm text-red-500">{formError}</p>}
+        {callbackMessage && (
+          <p
+            className={cn(
+              "text-sm",
+              callbackMessage.tone === "success"
+                ? "text-emerald-600 dark:text-emerald-400"
+                : "text-red-500",
+            )}
+          >
+            {callbackMessage.text}
+          </p>
+        )}
         {successMessage && (
           <p className="text-sm text-emerald-600 dark:text-emerald-400">{successMessage}</p>
+        )}
+
+        {showResendVerification && (
+          <button
+            type="button"
+            disabled={disabled || isResendingVerification}
+            onClick={async () => {
+              setErrors({});
+              setSuccessMessage(null);
+              setIsResendingVerification(true);
+              const result = await onResendVerificationEmail(email);
+              setIsResendingVerification(false);
+              if (result.error) {
+                setErrors({ general: result.error });
+                return;
+              }
+              setSuccessMessage(
+                "Verification email sent. Please check your inbox and spam folder.",
+              );
+            }}
+            className="inline-flex items-center justify-center rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
+          >
+            {isResendingVerification ? "Resending..." : "Resend verification link"}
+          </button>
         )}
 
         <StatefulButton
@@ -310,7 +401,7 @@ export const AuthForm = ({
           type="submit"
           onClick={handleAction}
           disabled={disabled}
-          className="mt-1 hover:bg-violet-600 dark:hover:bg-violet-400 dark:hover:text-slate-950"
+          className="mt-1"
         >
           {actionLabel}
         </StatefulButton>
@@ -383,6 +474,22 @@ export const AuthForm = ({
             >
               <IconBrandGoogle className="h-4 w-4" />
               <span>Continue with Google</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={async () => {
+                resetFeedback();
+                const result = await onSignInAsMockUser();
+                if (result.error) {
+                  setErrors({ general: result.error });
+                }
+              }}
+              className="shadow-input inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 transition-all hover:-translate-y-0.5 hover:border-violet-400 hover:bg-violet-50 hover:text-violet-700 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-violet-400 dark:hover:bg-violet-500/20 dark:hover:text-violet-200"
+              aria-label="Continue with mock user"
+              disabled={disabled}
+            >
+              <span>Continue as Mock User</span>
             </button>
           </>
         )}

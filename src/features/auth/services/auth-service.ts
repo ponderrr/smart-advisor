@@ -6,6 +6,34 @@ export interface AuthError {
 }
 
 class AuthService {
+  private toUserFriendlyError(rawMessage: string | undefined, fallback: string): string {
+    const message = (rawMessage || "").toLowerCase();
+
+    if (message.includes("user from sub claim in jwt does not exist")) {
+      return "Your session is no longer valid. Please sign in again.";
+    }
+    if (message.includes("jwt") && message.includes("expired")) {
+      return "Your session expired. Please sign in again.";
+    }
+    if (message.includes("invalid refresh token") || message.includes("refresh token")) {
+      return "Your session expired. Please sign in again.";
+    }
+    if (message.includes("otp_expired") || message.includes("email link is invalid") || message.includes("expired")) {
+      return "That email link has expired. Please request a new one.";
+    }
+    if (message.includes("email not confirmed")) {
+      return "Please verify your email before signing in.";
+    }
+    if (message.includes("invalid login credentials")) {
+      return "Invalid email or password. Please try again.";
+    }
+    if (message.includes("too many requests") || message.includes("rate limit")) {
+      return "Too many attempts right now. Please wait a moment and try again.";
+    }
+
+    return fallback;
+  }
+
   async signUp(
     email: string,
     password: string,
@@ -15,6 +43,7 @@ class AuthService {
     try {
       if (process.env.NODE_ENV === 'development') console.log("Starting signup process for:", email);
       const normalizedEmail = email.trim().toLowerCase();
+      const firstName = name.trim().split(/\s+/)[0] || "there";
 
       // Determine the correct redirect URL based on environment
       const getRedirectUrl = () => {
@@ -31,6 +60,8 @@ class AuthService {
         options: {
           data: {
             name,
+            full_name: name,
+            first_name: firstName,
             age,
           },
           // Use dynamic redirect URL that works for both local and production
@@ -40,7 +71,12 @@ class AuthService {
 
       if (authError) {
         console.error("Sign up auth error:", authError);
-        return { error: authError.message };
+        return {
+          error: this.toUserFriendlyError(
+            authError.message,
+            "We couldn't create your account right now. Please try again.",
+          ),
+        };
       }
 
       if (!authData.user) {
@@ -55,10 +91,8 @@ class AuthService {
         Array.isArray(authData.user.identities) &&
         authData.user.identities.length === 0
       ) {
-        return {
-          error:
-            "An account with this email already exists in authentication. Please sign in or use Forgot Password.",
-        };
+        // Do not leak account existence details. Treat this as a neutral success path.
+        return { error: null };
       }
 
       if (process.env.NODE_ENV === 'development') console.log("Auth user created successfully:", authData.user.id);
@@ -88,10 +122,16 @@ class AuthService {
 
       if (profileError) {
         console.error("Error creating profile:", profileError);
+        // Ensure no auth state lingers if profile setup fails.
+        await supabase.auth.signOut();
         return {
           error: "Failed to create user profile. Please try signing in.",
         };
       }
+
+      // Keep signup flow explicit: user confirms email, then signs in intentionally.
+      // This also clears any unexpected session/token created by auto-confirm setups.
+      await supabase.auth.signOut();
 
       if (process.env.NODE_ENV === 'development') console.log("Profile created successfully");
       return { error: null };
@@ -147,7 +187,12 @@ class AuthService {
           };
         }
 
-        return { error: error.message };
+        return {
+          error: this.toUserFriendlyError(
+            error.message,
+            "Sign in failed. Please try again.",
+          ),
+        };
       }
 
       if (!data.user) {
@@ -210,7 +255,12 @@ class AuthService {
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error("Sign out error:", error);
-        return { error: error.message };
+        return {
+          error: this.toUserFriendlyError(
+            error.message,
+            "Unable to sign out right now. Please try again.",
+          ),
+        };
       }
       if (process.env.NODE_ENV === 'development') console.log("User signed out successfully");
       return { error: null };
@@ -234,7 +284,12 @@ class AuthService {
 
       if (error) {
         console.error("Google sign-in error:", error);
-        return { error: error.message };
+        return {
+          error: this.toUserFriendlyError(
+            error.message,
+            "Unable to continue with Google sign-in.",
+          ),
+        };
       }
 
       return { error: null };
@@ -284,7 +339,12 @@ class AuthService {
 
       if (error) {
         console.error("Reset password error:", error);
-        return { error: error.message };
+        return {
+          error: this.toUserFriendlyError(
+            error.message,
+            "Unable to send reset email right now. Please try again.",
+          ),
+        };
       }
 
       return { error: null };
@@ -293,6 +353,50 @@ class AuthService {
       return {
         error:
           "An unexpected error occurred while sending reset email. Please try again.",
+      };
+    }
+  }
+
+  async resendVerificationEmail(
+    email: string
+  ): Promise<{ error: string | null }> {
+    try {
+      if (!email) {
+        return { error: "Enter your email to resend verification." };
+      }
+
+      if (!/\S+@\S+\.\S+/.test(email)) {
+        return { error: "Please enter a valid email address" };
+      }
+
+      const origin =
+        typeof window !== "undefined"
+          ? window.location.origin
+          : "https://smartadvisor.live";
+
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: email.trim().toLowerCase(),
+        options: {
+          emailRedirectTo: `${origin}/auth/callback`,
+        },
+      });
+
+      if (error) {
+        console.error("Resend verification error:", error);
+        return {
+          error: this.toUserFriendlyError(
+            error.message,
+            "Unable to resend verification email right now. Please try again.",
+          ),
+        };
+      }
+
+      return { error: null };
+    } catch (err) {
+      console.error("Unexpected error during resend verification:", err);
+      return {
+        error: "Unable to resend verification email right now. Please try again.",
       };
     }
   }
@@ -337,7 +441,13 @@ class AuthService {
           "authService.getCurrentUser: Error getting user:",
           userError
         );
-        return { user: null, error: userError.message };
+        return {
+          user: null,
+          error: this.toUserFriendlyError(
+            userError.message,
+            "We couldn't verify your session. Please sign in again.",
+          ),
+        };
       }
 
       if (!user) {
@@ -472,7 +582,12 @@ class AuthService {
 
       if (userError) {
         console.error("Error getting user for profile update:", userError);
-        return { error: userError.message };
+        return {
+          error: this.toUserFriendlyError(
+            userError.message,
+            "Unable to update profile right now. Please try again.",
+          ),
+        };
       }
 
       if (!user) {
@@ -490,7 +605,12 @@ class AuthService {
 
       if (updateError) {
         console.error("Error updating profile:", updateError);
-        return { error: updateError.message };
+        return {
+          error: this.toUserFriendlyError(
+            updateError.message,
+            "Unable to update profile right now. Please try again.",
+          ),
+        };
       }
 
       return { error: null };

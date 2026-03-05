@@ -1,7 +1,8 @@
 'use client';
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from 'next/navigation';
-import { RefreshCw, Heart, User, LogOut, Star } from "lucide-react";
+import { RefreshCw, Heart, LogOut, Star, BookOpen, Film } from "lucide-react";
+import { motion } from "framer-motion";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { enhancedRecommendationsService } from "@/features/recommendations/services/enhanced-recommendations-service";
 import { databaseService } from "@/features/recommendations/services/database-service";
@@ -10,66 +11,58 @@ import { ExpandableText } from "@/components/ExpandableText";
 import {
   EnhancedButton,
   LoadingScreen,
-  RecommendationLoadingShimmer,
 } from "@/components/enhanced";
 import { SafeLocalStorage } from "@/utils/localStorage";
 import { useQuizStore } from '@/features/quiz/store/quiz-store';
-import { BrandWordmark } from "@/components/brand-wordmark";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
+import {
+  Navbar,
+  NavBody,
+  NavItems,
+  MobileNav,
+  NavbarLogo,
+  MobileNavHeader,
+  MobileNavToggle,
+  MobileNavMenu,
+} from "@/components/ui/resizable-navbar";
+import { cn } from "@/lib/utils";
 
-// Utility function to safely serialize data, handling circular references and non-serializable values
 const safeStringify = (obj: unknown): string => {
   const seen = new WeakSet();
 
   try {
-    return JSON.stringify(obj, (key, value) => {
-      // Handle circular references
+    return JSON.stringify(obj, (_key, value) => {
       if (typeof value === "object" && value !== null) {
         if (seen.has(value)) {
           return "[Circular Reference]";
         }
         seen.add(value);
       }
-
-      // Handle functions and other non-serializable values
-      if (typeof value === "function") {
-        return "[Function]";
-      }
-
-      if (typeof value === "symbol") {
-        return "[Symbol]";
-      }
-
-      if (value === undefined) {
-        return "[Undefined]";
-      }
-
+      if (typeof value === "function") return "[Function]";
+      if (typeof value === "symbol") return "[Symbol]";
+      if (value === undefined) return "[Undefined]";
       return value;
     });
   } catch (error) {
     if (process.env.NODE_ENV === 'development') console.warn("Failed to stringify object, using fallback:", error);
-    // Fallback: create a hash based on object keys and content type
     return `fallback-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 };
 
-// Session storage key for tracking generated sessions
 const GENERATED_SESSIONS_KEY = "smart_advisor_generated_sessions";
 
-// Function to get generated sessions from localStorage
 const getGeneratedSessions = (): Set<string> => {
   const stored = SafeLocalStorage.getJSON<string[]>(GENERATED_SESSIONS_KEY, []);
   return new Set(stored);
 };
 
-// Function to save generated sessions to localStorage
 const saveGeneratedSession = (sessionId: string) => {
   const sessions = getGeneratedSessions();
   sessions.add(sessionId);
 
-  // Keep only the last 10 sessions to prevent localStorage bloat
   const sessionsArray = Array.from(sessions);
-  const sessionsToStore =
-    sessionsArray.length > 10 ? sessionsArray.slice(-10) : sessionsArray;
+  const sessionsToStore = sessionsArray.length > 10 ? sessionsArray.slice(-10) : sessionsArray;
 
   SafeLocalStorage.setJSON(GENERATED_SESSIONS_KEY, sessionsToStore);
 };
@@ -80,12 +73,10 @@ const ResultsPage = () => {
   const { contentType, answers, reset } = useQuizStore();
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showUserMenu, setShowUserMenu] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [generationStep, setGenerationStep] = useState<string>(
-    "Analyzing your answers..."
-  );
+  const [generationStep, setGenerationStep] = useState<string>("Analyzing your answers...");
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const getMatchScore = (index: number) => Math.max(78, 95 - index * 4);
   const getMatchLabel = (score: number) => {
@@ -94,13 +85,17 @@ const ResultsPage = () => {
     return "Good Match";
   };
 
-  // Track recommendation session state
   const currentSessionRef = useRef<string | null>(null);
   const generatedRecommendationsRef = useRef<Recommendation[]>([]);
   const isInitialLoadRef = useRef(true);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Create a unique session identifier based on the answers and content type
+  const navItems = [
+    { name: "Dashboard", link: "/dashboard" },
+    { name: "Start Quiz", link: "/content-selection" },
+    { name: "History", link: "/history" },
+  ];
+
   const sessionId = (() => {
     if (!answers || !contentType) {
       return null;
@@ -112,22 +107,17 @@ const ResultsPage = () => {
       return `${serializedAnswers}-${contentType}-${userId}`;
     } catch (error) {
       if (process.env.NODE_ENV === 'development') console.warn("Failed to create session ID, using fallback:", error);
-      return `fallback-session-${Date.now()}-${Math.random()
-        .toString(36)
-        .substr(2, 9)}`;
+      return `fallback-session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     }
   })();
 
-  // Function to handle generating new recommendations
   const handleGenerateRecommendations = useCallback(async () => {
     if (!sessionId || !user) return;
 
-    // Cancel any existing operation
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
 
-    // Create new AbortController for this operation
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
 
@@ -135,20 +125,14 @@ const ResultsPage = () => {
       setLoading(true);
       setError(null);
 
-      if (process.env.NODE_ENV === 'development') console.log("Starting AI recommendation generation for user:", user.id);
-
-      // Check if operation was aborted
       if (abortController.signal.aborted) return;
 
-      // Update generation steps for better UX
       setGenerationStep("Analyzing your answers...");
       await new Promise((resolve) => setTimeout(resolve, 1000));
-
       if (abortController.signal.aborted) return;
 
       setGenerationStep("Generating personalized recommendations...");
       await new Promise((resolve) => setTimeout(resolve, 500));
-
       if (abortController.signal.aborted) return;
 
       setGenerationStep("Enhancing with movie and book data...");
@@ -162,55 +146,38 @@ const ResultsPage = () => {
 
       const recs = await enhancedRecommendationsService.retryRecommendation(
         questionnaireData,
-        user.id
+        user.id,
       );
 
       if (abortController.signal.aborted) return;
 
       setGenerationStep("Finalizing your recommendations...");
       await new Promise((resolve) => setTimeout(resolve, 500));
-
       if (abortController.signal.aborted) return;
 
-      if (process.env.NODE_ENV === 'development') console.log("Recommendations generated successfully:", recs);
-
-      // Cache the recommendations for this session
       generatedRecommendationsRef.current = recs;
       currentSessionRef.current = sessionId;
-
-      // Mark this session as generated
       saveGeneratedSession(sessionId);
-
       setRecommendations(recs);
-    } catch (error) {
-      // Don't set error if operation was aborted
-      if (abortController.signal.aborted) {
-        if (process.env.NODE_ENV === 'development') console.log("Recommendation generation aborted");
-        return;
-      }
-      console.error("Error generating recommendations:", error);
-      setError(
-        "Failed to generate personalized recommendations. Please try again."
-      );
+    } catch (err) {
+      if (abortController.signal.aborted) return;
+      console.error("Error generating recommendations:", err);
+      setError("Failed to generate personalized recommendations. Please try again.");
     } finally {
-      // Only update loading state if not aborted
       if (!abortController.signal.aborted) {
         setLoading(false);
       }
-      // Clear the abort controller reference
       if (abortControllerRef.current === abortController) {
         abortControllerRef.current = null;
       }
     }
   }, [sessionId, user, answers, contentType]);
 
-  // Function to check if session was already generated
-  const wasSessionGenerated = useCallback((sessionId: string): boolean => {
+  const wasSessionGenerated = useCallback((id: string): boolean => {
     const generatedSessions = getGeneratedSessions();
-    return generatedSessions.has(sessionId);
+    return generatedSessions.has(id);
   }, []);
 
-  // Function to handle confirmation dialog
   const handleConfirmGeneration = () => {
     setShowConfirmDialog(false);
     handleGenerateRecommendations();
@@ -222,40 +189,30 @@ const ResultsPage = () => {
   };
 
   useEffect(() => {
-    // Redirect if no data
     if (!contentType || !answers?.length || !user || !sessionId) {
       router.push("/content-selection");
       return;
     }
 
-    // Check if this is the same session as before
     const isSameSession = currentSessionRef.current === sessionId;
-    const hasExistingRecommendations =
-      generatedRecommendationsRef.current.length > 0;
+    const hasExistingRecommendations = generatedRecommendationsRef.current.length > 0;
 
-    // If we have cached recommendations for this session, use them
     if (isSameSession && hasExistingRecommendations) {
-      if (process.env.NODE_ENV === 'development') console.log("Using cached recommendations for same session");
       setRecommendations(generatedRecommendationsRef.current);
       setLoading(false);
       return;
     }
 
-    // Check if this session was already generated (from localStorage)
     const sessionWasGenerated = wasSessionGenerated(sessionId);
 
     if (sessionWasGenerated && isInitialLoadRef.current) {
-      // This session was already generated before, show confirmation dialog
-      if (process.env.NODE_ENV === 'development') console.log("Session was already generated, showing confirmation dialog");
       setShowConfirmDialog(true);
       setLoading(false);
       isInitialLoadRef.current = false;
       return;
     }
 
-    // Generate recommendations for new session
     if (!sessionWasGenerated) {
-      if (process.env.NODE_ENV === 'development') console.log("Generating recommendations for new session:", sessionId);
       handleGenerateRecommendations();
     } else {
       setLoading(false);
@@ -272,43 +229,31 @@ const ResultsPage = () => {
     handleGenerateRecommendations,
   ]);
 
-  // Add beforeunload event listener to warn about page refresh
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (recommendations.length > 0 && !error) {
         e.preventDefault();
-        e.returnValue =
-          "You have unsaved recommendations. Are you sure you want to leave?";
+        e.returnValue = "You have unsaved recommendations. Are you sure you want to leave?";
         return "You have unsaved recommendations. Are you sure you want to leave?";
       }
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [recommendations.length, error]);
 
-  // Cleanup effect to prevent memory leaks
   useEffect(() => {
     return () => {
-      // Abort any ongoing operations
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
         abortControllerRef.current = null;
       }
 
-      // Clear refs to prevent memory leaks
       currentSessionRef.current = null;
       generatedRecommendationsRef.current = [];
       isInitialLoadRef.current = true;
     };
   }, []);
-
-  const handleLogoClick = () => {
-    router.push("/");
-  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -316,13 +261,11 @@ const ResultsPage = () => {
   };
 
   const handleGetAnother = () => {
-    // Abort any ongoing operations
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
     }
 
-    // Clear the session cache when getting another recommendation
     currentSessionRef.current = null;
     generatedRecommendationsRef.current = [];
     isInitialLoadRef.current = true;
@@ -330,38 +273,29 @@ const ResultsPage = () => {
     router.push("/content-selection");
   };
 
-  const handleViewHistory = () => {
-    router.push("/history");
-  };
-
   const handleToggleFavorite = async (recommendationId: string) => {
     try {
-      const { error } = await databaseService.toggleFavorite(recommendationId);
-      if (!error) {
-        // Update both local state and cached recommendations
+      const { error: toggleError } = await databaseService.toggleFavorite(recommendationId);
+      if (!toggleError) {
         const updatedRecs = recommendations.map((rec) =>
           rec.id === recommendationId
             ? { ...rec, is_favorited: !rec.is_favorited }
-            : rec
+            : rec,
         );
         setRecommendations(updatedRecs);
         generatedRecommendationsRef.current = updatedRecs;
-      } else {
-        console.error("Error toggling favorite:", error);
       }
-    } catch (error) {
-      console.error("Error toggling favorite:", error);
+    } catch (err) {
+      console.error("Error toggling favorite:", err);
     }
   };
 
   const handleRetry = () => {
-    // Abort any ongoing operations
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
     }
 
-    // Clear cache and regenerate
     currentSessionRef.current = null;
     generatedRecommendationsRef.current = [];
     isInitialLoadRef.current = true;
@@ -369,60 +303,126 @@ const ResultsPage = () => {
   };
 
   if (!contentType || !answers?.length || !user) {
-    return null; // Redirect will happen in useEffect
+    return null;
   }
 
-  // Show confirmation dialog if needed
+  const topBar = (
+    <Navbar>
+      <NavBody>
+        <div className="flex w-[320px] shrink-0 items-center">
+          <NavbarLogo />
+        </div>
+
+        <div className="flex flex-1 justify-center">
+          <NavItems items={navItems} className="justify-center px-2" />
+        </div>
+
+        <div className="flex w-[320px] shrink-0 items-center justify-end gap-4">
+          <ThemeToggle />
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="inline-flex items-center gap-2 text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400"
+          >
+            <LogOut size={14} />
+            Sign Out
+          </button>
+          <HoverBorderGradient
+            onClick={() => router.push('/history')}
+            idleColor="17, 24, 39"
+            darkIdleColor="255, 255, 255"
+            highlightColor="139, 92, 246"
+            darkHighlightColor="167, 139, 250"
+            containerClassName="rounded-full"
+            className="whitespace-nowrap bg-white px-6 py-2.5 text-base font-black leading-none tracking-tighter text-black dark:bg-black dark:text-white"
+          >
+            History
+          </HoverBorderGradient>
+        </div>
+      </NavBody>
+
+      <MobileNav>
+        <MobileNavHeader>
+          <NavbarLogo />
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+            <MobileNavToggle
+              isOpen={isMobileMenuOpen}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            />
+          </div>
+        </MobileNavHeader>
+        <MobileNavMenu isOpen={isMobileMenuOpen}>
+          {navItems.map((item) => (
+            <button
+              key={item.name}
+              type="button"
+              onClick={() => {
+                router.push(item.link);
+                setIsMobileMenuOpen(false);
+              }}
+              className="text-left text-xl font-black tracking-tight text-slate-800 dark:text-slate-100"
+            >
+              {item.name}
+            </button>
+          ))}
+          <HoverBorderGradient
+            onClick={() => {
+              router.push('/history');
+              setIsMobileMenuOpen(false);
+            }}
+            idleColor="17, 24, 39"
+            darkIdleColor="255, 255, 255"
+            highlightColor="139, 92, 246"
+            darkHighlightColor="167, 139, 250"
+            containerClassName="mt-2 w-full rounded-full"
+            className="w-full py-4 text-center text-xs font-black uppercase tracking-widest"
+          >
+            History
+          </HoverBorderGradient>
+          <button
+            type="button"
+            onClick={async () => {
+              await handleSignOut();
+              setIsMobileMenuOpen(false);
+            }}
+            className="text-left text-xl font-black tracking-tight text-slate-800 dark:text-slate-100"
+          >
+            Sign Out
+          </button>
+        </MobileNavMenu>
+      </MobileNav>
+    </Navbar>
+  );
+
   if (showConfirmDialog) {
     return (
-      <div className="bg-appPrimary text-textPrimary font-inter min-h-screen">
-        {/* Header */}
-        <header className="h-[72px] flex items-center justify-between px-6 md:px-12 bg-appPrimary">
-          <button
-            onClick={handleLogoClick}
-            className="inline-flex items-center cursor-pointer hover:opacity-80 transition-opacity duration-200"
-          >
-            <BrandWordmark imageClassName="h-8" />
-          </button>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-appAccent rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-medium">
-                {user?.name.charAt(0).toUpperCase()}
-              </span>
+      <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
+        {topBar}
+        <main className="px-6 pb-20 pt-32 md:pt-36">
+          <div className="mx-auto max-w-xl rounded-3xl border border-slate-200/80 bg-white/80 p-8 text-center shadow-sm backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/65">
+            <div className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-indigo-600 text-white">
+              <RefreshCw size={20} />
             </div>
-            <span className="text-textSecondary text-[15px]">
-              Hi, {user?.name}
-            </span>
-          </div>
-        </header>
-
-        <main className="flex flex-col items-center justify-center px-6 pt-[120px] pb-[100px]">
-          <div className="text-center max-w-md">
-            <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-8">
-              <RefreshCw className="w-8 h-8 text-white" />
-            </div>
-            <h2 className="text-2xl font-semibold text-textPrimary mb-4">
-              Generate New Recommendations?
-            </h2>
-            <p className="text-textSecondary mb-6">
-              It looks like you've already received recommendations for these
-              answers. Generating new ones will create additional entries in
-              your history.
+            <h2 className="text-2xl font-black tracking-tight">Generate new recommendations?</h2>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+              You already generated recommendations for these answers. Generate new ones or view your history.
             </p>
-            <div className="flex gap-4 justify-center">
-              <EnhancedButton
+            <div className="mt-6 flex items-center justify-center gap-3">
+              <button
+                type="button"
                 onClick={handleCancelGeneration}
-                variant="outline"
+                className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-800"
               >
                 Go to History
-              </EnhancedButton>
-              <EnhancedButton
+              </button>
+              <button
+                type="button"
                 onClick={handleConfirmGeneration}
-                variant="primary"
-                glow
+                className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-500"
               >
                 Generate New
-              </EnhancedButton>
+              </button>
             </div>
           </div>
         </main>
@@ -432,79 +432,39 @@ const ResultsPage = () => {
 
   if (loading) {
     return (
-      <div className="bg-appPrimary text-textPrimary font-inter min-h-screen">
-        {/* Header */}
-        <header className="h-[72px] flex items-center justify-between px-6 md:px-12 bg-appPrimary">
-          <button
-            onClick={handleLogoClick}
-            className="inline-flex items-center cursor-pointer hover:opacity-80 transition-opacity duration-200"
-          >
-            <BrandWordmark imageClassName="h-8" />
-          </button>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-appAccent rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-medium">
-                {user?.name.charAt(0).toUpperCase()}
-              </span>
-            </div>
-            <span className="text-textSecondary text-[15px]">
-              Hi, {user?.name}
-            </span>
-          </div>
-        </header>
-
-        <LoadingScreen
-          message="Creating Your Recommendations"
-          submessage={generationStep}
-        />
+      <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
+        {topBar}
+        <LoadingScreen message="Creating your recommendations" submessage={generationStep} />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-appPrimary text-textPrimary font-inter min-h-screen">
-        {/* Header */}
-        <header className="h-[72px] flex items-center justify-between px-6 md:px-12 bg-appPrimary">
-          <button
-            onClick={handleLogoClick}
-            className="inline-flex items-center cursor-pointer hover:opacity-80 transition-opacity duration-200"
-          >
-            <BrandWordmark imageClassName="h-8" />
-          </button>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-appAccent rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-medium">
-                {user?.name.charAt(0).toUpperCase()}
-              </span>
+      <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
+        {topBar}
+        <main className="px-6 pb-20 pt-32 md:pt-36">
+          <div className="mx-auto max-w-xl rounded-3xl border border-slate-200/80 bg-white/80 p-8 text-center shadow-sm backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/65">
+            <div className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-red-500 text-white">
+              <RefreshCw size={20} />
             </div>
-            <span className="text-textSecondary text-[15px]">
-              Hi, {user?.name}
-            </span>
-          </div>
-        </header>
-
-        {/* Error Content */}
-        <main className="flex flex-col items-center justify-center px-6 pt-[120px] pb-[100px]">
-          <div className="text-center max-w-md animate-in fade-in duration-700">
-            <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-8">
-              <span className="text-white text-2xl">!</span>
-            </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-textPrimary mb-4">
-              Recommendation Generation Failed
-            </h1>
-            <p className="text-lg text-textSecondary mb-8">{error}</p>
-            <div className="flex gap-4 justify-center">
-              <EnhancedButton onClick={handleRetry} variant="primary" glow>
-                <RefreshCw size={16} />
+            <h2 className="text-2xl font-black tracking-tight">Recommendation generation failed</h2>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{error}</p>
+            <div className="mt-6 flex items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={handleRetry}
+                className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-500"
+              >
                 Try Again
-              </EnhancedButton>
-              <EnhancedButton
-                onClick={() => router.push("/questionnaire")}
-                variant="secondary"
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push('/questionnaire')}
+                className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-800"
               >
                 Retake Quiz
-              </EnhancedButton>
+              </button>
             </div>
           </div>
         </main>
@@ -513,166 +473,89 @@ const ResultsPage = () => {
   }
 
   return (
-    <div className="bg-appPrimary text-textPrimary font-inter min-h-screen">
-      {/* Header */}
-      <header className="h-[72px] flex items-center justify-between px-6 md:px-12 bg-appPrimary">
-        <button
-          onClick={handleLogoClick}
-          className="inline-flex items-center cursor-pointer hover:opacity-80 transition-opacity duration-200"
-        >
-          <BrandWordmark imageClassName="h-8" />
-        </button>
-        <div className="relative">
-          <button
-            onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity duration-200"
+    <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
+      {topBar}
+
+      <main className="px-6 pb-20 pt-32 md:pt-36">
+        <div className="mx-auto max-w-7xl">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35 }}
+            className="mb-8 text-center"
           >
-            <div className="w-8 h-8 bg-appAccent rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-medium">
-                {user?.name.charAt(0).toUpperCase()}
-              </span>
-            </div>
-            <span className="text-textSecondary text-[15px]">
-              Hi, {user?.name}
-            </span>
-          </button>
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Step 4 of 4</p>
+            <h1 className="mt-4 text-4xl font-black tracking-tighter md:text-5xl">Your Recommendations</h1>
+            <p className="mt-3 text-base text-slate-600 dark:text-slate-400 md:text-lg">
+              Ranked picks based on your answers.
+            </p>
+          </motion.div>
 
-          {showUserMenu && (
-            <div className="user-menu absolute right-0 top-full mt-2 w-48 bg-appSecondary border border-gray-700 rounded-lg shadow-lg z-50">
-              <button
-                onClick={() => router.push("/history")}
-                className="user-menu-item w-full flex items-center gap-2 px-4 py-3 text-textSecondary hover:text-textPrimary hover:bg-gray-700 transition-colors duration-200"
-              >
-                <User size={16} />
-                View History
-              </button>
-              <button
-                onClick={handleSignOut}
-                className="user-menu-item w-full flex items-center gap-2 px-4 py-3 text-textSecondary hover:text-textPrimary hover:bg-gray-700 transition-colors duration-200 border-t border-gray-700"
-              >
-                <LogOut size={16} />
-                Sign Out
-              </button>
-            </div>
-          )}
-        </div>
-      </header>
+          <div className="space-y-6">
+            {recommendations.map((rec, index) => {
+              const matchScore = getMatchScore(index);
+              const matchLabel = getMatchLabel(matchScore);
+              const whyText = rec.explanation || `This ${rec.type} aligns with your preferences and pacing choices.`;
 
-      {/* Main Content */}
-      <main className="px-4 sm:px-6 pt-[80px] md:pt-[120px] pb-[100px]">
-        {/* Progress Indicator */}
-        <div className="text-center text-textTertiary text-sm mb-8 animate-in fade-in duration-500">
-          Step 4 of 4
-        </div>
-
-        {/* Title */}
-        <div className="text-center mb-12 animate-in fade-in duration-700 delay-200">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-textPrimary mb-4">
-            Your AI-Generated Recommendations
-          </h1>
-          <p className="text-base sm:text-lg text-textSecondary">
-            Based on your personalized answers, here's what our AI recommends
-          </p>
-        </div>
-
-        {/* Recommendations */}
-        <div className="max-w-6xl mx-auto space-y-8 sm:space-y-12">
-          {recommendations.map((rec, index) => (
-            <div
-              key={rec.id}
-              className="recommendation-card bg-appSecondary border border-gray-700 rounded-2xl p-6 sm:p-8 flex flex-col lg:flex-row gap-6 lg:gap-8"
-              style={{ animationDelay: `${400 + index * 200}ms` }}
-            >
-              {(() => {
-                const matchScore = getMatchScore(index);
-                const matchLabel = getMatchLabel(matchScore);
-                const whyText =
-                  rec.explanation ||
-                  `This ${rec.type} fits your selected mood and preferences, with a style that aligns well with your answers.`;
-
-                return (
-                  <>
-                    {/* Poster/Cover - Larger on mobile, maintains aspect ratio */}
-                    <div className="w-full sm:w-64 lg:w-72 h-80 sm:h-96 lg:h-[28rem] bg-gray-700 rounded-lg flex-shrink-0 overflow-hidden mx-auto lg:mx-0">
+              return (
+                <motion.article
+                  key={rec.id}
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.32, delay: index * 0.06 }}
+                  className="rounded-3xl border border-slate-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/65 md:p-6"
+                >
+                  <div className="grid grid-cols-1 gap-5 lg:grid-cols-[240px_1fr]">
+                    <div className="relative aspect-[2/3] overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800">
                       {rec.poster_url ? (
                         <img
                           src={rec.poster_url}
                           alt={rec.title}
-                          className="w-full h-full object-cover rounded-lg transition-transform duration-300 hover:scale-105"
-                          onError={(e) => {
-                            e.currentTarget.style.display = "none";
-                            e.currentTarget.nextElementSibling?.classList.remove(
-                              "hidden"
-                            );
-                          }}
+                          className="h-full w-full object-cover"
                         />
-                      ) : null}
-                      <div
-                        className={`w-full h-full flex items-center justify-center text-textTertiary ${rec.poster_url ? "hidden" : ""
-                          }`}
-                      >
-                        No Image
-                      </div>
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-slate-500 dark:text-slate-400">
+                          {rec.type === 'movie' ? <Film size={28} /> : <BookOpen size={28} />}
+                        </div>
+                      )}
                     </div>
 
-                    {/* Content - More spacious */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between mb-6">
-                        <div className="flex-1 min-w-0">
-                          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-textPrimary mb-3 leading-tight">
-                            {rec.title}
-                          </h2>
-                          {rec.director && (
-                            <p className="text-base sm:text-lg text-textSecondary mb-1">
-                              Directed by {rec.director}
-                            </p>
-                          )}
-                          {rec.author && (
-                            <p className="text-base sm:text-lg text-textSecondary mb-1">
-                              By {rec.author}
-                            </p>
-                          )}
-                          {rec.year && (
-                            <p className="text-base sm:text-lg text-textSecondary">
-                              {rec.year}
-                            </p>
-                          )}
+                    <div>
+                      <div className="mb-3 flex items-start justify-between gap-4">
+                        <div>
+                          <h2 className="text-2xl font-black tracking-tight md:text-3xl">{rec.title}</h2>
+                          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                            {rec.author ? `By ${rec.author}` : rec.director ? `Directed by ${rec.director}` : ""}
+                            {rec.year ? ` · ${rec.year}` : ""}
+                          </p>
                         </div>
                         <button
+                          type="button"
                           onClick={() => handleToggleFavorite(rec.id)}
-                          className={`favorite-button p-3 rounded-full transition-colors duration-200 ml-4 flex-shrink-0 ${rec.is_favorited
-                            ? "bg-red-500 text-white favorited"
-                            : "bg-gray-700 text-textSecondary hover:text-red-500"
-                            }`}
+                          className={cn(
+                            "rounded-full p-2 transition-colors",
+                            rec.is_favorited
+                              ? "bg-rose-500 text-white"
+                              : "bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700",
+                          )}
                         >
-                          <Heart
-                            size={24}
-                            fill={rec.is_favorited ? "currentColor" : "none"}
-                          />
+                          <Heart size={18} fill={rec.is_favorited ? "currentColor" : "none"} />
                         </button>
                       </div>
 
-                      {/* Rating - Larger */}
-                      {rec.rating && (
-                        <div className="flex items-center gap-3 mb-6">
-                          <Star className="w-6 h-6 text-yellow-500 fill-current" />
-                          <span className="text-lg sm:text-xl text-textPrimary font-medium">
-                            {rec.rating}
-                          </span>
+                      {typeof rec.rating === 'number' && (
+                        <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-slate-200/70 px-3 py-1 text-sm font-semibold text-slate-700 dark:bg-slate-800/80 dark:text-slate-200">
+                          <Star size={14} className="fill-current text-amber-500" />
+                          {rec.rating}
                         </div>
                       )}
 
-                      {/* Genres - Larger badges */}
-                      {rec.genres && rec.genres.length > 0 && (
-                        <div className="flex flex-wrap gap-2 sm:gap-3 mb-6">
-                          {rec.genres.map((g, genreIndex) => (
+                      {rec.genres?.length > 0 && (
+                        <div className="mb-4 flex flex-wrap gap-2">
+                          {rec.genres.map((g) => (
                             <span
                               key={g}
-                              className="px-4 py-2 bg-appAccent text-white text-sm sm:text-base rounded-full animate-in fade-in duration-500"
-                              style={{
-                                animationDelay: `${800 + index * 200 + genreIndex * 100
-                                  }ms`,
-                              }}
+                              className="rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white dark:bg-indigo-500"
                             >
                               {g}
                             </span>
@@ -680,75 +563,59 @@ const ResultsPage = () => {
                         </div>
                       )}
 
-                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 mb-6">
-                        <div className="rounded-xl border border-gray-700 bg-appPrimary p-4">
-                          <p className="text-xs uppercase tracking-[0.16em] text-textTertiary mb-2">
-                            Match
-                          </p>
-                          <div className="flex items-center justify-between gap-3">
-                            <span className="text-sm sm:text-base text-textPrimary font-semibold">
-                              {matchLabel}
-                            </span>
-                            <span className="px-3 py-1 rounded-full bg-appAccent text-white text-xs sm:text-sm font-semibold">
-                              {matchScore}%
-                            </span>
+                      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 p-3 dark:border-slate-700 dark:bg-slate-950/40">
+                          <p className="mb-1 text-[11px] uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Match</p>
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-semibold">{matchLabel}</p>
+                            <span className="rounded-full bg-indigo-600 px-2 py-0.5 text-xs font-semibold text-white">{matchScore}%</span>
                           </div>
                         </div>
-                        <div className="rounded-xl border border-gray-700 bg-appPrimary p-4">
-                          <p className="text-xs uppercase tracking-[0.16em] text-textTertiary mb-2">
-                            Why
-                          </p>
-                          <p className="text-sm text-textSecondary leading-relaxed">
-                            {whyText}
-                          </p>
+                        <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 p-3 dark:border-slate-700 dark:bg-slate-950/40">
+                          <p className="mb-1 text-[11px] uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Why</p>
+                          <p className="text-xs text-slate-600 dark:text-slate-300">{whyText}</p>
                         </div>
                       </div>
 
-                      {/* Expandable Description - Much larger and more prominent */}
                       {rec.description && (
-                        <div
-                          className="animate-in fade-in duration-700"
-                          style={{ animationDelay: `${1000 + index * 200}ms` }}
-                        >
-                          <ExpandableText
-                            text={rec.description}
-                            title={
-                              rec.type === "movie"
-                                ? "Plot Summary:"
-                                : "Book Description:"
-                            }
-                            maxLines={5} // Increased from 3 to 5
-                            className="bg-appPrimary text-base sm:text-lg leading-relaxed" // Larger text and better spacing
-                          />
-                        </div>
+                        <ExpandableText
+                          text={rec.description}
+                          title={rec.type === "movie" ? "Plot Summary:" : "Book Description:"}
+                          maxLines={4}
+                          className="bg-slate-50 text-slate-700 dark:bg-slate-950/40 dark:text-slate-300"
+                        />
                       )}
                     </div>
-                  </>
-                );
-              })()}
-            </div>
-          ))}
-        </div>
+                  </div>
+                </motion.article>
+              );
+            })}
+          </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mt-12 animate-in fade-in duration-700 delay-1000">
-          <EnhancedButton
-            onClick={handleGetAnother}
-            variant="primary"
-            size="lg"
-            glow
-            className="w-full sm:w-auto"
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.12 }}
+            className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row"
           >
-            Get Another Recommendation
-          </EnhancedButton>
-          <EnhancedButton
-            onClick={handleViewHistory}
-            variant="secondary"
-            size="lg"
-            className="w-full sm:w-auto"
-          >
-            View My History
-          </EnhancedButton>
+            <EnhancedButton
+              onClick={handleGetAnother}
+              variant="primary"
+              size="lg"
+              glow
+              className="w-full sm:w-auto"
+            >
+              Get Another Recommendation
+            </EnhancedButton>
+            <EnhancedButton
+              onClick={() => router.push('/history')}
+              variant="secondary"
+              size="lg"
+              className="w-full sm:w-auto"
+            >
+              View My History
+            </EnhancedButton>
+          </motion.div>
         </div>
       </main>
     </div>
