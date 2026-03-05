@@ -10,6 +10,7 @@ import {
 } from "framer-motion";
 import React, { useState } from "react";
 import { BrandWordmark } from "@/components/brand-wordmark";
+import Link from "next/link";
 
 interface NavbarProps {
   children: React.ReactNode;
@@ -140,9 +141,9 @@ export const NavItems = ({ items, className, scrolled = false }: NavItemsProps) 
         }
 
         return (
-          <motion.a key={idx} href={item.link} {...motionProps}>
+          <Link key={idx} href={item.link} className={linkClassName}>
             {item.name}
-          </motion.a>
+          </Link>
         );
       })}
     </motion.div>
@@ -203,7 +204,7 @@ export const MobileNavToggle = ({ isOpen, onClick }: any) => (
 );
 
 export const NavbarLogo = () => (
-  <a
+  <Link
     href="/"
     onClick={(event) => {
       if (typeof window !== "undefined" && window.location.pathname === "/") {
@@ -214,7 +215,7 @@ export const NavbarLogo = () => (
     className="group inline-flex shrink-0 items-center pr-3 transition-opacity hover:opacity-85"
   >
     <BrandWordmark imageClassName="h-8 md:h-9" />
-  </a>
+  </Link>
 );
 
 export const NavbarButton = ({ children, ...props }: any) => (

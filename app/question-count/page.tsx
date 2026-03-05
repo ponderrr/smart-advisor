@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useQuizStore } from '@/features/quiz/store/quiz-store';
 import { ThemeToggle } from "@/components/theme-toggle";
-import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
+import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import {
   Navbar,
   NavBody,
@@ -59,8 +59,8 @@ const QuestionCountPage = () => {
 
   const navItems = [
     { name: "Dashboard", link: "/dashboard" },
-    { name: "Start Quiz", link: "/content-selection" },
     { name: "History", link: "/history" },
+    { name: "Settings", link: "/settings" },
   ];
 
   if (!contentType) return null;
@@ -82,22 +82,11 @@ const QuestionCountPage = () => {
             <button
               type="button"
               onClick={handleSignOut}
-              className="inline-flex items-center gap-2 text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400"
+              className="inline-flex items-center gap-2 text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400"
             >
               <LogOut size={14} />
               Sign Out
             </button>
-            <HoverBorderGradient
-              onClick={handleContinue}
-              idleColor="17, 24, 39"
-              darkIdleColor="255, 255, 255"
-              highlightColor="139, 92, 246"
-              darkHighlightColor="167, 139, 250"
-              containerClassName="rounded-full"
-              className="whitespace-nowrap bg-white px-6 py-2.5 text-base font-black leading-none tracking-tighter text-black dark:bg-black dark:text-white"
-            >
-              Continue
-            </HoverBorderGradient>
           </div>
         </NavBody>
 
@@ -126,27 +115,13 @@ const QuestionCountPage = () => {
                 {item.name}
               </button>
             ))}
-            <HoverBorderGradient
-              onClick={() => {
-                handleContinue();
-                setIsMobileMenuOpen(false);
-              }}
-              idleColor="17, 24, 39"
-              darkIdleColor="255, 255, 255"
-              highlightColor="139, 92, 246"
-              darkHighlightColor="167, 139, 250"
-              containerClassName="mt-2 w-full rounded-full"
-              className="w-full py-4 text-center text-xs font-black uppercase tracking-widest"
-            >
-              Continue
-            </HoverBorderGradient>
             <button
               type="button"
               onClick={async () => {
                 await handleSignOut();
                 setIsMobileMenuOpen(false);
               }}
-              className="text-left text-xl font-black tracking-tight text-slate-800 dark:text-slate-100"
+              className="text-left text-xl font-black tracking-tight text-rose-600 dark:text-rose-400"
             >
               Sign Out
             </button>
@@ -163,7 +138,7 @@ const QuestionCountPage = () => {
             className="mb-10 text-center"
           >
             <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Step 2 of 4</p>
-            <h1 className="mt-4 text-4xl font-black tracking-tighter md:text-5xl">
+            <h1 className="mt-4 text-4xl font-black tracking-tighter md:text-5xl md:whitespace-nowrap">
               How many questions should we ask?
             </h1>
             <p className="mx-auto mt-3 max-w-2xl text-base text-slate-600 dark:text-slate-400 md:text-lg">
@@ -175,18 +150,18 @@ const QuestionCountPage = () => {
             initial={{ opacity: 0, y: 18, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.4, ease: "easeOut", delay: 0.08 }}
-            className="rounded-3xl border border-slate-200/80 bg-white/80 p-6 shadow-sm backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/65 md:p-8"
+            className="rounded-3xl border border-slate-200/70 bg-white/85 p-6 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 md:p-8"
           >
-            <div className="mb-8 text-center">
-              <div className="text-6xl font-black tracking-tight text-indigo-600 dark:text-indigo-400">
+            <div className="mb-6 text-center">
+              <div className="text-7xl font-black tracking-tight text-indigo-600 dark:text-indigo-400">
                 {questionCount}
               </div>
-              <p className="mt-2 text-sm font-semibold text-slate-600 dark:text-slate-300">
+              <p className="mt-2 text-base font-semibold text-slate-600 dark:text-slate-300">
                 {questionCount === 1 ? "Question" : "Questions"}
               </p>
             </div>
 
-            <div className="relative mb-4">
+            <div className="relative mb-6 rounded-2xl border border-slate-200/80 bg-slate-50/70 px-4 py-5 dark:border-slate-700 dark:bg-slate-950/40">
               <input
                 type="range"
                 min={3}
@@ -200,7 +175,7 @@ const QuestionCountPage = () => {
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.2 }}
-                className="mt-2 text-center text-xs text-slate-600 dark:text-slate-400"
+                className="mt-3 text-center text-sm font-medium text-slate-600 dark:text-slate-400"
               >
                 {questionCount <= 5
                   ? "Quick and focused"
@@ -210,9 +185,13 @@ const QuestionCountPage = () => {
               </motion.div>
             </div>
 
-            <div className="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400">
-              <span>3 minimum</span>
-              <span>15 maximum</span>
+            <div className="grid grid-cols-2 gap-3 text-xs font-semibold text-slate-600 dark:text-slate-300">
+              <div className="rounded-xl border border-slate-200/80 bg-white px-3 py-2 text-center dark:border-slate-700 dark:bg-slate-900/60">
+                3 minimum
+              </div>
+              <div className="rounded-xl border border-slate-200/80 bg-white px-3 py-2 text-center dark:border-slate-700 dark:bg-slate-900/60">
+                15 maximum
+              </div>
             </div>
           </motion.section>
 
@@ -225,23 +204,18 @@ const QuestionCountPage = () => {
             <button
               type="button"
               onClick={() => router.push('/content-selection')}
-              className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-800"
+              className="rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-800"
             >
               Back
             </button>
-            <button
-              type="button"
+            <StatefulButton
               onClick={handleContinue}
               disabled={isLoading}
-              className={cn(
-                "rounded-xl px-6 py-3 text-sm font-semibold transition-colors",
-                isLoading
-                  ? "cursor-not-allowed bg-slate-300 text-slate-500 dark:bg-slate-800 dark:text-slate-500"
-                  : "bg-indigo-600 text-white hover:bg-indigo-500",
-              )}
+              state={isLoading ? "loading" : "idle"}
+              className="h-11 w-auto rounded-full px-6 text-sm font-semibold"
             >
-              {isLoading ? "Continuing..." : "Continue"}
-            </button>
+              Continue
+            </StatefulButton>
           </motion.div>
         </div>
       </main>

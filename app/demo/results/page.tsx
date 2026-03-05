@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { IconArrowLeft } from "@tabler/icons-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 type DemoBook = {
   id: string;
@@ -120,6 +121,7 @@ export default function DemoResultsPage() {
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
             Demo Results
           </p>
+          <ThemeToggle />
         </div>
 
         <div className="mb-8">

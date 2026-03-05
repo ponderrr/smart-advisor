@@ -10,12 +10,10 @@ import { Recommendation } from "@/features/recommendations/types/recommendation"
 import { ExpandableText } from "@/components/ExpandableText";
 import {
   EnhancedButton,
-  LoadingScreen,
 } from "@/components/enhanced";
 import { SafeLocalStorage } from "@/utils/localStorage";
 import { useQuizStore } from '@/features/quiz/store/quiz-store';
 import { ThemeToggle } from "@/components/theme-toggle";
-import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import {
   Navbar,
   NavBody,
@@ -67,6 +65,46 @@ const saveGeneratedSession = (sessionId: string) => {
   SafeLocalStorage.setJSON(GENERATED_SESSIONS_KEY, sessionsToStore);
 };
 
+const ResultsShimmerLoader = ({ step }: { step: string }) => {
+  return (
+    <main className="px-6 pb-20 pt-32 md:pt-36">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-6">
+          <div className="h-4 w-28 animate-pulse rounded-full bg-slate-200 dark:bg-slate-800" />
+          <div className="mt-4 h-12 w-72 animate-pulse rounded-full bg-slate-200 dark:bg-slate-800" />
+          <div className="mt-3 h-4 w-96 max-w-full animate-pulse rounded-full bg-slate-200 dark:bg-slate-800" />
+        </div>
+
+        <div className="mb-6 overflow-hidden rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-sm dark:border-slate-700/70 dark:bg-slate-900/65">
+          <div className="relative h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
+            <div className="absolute inset-y-0 -left-1/3 w-1/3 animate-[shimmer_1.2s_infinite] rounded-full bg-gradient-to-r from-transparent via-indigo-500/60 to-transparent" />
+          </div>
+          <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">{step}</p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+          {[...Array(2)].map((_, i) => (
+            <div
+              key={i}
+              className="rounded-3xl border border-slate-200/80 bg-white/80 p-5 shadow-sm dark:border-slate-700/70 dark:bg-slate-900/65"
+            >
+              <div className="grid grid-cols-[130px_1fr] gap-4">
+                <div className="aspect-[2/3] animate-pulse rounded-2xl bg-slate-200 dark:bg-slate-800" />
+                <div className="space-y-3">
+                  <div className="h-7 w-3/4 animate-pulse rounded-full bg-slate-200 dark:bg-slate-800" />
+                  <div className="h-4 w-1/2 animate-pulse rounded-full bg-slate-200 dark:bg-slate-800" />
+                  <div className="h-20 animate-pulse rounded-2xl bg-slate-200 dark:bg-slate-800" />
+                  <div className="h-20 animate-pulse rounded-2xl bg-slate-200 dark:bg-slate-800" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </main>
+  );
+};
+
 const ResultsPage = () => {
   const router = useRouter();
   const { user, signOut } = useAuth();
@@ -92,8 +130,8 @@ const ResultsPage = () => {
 
   const navItems = [
     { name: "Dashboard", link: "/dashboard" },
-    { name: "Start Quiz", link: "/content-selection" },
     { name: "History", link: "/history" },
+    { name: "Settings", link: "/settings" },
   ];
 
   const sessionId = (() => {
@@ -275,6 +313,10 @@ const ResultsPage = () => {
 
   const handleToggleFavorite = async (recommendationId: string) => {
     try {
+      if (!recommendationId) {
+        return;
+      }
+
       const { error: toggleError } = await databaseService.toggleFavorite(recommendationId);
       if (!toggleError) {
         const updatedRecs = recommendations.map((rec) =>
@@ -322,22 +364,11 @@ const ResultsPage = () => {
           <button
             type="button"
             onClick={handleSignOut}
-            className="inline-flex items-center gap-2 text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400"
+            className="inline-flex items-center gap-2 text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400"
           >
             <LogOut size={14} />
             Sign Out
           </button>
-          <HoverBorderGradient
-            onClick={() => router.push('/history')}
-            idleColor="17, 24, 39"
-            darkIdleColor="255, 255, 255"
-            highlightColor="139, 92, 246"
-            darkHighlightColor="167, 139, 250"
-            containerClassName="rounded-full"
-            className="whitespace-nowrap bg-white px-6 py-2.5 text-base font-black leading-none tracking-tighter text-black dark:bg-black dark:text-white"
-          >
-            History
-          </HoverBorderGradient>
         </div>
       </NavBody>
 
@@ -366,27 +397,13 @@ const ResultsPage = () => {
               {item.name}
             </button>
           ))}
-          <HoverBorderGradient
-            onClick={() => {
-              router.push('/history');
-              setIsMobileMenuOpen(false);
-            }}
-            idleColor="17, 24, 39"
-            darkIdleColor="255, 255, 255"
-            highlightColor="139, 92, 246"
-            darkHighlightColor="167, 139, 250"
-            containerClassName="mt-2 w-full rounded-full"
-            className="w-full py-4 text-center text-xs font-black uppercase tracking-widest"
-          >
-            History
-          </HoverBorderGradient>
           <button
             type="button"
             onClick={async () => {
               await handleSignOut();
               setIsMobileMenuOpen(false);
             }}
-            className="text-left text-xl font-black tracking-tight text-slate-800 dark:text-slate-100"
+            className="text-left text-xl font-black tracking-tight text-rose-600 dark:text-rose-400"
           >
             Sign Out
           </button>
@@ -412,14 +429,14 @@ const ResultsPage = () => {
               <button
                 type="button"
                 onClick={handleCancelGeneration}
-                className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-800"
+                className="rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-800"
               >
                 Go to History
               </button>
               <button
                 type="button"
                 onClick={handleConfirmGeneration}
-                className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-500"
+                className="rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-500"
               >
                 Generate New
               </button>
@@ -434,7 +451,7 @@ const ResultsPage = () => {
     return (
       <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
         {topBar}
-        <LoadingScreen message="Creating your recommendations" submessage={generationStep} />
+        <ResultsShimmerLoader step={generationStep} />
       </div>
     );
   }
@@ -454,14 +471,14 @@ const ResultsPage = () => {
               <button
                 type="button"
                 onClick={handleRetry}
-                className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-500"
+                className="rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-500"
               >
                 Try Again
               </button>
               <button
                 type="button"
                 onClick={() => router.push('/questionnaire')}
-                className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-800"
+                className="rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-800"
               >
                 Retake Quiz
               </button>
@@ -603,7 +620,7 @@ const ResultsPage = () => {
               variant="primary"
               size="lg"
               glow
-              className="w-full sm:w-auto"
+              className="w-full rounded-full sm:w-auto"
             >
               Get Another Recommendation
             </EnhancedButton>
@@ -611,7 +628,7 @@ const ResultsPage = () => {
               onClick={() => router.push('/history')}
               variant="secondary"
               size="lg"
-              className="w-full sm:w-auto"
+              className="w-full rounded-full sm:w-auto"
             >
               View My History
             </EnhancedButton>

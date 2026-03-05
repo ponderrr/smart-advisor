@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, LogOut, RefreshCw } from "lucide-react";
+import { IconCheck } from "@tabler/icons-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { generateQuestionsWithRetry } from "@/features/recommendations/services/ai-service";
@@ -10,13 +11,12 @@ import { Question } from "@/features/quiz/types/question";
 import { Answer } from "@/features/quiz/types/answer";
 import { v4 as uuidv4 } from "uuid";
 import {
-  EnhancedTextarea,
-  LoadingScreen,
   EnhancedProgress,
 } from "@/components/enhanced";
 import { useQuizStore } from '@/features/quiz/store/quiz-store';
 import { ThemeToggle } from "@/components/theme-toggle";
-import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
+import { Button as StatefulButton } from "@/components/ui/stateful-button";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Navbar,
   NavBody,
@@ -28,6 +28,35 @@ import {
   MobileNavMenu,
 } from "@/components/ui/resizable-navbar";
 import { cn } from "@/lib/utils";
+
+const QUESTION_OPTION_SETS: Record<"movie" | "book" | "both", string[][]> = {
+  movie: [
+    ["Action-packed", "Emotional", "Mind-bending", "Comfort watch"],
+    ["Fast and intense", "Balanced pace", "Slow burn", "Short and snappy"],
+    ["Popular hits", "Underrated gems", "Classics", "Something new"],
+    ["Solo watch", "Date night", "Family-friendly", "Late-night vibe"],
+  ],
+  book: [
+    ["Character-driven", "Plot-driven", "Reflective", "Escapist"],
+    ["Quick read", "Medium depth", "Deep and layered", "Series starter"],
+    ["Bestseller", "Hidden gem", "Classic", "Fresh release"],
+    ["Light and fun", "Thought-provoking", "Emotional", "Dark and tense"],
+  ],
+  both: [
+    ["Movie first", "Book first", "Either works", "Match both formats"],
+    ["Fast and intense", "Balanced pace", "Slow burn", "Quick and easy"],
+    ["Popular picks", "Underrated picks", "Classics", "Something new"],
+    ["Comforting", "Suspenseful", "Inspiring", "Mind-bending"],
+  ],
+};
+
+const getQuestionOptions = (
+  type: "movie" | "book" | "both",
+  index: number,
+) => {
+  const sets = QUESTION_OPTION_SETS[type];
+  return sets[index % sets.length];
+};
 
 const QuestionnairePage = () => {
   const router = useRouter();
@@ -44,8 +73,8 @@ const QuestionnairePage = () => {
 
   const navItems = [
     { name: "Dashboard", link: "/dashboard" },
-    { name: "Start Quiz", link: "/content-selection" },
     { name: "History", link: "/history" },
+    { name: "Settings", link: "/settings" },
   ];
 
   const loadQuestions = useCallback(async () => {
@@ -54,21 +83,35 @@ const QuestionnairePage = () => {
       setIsLoading(true);
       setError(null);
 
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        setError("Your session expired. Please sign in again to continue.");
+        return;
+      }
+
       const generatedQuestions = await generateQuestionsWithRetry(
         contentType,
         user.age,
         questionCount,
         user.name,
+        1,
       );
 
       setQuestions(generatedQuestions);
     } catch (err) {
       console.error("Failed to load questions:", err);
-      setError("We could not generate your questions. Please try again.");
+      const errMsg = err instanceof Error ? err.message : "";
+      if (errMsg.toLowerCase().includes("not authenticated")) {
+        setError("Your session expired. Please sign in again to continue.");
+      } else {
+        setError("We could not generate your questions. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
-  }, [contentType, user, questionCount]);
+  }, [contentType, questionCount, user]);
 
   useEffect(() => {
     if (!contentType || !user) {
@@ -78,6 +121,19 @@ const QuestionnairePage = () => {
 
     loadQuestions();
   }, [contentType, user, router, loadQuestions]);
+
+  useEffect(() => {
+    const hasInProgressAnswers = Object.values(answers).some((v) => v.trim().length > 0);
+    if (!hasInProgressAnswers || isSubmitting) return;
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [answers, isSubmitting]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -147,22 +203,11 @@ const QuestionnairePage = () => {
           <button
             type="button"
             onClick={handleSignOut}
-            className="inline-flex items-center gap-2 text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400"
+            className="inline-flex items-center gap-2 text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400"
           >
             <LogOut size={14} />
             Sign Out
           </button>
-          <HoverBorderGradient
-            onClick={() => router.push('/history')}
-            idleColor="17, 24, 39"
-            darkIdleColor="255, 255, 255"
-            highlightColor="139, 92, 246"
-            darkHighlightColor="167, 139, 250"
-            containerClassName="rounded-full"
-            className="whitespace-nowrap bg-white px-6 py-2.5 text-base font-black leading-none tracking-tighter text-black dark:bg-black dark:text-white"
-          >
-            History
-          </HoverBorderGradient>
         </div>
       </NavBody>
 
@@ -191,27 +236,13 @@ const QuestionnairePage = () => {
               {item.name}
             </button>
           ))}
-          <HoverBorderGradient
-            onClick={() => {
-              router.push('/history');
-              setIsMobileMenuOpen(false);
-            }}
-            idleColor="17, 24, 39"
-            darkIdleColor="255, 255, 255"
-            highlightColor="139, 92, 246"
-            darkHighlightColor="167, 139, 250"
-            containerClassName="mt-2 w-full rounded-full"
-            className="w-full py-4 text-center text-xs font-black uppercase tracking-widest"
-          >
-            History
-          </HoverBorderGradient>
           <button
             type="button"
             onClick={async () => {
               await handleSignOut();
               setIsMobileMenuOpen(false);
             }}
-            className="text-left text-xl font-black tracking-tight text-slate-800 dark:text-slate-100"
+            className="text-left text-xl font-black tracking-tight text-rose-600 dark:text-rose-400"
           >
             Sign Out
           </button>
@@ -224,10 +255,30 @@ const QuestionnairePage = () => {
     return (
       <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
         {topBar}
-        <LoadingScreen
-          message={`Generating ${questionCount} personalized questions`}
-          submessage="Tuning prompts to your selected content type and profile."
-        />
+        <main className="px-6 pb-20 pt-32 md:pt-36">
+          <div className="mx-auto max-w-2xl rounded-3xl border border-slate-200/70 bg-white/85 p-8 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+              Step 3 of 4
+            </p>
+            <h1 className="mt-4 text-3xl font-black tracking-tighter md:text-4xl">
+              Generating your questions
+            </h1>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+              Building {questionCount} personalized prompts for your profile.
+            </p>
+
+            <div className="relative mx-auto mt-8 h-12 w-full max-w-md overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-50/80 dark:border-slate-700 dark:bg-slate-950/40">
+              <motion.div
+                className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent"
+                animate={{ x: ["-120%", "340%"] }}
+                transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+              />
+              <div className="relative z-10 flex h-full items-center justify-center text-sm font-semibold text-slate-700 dark:text-slate-200">
+                {contentType?.toUpperCase()} QUESTIONNAIRE
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
     );
   }
@@ -237,7 +288,7 @@ const QuestionnairePage = () => {
       <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
         {topBar}
         <main className="px-6 pb-20 pt-32 md:pt-36">
-          <div className="mx-auto max-w-xl rounded-3xl border border-slate-200/80 bg-white/80 p-8 text-center shadow-sm backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/65">
+          <div className="mx-auto max-w-xl rounded-3xl border border-slate-200/70 bg-white/85 p-8 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
             <div className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-red-500 text-white">
               <RefreshCw size={20} />
             </div>
@@ -247,14 +298,14 @@ const QuestionnairePage = () => {
               <button
                 type="button"
                 onClick={loadQuestions}
-                className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-500"
+                className="rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-500"
               >
                 Try Again
               </button>
               <button
                 type="button"
                 onClick={() => router.push('/question-count')}
-                className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-800"
+                className="rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-800"
               >
                 Back
               </button>
@@ -296,22 +347,39 @@ const QuestionnairePage = () => {
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 exit={{ opacity: 0, y: -10, filter: "blur(4px)" }}
                 transition={{ duration: 0.28, ease: "easeOut" }}
-                className="rounded-3xl border border-slate-200/80 bg-white/80 p-6 shadow-sm backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/65 md:p-8"
+                className="rounded-3xl border border-slate-200/70 bg-white/85 p-6 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 md:p-8"
               >
                 <h1 className="text-2xl font-black tracking-tight md:text-3xl">
                   {currentQuestion.text}
                 </h1>
                 <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
-                  Add a clear answer. More detail gives better recommendations.
+                  Pick one option so we can tune your recommendations.
                 </p>
 
-                <div className="mt-5">
-                  <EnhancedTextarea
-                    value={answers[currentQuestion.id] || ""}
-                    onChange={(e) => handleAnswer(e.target.value)}
-                    placeholder="Type your answer here..."
-                    className="min-h-36 resize-none"
-                  />
+                <div className="mt-7 grid gap-3 sm:grid-cols-2">
+                  {getQuestionOptions(contentType, currentQuestionIndex).map((option) => {
+                    const selected = answers[currentQuestion.id] === option;
+                    return (
+                      <button
+                        key={option}
+                        type="button"
+                        onClick={() => handleAnswer(option)}
+                        className={cn(
+                          "group flex items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all",
+                          selected
+                            ? "border-indigo-400 bg-indigo-50 text-indigo-700 dark:border-indigo-500/70 dark:bg-indigo-500/15 dark:text-indigo-300"
+                            : "border-slate-200/80 bg-white text-slate-800 hover:border-indigo-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:border-slate-500 dark:hover:bg-slate-900",
+                        )}
+                      >
+                        <span className="text-sm font-semibold sm:text-base">{option}</span>
+                        {selected ? (
+                          <IconCheck className="h-5 w-5" />
+                        ) : (
+                          <span className="h-5 w-5 rounded-full border border-slate-300 transition group-hover:border-indigo-300 dark:border-slate-600" />
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </motion.section>
             )}
@@ -326,30 +394,21 @@ const QuestionnairePage = () => {
             <button
               type="button"
               onClick={handlePrevious}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-800"
+              className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-800"
             >
               <ArrowLeft size={16} />
               Previous
             </button>
 
-            <button
-              type="button"
+            <StatefulButton
               onClick={handleNext}
               disabled={!canProceed || isSubmitting}
-              className={cn(
-                "inline-flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold transition-colors",
-                !canProceed || isSubmitting
-                  ? "cursor-not-allowed bg-slate-300 text-slate-500 dark:bg-slate-800 dark:text-slate-500"
-                  : "bg-indigo-600 text-white hover:bg-indigo-500",
-              )}
+              state={isSubmitting ? "loading" : "idle"}
+              className={cn("inline-flex h-11 w-auto items-center gap-2 rounded-full px-6 text-sm font-semibold")}
             >
-              {isSubmitting
-                ? "Submitting..."
-                : currentQuestionIndex === questions.length - 1
-                  ? "Get Recommendations"
-                  : "Next"}
+              {currentQuestionIndex === questions.length - 1 ? "Get Recommendations" : "Next"}
               <ArrowRight size={16} />
-            </button>
+            </StatefulButton>
           </motion.div>
         </div>
       </main>

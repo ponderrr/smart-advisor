@@ -28,7 +28,6 @@ interface AuthContextType {
   ) => Promise<{ error: string | null }>;
   signOut: () => Promise<{ error: string | null }>;
   signInWithGoogle: () => Promise<{ error: string | null }>;
-  signInAsMockUser: () => Promise<{ error: string | null }>;
   resetPassword: (email: string) => Promise<{ error: string | null }>;
   resendVerificationEmail: (
     email: string
@@ -38,21 +37,14 @@ interface AuthContextType {
     name: string,
     age: number
   ) => Promise<{ error: string | null }>;
+  updateEmail: (email: string) => Promise<{ error: string | null }>;
+  updatePassword: (password: string) => Promise<{ error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const REMEMBER_UNTIL_KEY = "smart_advisor_remember_until";
 const VOLATILE_SESSION_KEY = "smart_advisor_volatile_session";
-const MOCK_USER_KEY = "smart_advisor_mock_user";
-const MOCK_USER_COOKIE = "sa_mock";
-const MOCK_USER: User = {
-  id: "mock-user-id",
-  email: "mock@smartadvisor.local",
-  name: "Mock User",
-  age: 25,
-  created_at: new Date().toISOString(),
-};
 
 const setSessionPreference = (rememberFor30Days: boolean) => {
   if (typeof window === "undefined") return;
@@ -75,23 +67,6 @@ const clearSessionPreference = () => {
   if (typeof window === "undefined") return;
   window.localStorage.removeItem(REMEMBER_UNTIL_KEY);
   window.sessionStorage.removeItem(VOLATILE_SESSION_KEY);
-};
-
-const setMockSession = (enabled: boolean) => {
-  if (typeof window === "undefined") return;
-  if (enabled) {
-    window.sessionStorage.setItem(MOCK_USER_KEY, "1");
-    document.cookie = `${MOCK_USER_COOKIE}=1; path=/; samesite=lax`;
-    return;
-  }
-
-  window.sessionStorage.removeItem(MOCK_USER_KEY);
-  document.cookie = `${MOCK_USER_COOKIE}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; samesite=lax`;
-};
-
-const hasMockSession = () => {
-  if (typeof window === "undefined") return false;
-  return window.sessionStorage.getItem(MOCK_USER_KEY) === "1";
 };
 
 const shouldKeepExistingSession = () => {
@@ -205,11 +180,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setSession(session);
 
           if (event === "SIGNED_IN" && session?.user) {
-            setMockSession(false);
             fetchUserProfile(session.user, abortController.signal);
-          } else if (!session?.user && hasMockSession()) {
-            setUser(MOCK_USER);
-            setLoading(false);
           } else if (!session?.user) {
             setUser(null);
             setLoading(false);
@@ -236,13 +207,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
 
         if (process.env.NODE_ENV === 'development') console.log("Initial session:", initialSession?.user?.id || "none");
-
-        if (!initialSession?.user && hasMockSession()) {
-          setUser(MOCK_USER);
-          setSession(null);
-          setLoading(false);
-          return;
-        }
 
         if (initialSession?.user && !shouldKeepExistingSession()) {
           if (process.env.NODE_ENV === "development") {
@@ -301,7 +265,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setError(result.error);
         console.error("Signin failed:", result.error);
       } else {
-        setMockSession(false);
         setSessionPreference(rememberFor30Days);
         if (process.env.NODE_ENV === 'development') console.log("Signin successful");
         // Auth state change will be handled by the listener and subsequent useEffect for profile fetch
@@ -336,7 +299,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setError(result.error);
         console.error("Signup failed:", result.error);
       } else {
-        setMockSession(false);
         clearSessionPreference();
         await supabase.auth.signOut();
         setUser(null);
@@ -369,7 +331,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setError(result.error);
         console.error("Signout failed:", result.error);
       } else {
-        setMockSession(false);
         clearSessionPreference();
         if (process.env.NODE_ENV === 'development') console.log("Signout successful");
         setUser(null);
@@ -429,25 +390,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const signInAsMockUser = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      setMockSession(true);
-      setSessionPreference(false);
-      setUser(MOCK_USER);
-      setSession(null);
-      return { error: null };
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unable to continue with mock user.";
-      setError(errorMessage);
-      return { error: errorMessage };
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const resendVerificationEmail = async (email: string) => {
     try {
       setLoading(true);
@@ -495,6 +437,50 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const updateEmail = async (email: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const result = await authService.updateEmail(email);
+      if (result.error) {
+        setError(result.error);
+      } else if (user) {
+        setUser({ ...user, email: email.trim().toLowerCase() });
+      }
+
+      return result;
+    } catch (error) {
+      console.error("Error updating email:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
+      setError(errorMessage);
+      return { error: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updatePassword = async (password: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await authService.updatePassword(password);
+      if (result.error) {
+        setError(result.error);
+      }
+      return result;
+    } catch (error) {
+      console.error("Error updating password:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
+      setError(errorMessage);
+      return { error: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const clearError = () => {
     setError(null);
   };
@@ -508,11 +494,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     signUp,
     signOut,
     signInWithGoogle,
-    signInAsMockUser,
     resetPassword,
     resendVerificationEmail,
     clearError,
     updateProfile,
+    updateEmail,
+    updatePassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

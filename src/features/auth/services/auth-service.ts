@@ -619,6 +619,69 @@ class AuthService {
       return { error: "An unexpected error occurred while updating profile" };
     }
   }
+
+  async updateEmail(email: string): Promise<{ error: string | null }> {
+    try {
+      const normalizedEmail = email.trim().toLowerCase();
+      if (!normalizedEmail) {
+        return { error: "Enter an email address." };
+      }
+      if (!/\S+@\S+\.\S+/.test(normalizedEmail)) {
+        return { error: "Please enter a valid email address." };
+      }
+
+      const { error: authError } = await supabase.auth.updateUser({
+        email: normalizedEmail,
+      });
+
+      if (authError) {
+        return {
+          error: this.toUserFriendlyError(
+            authError.message,
+            "Unable to update email right now. Please try again.",
+          ),
+        };
+      }
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user?.id) {
+        await supabase
+          .from("profiles")
+          .update({ email: normalizedEmail, updated_at: new Date().toISOString() })
+          .eq("id", user.id);
+      }
+
+      return { error: null };
+    } catch (err) {
+      console.error("Unexpected error updating email:", err);
+      return { error: "An unexpected error occurred while updating email." };
+    }
+  }
+
+  async updatePassword(password: string): Promise<{ error: string | null }> {
+    try {
+      if (!password || password.length < 8) {
+        return { error: "Password must be at least 8 characters." };
+      }
+
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) {
+        return {
+          error: this.toUserFriendlyError(
+            error.message,
+            "Unable to update password right now. Please try again.",
+          ),
+        };
+      }
+
+      return { error: null };
+    } catch (err) {
+      console.error("Unexpected error updating password:", err);
+      return { error: "An unexpected error occurred while updating password." };
+    }
+  }
 }
 
 export const authService = new AuthService();

@@ -98,8 +98,7 @@ export async function generateRecommendations(
     }
 
     const response = await fetch(
-      `${
-        process.env.NEXT_PUBLIC_SUPABASE_URL
+      `${process.env.NEXT_PUBLIC_SUPABASE_URL
       }/functions/v1/anthropic-recommendations`,
       {
         method: "POST",

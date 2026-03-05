@@ -26,7 +26,6 @@ interface AuthFormProps {
     rememberFor30Days: boolean
   ) => Promise<{ error: string | null }>;
   onGoogleSignIn: () => Promise<{ error: string | null }>;
-  onSignInAsMockUser: () => Promise<{ error: string | null }>;
   onSignUp: (
     email: string,
     password: string,
@@ -43,7 +42,6 @@ export const AuthForm = ({
   onClearError,
   onSignIn,
   onGoogleSignIn,
-  onSignInAsMockUser,
   onSignUp,
   onResetPassword,
   onResendVerificationEmail,
@@ -476,21 +474,6 @@ export const AuthForm = ({
               <span>Continue with Google</span>
             </button>
 
-            <button
-              type="button"
-              onClick={async () => {
-                resetFeedback();
-                const result = await onSignInAsMockUser();
-                if (result.error) {
-                  setErrors({ general: result.error });
-                }
-              }}
-              className="shadow-input inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 transition-all hover:-translate-y-0.5 hover:border-violet-400 hover:bg-violet-50 hover:text-violet-700 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-violet-400 dark:hover:bg-violet-500/20 dark:hover:text-violet-200"
-              aria-label="Continue with mock user"
-              disabled={disabled}
-            >
-              <span>Continue as Mock User</span>
-            </button>
           </>
         )}
 
