@@ -106,12 +106,7 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Log error in development only
-    if (process.env.NODE_ENV === 'development') {
-      console.error("ErrorBoundary caught an error:", error, errorInfo);
-    }
-
-    // Update state with error info
+    console.error("ErrorBoundary caught an error:", error);
     this.setState({ errorInfo });
   }
 
@@ -212,34 +207,6 @@ class ErrorBoundary extends Component<Props, State> {
                 Reload Page
               </Button>
             </div>
-            {process.env.NODE_ENV === 'development' && this.state.error && (
-              <details className="mt-8 text-left">
-                <summary className="text-textTertiary cursor-pointer hover:text-textSecondary">
-                  Error Details (Development)
-                </summary>
-                <div className="mt-4 p-4 bg-gray-800 rounded text-xs text-gray-300 overflow-auto">
-                  <div className="mb-2">
-                    <strong>Error:</strong> {this.state.error.message}
-                  </div>
-                  {this.state.error.stack && (
-                    <div>
-                      <strong>Stack Trace:</strong>
-                      <pre className="mt-1 whitespace-pre-wrap">
-                        {this.state.error.stack}
-                      </pre>
-                    </div>
-                  )}
-                  {this.state.errorInfo && (
-                    <div className="mt-2">
-                      <strong>Component Stack:</strong>
-                      <pre className="mt-1 whitespace-pre-wrap">
-                        {this.state.errorInfo.componentStack}
-                      </pre>
-                    </div>
-                  )}
-                </div>
-              </details>
-            )}
           </div>
         </div>
       );

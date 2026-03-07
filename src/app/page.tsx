@@ -438,7 +438,7 @@ const RotatingLogoSets = () => {
                   alt={logo.name}
                   className={cn(
                     "w-auto object-contain grayscale brightness-0 transition dark:invert",
-                    logo.name === "Google Books" ? "h-12 md:h-[3.25rem]" : "h-10 md:h-11"
+                    logo.name === "Open Library" ? "h-12 md:h-[3.25rem]" : "h-10 md:h-11"
                   )}
                   loading="lazy"
                   decoding="async"

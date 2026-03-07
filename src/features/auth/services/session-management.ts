@@ -23,6 +23,38 @@ class SessionManagementService {
       const deviceInfo = parseUserAgent(userAgent);
       const ipAddress = await getClientIpAddress();
 
+      // Check for existing active session with same browser+OS to prevent duplicates
+      const { data: existing } = await supabase
+        .from("sessions")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("browser_name", deviceInfo.browserName)
+        .eq("os_name", deviceInfo.osName)
+        .is("revoked_at", null)
+        .limit(1);
+
+      if (existing && existing.length > 0) {
+        // Update existing session instead of creating a duplicate
+        const { error } = await supabase
+          .from("sessions")
+          .update({
+            session_id: sessionId,
+            ip_address: ipAddress,
+            user_agent: userAgent,
+            browser_version: deviceInfo.browserVersion,
+            os_version: deviceInfo.osVersion,
+            is_current_device: isCurrentDevice,
+            last_activity: new Date().toISOString(),
+          })
+          .eq("id", existing[0].id);
+
+        if (error) {
+          console.error("Error updating session record:", error);
+          return { error: "Failed to update session record" };
+        }
+        return { error: null };
+      }
+
       const { error } = await supabase.from("sessions").insert({
         user_id: userId,
         session_id: sessionId,
@@ -65,6 +97,16 @@ class SessionManagementService {
       if (error) {
         console.error("Error fetching sessions:", error);
         return { sessions: [], error: "Failed to fetch sessions" };
+      }
+
+      // Re-detect current device based on user agent match
+      if (typeof navigator !== "undefined" && data) {
+        const currentDevice = parseUserAgent(navigator.userAgent);
+        for (const session of data) {
+          session.is_current_device =
+            session.browser_name === currentDevice.browserName &&
+            session.os_name === currentDevice.osName;
+        }
       }
 
       return { sessions: data || [], error: null };

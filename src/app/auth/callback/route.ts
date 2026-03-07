@@ -54,6 +54,12 @@ export async function GET(request: NextRequest) {
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      // Check if MFA is required (user has enrolled factors)
+      const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (aalData && aalData.nextLevel === 'aal2' && aalData.currentLevel === 'aal1') {
+        // Redirect to auth page with mfa_required flag so the client shows the challenge
+        return NextResponse.redirect(`${origin}/auth?mfa_required=true`);
+      }
       return NextResponse.redirect(`${origin}${next}`);
     }
     const params = new URLSearchParams({

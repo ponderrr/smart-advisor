@@ -9,49 +9,37 @@ type DemoBook = {
   infoLink: string;
 };
 
-const normalizeDescription = (description: string) => {
-  return description.replace(/<[^>]*>/g, "").trim();
-};
-
 export async function GET(request: NextRequest) {
   const q = request.nextUrl.searchParams.get("q") || "best fiction books";
-  const apiKey = process.env.GOOGLE_BOOKS_API_KEY;
-
-  if (!apiKey) {
-    return NextResponse.json({ books: [] }, { status: 200 });
-  }
 
   try {
     const query = encodeURIComponent(q);
-    const url = `https://www.googleapis.com/books/v1/volumes?q=${query}&printType=books&orderBy=relevance&maxResults=8&key=${apiKey}`;
-    const response = await fetch(url, { cache: "no-store" });
+    const url = `https://openlibrary.org/search.json?q=${query}&limit=16&fields=key,title,author_name,first_publish_year,cover_i,number_of_pages_median`;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+
+    const response = await fetch(url, { cache: "no-store", signal: controller.signal });
+    clearTimeout(timeout);
 
     if (!response.ok) {
-      throw new Error(`Google Books request failed: ${response.status}`);
+      throw new Error(`Open Library request failed: ${response.status}`);
     }
 
     const data = await response.json();
-    const items = Array.isArray(data.items) ? data.items : [];
+    const docs = Array.isArray(data.docs) ? data.docs : [];
 
-    const books: DemoBook[] = items
-      .map((item: any): DemoBook | null => {
-        const info = item?.volumeInfo;
-        const image =
-          info?.imageLinks?.thumbnail ||
-          info?.imageLinks?.smallThumbnail ||
-          "";
-        if (!info?.title || !image) return null;
-
-        return {
-          id: item.id || crypto.randomUUID(),
-          title: info.title,
-          authors: Array.isArray(info.authors) ? info.authors.join(", ") : "Unknown author",
-          description: normalizeDescription(info.description || "No description available yet."),
-          cover: image.replace("http://", "https://").replace("zoom=1", "zoom=2"),
-          infoLink: info.infoLink || "https://books.google.com",
-        };
-      })
-      .filter((book: DemoBook | null): book is DemoBook => Boolean(book))
+    const books: DemoBook[] = docs
+      .filter((doc: any) => doc.cover_i && doc.title)
+      .map((doc: any): DemoBook => ({
+        id: doc.key || crypto.randomUUID(),
+        title: doc.title,
+        authors: Array.isArray(doc.author_name) ? doc.author_name.join(", ") : "Unknown author",
+        description: doc.first_publish_year
+          ? `First published in ${doc.first_publish_year}${doc.number_of_pages_median ? ` · ${doc.number_of_pages_median} pages` : ""}`
+          : "No description available yet.",
+        cover: `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`,
+        infoLink: `https://openlibrary.org${doc.key}`,
+      }))
       .slice(0, 6);
 
     return NextResponse.json({ books }, { status: 200 });

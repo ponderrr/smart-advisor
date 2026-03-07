@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { authService } from "../services/auth-service";
-import { ShieldCheck, ArrowRight, Copy, Check } from "lucide-react";
+import { ShieldCheck, ArrowRight, Copy, Check, Download } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -12,8 +12,10 @@ interface MfaSetupProps {
   onSkip?: () => void;
 }
 
+type SetupStep = "intro" | "qr" | "verify" | "backup-codes";
+
 export const MfaSetup = ({ onComplete, onSkip }: MfaSetupProps) => {
-  const [step, setStep] = useState<"intro" | "qr" | "verify">("intro");
+  const [step, setStep] = useState<SetupStep>("intro");
   const [qrCode, setQrCode] = useState<string>("");
   const [secret, setSecret] = useState<string>("");
   const [factorId, setFactorId] = useState<string>("");
@@ -21,6 +23,8 @@ export const MfaSetup = ({ onComplete, onSkip }: MfaSetupProps) => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [backupCodes, setBackupCodes] = useState<string[]>([]);
+  const [backupCodesCopied, setBackupCodesCopied] = useState(false);
 
   const handleEnroll = async () => {
     setLoading(true);
@@ -51,15 +55,32 @@ export const MfaSetup = ({ onComplete, onSkip }: MfaSetupProps) => {
     setLoading(true);
     setError(null);
     const { error: verifyError } = await authService.verifyMFA(factorId, code);
-    setLoading(false);
 
     if (verifyError) {
+      setLoading(false);
       setError(verifyError);
       toast.error(verifyError);
-    } else {
-      toast.success("MFA enabled successfully!");
-      onComplete();
+      return;
     }
+
+    // Generate backup codes after successful MFA setup
+    const { codes, error: backupError } =
+      await authService.generateBackupCodes();
+    setLoading(false);
+
+    if (backupError || codes.length === 0) {
+      // MFA is enabled but backup codes failed — still proceed but warn
+      toast.success("MFA enabled successfully!");
+      toast.warning(
+        "Could not generate backup codes. You can regenerate them from Security settings.",
+      );
+      onComplete();
+      return;
+    }
+
+    setBackupCodes(codes);
+    toast.success("MFA enabled successfully!");
+    setStep("backup-codes");
   };
 
   const handleCopySecret = () => {
@@ -69,6 +90,36 @@ export const MfaSetup = ({ onComplete, onSkip }: MfaSetupProps) => {
       setTimeout(() => setCopied(false), 2000);
       toast.success("Secret copied to clipboard");
     }
+  };
+
+  const handleCopyBackupCodes = () => {
+    const text = backupCodes.join("\n");
+    navigator.clipboard.writeText(text);
+    setBackupCodesCopied(true);
+    setTimeout(() => setBackupCodesCopied(false), 2000);
+    toast.success("Backup codes copied to clipboard");
+  };
+
+  const handleDownloadBackupCodes = () => {
+    const text = [
+      "Smart Advisor - MFA Backup Codes",
+      "================================",
+      "Store these codes in a safe place.",
+      "Each code can only be used once.",
+      "",
+      ...backupCodes,
+      "",
+      `Generated: ${new Date().toLocaleDateString()}`,
+    ].join("\n");
+
+    const blob = new Blob([text], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "smart-advisor-backup-codes.txt";
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Backup codes downloaded");
   };
 
   return (
@@ -213,6 +264,67 @@ export const MfaSetup = ({ onComplete, onSkip }: MfaSetupProps) => {
           >
             Back to QR Code
           </button>
+        </motion.div>
+      )}
+
+      {step === "backup-codes" && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-md"
+        >
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+            Save your backup codes
+          </h2>
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            If you lose access to your authenticator app, you can use one of
+            these codes to sign in. Each code can only be used once.
+          </p>
+
+          <div className="mt-6 rounded-lg border-2 border-amber-200 bg-amber-50 p-4 dark:border-amber-800/50 dark:bg-amber-900/20">
+            <p className="mb-3 text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+              Store these in a safe place
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {backupCodes.map((backupCode, i) => (
+                <code
+                  key={i}
+                  className="rounded bg-white px-2 py-1.5 text-center font-mono text-sm font-semibold text-slate-800 dark:bg-slate-800 dark:text-slate-200"
+                >
+                  {backupCode}
+                </code>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-4 flex gap-2">
+            <Button
+              onClick={handleCopyBackupCodes}
+              variant="outline"
+              size="sm"
+              className="flex-1"
+            >
+              {backupCodesCopied ? (
+                <Check className="mr-2 h-4 w-4 text-green-500" />
+              ) : (
+                <Copy className="mr-2 h-4 w-4" />
+              )}
+              {backupCodesCopied ? "Copied" : "Copy"}
+            </Button>
+            <Button
+              onClick={handleDownloadBackupCodes}
+              variant="outline"
+              size="sm"
+              className="flex-1"
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Download
+            </Button>
+          </div>
+
+          <Button onClick={onComplete} size="lg" className="mt-6 w-full">
+            I've saved my codes
+          </Button>
         </motion.div>
       )}
     </div>

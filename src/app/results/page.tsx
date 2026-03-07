@@ -43,8 +43,7 @@ const safeStringify = (obj: unknown): string => {
       if (value === undefined) return "[Undefined]";
       return value;
     });
-  } catch (error) {
-    if (process.env.NODE_ENV === 'development') console.warn("Failed to stringify object, using fallback:", error);
+  } catch {
     return `fallback-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 };
@@ -144,8 +143,7 @@ const ResultsPage = () => {
       const serializedAnswers = safeStringify(answers);
       const userId = user?.id || "anonymous";
       return `${serializedAnswers}-${contentType}-${userId}`;
-    } catch (error) {
-      if (process.env.NODE_ENV === 'development') console.warn("Failed to create session ID, using fallback:", error);
+    } catch {
       return `fallback-session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     }
   })();

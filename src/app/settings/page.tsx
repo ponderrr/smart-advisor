@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   CircleOff,
@@ -14,11 +14,11 @@ import {
   Mail,
   Lock,
   ChevronRight,
+  X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { authService } from "@/features/auth/services/auth-service";
-import { supabase } from "@/integrations/supabase/client";
 import { MfaSetup, MfaManagement, SessionsManagement } from "@/features/auth/components";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
@@ -165,6 +165,9 @@ const SettingsPage = () => {
   const [showMfaPanel, setShowMfaPanel] = useState(false);
   const [mfaEnabled, setMfaEnabled] = useState(false);
   const [mfaChecked, setMfaChecked] = useState(false);
+  const [backupEmail, setBackupEmail] = useState("");
+  const [currentBackupEmail, setCurrentBackupEmail] = useState<string | null>(null);
+  const [savingBackupEmail, setSavingBackupEmail] = useState(false);
 
   const showMessage = (
     text: string,
@@ -176,33 +179,62 @@ const SettingsPage = () => {
     else toast.info(text);
   };
 
-  const verifyWithPasswordPrompt = async (actionLabel: string) => {
-    if (!user?.email) {
-      showMessage("Unable to verify. Please sign in again.", "error");
-      return false;
+  // MFA verification modal state
+  const [verifyModal, setVerifyModal] = useState<{
+    open: boolean;
+    actionLabel: string;
+    mode: "totp" | "enroll";
+  }>({ open: false, actionLabel: "", mode: "totp" });
+  const [verifyCode, setVerifyCode] = useState("");
+  const [verifyError, setVerifyError] = useState("");
+  const [verifyLoading, setVerifyLoading] = useState(false);
+  const verifyResolveRef = useRef<((ok: boolean) => void) | null>(null);
+
+  const requestVerification = useCallback(
+    (actionLabel: string): Promise<boolean> => {
+      return new Promise((resolve) => {
+        verifyResolveRef.current = resolve;
+        setVerifyCode("");
+        setVerifyError("");
+        setVerifyLoading(false);
+        setVerifyModal({
+          open: true,
+          actionLabel,
+          mode: mfaEnabled ? "totp" : "enroll",
+        });
+      });
+    },
+    [mfaEnabled],
+  );
+
+  const closeVerifyModal = useCallback((result: boolean) => {
+    setVerifyModal((prev) => ({ ...prev, open: false }));
+    verifyResolveRef.current?.(result);
+    verifyResolveRef.current = null;
+  }, []);
+
+  const handleVerifySubmit = useCallback(async () => {
+    if (verifyCode.length !== 6) {
+      setVerifyError("Enter a 6-digit code");
+      return;
     }
-    const password = window.prompt(
-      `Enter your current password to ${actionLabel}:`,
-      "",
-    );
-    if (password === null) {
-      showMessage(`${actionLabel.charAt(0).toUpperCase() + actionLabel.slice(1)} canceled.`, "info");
-      return false;
+    setVerifyLoading(true);
+    setVerifyError("");
+    const { data: factors } = await authService.listMFAFactors();
+    const factor = factors?.totp?.find((f: any) => f.status === "verified");
+    if (!factor) {
+      setVerifyError("No verified MFA factor found");
+      setVerifyLoading(false);
+      return;
     }
-    if (!password.trim()) {
-      showMessage("Password is required.", "error");
-      return false;
+    const result = await authService.verifyMFA(factor.id, verifyCode);
+    setVerifyLoading(false);
+    if (result.error) {
+      setVerifyError(result.error);
+    } else {
+      closeVerifyModal(true);
     }
-    const { error } = await supabase.auth.signInWithPassword({
-      email: user.email.trim().toLowerCase(),
-      password: password.trim(),
-    });
-    if (error) {
-      showMessage("Password verification failed.", "error");
-      return false;
-    }
-    return true;
-  };
+  }, [verifyCode, closeVerifyModal]);
 
   const navItems = [
     { name: "Dashboard", link: "/dashboard" },
@@ -231,7 +263,7 @@ const SettingsPage = () => {
   const handleSaveProfile = async () => {
     setSavingProfile(true);
     setMessage(null);
-    const verified = await verifyWithPasswordPrompt("save your profile");
+    const verified = await requestVerification("save your profile");
     if (!verified) { setSavingProfile(false); return; }
     const trimmedName = newName.trim();
     if (!trimmedName) {
@@ -258,7 +290,7 @@ const SettingsPage = () => {
       setSavingEmail(false);
       return;
     }
-    const verified = await verifyWithPasswordPrompt("update your email");
+    const verified = await requestVerification("update your email");
     if (!verified) { setSavingEmail(false); return; }
     const result = await updateEmail(newEmail);
     showMessage(result.error ?? "Check your inbox to confirm.", result.error ? "error" : "success");
@@ -273,7 +305,7 @@ const SettingsPage = () => {
       setSavingPassword(false);
       return;
     }
-    const verified = await verifyWithPasswordPrompt("change your password");
+    const verified = await requestVerification("change your password");
     if (!verified) { setSavingPassword(false); return; }
     const result = await updatePassword(newPassword);
     if (result.error) {
@@ -288,7 +320,7 @@ const SettingsPage = () => {
 
   const handleSaveContentPreferences = async () => {
     if (typeof window === "undefined") return;
-    const verified = await verifyWithPasswordPrompt("save content preferences");
+    const verified = await requestVerification("save content preferences");
     if (!verified) return;
     window.localStorage.setItem(PREF_CONTENT_KEY, contentFocus);
     window.localStorage.setItem(PREF_DISCOVERY_KEY, discoveryLevel);
@@ -298,7 +330,7 @@ const SettingsPage = () => {
 
   const handleDisableAccount = async () => {
     if (!window.confirm("Disable your account? You'll be signed out and unable to sign in until re-enabled by support.")) return;
-    const verified = await verifyWithPasswordPrompt("disable your account");
+    const verified = await requestVerification("disable your account");
     if (!verified) return;
     if (!window.confirm("Final confirmation. Disable now?")) return;
     setAccountActionLoading(true);
@@ -310,7 +342,7 @@ const SettingsPage = () => {
 
   const handleDeleteAccount = async () => {
     if (!window.confirm("Permanently delete your account? This cannot be undone.")) return;
-    const verified = await verifyWithPasswordPrompt("permanently delete your account");
+    const verified = await requestVerification("permanently delete your account");
     if (!verified) return;
     const typed = window.prompt('Type "DELETE" to confirm:');
     if (typed !== "DELETE") { showMessage("Deletion canceled.", "info"); return; }
@@ -351,6 +383,44 @@ const SettingsPage = () => {
     };
     checkMfa();
   }, [showMfaPanel]);
+
+  // Load backup email on mount
+  useEffect(() => {
+    const loadBackupEmail = async () => {
+      const { email } = await authService.getBackupEmail();
+      setCurrentBackupEmail(email);
+    };
+    loadBackupEmail();
+  }, []);
+
+  const handleSaveBackupEmail = async () => {
+    if (!backupEmail.trim()) {
+      showMessage("Email is required.", "error");
+      return;
+    }
+    setSavingBackupEmail(true);
+    const { error } = await authService.setBackupEmail(backupEmail.trim());
+    setSavingBackupEmail(false);
+    if (error) {
+      showMessage(error, "error");
+    } else {
+      setCurrentBackupEmail(backupEmail.trim());
+      setBackupEmail("");
+      showMessage("Backup email saved.", "success");
+    }
+  };
+
+  const handleRemoveBackupEmail = async () => {
+    setSavingBackupEmail(true);
+    const { error } = await authService.removeBackupEmail();
+    setSavingBackupEmail(false);
+    if (error) {
+      showMessage(error, "error");
+    } else {
+      setCurrentBackupEmail(null);
+      showMessage("Backup email removed.", "success");
+    }
+  };
 
   return (
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
@@ -604,6 +674,68 @@ const SettingsPage = () => {
                   )}
                 </SectionCard>
 
+                {/* Backup Email */}
+                <SectionCard>
+                  <SectionHeader
+                    title="Backup Email"
+                    description="Set a recovery email for account verification when your authenticator is unavailable."
+                  />
+                  {currentBackupEmail ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+                        <div>
+                          <p className="text-sm font-semibold">{currentBackupEmail}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            Active backup email
+                          </p>
+                        </div>
+                        <button
+                          onClick={handleRemoveBackupEmail}
+                          disabled={savingBackupEmail}
+                          className="text-xs font-semibold text-red-600 hover:text-red-500 disabled:opacity-50 dark:text-red-400"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <SettingsInput
+                          label="Change Backup Email"
+                          value={backupEmail}
+                          onChange={setBackupEmail}
+                          placeholder="new-backup@example.com"
+                          icon={<Mail size={14} />}
+                        />
+                      </div>
+                      <StatefulButton
+                        onClick={handleSaveBackupEmail}
+                        state={savingBackupEmail ? "loading" : "idle"}
+                        className="h-10 min-w-[160px] rounded-full px-6 text-sm font-semibold"
+                      >
+                        Update Backup Email
+                      </StatefulButton>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <SettingsInput
+                          label="Backup Email"
+                          value={backupEmail}
+                          onChange={setBackupEmail}
+                          placeholder="backup@example.com"
+                          icon={<Mail size={14} />}
+                        />
+                      </div>
+                      <StatefulButton
+                        onClick={handleSaveBackupEmail}
+                        state={savingBackupEmail ? "loading" : "idle"}
+                        className="h-10 min-w-[160px] rounded-full px-6 text-sm font-semibold"
+                      >
+                        Save Backup Email
+                      </StatefulButton>
+                    </div>
+                  )}
+                </SectionCard>
+
                 {/* Sessions */}
                 {user?.id && <SessionsManagement userId={user.id} />}
               </motion.div>
@@ -758,6 +890,122 @@ const SettingsPage = () => {
           </div>
         </div>
       </main>
+
+      {/* MFA Verification Modal */}
+      <AnimatePresence>
+        {verifyModal.open && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+            onClick={() => closeVerifyModal(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative mx-4 w-full max-w-md rounded-2xl border border-slate-200/70 bg-white p-6 shadow-xl dark:border-slate-700/60 dark:bg-slate-900"
+            >
+              <button
+                onClick={() => closeVerifyModal(false)}
+                className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+              >
+                <X size={18} />
+              </button>
+
+              {verifyModal.mode === "totp" ? (
+                <>
+                  <div className="mb-5">
+                    <div className="mb-3 flex items-center gap-2">
+                      <div className="rounded-xl bg-violet-100 p-2 dark:bg-violet-900/30">
+                        <ShieldCheck size={18} className="text-violet-600 dark:text-violet-400" />
+                      </div>
+                      <h3 className="text-lg font-bold">Verify Identity</h3>
+                    </div>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                      Enter your 6-digit authenticator code to{" "}
+                      <span className="font-medium text-slate-700 dark:text-slate-200">
+                        {verifyModal.actionLabel}
+                      </span>
+                      .
+                    </p>
+                  </div>
+
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    value={verifyCode}
+                    onChange={(e) => {
+                      const v = e.target.value.replace(/\D/g, "").slice(0, 6);
+                      setVerifyCode(v);
+                      setVerifyError("");
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleVerifySubmit();
+                    }}
+                    placeholder="000000"
+                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-2xl font-mono tracking-[0.3em] transition-colors focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-100"
+                    autoFocus
+                  />
+
+                  {verifyError && (
+                    <p className="mt-2 text-sm font-medium text-red-600 dark:text-red-400">
+                      {verifyError}
+                    </p>
+                  )}
+
+                  <div className="mt-4 flex gap-3">
+                    <button
+                      onClick={() => closeVerifyModal(false)}
+                      className="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                    >
+                      Cancel
+                    </button>
+                    <StatefulButton
+                      onClick={handleVerifySubmit}
+                      state={verifyLoading ? "loading" : "idle"}
+                      disabled={verifyCode.length !== 6}
+                      className="flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold"
+                    >
+                      Verify
+                    </StatefulButton>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="mb-4">
+                    <div className="mb-3 flex items-center gap-2">
+                      <div className="rounded-xl bg-violet-100 p-2 dark:bg-violet-900/30">
+                        <ShieldCheck size={18} className="text-violet-600 dark:text-violet-400" />
+                      </div>
+                      <h3 className="text-lg font-bold">Set Up 2FA First</h3>
+                    </div>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                      Two-factor authentication is required to{" "}
+                      <span className="font-medium text-slate-700 dark:text-slate-200">
+                        {verifyModal.actionLabel}
+                      </span>
+                      . Set it up now to continue.
+                    </p>
+                  </div>
+
+                  <MfaSetup
+                    onComplete={() => {
+                      setMfaEnabled(true);
+                      closeVerifyModal(true);
+                    }}
+                    onSkip={() => closeVerifyModal(false)}
+                  />
+                </>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

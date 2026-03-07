@@ -11,7 +11,6 @@ import {
   IconBrandGoogle,
   IconEye,
   IconEyeOff,
-  IconShieldCheck,
 } from "@tabler/icons-react";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import { Input } from "@/components/ui/input";
@@ -19,8 +18,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { ShieldCheck, KeyRound } from "lucide-react";
 
-export type AuthMode = "signin" | "signup" | "forgot" | "verify-email";
+export type AuthMode =
+  | "signin"
+  | "signup"
+  | "forgot"
+  | "verify-email"
+  | "mfa-challenge";
 
 const MODE_HEADINGS = {
   signin: [
@@ -31,7 +36,7 @@ const MODE_HEADINGS = {
   signup: [
     "Create your account",
     "Join Smart Advisor",
-    "Let’s set up your profile",
+    "Let's set up your profile",
   ],
   forgot: [
     "Reset your password",
@@ -39,6 +44,11 @@ const MODE_HEADINGS = {
     "Get back into your account",
   ],
   "verify-email": ["Check your inbox", "Almost there", "One last step"],
+  "mfa-challenge": [
+    "Verify your identity",
+    "One more step",
+    "Security check",
+  ],
 } as const;
 
 interface AuthFormProps {
@@ -50,7 +60,7 @@ interface AuthFormProps {
     email: string,
     password: string,
     rememberFor30Days: boolean,
-  ) => Promise<{ error: string | null }>;
+  ) => Promise<{ error: string | null; mfaRequired?: boolean }>;
   onGoogleSignIn: () => Promise<{ error: string | null }>;
   onSignUp: (
     email: string,
@@ -63,7 +73,14 @@ interface AuthFormProps {
   onResendVerificationEmail: (
     email: string,
   ) => Promise<{ error: string | null }>;
-  onMockSignIn?: () => Promise<{ error: string | null }>;
+  onVerifyMFA: (
+    factorId: string,
+    code: string,
+  ) => Promise<{ data?: any; error: string | null }>;
+  onListMFAFactors: () => Promise<{ data?: any; error: string | null }>;
+  onVerifyBackupCode: (code: string) => Promise<{ error: string | null }>;
+  initialMfaRequired?: boolean;
+  onMfaChallengeResolved?: () => void;
 }
 
 export const AuthForm = ({
@@ -76,11 +93,17 @@ export const AuthForm = ({
   onSignUp,
   onResetPassword,
   onResendVerificationEmail,
-  onMockSignIn,
+  onVerifyMFA,
+  onListMFAFactors,
+  onVerifyBackupCode,
+  initialMfaRequired = false,
+  onMfaChallengeResolved,
 }: AuthFormProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [mode, setMode] = useState<AuthMode>("signin");
+  const [mode, setMode] = useState<AuthMode>(
+    initialMfaRequired ? "mfa-challenge" : "signin",
+  );
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -93,13 +116,34 @@ export const AuthForm = ({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isResendingVerification, setIsResendingVerification] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [headingChoice, setHeadingChoice] = useState<Record<AuthMode, number>>({
+  const [headingChoice, setHeadingChoice] = useState<
+    Record<AuthMode, number>
+  >({
     signin: 0,
     signup: 0,
     forgot: 0,
     "verify-email": 0,
+    "mfa-challenge": 0,
   });
   const [signupEmail, setSignupEmail] = useState("");
+
+  // MFA challenge state
+  const [mfaFactorId, setMfaFactorId] = useState("");
+  const [mfaCode, setMfaCode] = useState("");
+  const [mfaInputMode, setMfaInputMode] = useState<"totp" | "backup">("totp");
+  const [mfaVerifying, setMfaVerifying] = useState(false);
+
+  // When initialMfaRequired changes to true (e.g. OAuth callback), load factors
+  useEffect(() => {
+    if (initialMfaRequired && !mfaFactorId) {
+      setMode("mfa-challenge");
+      onListMFAFactors().then((result) => {
+        if (result.data?.totp?.length > 0) {
+          setMfaFactorId(result.data.totp[0].id);
+        }
+      });
+    }
+  }, [initialMfaRequired]);
 
   useEffect(() => {
     setHeadingChoice({
@@ -109,11 +153,15 @@ export const AuthForm = ({
       "verify-email": Math.floor(
         Math.random() * MODE_HEADINGS["verify-email"].length,
       ),
+      "mfa-challenge": Math.floor(
+        Math.random() * MODE_HEADINGS["mfa-challenge"].length,
+      ),
     });
   }, []);
 
   const callbackError = searchParams?.get("error") ?? null;
-  const callbackErrorDescription = searchParams?.get("error_description") ?? null;
+  const callbackErrorDescription =
+    searchParams?.get("error_description") ?? null;
   const isExpiredVerificationLink =
     callbackError === "otp_expired" || callbackError === "verification_failed";
 
@@ -175,6 +223,9 @@ export const AuthForm = ({
       setUsername("");
     }
     setRememberFor30Days(false);
+    setMfaCode("");
+    setMfaFactorId("");
+    setMfaInputMode("totp");
     setHeadingChoice((prev) => ({
       ...prev,
       [nextMode]: Math.floor(Math.random() * MODE_HEADINGS[nextMode].length),
@@ -258,16 +309,15 @@ export const AuthForm = ({
         const result = await onSignIn(email, password, rememberFor30Days);
         if (result.error) {
           setErrors({ general: result.error });
+        } else if (result.mfaRequired) {
+          // MFA is required — fetch factors and show challenge
+          const factorsResult = await onListMFAFactors();
+          if (factorsResult.data?.totp?.length > 0) {
+            setMfaFactorId(factorsResult.data.totp[0].id);
+          }
+          setMode("mfa-challenge");
         } else {
           router.replace("/dashboard");
-          setTimeout(() => {
-            if (
-              typeof window !== "undefined" &&
-              window.location.pathname === "/auth"
-            ) {
-              window.location.assign("/dashboard");
-            }
-          }, 350);
         }
         return result;
       }
@@ -295,6 +345,43 @@ export const AuthForm = ({
     }
   };
 
+  const handleMfaVerify = async () => {
+    resetFeedback();
+    setMfaVerifying(true);
+
+    try {
+      if (mfaInputMode === "totp") {
+        if (mfaCode.length !== 6) {
+          setErrors({ general: "Please enter a 6-digit code" });
+          return;
+        }
+        const result = await onVerifyMFA(mfaFactorId, mfaCode);
+        if (result.error) {
+          setErrors({ general: result.error });
+        } else {
+          onMfaChallengeResolved?.();
+          router.replace("/dashboard");
+        }
+      } else {
+        // Backup code verification
+        const trimmed = mfaCode.trim();
+        if (!trimmed) {
+          setErrors({ general: "Please enter a backup code" });
+          return;
+        }
+        const result = await onVerifyBackupCode(trimmed);
+        if (result.error) {
+          setErrors({ general: result.error });
+        } else {
+          onMfaChallengeResolved?.();
+          router.replace("/dashboard");
+        }
+      }
+    } finally {
+      setMfaVerifying(false);
+    }
+  };
+
   return (
     <div
       className={cn(
@@ -303,6 +390,7 @@ export const AuthForm = ({
         mode === "signin" && "min-h-[500px]",
         mode === "forgot" && "min-h-[430px]",
         mode === "verify-email" && "min-h-[400px]",
+        mode === "mfa-challenge" && "min-h-[440px]",
       )}
     >
       <AnimatePresence mode="wait">
@@ -323,6 +411,29 @@ export const AuthForm = ({
                 return result;
               }}
               isResending={isResendingVerification}
+              onBackToSignIn={() => toggleMode("signin")}
+            />
+          </motion.div>
+        ) : mode === "mfa-challenge" ? (
+          <motion.div
+            key="mfa-challenge"
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -10 }}
+            className="flex flex-col h-full"
+          >
+            <MfaChallengeScreen
+              mfaCode={mfaCode}
+              onMfaCodeChange={setMfaCode}
+              mfaInputMode={mfaInputMode}
+              onToggleMfaInputMode={() => {
+                setMfaInputMode((m) => (m === "totp" ? "backup" : "totp"));
+                setMfaCode("");
+                resetFeedback();
+              }}
+              onVerify={handleMfaVerify}
+              verifying={mfaVerifying}
+              error={formError}
               onBackToSignIn={() => toggleMode("signin")}
             />
           </motion.div>
@@ -400,7 +511,9 @@ export const AuthForm = ({
                         }
                         placeholder="••••••••"
                         value={password}
-                        onChange={(event) => setPassword(event.target.value)}
+                        onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                          setPassword(event.target.value)
+                        }
                         showPassword={showPassword}
                         onTogglePassword={() =>
                           setShowPassword((prev) => !prev)
@@ -457,7 +570,7 @@ export const AuthForm = ({
                         id="auth-confirm-password"
                         placeholder="••••••••"
                         value={confirmPassword}
-                        onChange={(event) =>
+                        onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                           setConfirmPassword(event.target.value)
                         }
                         showPassword={showConfirmPassword}
@@ -588,23 +701,6 @@ export const AuthForm = ({
                       <IconBrandGoogle className="h-4 w-4" />
                       <span>Continue with Google</span>
                     </AuthHoverButton>
-
-                    {onMockSignIn && (
-                      <AuthHoverButton
-                        type="button"
-                        onClick={async () => {
-                          resetFeedback();
-                          const result = await onMockSignIn();
-                          if (result.error)
-                            setErrors({ general: result.error });
-                        }}
-                        className="shadow-input inline-flex h-10 w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 transition-all hover:border-orange-400 hover:bg-orange-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-                        disabled={buttonDisabled}
-                      >
-                        <IconShieldCheck className="h-4 w-4" />
-                        <span>Mock Sign In (Dev)</span>
-                      </AuthHoverButton>
-                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -640,6 +736,120 @@ export const AuthForm = ({
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  );
+};
+
+/* --- MFA CHALLENGE SCREEN --- */
+
+const MfaChallengeScreen = ({
+  mfaCode,
+  onMfaCodeChange,
+  mfaInputMode,
+  onToggleMfaInputMode,
+  onVerify,
+  verifying,
+  error,
+  onBackToSignIn,
+}: {
+  mfaCode: string;
+  onMfaCodeChange: (code: string) => void;
+  mfaInputMode: "totp" | "backup";
+  onToggleMfaInputMode: () => void;
+  onVerify: () => void;
+  verifying: boolean;
+  error: string | null;
+  onBackToSignIn: () => void;
+}) => {
+  const isTotp = mfaInputMode === "totp";
+
+  return (
+    <div className="flex flex-col items-center justify-center space-y-5 py-4 text-center">
+      <div className="rounded-full bg-violet-100 p-4 dark:bg-violet-900/30">
+        {isTotp ? (
+          <ShieldCheck className="h-10 w-10 text-violet-600 dark:text-violet-400" />
+        ) : (
+          <KeyRound className="h-10 w-10 text-violet-600 dark:text-violet-400" />
+        )}
+      </div>
+
+      <div>
+        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+          {isTotp ? "Enter verification code" : "Enter backup code"}
+        </h2>
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+          {isTotp
+            ? "Open your authenticator app and enter the 6-digit code."
+            : "Enter one of your pre-generated backup codes."}
+        </p>
+      </div>
+
+      <div className="w-full max-w-xs">
+        {isTotp ? (
+          <input
+            type="text"
+            inputMode="numeric"
+            maxLength={6}
+            value={mfaCode}
+            onChange={(e) =>
+              onMfaCodeChange(e.target.value.replace(/\D/g, ""))
+            }
+            className="w-full rounded-lg border-2 border-slate-200 bg-white px-4 py-4 text-center text-3xl font-bold tracking-[0.4em] text-slate-900 placeholder-slate-300 focus:border-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder-slate-600"
+            placeholder="000000"
+            autoFocus
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && mfaCode.length === 6) onVerify();
+            }}
+          />
+        ) : (
+          <input
+            type="text"
+            value={mfaCode}
+            onChange={(e) => onMfaCodeChange(e.target.value)}
+            className="w-full rounded-lg border-2 border-slate-200 bg-white px-4 py-3 text-center font-mono text-lg font-semibold tracking-wider text-slate-900 placeholder-slate-300 uppercase focus:border-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder-slate-600"
+            placeholder="XXXXX-XXXXX"
+            autoFocus
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && mfaCode.trim()) onVerify();
+            }}
+          />
+        )}
+
+        {error && (
+          <p className="mt-2 text-sm font-medium text-red-500">{error}</p>
+        )}
+      </div>
+
+      <div className="w-full max-w-xs space-y-3">
+        <AuthHoverButton
+          type="button"
+          onClick={onVerify}
+          disabled={
+            verifying || (isTotp ? mfaCode.length !== 6 : !mfaCode.trim())
+          }
+          className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-violet-600 text-sm font-semibold text-white transition-all hover:bg-violet-500 disabled:opacity-50"
+        >
+          {verifying ? "Verifying..." : "Verify"}
+        </AuthHoverButton>
+
+        <button
+          type="button"
+          onClick={onToggleMfaInputMode}
+          className="w-full text-sm font-medium text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+        >
+          {isTotp
+            ? "Can't access your authenticator? Use a backup code"
+            : "Use authenticator app instead"}
+        </button>
+
+        <button
+          type="button"
+          onClick={onBackToSignIn}
+          className="text-sm font-semibold text-violet-600 transition-colors hover:text-violet-500 dark:text-violet-400 dark:hover:text-violet-300"
+        >
+          Back to sign in
+        </button>
+      </div>
     </div>
   );
 };
@@ -734,7 +944,7 @@ export const AuthHoverButton = ({ className, children, ...props }: any) => {
   return (
     <motion.button
       {...props}
-      onMouseMove={(e) => {
+      onMouseMove={(e: React.MouseEvent) => {
         const { left, top } = e.currentTarget.getBoundingClientRect();
         mouseX.set(e.clientX - left);
         mouseY.set(e.clientY - top);

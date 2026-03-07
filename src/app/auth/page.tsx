@@ -1,12 +1,13 @@
 "use client";
 
-import { Suspense, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { AuthForm, AuthLayout } from "@/features/auth/components";
 
 const AuthPageContent = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const {
     signIn,
     signInWithGoogle,
@@ -19,14 +20,41 @@ const AuthPageContent = () => {
     signupCooldown,
     user,
     session,
-    mockSignIn,
+    verifyMFA,
+    listMFAFactors,
+    verifyBackupCode,
+    getAALLevel,
   } = useAuth();
 
+  // Track whether MFA challenge is active (blocks dashboard redirect)
+  const [mfaChallengeActive, setMfaChallengeActive] = useState(false);
+
+  // Check for mfa_required param from OAuth callback
+  const oauthMfaRequired = searchParams?.get("mfa_required") === "true";
+
   useEffect(() => {
-    if ((session || user) && !loading) {
-      router.push("/dashboard");
+    if (oauthMfaRequired && session) {
+      setMfaChallengeActive(true);
     }
-  }, [session, user, loading, router]);
+  }, [oauthMfaRequired, session]);
+
+  // Only auto-redirect to dashboard if MFA challenge is NOT active
+  useEffect(() => {
+    if ((session || user) && !loading && !mfaChallengeActive && !oauthMfaRequired) {
+      // Double-check AAL before redirecting
+      if (session) {
+        getAALLevel().then(({ data }) => {
+          if (data && data.nextLevel === "aal2" && data.currentLevel === "aal1") {
+            setMfaChallengeActive(true);
+          } else {
+            router.push("/dashboard");
+          }
+        });
+      } else {
+        router.push("/dashboard");
+      }
+    }
+  }, [session, user, loading, mfaChallengeActive, oauthMfaRequired, router, getAALLevel]);
 
   return (
     <AuthLayout onLogoClick={() => router.push("/")}>
@@ -40,7 +68,11 @@ const AuthPageContent = () => {
         onResetPassword={resetPassword}
         onResendVerificationEmail={resendVerificationEmail}
         onClearError={clearError}
-        onMockSignIn={mockSignIn}
+        onVerifyMFA={verifyMFA}
+        onListMFAFactors={listMFAFactors}
+        onVerifyBackupCode={verifyBackupCode}
+        initialMfaRequired={mfaChallengeActive}
+        onMfaChallengeResolved={() => setMfaChallengeActive(false)}
       />
     </AuthLayout>
   );
