@@ -202,7 +202,7 @@ const Index = () => {
       {/* HOW IT WORKS SECTION */}
       <section
         id="how-it-works"
-        className="scroll-mt-32 py-24 px-6 bg-slate-50 dark:bg-slate-900/50"
+        className="scroll-mt-32 py-24 px-6 bg-slate-50 dark:bg-slate-950"
       >
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-4xl font-black tracking-tight md:text-5xl">
