@@ -273,22 +273,6 @@ export default function Index() {
               ))}
             </div>
           </div>
-
-          {/* Supplemental Cards */}
-          <div className="mt-8 grid grid-cols-1 gap-3 md:grid-cols-3">
-            {howItWorksCards.map((card, idx) => (
-              <motion.div
-                key={card.title}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.45, delay: idx * 0.08 }}
-                className="rounded-2xl border border-slate-200/80 bg-white/80 p-4 text-sm text-slate-700 shadow-sm dark:border-slate-700/70 dark:bg-slate-900/65 dark:text-slate-300"
-              >
-                {card.detail}
-              </motion.div>
-            ))}
-          </div>
         </div>
       </section>
 
