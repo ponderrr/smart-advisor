@@ -15,8 +15,7 @@ export const howItWorksCards = [
       "https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=1200&q=80",
     hoverImage:
       "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=1200&q=80",
-    detail:
-      "The short flow is designed for your current mood, not stale profile assumptions from months ago.",
+
   },
   {
     title: "We Narrow Down Your Best Options",
@@ -26,8 +25,7 @@ export const howItWorksCards = [
       "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=80",
     hoverImage:
       "https://images.unsplash.com/photo-1616530940355-351fabd9524b?auto=format&fit=crop&w=1200&q=80",
-    detail:
-      "We prioritize tone, pacing, and fit so your top results feel right from the start.",
+
   },
   {
     title: "Get Picks You Can Trust",
@@ -37,8 +35,6 @@ export const howItWorksCards = [
       "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=1200&q=80",
     hoverImage:
       "https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&w=1200&q=80",
-    detail:
-      "Save favorites, compare quickly, and move from indecision to your next watch or read in minutes.",
   },
 ];
 
