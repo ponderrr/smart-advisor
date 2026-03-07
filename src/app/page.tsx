@@ -3,10 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  IconBrandGithub,
-  IconChevronDown,
-} from "@tabler/icons-react";
+import { IconBrandGithub, IconChevronDown } from "@tabler/icons-react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { AnimatedTestimonials } from "@/components/ui/animated-testimonials";
 import { LinkPreview } from "@/components/ui/link-preview";
@@ -26,46 +23,17 @@ import {
 } from "@/components/ui/resizable-navbar";
 import { HeroSection } from "@/features/home/components";
 import { cn } from "@/lib/utils";
-import {
-  faqItems,
-  howItWorksCards,
-  logoSets,
-  teamMembers,
-} from "@/features/home/data";
+import { faqItems, logoSets, teamMembers } from "@/features/home/data";
 
-const howItWorksInteractive = [
-  {
-    title: "Share Your Mood",
-    description: "Pick what you want right now in a few quick taps.",
-    detail: "Choose genres, tone, and discovery level so recommendations feel personal from the start.",
-  },
-  {
-    title: "Get Movie + Book Matches",
-    description: "We surface both movie and book options together.",
-    detail: "See two formats side by side so you can choose what fits your time and attention.",
-  },
-  {
-    title: "Pick With Confidence",
-    description: "Each result is clear, focused, and easy to compare.",
-    detail: "No endless scrolling. You get context-aware picks you can act on immediately.",
-  },
-];
-
-const howItWorksVideos = [
-  "/animations/security-status-safe.webm",
-  "/animations/Popcorn.webm",
-  "/animations/Books.webm",
-];
-
-export default function Index() {
+const Index = () => {
   const router = useRouter();
   const { user, signOut } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [activeHowItWorks, setActiveHowItWorks] = useState(0);
 
   const handleGetStarted = () =>
     user ? router.push("/dashboard") : router.push("/auth");
+
   const handleSignOut = async () => {
     await signOut();
     router.push("/");
@@ -96,6 +64,7 @@ export default function Index() {
 
   return (
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
+      {/* Navbar */}
       <Navbar>
         <NavBody>
           <div className="flex min-w-0 flex-1 items-center">
@@ -108,6 +77,7 @@ export default function Index() {
 
           <div className="flex min-w-0 flex-1 items-center justify-end gap-4">
             <ThemeToggle />
+
             {user && (
               <HoverBorderGradient
                 onClick={() => router.push("/dashboard")}
@@ -121,6 +91,7 @@ export default function Index() {
                 Dashboard
               </HoverBorderGradient>
             )}
+
             {user && (
               <button
                 type="button"
@@ -130,6 +101,7 @@ export default function Index() {
                 Sign Out
               </button>
             )}
+
             {!user && (
               <HoverBorderGradient
                 onClick={handleGetStarted}
@@ -157,6 +129,7 @@ export default function Index() {
               />
             </div>
           </MobileNavHeader>
+
           <MobileNavMenu isOpen={isMobileMenuOpen}>
             {homeNavItems.map((item) => (
               <button
@@ -175,6 +148,7 @@ export default function Index() {
                 {item.name}
               </button>
             ))}
+
             {!user && (
               <HoverBorderGradient
                 onClick={handleGetStarted}
@@ -188,6 +162,7 @@ export default function Index() {
                 Get Started
               </HoverBorderGradient>
             )}
+
             {user && (
               <HoverBorderGradient
                 onClick={() => {
@@ -204,6 +179,7 @@ export default function Index() {
                 Dashboard
               </HoverBorderGradient>
             )}
+
             {user && (
               <button
                 type="button"
@@ -220,64 +196,40 @@ export default function Index() {
         </MobileNav>
       </Navbar>
 
+      {/* Hero Section */}
       <HeroSection />
 
       {/* HOW IT WORKS SECTION */}
-      <section id="how-it-works" className="scroll-mt-32 px-6 py-24 md:py-32">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-12 text-center md:mb-16">
-            <h2 className="mb-4 mt-5 text-4xl font-black tracking-tighter md:text-5xl">
-              How It Works
-            </h2>
-            <p className="mx-auto max-w-2xl text-base text-slate-600 dark:text-slate-400 md:text-lg">
-              A faster way to go from indecision to a great watch or read.
-            </p>
-          </div>
+      <section
+        id="how-it-works"
+        className="scroll-mt-32 py-24 px-6 bg-slate-50 dark:bg-slate-900/50"
+      >
+        <div className="max-w-7xl mx-auto text-center">
+          <h2 className="text-4xl font-black tracking-tight md:text-5xl">
+            How It Works
+          </h2>
+          <p className="mt-4 text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+            A faster way to go from indecision to a great watch or read.
+          </p>
 
-          <div
-            className={cn(
-              "relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 p-4 shadow-sm backdrop-blur-md md:p-8",
-              "dark:border-slate-700/70 dark:bg-slate-900/65",
-            )}
-          >
-            {/* Video Container */}
-            <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-black dark:border-slate-700/70 shadow-2xl">
-              <video
-                className="aspect-video w-full"
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="auto"
-                src="/animations/full-walkthrough.webm" // Replace with your combined video path
-              />
-            </div>
-
-            {/* Static Feature Grid instead of interactive buttons */}
-            <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-3">
-              {howItWorksInteractive.map((step, idx) => (
-                <div key={step.title} className="flex flex-col">
-                  <span className="mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-rose-500/10 text-xs font-black text-rose-600 dark:bg-rose-500/20 dark:text-rose-400">
-                    {idx + 1}
-                  </span>
-                  <h3 className="text-xl font-black tracking-tight text-slate-900 dark:text-slate-100">
-                    {step.title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-                    {step.description}
-                  </p>
-                  <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                    {step.detail}
-                  </p>
-                </div>
-              ))}
-            </div>
+          <div className="mt-12 max-w-4xl mx-auto rounded-3xl overflow-hidden shadow-2xl border-8 border-white dark:border-slate-800">
+            <video
+              src="/animations/security-status-safe.webm"
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="metadata"
+              className="w-full aspect-video object-cover"
+            />
           </div>
         </div>
       </section>
 
+      {/* Features Section */}
       <FeaturesSectionDemo />
 
+      {/* Powered By */}
       <section id="powered-by" className="scroll-mt-32 px-6 py-24 md:py-32">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12 text-center md:mb-16">
@@ -292,6 +244,7 @@ export default function Index() {
         </div>
       </section>
 
+      {/* Meet The Team */}
       <section id="meet-the-team" className="scroll-mt-32 px-6 py-24 md:py-32">
         <div className="mx-auto max-w-6xl text-center">
           <h2 className="mb-24 text-4xl font-black tracking-tighter md:text-5xl">
@@ -301,6 +254,7 @@ export default function Index() {
         </div>
       </section>
 
+      {/* FAQ */}
       <section id="faq" className="scroll-mt-32 px-6 py-24 md:py-28">
         <div className="mx-auto max-w-3xl">
           <div className="mb-10 text-center">
@@ -341,7 +295,7 @@ export default function Index() {
                       "flex w-full items-center justify-between px-5 py-4 text-left transition-colors",
                       isOpen
                         ? "bg-slate-100 dark:bg-slate-800/80"
-                        : "bg-white dark:bg-slate-900/60",
+                        : "bg-white dark:bg-slate-900/60"
                     )}
                   >
                     <span className="pr-4 text-sm font-semibold text-slate-900 dark:text-slate-100 md:text-base">
@@ -350,7 +304,7 @@ export default function Index() {
                     <IconChevronDown
                       className={cn(
                         "h-5 w-5 shrink-0 text-slate-500 transition-transform duration-300",
-                        isOpen && "rotate-180",
+                        isOpen && "rotate-180"
                       )}
                     />
                   </button>
@@ -376,6 +330,7 @@ export default function Index() {
         </div>
       </section>
 
+      {/* Footer */}
       <footer className="px-6 py-14">
         <div className="mx-auto max-w-7xl">
           <div className="flex justify-center">
@@ -448,8 +403,9 @@ export default function Index() {
       </footer>
     </div>
   );
-}
+};
 
+// Rotating Logos Component
 const RotatingLogoSets = () => {
   const [activeSet, setActiveSet] = useState(0);
 
@@ -482,7 +438,7 @@ const RotatingLogoSets = () => {
                   alt={logo.name}
                   className={cn(
                     "w-auto object-contain grayscale brightness-0 transition dark:invert",
-                    logo.name === "Google Books" ? "h-12 md:h-[3.25rem]" : "h-10 md:h-11",
+                    logo.name === "Google Books" ? "h-12 md:h-[3.25rem]" : "h-10 md:h-11"
                   )}
                   loading="lazy"
                   decoding="async"
@@ -499,3 +455,5 @@ const RotatingLogoSets = () => {
     </div>
   );
 };
+
+export default Index;
