@@ -19,7 +19,7 @@ interface AuthContextType {
     email: string,
     password: string,
     rememberFor30Days?: boolean,
-  ) => Promise<{ error: string | null }>;
+  ) => Promise<{ error: string | null; mfaRequired?: boolean }>;
   signUp: (
     email: string,
     password: string,
@@ -49,7 +49,19 @@ interface AuthContextType {
   signOutAllDevices: () => Promise<{ error: string | null }>;
   deleteAccount: () => Promise<{ error: string | null }>;
   disableAccount: () => Promise<{ error: string | null }>;
-  mockSignIn?: () => Promise<{ error: string | null }>;
+  getAALLevel: () => Promise<{ data?: any; error: string | null }>;
+  generateBackupCodes: () => Promise<{
+    codes: string[];
+    error: string | null;
+  }>;
+  verifyBackupCode: (code: string) => Promise<{ error: string | null }>;
+  getRemainingBackupCodeCount: () => Promise<{
+    count: number;
+    error: string | null;
+  }>;
+  setBackupEmail: (email: string) => Promise<{ error: string | null }>;
+  getBackupEmail: () => Promise<{ email: string | null; error: string | null }>;
+  removeBackupEmail: () => Promise<{ error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -105,36 +117,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [mounted, setMounted] = useState(false);
   const [signupCooldown, setSignupCooldown] = useState(false);
 
-  // New function to handle user profile fetching with AbortController
   const fetchUserProfile = async (
     _supabaseUser: SupabaseUser,
     signal?: AbortSignal,
   ) => {
-    // Check if operation was aborted before any state updates
-    if (signal?.aborted) {
-      if (process.env.NODE_ENV === "development")
-        console.log("useAuth: fetchUserProfile aborted");
-      return;
-    }
+    if (signal?.aborted) return;
 
     try {
       setLoading(true);
       setError(null);
-      if (process.env.NODE_ENV === "development") {
-        console.log(
-          "useAuth: fetchUserProfile - attempting to get current user...",
-        );
-      }
 
       const { user: profileUser, error: profileError } =
         await authService.getCurrentUser();
 
-      // Check again if operation was aborted after async call
-      if (signal?.aborted) {
-        if (process.env.NODE_ENV === "development")
-          console.log("useAuth: fetchUserProfile aborted after API call");
-        return;
-      }
+      if (signal?.aborted) return;
 
       if (profileError) {
         console.error("useAuth: Error loading user profile:", profileError);
@@ -142,27 +138,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(null);
       } else {
         setUser(profileUser);
-        if (process.env.NODE_ENV === "development") {
-          console.log(
-            "useAuth: User profile loaded successfully.",
-            profileUser?.id,
-          );
-        }
       }
     } catch (err) {
-      // Don't set error if operation was aborted
-      if (signal?.aborted) {
-        if (process.env.NODE_ENV === "development")
-          console.log(
-            "useAuth: fetchUserProfile aborted during error handling",
-          );
-        return;
-      }
+      if (signal?.aborted) return;
       console.error("useAuth: Unexpected error loading profile:", err);
       setUser(null);
       setError("An unexpected error occurred while loading profile.");
     } finally {
-      // Only update loading state if not aborted
       if (!signal?.aborted) {
         setLoading(false);
       }
@@ -181,26 +163,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const initializeAuth = async () => {
       try {
-        if (process.env.NODE_ENV === "development")
-          console.log("Initializing auth state...");
         setError(null);
 
-        // Check if operation was aborted before starting
         if (abortController.signal.aborted) return;
 
-        // Set up auth state listener first
         const {
           data: { subscription: sub },
         } = supabase.auth.onAuthStateChange(async (event, session) => {
-          if (process.env.NODE_ENV === "development")
-            console.log("Auth state changed:", event, session?.user?.id);
-
           if (!mounted || abortController.signal.aborted) return;
 
           setSession(session);
 
           if (event === "SIGNED_IN" && session?.user) {
             fetchUserProfile(session.user, abortController.signal);
+          } else if (event === "TOKEN_REFRESHED" && session?.user) {
+            setSession(session);
           } else if (!session?.user) {
             setUser(null);
             setLoading(false);
@@ -208,10 +185,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
         subscription = sub;
 
-        // Check if operation was aborted before API call
         if (abortController.signal.aborted) return;
 
-        // Check for existing session
         const {
           data: { session: initialSession },
           error: sessionError,
@@ -226,15 +201,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           return;
         }
 
-        if (process.env.NODE_ENV === "development")
-          console.log("Initial session:", initialSession?.user?.id || "none");
-
         if (initialSession?.user && !shouldKeepExistingSession()) {
-          if (process.env.NODE_ENV === "development") {
-            console.log(
-              "No valid remember/session preference found. Signing out stale session.",
-            );
-          }
           await supabase.auth.signOut();
           setUser(null);
           setSession(null);
@@ -280,19 +247,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
       setError(null);
-      if (process.env.NODE_ENV === "development")
-        console.log("Attempting signin...");
 
       const result = await authService.signIn(email, password);
 
       if (result.error) {
         setError(result.error);
-        console.error("Signin failed:", result.error);
       } else {
         setSessionPreference(rememberFor30Days);
-        if (process.env.NODE_ENV === "development")
-          console.log("Signin successful");
-        // Auth state change will be handled by the listener and subsequent useEffect for profile fetch
+
+        // Check AAL level — if MFA is enrolled, currentLevel may be aal1 while nextLevel is aal2
+        const { data: aalData } = await authService.getAALLevel();
+        if (aalData && aalData.nextLevel === "aal2" && aalData.currentLevel === "aal1") {
+          return { error: null, mfaRequired: true };
+        }
       }
 
       return result;
@@ -323,8 +290,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
       setError(null);
-      if (process.env.NODE_ENV === "development")
-        console.log("Attempting signup...");
 
       const result = await authService.signUp(
         email,
@@ -336,7 +301,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (result.error) {
         setError(result.error);
-        console.error("Signup failed:", result.error);
         const lower = result.error.toLowerCase();
         if (
           lower.includes("too many attempts") ||
@@ -350,9 +314,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         await supabase.auth.signOut();
         setUser(null);
         setSession(null);
-        if (process.env.NODE_ENV === "development")
-          console.log("Signup successful");
-        // Auth state change will be handled by the listener and subsequent useEffect for profile fetch
       }
 
       return result;
@@ -371,18 +332,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
       setError(null);
-      if (process.env.NODE_ENV === "development")
-        console.log("Attempting signout...");
 
       const result = await authService.signOut();
 
       if (result.error) {
         setError(result.error);
-        console.error("Signout failed:", result.error);
       } else {
         clearSessionPreference();
-        if (process.env.NODE_ENV === "development")
-          console.log("Signout successful");
         setUser(null);
         setSession(null);
         setLoading(false); // Explicitly set loading to false on sign out
@@ -681,35 +637,65 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const mockSignIn = async () => {
-    if (process.env.NODE_ENV !== "development") {
-      return { error: "Mock signin only available in development" };
-    }
+  const getAALLevel = async () => {
     try {
-      setLoading(true);
-      setError(null);
-      // Create a fake user for testing
-      const fakeUser: User = {
-        id: "mock-user-id",
-        email: "mock@example.com",
-        name: "Mock User",
-        username: "mockuser",
-        age: 25,
-        created_at: new Date().toISOString(),
-        mfa_enabled: false,
-      };
-      setUser(fakeUser);
-      setSession(null); // No real session
-      return { error: null };
+      const result = await authService.getAALLevel();
+      if (result.error) {
+        setError(result.error);
+      }
+      return result;
     } catch (error) {
-      console.error("Error in mock signin:", error);
+      console.error("Error getting AAL level:", error);
       const errorMessage =
         error instanceof Error ? error.message : "An unexpected error occurred";
       setError(errorMessage);
-      return { error: errorMessage };
-    } finally {
-      setLoading(false);
+      return { data: null, error: errorMessage };
     }
+  };
+
+  const generateBackupCodes = async () => {
+    try {
+      return await authService.generateBackupCodes();
+    } catch (error) {
+      console.error("Error generating backup codes:", error);
+      return { codes: [], error: "Failed to generate backup codes" };
+    }
+  };
+
+  const verifyBackupCode = async (code: string) => {
+    try {
+      const result = await authService.verifyBackupCode(code);
+      if (result.error) {
+        setError(result.error);
+      }
+      return result;
+    } catch (error) {
+      console.error("Error verifying backup code:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to verify backup code";
+      setError(errorMessage);
+      return { error: errorMessage };
+    }
+  };
+
+  const getRemainingBackupCodeCount = async () => {
+    try {
+      return await authService.getRemainingBackupCodeCount();
+    } catch (error) {
+      return { count: 0, error: "Failed to get backup code count" };
+    }
+  };
+
+  const setBackupEmail = async (email: string) => {
+    return authService.setBackupEmail(email);
+  };
+
+  const getBackupEmail = async () => {
+    return authService.getBackupEmail();
+  };
+
+  const removeBackupEmail = async () => {
+    return authService.removeBackupEmail();
   };
 
   const value = {
@@ -735,7 +721,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     signOutAllDevices,
     deleteAccount,
     disableAccount,
-    ...(process.env.NODE_ENV === "development" && { mockSignIn }),
+    getAALLevel,
+    generateBackupCodes,
+    verifyBackupCode,
+    getRemainingBackupCodeCount,
+    setBackupEmail,
+    getBackupEmail,
+    removeBackupEmail,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

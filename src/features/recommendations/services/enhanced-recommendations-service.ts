@@ -1,6 +1,6 @@
 import { generateRecommendations } from "@/features/recommendations/services/ai-service";
 import { tmdbService } from "@/features/recommendations/services/tmdb-service";
-import { googleBooksService } from "@/features/recommendations/services/google-books-service";
+import { openLibraryService } from "@/features/recommendations/services/open-library-service";
 import { databaseService } from "@/features/recommendations/services/database-service";
 import { Recommendation } from "@/features/recommendations/types/recommendation";
 import { Answer } from "@/features/quiz/types/answer";
@@ -52,20 +52,19 @@ class EnhancedRecommendationsService {
     retryCount = 0
   ): Promise<Recommendation[]> {
     try {
-      const recommendations = await this.generateEnhancedRecommendations(
+      return await this.generateEnhancedRecommendations(
         questionnaireData,
         userId
       );
-      return recommendations;
     } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error(
-          `Recommendation generation attempt ${retryCount + 1} failed:`,
-          error
-        );
-      }
+      const errorMsg = error instanceof Error ? error.message.toLowerCase() : "";
+      const isNonRetryable =
+        errorMsg.includes("not authenticated") ||
+        errorMsg.includes("unauthorized") ||
+        errorMsg.includes("401") ||
+        errorMsg.includes("403");
 
-      if (retryCount < this.MAX_RETRIES) {
+      if (!isNonRetryable && retryCount < this.MAX_RETRIES) {
         await this.delay(this.RETRY_DELAY * (retryCount + 1));
         return this.retryRecommendation(
           questionnaireData,
@@ -74,10 +73,11 @@ class EnhancedRecommendationsService {
         );
       }
 
-      throw new Error(
-        `Failed to generate recommendations after ${this.MAX_RETRIES + 1
-        } attempts`
-      );
+      throw error instanceof Error
+        ? error
+        : new Error(
+            `Failed to generate recommendations after ${this.MAX_RETRIES + 1} attempts`,
+          );
     }
   }
 
@@ -87,14 +87,6 @@ class EnhancedRecommendationsService {
   ): Promise<Recommendation[]> {
     const { answers, contentType, userAge, userName } = questionnaireData;
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log("Starting enhanced recommendation generation:", {
-        contentType,
-        userAge,
-      });
-    }
-
-    // Generate recommendations using Anthropic
     const aiRecommendations = await generateRecommendations(
       answers,
       contentType,
@@ -102,11 +94,6 @@ class EnhancedRecommendationsService {
       userName
     );
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log("AI recommendations generated:", aiRecommendations);
-    }
-
-    // Convert RecommendationData to array of recommendations
     const recommendationsArray: Partial<Recommendation>[] = [];
 
     if (contentType === "movie" || contentType === "both") {
@@ -131,13 +118,11 @@ class EnhancedRecommendationsService {
       throw new Error("No recommendations were generated");
     }
 
-    // Enhance with external API data and save to database
     const enhancedRecommendations = await Promise.all(
       recommendationsArray.map(async (rec) => {
         try {
           let enhancedRec = { ...rec };
 
-          // Enhance movies with TMDB data
           if (rec.type === "movie") {
             try {
               const tmdbData = rec.title ? await tmdbService.searchMovie(rec.title) : null;
@@ -147,25 +132,17 @@ class EnhancedRecommendationsService {
                   poster_url: tmdbData.poster || rec.poster_url,
                   rating: tmdbData.rating || rec.rating,
                   year: tmdbData.year || rec.year,
-                  // KEEP the AI explanation as the primary description, only use TMDB as fallback
                   description: enhancedRec.explanation || tmdbData.description,
                 };
               }
-            } catch (tmdbError) {
-              if (process.env.NODE_ENV === 'development') {
-                console.warn(
-                  "TMDB enhancement failed for:",
-                  rec.title,
-                  tmdbError
-                );
-              }
+            } catch {
+              // TMDB enhancement is non-critical
             }
           }
 
-          // Enhance books with Google Books data
           if (rec.type === "book") {
             try {
-              const bookData = rec.title ? await googleBooksService.searchBook(
+              const bookData = rec.title ? await openLibraryService.searchBook(
                 rec.title,
                 rec.author
               ) : null;
@@ -175,22 +152,14 @@ class EnhancedRecommendationsService {
                   poster_url: bookData.cover || rec.poster_url,
                   rating: bookData.rating || rec.rating,
                   year: bookData.year || rec.year,
-                  // KEEP the AI explanation as the primary description, only use Google Books as fallback
                   description: enhancedRec.explanation || bookData.description,
                 };
               }
-            } catch (bookError) {
-              if (process.env.NODE_ENV === 'development') {
-                console.warn(
-                  "Google Books enhancement failed for:",
-                  rec.title,
-                  bookError
-                );
-              }
+            } catch {
+              // Open Library enhancement is non-critical
             }
           }
 
-          // Save to database
           const { data: savedRec, error } =
             await databaseService.saveRecommendation({
               ...enhancedRec,
@@ -198,9 +167,6 @@ class EnhancedRecommendationsService {
             } as any);
 
           if (error) {
-            if (process.env.NODE_ENV === 'development') {
-              console.error("Failed to save recommendation:", error);
-            }
             return this.toRecommendation(enhancedRec as Recommendation, userId, contentType);
           }
 
@@ -209,21 +175,11 @@ class EnhancedRecommendationsService {
           }
 
           return this.toRecommendation(enhancedRec as Recommendation, userId, contentType);
-        } catch (error) {
-          if (process.env.NODE_ENV === 'development') {
-            console.error("Error enhancing recommendation:", error);
-          }
+        } catch {
           return this.toRecommendation(rec as Recommendation, userId, contentType);
         }
       })
     );
-
-    if (process.env.NODE_ENV === 'development') {
-      console.log(
-        "Enhanced recommendations completed:",
-        enhancedRecommendations.length
-      );
-    }
 
     return enhancedRecommendations as Recommendation[];
   }

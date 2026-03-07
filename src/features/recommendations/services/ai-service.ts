@@ -1,7 +1,23 @@
-import { FunctionsHttpError, FunctionsRelayError, FunctionsFetchError } from "@supabase/supabase-js";
+import {
+  FunctionsHttpError,
+  FunctionsRelayError,
+  FunctionsFetchError,
+} from "@supabase/supabase-js";
 import { Question } from "@/features/quiz/types/question";
 import { Answer } from "@/features/quiz/types/answer";
 import { supabase } from "@/integrations/supabase/client";
+
+function isNonRetryableError(error: unknown): boolean {
+  const msg =
+    error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+  return (
+    msg.includes("not authenticated") ||
+    msg.includes("unauthorized") ||
+    msg.includes("401") ||
+    msg.includes("403") ||
+    msg.includes("forbidden")
+  );
+}
 
 async function extractEdgeFunctionError(error: unknown): Promise<string> {
   if (error instanceof FunctionsHttpError) {
@@ -13,10 +29,10 @@ async function extractEdgeFunctionError(error: unknown): Promise<string> {
     }
   }
   if (error instanceof FunctionsRelayError) {
-    return `Relay error: ${error.message}`;
+    return "The AI service is temporarily unavailable. Please try again.";
   }
   if (error instanceof FunctionsFetchError) {
-    return `Network error: ${error.message}`;
+    return "Network error connecting to AI service. Please check your connection.";
   }
   if (error instanceof Error) {
     return error.message;
@@ -52,7 +68,7 @@ export async function generateQuestions(
   contentType: "movie" | "book" | "both",
   userAge: number,
   questionCount: number = 5,
-  userName: string = "User"
+  userName: string = "User",
 ): Promise<Question[]> {
   try {
     // Get user session for authentication
@@ -63,22 +79,30 @@ export async function generateQuestions(
       throw new Error("User not authenticated");
     }
 
-    const { data, error } = await supabase.functions.invoke("anthropic-questions", {
-      body: {
-        contentType,
-        name: userName,
-        age: userAge,
-        questionCount,
+    const { data, error } = await supabase.functions.invoke(
+      "anthropic-questions",
+      {
+        body: {
+          contentType,
+          name: userName,
+          age: userAge,
+          questionCount,
+        },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
       },
-      headers: {
-        Authorization: `Bearer ${session.access_token}`,
-      },
-    });
+    );
 
     if (error) {
       const errorDetail = await extractEdgeFunctionError(error);
-      if (errorDetail.includes("401") || errorDetail.toLowerCase().includes("unauthorized")) {
-        throw new Error("Your session is not authorized for question generation.");
+      if (
+        errorDetail.includes("401") ||
+        errorDetail.toLowerCase().includes("unauthorized")
+      ) {
+        throw new Error(
+          "Your session is not authorized for question generation.",
+        );
       }
       throw new Error(errorDetail || "Failed to generate questions");
     }
@@ -100,7 +124,7 @@ export async function generateRecommendations(
   answers: Answer[],
   contentType: "movie" | "book" | "both",
   userAge: number,
-  userName: string = "User"
+  userName: string = "User",
 ): Promise<RecommendationData> {
   try {
     // Get user session for authentication
@@ -111,21 +135,27 @@ export async function generateRecommendations(
       throw new Error("User not authenticated");
     }
 
-    const { data, error } = await supabase.functions.invoke("anthropic-recommendations", {
-      body: {
-        answers,
-        contentType,
-        name: userName,
-        age: userAge,
+    const { data, error } = await supabase.functions.invoke(
+      "anthropic-recommendations",
+      {
+        body: {
+          answers,
+          contentType,
+          name: userName,
+          age: userAge,
+        },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
       },
-      headers: {
-        Authorization: `Bearer ${session.access_token}`,
-      },
-    });
+    );
 
     if (error) {
       const errorDetail = await extractEdgeFunctionError(error);
-      if (errorDetail.includes("401") || errorDetail.toLowerCase().includes("unauthorized")) {
+      if (
+        errorDetail.includes("401") ||
+        errorDetail.toLowerCase().includes("unauthorized")
+      ) {
         throw new Error("Your session is not authorized for recommendations.");
       }
       throw new Error(errorDetail || "Failed to generate recommendations");
@@ -157,15 +187,24 @@ export async function generateQuestionsWithRetry(
   userAge: number,
   questionCount: number = 5,
   userName: string = "User",
-  maxRetries: number = 3
+  maxRetries: number = 3,
 ): Promise<Question[]> {
   let lastError;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      return await generateQuestions(contentType, userAge, questionCount, userName);
+      return await generateQuestions(
+        contentType,
+        userAge,
+        questionCount,
+        userName,
+      );
     } catch (error) {
       lastError = error;
+
+      if (isNonRetryableError(error)) {
+        break;
+      }
 
       if (attempt < maxRetries) {
         const delay = Math.pow(2, attempt) * 1000;
@@ -185,15 +224,24 @@ export async function generateRecommendationsWithRetry(
   contentType: "movie" | "book" | "both",
   userAge: number,
   userName: string = "User",
-  maxRetries: number = 3
+  maxRetries: number = 3,
 ): Promise<RecommendationData> {
   let lastError;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      return await generateRecommendations(answers, contentType, userAge, userName);
+      return await generateRecommendations(
+        answers,
+        contentType,
+        userAge,
+        userName,
+      );
     } catch (error) {
       lastError = error;
+
+      if (isNonRetryableError(error)) {
+        break;
+      }
 
       if (attempt < maxRetries) {
         const delay = Math.pow(2, attempt) * 1000;

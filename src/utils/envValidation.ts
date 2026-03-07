@@ -31,44 +31,12 @@ export const validateEnvironment = (): EnvValidationResult => {
   if (env.NEXT_PUBLIC_TMDB_API_KEY) {
     exposedKeys.push("NEXT_PUBLIC_TMDB_API_KEY");
   }
-  if (env.NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY) {
-    exposedKeys.push("NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY");
-  }
-
   if (exposedKeys.length > 0) {
     warnings.push(
       `CRITICAL SECURITY VULNERABILITY: The following API keys are exposed in the client bundle: ${exposedKeys.join(
         ", "
       )}. Remove these immediately!`
     );
-  }
-
-  // Optional environment variables that enhance features but aren't required
-  if (process.env.NODE_ENV === 'development') {
-    const optionalEnvVars = {
-      NEXT_PUBLIC_TMDB_API_KEY: process.env.NEXT_PUBLIC_TMDB_API_KEY,
-      NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY: process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY,
-    };
-
-    const missingOptional = Object.entries(optionalEnvVars)
-      .filter(([_, value]) => !value)
-      .map(([key]) => key);
-
-    if (missingOptional.length > 0) {
-      console.info(
-        "Optional environment variables missing (enhanced features may be limited):",
-        missingOptional
-      );
-      console.info(
-        "These services will fall back to default behavior via Edge Functions"
-      );
-    }
-  }
-
-  // Only log warnings in development mode
-  if (process.env.NODE_ENV === 'development' && warnings.length > 0) {
-    console.warn("Environment validation warnings:");
-    warnings.forEach((warning) => console.warn(`- ${warning}`));
   }
 
   return {

@@ -12,31 +12,37 @@ type DemoItem = {
 
 const sanitize = (text: string) => text.replace(/<[^>]*>/g, "").trim();
 
-async function fetchBooks(query: string, apiKey: string, limit: number): Promise<DemoItem[]> {
-  const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(
+async function fetchBooks(query: string, limit: number): Promise<DemoItem[]> {
+  const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(
     query,
-  )}&printType=books&orderBy=relevance&maxResults=${Math.max(limit, 6)}&key=${apiKey}`;
-  const response = await fetch(url, { cache: "no-store" });
-  if (!response.ok) throw new Error(`Books error ${response.status}`);
-  const data = await response.json();
-  const items = Array.isArray(data.items) ? data.items : [];
-  return items
-    .map((item: any): DemoItem | null => {
-      const info = item?.volumeInfo;
-      const thumb = info?.imageLinks?.thumbnail || info?.imageLinks?.smallThumbnail;
-      if (!info?.title || !thumb) return null;
-      return {
-        id: item.id || crypto.randomUUID(),
+  )}&limit=${Math.max(limit * 2, 12)}&fields=key,title,author_name,first_publish_year,cover_i,number_of_pages_median`;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+
+  try {
+    const response = await fetch(url, { cache: "no-store", signal: controller.signal });
+    clearTimeout(timeout);
+    if (!response.ok) throw new Error(`Open Library error ${response.status}`);
+    const data = await response.json();
+    const docs = Array.isArray(data.docs) ? data.docs : [];
+    return docs
+      .filter((doc: any) => doc.cover_i && doc.title)
+      .map((doc: any): DemoItem => ({
+        id: doc.key || crypto.randomUUID(),
         type: "book",
-        title: info.title,
-        subtitle: Array.isArray(info.authors) ? info.authors.join(", ") : "Unknown author",
-        description: sanitize(info.description || "No description available."),
-        image: thumb.replace("http://", "https://").replace("zoom=1", "zoom=2"),
-        infoLink: info.infoLink || "https://books.google.com",
-      };
-    })
-    .filter((item: DemoItem | null): item is DemoItem => Boolean(item))
-    .slice(0, limit);
+        title: doc.title,
+        subtitle: Array.isArray(doc.author_name) ? doc.author_name.join(", ") : "Unknown author",
+        description: doc.first_publish_year
+          ? `First published in ${doc.first_publish_year}${doc.number_of_pages_median ? ` · ${doc.number_of_pages_median} pages` : ""}`
+          : "No description available.",
+        image: `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`,
+        infoLink: `https://openlibrary.org${doc.key}`,
+      }))
+      .slice(0, limit);
+  } catch {
+    clearTimeout(timeout);
+    return [];
+  }
 }
 
 async function fetchMovies(query: string, apiKey: string, limit: number): Promise<DemoItem[]> {
@@ -81,14 +87,13 @@ export async function GET(request: NextRequest) {
   const contentType = request.nextUrl.searchParams.get("type") || "both";
   const query = request.nextUrl.searchParams.get("q") || "best recommendations";
 
-  const booksKey = process.env.GOOGLE_BOOKS_API_KEY;
   const tmdbKey = process.env.TMDB_API_KEY;
 
   try {
     const targetPerType = contentType === "both" ? 3 : 6;
     const tasks: Promise<DemoItem[]>[] = [];
     if (contentType === "book" || contentType === "both") {
-      if (booksKey) tasks.push(fetchBooks(query, booksKey, targetPerType));
+      tasks.push(fetchBooks(query, targetPerType));
     }
     if (contentType === "movie" || contentType === "both") {
       if (tmdbKey) tasks.push(fetchMovies(query, tmdbKey, targetPerType));

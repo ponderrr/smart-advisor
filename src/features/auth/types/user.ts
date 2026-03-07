@@ -7,4 +7,5 @@ export interface User {
   created_at: string;
   mfa_enabled?: boolean;
   last_login?: string;
+  backup_email?: string;
 }

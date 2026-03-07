@@ -3,9 +3,6 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
-  const isDevelopment = process.env.NODE_ENV === 'development';
-  const bypassAuthGuard = process.env.NEXT_DEV_BYPASS_AUTH === 'true';
-  const hasMockUser = request.cookies.get('sa_mock')?.value === '1';
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -32,19 +29,14 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
   const isApiRoute = pathname.startsWith('/api/');
-  const publicRoutes = ['/', '/auth', '/auth/callback', '/demo'];
+  const publicRoutes = ['/', '/auth', '/auth/callback'];
   const isPublic = publicRoutes.some(
     route =>
       pathname === route ||
-      pathname.startsWith('/auth/') ||
-      pathname.startsWith('/demo')
+      pathname.startsWith('/auth/')
   );
 
   if (isApiRoute) {
-    return supabaseResponse;
-  }
-
-  if (isDevelopment || bypassAuthGuard || hasMockUser) {
     return supabaseResponse;
   }
 

@@ -9,13 +9,15 @@ type HeroMediaResponse = {
   };
 };
 
-const BOOK_QUERIES = [
-  "subject:fiction",
-  "subject:fantasy",
-  "subject:mystery",
-  "subject:science fiction",
-  "subject:thriller",
-  "subject:history",
+const BOOK_SUBJECTS = [
+  "fiction",
+  "fantasy",
+  "mystery",
+  "science_fiction",
+  "thriller",
+  "history",
+  "romance",
+  "adventure",
 ];
 
 const TMDB_ENDPOINTS = [
@@ -43,44 +45,50 @@ const shuffle = <T,>(items: T[]) => {
   return arr;
 };
 
-const uniqueUrls = (items: string[]) => Array.from(new Set(items.filter(Boolean)));
-
-const normalizeBookCover = (url: string) =>
-  url.replace("http://", "https://").replace("zoom=1", "zoom=2");
+const uniqueUrls = (items: string[]) =>
+  Array.from(new Set(items.filter(Boolean)));
 
 const pickPoster = (posterPath: string | null | undefined) =>
   posterPath ? `https://image.tmdb.org/t/p/w500${posterPath}` : null;
 
-async function fetchBookCovers(apiKey?: string): Promise<string[]> {
-  const selectedQueries = pickRandomUnique(BOOK_QUERIES, 2);
-  const responses = await Promise.all(
-    selectedQueries.map(async (query) => {
-      const encodedQuery = encodeURIComponent(query);
-      const startIndex = Math.floor(Math.random() * 35);
-      const keyParam = apiKey ? `&key=${encodeURIComponent(apiKey)}` : "";
-      const url = `https://www.googleapis.com/books/v1/volumes?q=${encodedQuery}&printType=books&orderBy=relevance&maxResults=20&startIndex=${startIndex}${keyParam}`;
+async function fetchBookCovers(): Promise<string[]> {
+  const selectedSubjects = pickRandomUnique(BOOK_SUBJECTS, 2);
+  const offset = Math.floor(Math.random() * 30);
 
-      let response = await fetch(url, { next: { revalidate: 0 } });
-      if (!response.ok && apiKey) {
-        // Retry without key in case key restrictions block local calls.
-        const fallbackUrl = `https://www.googleapis.com/books/v1/volumes?q=${encodedQuery}&printType=books&orderBy=relevance&maxResults=20&startIndex=${startIndex}`;
-        response = await fetch(fallbackUrl, { next: { revalidate: 0 } });
+  const responses = await Promise.all(
+    selectedSubjects.map(async (subject) => {
+      const url = `https://openlibrary.org/subjects/${subject}.json?limit=20&offset=${offset}`;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+      try {
+        const response = await fetch(url, {
+          signal: controller.signal,
+          next: { revalidate: 0 },
+        });
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          return [];
+        }
+
+        const data = await response.json();
+        const works = Array.isArray(data?.works) ? data.works : [];
+
+        return works
+          .filter((w: any) => w.cover_id && w.cover_id > 0)
+          .map(
+            (w: any) =>
+              `https://covers.openlibrary.org/b/id/${w.cover_id}-M.jpg`,
+          );
+      } catch {
+        clearTimeout(timeoutId);
+        return [];
       }
-      if (!response.ok) {
-        throw new Error(`Google Books error: ${response.status}`);
-      }
-      const data = (await response.json()) as { items?: any[] };
-      return Array.isArray(data.items) ? data.items : [];
     }),
   );
 
-  const covers = responses
-    .flat()
-    .map((item: any) => item?.volumeInfo?.imageLinks?.thumbnail || item?.volumeInfo?.imageLinks?.smallThumbnail)
-    .filter((cover): cover is string => Boolean(cover))
-    .map(normalizeBookCover);
-
-  return shuffle(uniqueUrls(covers)).slice(0, 10);
+  return shuffle(uniqueUrls(responses.flat())).slice(0, 10);
 }
 
 async function fetchMoviePosters(apiKey: string): Promise<string[]> {
@@ -108,7 +116,6 @@ async function fetchMoviePosters(apiKey: string): Promise<string[]> {
 
 export async function GET() {
   const tmdbKey = process.env.TMDB_API_KEY;
-  const googleBooksKey = process.env.GOOGLE_BOOKS_API_KEY;
 
   const status: HeroMediaResponse["status"] = {
     books: "error",
@@ -116,7 +123,7 @@ export async function GET() {
   };
 
   const [booksResult, moviesResult] = await Promise.allSettled([
-    fetchBookCovers(googleBooksKey),
+    fetchBookCovers(),
     tmdbKey ? fetchMoviePosters(tmdbKey) : Promise.resolve([]),
   ]);
 

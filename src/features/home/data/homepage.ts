@@ -43,7 +43,7 @@ export const logoSets = [
     { name: "Next.js", src: "https://cdn.simpleicons.org/nextdotjs/111111" },
     { name: "Supabase", src: "https://cdn.simpleicons.org/supabase/111111" },
     { name: "TMDB", src: "https://cdn.simpleicons.org/themoviedatabase/111111" },
-    { name: "Google Books", src: "" },
+    { name: "Open Library", src: "" },
   ],
   [
     { name: "TypeScript", src: "https://cdn.simpleicons.org/typescript/111111" },
@@ -63,7 +63,7 @@ export const faqItems = [
   {
     question: "How does Smart Advisor personalize recommendations?",
     answer:
-      "Smart Advisor uses your quiz answers to understand your mood, pacing preferences, and genre interests. It then combines this with real-time data from TMDB and Google Books to generate recommendations with clear reasoning behind every pick.",
+      "Smart Advisor uses your quiz answers to understand your mood, pacing preferences, and genre interests. It then combines this with real-time data from TMDB and Open Library to generate recommendations with clear reasoning behind every pick.",
   },
   {
     question: "How do I create an account?",
@@ -83,7 +83,7 @@ export const faqItems = [
   {
     question: "How are results generated?",
     answer:
-      "Your answers are processed by an AI model that selects titles matching your preferences. Each recommendation is then enriched with real poster art, ratings, and descriptions from TMDB (movies) and Google Books (books).",
+      "Your answers are processed by an AI model that selects titles matching your preferences. Each recommendation is then enriched with real poster art, ratings, and descriptions from TMDB (movies) and Open Library (books).",
   },
   {
     question: "Can I use Smart Advisor for both movies and books?",
