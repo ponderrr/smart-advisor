@@ -3,8 +3,12 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/features/auth/services/auth-service";
-import { AuthLayout, AuthHoverButton } from "@/features/auth/components";
-import { FormField, PasswordInput } from "@/features/auth/components/auth-form";
+import { AuthLayout } from "@/features/auth/components";
+import {
+  AuthHoverButton,
+  FormField,
+  PasswordInput,
+} from "@/features/auth/components/auth-form";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -39,30 +43,35 @@ export default function ResetPasswordPage() {
         {success ? (
           <div className="text-center">
             <h1 className="text-2xl font-black">Password Updated</h1>
-            <p className="mt-2 text-slate-600">Your password has been changed successfully. Redirecting you to sign in...</p>
+            <p className="mt-2 text-slate-600">
+              Your password has been changed successfully. Redirecting you to
+              sign in...
+            </p>
           </div>
         ) : (
           <form onSubmit={handleReset} className="space-y-6">
             <div>
               <h1 className="text-2xl font-black">Set New Password</h1>
-              <p className="text-slate-500">Enter your new secure password below.</p>
+              <p className="text-slate-500">
+                Enter your new secure password below.
+              </p>
             </div>
 
-            <FormField label="New Password">
+            <FormField label="New Password" htmlFor="new-password">
               <PasswordInput
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 showPassword={false}
-                onTogglePassword={() => { }}
+                onTogglePassword={() => {}}
               />
             </FormField>
 
-            <FormField label="Confirm New Password" error={error}>
+            <FormField label="Confirm New Password" htmlFor="confirm-password" error={error ?? undefined}>
               <PasswordInput
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 showPassword={false}
-                onTogglePassword={() => { }}
+                onTogglePassword={() => {}}
               />
             </FormField>
 

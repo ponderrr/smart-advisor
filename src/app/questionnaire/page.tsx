@@ -7,6 +7,7 @@ import { IconCheck } from "@tabler/icons-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { generateQuestionsWithRetry } from "@/features/recommendations/services/ai-service";
+import { generateFallbackQuestions } from "@/features/quiz/utils/fallback-questions";
 import { Question } from "@/features/quiz/types/question";
 import { Answer } from "@/features/quiz/types/answer";
 import { v4 as uuidv4 } from "uuid";
@@ -88,13 +89,19 @@ const QuestionnairePage = () => {
         return;
       }
 
-      const generatedQuestions = await generateQuestionsWithRetry(
-        contentType,
-        user.age,
-        questionCount,
-        user.name,
-        1,
-      );
+      let generatedQuestions: Question[];
+      try {
+        generatedQuestions = await generateQuestionsWithRetry(
+          contentType,
+          user.age,
+          questionCount,
+          user.name,
+          1,
+        );
+      } catch (aiErr) {
+        console.warn("AI question generation failed, using fallback questions:", aiErr);
+        generatedQuestions = generateFallbackQuestions(contentType, user.age, questionCount);
+      }
 
       setQuestions(generatedQuestions);
     } catch (err) {
@@ -403,7 +410,7 @@ const QuestionnairePage = () => {
                   </p>
 
                   <div className="mt-7 grid gap-3 sm:grid-cols-2">
-                    {getQuestionOptions(contentType, currentQuestionIndex).map((option) => {
+                    {getQuestionOptions(contentType ?? "both", currentQuestionIndex).map((option) => {
                       const selected = answers[currentQuestion.id] === option;
                       return (
                         <GlowPillButton

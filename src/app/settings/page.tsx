@@ -222,21 +222,63 @@ const SettingsPage = () => {
     setMessage("Content preferences saved.");
   };
 
+  const [accountActionLoading, setAccountActionLoading] = useState(false);
+
   const handleDisableAccount = async () => {
-    const confirmed = window.confirm(
-      "Disable account is not fully wired yet. Continue and sign out on this device?",
+    const firstConfirm = window.confirm(
+      "Are you sure you want to disable your account? You will be signed out and unable to sign in until the account is re-enabled by support.",
     );
-    if (!confirmed) return;
-    await signOut();
+    if (!firstConfirm) return;
+
+    const verified = await verifyWithPasswordPrompt("disable your account");
+    if (!verified) return;
+
+    const finalConfirm = window.confirm(
+      "This is your final confirmation. Disable your account now?",
+    );
+    if (!finalConfirm) return;
+
+    setAccountActionLoading(true);
+    setMessage(null);
+
+    const result = await authService.disableAccount();
+    if (result.error) {
+      setMessage(result.error);
+      setAccountActionLoading(false);
+      return;
+    }
+
     router.push("/");
   };
 
   const handleDeleteAccount = async () => {
-    const confirmed = window.confirm(
-      "Delete account requires backend setup. We have not deleted anything yet. Continue?",
+    const firstConfirm = window.confirm(
+      "Are you sure you want to permanently delete your account? This action cannot be undone. All your data, preferences, and recommendation history will be erased.",
     );
-    if (!confirmed) return;
-    setMessage("Delete account flow is ready in UI and pending backend wiring.");
+    if (!firstConfirm) return;
+
+    const verified = await verifyWithPasswordPrompt("permanently delete your account");
+    if (!verified) return;
+
+    const typed = window.prompt(
+      'Type "DELETE" to confirm permanent account deletion:',
+    );
+    if (typed !== "DELETE") {
+      setMessage("Account deletion canceled. You did not type DELETE.");
+      return;
+    }
+
+    setAccountActionLoading(true);
+    setMessage(null);
+
+    const result = await authService.deleteAccount();
+    if (result.error) {
+      setMessage(result.error);
+      setAccountActionLoading(false);
+      return;
+    }
+
+    router.push("/");
   };
 
   useEffect(() => {
@@ -692,17 +734,19 @@ const SettingsPage = () => {
                         <div className="mt-4 flex flex-wrap gap-3">
                           <GlowPillButton
                             onClick={handleDisableAccount}
-                            className="inline-flex items-center gap-2 border-rose-300 bg-white px-4 py-2 text-sm font-semibold text-rose-700 dark:border-rose-700 dark:bg-slate-900 dark:text-rose-300"
+                            disabled={accountActionLoading}
+                            className="inline-flex items-center gap-2 border-rose-300 bg-white px-4 py-2 text-sm font-semibold text-rose-700 disabled:opacity-50 dark:border-rose-700 dark:bg-slate-900 dark:text-rose-300"
                           >
                             <UserMinus size={14} />
-                            Disable Account
+                            {accountActionLoading ? "Processing..." : "Disable Account"}
                           </GlowPillButton>
                           <GlowPillButton
                             onClick={handleDeleteAccount}
-                            className="inline-flex items-center gap-2 bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-500 dark:bg-rose-600 dark:text-white"
+                            disabled={accountActionLoading}
+                            className="inline-flex items-center gap-2 bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-500 disabled:opacity-50 dark:bg-rose-600 dark:text-white"
                           >
                             <Trash2 size={14} />
-                            Delete Account
+                            {accountActionLoading ? "Processing..." : "Delete Account"}
                           </GlowPillButton>
                         </div>
                       </div>
