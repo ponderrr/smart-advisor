@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CircleOff, Shield, SlidersHorizontal, UserRound, Sparkles, Link2, UserMinus, Trash2 } from "lucide-react";
+import { CircleOff, Shield, SlidersHorizontal, UserRound, Link2, UserMinus, Trash2, ShieldCheck, Smartphone } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
+import { authService } from "@/features/auth/services/auth-service";
 import { supabase } from "@/integrations/supabase/client";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
@@ -443,15 +444,16 @@ const SettingsPage = () => {
                   )}
 
                   {activeSection === "security" && (
-                    <div className="space-y-6">
-                      <div>
+                    <div className="space-y-10">
+                      <section>
                         <h2 className="text-2xl font-black tracking-tight">Security</h2>
                         <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                          Manage email and password settings.
+                          Manage your account's protection and access.
                         </p>
-                      </div>
+                      </section>
 
-                      <div className="space-y-3">
+                      {/* Email */}
+                      <section className="space-y-3">
                         <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Email address</p>
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                           <div className="relative">
@@ -479,11 +481,12 @@ const SettingsPage = () => {
                         >
                           Update Email
                         </StatefulButton>
-                      </div>
+                      </section>
 
                       <div className="h-px w-full bg-slate-200 dark:bg-slate-700" />
 
-                      <div className="space-y-3">
+                      {/* Password */}
+                      <section className="space-y-3">
                         <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Change password</p>
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                           <input
@@ -508,7 +511,58 @@ const SettingsPage = () => {
                         >
                           Update Password
                         </StatefulButton>
-                      </div>
+                      </section>
+
+                      <div className="h-px w-full bg-slate-200 dark:bg-slate-700" />
+
+                      {/* MFA */}
+                      <section className="rounded-2xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-900/50">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className="rounded-xl bg-violet-100 p-2 dark:bg-violet-900/30">
+                              <ShieldCheck className="h-6 w-6 text-violet-600 dark:text-violet-400" />
+                            </div>
+                            <div>
+                              <h3 className="font-bold">Two-Factor Authentication</h3>
+                              <p className="text-sm text-slate-500">Add an extra layer of security to your account.</p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => { /* Trigger password prompt then MFA flow */ }}
+                            className="rounded-lg bg-white px-4 py-2 text-sm font-bold shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50 dark:bg-slate-800 dark:ring-slate-700"
+                          >
+                            Manage
+                          </button>
+                        </div>
+                      </section>
+
+                      {/* Connected Devices */}
+                      <section>
+                        <h3 className="mb-4 text-lg font-bold">Connected Devices</h3>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-white p-4 dark:border-slate-800 dark:bg-slate-900/30">
+                            <div className="flex items-center gap-4">
+                              <Smartphone className="h-5 w-5 text-slate-400" />
+                              <div>
+                                <p className="font-medium">Current Session</p>
+                                <p className="text-xs text-slate-500">This Device • Active now</p>
+                              </div>
+                            </div>
+                            <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                              ACTIVE
+                            </span>
+                          </div>
+                          <button
+                            onClick={async () => {
+                              const confirmed = window.confirm("Sign out of all other devices?");
+                              if (confirmed) await authService.signOut();
+                            }}
+                            className="w-full rounded-xl border border-red-100 py-3 text-sm font-bold text-red-600 transition hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-900/20"
+                          >
+                            Revoke all other sessions
+                          </button>
+                        </div>
+                      </section>
                     </div>
                   )}
 
