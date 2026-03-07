@@ -222,7 +222,7 @@ const QuestionCountPage = () => {
                 onClick={handleContinue}
                 disabled={isLoading}
                 className={cn(
-                  "inline-flex items-center justify-center gap-2 bg-slate-900 px-7 py-3 text-sm font-black tracking-tight text-black disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-800 dark:text-white",
+                  "inline-flex items-center justify-center gap-2 bg-slate-900 px-7 py-3 text-sm font-black tracking-tight text-white disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-100 dark:text-slate-900",
                 )}
               >
                 {isLoading ? "Continuing..." : "Continue"}

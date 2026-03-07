@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { AuthForm, AuthLayout } from "@/features/auth/components";
 
-const AuthPage = () => {
+const AuthPageContent = () => {
   const router = useRouter();
   const {
     signIn,
@@ -45,5 +45,11 @@ const AuthPage = () => {
     </AuthLayout>
   );
 };
+
+const AuthPage = () => (
+  <Suspense>
+    <AuthPageContent />
+  </Suspense>
+);
 
 export default AuthPage;

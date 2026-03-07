@@ -19,6 +19,7 @@ import {
   MobileNavMenu,
 } from "@/components/ui/resizable-navbar";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 type HistoryFilter = "all" | "movies" | "books" | "favorites";
 type SortMode = "newest" | "oldest" | "favorites_first";
@@ -111,12 +112,16 @@ const AccountHistoryPage = () => {
 
   const handleToggleFavorite = async (recommendationId: string) => {
     const { error } = await databaseService.toggleFavorite(recommendationId);
-    if (!error) {
+    if (error) {
+      toast.error("Failed to update favorite");
+    } else {
+      const rec = recommendations.find((r) => r.id === recommendationId);
+      toast.success(rec?.is_favorited ? "Removed from favorites" : "Added to favorites");
       setRecommendations((prev) =>
-        prev.map((rec) =>
-          rec.id === recommendationId
-            ? { ...rec, is_favorited: !rec.is_favorited }
-            : rec,
+        prev.map((r) =>
+          r.id === recommendationId
+            ? { ...r, is_favorited: !r.is_favorited }
+            : r,
         ),
       );
     }
@@ -127,7 +132,10 @@ const AccountHistoryPage = () => {
     if (!shouldDelete) return;
 
     const { error } = await databaseService.deleteRecommendation(recommendationId);
-    if (!error) {
+    if (error) {
+      toast.error("Failed to delete recommendation");
+    } else {
+      toast.success("Recommendation deleted");
       setRecommendations((prev) => prev.filter((rec) => rec.id !== recommendationId));
     }
   };
@@ -289,7 +297,7 @@ const AccountHistoryPage = () => {
               </p>
               <GlowPillButton
                 onClick={() => router.push('/content-selection')}
-                className="mt-5 bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-black dark:text-white"
+                className="mt-5 bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white"
               >
                 Start New Quiz
               </GlowPillButton>

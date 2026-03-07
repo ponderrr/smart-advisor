@@ -79,14 +79,29 @@ class SessionManagementService {
    */
   async revokeSession(sessionId: string): Promise<{ error: string | null }> {
     try {
-      const { error } = await supabase
+      // Try matching by DB row id first, then fall back to session_id column
+      const { data, error } = await supabase
         .from("sessions")
         .update({ revoked_at: new Date().toISOString() })
-        .eq("session_id", sessionId);
+        .eq("id", sessionId)
+        .select("id");
 
       if (error) {
         console.error("Error revoking session:", error);
         return { error: "Failed to revoke session" };
+      }
+
+      // If no rows matched by `id`, try `session_id` column as fallback
+      if (!data || data.length === 0) {
+        const { error: fallbackError } = await supabase
+          .from("sessions")
+          .update({ revoked_at: new Date().toISOString() })
+          .eq("session_id", sessionId);
+
+        if (fallbackError) {
+          console.error("Error revoking session (fallback):", fallbackError);
+          return { error: "Failed to revoke session" };
+        }
       }
 
       return { error: null };

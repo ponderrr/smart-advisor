@@ -1,19 +1,28 @@
-'use client';
+"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CircleOff, Shield, SlidersHorizontal, UserRound, Link2, UserMinus, Trash2, ShieldCheck, Smartphone } from "lucide-react";
+import {
+  CircleOff,
+  Shield,
+  SlidersHorizontal,
+  UserRound,
+  Link2,
+  UserMinus,
+  Trash2,
+  ShieldCheck,
+  Mail,
+  Lock,
+  ChevronRight,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { authService } from "@/features/auth/services/auth-service";
 import { supabase } from "@/integrations/supabase/client";
+import { MfaSetup, MfaManagement, SessionsManagement } from "@/features/auth/components";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import { GlowPillButton } from "@/components/ui/glow-pill-button";
-import {
-  Sidebar,
-  SidebarBody,
-  SidebarLink,
-} from "@/components/ui/sidebar";
 import {
   Navbar,
   NavBody,
@@ -25,18 +34,114 @@ import {
   MobileNavMenu,
 } from "@/components/ui/resizable-navbar";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 type SettingsSection = "profile" | "security" | "content" | "integrations";
 const PREF_CONTENT_KEY = "smart_advisor_pref_content_focus";
 const PREF_DISCOVERY_KEY = "smart_advisor_pref_discovery";
 const PREF_QUESTION_COUNT_KEY = "smart_advisor_pref_question_count";
 
+/* ------------------------------------------------------------------ */
+/*  Reusable sub-components                                          */
+/* ------------------------------------------------------------------ */
+
+const SectionCard = ({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => (
+  <div
+    className={cn(
+      "rounded-2xl border border-slate-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-sm dark:border-slate-700/60 dark:bg-slate-900/60 sm:p-6",
+      className,
+    )}
+  >
+    {children}
+  </div>
+);
+
+const SectionHeader = ({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) => (
+  <div className="mb-5">
+    <h2 className="text-xl font-bold tracking-tight">{title}</h2>
+    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+      {description}
+    </p>
+  </div>
+);
+
+const SettingsInput = ({
+  label,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+  disabled = false,
+  readOnly = false,
+  icon,
+  ...props
+}: {
+  label: string;
+  value: string;
+  onChange?: (v: string) => void;
+  placeholder?: string;
+  type?: string;
+  disabled?: boolean;
+  readOnly?: boolean;
+  icon?: React.ReactNode;
+} & Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange">) => (
+  <label className="block space-y-1.5">
+    <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+      {label}
+    </span>
+    <div className="relative">
+      <input
+        value={value}
+        onChange={onChange ? (e) => onChange(e.target.value) : undefined}
+        placeholder={placeholder}
+        type={type}
+        disabled={disabled}
+        readOnly={readOnly}
+        className={cn(
+          "w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm transition-colors focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-100 dark:focus:border-indigo-500",
+          (disabled || readOnly) &&
+            "cursor-not-allowed bg-slate-50 text-slate-500 dark:bg-slate-800/40 dark:text-slate-400",
+        )}
+        {...props}
+      />
+      {icon && (
+        <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+          {icon}
+        </div>
+      )}
+    </div>
+  </label>
+);
+
+/* ------------------------------------------------------------------ */
+/*  Main settings page                                                */
+/* ------------------------------------------------------------------ */
+
 const SettingsPage = () => {
   const router = useRouter();
-  const { user, session, signOut, updateProfile, updateEmail, updatePassword } = useAuth();
+  const {
+    user,
+    session,
+    signOut,
+    updateProfile,
+    updateEmail,
+    updatePassword,
+  } = useAuth();
 
-  const [activeSection, setActiveSection] = useState<SettingsSection>("profile");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeSection, setActiveSection] =
+    useState<SettingsSection>("profile");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const [newName, setNewName] = useState("");
@@ -49,42 +154,53 @@ const SettingsPage = () => {
   const [savingEmail, setSavingEmail] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
 
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<{
+    text: string;
+    type: "success" | "error" | "info";
+  } | null>(null);
   const [contentFocus, setContentFocus] = useState("both");
   const [discoveryLevel, setDiscoveryLevel] = useState("balanced");
   const [preferredQuestionCount, setPreferredQuestionCount] = useState(5);
+  const [accountActionLoading, setAccountActionLoading] = useState(false);
+  const [showMfaPanel, setShowMfaPanel] = useState(false);
+  const [mfaEnabled, setMfaEnabled] = useState(false);
+  const [mfaChecked, setMfaChecked] = useState(false);
+
+  const showMessage = (
+    text: string,
+    type: "success" | "error" | "info" = "info",
+  ) => {
+    setMessage({ text, type });
+    if (type === "success") toast.success(text);
+    else if (type === "error") toast.error(text);
+    else toast.info(text);
+  };
 
   const verifyWithPasswordPrompt = async (actionLabel: string) => {
     if (!user?.email) {
-      setMessage("Unable to verify your account right now. Please sign in again.");
+      showMessage("Unable to verify. Please sign in again.", "error");
       return false;
     }
-
     const password = window.prompt(
       `Enter your current password to ${actionLabel}:`,
       "",
     );
-
     if (password === null) {
-      setMessage(`${actionLabel.charAt(0).toUpperCase() + actionLabel.slice(1)} canceled.`);
+      showMessage(`${actionLabel.charAt(0).toUpperCase() + actionLabel.slice(1)} canceled.`, "info");
       return false;
     }
-
     if (!password.trim()) {
-      setMessage("Password is required to continue.");
+      showMessage("Password is required.", "error");
       return false;
     }
-
-    const { error: verifyError } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email: user.email.trim().toLowerCase(),
       password: password.trim(),
     });
-
-    if (verifyError) {
-      setMessage("Password verification failed. No changes were saved.");
+    if (error) {
+      showMessage("Password verification failed.", "error");
       return false;
     }
-
     return true;
   };
 
@@ -94,27 +210,11 @@ const SettingsPage = () => {
     { name: "Settings", link: "/settings" },
   ];
 
-  const sectionLinks = [
-    {
-      id: "profile" as SettingsSection,
-      label: "Profile",
-      icon: <UserRound className="h-4 w-4 text-slate-700 dark:text-slate-300" />,
-    },
-    {
-      id: "security" as SettingsSection,
-      label: "Security",
-      icon: <Shield className="h-4 w-4 text-slate-700 dark:text-slate-300" />,
-    },
-    {
-      id: "content" as SettingsSection,
-      label: "Content",
-      icon: <SlidersHorizontal className="h-4 w-4 text-slate-700 dark:text-slate-300" />,
-    },
-    {
-      id: "integrations" as SettingsSection,
-      label: "Integrations",
-      icon: <Link2 className="h-4 w-4 text-slate-700 dark:text-slate-300" />,
-    },
+  const sectionTabs: { id: SettingsSection; label: string; icon: React.ReactNode }[] = [
+    { id: "profile", label: "Profile", icon: <UserRound size={15} /> },
+    { id: "security", label: "Security", icon: <Shield size={15} /> },
+    { id: "content", label: "Content", icon: <SlidersHorizontal size={15} /> },
+    { id: "integrations", label: "Integrations", icon: <Link2 size={15} /> },
   ];
 
   const isGoogleConnected = (() => {
@@ -131,631 +231,531 @@ const SettingsPage = () => {
   const handleSaveProfile = async () => {
     setSavingProfile(true);
     setMessage(null);
-
     const verified = await verifyWithPasswordPrompt("save your profile");
-    if (!verified) {
-      setSavingProfile(false);
-      return;
-    }
-
+    if (!verified) { setSavingProfile(false); return; }
     const trimmedName = newName.trim();
     if (!trimmedName) {
-      setMessage("New username is required.");
+      showMessage("New username is required.", "error");
       setSavingProfile(false);
       return;
     }
-
     const parsedAge = Number(age);
     const result = await updateProfile(trimmedName, Number.isFinite(parsedAge) ? parsedAge : 25);
-    setMessage(result.error ?? "Profile updated.");
+    showMessage(result.error ?? "Profile updated.", result.error ? "error" : "success");
     setSavingProfile(false);
   };
 
   const handleSaveEmail = async () => {
     setSavingEmail(true);
     setMessage(null);
-
     if (!newEmail.trim()) {
-      setMessage("New email is required.");
+      showMessage("New email is required.", "error");
       setSavingEmail(false);
       return;
     }
-
     if (user?.email && newEmail.trim().toLowerCase() === user.email.trim().toLowerCase()) {
-      setMessage("New email must be different from your current email.");
+      showMessage("New email must be different.", "error");
       setSavingEmail(false);
       return;
     }
-
     const verified = await verifyWithPasswordPrompt("update your email");
-    if (!verified) {
-      setSavingEmail(false);
-      return;
-    }
-
+    if (!verified) { setSavingEmail(false); return; }
     const result = await updateEmail(newEmail);
-    setMessage(result.error ?? "Check your inbox to confirm your new email.");
+    showMessage(result.error ?? "Check your inbox to confirm.", result.error ? "error" : "success");
     setSavingEmail(false);
   };
 
   const handleSavePassword = async () => {
     setSavingPassword(true);
     setMessage(null);
-
     if (newPassword !== confirmPassword) {
-      setMessage("Passwords do not match.");
+      showMessage("Passwords do not match.", "error");
       setSavingPassword(false);
       return;
     }
-
     const verified = await verifyWithPasswordPrompt("change your password");
-    if (!verified) {
-      setSavingPassword(false);
-      return;
-    }
-
+    if (!verified) { setSavingPassword(false); return; }
     const result = await updatePassword(newPassword);
     if (result.error) {
-      setMessage(result.error);
+      showMessage(result.error, "error");
     } else {
-      setMessage("Password updated.");
+      showMessage("Password updated.", "success");
       setNewPassword("");
       setConfirmPassword("");
     }
-
     setSavingPassword(false);
   };
 
   const handleSaveContentPreferences = async () => {
     if (typeof window === "undefined") return;
     const verified = await verifyWithPasswordPrompt("save content preferences");
-    if (!verified) {
-      return;
-    }
-
+    if (!verified) return;
     window.localStorage.setItem(PREF_CONTENT_KEY, contentFocus);
     window.localStorage.setItem(PREF_DISCOVERY_KEY, discoveryLevel);
-    window.localStorage.setItem(
-      PREF_QUESTION_COUNT_KEY,
-      String(preferredQuestionCount),
-    );
-    setMessage("Content preferences saved.");
+    window.localStorage.setItem(PREF_QUESTION_COUNT_KEY, String(preferredQuestionCount));
+    showMessage("Content preferences saved.", "success");
   };
 
-  const [accountActionLoading, setAccountActionLoading] = useState(false);
-
   const handleDisableAccount = async () => {
-    const firstConfirm = window.confirm(
-      "Are you sure you want to disable your account? You will be signed out and unable to sign in until the account is re-enabled by support.",
-    );
-    if (!firstConfirm) return;
-
+    if (!window.confirm("Disable your account? You'll be signed out and unable to sign in until re-enabled by support.")) return;
     const verified = await verifyWithPasswordPrompt("disable your account");
     if (!verified) return;
-
-    const finalConfirm = window.confirm(
-      "This is your final confirmation. Disable your account now?",
-    );
-    if (!finalConfirm) return;
-
+    if (!window.confirm("Final confirmation. Disable now?")) return;
     setAccountActionLoading(true);
     setMessage(null);
-
     const result = await authService.disableAccount();
-    if (result.error) {
-      setMessage(result.error);
-      setAccountActionLoading(false);
-      return;
-    }
-
+    if (result.error) { showMessage(result.error, "error"); setAccountActionLoading(false); return; }
     router.push("/");
   };
 
   const handleDeleteAccount = async () => {
-    const firstConfirm = window.confirm(
-      "Are you sure you want to permanently delete your account? This action cannot be undone. All your data, preferences, and recommendation history will be erased.",
-    );
-    if (!firstConfirm) return;
-
+    if (!window.confirm("Permanently delete your account? This cannot be undone.")) return;
     const verified = await verifyWithPasswordPrompt("permanently delete your account");
     if (!verified) return;
-
-    const typed = window.prompt(
-      'Type "DELETE" to confirm permanent account deletion:',
-    );
-    if (typed !== "DELETE") {
-      setMessage("Account deletion canceled. You did not type DELETE.");
-      return;
-    }
-
+    const typed = window.prompt('Type "DELETE" to confirm:');
+    if (typed !== "DELETE") { showMessage("Deletion canceled.", "info"); return; }
     setAccountActionLoading(true);
     setMessage(null);
-
     const result = await authService.deleteAccount();
-    if (result.error) {
-      setMessage(result.error);
-      setAccountActionLoading(false);
-      return;
-    }
-
+    if (result.error) { showMessage(result.error, "error"); setAccountActionLoading(false); return; }
     router.push("/");
   };
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const storedContent = window.localStorage.getItem(PREF_CONTENT_KEY);
-    const storedDiscovery = window.localStorage.getItem(PREF_DISCOVERY_KEY);
-    const storedQuestionCount = Number(
-      window.localStorage.getItem(PREF_QUESTION_COUNT_KEY) || "5",
-    );
-
-    if (storedContent && ["movie", "book", "both"].includes(storedContent)) {
-      setContentFocus(storedContent);
-    }
-    if (
-      storedDiscovery &&
-      ["safe", "balanced", "adventurous"].includes(storedDiscovery)
-    ) {
-      setDiscoveryLevel(storedDiscovery);
-    }
-    if (
-      Number.isFinite(storedQuestionCount) &&
-      storedQuestionCount >= 3 &&
-      storedQuestionCount <= 15
-    ) {
-      setPreferredQuestionCount(storedQuestionCount);
-    }
+    const sc = window.localStorage.getItem(PREF_CONTENT_KEY);
+    const sd = window.localStorage.getItem(PREF_DISCOVERY_KEY);
+    const sq = Number(window.localStorage.getItem(PREF_QUESTION_COUNT_KEY) || "5");
+    if (sc && ["movie", "book", "both"].includes(sc)) setContentFocus(sc);
+    if (sd && ["safe", "balanced", "adventurous"].includes(sd)) setDiscoveryLevel(sd);
+    if (Number.isFinite(sq) && sq >= 3 && sq <= 15) setPreferredQuestionCount(sq);
   }, []);
 
   useEffect(() => {
     if (!message) return;
-    const timer = setTimeout(() => setMessage(null), 4000);
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => setMessage(null), 4000);
+    return () => clearTimeout(t);
   }, [message]);
 
   useEffect(() => {
     setAge(user?.age ? String(user.age) : "");
   }, [user?.age]);
 
+  // Check MFA status on mount and when panel closes
+  useEffect(() => {
+    const checkMfa = async () => {
+      const { data } = await authService.listMFAFactors();
+      const hasVerified = data?.totp?.some((f: any) => f.status === "verified") ?? false;
+      setMfaEnabled(hasVerified);
+      setMfaChecked(true);
+    };
+    checkMfa();
+  }, [showMfaPanel]);
+
   return (
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
+      {/* Navbar */}
       <Navbar>
         <NavBody>
-          <div className="flex w-[320px] shrink-0 items-center">
-            <NavbarLogo />
-          </div>
+          <div className="flex w-[320px] shrink-0 items-center"><NavbarLogo /></div>
           <div className="flex flex-1 justify-center">
             <NavItems items={navItems} className="justify-center px-2" />
           </div>
           <div className="flex w-[320px] shrink-0 items-center justify-end gap-4">
             <ThemeToggle />
-            <button
-              type="button"
-              onClick={handleSignOut}
-              className="text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400"
-            >
+            <button type="button" onClick={handleSignOut}
+              className="text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400">
               Sign Out
             </button>
           </div>
         </NavBody>
-
         <MobileNav>
           <MobileNavHeader>
             <NavbarLogo />
             <div className="flex items-center gap-4">
               <ThemeToggle />
-              <MobileNavToggle
-                isOpen={isMobileMenuOpen}
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              />
+              <MobileNavToggle isOpen={isMobileMenuOpen} onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} />
             </div>
           </MobileNavHeader>
           <MobileNavMenu isOpen={isMobileMenuOpen}>
             {navItems.map((item) => (
-              <button
-                key={item.name}
-                type="button"
-                onClick={() => {
-                  router.push(item.link);
-                  setIsMobileMenuOpen(false);
-                }}
-                className="text-left text-xl font-black tracking-tight text-slate-800 dark:text-slate-100"
-              >
+              <button key={item.name} type="button"
+                onClick={() => { router.push(item.link); setIsMobileMenuOpen(false); }}
+                className="text-left text-xl font-black tracking-tight text-slate-800 dark:text-slate-100">
                 {item.name}
               </button>
             ))}
-            <button
-              type="button"
-              onClick={async () => {
-                await handleSignOut();
-                setIsMobileMenuOpen(false);
-              }}
-              className="text-left text-xl font-black tracking-tight text-rose-600 dark:text-rose-400"
-            >
+            <button type="button"
+              onClick={async () => { await handleSignOut(); setIsMobileMenuOpen(false); }}
+              className="text-left text-xl font-black tracking-tight text-rose-600 dark:text-rose-400">
               Sign Out
             </button>
           </MobileNavMenu>
         </MobileNav>
       </Navbar>
 
-      <main className="px-6 pb-20 pt-32 md:pt-36">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-8">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+      <main className="px-4 pb-20 pt-28 sm:px-6 md:pt-36">
+        <div className="mx-auto max-w-4xl">
+          {/* Header */}
+          <div className="mb-6">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
               Settings
             </p>
-            <h1 className="mt-3 text-5xl font-black tracking-tighter md:text-6xl">Account Preferences</h1>
-            <p className="mt-3 max-w-2xl text-base text-slate-600 dark:text-slate-400 md:text-lg">
-              Manage profile details, security, and recommendation defaults.
+            <h1 className="mt-2 text-4xl font-black tracking-tighter sm:text-5xl">
+              Account Settings
+            </h1>
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+              Manage your profile, security, and preferences.
             </p>
           </div>
 
-          <section className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 shadow-sm backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/65">
-            <div className="flex min-h-[620px] w-full">
-              <Sidebar open={sidebarOpen} setOpen={setSidebarOpen}>
-                <SidebarBody className="h-full min-h-[620px] border-r border-slate-200/80 dark:border-slate-700/70 dark:!bg-slate-900/70">
-                  <div className="mt-2 flex flex-1 flex-col gap-1">
-                    {sectionLinks.map((section) => (
-                      <div
-                        key={section.id}
-                        onClick={() => setActiveSection(section.id)}
-                        className="cursor-pointer"
-                      >
-                        <SidebarLink
-                          link={{
-                            label: section.label,
-                            href: "#",
-                            icon: section.icon,
-                          }}
-                          className={cn(
-                            "rounded-xl px-2",
-                            activeSection === section.id
-                              ? "bg-slate-200/80 dark:bg-slate-800/90"
-                              : "hover:bg-slate-200/40 dark:hover:bg-slate-800/40",
-                          )}
-                        />
-                      </div>
-                    ))}
+          {/* Tab Navigation */}
+          <div className="mb-6 flex gap-1 overflow-x-auto rounded-xl border border-slate-200/70 bg-white/80 p-1 shadow-sm backdrop-blur-sm dark:border-slate-700/60 dark:bg-slate-900/60">
+            {sectionTabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveSection(tab.id)}
+                className={cn(
+                  "flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-semibold transition-all",
+                  activeSection === tab.id
+                    ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300"
+                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-200",
+                )}
+              >
+                {tab.icon}
+                <span className="hidden sm:inline">{tab.label}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Toast Message */}
+          <AnimatePresence>
+            {message && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className={cn(
+                  "mb-5 rounded-xl border px-4 py-2.5 text-sm font-medium",
+                  message.type === "success" && "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300",
+                  message.type === "error" && "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-300",
+                  message.type === "info" && "border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300",
+                )}
+              >
+                {message.text}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Section Content */}
+          <div className="space-y-4">
+            {activeSection === "profile" && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+                <SectionCard>
+                  <SectionHeader title="Profile Details" description="Update your public account details." />
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <SettingsInput
+                      label="Current Username"
+                      value={user?.name || ""}
+                      readOnly
+                      disabled
+                      icon={<CircleOff size={14} />}
+                    />
+                    <SettingsInput
+                      label="New Username"
+                      value={newName}
+                      onChange={setNewName}
+                      placeholder="Enter new username"
+                    />
+                    <SettingsInput
+                      label="Age"
+                      value={age}
+                      onChange={setAge}
+                      type="number"
+                      placeholder="25"
+                      min={13}
+                      max={120}
+                    />
                   </div>
-                </SidebarBody>
-              </Sidebar>
+                  <div className="mt-5">
+                    <StatefulButton
+                      onClick={handleSaveProfile}
+                      state={savingProfile ? "loading" : "idle"}
+                      className="h-10 min-w-[160px] rounded-full px-6 text-sm font-semibold"
+                    >
+                      Save Profile
+                    </StatefulButton>
+                  </div>
+                </SectionCard>
+              </motion.div>
+            )}
 
-              <div className="flex-1 overflow-y-auto p-6 md:p-8">
-                <div className="max-w-3xl transition-opacity duration-300">
-                  {message && (
-                    <div className="mb-5 inline-flex max-w-xl items-center rounded-xl border border-slate-200/80 bg-slate-50/90 px-4 py-2 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200">
-                      {message}
-                    </div>
-                  )}
+            {activeSection === "security" && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+                {/* Email */}
+                <SectionCard>
+                  <SectionHeader title="Email Address" description="Update the email associated with your account." />
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <SettingsInput
+                      label="Current Email"
+                      value={user?.email || ""}
+                      readOnly
+                      disabled
+                      icon={<Mail size={14} />}
+                    />
+                    <SettingsInput
+                      label="New Email"
+                      value={newEmail}
+                      onChange={setNewEmail}
+                      placeholder="new@example.com"
+                    />
+                  </div>
+                  <div className="mt-5">
+                    <StatefulButton
+                      onClick={handleSaveEmail}
+                      state={savingEmail ? "loading" : "idle"}
+                      className="h-10 min-w-[160px] rounded-full px-6 text-sm font-semibold"
+                    >
+                      Update Email
+                    </StatefulButton>
+                  </div>
+                </SectionCard>
 
-                  {activeSection === "profile" && (
-                    <div className="space-y-6">
-                      <div>
-                        <h2 className="text-2xl font-black tracking-tight">Profile Details</h2>
-                        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                          Update your public account details.
-                        </p>
-                      </div>
-                      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                        <label className="space-y-2">
-                          <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Current Username</span>
-                          <div className="relative">
-                            <input
-                              value={user?.name || ""}
-                              readOnly
-                              disabled
-                              tabIndex={-1}
-                              aria-disabled="true"
-                              className="w-full cursor-not-allowed rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3 pr-11 text-sm text-slate-600 opacity-100 disabled:pointer-events-none dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300"
-                            />
-                            <CircleOff
-                              size={16}
-                              className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
-                            />
-                          </div>
-                        </label>
-                        <label className="space-y-2">
-                          <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">New Username</span>
-                          <input
-                            value={newName}
-                            onChange={(e) => setNewName(e.target.value)}
-                            placeholder="Enter new username"
-                            className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100"
-                          />
-                        </label>
-                        <label className="space-y-2">
-                          <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Age</span>
-                          <input
-                            value={age}
-                            onChange={(e) => setAge(e.target.value)}
-                            type="number"
-                            min={13}
-                            max={120}
-                            className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100"
-                          />
-                        </label>
-                      </div>
-                      <StatefulButton
-                        onClick={handleSaveProfile}
-                        state={savingProfile ? "loading" : "idle"}
-                        className="h-11 w-auto min-w-[180px] justify-center rounded-full px-6 text-sm font-semibold"
-                      >
-                        Save Profile
-                      </StatefulButton>
-                    </div>
-                  )}
+                {/* Password */}
+                <SectionCard>
+                  <SectionHeader title="Password" description="Change your account password." />
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <SettingsInput
+                      label="New Password"
+                      value={newPassword}
+                      onChange={setNewPassword}
+                      type="password"
+                      placeholder="••••••••"
+                      icon={<Lock size={14} />}
+                    />
+                    <SettingsInput
+                      label="Confirm Password"
+                      value={confirmPassword}
+                      onChange={setConfirmPassword}
+                      type="password"
+                      placeholder="••••••••"
+                    />
+                  </div>
+                  <div className="mt-5">
+                    <StatefulButton
+                      onClick={handleSavePassword}
+                      state={savingPassword ? "loading" : "idle"}
+                      className="h-10 min-w-[160px] rounded-full px-6 text-sm font-semibold"
+                    >
+                      Update Password
+                    </StatefulButton>
+                  </div>
+                </SectionCard>
 
-                  {activeSection === "security" && (
-                    <div className="space-y-10">
-                      <section>
-                        <h2 className="text-2xl font-black tracking-tight">Security</h2>
-                        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                          Manage your account's protection and access.
-                        </p>
-                      </section>
-
-                      {/* Email */}
-                      <section className="space-y-3">
-                        <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Email address</p>
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                          <div className="relative">
-                            <input
-                              value={user?.email || ""}
-                              readOnly
-                              disabled
-                              tabIndex={-1}
-                              aria-disabled="true"
-                              className="w-full cursor-not-allowed rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300"
-                              placeholder="Current email"
-                            />
-                          </div>
-                          <input
-                            value={newEmail}
-                            onChange={(e) => setNewEmail(e.target.value)}
-                            className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100"
-                            placeholder="New email"
-                          />
+                {/* MFA */}
+                <SectionCard>
+                  {!showMfaPanel ? (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="rounded-xl bg-violet-100 p-2 dark:bg-violet-900/30">
+                          <ShieldCheck size={18} className="text-violet-600 dark:text-violet-400" />
                         </div>
-                        <StatefulButton
-                          onClick={handleSaveEmail}
-                          state={savingEmail ? "loading" : "idle"}
-                          className="h-11 w-auto min-w-[180px] justify-center rounded-full px-6 text-sm font-semibold"
+                        <div>
+                          <h3 className="text-sm font-bold">Two-Factor Authentication</h3>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            {mfaEnabled ? "Your account is protected with 2FA" : "Extra security for your account."}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {mfaChecked && mfaEnabled && (
+                          <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                            ENABLED
+                          </span>
+                        )}
+                        <button
+                          onClick={() => setShowMfaPanel(true)}
+                          className="flex items-center gap-1 rounded-lg bg-white px-3 py-2 text-xs font-semibold shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50 dark:bg-slate-800 dark:ring-slate-700"
                         >
-                          Update Email
-                        </StatefulButton>
-                      </section>
-
-                      <div className="h-px w-full bg-slate-200 dark:bg-slate-700" />
-
-                      {/* Password */}
-                      <section className="space-y-3">
-                        <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Change password</p>
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                          <input
-                            type="password"
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                            className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100"
-                            placeholder="New password"
-                          />
-                          <input
-                            type="password"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100"
-                            placeholder="Confirm password"
-                          />
-                        </div>
-                        <StatefulButton
-                          onClick={handleSavePassword}
-                          state={savingPassword ? "loading" : "idle"}
-                          className="h-11 w-auto min-w-[180px] justify-center rounded-full px-6 text-sm font-semibold"
-                        >
-                          Update Password
-                        </StatefulButton>
-                      </section>
-
-                      <div className="h-px w-full bg-slate-200 dark:bg-slate-700" />
-
-                      {/* MFA */}
-                      <section className="rounded-2xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-900/50">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <div className="rounded-xl bg-violet-100 p-2 dark:bg-violet-900/30">
-                              <ShieldCheck className="h-6 w-6 text-violet-600 dark:text-violet-400" />
-                            </div>
-                            <div>
-                              <h3 className="font-bold">Two-Factor Authentication</h3>
-                              <p className="text-sm text-slate-500">Add an extra layer of security to your account.</p>
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => { /* Trigger password prompt then MFA flow */ }}
-                            className="rounded-lg bg-white px-4 py-2 text-sm font-bold shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50 dark:bg-slate-800 dark:ring-slate-700"
-                          >
-                            Manage
-                          </button>
-                        </div>
-                      </section>
-
-                      {/* Connected Devices */}
-                      <section>
-                        <h3 className="mb-4 text-lg font-bold">Connected Devices</h3>
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-white p-4 dark:border-slate-800 dark:bg-slate-900/30">
-                            <div className="flex items-center gap-4">
-                              <Smartphone className="h-5 w-5 text-slate-400" />
-                              <div>
-                                <p className="font-medium">Current Session</p>
-                                <p className="text-xs text-slate-500">This Device • Active now</p>
-                              </div>
-                            </div>
-                            <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-                              ACTIVE
-                            </span>
-                          </div>
-                          <button
-                            onClick={async () => {
-                              const confirmed = window.confirm("Sign out of all other devices?");
-                              if (confirmed) await authService.signOut();
-                            }}
-                            className="w-full rounded-xl border border-red-100 py-3 text-sm font-bold text-red-600 transition hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-900/20"
-                          >
-                            Revoke all other sessions
-                          </button>
-                        </div>
-                      </section>
+                          {mfaEnabled ? "Manage" : "Enable"} <ChevronRight size={12} />
+                        </button>
+                      </div>
                     </div>
-                  )}
-
-                  {activeSection === "content" && (
-                    <div className="space-y-6">
-                      <div>
-                        <h2 className="text-2xl font-black tracking-tight">Content Preferences</h2>
-                        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                          Set your default recommendation behavior.
-                        </p>
-                      </div>
-
-                      <div>
-                        <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Default recommendation type</p>
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {[
-                            { id: "movie", label: "Movies" },
-                            { id: "book", label: "Books" },
-                            { id: "both", label: "Both" },
-                          ].map((opt) => (
-                            <GlowPillButton
-                              key={opt.id}
-                              onClick={() => setContentFocus(opt.id)}
-                              active={contentFocus === opt.id}
-                              className="px-4 py-2 text-sm font-semibold"
-                            >
-                              {opt.label}
-                            </GlowPillButton>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div>
-                        <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Discovery level</p>
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {["safe", "balanced", "adventurous"].map((level) => (
-                            <GlowPillButton
-                              key={level}
-                              onClick={() => setDiscoveryLevel(level)}
-                              active={discoveryLevel === level}
-                              className="px-4 py-2 text-sm font-semibold capitalize"
-                            >
-                              {level}
-                            </GlowPillButton>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div>
-                        <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                          Default question count
-                        </p>
-                        <div className="mt-3 max-w-xl rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-900/60">
-                          <div className="mb-3 flex items-center justify-between">
-                            <span className="text-sm font-semibold text-slate-600 dark:text-slate-300">
-                              Questions per quiz
-                            </span>
-                            <span className="inline-flex min-w-[84px] items-center justify-center rounded-full bg-indigo-600 px-3 py-1 text-sm font-black text-white">
-                              {preferredQuestionCount}
-                            </span>
-                          </div>
-                          <input
-                            type="range"
-                            min={3}
-                            max={15}
-                            value={preferredQuestionCount}
-                            onChange={(e) =>
-                              setPreferredQuestionCount(Number(e.target.value))
-                            }
-                            className="w-full cursor-pointer accent-indigo-500"
-                          />
-                          <div className="mt-2 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
-                            <span>3 min</span>
-                            <span>15 max</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <StatefulButton
-                        onClick={handleSaveContentPreferences}
-                        className="h-11 w-auto min-w-[220px] justify-center rounded-full px-6 text-sm font-semibold"
+                  ) : (
+                    <div>
+                      <button
+                        onClick={() => setShowMfaPanel(false)}
+                        className="mb-4 text-xs font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                       >
-                        Save Content Preferences
-                      </StatefulButton>
-
-                      <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
-                        Preferences apply on your next quiz session
-                      </div>
+                        &larr; Back to Security
+                      </button>
+                      {mfaEnabled ? (
+                        <MfaManagement
+                          mfaEnabled={mfaEnabled}
+                          onMfaStatusChange={() => setShowMfaPanel(false)}
+                        />
+                      ) : (
+                        <MfaSetup
+                          onComplete={() => setShowMfaPanel(false)}
+                          onSkip={() => setShowMfaPanel(false)}
+                        />
+                      )}
                     </div>
                   )}
+                </SectionCard>
 
-                  {activeSection === "integrations" && (
-                    <div className="space-y-6">
-                      <div>
-                        <h2 className="text-2xl font-black tracking-tight">Integrations</h2>
-                        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                          Manage connected providers and account access controls.
-                        </p>
-                      </div>
+                {/* Sessions */}
+                {user?.id && <SessionsManagement userId={user.id} />}
+              </motion.div>
+            )}
 
-                      <div className="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-900/60">
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                          <div>
-                            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Google Sign-In</p>
-                            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                              {isGoogleConnected ? "Connected to your account" : "Not connected"}
-                            </p>
-                          </div>
-                          <span
-                            className={cn(
-                              "inline-flex items-center rounded-full px-3 py-1 text-xs font-black uppercase tracking-[0.12em]",
-                              isGoogleConnected
-                                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300"
-                                : "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
-                            )}
+            {activeSection === "content" && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+                <SectionCard>
+                  <SectionHeader title="Content Preferences" description="Set your default recommendation behavior." />
+
+                  <div className="space-y-5">
+                    <div>
+                      <p className="mb-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        Recommendation Type
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          { id: "movie", label: "Movies" },
+                          { id: "book", label: "Books" },
+                          { id: "both", label: "Both" },
+                        ].map((opt) => (
+                          <GlowPillButton
+                            key={opt.id}
+                            onClick={() => setContentFocus(opt.id)}
+                            active={contentFocus === opt.id}
+                            className="px-4 py-2 text-sm font-semibold"
                           >
-                            {isGoogleConnected ? "Connected" : "Inactive"}
+                            {opt.label}
+                          </GlowPillButton>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="mb-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        Discovery Level
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {["safe", "balanced", "adventurous"].map((level) => (
+                          <GlowPillButton
+                            key={level}
+                            onClick={() => setDiscoveryLevel(level)}
+                            active={discoveryLevel === level}
+                            className="px-4 py-2 text-sm font-semibold capitalize"
+                          >
+                            {level}
+                          </GlowPillButton>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="mb-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        Questions per quiz
+                      </p>
+                      <div className="max-w-sm rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+                        <div className="mb-3 flex items-center justify-between">
+                          <span className="text-sm text-slate-600 dark:text-slate-300">
+                            Count
+                          </span>
+                          <span className="inline-flex min-w-[60px] items-center justify-center rounded-full bg-indigo-600 px-2.5 py-0.5 text-sm font-bold text-white">
+                            {preferredQuestionCount}
                           </span>
                         </div>
-                      </div>
-
-                      <div className="rounded-2xl border border-rose-200/80 bg-rose-50/70 p-4 dark:border-rose-900/50 dark:bg-rose-950/30">
-                        <p className="text-sm font-semibold text-rose-700 dark:text-rose-300">Danger Zone</p>
-                        <p className="mt-1 text-sm text-rose-600/90 dark:text-rose-300/80">
-                          These actions are sensitive. Confirm carefully before continuing.
-                        </p>
-                        <div className="mt-4 flex flex-wrap gap-3">
-                          <GlowPillButton
-                            onClick={handleDisableAccount}
-                            disabled={accountActionLoading}
-                            className="inline-flex items-center gap-2 border-rose-300 bg-white px-4 py-2 text-sm font-semibold text-rose-700 disabled:opacity-50 dark:border-rose-700 dark:bg-slate-900 dark:text-rose-300"
-                          >
-                            <UserMinus size={14} />
-                            {accountActionLoading ? "Processing..." : "Disable Account"}
-                          </GlowPillButton>
-                          <GlowPillButton
-                            onClick={handleDeleteAccount}
-                            disabled={accountActionLoading}
-                            className="inline-flex items-center gap-2 bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-500 disabled:opacity-50 dark:bg-rose-600 dark:text-white"
-                          >
-                            <Trash2 size={14} />
-                            {accountActionLoading ? "Processing..." : "Delete Account"}
-                          </GlowPillButton>
+                        <input
+                          type="range"
+                          min={3}
+                          max={15}
+                          value={preferredQuestionCount}
+                          onChange={(e) => setPreferredQuestionCount(Number(e.target.value))}
+                          className="w-full cursor-pointer accent-indigo-500"
+                        />
+                        <div className="mt-1.5 flex justify-between text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                          <span>3</span>
+                          <span>15</span>
                         </div>
                       </div>
                     </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </section>
+                  </div>
+
+                  <div className="mt-5 flex items-center gap-3">
+                    <StatefulButton
+                      onClick={handleSaveContentPreferences}
+                      className="h-10 min-w-[200px] rounded-full px-6 text-sm font-semibold"
+                    >
+                      Save Preferences
+                    </StatefulButton>
+                    <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                      Applies on next quiz
+                    </span>
+                  </div>
+                </SectionCard>
+              </motion.div>
+            )}
+
+            {activeSection === "integrations" && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+                {/* Google */}
+                <SectionCard>
+                  <SectionHeader title="Integrations" description="Connected providers and services." />
+                  <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+                    <div>
+                      <p className="text-sm font-semibold">Google Sign-In</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        {isGoogleConnected ? "Connected to your account" : "Not connected"}
+                      </p>
+                    </div>
+                    <span
+                      className={cn(
+                        "rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider",
+                        isGoogleConnected
+                          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                          : "bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300",
+                      )}
+                    >
+                      {isGoogleConnected ? "Connected" : "Inactive"}
+                    </span>
+                  </div>
+                </SectionCard>
+
+                {/* Danger Zone */}
+                <SectionCard className="!border-red-200/70 dark:!border-red-900/40">
+                  <div className="mb-4">
+                    <h2 className="text-lg font-bold text-red-700 dark:text-red-400">
+                      Danger Zone
+                    </h2>
+                    <p className="mt-0.5 text-xs text-red-600/80 dark:text-red-300/70">
+                      These actions are irreversible. Proceed carefully.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    <GlowPillButton
+                      onClick={handleDisableAccount}
+                      disabled={accountActionLoading}
+                      className="inline-flex items-center gap-2 border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 disabled:opacity-50 dark:border-red-800 dark:bg-slate-900 dark:text-red-400"
+                    >
+                      <UserMinus size={14} />
+                      {accountActionLoading ? "Processing…" : "Disable Account"}
+                    </GlowPillButton>
+                    <GlowPillButton
+                      onClick={handleDeleteAccount}
+                      disabled={accountActionLoading}
+                      className="inline-flex items-center gap-2 bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500 disabled:opacity-50"
+                    >
+                      <Trash2 size={14} />
+                      {accountActionLoading ? "Processing…" : "Delete Account"}
+                    </GlowPillButton>
+                  </div>
+                </SectionCard>
+              </motion.div>
+            )}
+          </div>
         </div>
       </main>
     </div>

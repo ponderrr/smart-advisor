@@ -63,37 +63,62 @@ export const faqItems = [
   {
     question: "How does Smart Advisor personalize recommendations?",
     answer:
-      "We combine your answers with trusted metadata from movie and book providers, then rank results to match your mood, genre preferences, and discovery intent.",
+      "Smart Advisor uses your quiz answers to understand your mood, pacing preferences, and genre interests. It then combines this with real-time data from TMDB and Google Books to generate recommendations with clear reasoning behind every pick.",
   },
   {
-    question: "Do I need to complete a long onboarding flow?",
+    question: "How do I create an account?",
     answer:
-      "No. The flow is intentionally short. You can answer quickly and still get high-quality recommendations with clear reasoning behind each pick.",
+      "Click Sign Up on the login page, enter your name, email, and a password (minimum 8 characters). You will receive a verification email — click the link to activate your account before signing in.",
+  },
+  {
+    question: "Why do I need to verify my email?",
+    answer:
+      "Email verification confirms your identity and protects your account. You will not be able to sign in until you click the verification link sent to your inbox. Check your spam folder if you do not see it.",
+  },
+  {
+    question: "How does the quiz work?",
+    answer:
+      "You choose a content type (movie, book, or both), select how many questions you want (3 to 15), then answer each one. Your responses are sent to our AI which generates personalized recommendations tailored to your answers.",
+  },
+  {
+    question: "How are results generated?",
+    answer:
+      "Your answers are processed by an AI model that selects titles matching your preferences. Each recommendation is then enriched with real poster art, ratings, and descriptions from TMDB (movies) and Google Books (books).",
   },
   {
     question: "Can I use Smart Advisor for both movies and books?",
     answer:
-      "Yes. You can discover movies, books, or both in the same experience, and your recommendation history is saved for future sessions.",
+      "Yes. Select 'Both' during content selection to receive one movie and one book recommendation in the same session. Your entire recommendation history is saved for future reference.",
   },
   {
     question: "How is my personal data handled?",
     answer:
-      "Your account information is protected, and we only use your preferences to improve your recommendations.",
+      "Your data is stored securely in Supabase with row-level security policies. We only use your preferences and quiz answers to generate recommendations. We do not share your data with third parties.",
   },
   {
-    question: "Can I request deletion of my account data?",
+    question: "What is two-factor authentication (MFA)?",
     answer:
-      "Yes. Contact support and we can help remove your profile and associated recommendation history from the platform.",
+      "MFA adds an extra layer of security by requiring a code from an authenticator app (like Google Authenticator or Authy) when you sign in. You can enable it from Account Settings under the Security tab.",
   },
   {
-    question: "What if recommendations feel off for me?",
+    question: "How do I manage my devices and sessions?",
     answer:
-      "You can rerun the questionnaire anytime and adjust answers until the recommendations feel right.",
+      "Go to Account Settings, open the Security tab, and scroll to Active Sessions. You can see all devices where you are signed in, revoke access for individual devices, or sign out of all devices at once.",
+  },
+  {
+    question: "Can I delete or disable my account?",
+    answer:
+      "Yes. In Account Settings under the Integrations tab, you will find a Danger Zone section. You can disable your account (which can be re-enabled by support) or permanently delete it along with all associated data.",
+  },
+  {
+    question: "What if my recommendations feel off?",
+    answer:
+      "You can retake the quiz anytime with different answers. Try adjusting the number of questions or experimenting with different mood and pacing choices to refine your results.",
   },
   {
     question: "Is Smart Advisor open source?",
     answer:
-      "Yes. Smart Advisor is open source, and you can review the codebase and follow project updates on GitHub.",
+      "Yes. Smart Advisor is fully open source. You can review the codebase, report issues, and follow development progress on GitHub.",
   },
 ];
 

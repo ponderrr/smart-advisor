@@ -92,6 +92,7 @@ export const AuthForm = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isResendingVerification, setIsResendingVerification] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [headingChoice, setHeadingChoice] = useState<Record<AuthMode, number>>({
     signin: 0,
     signup: 0,
@@ -144,7 +145,7 @@ export const AuthForm = ({
         ? "Create Account"
         : "Send reset link";
 
-  const disabled = loading || (mode === "signup" && signupCooldown);
+  const buttonDisabled = submitting || (mode === "signup" && signupCooldown);
 
   const formError = useMemo(
     () => errors.general || authError || null,
@@ -238,54 +239,60 @@ export const AuthForm = ({
       return { error: "Please correct the highlighted fields" };
     }
 
-    if (mode === "forgot") {
-      const result = await onResetPassword(email);
+    setSubmitting(true);
+
+    try {
+      if (mode === "forgot") {
+        const result = await onResetPassword(email);
+        if (result.error) {
+          setErrors({ general: result.error });
+          return result;
+        }
+        setSuccessMessage(
+          "If an account exists for this email, a password reset link has been sent.",
+        );
+        return { error: null };
+      }
+
+      if (mode === "signin") {
+        const result = await onSignIn(email, password, rememberFor30Days);
+        if (result.error) {
+          setErrors({ general: result.error });
+        } else {
+          router.replace("/dashboard");
+          setTimeout(() => {
+            if (
+              typeof window !== "undefined" &&
+              window.location.pathname === "/auth"
+            ) {
+              window.location.assign("/dashboard");
+            }
+          }, 350);
+        }
+        return result;
+      }
+
+      // SIGN UP LOGIC
+      const result = await onSignUp(
+        email,
+        password,
+        username.trim(),
+        username.trim(),
+        Number(age),
+      );
+
       if (result.error) {
         setErrors({ general: result.error });
         return result;
       }
-      setSuccessMessage(
-        "If an account exists for this email, a password reset link has been sent.",
-      );
+
+      // On Success: Show email verification screen
+      setSignupEmail(email);
+      setMode("verify-email");
       return { error: null };
+    } finally {
+      setSubmitting(false);
     }
-
-    if (mode === "signin") {
-      const result = await onSignIn(email, password, rememberFor30Days);
-      if (result.error) {
-        setErrors({ general: result.error });
-      } else {
-        router.replace("/dashboard");
-        setTimeout(() => {
-          if (
-            typeof window !== "undefined" &&
-            window.location.pathname === "/auth"
-          ) {
-            window.location.assign("/dashboard");
-          }
-        }, 350);
-      }
-      return result;
-    }
-
-    // SIGN UP LOGIC
-    const result = await onSignUp(
-      email,
-      password,
-      username.trim(),
-      username.trim(),
-      Number(age),
-    );
-
-    if (result.error) {
-      setErrors({ general: result.error });
-      return result;
-    }
-
-    // On Success: Show email verification screen
-    setSignupEmail(email);
-    setMode("verify-email");
-    return { error: null };
   };
 
   return (
@@ -366,7 +373,6 @@ export const AuthForm = ({
                   placeholder="you@example.com"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
-                  disabled={disabled}
                   className="focus-visible:ring-slate-400 dark:focus-visible:ring-slate-500"
                 />
               </FormField>
@@ -395,7 +401,6 @@ export const AuthForm = ({
                         placeholder="••••••••"
                         value={password}
                         onChange={(event) => setPassword(event.target.value)}
-                        disabled={disabled}
                         showPassword={showPassword}
                         onTogglePassword={() =>
                           setShowPassword((prev) => !prev)
@@ -426,7 +431,6 @@ export const AuthForm = ({
                         placeholder="yourname"
                         value={username}
                         onChange={(event) => setUsername(event.target.value)}
-                        disabled={disabled}
                       />
                     </FormField>
 
@@ -441,7 +445,6 @@ export const AuthForm = ({
                         placeholder="18"
                         value={age}
                         onChange={(event) => setAge(event.target.value)}
-                        disabled={disabled}
                       />
                     </FormField>
 
@@ -457,7 +460,6 @@ export const AuthForm = ({
                         onChange={(event) =>
                           setConfirmPassword(event.target.value)
                         }
-                        disabled={disabled}
                         showPassword={showConfirmPassword}
                         onTogglePassword={() =>
                           setShowConfirmPassword((prev) => !prev)
@@ -490,7 +492,7 @@ export const AuthForm = ({
               {showResendVerification && (
                 <AuthHoverButton
                   type="button"
-                  disabled={disabled || isResendingVerification}
+                  disabled={buttonDisabled || isResendingVerification}
                   onClick={async () => {
                     resetFeedback();
                     setIsResendingVerification(true);
@@ -521,7 +523,7 @@ export const AuthForm = ({
                 key={`stateful-${mode}`}
                 type="submit"
                 onClick={handleAction}
-                disabled={disabled}
+                disabled={buttonDisabled}
                 hoverGlow
                 className="mt-1"
               >
@@ -545,7 +547,7 @@ export const AuthForm = ({
                           setRememberFor30Days(Boolean(checked))
                         }
                         className="h-4 w-4 rounded border-slate-300 data-[state=checked]:bg-violet-600 dark:border-slate-600"
-                        disabled={disabled}
+                        disabled={buttonDisabled}
                       />
                       <Label.Root
                         htmlFor="remember-for-30-days"
@@ -560,7 +562,7 @@ export const AuthForm = ({
                         type="button"
                         onClick={() => toggleMode("forgot")}
                         className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
-                        disabled={disabled}
+                        disabled={buttonDisabled}
                       >
                         Forgot Password?
                       </button>
@@ -581,7 +583,7 @@ export const AuthForm = ({
                         if (result.error) setErrors({ general: result.error });
                       }}
                       className="shadow-input inline-flex h-10 w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 transition-all hover:border-violet-400 hover:bg-violet-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-                      disabled={disabled}
+                      disabled={buttonDisabled}
                     >
                       <IconBrandGoogle className="h-4 w-4" />
                       <span>Continue with Google</span>
@@ -597,7 +599,7 @@ export const AuthForm = ({
                             setErrors({ general: result.error });
                         }}
                         className="shadow-input inline-flex h-10 w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 transition-all hover:border-orange-400 hover:bg-orange-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-                        disabled={disabled}
+                        disabled={buttonDisabled}
                       >
                         <IconShieldCheck className="h-4 w-4" />
                         <span>Mock Sign In (Dev)</span>
@@ -625,7 +627,7 @@ export const AuthForm = ({
                     )
                   }
                   className="font-semibold text-violet-600 transition-colors hover:text-violet-500 dark:text-violet-400 dark:hover:text-violet-300"
-                  disabled={disabled}
+                  disabled={buttonDisabled}
                 >
                   {mode === "forgot"
                     ? "Sign in"

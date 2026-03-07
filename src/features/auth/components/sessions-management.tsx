@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { sessionManagementService } from "../services/session-management";
+import { authService } from "../services/auth-service";
 import { LogOut, Smartphone, Globe, LogOutIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -27,6 +29,7 @@ interface SessionsManagementProps {
 }
 
 export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
+  const router = useRouter();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [revoking, setRevoking] = useState<string | null>(null);
@@ -50,16 +53,22 @@ export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
     setSessions(sessions as Session[]);
   };
 
-  const handleRevokeSession = async (sessionId: string) => {
-    setRevoking(sessionId);
-    const { error } = await sessionManagementService.revokeSession(sessionId);
+  const handleRevokeSession = async (session: Session) => {
+    setRevoking(session.id);
+    const { error } = await sessionManagementService.revokeSession(session.id);
     setRevoking(null);
 
     if (error) {
       toast.error(error);
     } else {
       toast.success("Session revoked");
-      setSessions(sessions.filter((s) => s.id !== sessionId));
+      setSessions((prev) => prev.filter((s) => s.id !== session.id));
+
+      // If revoking current device, sign out and redirect
+      if (session.is_current_device) {
+        await authService.signOut();
+        router.push("/");
+      }
     }
   };
 
@@ -69,14 +78,16 @@ export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
     }
 
     setSigningOutAll(true);
-    const { error } = await sessionManagementService.revokeAllSessions(userId);
+
+    // signOutAllDevices: revokes DB sessions, then signs out globally from Supabase
+    const { error } = await authService.signOutAllDevices();
     setSigningOutAll(false);
 
     if (error) {
       toast.error(error);
     } else {
       toast.success("All sessions revoked");
-      setSessions([]);
+      router.push("/");
     }
   };
 
@@ -112,7 +123,7 @@ export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
             className="text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/20"
           >
             <LogOutIcon className="h-4 w-4 mr-2" />
-            Sign Out All
+            {signingOutAll ? "Signing out..." : "Sign Out All"}
           </Button>
         )}
       </div>
@@ -155,7 +166,7 @@ export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
                     )}
                   </div>
                   <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                    {session.os_name} • {session.browser_name}{" "}
+                    {session.os_name} &bull; {session.browser_name}{" "}
                     {session.browser_version}
                   </p>
                   {session.ip_address && (
@@ -171,12 +182,12 @@ export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => handleRevokeSession(session.id)}
-                disabled={revoking === session.id}
+                onClick={() => handleRevokeSession(session)}
+                disabled={revoking === session.id || signingOutAll}
                 className="text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/20 ml-2"
               >
                 {revoking === session.id ? (
-                  <span className="h-4 w-4 animate-spin">⌛</span>
+                  <span className="h-4 w-4 animate-spin">&#8987;</span>
                 ) : (
                   <LogOut className="h-4 w-4" />
                 )}

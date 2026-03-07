@@ -471,28 +471,32 @@ class AuthService {
         factorType: "totp",
       });
       if (error)
-        return { error: this.toUserFriendlyError(error.message), data: null };
+        return { error: this.toUserFriendlyError(error.message, "Failed to start MFA enrollment. Please try again."), data: null };
 
-      // Store MFA factor in database
+      // Store MFA factor in database (non-blocking — don't fail enrollment if DB insert fails)
       if (data?.id) {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (user?.id) {
-          await supabase.from("mfa_factors").insert({
-            user_id: user.id,
-            factor_type: "totp",
-            factor_id: data.id,
-            is_verified: false,
-            enrolled_at: new Date().toISOString(),
-          });
+        try {
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
+          if (user?.id) {
+            await supabase.from("mfa_factors").insert({
+              user_id: user.id,
+              factor_type: "totp",
+              factor_id: data.id,
+              is_verified: false,
+              enrolled_at: new Date().toISOString(),
+            });
+          }
+        } catch (dbErr) {
+          console.warn("Non-critical: failed to store MFA factor in DB:", dbErr);
         }
       }
 
       return { data, error: null };
     } catch (err) {
       console.error("Error enrolling MFA:", err);
-      return { error: "Failed to enroll MFA", data: null };
+      return { error: "Failed to enroll MFA. Please try again.", data: null };
     }
   }
 
@@ -604,16 +608,20 @@ class AuthService {
 
   async signOutAllDevices() {
     try {
-      const { error } = await supabase.auth.signOut({ scope: "global" });
-      if (error) return { error: this.toUserFriendlyError(error.message) };
-
-      // Revoke all sessions in database
+      // Get user ID BEFORE signing out (session is destroyed after signOut)
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (user?.id) {
-        await sessionManagementService.revokeAllSessions(user.id);
+      const userId = user?.id;
+
+      // Revoke all sessions in database first
+      if (userId) {
+        await sessionManagementService.revokeAllSessions(userId);
       }
+
+      // Now sign out globally (invalidates all Supabase sessions)
+      const { error } = await supabase.auth.signOut({ scope: "global" });
+      if (error) return { error: this.toUserFriendlyError(error.message) };
 
       return { error: null };
     } catch (err) {
