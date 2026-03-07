@@ -272,7 +272,7 @@ export default function DemoPage() {
                       title={card.title}
                       description={card.description}
                       mediaSrc={card.mediaSrc}
-                      secondaryMediaSrc={card.secondaryMediaSrc}
+                      secondaryMediaSrc={"secondaryMediaSrc" in card ? card.secondaryMediaSrc : undefined}
                       isSelected={answers[current.id] === card.option}
                       onClick={() => handleChoose(card.option)}
                     />

@@ -23,7 +23,7 @@ export const validateEnvironment = (): EnvValidationResult => {
   }
 
   // Check for accidentally exposed service keys (SECURITY CRITICAL)
-  const exposedKeys = [];
+  const exposedKeys: string[] = [];
 
   if (env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY) {
     exposedKeys.push("NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY");

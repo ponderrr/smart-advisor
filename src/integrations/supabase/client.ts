@@ -16,14 +16,14 @@ export function createClient() {
 
   // For client-side (browser)
   if (typeof window !== "undefined") {
-    return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey);
+    return createBrowserClient(supabaseUrl, supabaseAnonKey);
   }
 
   // For server-side (SSR) – must use server client so PKCE code verifier is
   // read from cookies and written back. createBrowserClient doesn't handle this.
   const { cookies } = require("next/headers");
   const cookieStore = cookies();
-  return createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
+  return createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
       getAll() {
         return cookieStore.getAll();

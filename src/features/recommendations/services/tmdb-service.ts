@@ -26,7 +26,7 @@ class TMDBService {
         }/functions/v1/tmdb-proxy?title=${encodeURIComponent(title)}`,
         {
           headers: {
-            apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+            apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",
           },
         }
       );

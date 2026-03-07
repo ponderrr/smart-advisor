@@ -25,6 +25,7 @@ import {
   MobileNavMenu,
 } from "@/components/ui/resizable-navbar";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const safeStringify = (obj: unknown): string => {
   const seen = new WeakSet();
@@ -177,7 +178,7 @@ const ResultsPage = () => {
 
       const questionnaireData = {
         answers,
-        contentType,
+        contentType: contentType ?? "both" as const,
         userAge: user.age,
         userName: user.name,
       };
@@ -318,11 +319,15 @@ const ResultsPage = () => {
       }
 
       const { error: toggleError } = await databaseService.toggleFavorite(recommendationId);
-      if (!toggleError) {
-        const updatedRecs = recommendations.map((rec) =>
-          rec.id === recommendationId
-            ? { ...rec, is_favorited: !rec.is_favorited }
-            : rec,
+      if (toggleError) {
+        toast.error("Failed to update favorite");
+      } else {
+        const rec = recommendations.find((r) => r.id === recommendationId);
+        toast.success(rec?.is_favorited ? "Removed from favorites" : "Added to favorites");
+        const updatedRecs = recommendations.map((r) =>
+          r.id === recommendationId
+            ? { ...r, is_favorited: !r.is_favorited }
+            : r,
         );
         setRecommendations(updatedRecs);
         generatedRecommendationsRef.current = updatedRecs;
@@ -470,7 +475,7 @@ const ResultsPage = () => {
               <button
                 type="button"
                 onClick={handleRetry}
-                className="rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-indigo-500 dark:text-white"
+                className="rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-500"
               >
                 Try Again
               </button>

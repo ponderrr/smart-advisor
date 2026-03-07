@@ -140,7 +140,7 @@ class EnhancedRecommendationsService {
           // Enhance movies with TMDB data
           if (rec.type === "movie") {
             try {
-              const tmdbData = await tmdbService.searchMovie(rec.title);
+              const tmdbData = rec.title ? await tmdbService.searchMovie(rec.title) : null;
               if (tmdbData) {
                 enhancedRec = {
                   ...enhancedRec,
@@ -165,10 +165,10 @@ class EnhancedRecommendationsService {
           // Enhance books with Google Books data
           if (rec.type === "book") {
             try {
-              const bookData = await googleBooksService.searchBook(
+              const bookData = rec.title ? await googleBooksService.searchBook(
                 rec.title,
                 rec.author
-              );
+              ) : null;
               if (bookData) {
                 enhancedRec = {
                   ...enhancedRec,

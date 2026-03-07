@@ -12,6 +12,10 @@ export const GlowPillButton = ({
   className,
   active = false,
   children,
+  onDrag: _onDrag,
+  onDragStart: _onDragStart,
+  onDragEnd: _onDragEnd,
+  onAnimationStart: _onAnimationStart,
   ...props
 }: GlowPillButtonProps) => {
   const radius = 110;

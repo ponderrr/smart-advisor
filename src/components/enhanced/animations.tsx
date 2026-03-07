@@ -10,7 +10,7 @@ export const AnimationUtils = {
     children: React.ReactNode,
     delay = 100
   ): React.ReactElement[] => {
-    return React.Children.map(children, (child, index) => (
+    return (React.Children.map(children, (child, index) => (
       <div
         key={index}
         className="animate-in fade-in duration-700"
@@ -18,7 +18,7 @@ export const AnimationUtils = {
       >
         {child}
       </div>
-    ));
+    )) ?? []);
   },
 
   // Fade in animation props

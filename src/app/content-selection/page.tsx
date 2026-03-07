@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from 'next/navigation';
 import { motion } from "framer-motion";
+import { Check } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useQuizStore } from '@/features/quiz/store/quiz-store';
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -53,6 +54,12 @@ const SelectionCard: React.FC<SelectionCardProps> = ({
           : "border-slate-200/80 bg-white/80 hover:-translate-y-1 hover:border-indigo-300 hover:shadow-md dark:border-slate-700/70 dark:bg-slate-900/65 dark:hover:border-indigo-500/60",
       )}
     >
+      {isSelected && (
+        <div className="absolute right-3 top-3 z-10 inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-500 text-white shadow-md">
+          <Check size={16} />
+        </div>
+      )}
+
       <div className="relative aspect-[16/9] overflow-hidden bg-slate-200 dark:bg-slate-800">
         {secondaryMediaSrc ? (
           <div className="grid h-full w-full grid-cols-2 gap-1 p-1">
