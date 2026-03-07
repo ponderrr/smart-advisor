@@ -7,7 +7,6 @@ import {
   IconBrandGithub,
   IconChevronDown,
 } from "@tabler/icons-react";
-
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { AnimatedTestimonials } from "@/components/ui/animated-testimonials";
 import { LinkPreview } from "@/components/ui/link-preview";
@@ -15,7 +14,6 @@ import { BrandWordmark } from "@/components/brand-wordmark";
 import { ThemeToggle } from "@/components/theme-toggle";
 import FeaturesSectionDemo from "@/components/features-section-demo-3";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
-import { GlowPillButton } from "@/components/ui/glow-pill-button";
 import {
   Navbar,
   NavBody,
@@ -238,60 +236,46 @@ export default function Index() {
 
           <div
             className={cn(
-              "relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 p-4 shadow-sm backdrop-blur-md md:p-6",
+              "relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 p-4 shadow-sm backdrop-blur-md md:p-8",
               "dark:border-slate-700/70 dark:bg-slate-900/65",
             )}
           >
-            <div className="mb-4 flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-                  Video Walkthrough
-                </p>
-                <h3 className="mt-2 text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100 md:text-3xl">
-                  {howItWorksInteractive[activeHowItWorks].title}
-                </h3>
-              </div>
-            </div>
-
-            <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-black dark:border-slate-700/70">
+            {/* Video Container */}
+            <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-black dark:border-slate-700/70 shadow-2xl">
               <video
-                key={`how-step-${activeHowItWorks}`}
                 className="aspect-video w-full"
                 autoPlay
                 muted
+                loop
                 playsInline
                 preload="auto"
-                src={howItWorksVideos[activeHowItWorks] ?? howItWorksVideos[0]}
-                onEnded={() =>
-                  setActiveHowItWorks((prev) => (prev + 1) % howItWorksInteractive.length)
-                }
+                src="/animations/full-walkthrough.webm" // Replace with your combined video path
               />
             </div>
 
-            <div className="mt-4 grid grid-cols-1 gap-2 md:grid-cols-3">
-              {howItWorksInteractive.map((step, idx) => {
-                const isActive = idx === activeHowItWorks;
-                return (
-                  <GlowPillButton
-                    key={step.title}
-                    onClick={() => setActiveHowItWorks(idx)}
-                    active={isActive}
-                  >
-                    Step {idx + 1}
-                  </GlowPillButton>
-                );
-              })}
+            {/* Static Feature Grid instead of interactive buttons */}
+            <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-3">
+              {howItWorksInteractive.map((step, idx) => (
+                <div key={step.title} className="flex flex-col">
+                  <span className="mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-rose-500/10 text-xs font-black text-rose-600 dark:bg-rose-500/20 dark:text-rose-400">
+                    {idx + 1}
+                  </span>
+                  <h3 className="text-xl font-black tracking-tight text-slate-900 dark:text-slate-100">
+                    {step.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                    {step.description}
+                  </p>
+                  <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                    {step.detail}
+                  </p>
+                </div>
+              ))}
             </div>
-
-            <p className="mt-4 text-sm leading-relaxed text-slate-700 dark:text-slate-300 md:text-base">
-              {howItWorksInteractive[activeHowItWorks].description}
-            </p>
-            <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400 md:text-sm">
-              {howItWorksInteractive[activeHowItWorks].detail}
-            </p>
           </div>
 
-          <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-3">
+          {/* Supplemental Cards */}
+          <div className="mt-8 grid grid-cols-1 gap-3 md:grid-cols-3">
             {howItWorksCards.map((card, idx) => (
               <motion.div
                 key={card.title}
@@ -299,9 +283,7 @@ export default function Index() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.45, delay: idx * 0.08 }}
-                className={cn(
-                  "rounded-2xl border border-slate-200/80 bg-white/80 p-4 text-sm text-slate-700 shadow-sm dark:border-slate-700/70 dark:bg-slate-900/65 dark:text-slate-300",
-                )}
+                className="rounded-2xl border border-slate-200/80 bg-white/80 p-4 text-sm text-slate-700 shadow-sm dark:border-slate-700/70 dark:bg-slate-900/65 dark:text-slate-300"
               >
                 {card.detail}
               </motion.div>

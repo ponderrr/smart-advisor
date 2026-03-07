@@ -353,24 +353,25 @@ const SettingsPage = () => {
                 <SidebarBody className="h-full min-h-[620px] border-r border-slate-200/80 dark:border-slate-700/70 dark:!bg-slate-900/70">
                   <div className="mt-2 flex flex-1 flex-col gap-1">
                     {sectionLinks.map((section) => (
-                      <SidebarLink
+                      <div
                         key={section.id}
-                        link={{
-                          label: section.label,
-                          href: "#",
-                          icon: section.icon,
-                        }}
-                        className={cn(
-                          "rounded-xl px-2",
-                          activeSection === section.id
-                            ? "bg-slate-200/80 dark:bg-slate-800/90"
-                            : "hover:bg-slate-200/40 dark:hover:bg-slate-800/40",
-                        )}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setActiveSection(section.id);
-                        }}
-                      />
+                        onClick={() => setActiveSection(section.id)}
+                        className="cursor-pointer"
+                      >
+                        <SidebarLink
+                          link={{
+                            label: section.label,
+                            href: "#",
+                            icon: section.icon,
+                          }}
+                          className={cn(
+                            "rounded-xl px-2",
+                            activeSection === section.id
+                              ? "bg-slate-200/80 dark:bg-slate-800/90"
+                              : "hover:bg-slate-200/40 dark:hover:bg-slate-800/40",
+                          )}
+                        />
+                      </div>
                     ))}
                   </div>
                 </SidebarBody>
@@ -594,7 +595,6 @@ const SettingsPage = () => {
                       </StatefulButton>
 
                       <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
-                        <Sparkles size={13} />
                         Preferences apply on your next quiz session
                       </div>
                     </div>
