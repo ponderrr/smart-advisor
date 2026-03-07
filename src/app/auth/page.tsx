@@ -16,8 +16,10 @@ const AuthPage = () => {
     clearError,
     loading,
     error: authError,
+    signupCooldown,
     user,
     session,
+    mockSignIn,
   } = useAuth();
 
   useEffect(() => {
@@ -31,12 +33,14 @@ const AuthPage = () => {
       <AuthForm
         loading={loading}
         authError={authError}
+        signupCooldown={signupCooldown}
         onSignIn={signIn}
         onGoogleSignIn={signInWithGoogle}
         onSignUp={signUp}
         onResetPassword={resetPassword}
         onResendVerificationEmail={resendVerificationEmail}
         onClearError={clearError}
+        onMockSignIn={mockSignIn}
       />
     </AuthLayout>
   );

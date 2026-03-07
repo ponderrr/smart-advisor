@@ -71,7 +71,8 @@ export async function GET(request: NextRequest) {
     });
     if (!error) {
       if (type === 'recovery') {
-        return NextResponse.redirect(`${origin}/auth?recovery=true`);
+        // redirect directly to reset page so user can update password
+        return NextResponse.redirect(`${origin}/auth/reset-password`);
       }
       return NextResponse.redirect(`${origin}/auth?verified=true`);
     }
@@ -82,5 +83,4 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/auth?${params.toString()}`);
   }
 
-  return NextResponse.redirect(`${origin}/auth?error=callback_error`);
 }

@@ -18,27 +18,38 @@ interface AuthContextType {
   signIn: (
     email: string,
     password: string,
-    rememberFor30Days?: boolean
+    rememberFor30Days?: boolean,
   ) => Promise<{ error: string | null }>;
   signUp: (
     email: string,
     password: string,
     name: string,
-    age: number
+    username: string,
+    age: number,
   ) => Promise<{ error: string | null }>;
+  signupCooldown: boolean;
   signOut: () => Promise<{ error: string | null }>;
   signInWithGoogle: () => Promise<{ error: string | null }>;
   resetPassword: (email: string) => Promise<{ error: string | null }>;
-  resendVerificationEmail: (
-    email: string
-  ) => Promise<{ error: string | null }>;
+  resendVerificationEmail: (email: string) => Promise<{ error: string | null }>;
   clearError: () => void;
   updateProfile: (
     name: string,
-    age: number
+    age: number,
   ) => Promise<{ error: string | null }>;
   updateEmail: (email: string) => Promise<{ error: string | null }>;
   updatePassword: (password: string) => Promise<{ error: string | null }>;
+  enrollMFA: () => Promise<{ data?: any; error: string | null }>;
+  verifyMFA: (
+    factorId: string,
+    code: string,
+  ) => Promise<{ data?: any; error: string | null }>;
+  unenrollMFA: (factorId: string) => Promise<{ error: string | null }>;
+  listMFAFactors: () => Promise<{ data?: any; error: string | null }>;
+  signOutAllDevices: () => Promise<{ error: string | null }>;
+  deleteAccount: () => Promise<{ error: string | null }>;
+  disableAccount: () => Promise<{ error: string | null }>;
+  mockSignIn?: () => Promise<{ error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -72,7 +83,8 @@ const clearSessionPreference = () => {
 const shouldKeepExistingSession = () => {
   if (typeof window === "undefined") return false;
 
-  const volatileSession = window.sessionStorage.getItem(VOLATILE_SESSION_KEY) === "1";
+  const volatileSession =
+    window.sessionStorage.getItem(VOLATILE_SESSION_KEY) === "1";
   const rememberUntilRaw = window.localStorage.getItem(REMEMBER_UNTIL_KEY);
   const rememberUntil = Number(rememberUntilRaw);
   const hasValidRemember =
@@ -91,24 +103,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [signupCooldown, setSignupCooldown] = useState(false);
 
   // New function to handle user profile fetching with AbortController
   const fetchUserProfile = async (
     _supabaseUser: SupabaseUser,
-    signal?: AbortSignal
+    signal?: AbortSignal,
   ) => {
     // Check if operation was aborted before any state updates
     if (signal?.aborted) {
-      if (process.env.NODE_ENV === 'development') console.log("useAuth: fetchUserProfile aborted");
+      if (process.env.NODE_ENV === "development")
+        console.log("useAuth: fetchUserProfile aborted");
       return;
     }
 
     try {
       setLoading(true);
       setError(null);
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === "development") {
         console.log(
-          "useAuth: fetchUserProfile - attempting to get current user..."
+          "useAuth: fetchUserProfile - attempting to get current user...",
         );
       }
 
@@ -117,7 +131,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       // Check again if operation was aborted after async call
       if (signal?.aborted) {
-        if (process.env.NODE_ENV === 'development') console.log("useAuth: fetchUserProfile aborted after API call");
+        if (process.env.NODE_ENV === "development")
+          console.log("useAuth: fetchUserProfile aborted after API call");
         return;
       }
 
@@ -127,17 +142,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(null);
       } else {
         setUser(profileUser);
-        if (process.env.NODE_ENV === 'development') {
+        if (process.env.NODE_ENV === "development") {
           console.log(
             "useAuth: User profile loaded successfully.",
-            profileUser?.id
+            profileUser?.id,
           );
         }
       }
     } catch (err) {
       // Don't set error if operation was aborted
       if (signal?.aborted) {
-        if (process.env.NODE_ENV === 'development') console.log("useAuth: fetchUserProfile aborted during error handling");
+        if (process.env.NODE_ENV === "development")
+          console.log(
+            "useAuth: fetchUserProfile aborted during error handling",
+          );
         return;
       }
       console.error("useAuth: Unexpected error loading profile:", err);
@@ -163,7 +181,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const initializeAuth = async () => {
       try {
-        if (process.env.NODE_ENV === 'development') console.log("Initializing auth state...");
+        if (process.env.NODE_ENV === "development")
+          console.log("Initializing auth state...");
         setError(null);
 
         // Check if operation was aborted before starting
@@ -173,7 +192,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const {
           data: { subscription: sub },
         } = supabase.auth.onAuthStateChange(async (event, session) => {
-          if (process.env.NODE_ENV === 'development') console.log("Auth state changed:", event, session?.user?.id);
+          if (process.env.NODE_ENV === "development")
+            console.log("Auth state changed:", event, session?.user?.id);
 
           if (!mounted || abortController.signal.aborted) return;
 
@@ -206,11 +226,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           return;
         }
 
-        if (process.env.NODE_ENV === 'development') console.log("Initial session:", initialSession?.user?.id || "none");
+        if (process.env.NODE_ENV === "development")
+          console.log("Initial session:", initialSession?.user?.id || "none");
 
         if (initialSession?.user && !shouldKeepExistingSession()) {
           if (process.env.NODE_ENV === "development") {
-            console.log("No valid remember/session preference found. Signing out stale session.");
+            console.log(
+              "No valid remember/session preference found. Signing out stale session.",
+            );
           }
           await supabase.auth.signOut();
           setUser(null);
@@ -257,7 +280,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
       setError(null);
-      if (process.env.NODE_ENV === 'development') console.log("Attempting signin...");
+      if (process.env.NODE_ENV === "development")
+        console.log("Attempting signin...");
 
       const result = await authService.signIn(email, password);
 
@@ -266,7 +290,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         console.error("Signin failed:", result.error);
       } else {
         setSessionPreference(rememberFor30Days);
-        if (process.env.NODE_ENV === 'development') console.log("Signin successful");
+        if (process.env.NODE_ENV === "development")
+          console.log("Signin successful");
         // Auth state change will be handled by the listener and subsequent useEffect for profile fetch
       }
 
@@ -286,24 +311,47 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     email: string,
     password: string,
     name: string,
-    age: number
+    username: string,
+    age: number,
   ) => {
+    if (signupCooldown) {
+      const msg = "Please wait a moment before trying again.";
+      setError(msg);
+      return { error: msg };
+    }
+
     try {
       setLoading(true);
       setError(null);
-      if (process.env.NODE_ENV === 'development') console.log("Attempting signup...");
+      if (process.env.NODE_ENV === "development")
+        console.log("Attempting signup...");
 
-      const result = await authService.signUp(email, password, name, age);
+      const result = await authService.signUp(
+        email,
+        password,
+        name,
+        username,
+        age,
+      );
 
       if (result.error) {
         setError(result.error);
         console.error("Signup failed:", result.error);
+        const lower = result.error.toLowerCase();
+        if (
+          lower.includes("too many attempts") ||
+          lower.includes("rate limit")
+        ) {
+          setSignupCooldown(true);
+          setTimeout(() => setSignupCooldown(false), 30000);
+        }
       } else {
         clearSessionPreference();
         await supabase.auth.signOut();
         setUser(null);
         setSession(null);
-        if (process.env.NODE_ENV === 'development') console.log("Signup successful");
+        if (process.env.NODE_ENV === "development")
+          console.log("Signup successful");
         // Auth state change will be handled by the listener and subsequent useEffect for profile fetch
       }
 
@@ -323,7 +371,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
       setError(null);
-      if (process.env.NODE_ENV === 'development') console.log("Attempting signout...");
+      if (process.env.NODE_ENV === "development")
+        console.log("Attempting signout...");
 
       const result = await authService.signOut();
 
@@ -332,7 +381,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         console.error("Signout failed:", result.error);
       } else {
         clearSessionPreference();
-        if (process.env.NODE_ENV === 'development') console.log("Signout successful");
+        if (process.env.NODE_ENV === "development")
+          console.log("Signout successful");
         setUser(null);
         setSession(null);
         setLoading(false); // Explicitly set loading to false on sign out
@@ -481,8 +531,185 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // MFA Methods
+  const enrollMFA = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await authService.enrollMFA();
+      if (result.error) {
+        setError(result.error);
+      }
+      return result;
+    } catch (error) {
+      console.error("Error enrolling MFA:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
+      setError(errorMessage);
+      return { error: errorMessage, data: null };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyMFA = async (factorId: string, code: string) => {
+    try {
+      setError(null);
+      const result = await authService.verifyMFA(factorId, code);
+      if (result.error) {
+        setError(result.error);
+      }
+      return result;
+    } catch (error) {
+      console.error("Error verifying MFA:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
+      setError(errorMessage);
+      return { error: errorMessage, data: null };
+    }
+  };
+
+  const unenrollMFA = async (factorId: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await authService.unenrollMFA(factorId);
+      if (result.error) {
+        setError(result.error);
+      }
+      return result;
+    } catch (error) {
+      console.error("Error unenrolling MFA:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
+      setError(errorMessage);
+      return { error: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const listMFAFactors = async () => {
+    try {
+      const result = await authService.listMFAFactors();
+      if (result.error) {
+        setError(result.error);
+      }
+      return result;
+    } catch (error) {
+      console.error("Error listing MFA factors:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
+      setError(errorMessage);
+      return { error: errorMessage, data: null };
+    }
+  };
+
   const clearError = () => {
     setError(null);
+  };
+
+  const signOutAllDevices = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await authService.signOutAllDevices();
+      if (result.error) {
+        setError(result.error);
+      } else {
+        clearSessionPreference();
+        setUser(null);
+        setSession(null);
+      }
+      return result;
+    } catch (error) {
+      console.error("Error signing out all devices:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
+      setError(errorMessage);
+      return { error: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteAccount = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await authService.deleteAccount();
+      if (result.error) {
+        setError(result.error);
+      } else {
+        clearSessionPreference();
+        setUser(null);
+        setSession(null);
+      }
+      return result;
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
+      setError(errorMessage);
+      return { error: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const disableAccount = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await authService.disableAccount();
+      if (result.error) {
+        setError(result.error);
+      } else {
+        clearSessionPreference();
+        setUser(null);
+        setSession(null);
+      }
+      return result;
+    } catch (error) {
+      console.error("Error disabling account:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
+      setError(errorMessage);
+      return { error: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const mockSignIn = async () => {
+    if (process.env.NODE_ENV !== "development") {
+      return { error: "Mock signin only available in development" };
+    }
+    try {
+      setLoading(true);
+      setError(null);
+      // Create a fake user for testing
+      const fakeUser: User = {
+        id: "mock-user-id",
+        email: "mock@example.com",
+        name: "Mock User",
+        username: "mockuser",
+        age: 25,
+        created_at: new Date().toISOString(),
+        mfa_enabled: false,
+      };
+      setUser(fakeUser);
+      setSession(null); // No real session
+      return { error: null };
+    } catch (error) {
+      console.error("Error in mock signin:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
+      setError(errorMessage);
+      return { error: errorMessage };
+    } finally {
+      setLoading(false);
+    }
   };
 
   const value = {
@@ -490,6 +717,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     session,
     loading,
     error,
+    signupCooldown,
     signIn,
     signUp,
     signOut,
@@ -500,6 +728,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     updateProfile,
     updateEmail,
     updatePassword,
+    enrollMFA,
+    verifyMFA,
+    unenrollMFA,
+    listMFAFactors,
+    signOutAllDevices,
+    deleteAccount,
+    disableAccount,
+    ...(process.env.NODE_ENV === "development" && { mockSignIn }),
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

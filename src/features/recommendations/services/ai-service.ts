@@ -1,6 +1,28 @@
+import { FunctionsHttpError, FunctionsRelayError, FunctionsFetchError } from "@supabase/supabase-js";
 import { Question } from "@/features/quiz/types/question";
 import { Answer } from "@/features/quiz/types/answer";
 import { supabase } from "@/integrations/supabase/client";
+
+async function extractEdgeFunctionError(error: unknown): Promise<string> {
+  if (error instanceof FunctionsHttpError) {
+    try {
+      const body = await error.context.json();
+      return body?.error || error.message || "Edge function returned an error";
+    } catch {
+      return error.message || "Edge function returned an error";
+    }
+  }
+  if (error instanceof FunctionsRelayError) {
+    return `Relay error: ${error.message}`;
+  }
+  if (error instanceof FunctionsFetchError) {
+    return `Network error: ${error.message}`;
+  }
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return String(error);
+}
 
 export interface MovieRecommendation {
   title: string;
@@ -54,10 +76,15 @@ export async function generateQuestions(
     });
 
     if (error) {
-      if (error.message?.includes("401")) {
+      const errorDetail = await extractEdgeFunctionError(error);
+      if (errorDetail.includes("401") || errorDetail.toLowerCase().includes("unauthorized")) {
         throw new Error("Your session is not authorized for question generation.");
       }
-      throw new Error(error.message || "Failed to generate questions");
+      throw new Error(errorDetail || "Failed to generate questions");
+    }
+
+    if (!data?.questions || !Array.isArray(data.questions)) {
+      throw new Error("Invalid response format from question generation");
     }
     return data.questions;
   } catch (error) {
@@ -97,10 +124,11 @@ export async function generateRecommendations(
     });
 
     if (error) {
-      if (error.message?.includes("401")) {
+      const errorDetail = await extractEdgeFunctionError(error);
+      if (errorDetail.includes("401") || errorDetail.toLowerCase().includes("unauthorized")) {
         throw new Error("Your session is not authorized for recommendations.");
       }
-      throw new Error(error.message || "Failed to generate recommendations");
+      throw new Error(errorDetail || "Failed to generate recommendations");
     }
 
     // Transform edge function response shape into the expected RecommendationData shape

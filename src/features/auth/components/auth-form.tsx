@@ -20,45 +20,63 @@ import { cn } from "@/lib/utils";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-// Updated AuthMode to include mfa-setup
-export type AuthMode = "signin" | "signup" | "forgot" | "mfa-setup";
+export type AuthMode = "signin" | "signup" | "forgot" | "verify-email";
 
 const MODE_HEADINGS = {
-  signin: ["Welcome back", "Great to see you again", "Ready for your next pick?"],
-  signup: ["Create your account", "Join Smart Advisor", "Let’s set up your profile"],
-  forgot: ["Reset your password", "Recover access", "Get back into your account"],
-  "mfa-setup": ["Secure your account", "Two-Factor Auth", "Extra Protection"],
+  signin: [
+    "Welcome back",
+    "Great to see you again",
+    "Ready for your next pick?",
+  ],
+  signup: [
+    "Create your account",
+    "Join Smart Advisor",
+    "Let’s set up your profile",
+  ],
+  forgot: [
+    "Reset your password",
+    "Recover access",
+    "Get back into your account",
+  ],
+  "verify-email": ["Check your inbox", "Almost there", "One last step"],
 } as const;
 
 interface AuthFormProps {
   loading: boolean;
   authError?: string | null;
+  signupCooldown?: boolean;
   onClearError: () => void;
   onSignIn: (
     email: string,
     password: string,
-    rememberFor30Days: boolean
+    rememberFor30Days: boolean,
   ) => Promise<{ error: string | null }>;
   onGoogleSignIn: () => Promise<{ error: string | null }>;
   onSignUp: (
     email: string,
     password: string,
     name: string,
+    username: string,
     age: number,
   ) => Promise<{ error: string | null }>;
   onResetPassword: (email: string) => Promise<{ error: string | null }>;
-  onResendVerificationEmail: (email: string) => Promise<{ error: string | null }>;
+  onResendVerificationEmail: (
+    email: string,
+  ) => Promise<{ error: string | null }>;
+  onMockSignIn?: () => Promise<{ error: string | null }>;
 }
 
 export const AuthForm = ({
   loading,
   authError,
+  signupCooldown = false,
   onClearError,
   onSignIn,
   onGoogleSignIn,
   onSignUp,
   onResetPassword,
   onResendVerificationEmail,
+  onMockSignIn,
 }: AuthFormProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -78,25 +96,28 @@ export const AuthForm = ({
     signin: 0,
     signup: 0,
     forgot: 0,
-    "mfa-setup": 0,
+    "verify-email": 0,
   });
+  const [signupEmail, setSignupEmail] = useState("");
 
   useEffect(() => {
     setHeadingChoice({
       signin: Math.floor(Math.random() * MODE_HEADINGS.signin.length),
       signup: Math.floor(Math.random() * MODE_HEADINGS.signup.length),
       forgot: Math.floor(Math.random() * MODE_HEADINGS.forgot.length),
-      "mfa-setup": Math.floor(Math.random() * MODE_HEADINGS["mfa-setup"].length),
+      "verify-email": Math.floor(
+        Math.random() * MODE_HEADINGS["verify-email"].length,
+      ),
     });
   }, []);
 
-  const callbackError = searchParams.get("error");
-  const callbackErrorDescription = searchParams.get("error_description");
+  const callbackError = searchParams?.get("error") ?? null;
+  const callbackErrorDescription = searchParams?.get("error_description") ?? null;
   const isExpiredVerificationLink =
     callbackError === "otp_expired" || callbackError === "verification_failed";
 
   const callbackMessage = useMemo(() => {
-    if (searchParams.get("verified") === "true") {
+    if (searchParams?.get("verified") === "true") {
       return {
         text: "Email verified successfully. You can sign in now.",
         tone: "success" as const,
@@ -104,7 +125,9 @@ export const AuthForm = ({
     }
     if (isExpiredVerificationLink) {
       return {
-        text: callbackErrorDescription || "This verification link expired. Enter your email below to resend a new one.",
+        text:
+          callbackErrorDescription ||
+          "This verification link expired. Enter your email below to resend a new one.",
         tone: "error" as const,
       };
     }
@@ -121,7 +144,7 @@ export const AuthForm = ({
         ? "Create Account"
         : "Send reset link";
 
-  const disabled = loading;
+  const disabled = loading || (mode === "signup" && signupCooldown);
 
   const formError = useMemo(
     () => errors.general || authError || null,
@@ -183,7 +206,8 @@ export const AuthForm = ({
       } else if (trimmedUsername.length > 24) {
         nextErrors.username = "Use 24 characters or fewer";
       } else if (!/^[a-zA-Z0-9._-]+$/.test(trimmedUsername)) {
-        nextErrors.username = "Use letters, numbers, dots, dashes, or underscores";
+        nextErrors.username =
+          "Use letters, numbers, dots, dashes, or underscores";
       }
 
       const parsedAge = Number(age);
@@ -220,7 +244,9 @@ export const AuthForm = ({
         setErrors({ general: result.error });
         return result;
       }
-      setSuccessMessage("If an account exists for this email, a password reset link has been sent.");
+      setSuccessMessage(
+        "If an account exists for this email, a password reset link has been sent.",
+      );
       return { error: null };
     }
 
@@ -231,7 +257,10 @@ export const AuthForm = ({
       } else {
         router.replace("/dashboard");
         setTimeout(() => {
-          if (typeof window !== "undefined" && window.location.pathname === "/auth") {
+          if (
+            typeof window !== "undefined" &&
+            window.location.pathname === "/auth"
+          ) {
             window.location.assign("/dashboard");
           }
         }, 350);
@@ -240,15 +269,22 @@ export const AuthForm = ({
     }
 
     // SIGN UP LOGIC
-    const result = await onSignUp(email, password, username.trim(), Number(age));
+    const result = await onSignUp(
+      email,
+      password,
+      username.trim(),
+      username.trim(),
+      Number(age),
+    );
 
     if (result.error) {
       setErrors({ general: result.error });
       return result;
     }
 
-    // On Success: Transition to MFA setup
-    setMode("mfa-setup");
+    // On Success: Show email verification screen
+    setSignupEmail(email);
+    setMode("verify-email");
     return { error: null };
   };
 
@@ -259,21 +295,28 @@ export const AuthForm = ({
         mode === "signup" && "min-h-[620px]",
         mode === "signin" && "min-h-[500px]",
         mode === "forgot" && "min-h-[430px]",
-        mode === "mfa-setup" && "min-h-[400px]"
+        mode === "verify-email" && "min-h-[400px]",
       )}
     >
       <AnimatePresence mode="wait">
-        {mode === "mfa-setup" ? (
+        {mode === "verify-email" ? (
           <motion.div
-            key="mfa"
+            key="verify-email"
             initial={{ opacity: 0, x: 10 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -10 }}
             className="flex flex-col h-full"
           >
-            <MfaSetup
-              onComplete={() => router.push("/dashboard")}
-              onSkip={() => router.push("/dashboard")}
+            <VerifyEmailScreen
+              email={signupEmail}
+              onResend={async () => {
+                setIsResendingVerification(true);
+                const result = await onResendVerificationEmail(signupEmail);
+                setIsResendingVerification(false);
+                return result;
+              }}
+              isResending={isResendingVerification}
+              onBackToSignIn={() => toggleMode("signin")}
             />
           </motion.div>
         ) : (
@@ -289,7 +332,12 @@ export const AuthForm = ({
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               transition={{ duration: 0.28, ease: "easeOut" }}
             >
-              <h1 className={cn("text-3xl font-black tracking-tight text-slate-900 dark:text-slate-100", mode === "forgot" && "whitespace-nowrap text-2xl sm:text-3xl")}>
+              <h1
+                className={cn(
+                  "text-3xl font-black tracking-tight text-slate-900 dark:text-slate-100",
+                  mode === "forgot" && "whitespace-nowrap text-2xl sm:text-3xl",
+                )}
+              >
                 {heading}
               </h1>
               <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-400">
@@ -301,8 +349,16 @@ export const AuthForm = ({
               </p>
             </motion.div>
 
-            <form onSubmit={(event) => event.preventDefault()} className="mt-6 space-y-4" noValidate>
-              <FormField label="Email" htmlFor="auth-email" error={errors.email}>
+            <form
+              onSubmit={(event) => event.preventDefault()}
+              className="mt-6 space-y-4"
+              noValidate
+            >
+              <FormField
+                label="Email"
+                htmlFor="auth-email"
+                error={errors.email}
+              >
                 <Input
                   id="auth-email"
                   type="email"
@@ -324,16 +380,26 @@ export const AuthForm = ({
                     exit={{ opacity: 0, height: 0, y: -4 }}
                     transition={{ duration: 0.2, ease: "easeOut" }}
                   >
-                    <FormField label="Password" htmlFor="auth-password" error={errors.password}>
+                    <FormField
+                      label="Password"
+                      htmlFor="auth-password"
+                      error={errors.password}
+                    >
                       <PasswordInput
                         id="auth-password"
-                        autoComplete={mode === "signin" ? "current-password" : "new-password"}
+                        autoComplete={
+                          mode === "signin"
+                            ? "current-password"
+                            : "new-password"
+                        }
                         placeholder="••••••••"
                         value={password}
                         onChange={(event) => setPassword(event.target.value)}
                         disabled={disabled}
                         showPassword={showPassword}
-                        onTogglePassword={() => setShowPassword((prev) => !prev)}
+                        onTogglePassword={() =>
+                          setShowPassword((prev) => !prev)
+                        }
                       />
                     </FormField>
                   </motion.div>
@@ -349,7 +415,11 @@ export const AuthForm = ({
                     exit={{ opacity: 0, height: 0, y: -4 }}
                     className="space-y-4"
                   >
-                    <FormField label="Username" htmlFor="auth-username" error={errors.username}>
+                    <FormField
+                      label="Username"
+                      htmlFor="auth-username"
+                      error={errors.username}
+                    >
                       <Input
                         id="auth-username"
                         type="text"
@@ -360,7 +430,11 @@ export const AuthForm = ({
                       />
                     </FormField>
 
-                    <FormField label="Age" htmlFor="auth-age" error={errors.age}>
+                    <FormField
+                      label="Age"
+                      htmlFor="auth-age"
+                      error={errors.age}
+                    >
                       <Input
                         id="auth-age"
                         type="number"
@@ -371,15 +445,23 @@ export const AuthForm = ({
                       />
                     </FormField>
 
-                    <FormField label="Confirm password" htmlFor="auth-confirm-password" error={errors.confirmPassword}>
+                    <FormField
+                      label="Confirm password"
+                      htmlFor="auth-confirm-password"
+                      error={errors.confirmPassword}
+                    >
                       <PasswordInput
                         id="auth-confirm-password"
                         placeholder="••••••••"
                         value={confirmPassword}
-                        onChange={(event) => setConfirmPassword(event.target.value)}
+                        onChange={(event) =>
+                          setConfirmPassword(event.target.value)
+                        }
                         disabled={disabled}
                         showPassword={showConfirmPassword}
-                        onTogglePassword={() => setShowConfirmPassword((prev) => !prev)}
+                        onTogglePassword={() =>
+                          setShowConfirmPassword((prev) => !prev)
+                        }
                       />
                     </FormField>
                   </motion.div>
@@ -388,12 +470,21 @@ export const AuthForm = ({
 
               {formError && <p className="text-sm text-red-500">{formError}</p>}
               {callbackMessage && (
-                <p className={cn("text-sm", callbackMessage.tone === "success" ? "text-emerald-600 dark:text-emerald-400" : "text-red-500")}>
+                <p
+                  className={cn(
+                    "text-sm",
+                    callbackMessage.tone === "success"
+                      ? "text-emerald-600 dark:text-emerald-400"
+                      : "text-red-500",
+                  )}
+                >
                   {callbackMessage.text}
                 </p>
               )}
               {successMessage && (
-                <p className="text-sm text-emerald-600 dark:text-emerald-400">{successMessage}</p>
+                <p className="text-sm text-emerald-600 dark:text-emerald-400">
+                  {successMessage}
+                </p>
               )}
 
               {showResendVerification && (
@@ -406,12 +497,24 @@ export const AuthForm = ({
                     const result = await onResendVerificationEmail(email);
                     setIsResendingVerification(false);
                     if (result.error) setErrors({ general: result.error });
-                    else setSuccessMessage("Verification email sent. Check your inbox.");
+                    else
+                      setSuccessMessage(
+                        "Verification email sent. Check your inbox.",
+                      );
                   }}
                   className="inline-flex items-center justify-center rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition-colors hover:border-violet-400 hover:bg-slate-100 hover:text-violet-700 disabled:opacity-60 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
                 >
-                  {isResendingVerification ? "Resending..." : "Resend verification link"}
+                  {isResendingVerification
+                    ? "Resending..."
+                    : "Resend verification link"}
                 </AuthHoverButton>
+              )}
+
+              {/* cooldown warning */}
+              {mode === "signup" && signupCooldown && (
+                <p className="text-center text-sm text-red-500">
+                  Please wait a moment before trying again.
+                </p>
               )}
 
               <StatefulButton
@@ -438,11 +541,16 @@ export const AuthForm = ({
                       <Checkbox
                         id="remember-for-30-days"
                         checked={rememberFor30Days}
-                        onCheckedChange={(checked) => setRememberFor30Days(Boolean(checked))}
+                        onCheckedChange={(checked) =>
+                          setRememberFor30Days(Boolean(checked))
+                        }
                         className="h-4 w-4 rounded border-slate-300 data-[state=checked]:bg-violet-600 dark:border-slate-600"
                         disabled={disabled}
                       />
-                      <Label.Root htmlFor="remember-for-30-days" className="cursor-pointer select-none text-xs font-medium text-slate-600 dark:text-slate-400">
+                      <Label.Root
+                        htmlFor="remember-for-30-days"
+                        className="cursor-pointer select-none text-xs font-medium text-slate-600 dark:text-slate-400"
+                      >
                         Keep me signed in for 30 days
                       </Label.Root>
                     </div>
@@ -478,19 +586,52 @@ export const AuthForm = ({
                       <IconBrandGoogle className="h-4 w-4" />
                       <span>Continue with Google</span>
                     </AuthHoverButton>
+
+                    {onMockSignIn && (
+                      <AuthHoverButton
+                        type="button"
+                        onClick={async () => {
+                          resetFeedback();
+                          const result = await onMockSignIn();
+                          if (result.error)
+                            setErrors({ general: result.error });
+                        }}
+                        className="shadow-input inline-flex h-10 w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 transition-all hover:border-orange-400 hover:bg-orange-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                        disabled={disabled}
+                      >
+                        <IconShieldCheck className="h-4 w-4" />
+                        <span>Mock Sign In (Dev)</span>
+                      </AuthHoverButton>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
 
               <p className="pt-1 text-center text-sm text-slate-600 dark:text-slate-400">
-                {mode === "forgot" ? "Remembered your password?" : mode === "signup" ? "Already have an account?" : "Don't have an account?"}{" "}
+                {mode === "forgot"
+                  ? "Remembered your password?"
+                  : mode === "signup"
+                    ? "Already have an account?"
+                    : "Don't have an account?"}{" "}
                 <button
                   type="button"
-                  onClick={() => toggleMode(mode === "forgot" ? "signin" : mode === "signup" ? "signin" : "signup")}
+                  onClick={() =>
+                    toggleMode(
+                      mode === "forgot"
+                        ? "signin"
+                        : mode === "signup"
+                          ? "signin"
+                          : "signup",
+                    )
+                  }
                   className="font-semibold text-violet-600 transition-colors hover:text-violet-500 dark:text-violet-400 dark:hover:text-violet-300"
                   disabled={disabled}
                 >
-                  {mode === "forgot" ? "Sign in" : mode === "signup" ? "Sign in" : "Sign up"}
+                  {mode === "forgot"
+                    ? "Sign in"
+                    : mode === "signup"
+                      ? "Sign in"
+                      : "Sign up"}
                 </button>
               </p>
             </form>
@@ -503,17 +644,42 @@ export const AuthForm = ({
 
 /* --- SUBCOMPONENTS --- */
 
-const FormField = ({ label, htmlFor, error, children }: { label: string; htmlFor: string; error?: string; children: React.ReactNode }) => (
+export const FormField = ({
+  label,
+  htmlFor,
+  error,
+  children,
+}: {
+  label: string;
+  htmlFor: string;
+  error?: string;
+  children: React.ReactNode;
+}) => (
   <div className="space-y-1.5">
-    <Label.Root htmlFor={htmlFor} className={cn("text-sm font-medium text-slate-700 dark:text-slate-300", error && "text-red-500")}>
+    <Label.Root
+      htmlFor={htmlFor}
+      className={cn(
+        "text-sm font-medium text-slate-700 dark:text-slate-300",
+        error && "text-red-500",
+      )}
+    >
       {label}
     </Label.Root>
     {children}
-    {error && <p role="alert" className="text-xs text-red-500">{error}</p>}
+    {error && (
+      <p role="alert" className="text-xs text-red-500">
+        {error}
+      </p>
+    )}
   </div>
 );
 
-const PasswordInput = ({ showPassword, onTogglePassword, className, ...props }: any) => {
+export const PasswordInput = ({
+  showPassword,
+  onTogglePassword,
+  className,
+  ...props
+}: any) => {
   const radius = 100;
   const [visible, setVisible] = useState(false);
   const mouseX = useMotionValue(0);
@@ -535,7 +701,10 @@ const PasswordInput = ({ showPassword, onTogglePassword, className, ...props }: 
     >
       <input
         type={showPassword ? "text" : "password"}
-        className={cn("shadow-input flex h-10 w-full rounded-md border-none bg-gray-50 px-3 py-2 pr-10 text-sm text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:bg-zinc-800 dark:text-white", className)}
+        className={cn(
+          "shadow-input flex h-10 w-full rounded-md border-none bg-gray-50 px-3 py-2 pr-10 text-sm text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:bg-zinc-800 dark:text-white",
+          className,
+        )}
         {...props}
       />
       <button
@@ -543,13 +712,17 @@ const PasswordInput = ({ showPassword, onTogglePassword, className, ...props }: 
         onClick={onTogglePassword}
         className="absolute inset-y-0 right-1 inline-flex items-center justify-center px-2 text-slate-500 hover:text-slate-900"
       >
-        {showPassword ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
+        {showPassword ? (
+          <IconEyeOff className="h-4 w-4" />
+        ) : (
+          <IconEye className="h-4 w-4" />
+        )}
       </button>
     </motion.div>
   );
 };
 
-const AuthHoverButton = ({ className, children, ...props }: any) => {
+export const AuthHoverButton = ({ className, children, ...props }: any) => {
   const radius = 110;
   const [visible, setVisible] = useState(false);
   const mouseX = useMotionValue(0);
@@ -574,32 +747,85 @@ const AuthHoverButton = ({ className, children, ...props }: any) => {
   );
 };
 
-/**
- * MFA SETUP PLACEHOLDER
- * Swap this with your actual MFA implementation.
- */
-const MfaSetup = ({ onComplete, onSkip }: { onComplete: () => void; onSkip: () => void }) => {
+const VerifyEmailScreen = ({
+  email,
+  onResend,
+  isResending,
+  onBackToSignIn,
+}: {
+  email: string;
+  onResend: () => Promise<{ error: string | null }>;
+  isResending: boolean;
+  onBackToSignIn: () => void;
+}) => {
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
+  const [resendError, setResendError] = useState<string | null>(null);
+
+  const handleResend = async () => {
+    setResendMessage(null);
+    setResendError(null);
+    const result = await onResend();
+    if (result.error) {
+      setResendError(result.error);
+    } else {
+      setResendMessage("Verification email sent. Check your inbox.");
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center space-y-6 py-4 text-center">
-      <div className="rounded-full bg-violet-100 p-4 dark:bg-violet-900/30">
-        <IconShieldCheck className="h-10 w-10 text-violet-600 dark:text-violet-400" />
+      <div className="rounded-full bg-emerald-100 p-4 dark:bg-emerald-900/30">
+        <svg
+          className="h-10 w-10 text-emerald-600 dark:text-emerald-400"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"
+          />
+        </svg>
       </div>
       <div>
-        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Protect your account</h2>
+        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+          Verify your email
+        </h2>
         <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
-          Add an extra layer of security by setting up Two-Factor Authentication now.
+          We sent a verification link to{" "}
+          <span className="font-semibold text-slate-800 dark:text-slate-200">
+            {email}
+          </span>
+          . Click the link to activate your account.
         </p>
       </div>
 
+      {resendMessage && (
+        <p className="text-sm text-emerald-600 dark:text-emerald-400">
+          {resendMessage}
+        </p>
+      )}
+      {resendError && (
+        <p className="text-sm text-red-500">{resendError}</p>
+      )}
+
       <div className="w-full space-y-3">
-        <StatefulButton onClick={onComplete} hoverGlow className="w-full">
-          Set up MFA now
-        </StatefulButton>
-        <button
-          onClick={onSkip}
-          className="text-sm font-medium text-slate-500 hover:text-slate-800 dark:hover:text-slate-300 transition-colors"
+        <AuthHoverButton
+          type="button"
+          onClick={handleResend}
+          disabled={isResending}
+          className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 transition-all hover:border-violet-400 hover:bg-violet-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
         >
-          I'll do this later
+          {isResending ? "Resending..." : "Resend verification email"}
+        </AuthHoverButton>
+        <button
+          type="button"
+          onClick={onBackToSignIn}
+          className="text-sm font-semibold text-violet-600 transition-colors hover:text-violet-500 dark:text-violet-400 dark:hover:text-violet-300"
+        >
+          Back to sign in
         </button>
       </div>
     </div>

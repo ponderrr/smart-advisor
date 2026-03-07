@@ -6,6 +6,12 @@ import {
   CardDescription,
   CardTitle,
 } from "@/components/cards-demo-3";
+import {
+  PrivateProfileSVG,
+  WarpSpeedSVG,
+  EasyTrustSVG,
+  ChooseBothSVG,
+} from "@/components/animated-svgs";
 
 export default function FeaturesSectionDemo() {
   const cardClassName =
@@ -24,10 +30,10 @@ export default function FeaturesSectionDemo() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {/* 1. SECURE LOCK (Snap & Bounce) */}
+          {/* 1. Private Profile - Lock with checkmark */}
           <Card className={cardClassName}>
             <div className="mt-5 h-[10rem] flex items-center justify-center">
-              <CardVideo src="/animations/lock-with-green-tick.webm" tilt="-2deg" />
+              <PrivateProfileSVG className="h-full w-auto max-w-[180px]" />
             </div>
             <CardTitle>Private Profile</CardTitle>
             <CardDescription>
@@ -35,10 +41,10 @@ export default function FeaturesSectionDemo() {
             </CardDescription>
           </Card>
 
-          {/* 2. DATA FLOW (Elastic Bars) */}
+          {/* 2. Warp Speed - Lightning bolt with rings */}
           <Card className={cardClassName}>
             <div className="mt-5 h-[10rem] flex items-center justify-center">
-              <CardVideo src="/animations/Sandy%20Loading.webm" />
+              <WarpSpeedSVG className="h-full w-auto max-w-[180px]" />
             </div>
             <CardTitle>Warp Speed Results</CardTitle>
             <CardDescription>
@@ -46,10 +52,10 @@ export default function FeaturesSectionDemo() {
             </CardDescription>
           </Card>
 
-          {/* 3. SHIELD (Pulse & Rotate) */}
+          {/* 3. Easy Trust - Shield with star */}
           <Card className={cardClassName}>
             <div className="mt-5 h-[10rem] flex items-center justify-center">
-              <CardVideo src="/animations/security-status-safe.webm" tilt="2deg" />
+              <EasyTrustSVG className="h-full w-auto max-w-[180px]" />
             </div>
             <CardTitle>Easy-To-Trust Picks</CardTitle>
             <CardDescription>
@@ -57,10 +63,10 @@ export default function FeaturesSectionDemo() {
             </CardDescription>
           </Card>
 
-          {/* 4. RADAR (Ping & Seek) */}
+          {/* 4. Choose Both - Book and film */}
           <Card className={cardClassName}>
             <div className="mt-5 h-[10rem] flex items-center justify-center">
-              <CombinedResultsVideo />
+              <ChooseBothSVG className="h-full w-auto max-w-[280px]" />
             </div>
             <CardTitle>Choose Across Both</CardTitle>
             <CardDescription>
@@ -72,47 +78,3 @@ export default function FeaturesSectionDemo() {
     </section>
   );
 }
-
-const CardVideo = ({ src, tilt = "0deg" }: { src: string; tilt?: string }) => {
-  return (
-    <video
-      src={src}
-      autoPlay
-      loop
-      muted
-      playsInline
-      preload="auto"
-      className="h-full w-full max-w-[180px] rounded-xl object-cover [filter:saturate(1.05)_brightness(1.02)] dark:[filter:saturate(0.95)_brightness(0.92)_contrast(1.08)]"
-      style={{ transform: `rotate(${tilt})` }}
-    />
-  );
-};
-
-const CombinedResultsVideo = () => {
-  return (
-    <div className="grid w-full max-w-[280px] grid-cols-2 gap-4">
-      <div className="overflow-hidden rounded-xl">
-        <video
-          src="/animations/Books.webm"
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          className="h-28 w-full object-cover"
-        />
-      </div>
-      <div className="overflow-hidden rounded-xl">
-        <video
-          src="/animations/Popcorn.webm"
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          className="h-28 w-full object-cover"
-        />
-      </div>
-    </div>
-  );
-};
