@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     title: "Smart Advisor — AI Movie & Book Recommendations",
     description:
       "Answer a short personality quiz and get a movie or book recommendation tailored specifically to you — powered by Claude AI.",
-    images: ["https://smartadvisor.live/smart-advisor-preview.png"],
+    images: ["https://smartadvisor.live/images/smart-advisor-preview.png"],
     siteName: "Smart Advisor",
   },
   twitter: {
@@ -23,12 +23,11 @@ export const metadata: Metadata = {
     title: "Smart Advisor — AI Movie & Book Recommendations",
     description:
       "Answer a short personality quiz and get a movie or book recommendation tailored specifically to you — powered by Claude AI.",
-    images: ["https://smartadvisor.live/smart-advisor-preview.png"],
+    images: ["https://smartadvisor.live/images/smart-advisor-preview.png"],
   },
   robots: "index, follow",
   icons: {
-    icon: "/SmartAdvisor-LM.svg",
-    apple: "/SmartAdvisor-LM.svg",
+    icon: { url: "/svgs/smartadvisor/SmartAdvisor.svg", type: "image/svg+xml" },
   },
 };
 
@@ -39,7 +38,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>
+      <body className="antialiased">
         <Providers>{children}</Providers>
       </body>
     </html>

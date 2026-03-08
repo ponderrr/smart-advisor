@@ -9,12 +9,12 @@ export function BrandWordmark({ className, imageClassName }: BrandWordmarkProps)
   return (
     <span className={cn("inline-flex shrink-0 items-center whitespace-nowrap", className)}>
       <img
-        src="/SmartAdvisor-LM.svg"
+        src="/svgs/smartadvisor/SmartAdvisor-LM.svg"
         alt="Smart Advisor"
         className={cn("h-8 w-auto shrink-0 dark:hidden", imageClassName)}
       />
       <img
-        src="/SmartAdvisor-DM.svg"
+        src="/svgs/smartadvisor/SmartAdvisor-DM.svg"
         alt="Smart Advisor"
         className={cn("hidden h-8 w-auto shrink-0 dark:block", imageClassName)}
       />
