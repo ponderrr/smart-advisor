@@ -128,7 +128,7 @@ export const teamMembers = [
       "Built Smart Advisor to make recommendations feel personal, fast, and genuinely useful.",
     name: "Andrew Ponder",
     designation: "Creator",
-    src: "/Andrew.jpg",
+    src: "/images/Andrew.jpg",
   },
   {
     quote:

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="135%" y2="135%">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+  </defs>
+  <style>
+    .triangle { fill: #1a1a2e; opacity: 0.18; }
+    .sparkle  { fill: #1a1a2e; opacity: 0.5; }
+    @media (prefers-color-scheme: dark) {
+      .triangle { fill: #ffffff; opacity: 0.25; }
+      .sparkle  { fill: #ffffff; opacity: 0.85; }
+    }
+  </style>
+
+  <!-- Bookmark centered and scaled to fill favicon -->
+  <g transform="translate(16, 16) scale(1.2) translate(-16, -15)">
+    <path d="M9 4 L23 4 L23 26 L16 21 L9 26 Z" fill="url(#g)"/>
+    <path d="M13 11 L21 15 L13 19 Z" class="triangle"/>
+    <!-- Sparkle beneath bookmark tip -->
+    <path d="M16 21.5 L16.5 22.8 L18 23.3 L16.5 23.8 L16 25.1 L15.5 23.8 L14 23.3 L15.5 22.8 Z" class="sparkle"/>
+  </g>
+</svg>
