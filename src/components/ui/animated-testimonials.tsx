@@ -21,6 +21,9 @@ export const AnimatedTestimonials = ({
   showArrows?: boolean;
 }) => {
   const [active, setActive] = useState(0);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
 
   const handleNext = useCallback(() => {
     setActive((prev) => (prev + 1) % testimonials.length);
@@ -54,12 +57,24 @@ export const AnimatedTestimonials = ({
               {testimonials.map((testimonial, index) => (
                 <motion.div
                   key={testimonial.src}
-                  initial={{
-                    opacity: 0,
-                    scale: 0.9,
-                    z: -100,
-                    rotate: getRotateY(index),
-                  }}
+                  initial={
+                    mounted
+                      ? {
+                          opacity: 0,
+                          scale: 0.9,
+                          z: -100,
+                          rotate: getRotateY(index),
+                        }
+                      : {
+                          opacity: isActive(index) ? 1 : 0.7,
+                          scale: isActive(index) ? 1 : 0.95,
+                          z: isActive(index) ? 0 : -100,
+                          rotate: isActive(index) ? 0 : getRotateY(index),
+                          zIndex: isActive(index)
+                            ? 40
+                            : testimonials.length + 2 - index,
+                        }
+                  }
                   animate={{
                     opacity: isActive(index) ? 1 : 0.7,
                     scale: isActive(index) ? 1 : 0.95,

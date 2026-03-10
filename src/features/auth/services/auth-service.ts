@@ -160,10 +160,20 @@ class AuthService {
         );
 
         if (profileError) {
-          await supabase.auth.signOut();
-          return {
-            error: "Failed to create user profile. Please try signing in.",
-          };
+          // Check if profile was already created (e.g. by a database trigger)
+          const { data: existingProfile } = await supabase
+            .from("profiles")
+            .select("id")
+            .eq("id", authData.user.id)
+            .single();
+
+          if (!existingProfile) {
+            await supabase.auth.signOut();
+            return {
+              error: "Failed to create user profile. Please try signing in.",
+            };
+          }
+          // Profile exists (likely created by trigger), continue normally
         }
       }
 

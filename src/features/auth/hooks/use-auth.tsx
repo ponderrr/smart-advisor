@@ -9,6 +9,7 @@ import { User as SupabaseUser, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@/features/auth/types/user";
 import { authService } from "@/features/auth/services/auth-service";
+import { sessionManagementService } from "@/features/auth/services/session-management";
 
 interface AuthContextType {
   user: User | null;
@@ -176,6 +177,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
           if (event === "SIGNED_IN" && session?.user) {
             fetchUserProfile(session.user, abortController.signal);
+            // Ensure a session record exists for Active Sessions tracking
+            if (typeof window !== "undefined" && session.access_token) {
+              sessionManagementService
+                .createSessionRecord(
+                  session.user.id,
+                  session.access_token,
+                  navigator.userAgent,
+                )
+                .catch(() => {
+                  // Non-critical: don't block auth flow if session tracking fails
+                });
+            }
           } else if (event === "TOKEN_REFRESHED" && session?.user) {
             setSession(session);
           } else if (!session?.user) {

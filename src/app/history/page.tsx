@@ -217,15 +217,15 @@ const AccountHistoryPage = () => {
 
       <main className="px-6 pb-20 pt-32 md:pt-36">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
                 History
               </p>
-              <h1 className="mt-3 text-5xl font-black tracking-tighter md:text-6xl">
+              <h1 className="mt-2 text-4xl font-black tracking-tighter sm:text-5xl">
                 Your Recommendation Library
               </h1>
-              <p className="mt-3 max-w-2xl text-base text-slate-600 dark:text-slate-400 md:text-lg">
+              <p className="mt-2 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
                 Browse everything you have saved and refine what you keep.
               </p>
             </div>

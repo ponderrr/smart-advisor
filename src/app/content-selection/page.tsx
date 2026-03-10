@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from 'next/navigation';
 import { motion } from "framer-motion";
-import { Check } from "lucide-react";
+import { Check, ArrowLeft, ArrowRight } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useQuizStore } from '@/features/quiz/store/quiz-store';
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Button as StatefulButton } from "@/components/ui/stateful-button";
+import { GlowPillButton } from "@/components/ui/glow-pill-button";
 import {
   Navbar,
   NavBody,
@@ -43,15 +43,14 @@ const SelectionCard: React.FC<SelectionCardProps> = ({
   onClick,
 }) => {
   return (
-    <motion.button
-      type="button"
+    <GlowPillButton
       onClick={() => onClick(id)}
-      whileHover={{ y: -4 }}
+      active={isSelected}
       className={cn(
-        "w-full overflow-hidden rounded-3xl border p-0 text-left shadow-sm backdrop-blur-md transition-all duration-300",
+        "relative w-full overflow-hidden rounded-3xl border p-0 text-left shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-1",
         isSelected
           ? "border-indigo-500 bg-white shadow-lg dark:border-indigo-400 dark:bg-slate-900/70"
-          : "border-slate-200/80 bg-white/80 hover:-translate-y-1 hover:border-indigo-300 hover:shadow-md dark:border-slate-700/70 dark:bg-slate-900/65 dark:hover:border-indigo-500/60",
+          : "border-slate-200/80 bg-white/80 hover:border-indigo-300 hover:shadow-md dark:border-slate-700/70 dark:bg-slate-900/65 dark:hover:border-indigo-500/60",
       )}
     >
       {isSelected && (
@@ -95,11 +94,11 @@ const SelectionCard: React.FC<SelectionCardProps> = ({
         )}
       </div>
 
-      <div className="p-5">
-        <h3 className="text-2xl font-black tracking-tight">{title}</h3>
+      <div className="p-4 sm:p-5">
+        <h3 className="text-xl font-black tracking-tight sm:text-2xl">{title}</h3>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{description}</p>
       </div>
-    </motion.button>
+    </GlowPillButton>
   );
 };
 
@@ -110,6 +109,8 @@ const ContentSelectionPage = () => {
   const [selectedType, setSelectedType] = useState<ContentType>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showValidationFlash, setShowValidationFlash] = useState(false);
+  const [validationMessage, setValidationMessage] = useState<string | null>(null);
 
   const navItems = [
     { name: "Dashboard", link: "/dashboard" },
@@ -117,19 +118,22 @@ const ContentSelectionPage = () => {
     { name: "Settings", link: "/settings" },
   ];
 
-  const handleContinue = async () => {
-    if (!selectedType) return;
+  const handleContinue = () => {
+    if (!selectedType) {
+      setShowValidationFlash(true);
+      setValidationMessage("Please select an option before continuing.");
+      window.setTimeout(() => setShowValidationFlash(false), 650);
+      window.setTimeout(() => setValidationMessage(null), 3200);
+      return;
+    }
 
     setIsLoading(true);
+    setContentType(selectedType);
+    router.push("/question-count");
+  };
 
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      setContentType(selectedType);
-      router.push("/question-count");
-    } catch (error) {
-      console.error("Error proceeding to question count:", error);
-      setIsLoading(false);
-    }
+  const handleBack = () => {
+    router.push("/dashboard");
   };
 
   const handleSignOut = async () => {
@@ -174,11 +178,9 @@ const ContentSelectionPage = () => {
           <div className="flex w-[320px] shrink-0 items-center">
             <NavbarLogo />
           </div>
-
           <div className="flex flex-1 justify-center">
             <NavItems items={navItems} className="justify-center px-2" />
           </div>
-
           <div className="flex w-[320px] shrink-0 items-center justify-end gap-4">
             <ThemeToggle />
             <button
@@ -190,7 +192,6 @@ const ContentSelectionPage = () => {
             </button>
           </div>
         </NavBody>
-
         <MobileNav>
           <MobileNavHeader>
             <NavbarLogo />
@@ -230,40 +231,94 @@ const ContentSelectionPage = () => {
         </MobileNav>
       </Navbar>
 
-      <main className="px-6 pb-20 pt-32 md:pt-36">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-10 text-center">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Step 1 of 4</p>
-            <h1 className="mt-4 text-4xl font-black tracking-tighter md:text-5xl">What would you like a recommendation for?</h1>
-            <p className="mx-auto mt-3 max-w-2xl text-base text-slate-600 dark:text-slate-400 md:text-lg">
-              Pick one option to start your personalized flow.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            {cards.map((card) => (
-              <SelectionCard
-                key={card.id}
-                id={card.id}
-                title={card.title}
-                description={card.description}
-                mediaSrc={card.mediaSrc}
-                secondaryMediaSrc={card.secondaryMediaSrc}
-                isSelected={selectedType === card.id}
-                onClick={setSelectedType}
-              />
-            ))}
-          </div>
-
-          <div className="mt-8 flex justify-center">
-            <StatefulButton
-              onClick={handleContinue}
-              disabled={!selectedType || isLoading}
-              state={isLoading ? "loading" : "idle"}
-              className="h-14 w-auto rounded-full px-12 text-base font-black tracking-tight sm:text-lg"
+      <main className="px-4 pb-20 pt-32 md:pt-36 sm:px-6">
+        <div className="mx-auto w-full max-w-4xl">
+          {/* Demo-style header bar */}
+          <div className="mb-8 flex items-center justify-between gap-3">
+            <GlowPillButton
+              onClick={handleBack}
+              className="inline-flex items-center gap-2 border-slate-300/80 bg-white/80 px-4 py-2 text-sm font-semibold dark:border-slate-700 dark:bg-slate-900/70"
             >
-              Continue
-            </StatefulButton>
+              <ArrowLeft size={16} />
+              Back
+            </GlowPillButton>
+            <p className="text-base font-extrabold tracking-wide text-slate-800 dark:text-slate-100 md:text-lg">
+              Step 1 of 4
+            </p>
+            <div className="flex items-center gap-3">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                Quiz Setup
+              </p>
+              <ThemeToggle />
+            </div>
+          </div>
+
+          {/* Progress bar */}
+          <div className="mb-8 h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
+            <motion.div
+              className="h-full rounded-full bg-indigo-500"
+              initial={false}
+              animate={{ width: "25%" }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            />
+          </div>
+
+          {/* Card container */}
+          <div className="rounded-3xl border border-slate-200/70 bg-white/85 p-6 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.22 }}
+            >
+              <h1 className="text-2xl font-black tracking-tight sm:text-3xl">
+                What would you like a recommendation for?
+              </h1>
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 sm:text-base">
+                Pick one so we can tailor your recommendation flow.
+              </p>
+
+              <div className="mt-7 grid grid-cols-1 gap-4 md:grid-cols-3">
+                {cards.map((card) => (
+                  <SelectionCard
+                    key={card.id}
+                    id={card.id}
+                    title={card.title}
+                    description={card.description}
+                    mediaSrc={card.mediaSrc}
+                    secondaryMediaSrc={card.secondaryMediaSrc}
+                    isSelected={selectedType === card.id}
+                    onClick={setSelectedType}
+                  />
+                ))}
+              </div>
+            </motion.div>
+
+            <div className="mt-8 flex items-center justify-end">
+              <motion.div
+                animate={
+                  showValidationFlash
+                    ? { scale: [1, 1.03, 0.99, 1], x: [0, -4, 4, 0] }
+                    : { scale: 1, x: 0 }
+                }
+                transition={{ duration: 0.45 }}
+              >
+                <GlowPillButton
+                  onClick={handleContinue}
+                  disabled={isLoading}
+                  className={cn(
+                    "inline-flex items-center justify-center gap-2 bg-slate-900 px-6 py-2.5 text-sm font-black tracking-tight text-white disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-100 dark:text-slate-900",
+                  )}
+                >
+                  {isLoading ? "Continuing..." : "Continue"}
+                  <ArrowRight size={16} />
+                </GlowPillButton>
+              </motion.div>
+            </div>
+            {validationMessage ? (
+              <p className="mt-3 text-right text-xs font-semibold text-red-500 dark:text-red-400">
+                {validationMessage}
+              </p>
+            ) : null}
           </div>
         </div>
       </main>

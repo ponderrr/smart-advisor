@@ -4,6 +4,7 @@ import { AuthProvider } from "@/features/auth/hooks/use-auth";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
 import { useState } from "react";
+import { SiteBanner } from "@/components/site-banner";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -26,6 +27,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
+          <SiteBanner />
           <div className="min-h-screen bg-background font-sans antialiased">
             {children}
           </div>

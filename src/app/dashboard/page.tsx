@@ -37,6 +37,7 @@ import {
   MobileNavMenu,
 } from "@/components/ui/resizable-navbar";
 import { cn } from "@/lib/utils";
+import { MfaSetupPrompt } from "@/components/mfa-setup-prompt";
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 18 },
@@ -165,10 +166,10 @@ const DashboardPage = () => {
               <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
                 Dashboard
               </p>
-              <h1 className="mt-2 text-4xl font-black tracking-tighter sm:text-5xl md:text-6xl">
+              <h1 className="mt-2 text-4xl font-black tracking-tighter sm:text-5xl">
                 Welcome{user?.name ? `, ${user.name}` : ""}.
               </h1>
-              <p className="mt-2 max-w-xl text-sm text-slate-500 dark:text-slate-400 md:text-base">
+              <p className="mt-2 max-w-xl text-sm text-slate-500 dark:text-slate-400">
                 Your personalized recommendation hub.
               </p>
             </div>
@@ -355,6 +356,8 @@ const DashboardPage = () => {
           </div>
         </div>
       </main>
+
+      <MfaSetupPrompt userId={user?.id} />
     </div>
   );
 };
