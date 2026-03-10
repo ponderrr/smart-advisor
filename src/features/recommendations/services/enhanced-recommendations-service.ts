@@ -81,45 +81,62 @@ class EnhancedRecommendationsService {
     }
   }
 
+  /**
+   * Determines target counts: 6 for single type, 3+3 for both.
+   * Makes parallel AI calls, deduplicates by title, enriches, and saves.
+   */
   async generateEnhancedRecommendations(
     questionnaireData: QuestionnaireData,
     userId: string
   ): Promise<Recommendation[]> {
     const { answers, contentType, userAge, userName } = questionnaireData;
 
-    const aiRecommendations = await generateRecommendations(
-      answers,
-      contentType,
-      userAge,
-      userName
+    const movieTarget = contentType === "movie" ? 6 : contentType === "both" ? 3 : 0;
+    const bookTarget = contentType === "book" ? 6 : contentType === "both" ? 3 : 0;
+    const totalCalls = contentType === "both" ? 3 : 6;
+
+    // Make parallel AI calls to collect multiple recommendations
+    const callResults = await Promise.allSettled(
+      Array.from({ length: totalCalls }, () =>
+        generateRecommendations(answers, contentType, userAge, userName)
+      )
     );
 
-    const recommendationsArray: Partial<Recommendation>[] = [];
+    const movieRecs: Partial<Recommendation>[] = [];
+    const bookRecs: Partial<Recommendation>[] = [];
+    const seenMovieTitles = new Set<string>();
+    const seenBookTitles = new Set<string>();
 
-    if (contentType === "movie" || contentType === "both") {
-      if (aiRecommendations.movieRecommendation) {
-        recommendationsArray.push({
-          ...aiRecommendations.movieRecommendation,
-          type: "movie",
-        });
+    for (const result of callResults) {
+      if (result.status !== "fulfilled") continue;
+      const data = result.value;
+
+      if (data.movieRecommendation && movieRecs.length < movieTarget) {
+        const title = data.movieRecommendation.title.toLowerCase().trim();
+        if (!seenMovieTitles.has(title)) {
+          seenMovieTitles.add(title);
+          movieRecs.push({ ...data.movieRecommendation, type: "movie" });
+        }
+      }
+
+      if (data.bookRecommendation && bookRecs.length < bookTarget) {
+        const title = data.bookRecommendation.title.toLowerCase().trim();
+        if (!seenBookTitles.has(title)) {
+          seenBookTitles.add(title);
+          bookRecs.push({ ...data.bookRecommendation, type: "book" });
+        }
       }
     }
 
-    if (contentType === "book" || contentType === "both") {
-      if (aiRecommendations.bookRecommendation) {
-        recommendationsArray.push({
-          ...aiRecommendations.bookRecommendation,
-          type: "book",
-        });
-      }
-    }
+    const allRecs = [...movieRecs, ...bookRecs];
 
-    if (recommendationsArray.length === 0) {
+    if (allRecs.length === 0) {
       throw new Error("No recommendations were generated");
     }
 
+    // Enrich and save each recommendation
     const enhancedRecommendations = await Promise.all(
-      recommendationsArray.map(async (rec) => {
+      allRecs.map(async (rec) => {
         try {
           let enhancedRec = { ...rec };
 

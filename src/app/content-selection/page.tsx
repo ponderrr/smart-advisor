@@ -245,12 +245,9 @@ const ContentSelectionPage = () => {
             <p className="text-base font-extrabold tracking-wide text-slate-800 dark:text-slate-100 md:text-lg">
               Step 1 of 4
             </p>
-            <div className="flex items-center gap-3">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                Quiz Setup
-              </p>
-              <ThemeToggle />
-            </div>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+              Quiz Setup
+            </p>
           </div>
 
           {/* Progress bar */}

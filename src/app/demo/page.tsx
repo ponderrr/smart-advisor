@@ -8,6 +8,16 @@ import { IconArrowLeft, IconArrowRight, IconCheck } from "@tabler/icons-react";
 import { useQuizStore, type ContentType } from "@/features/quiz/store/quiz-store";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { GlowPillButton } from "@/components/ui/glow-pill-button";
+import {
+  Navbar,
+  NavBody,
+  NavItems,
+  MobileNav,
+  NavbarLogo,
+  MobileNavHeader,
+  MobileNavToggle,
+  MobileNavMenu,
+} from "@/components/ui/resizable-navbar";
 import { cn } from "@/lib/utils";
 
 type DemoQuestion = {
@@ -216,28 +226,73 @@ export default function DemoPage() {
     setStep((prev) => prev - 1);
   };
   const [showValidationFlash, setShowValidationFlash] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const navItems = [
+    { name: "How It Works", link: "/#how-it-works" },
+    { name: "FAQ", link: "/#faq" },
+  ];
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-10 text-slate-900 dark:bg-slate-950 dark:text-slate-100 sm:px-6">
-      <div className="mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-4xl flex-col justify-center">
-        <div className="mb-8 flex items-center justify-between gap-3">
-          <GlowPillButton
-            onClick={handleBack}
-            className="inline-flex items-center gap-2 border-slate-300/80 bg-white/80 px-4 py-2 text-sm font-semibold dark:border-slate-700 dark:bg-slate-900/70"
-          >
-            <IconArrowLeft className="h-4 w-4" />
-            Back
-          </GlowPillButton>
-          <p className="text-base font-extrabold tracking-wide text-slate-800 dark:text-slate-100 md:text-lg">
-            {step + 1} out of {DEMO_QUESTIONS.length} questions
-          </p>
-          <div className="flex items-center gap-3">
+    <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
+      <Navbar>
+        <NavBody>
+          <div className="flex min-w-0 flex-1 items-center">
+            <NavbarLogo />
+          </div>
+          <div className="flex shrink-0 justify-center px-6">
+            <NavItems items={navItems} className="justify-center px-2" />
+          </div>
+          <div className="flex min-w-0 flex-1 items-center justify-end gap-4">
+            <ThemeToggle />
+          </div>
+        </NavBody>
+        <MobileNav>
+          <MobileNavHeader>
+            <NavbarLogo />
+            <div className="flex items-center gap-4">
+              <ThemeToggle />
+              <MobileNavToggle
+                isOpen={isMobileMenuOpen}
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              />
+            </div>
+          </MobileNavHeader>
+          <MobileNavMenu isOpen={isMobileMenuOpen}>
+            {navItems.map((item) => (
+              <button
+                key={item.name}
+                type="button"
+                onClick={() => {
+                  router.push(item.link);
+                  setIsMobileMenuOpen(false);
+                }}
+                className="text-left text-xl font-black tracking-tight text-slate-800 dark:text-slate-100"
+              >
+                {item.name}
+              </button>
+            ))}
+          </MobileNavMenu>
+        </MobileNav>
+      </Navbar>
+
+      <main className="px-4 pb-20 pt-32 md:pt-36 sm:px-6">
+        <div className="mx-auto w-full max-w-4xl">
+          <div className="mb-8 flex items-center justify-between gap-3">
+            <GlowPillButton
+              onClick={handleBack}
+              className="inline-flex items-center gap-2 border-slate-300/80 bg-white/80 px-4 py-2 text-sm font-semibold dark:border-slate-700 dark:bg-slate-900/70"
+            >
+              <IconArrowLeft className="h-4 w-4" />
+              Back
+            </GlowPillButton>
+            <p className="text-base font-extrabold tracking-wide text-slate-800 dark:text-slate-100 md:text-lg">
+              {step + 1} out of {DEMO_QUESTIONS.length} questions
+            </p>
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
               Demo Survey
             </p>
-            <ThemeToggle />
           </div>
-        </div>
 
         <div className="mb-8 h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
           <motion.div
@@ -336,5 +391,6 @@ export default function DemoPage() {
         </div>
       </div>
     </main>
+    </div>
   );
 }
