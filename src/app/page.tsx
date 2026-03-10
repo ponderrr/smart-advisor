@@ -361,7 +361,7 @@ const Index = () => {
                   <button
                     type="button"
                     onClick={() => smoothScrollToSection(item.href)}
-                    className="transition-colors hover:text-rose-600 dark:hover:text-rose-400"
+                    className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400"
                   >
                     {item.label}
                   </button>
@@ -393,7 +393,7 @@ const Index = () => {
                 aria-label="GitHub"
                 target="_blank"
                 rel="noreferrer"
-                className="transition-colors hover:text-rose-600 dark:hover:text-rose-400"
+                className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400"
               >
                 <IconBrandGithub className="h-5 w-5" />
               </a>

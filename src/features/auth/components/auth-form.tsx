@@ -19,13 +19,15 @@ import { cn } from "@/lib/utils";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ShieldCheck, KeyRound } from "lucide-react";
+import { MfaSetup } from "./mfa-setup";
 
 export type AuthMode =
   | "signin"
   | "signup"
   | "forgot"
   | "verify-email"
-  | "mfa-challenge";
+  | "mfa-challenge"
+  | "mfa-setup";
 
 const MODE_HEADINGS = {
   signin: [
@@ -48,6 +50,11 @@ const MODE_HEADINGS = {
     "Verify your identity",
     "One more step",
     "Security check",
+  ],
+  "mfa-setup": [
+    "Secure your account",
+    "Add extra protection",
+    "Enable two-factor auth",
   ],
 } as const;
 
@@ -124,6 +131,7 @@ export const AuthForm = ({
     forgot: 0,
     "verify-email": 0,
     "mfa-challenge": 0,
+    "mfa-setup": 0,
   });
   const [signupEmail, setSignupEmail] = useState("");
 
@@ -155,6 +163,9 @@ export const AuthForm = ({
       ),
       "mfa-challenge": Math.floor(
         Math.random() * MODE_HEADINGS["mfa-challenge"].length,
+      ),
+      "mfa-setup": Math.floor(
+        Math.random() * MODE_HEADINGS["mfa-setup"].length,
       ),
     });
   }, []);
@@ -317,7 +328,16 @@ export const AuthForm = ({
           }
           setMode("mfa-challenge");
         } else {
-          router.replace("/dashboard");
+          // Check if user has MFA set up; if not, offer setup
+          const factorsResult = await onListMFAFactors();
+          const hasVerified = factorsResult.data?.totp?.some(
+            (f: any) => f.status === "verified",
+          );
+          if (!hasVerified) {
+            setMode("mfa-setup");
+          } else {
+            router.replace("/dashboard");
+          }
         }
         return result;
       }
@@ -391,10 +411,24 @@ export const AuthForm = ({
         mode === "forgot" && "min-h-[430px]",
         mode === "verify-email" && "min-h-[400px]",
         mode === "mfa-challenge" && "min-h-[440px]",
+        mode === "mfa-setup" && "min-h-[500px]",
       )}
     >
       <AnimatePresence mode="wait">
-        {mode === "verify-email" ? (
+        {mode === "mfa-setup" ? (
+          <motion.div
+            key="mfa-setup"
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -10 }}
+            className="flex flex-col h-full"
+          >
+            <MfaSetup
+              onComplete={() => router.replace("/dashboard")}
+              onSkip={() => router.replace("/dashboard")}
+            />
+          </motion.div>
+        ) : mode === "verify-email" ? (
           <motion.div
             key="verify-email"
             initial={{ opacity: 0, x: 10 }}
