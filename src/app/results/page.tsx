@@ -452,7 +452,7 @@ const ResultsPage = () => {
 
       const { error: toggleError } = await databaseService.toggleFavorite(recommendationId);
       if (toggleError) {
-        toast.error("Failed to update favorite");
+        toast.error("Couldn't update your favorite — please try again");
       } else {
         const rec = recommendations.find((r) => r.id === recommendationId);
         toast.success(rec?.is_favorited ? "Removed from favorites" : "Added to favorites");
@@ -490,7 +490,7 @@ const ResultsPage = () => {
       }
     } else {
       await navigator.clipboard.writeText(text);
-      toast.success("Copied to clipboard!");
+      toast.success("Your picks have been copied to your clipboard!");
     }
   };
 

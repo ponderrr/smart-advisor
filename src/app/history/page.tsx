@@ -8,6 +8,7 @@ import { databaseService, FilterOptions } from "@/features/recommendations/servi
 import { Recommendation } from "@/features/recommendations/types/recommendation";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { GlowPillButton } from "@/components/ui/glow-pill-button";
+import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import {
   Navbar,
   NavBody,
@@ -113,7 +114,7 @@ const AccountHistoryPage = () => {
   const handleToggleFavorite = async (recommendationId: string) => {
     const { error } = await databaseService.toggleFavorite(recommendationId);
     if (error) {
-      toast.error("Failed to update favorite");
+      toast.error("Couldn't update your favorite — please try again");
     } else {
       const rec = recommendations.find((r) => r.id === recommendationId);
       toast.success(rec?.is_favorited ? "Removed from favorites" : "Added to favorites");
@@ -133,9 +134,9 @@ const AccountHistoryPage = () => {
 
     const { error } = await databaseService.deleteRecommendation(recommendationId);
     if (error) {
-      toast.error("Failed to delete recommendation");
+      toast.error("Couldn't remove that recommendation — please try again");
     } else {
-      toast.success("Recommendation deleted");
+      toast.success("Recommendation removed from your library");
       setRecommendations((prev) => prev.filter((rec) => rec.id !== recommendationId));
     }
   };
@@ -229,13 +230,13 @@ const AccountHistoryPage = () => {
                 Browse everything you have saved and refine what you keep.
               </p>
             </div>
-            <GlowPillButton
+            <StatefulButton
               onClick={() => router.push('/content-selection')}
-              className="inline-flex items-center gap-2 border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
+              className="inline-flex w-auto items-center gap-2 px-5 py-3 text-sm font-semibold"
             >
               <Plus size={16} />
               Get New Recommendation
-            </GlowPillButton>
+            </StatefulButton>
           </div>
 
           <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">

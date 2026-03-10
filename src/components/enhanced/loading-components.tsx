@@ -238,6 +238,16 @@ export const EnhancedSpinner: React.FC<{
   );
 };
 
+// Page Loading Sweep Bar
+export const PageLoadingSweep: React.FC = () => {
+  return (
+    <>
+      <div className="page-loading-sweep" role="status" aria-label="Loading page" />
+      <div className="page-loading-glow" />
+    </>
+  );
+};
+
 // Loading Screen Component
 export const LoadingScreen: React.FC<{
   message?: string;
@@ -245,8 +255,8 @@ export const LoadingScreen: React.FC<{
 }> = ({ message = "Loading...", submessage }) => {
   return (
     <div className="min-h-screen bg-appPrimary flex items-center justify-center">
+      <PageLoadingSweep />
       <div className="text-center">
-        <EnhancedSpinner size="lg" className="mx-auto mb-8" />
         <h2 className="text-2xl font-semibold text-textPrimary mb-2">
           {message}
         </h2>

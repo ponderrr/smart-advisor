@@ -53,7 +53,7 @@ export const MfaManagement = ({
     setLoading(false);
 
     if (error) {
-      toast.error("Failed to load MFA factors");
+      toast.error("Couldn't load your security settings — please refresh the page");
       return;
     }
 
@@ -104,7 +104,7 @@ export const MfaManagement = ({
     if (error) {
       toast.error(error);
     } else {
-      toast.success("MFA disabled successfully");
+      toast.success("Two-factor authentication has been turned off");
       await loadFactors();
       onMfaStatusChange?.();
     }
@@ -122,7 +122,7 @@ export const MfaManagement = ({
 
     setNewBackupCodes(codes);
     setBackupCodeCount(codes.length);
-    toast.success("New backup codes generated");
+    toast.success("Fresh backup codes are ready — save them somewhere safe");
   };
 
   const handleCopyBackupCodes = () => {
@@ -130,7 +130,7 @@ export const MfaManagement = ({
     navigator.clipboard.writeText(text);
     setBackupCodesCopied(true);
     setTimeout(() => setBackupCodesCopied(false), 2000);
-    toast.success("Backup codes copied");
+    toast.success("Backup codes copied to your clipboard");
   };
 
   const handleDownloadBackupCodes = () => {

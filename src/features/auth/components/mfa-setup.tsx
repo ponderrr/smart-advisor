@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { authService } from "../services/auth-service";
 import { ShieldCheck, ArrowRight, Copy, Check, Download } from "lucide-react";
 import { motion } from "framer-motion";
@@ -25,6 +25,36 @@ export const MfaSetup = ({ onComplete, onSkip }: MfaSetupProps) => {
   const [copied, setCopied] = useState(false);
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
   const [backupCodesCopied, setBackupCodesCopied] = useState(false);
+  const [qrRefreshCountdown, setQrRefreshCountdown] = useState(0);
+
+  const QR_REFRESH_INTERVAL = 300; // 5 minutes in seconds
+
+  const handleRefreshQr = useCallback(async () => {
+    const { data, error: enrollError } = await authService.enrollMFA();
+    if (!enrollError && data?.totp?.qr_code && data?.id) {
+      setQrCode(data.totp.qr_code);
+      setSecret(data.totp.secret || "");
+      setFactorId(data.id);
+      setQrRefreshCountdown(QR_REFRESH_INTERVAL);
+    }
+  }, []);
+
+  // Auto-refresh QR code countdown
+  useEffect(() => {
+    if (step !== "qr" || qrRefreshCountdown <= 0) return;
+
+    const timer = setInterval(() => {
+      setQrRefreshCountdown((prev) => {
+        if (prev <= 1) {
+          handleRefreshQr();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [step, qrRefreshCountdown, handleRefreshQr]);
 
   const handleEnroll = async () => {
     setLoading(true);
@@ -42,6 +72,7 @@ export const MfaSetup = ({ onComplete, onSkip }: MfaSetupProps) => {
       setQrCode(data.totp.qr_code);
       setSecret(data.totp.secret || "");
       setFactorId(data.id);
+      setQrRefreshCountdown(QR_REFRESH_INTERVAL);
       setStep("qr");
     }
   };
@@ -70,16 +101,16 @@ export const MfaSetup = ({ onComplete, onSkip }: MfaSetupProps) => {
 
     if (backupError || codes.length === 0) {
       // MFA is enabled but backup codes failed — still proceed but warn
-      toast.success("MFA enabled successfully!");
+      toast.success("Two-factor authentication is now active!");
       toast.warning(
-        "Could not generate backup codes. You can regenerate them from Security settings.",
+        "We couldn't generate backup codes right now. You can create them anytime from your Security settings.",
       );
       onComplete();
       return;
     }
 
     setBackupCodes(codes);
-    toast.success("MFA enabled successfully!");
+    toast.success("Two-factor authentication is now active!");
     setStep("backup-codes");
   };
 
@@ -88,7 +119,7 @@ export const MfaSetup = ({ onComplete, onSkip }: MfaSetupProps) => {
       navigator.clipboard.writeText(secret);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-      toast.success("Secret copied to clipboard");
+      toast.success("Secret code copied — paste it in your authenticator app");
     }
   };
 
@@ -97,7 +128,7 @@ export const MfaSetup = ({ onComplete, onSkip }: MfaSetupProps) => {
     navigator.clipboard.writeText(text);
     setBackupCodesCopied(true);
     setTimeout(() => setBackupCodesCopied(false), 2000);
-    toast.success("Backup codes copied to clipboard");
+    toast.success("Backup codes copied to your clipboard");
   };
 
   const handleDownloadBackupCodes = () => {
@@ -119,7 +150,7 @@ export const MfaSetup = ({ onComplete, onSkip }: MfaSetupProps) => {
     a.download = "smart-advisor-backup-codes.txt";
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("Backup codes downloaded");
+    toast.success("Backup codes saved to your downloads");
   };
 
   return (
@@ -181,8 +212,15 @@ export const MfaSetup = ({ onComplete, onSkip }: MfaSetupProps) => {
           </p>
 
           {qrCode && (
-            <div className="my-6 flex justify-center rounded-xl border-4 border-white bg-white p-3 shadow-xl dark:border-slate-800 dark:bg-slate-800">
-              <img src={qrCode} alt="MFA QR Code" className="h-48 w-48" />
+            <div className="my-6">
+              <div className="flex justify-center rounded-xl border-4 border-white bg-white p-3 shadow-xl">
+                <img src={qrCode} alt="MFA QR Code" className="h-48 w-48" />
+              </div>
+              {qrRefreshCountdown > 0 && (
+                <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
+                  QR code refreshes in {Math.floor(qrRefreshCountdown / 60)}:{String(qrRefreshCountdown % 60).padStart(2, "0")}
+                </p>
+              )}
             </div>
           )}
 
