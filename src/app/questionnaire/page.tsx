@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { IconCheck } from "@tabler/icons-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,7 +11,7 @@ import { generateFallbackQuestions } from "@/features/quiz/utils/fallback-questi
 import { Question } from "@/features/quiz/types/question";
 import { Answer } from "@/features/quiz/types/answer";
 import { v4 as uuidv4 } from "uuid";
-import { useQuizStore } from '@/features/quiz/store/quiz-store';
+import { useQuizStore } from "@/features/quiz/store/quiz-store";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { GlowPillButton } from "@/components/ui/glow-pill-button";
 import { supabase } from "@/integrations/supabase/client";
@@ -50,23 +50,68 @@ const QUESTION_OPTION_SETS: Record<"movie" | "book" | "both", string[][]> = {
 
 const SELECT_ALL_OPTIONS: Record<"movie" | "book" | "both", string[][]> = {
   movie: [
-    ["Action", "Comedy", "Drama", "Horror", "Sci-Fi", "Romance", "Thriller", "Documentary"],
-    ["Great acting", "Stunning visuals", "Strong plot", "Unique concept", "Emotional depth", "Humor"],
+    [
+      "Action",
+      "Comedy",
+      "Drama",
+      "Horror",
+      "Sci-Fi",
+      "Romance",
+      "Thriller",
+      "Documentary",
+    ],
+    [
+      "Great acting",
+      "Stunning visuals",
+      "Strong plot",
+      "Unique concept",
+      "Emotional depth",
+      "Humor",
+    ],
   ],
   book: [
-    ["Fantasy", "Mystery", "Sci-Fi", "Romance", "Literary Fiction", "Thriller", "Non-Fiction", "Historical"],
-    ["Rich characters", "Beautiful prose", "Fast plot", "World-building", "Emotional depth", "Humor"],
+    [
+      "Fantasy",
+      "Mystery",
+      "Sci-Fi",
+      "Romance",
+      "Literary Fiction",
+      "Thriller",
+      "Non-Fiction",
+      "Historical",
+    ],
+    [
+      "Rich characters",
+      "Beautiful prose",
+      "Fast plot",
+      "World-building",
+      "Emotional depth",
+      "Humor",
+    ],
   ],
   both: [
-    ["Action", "Fantasy", "Drama", "Mystery", "Sci-Fi", "Romance", "Thriller", "Comedy"],
-    ["Great characters", "Strong plot", "Unique concept", "Emotional depth", "World-building", "Humor"],
+    [
+      "Action",
+      "Fantasy",
+      "Drama",
+      "Mystery",
+      "Sci-Fi",
+      "Romance",
+      "Thriller",
+      "Comedy",
+    ],
+    [
+      "Great characters",
+      "Strong plot",
+      "Unique concept",
+      "Emotional depth",
+      "World-building",
+      "Humor",
+    ],
   ],
 };
 
-const getQuestionOptions = (
-  type: "movie" | "book" | "both",
-  index: number,
-) => {
+const getQuestionOptions = (type: "movie" | "book" | "both", index: number) => {
   const sets = QUESTION_OPTION_SETS[type];
   return sets[index % sets.length];
 };
@@ -80,9 +125,23 @@ const getSelectAllOptions = (
 };
 
 /* ---------- Bouncing Words Loading Animation ---------- */
-const LOADING_WORDS = ["Analyzing", "your", "profile", "and", "crafting", "personalized", "questions"];
+const LOADING_WORDS = [
+  "Analyzing",
+  "your",
+  "profile",
+  "and",
+  "crafting",
+  "personalized",
+  "questions",
+];
 
-const BouncingWordsLoader = ({ questionCount, contentType }: { questionCount: number; contentType: string | null }) => (
+const BouncingWordsLoader = ({
+  questionCount,
+  contentType,
+}: {
+  questionCount: number;
+  contentType: string | null;
+}) => (
   <div className="mx-auto flex min-h-[420px] w-full max-w-4xl flex-col justify-center rounded-3xl border border-slate-200/70 bg-white/85 p-6 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
     <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
       Step 3 of 4
@@ -95,7 +154,16 @@ const BouncingWordsLoader = ({ questionCount, contentType }: { questionCount: nu
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" strokeWidth="2" className="text-indigo-500/20" />
+        <rect
+          x="4"
+          y="4"
+          width="16"
+          height="16"
+          rx="2"
+          stroke="currentColor"
+          strokeWidth="2"
+          className="text-indigo-500/20"
+        />
         <motion.path
           d="M4 8H20"
           stroke="#6366f1"
@@ -160,12 +228,18 @@ const BouncingWordsLoader = ({ questionCount, contentType }: { questionCount: nu
 const QuestionnairePage = () => {
   const router = useRouter();
   const { user, signOut } = useAuth();
-  const { contentType, questionCount, setAnswers: setStoreAnswers } = useQuizStore();
+  const {
+    contentType,
+    questionCount,
+    setAnswers: setStoreAnswers,
+  } = useQuizStore();
 
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [multiAnswers, setMultiAnswers] = useState<Record<string, string[]>>({});
+  const [multiAnswers, setMultiAnswers] = useState<Record<string, string[]>>(
+    {},
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -201,8 +275,15 @@ const QuestionnairePage = () => {
           1,
         );
       } catch (aiErr) {
-        console.warn("AI question generation failed, using fallback questions:", aiErr);
-        generatedQuestions = generateFallbackQuestions(contentType, user.age, questionCount);
+        console.warn(
+          "AI question generation failed, using fallback questions:",
+          aiErr,
+        );
+        generatedQuestions = generateFallbackQuestions(
+          contentType,
+          user.age,
+          questionCount,
+        );
       }
 
       setQuestions(generatedQuestions);
@@ -249,7 +330,10 @@ const QuestionnairePage = () => {
   };
 
   const currentQuestion = questions[currentQuestionIndex];
-  const progress = questions.length > 0 ? ((currentQuestionIndex + 1) / questions.length) * 100 : 0;
+  const progress =
+    questions.length > 0
+      ? ((currentQuestionIndex + 1) / questions.length) * 100
+      : 0;
 
   const handleAnswer = (answer: string) => {
     if (!currentQuestion) return;
@@ -398,7 +482,10 @@ const QuestionnairePage = () => {
       <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
         {topBar}
         <main className="px-4 pb-20 pt-32 md:pt-36 sm:px-6">
-          <BouncingWordsLoader questionCount={questionCount} contentType={contentType} />
+          <BouncingWordsLoader
+            questionCount={questionCount}
+            contentType={contentType}
+          />
         </main>
       </div>
     );
@@ -421,8 +508,12 @@ const QuestionnairePage = () => {
                 className="h-full w-full object-contain"
               />
             </div>
-            <h2 className="text-2xl font-black tracking-tight">Unable to load questions</h2>
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{error}</p>
+            <h2 className="text-2xl font-black tracking-tight">
+              Unable to load questions
+            </h2>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+              {error}
+            </p>
             <div className="mt-6 flex items-center justify-center gap-3">
               <GlowPillButton
                 onClick={loadQuestions}
@@ -431,7 +522,7 @@ const QuestionnairePage = () => {
                 Try Again
               </GlowPillButton>
               <GlowPillButton
-                onClick={() => router.push('/question-count')}
+                onClick={() => router.push("/question-count")}
                 className="border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
               >
                 Back
@@ -453,7 +544,9 @@ const QuestionnairePage = () => {
           <textarea
             value={answers[currentQuestion.id] ?? ""}
             onChange={(e) => handleAnswer(e.target.value)}
-            placeholder={currentQuestion.placeholder ?? "Type your answer here..."}
+            placeholder={
+              currentQuestion.placeholder ?? "Type your answer here..."
+            }
             rows={3}
             className="w-full resize-none rounded-2xl border border-slate-200/80 bg-white px-4 py-3 text-sm font-medium text-slate-900 placeholder-slate-400 outline-none transition-all focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-indigo-500/70"
           />
@@ -462,7 +555,10 @@ const QuestionnairePage = () => {
     }
 
     if (qType === "select_all") {
-      const options = getSelectAllOptions(contentType ?? "both", selectAllIndex);
+      const options = getSelectAllOptions(
+        contentType ?? "both",
+        selectAllIndex,
+      );
       const selected = multiAnswers[currentQuestion.id] ?? [];
       return (
         <>
@@ -495,7 +591,10 @@ const QuestionnairePage = () => {
     }
 
     // single_select (default)
-    const options = getQuestionOptions(contentType ?? "both", currentQuestionIndex);
+    const options = getQuestionOptions(
+      contentType ?? "both",
+      currentQuestionIndex,
+    );
     return (
       <div className="mt-7 grid gap-3 sm:grid-cols-2">
         {options.map((option) => {
@@ -512,7 +611,9 @@ const QuestionnairePage = () => {
                   : "border-slate-200/80 bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200",
               )}
             >
-              <span className="text-sm font-semibold sm:text-base">{option}</span>
+              <span className="text-sm font-semibold sm:text-base">
+                {option}
+              </span>
               {selected ? (
                 <IconCheck className="h-5 w-5" />
               ) : (
@@ -528,7 +629,8 @@ const QuestionnairePage = () => {
   const getSubtitle = () => {
     if (!currentQuestion) return "";
     const qType = currentQuestion.type ?? "single_select";
-    if (qType === "fill_in_blank") return "Share your thoughts in your own words.";
+    if (qType === "fill_in_blank")
+      return "Share your thoughts in your own words.";
     if (qType === "select_all") return "Choose as many as you like.";
     return "Pick one so we can tune your recommendations.";
   };
@@ -592,7 +694,9 @@ const QuestionnairePage = () => {
                 disabled={!canProceed || isSubmitting}
                 className="inline-flex items-center justify-center gap-2 bg-white px-6 py-2.5 text-sm font-black tracking-tight text-black disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-900 dark:text-white"
               >
-                {currentQuestionIndex === questions.length - 1 ? "Get Recommendations" : "Next"}
+                {currentQuestionIndex === questions.length - 1
+                  ? "Get Recommendations"
+                  : "Next"}
                 <ArrowRight size={16} />
               </GlowPillButton>
             </div>

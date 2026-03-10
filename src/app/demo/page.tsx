@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { IconArrowLeft, IconArrowRight, IconCheck } from "@tabler/icons-react";
 
-import { useQuizStore, type ContentType } from "@/features/quiz/store/quiz-store";
+import {
+  useQuizStore,
+  type ContentType,
+} from "@/features/quiz/store/quiz-store";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { GlowPillButton } from "@/components/ui/glow-pill-button";
 import {
@@ -97,8 +100,12 @@ const DemoContentCard = ({
       </div>
 
       <div className="p-4 sm:p-5">
-        <h3 className="text-xl font-black tracking-tight sm:text-2xl">{title}</h3>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{description}</p>
+        <h3 className="text-xl font-black tracking-tight sm:text-2xl">
+          {title}
+        </h3>
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+          {description}
+        </p>
       </div>
     </GlowPillButton>
   );
@@ -141,13 +148,15 @@ const DEMO_CONTENT_CARDS = [
   {
     option: "Movies",
     title: "Movie",
-    description: "Find a movie recommendation that fits your current mood and pace.",
+    description:
+      "Find a movie recommendation that fits your current mood and pace.",
     mediaSrc: "/animations/Popcorn.webm",
   },
   {
     option: "Books",
     title: "Book",
-    description: "Get a reading recommendation tailored to your style and interests.",
+    description:
+      "Get a reading recommendation tailored to your style and interests.",
     mediaSrc: "/animations/Books.webm",
   },
   {
@@ -171,7 +180,9 @@ export default function DemoPage() {
 
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [validationMessage, setValidationMessage] = useState<string | null>(null);
+  const [validationMessage, setValidationMessage] = useState<string | null>(
+    null,
+  );
 
   const current = DEMO_QUESTIONS[step];
   const progress = ((step + 1) / DEMO_QUESTIONS.length) * 100;
@@ -218,7 +229,9 @@ export default function DemoPage() {
 
   const handleBack = () => {
     if (step === 0) {
-      const confirmed = window.confirm("Are you sure you want to go back to the home page?");
+      const confirmed = window.confirm(
+        "Are you sure you want to go back to the home page?",
+      );
       if (!confirmed) return;
       router.push("/");
       return;
@@ -294,103 +307,109 @@ export default function DemoPage() {
             </p>
           </div>
 
-        <div className="mb-8 h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
-          <motion.div
-            className="h-full rounded-full bg-indigo-500"
-            initial={false}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-          />
-        </div>
-
-        <div className="rounded-3xl border border-slate-200/70 bg-white/85 p-6 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
-          <AnimatePresence mode="wait">
+          <div className="mb-8 h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
             <motion.div
-              key={current.id}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.22 }}
-            >
-              <h1 className="text-2xl font-black tracking-tight sm:text-3xl">
-                {current.title}
-              </h1>
-              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 sm:text-base">
-                {current.subtitle}
-              </p>
-
-              {current.id === "contentType" ? (
-                <div className="mt-7 grid grid-cols-1 gap-4 md:grid-cols-3">
-                  {DEMO_CONTENT_CARDS.map((card) => (
-                    <DemoContentCard
-                      key={card.option}
-                      title={card.title}
-                      description={card.description}
-                      mediaSrc={card.mediaSrc}
-                      secondaryMediaSrc={"secondaryMediaSrc" in card ? card.secondaryMediaSrc : undefined}
-                      isSelected={answers[current.id] === card.option}
-                      onClick={() => handleChoose(card.option)}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="mt-7 grid gap-3 sm:grid-cols-2">
-                  {current.options.map((option) => {
-                    const selected = answers[current.id] === option;
-                    return (
-                      <GlowPillButton
-                        key={option}
-                        onClick={() => handleChoose(option)}
-                        active={selected}
-                        className={cn(
-                          "group flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all",
-                          selected
-                            ? "border-indigo-400 bg-indigo-50 text-indigo-700 dark:border-indigo-500/70 dark:bg-indigo-500/15 dark:text-indigo-300"
-                            : "border-slate-200/80 bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200",
-                        )}
-                      >
-                        <span className="text-sm font-semibold sm:text-base">{option}</span>
-                        {selected ? (
-                          <IconCheck className="h-5 w-5" />
-                        ) : (
-                          <span className="h-5 w-5 rounded-full border border-slate-300 transition group-hover:border-indigo-300 dark:border-slate-600" />
-                        )}
-                      </GlowPillButton>
-                    );
-                  })}
-                </div>
-              )}
-            </motion.div>
-          </AnimatePresence>
-
-          <div className="mt-8 flex items-center justify-end">
-            <motion.div
-              animate={
-                showValidationFlash
-                  ? { scale: [1, 1.03, 0.99, 1], x: [0, -4, 4, 0] }
-                  : { scale: 1, x: 0 }
-              }
-              transition={{ duration: 0.45 }}
-            >
-              <GlowPillButton
-                onClick={handleNext}
-                className={cn(
-                  "inline-flex items-center justify-center gap-2 bg-white px-6 py-2.5 text-sm font-black tracking-tight text-black dark:bg-slate-900 dark:text-white",
-                )}
-              >
-                {step === DEMO_QUESTIONS.length - 1 ? "Continue" : "Next"}
-                <IconArrowRight className="h-4 w-4" />
-              </GlowPillButton>
-            </motion.div>
+              className="h-full rounded-full bg-indigo-500"
+              initial={false}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            />
           </div>
-          {validationMessage ? (
-            <p className="mt-3 text-right text-xs font-semibold text-red-500 dark:text-red-400">
-              {validationMessage}
-            </p>
-          ) : null}
+
+          <div className="rounded-3xl border border-slate-200/70 bg-white/85 p-6 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={current.id}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.22 }}
+              >
+                <h1 className="text-2xl font-black tracking-tight sm:text-3xl">
+                  {current.title}
+                </h1>
+                <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 sm:text-base">
+                  {current.subtitle}
+                </p>
+
+                {current.id === "contentType" ? (
+                  <div className="mt-7 grid grid-cols-1 gap-4 md:grid-cols-3">
+                    {DEMO_CONTENT_CARDS.map((card) => (
+                      <DemoContentCard
+                        key={card.option}
+                        title={card.title}
+                        description={card.description}
+                        mediaSrc={card.mediaSrc}
+                        secondaryMediaSrc={
+                          "secondaryMediaSrc" in card
+                            ? card.secondaryMediaSrc
+                            : undefined
+                        }
+                        isSelected={answers[current.id] === card.option}
+                        onClick={() => handleChoose(card.option)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mt-7 grid gap-3 sm:grid-cols-2">
+                    {current.options.map((option) => {
+                      const selected = answers[current.id] === option;
+                      return (
+                        <GlowPillButton
+                          key={option}
+                          onClick={() => handleChoose(option)}
+                          active={selected}
+                          className={cn(
+                            "group flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all",
+                            selected
+                              ? "border-indigo-400 bg-indigo-50 text-indigo-700 dark:border-indigo-500/70 dark:bg-indigo-500/15 dark:text-indigo-300"
+                              : "border-slate-200/80 bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200",
+                          )}
+                        >
+                          <span className="text-sm font-semibold sm:text-base">
+                            {option}
+                          </span>
+                          {selected ? (
+                            <IconCheck className="h-5 w-5" />
+                          ) : (
+                            <span className="h-5 w-5 rounded-full border border-slate-300 transition group-hover:border-indigo-300 dark:border-slate-600" />
+                          )}
+                        </GlowPillButton>
+                      );
+                    })}
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
+
+            <div className="mt-8 flex items-center justify-end">
+              <motion.div
+                animate={
+                  showValidationFlash
+                    ? { scale: [1, 1.03, 0.99, 1], x: [0, -4, 4, 0] }
+                    : { scale: 1, x: 0 }
+                }
+                transition={{ duration: 0.45 }}
+              >
+                <GlowPillButton
+                  onClick={handleNext}
+                  className={cn(
+                    "inline-flex items-center justify-center gap-2 bg-white px-6 py-2.5 text-sm font-black tracking-tight text-black dark:bg-slate-900 dark:text-white",
+                  )}
+                >
+                  {step === DEMO_QUESTIONS.length - 1 ? "Continue" : "Next"}
+                  <IconArrowRight className="h-4 w-4" />
+                </GlowPillButton>
+              </motion.div>
+            </div>
+            {validationMessage ? (
+              <p className="mt-3 text-right text-xs font-semibold text-red-500 dark:text-red-400">
+                {validationMessage}
+              </p>
+            ) : null}
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
     </div>
   );
 }

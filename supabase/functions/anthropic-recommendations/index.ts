@@ -2,7 +2,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
 };
 
 const MINOR_SYSTEM_PROMPT = `You are Smart Advisor, a warm and enthusiastic entertainment companion.
@@ -35,10 +36,13 @@ serve(async (req) => {
     const { name, age, answers, contentType } = await req.json();
 
     if (!name || !age || !answers) {
-      return new Response(JSON.stringify({ error: "Missing required fields" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: "Missing required fields" }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     const isAdult = age >= 18;
@@ -50,12 +54,26 @@ serve(async (req) => {
     const recommendations = [];
 
     if (wantsMovies) {
-      const movieRec = await getRecommendation({ type: "movie", name, age, answers, isAdult, systemPrompt });
+      const movieRec = await getRecommendation({
+        type: "movie",
+        name,
+        age,
+        answers,
+        isAdult,
+        systemPrompt,
+      });
       recommendations.push({ type: "movie", ...movieRec });
     }
 
     if (wantsBooks) {
-      const bookRec = await getRecommendation({ type: "book", name, age, answers, isAdult, systemPrompt });
+      const bookRec = await getRecommendation({
+        type: "book",
+        name,
+        age,
+        answers,
+        isAdult,
+        systemPrompt,
+      });
       recommendations.push({ type: "book", ...bookRec });
     }
 
@@ -71,7 +89,14 @@ serve(async (req) => {
   }
 });
 
-async function getRecommendation({ type, name, age, answers, isAdult, systemPrompt }: {
+async function getRecommendation({
+  type,
+  name,
+  age,
+  answers,
+  isAdult,
+  systemPrompt,
+}: {
   type: "movie" | "book";
   name: string;
   age: number;
@@ -88,9 +113,10 @@ async function getRecommendation({ type, name, age, answers, isAdult, systemProm
 Their answers:
 ${answersText}
 
-${isAdult
-  ? `This is an adult. You may recommend content with mature themes if it genuinely fits their profile.`
-  : `This is a minor. Recommend age-appropriate content only.`
+${
+  isAdult
+    ? `This is an adult. You may recommend content with mature themes if it genuinely fits their profile.`
+    : `This is a minor. Recommend age-appropriate content only.`
 }
 
 Return ONLY a JSON object. No markdown, no explanation. Exact format:
@@ -100,8 +126,8 @@ Return ONLY a JSON object. No markdown, no explanation. Exact format:
   "explanation": "2-3 sentences explaining specifically why THIS person will love it, referencing their answers",
   "genre": "Primary genre",
   "year": 2019,
-  "director": ${type === "movie" ? '"Director name"' : 'null'},
-  "author": ${type === "book" ? '"Author name"' : 'null'},
+  "director": ${type === "movie" ? '"Director name"' : "null"},
+  "author": ${type === "book" ? '"Author name"' : "null"},
   "rating": 8.4
 }`;
 

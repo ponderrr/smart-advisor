@@ -25,7 +25,7 @@ const TMDB_ENDPOINTS = [
   "discover/tv?include_adult=false&include_null_first_air_dates=false&language=en-US&sort_by=popularity.desc",
 ];
 
-const pickRandomUnique = <T,>(items: T[], count: number) => {
+const pickRandomUnique = <T>(items: T[], count: number) => {
   const copy = [...items];
   const picked: T[] = [];
   while (copy.length > 0 && picked.length < count) {
@@ -36,7 +36,7 @@ const pickRandomUnique = <T,>(items: T[], count: number) => {
   return picked;
 };
 
-const shuffle = <T,>(items: T[]) => {
+const shuffle = <T>(items: T[]) => {
   const arr = [...items];
   for (let i = arr.length - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));

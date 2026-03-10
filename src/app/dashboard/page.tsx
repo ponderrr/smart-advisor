@@ -64,18 +64,33 @@ const DashboardPage = () => {
       setLoading(false);
     };
     load();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, []);
 
   const genreChartData = useMemo(() => {
-    const byGenre = new Map<string, { genre: string; movie: number; book: number; total: number }>();
+    const byGenre = new Map<
+      string,
+      { genre: string; movie: number; book: number; total: number }
+    >();
     recommendations.forEach((rec) => {
-      const genres = Array.isArray(rec.genres) && rec.genres.length > 0
-        ? rec.genres.flatMap((g) => g.split(/[,&/|]/g)).map((g) => g.trim()).filter(Boolean)
-        : ["Other"];
+      const genres =
+        Array.isArray(rec.genres) && rec.genres.length > 0
+          ? rec.genres
+              .flatMap((g) => g.split(/[,&/|]/g))
+              .map((g) => g.trim())
+              .filter(Boolean)
+          : ["Other"];
       genres.forEach((genre) => {
-        const label = genre.length > 14 ? `${genre.slice(0, 14).trim()}…` : genre;
-        const cur = byGenre.get(label) ?? { genre: label, movie: 0, book: 0, total: 0 };
+        const label =
+          genre.length > 14 ? `${genre.slice(0, 14).trim()}…` : genre;
+        const cur = byGenre.get(label) ?? {
+          genre: label,
+          movie: 0,
+          book: 0,
+          total: 0,
+        };
         if (rec.type === "movie") cur.movie += 1;
         if (rec.type === "book") cur.book += 1;
         cur.total += 1;
@@ -141,7 +156,10 @@ const DashboardPage = () => {
               <button
                 key={item.name}
                 type="button"
-                onClick={() => { router.push(item.link); setIsMobileMenuOpen(false); }}
+                onClick={() => {
+                  router.push(item.link);
+                  setIsMobileMenuOpen(false);
+                }}
                 className="text-left text-xl font-black tracking-tight text-slate-800 dark:text-slate-100"
               >
                 {item.name}
@@ -149,7 +167,10 @@ const DashboardPage = () => {
             ))}
             <button
               type="button"
-              onClick={async () => { await handleSignOut(); setIsMobileMenuOpen(false); }}
+              onClick={async () => {
+                await handleSignOut();
+                setIsMobileMenuOpen(false);
+              }}
               className="text-left text-xl font-black tracking-tight text-rose-600 dark:text-rose-400"
             >
               Sign Out
@@ -161,7 +182,10 @@ const DashboardPage = () => {
       <main className="px-4 pb-20 pt-28 sm:px-6 md:pt-36">
         <div className="mx-auto max-w-7xl">
           {/* Header */}
-          <motion.div {...fadeUp(0)} className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+          <motion.div
+            {...fadeUp(0)}
+            className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between"
+          >
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
                 Dashboard
@@ -190,12 +214,35 @@ const DashboardPage = () => {
           </motion.div>
 
           {/* Stats Row */}
-          <motion.div {...fadeUp(0.05)} className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+          <motion.div
+            {...fadeUp(0.05)}
+            className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4"
+          >
             {[
-              { label: "Total Picks", value: stats.total, icon: TrendingUp, color: "text-indigo-500" },
-              { label: "Movies", value: stats.movies, icon: Film, color: "text-violet-500" },
-              { label: "Books", value: stats.books, icon: BookOpen, color: "text-emerald-500" },
-              { label: "Favorites", value: stats.favorites, icon: Sparkles, color: "text-amber-500" },
+              {
+                label: "Total Picks",
+                value: stats.total,
+                icon: TrendingUp,
+                color: "text-indigo-500",
+              },
+              {
+                label: "Movies",
+                value: stats.movies,
+                icon: Film,
+                color: "text-violet-500",
+              },
+              {
+                label: "Books",
+                value: stats.books,
+                icon: BookOpen,
+                color: "text-emerald-500",
+              },
+              {
+                label: "Favorites",
+                value: stats.favorites,
+                icon: Sparkles,
+                color: "text-amber-500",
+              },
             ].map((stat) => (
               <div
                 key={stat.label}
@@ -215,11 +262,29 @@ const DashboardPage = () => {
           </motion.div>
 
           {/* Quick Actions */}
-          <motion.div {...fadeUp(0.1)} className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <motion.div
+            {...fadeUp(0.1)}
+            className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3"
+          >
             {[
-              { title: "Account Settings", desc: "Update profile and preferences.", icon: Settings, href: "/settings" },
-              { title: "Latest Results", desc: "Jump to your latest picks.", icon: Sparkles, href: "/results" },
-              { title: "History", desc: "Browse past recommendations.", icon: Clock, href: "/history" },
+              {
+                title: "Account Settings",
+                desc: "Update profile and preferences.",
+                icon: Settings,
+                href: "/settings",
+              },
+              {
+                title: "Latest Results",
+                desc: "Jump to your latest picks.",
+                icon: Sparkles,
+                href: "/results",
+              },
+              {
+                title: "History",
+                desc: "Browse past recommendations.",
+                icon: Clock,
+                href: "/history",
+              },
             ].map((card) => (
               <button
                 key={card.title}
@@ -230,13 +295,23 @@ const DashboardPage = () => {
                 )}
               >
                 <div className="rounded-xl bg-slate-100 p-2.5 dark:bg-slate-800">
-                  <card.icon size={18} className="text-slate-600 dark:text-slate-300" />
+                  <card.icon
+                    size={18}
+                    className="text-slate-600 dark:text-slate-300"
+                  />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-sm font-bold tracking-tight">{card.title}</h3>
-                  <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{card.desc}</p>
+                  <h3 className="text-sm font-bold tracking-tight">
+                    {card.title}
+                  </h3>
+                  <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                    {card.desc}
+                  </p>
                 </div>
-                <ArrowRight size={14} className="mt-1 text-slate-400 transition-transform group-hover:translate-x-0.5" />
+                <ArrowRight
+                  size={14}
+                  className="mt-1 text-slate-400 transition-transform group-hover:translate-x-0.5"
+                />
               </button>
             ))}
           </motion.div>
@@ -250,11 +325,15 @@ const DashboardPage = () => {
             >
               <div className="mb-4 flex items-center gap-2">
                 <BarChart3 size={16} className="text-indigo-500" />
-                <h2 className="text-lg font-bold tracking-tight">Genre Breakdown</h2>
+                <h2 className="text-lg font-bold tracking-tight">
+                  Genre Breakdown
+                </h2>
               </div>
 
               {loading ? (
-                <div className="flex h-56 items-center justify-center text-sm text-slate-400">Loading...</div>
+                <div className="flex h-56 items-center justify-center text-sm text-slate-400">
+                  Loading...
+                </div>
               ) : genreChartData.length === 0 ? (
                 <div className="flex h-56 items-center justify-center text-sm text-slate-400">
                   Take a quiz to see your genres.
@@ -262,7 +341,11 @@ const DashboardPage = () => {
               ) : (
                 <div className="h-56 w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={genreChartData} margin={{ top: 4, right: 8, left: -24, bottom: 0 }} barGap={4}>
+                    <BarChart
+                      data={genreChartData}
+                      margin={{ top: 4, right: 8, left: -24, bottom: 0 }}
+                      barGap={4}
+                    >
                       <XAxis
                         dataKey="genre"
                         tick={{ fill: "currentColor", fontSize: 11 }}
@@ -288,8 +371,20 @@ const DashboardPage = () => {
                           padding: "8px 12px",
                         }}
                       />
-                      <Bar dataKey="movie" stackId="a" fill="#6366f1" radius={[4, 4, 0, 0]} name="Movies" />
-                      <Bar dataKey="book" stackId="a" fill="#22c55e" radius={[4, 4, 0, 0]} name="Books" />
+                      <Bar
+                        dataKey="movie"
+                        stackId="a"
+                        fill="#6366f1"
+                        radius={[4, 4, 0, 0]}
+                        name="Movies"
+                      />
+                      <Bar
+                        dataKey="book"
+                        stackId="a"
+                        fill="#22c55e"
+                        radius={[4, 4, 0, 0]}
+                        name="Books"
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -304,7 +399,9 @@ const DashboardPage = () => {
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Sparkles size={16} className="text-amber-500" />
-                  <h2 className="text-lg font-bold tracking-tight">Recent Picks</h2>
+                  <h2 className="text-lg font-bold tracking-tight">
+                    Recent Picks
+                  </h2>
                 </div>
                 <button
                   onClick={() => router.push("/history")}
@@ -315,10 +412,15 @@ const DashboardPage = () => {
               </div>
 
               {loading ? (
-                <div className="flex h-56 items-center justify-center text-sm text-slate-400">Loading...</div>
+                <div className="flex h-56 items-center justify-center text-sm text-slate-400">
+                  Loading...
+                </div>
               ) : recommendations.length === 0 ? (
                 <div className="flex h-56 flex-col items-center justify-center gap-2 text-center text-sm text-slate-400">
-                  <Sparkles size={24} className="text-slate-300 dark:text-slate-600" />
+                  <Sparkles
+                    size={24}
+                    className="text-slate-300 dark:text-slate-600"
+                  />
                   <p>No recommendations yet. Start a quiz!</p>
                 </div>
               ) : (
@@ -337,13 +439,23 @@ const DashboardPage = () => {
                           />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center text-slate-400">
-                            {rec.type === "movie" ? <Film size={24} /> : <BookOpen size={24} />}
+                            {rec.type === "movie" ? (
+                              <Film size={24} />
+                            ) : (
+                              <BookOpen size={24} />
+                            )}
                           </div>
                         )}
                         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-3">
-                          <p className="line-clamp-2 text-sm font-bold leading-tight text-white">{rec.title}</p>
+                          <p className="line-clamp-2 text-sm font-bold leading-tight text-white">
+                            {rec.title}
+                          </p>
                           <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-white/20 px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-white/90">
-                            {rec.type === "movie" ? <Film size={10} /> : <BookOpen size={10} />}
+                            {rec.type === "movie" ? (
+                              <Film size={10} />
+                            ) : (
+                              <BookOpen size={10} />
+                            )}
                             {rec.type}
                           </span>
                         </div>

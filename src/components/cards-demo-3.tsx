@@ -22,7 +22,11 @@ export default function CardDemo() {
 const Skeleton = () => {
   useEffect(() => {
     const scale = [1, 1.1, 1];
-    const transform = ["translateY(0px)", "translateY(-4px)", "translateY(0px)"];
+    const transform = [
+      "translateY(0px)",
+      "translateY(-4px)",
+      "translateY(0px)",
+    ];
     const sequence = [
       [
         ".circle-1",
@@ -147,7 +151,7 @@ export const Card = ({
     <div
       className={cn(
         "max-w-sm w-full mx-auto p-8 rounded-xl border border-[rgba(255,255,255,0.10)] dark:bg-[rgba(40,40,40,0.70)] bg-gray-100 shadow-[2px_4px_16px_0px_rgba(248,248,248,0.06)_inset] group",
-        className
+        className,
       )}
     >
       {children}
@@ -166,7 +170,7 @@ export const CardTitle = ({
     <h3
       className={cn(
         "text-lg font-semibold text-gray-800 dark:text-white py-2",
-        className
+        className,
       )}
     >
       {children}
@@ -185,7 +189,7 @@ export const CardDescription = ({
     <p
       className={cn(
         "text-sm font-normal text-neutral-600 dark:text-neutral-400 max-w-sm",
-        className
+        className,
       )}
     >
       {children}
@@ -208,7 +212,7 @@ export const CardSkeletonContainer = ({
         "h-[15rem] md:h-[20rem] rounded-xl z-40",
         className,
         showGradient &&
-        "bg-neutral-300 dark:bg-[rgba(40,40,40,0.70)] [mask-image:radial-gradient(50%_50%_at_50%_50%,white_0%,transparent_100%)]"
+          "bg-neutral-300 dark:bg-[rgba(40,40,40,0.70)] [mask-image:radial-gradient(50%_50%_at_50%_50%,white_0%,transparent_100%)]",
       )}
     >
       {children}
@@ -229,7 +233,7 @@ const Container = ({
         `h-16 w-16 rounded-full flex items-center justify-center bg-[rgba(248,248,248,0.01)]
     shadow-[0px_0px_8px_0px_rgba(248,248,248,0.25)_inset,0px_32px_24px_-16px_rgba(0,0,0,0.40)]
     `,
-        className
+        className,
       )}
     >
       {children}

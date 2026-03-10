@@ -15,7 +15,6 @@ export const howItWorksCards = [
       "https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=1200&q=80",
     hoverImage:
       "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=1200&q=80",
-
   },
   {
     title: "We Narrow Down Your Best Options",
@@ -25,7 +24,6 @@ export const howItWorksCards = [
       "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=80",
     hoverImage:
       "https://images.unsplash.com/photo-1616530940355-351fabd9524b?auto=format&fit=crop&w=1200&q=80",
-
   },
   {
     title: "Get Picks You Can Trust",
@@ -42,11 +40,17 @@ export const logoSets = [
   [
     { name: "Next.js", src: "https://cdn.simpleicons.org/nextdotjs/111111" },
     { name: "Supabase", src: "https://cdn.simpleicons.org/supabase/111111" },
-    { name: "TMDB", src: "https://cdn.simpleicons.org/themoviedatabase/111111" },
+    {
+      name: "TMDB",
+      src: "https://cdn.simpleicons.org/themoviedatabase/111111",
+    },
     { name: "Open Library", src: "" },
   ],
   [
-    { name: "TypeScript", src: "https://cdn.simpleicons.org/typescript/111111" },
+    {
+      name: "TypeScript",
+      src: "https://cdn.simpleicons.org/typescript/111111",
+    },
     { name: "React", src: "https://cdn.simpleicons.org/react/111111" },
     { name: "Framer", src: "https://cdn.simpleicons.org/framer/111111" },
     { name: "Node.js", src: "https://cdn.simpleicons.org/nodedotjs/111111" },

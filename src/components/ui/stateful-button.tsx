@@ -1,7 +1,12 @@
 "use client";
 import { cn } from "@/lib/utils";
 import React from "react";
-import { AnimatePresence, motion, useMotionTemplate, useMotionValue } from "framer-motion";
+import {
+  AnimatePresence,
+  motion,
+  useMotionTemplate,
+  useMotionValue,
+} from "framer-motion";
 
 export type StatefulStatus = "idle" | "loading" | "success" | "error";
 
@@ -30,7 +35,8 @@ export const Button = ({
   hoverGlow = true,
   ...props
 }: ButtonProps) => {
-  const [internalState, setInternalState] = React.useState<StatefulStatus>("idle");
+  const [internalState, setInternalState] =
+    React.useState<StatefulStatus>("idle");
   const [hoverVisible, setHoverVisible] = React.useState(false);
   const controlled = typeof state !== "undefined";
   const currentState = controlled ? state : internalState;
@@ -158,10 +164,7 @@ const iconMotion = {
 
 const Loader = () => {
   return (
-    <motion.span
-      {...iconMotion}
-      className="inline-flex"
-    >
+    <motion.span {...iconMotion} className="inline-flex">
       <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
     </motion.span>
   );
@@ -169,10 +172,7 @@ const Loader = () => {
 
 const CheckIcon = () => {
   return (
-    <motion.span
-      {...iconMotion}
-      className="inline-flex"
-    >
+    <motion.span {...iconMotion} className="inline-flex">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="16"
@@ -192,10 +192,7 @@ const CheckIcon = () => {
 
 const ErrorIcon = () => {
   return (
-    <motion.span
-      {...iconMotion}
-      className="inline-flex"
-    >
+    <motion.span {...iconMotion} className="inline-flex">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="16"

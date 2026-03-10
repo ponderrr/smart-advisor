@@ -2,7 +2,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
 };
 
 const MINOR_SYSTEM_PROMPT = `You are Smart Advisor, a warm and enthusiastic entertainment companion.
@@ -37,27 +38,35 @@ serve(async (req) => {
     const { name, age, questionCount, contentType } = await req.json();
 
     if (!name || !age || !questionCount) {
-      return new Response(JSON.stringify({ error: "Missing required fields" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: "Missing required fields" }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     const isAdult = age >= 18;
     const systemPrompt = isAdult ? ADULT_SYSTEM_PROMPT : MINOR_SYSTEM_PROMPT;
 
-    const contentContext = contentType === "movie"
-      ? "movies only"
-      : contentType === "book"
-      ? "books only"
-      : "both movies and books";
+    const contentContext =
+      contentType === "movie"
+        ? "movies only"
+        : contentType === "book"
+          ? "books only"
+          : "both movies and books";
 
     const userPrompt = `Generate exactly ${questionCount} personalized quiz questions for ${name}, age ${age}.
 The goal is to understand their personality and taste deeply enough to recommend ${contentContext} they'll love.
 
-${isAdult ? `Since they are an adult, you may include 1-2 questions about preferences for mature themes
+${
+  isAdult
+    ? `Since they are an adult, you may include 1-2 questions about preferences for mature themes
 (dark content, sexuality in storytelling, moral complexity, horror intensity, etc).
-Frame these naturally and matter-of-factly.` : ""}
+Frame these naturally and matter-of-factly.`
+    : ""
+}
 
 Requirements:
 - Each question must be unique and reveal something meaningful about their taste

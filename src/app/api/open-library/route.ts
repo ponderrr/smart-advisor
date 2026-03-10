@@ -100,9 +100,7 @@ export async function GET(req: NextRequest) {
     const coverId = best.cover_i;
     const coverUrl = `https://covers.openlibrary.org/b/id/${coverId}-L.jpg`;
     const workKey = best.key || "";
-    const openLibraryUrl = workKey
-      ? `https://openlibrary.org${workKey}`
-      : null;
+    const openLibraryUrl = workKey ? `https://openlibrary.org${workKey}` : null;
 
     // Try to fetch work description
     let description = DEFAULT_BOOK.description;
@@ -110,10 +108,10 @@ export async function GET(req: NextRequest) {
       try {
         const workController = new AbortController();
         const workTimeout = setTimeout(() => workController.abort(), 4000);
-        const workRes = await fetch(
-          `https://openlibrary.org${workKey}.json`,
-          { signal: workController.signal, cache: "no-store" },
-        );
+        const workRes = await fetch(`https://openlibrary.org${workKey}.json`, {
+          signal: workController.signal,
+          cache: "no-store",
+        });
         clearTimeout(workTimeout);
 
         if (workRes.ok) {

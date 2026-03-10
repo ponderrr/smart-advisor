@@ -1,10 +1,13 @@
-'use client';
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import { BookOpen, Film, Heart, Plus, Trash2 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
-import { databaseService, FilterOptions } from "@/features/recommendations/services/database-service";
+import {
+  databaseService,
+  FilterOptions,
+} from "@/features/recommendations/services/database-service";
 import { Recommendation } from "@/features/recommendations/types/recommendation";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { GlowPillButton } from "@/components/ui/glow-pill-button";
@@ -87,7 +90,8 @@ const AccountHistoryPage = () => {
         if (filter === "books") filterConfig.contentType = "book";
         if (filter === "favorites") filterConfig.isFavorited = true;
 
-        const { data, error } = await databaseService.getUserRecommendations(filterConfig);
+        const { data, error } =
+          await databaseService.getUserRecommendations(filterConfig);
 
         if (error) {
           console.error("Error loading recommendations:", error);
@@ -117,7 +121,9 @@ const AccountHistoryPage = () => {
       toast.error("Couldn't update your favorite — please try again");
     } else {
       const rec = recommendations.find((r) => r.id === recommendationId);
-      toast.success(rec?.is_favorited ? "Removed from favorites" : "Added to favorites");
+      toast.success(
+        rec?.is_favorited ? "Removed from favorites" : "Added to favorites",
+      );
       setRecommendations((prev) =>
         prev.map((r) =>
           r.id === recommendationId
@@ -132,12 +138,15 @@ const AccountHistoryPage = () => {
     const shouldDelete = window.confirm("Delete this recommendation?");
     if (!shouldDelete) return;
 
-    const { error } = await databaseService.deleteRecommendation(recommendationId);
+    const { error } =
+      await databaseService.deleteRecommendation(recommendationId);
     if (error) {
       toast.error("Couldn't remove that recommendation — please try again");
     } else {
       toast.success("Recommendation removed from your library");
-      setRecommendations((prev) => prev.filter((rec) => rec.id !== recommendationId));
+      setRecommendations((prev) =>
+        prev.filter((rec) => rec.id !== recommendationId),
+      );
     }
   };
 
@@ -231,7 +240,7 @@ const AccountHistoryPage = () => {
               </p>
             </div>
             <StatefulButton
-              onClick={() => router.push('/content-selection')}
+              onClick={() => router.push("/content-selection")}
               className="inline-flex w-auto items-center gap-2 px-5 py-3 text-sm font-semibold"
             >
               <Plus size={16} />
@@ -250,8 +259,12 @@ const AccountHistoryPage = () => {
                 key={item.label}
                 className="rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-sm backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/65"
               >
-                <p className="text-xs uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">{item.label}</p>
-                <p className="mt-2 text-2xl font-black tracking-tight">{item.value}</p>
+                <p className="text-xs uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+                  {item.label}
+                </p>
+                <p className="mt-2 text-2xl font-black tracking-tight">
+                  {item.value}
+                </p>
               </div>
             ))}
           </div>
@@ -271,7 +284,9 @@ const AccountHistoryPage = () => {
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-sm text-slate-600 dark:text-slate-400">Sort:</span>
+              <span className="text-sm text-slate-600 dark:text-slate-400">
+                Sort:
+              </span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortMode)}
@@ -297,7 +312,7 @@ const AccountHistoryPage = () => {
                 Try a different filter or generate a fresh recommendation set.
               </p>
               <GlowPillButton
-                onClick={() => router.push('/content-selection')}
+                onClick={() => router.push("/content-selection")}
                 className="mt-5 bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white"
               >
                 Start New Quiz
@@ -319,15 +334,25 @@ const AccountHistoryPage = () => {
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center text-slate-500 dark:text-slate-400">
-                        {rec.type === "movie" ? <Film size={28} /> : <BookOpen size={28} />}
+                        {rec.type === "movie" ? (
+                          <Film size={28} />
+                        ) : (
+                          <BookOpen size={28} />
+                        )}
                       </div>
                     )}
 
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-4">
-                      <p className="line-clamp-2 text-base font-black tracking-tight text-white">{rec.title}</p>
+                      <p className="line-clamp-2 text-base font-black tracking-tight text-white">
+                        {rec.title}
+                      </p>
                       <div className="mt-2 flex items-center justify-between">
                         <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-1 text-[11px] uppercase tracking-[0.12em] text-white">
-                          {rec.type === "movie" ? <Film size={12} /> : <BookOpen size={12} />}
+                          {rec.type === "movie" ? (
+                            <Film size={12} />
+                          ) : (
+                            <BookOpen size={12} />
+                          )}
                           {rec.type}
                         </span>
                         <span className="text-xs text-white/80">
@@ -339,7 +364,9 @@ const AccountHistoryPage = () => {
 
                   <div className="p-3">
                     <p className="line-clamp-3 text-xs text-slate-600 dark:text-slate-300">
-                      {rec.explanation || rec.description || `A tailored ${rec.type} recommendation based on your recent quiz choices.`}
+                      {rec.explanation ||
+                        rec.description ||
+                        `A tailored ${rec.type} recommendation based on your recent quiz choices.`}
                     </p>
 
                     <div className="mt-4 flex items-center justify-between">
@@ -352,7 +379,10 @@ const AccountHistoryPage = () => {
                             : "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
                         )}
                       >
-                        <Heart size={12} fill={rec.is_favorited ? "currentColor" : "none"} />
+                        <Heart
+                          size={12}
+                          fill={rec.is_favorited ? "currentColor" : "none"}
+                        />
                         Favorite
                       </GlowPillButton>
 

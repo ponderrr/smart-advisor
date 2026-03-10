@@ -41,22 +41,24 @@ const Index = () => {
 
   const homeNavItems = user
     ? [
-      { name: "Dashboard", link: "/dashboard" },
-      { name: "History", link: "/history" },
-      { name: "Settings", link: "/settings" },
-    ]
+        { name: "Dashboard", link: "/dashboard" },
+        { name: "History", link: "/history" },
+        { name: "Settings", link: "/settings" },
+      ]
     : [
-      { name: "How It Works", link: "#how-it-works" },
-      { name: "Why Smart Advisor", link: "#why-smart-advisor" },
-      { name: "Powered By", link: "#powered-by" },
-      { name: "Our Team", link: "#meet-the-team" },
-      { name: "FAQ", link: "#faq" },
-    ];
+        { name: "How It Works", link: "#how-it-works" },
+        { name: "Why Smart Advisor", link: "#why-smart-advisor" },
+        { name: "Powered By", link: "#powered-by" },
+        { name: "Our Team", link: "#meet-the-team" },
+        { name: "FAQ", link: "#faq" },
+      ];
 
   const smoothScrollToSection = (selector: string) => {
     const section = document.querySelector(selector) as HTMLElement | null;
     if (!section) return;
-    const navbar = document.querySelector("[data-main-navbar='true']") as HTMLElement | null;
+    const navbar = document.querySelector(
+      "[data-main-navbar='true']",
+    ) as HTMLElement | null;
     const offset = (navbar?.offsetHeight ?? 96) + 16;
     const top = section.getBoundingClientRect().top + window.scrollY - offset;
     window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
@@ -237,7 +239,8 @@ const Index = () => {
               Powered By
             </h2>
             <p className="mx-auto max-w-3xl text-base text-slate-600 dark:text-slate-400 md:whitespace-nowrap md:text-lg">
-              Trusted services that help Smart Advisor stay fast, dependable, and helpful.
+              Trusted services that help Smart Advisor stay fast, dependable,
+              and helpful.
             </p>
           </div>
           <RotatingLogoSets />
@@ -250,7 +253,11 @@ const Index = () => {
           <h2 className="mb-24 text-4xl font-black tracking-tighter md:text-5xl">
             Meet the Team
           </h2>
-          <AnimatedTestimonials testimonials={teamMembers} autoplay showArrows={false} />
+          <AnimatedTestimonials
+            testimonials={teamMembers}
+            autoplay
+            showArrows={false}
+          />
         </div>
       </section>
 
@@ -258,7 +265,9 @@ const Index = () => {
       <section id="faq" className="scroll-mt-32 px-6 py-24 md:py-28">
         <div className="mx-auto max-w-3xl">
           <div className="mb-10 text-center">
-            <h2 className="text-4xl font-black tracking-tighter md:text-5xl">FAQ</h2>
+            <h2 className="text-4xl font-black tracking-tighter md:text-5xl">
+              FAQ
+            </h2>
             <p className="mx-auto mt-4 max-w-2xl text-sm text-slate-600 dark:text-slate-400 md:text-base">
               Questions before you get started? Reach out at{" "}
               <a
@@ -276,7 +285,8 @@ const Index = () => {
               >
                 GitHub
               </a>
-              . Smart Advisor is open source, so you can review and contribute anytime.
+              . Smart Advisor is open source, so you can review and contribute
+              anytime.
             </p>
           </div>
 
@@ -295,7 +305,7 @@ const Index = () => {
                       "flex w-full items-center justify-between px-5 py-4 text-left transition-colors",
                       isOpen
                         ? "bg-slate-100 dark:bg-slate-800/80"
-                        : "bg-white dark:bg-slate-900/60"
+                        : "bg-white dark:bg-slate-900/60",
                     )}
                   >
                     <span className="pr-4 text-sm font-semibold text-slate-900 dark:text-slate-100 md:text-base">
@@ -304,7 +314,7 @@ const Index = () => {
                     <IconChevronDown
                       className={cn(
                         "h-5 w-5 shrink-0 text-slate-500 transition-transform duration-300",
-                        isOpen && "rotate-180"
+                        isOpen && "rotate-180",
                       )}
                     />
                   </button>
@@ -314,7 +324,10 @@ const Index = () => {
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                        transition={{
+                          duration: 0.25,
+                          ease: [0.22, 1, 0.36, 1],
+                        }}
                         className="overflow-hidden"
                       >
                         <p className="bg-white px-5 pb-5 pt-1 text-sm leading-relaxed text-slate-600 dark:bg-slate-900/60 dark:text-slate-300">
@@ -337,7 +350,10 @@ const Index = () => {
             <a
               href="/"
               onClick={(event) => {
-                if (typeof window !== "undefined" && window.location.pathname === "/") {
+                if (
+                  typeof window !== "undefined" &&
+                  window.location.pathname === "/"
+                ) {
                   event.preventDefault();
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }
@@ -371,21 +387,32 @@ const Index = () => {
           </nav>
 
           <div className="mt-10 grid grid-cols-1 items-center gap-5 text-xs text-slate-500 dark:text-slate-400 md:grid-cols-3">
-            <p className="text-center md:text-left">© 2026 Smart Advisor. All rights reserved.</p>
+            <p className="text-center md:text-left">
+              © 2026 Smart Advisor. All rights reserved.
+            </p>
             <div className="whitespace-nowrap text-center text-sm text-slate-700 dark:text-slate-300">
               Built with{" "}
-              <LinkPreview url="https://react.dev" className="font-semibold text-slate-900 dark:text-slate-100">
+              <LinkPreview
+                url="https://react.dev"
+                className="font-semibold text-slate-900 dark:text-slate-100"
+              >
                 React
               </LinkPreview>
               ,{" "}
-              <LinkPreview url="https://nextjs.org" className="font-semibold text-slate-900 dark:text-white">
+              <LinkPreview
+                url="https://nextjs.org"
+                className="font-semibold text-slate-900 dark:text-white"
+              >
                 Next.js
               </LinkPreview>
               , and{" "}
-              <LinkPreview url="https://www.typescriptlang.org" className="font-semibold text-slate-900 dark:text-slate-100">
+              <LinkPreview
+                url="https://www.typescriptlang.org"
+                className="font-semibold text-slate-900 dark:text-slate-100"
+              >
                 TypeScript
-              </LinkPreview>
-              {" "}as an open-source project.
+              </LinkPreview>{" "}
+              as an open-source project.
             </div>
             <div className="flex items-center justify-center gap-4 md:justify-end">
               <a
@@ -429,7 +456,11 @@ const RotatingLogoSets = () => {
               initial={{ y: 40, opacity: 0, filter: "blur(10px)" }}
               animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
               exit={{ y: -40, opacity: 0, filter: "blur(10px)" }}
-              transition={{ duration: 0.45, delay: index * 0.1, ease: "easeOut" }}
+              transition={{
+                duration: 0.45,
+                delay: index * 0.1,
+                ease: "easeOut",
+              }}
               className="flex h-16 min-w-[150px] items-center justify-center"
             >
               {logo.src ? (
@@ -438,7 +469,9 @@ const RotatingLogoSets = () => {
                   alt={logo.name}
                   className={cn(
                     "w-auto object-contain grayscale brightness-0 transition dark:invert",
-                    logo.name === "Open Library" ? "h-12 md:h-[3.25rem]" : "h-10 md:h-11"
+                    logo.name === "Open Library"
+                      ? "h-12 md:h-[3.25rem]"
+                      : "h-10 md:h-11",
                   )}
                   loading="lazy"
                   decoding="async"

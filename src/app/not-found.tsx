@@ -1,5 +1,5 @@
-'use client';
-import { useRouter } from 'next/navigation';
+"use client";
+import { useRouter } from "next/navigation";
 import { Home, ArrowLeft } from "lucide-react";
 import { BrandWordmark } from "@/components/brand-wordmark";
 
@@ -36,7 +36,8 @@ const NotFound = () => {
             Page Not Found
           </h2>
           <p className="text-lg text-textSecondary mb-12 leading-relaxed">
-            Sorry, the page you're looking for doesn't exist. It might have been moved, deleted, or you entered the wrong URL.
+            Sorry, the page you're looking for doesn't exist. It might have been
+            moved, deleted, or you entered the wrong URL.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

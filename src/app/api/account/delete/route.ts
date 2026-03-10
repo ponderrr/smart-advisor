@@ -41,8 +41,9 @@ export async function POST(request: NextRequest) {
     await adminClient.from("profiles").delete().eq("id", user.id);
 
     // Delete the auth user
-    const { error: deleteError } =
-      await adminClient.auth.admin.deleteUser(user.id);
+    const { error: deleteError } = await adminClient.auth.admin.deleteUser(
+      user.id,
+    );
 
     if (deleteError) {
       console.error("Error deleting user:", deleteError);

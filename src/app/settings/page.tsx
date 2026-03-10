@@ -19,7 +19,11 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { authService } from "@/features/auth/services/auth-service";
-import { MfaSetup, MfaManagement, SessionsManagement } from "@/features/auth/components";
+import {
+  MfaSetup,
+  MfaManagement,
+  SessionsManagement,
+} from "@/features/auth/components";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import { GlowPillButton } from "@/components/ui/glow-pill-button";
@@ -131,14 +135,8 @@ const SettingsInput = ({
 
 const SettingsPage = () => {
   const router = useRouter();
-  const {
-    user,
-    session,
-    signOut,
-    updateProfile,
-    updateEmail,
-    updatePassword,
-  } = useAuth();
+  const { user, session, signOut, updateProfile, updateEmail, updatePassword } =
+    useAuth();
 
   const [activeSection, setActiveSection] =
     useState<SettingsSection>("profile");
@@ -166,7 +164,9 @@ const SettingsPage = () => {
   const [mfaEnabled, setMfaEnabled] = useState(false);
   const [mfaChecked, setMfaChecked] = useState(false);
   const [backupEmail, setBackupEmail] = useState("");
-  const [currentBackupEmail, setCurrentBackupEmail] = useState<string | null>(null);
+  const [currentBackupEmail, setCurrentBackupEmail] = useState<string | null>(
+    null,
+  );
   const [savingBackupEmail, setSavingBackupEmail] = useState(false);
 
   const showMessage = (
@@ -242,7 +242,11 @@ const SettingsPage = () => {
     { name: "Settings", link: "/settings" },
   ];
 
-  const sectionTabs: { id: SettingsSection; label: string; icon: React.ReactNode }[] = [
+  const sectionTabs: {
+    id: SettingsSection;
+    label: string;
+    icon: React.ReactNode;
+  }[] = [
     { id: "profile", label: "Profile", icon: <UserRound size={15} /> },
     { id: "security", label: "Security", icon: <Shield size={15} /> },
     { id: "content", label: "Content", icon: <SlidersHorizontal size={15} /> },
@@ -251,7 +255,8 @@ const SettingsPage = () => {
 
   const isGoogleConnected = (() => {
     const provider = session?.user?.app_metadata?.provider;
-    const providers = (session?.user?.app_metadata?.providers || []) as string[];
+    const providers = (session?.user?.app_metadata?.providers ||
+      []) as string[];
     return provider === "google" || providers.includes("google");
   })();
 
@@ -264,7 +269,10 @@ const SettingsPage = () => {
     setSavingProfile(true);
     setMessage(null);
     const verified = await requestVerification("save your profile");
-    if (!verified) { setSavingProfile(false); return; }
+    if (!verified) {
+      setSavingProfile(false);
+      return;
+    }
     const trimmedName = newName.trim();
     if (!trimmedName) {
       showMessage("New username is required.", "error");
@@ -272,8 +280,14 @@ const SettingsPage = () => {
       return;
     }
     const parsedAge = Number(age);
-    const result = await updateProfile(trimmedName, Number.isFinite(parsedAge) ? parsedAge : 25);
-    showMessage(result.error ?? "Profile updated.", result.error ? "error" : "success");
+    const result = await updateProfile(
+      trimmedName,
+      Number.isFinite(parsedAge) ? parsedAge : 25,
+    );
+    showMessage(
+      result.error ?? "Profile updated.",
+      result.error ? "error" : "success",
+    );
     setSavingProfile(false);
   };
 
@@ -285,15 +299,24 @@ const SettingsPage = () => {
       setSavingEmail(false);
       return;
     }
-    if (user?.email && newEmail.trim().toLowerCase() === user.email.trim().toLowerCase()) {
+    if (
+      user?.email &&
+      newEmail.trim().toLowerCase() === user.email.trim().toLowerCase()
+    ) {
       showMessage("New email must be different.", "error");
       setSavingEmail(false);
       return;
     }
     const verified = await requestVerification("update your email");
-    if (!verified) { setSavingEmail(false); return; }
+    if (!verified) {
+      setSavingEmail(false);
+      return;
+    }
     const result = await updateEmail(newEmail);
-    showMessage(result.error ?? "Check your inbox to confirm.", result.error ? "error" : "success");
+    showMessage(
+      result.error ?? "Check your inbox to confirm.",
+      result.error ? "error" : "success",
+    );
     setSavingEmail(false);
   };
 
@@ -306,7 +329,10 @@ const SettingsPage = () => {
       return;
     }
     const verified = await requestVerification("change your password");
-    if (!verified) { setSavingPassword(false); return; }
+    if (!verified) {
+      setSavingPassword(false);
+      return;
+    }
     const result = await updatePassword(newPassword);
     if (result.error) {
       showMessage(result.error, "error");
@@ -324,32 +350,56 @@ const SettingsPage = () => {
     if (!verified) return;
     window.localStorage.setItem(PREF_CONTENT_KEY, contentFocus);
     window.localStorage.setItem(PREF_DISCOVERY_KEY, discoveryLevel);
-    window.localStorage.setItem(PREF_QUESTION_COUNT_KEY, String(preferredQuestionCount));
+    window.localStorage.setItem(
+      PREF_QUESTION_COUNT_KEY,
+      String(preferredQuestionCount),
+    );
     showMessage("Content preferences saved.", "success");
   };
 
   const handleDisableAccount = async () => {
-    if (!window.confirm("Disable your account? You'll be signed out and unable to sign in until re-enabled by support.")) return;
+    if (
+      !window.confirm(
+        "Disable your account? You'll be signed out and unable to sign in until re-enabled by support.",
+      )
+    )
+      return;
     const verified = await requestVerification("disable your account");
     if (!verified) return;
     if (!window.confirm("Final confirmation. Disable now?")) return;
     setAccountActionLoading(true);
     setMessage(null);
     const result = await authService.disableAccount();
-    if (result.error) { showMessage(result.error, "error"); setAccountActionLoading(false); return; }
+    if (result.error) {
+      showMessage(result.error, "error");
+      setAccountActionLoading(false);
+      return;
+    }
     router.push("/");
   };
 
   const handleDeleteAccount = async () => {
-    if (!window.confirm("Permanently delete your account? This cannot be undone.")) return;
-    const verified = await requestVerification("permanently delete your account");
+    if (
+      !window.confirm("Permanently delete your account? This cannot be undone.")
+    )
+      return;
+    const verified = await requestVerification(
+      "permanently delete your account",
+    );
     if (!verified) return;
     const typed = window.prompt('Type "DELETE" to confirm:');
-    if (typed !== "DELETE") { showMessage("Deletion canceled.", "info"); return; }
+    if (typed !== "DELETE") {
+      showMessage("Deletion canceled.", "info");
+      return;
+    }
     setAccountActionLoading(true);
     setMessage(null);
     const result = await authService.deleteAccount();
-    if (result.error) { showMessage(result.error, "error"); setAccountActionLoading(false); return; }
+    if (result.error) {
+      showMessage(result.error, "error");
+      setAccountActionLoading(false);
+      return;
+    }
     router.push("/");
   };
 
@@ -357,10 +407,14 @@ const SettingsPage = () => {
     if (typeof window === "undefined") return;
     const sc = window.localStorage.getItem(PREF_CONTENT_KEY);
     const sd = window.localStorage.getItem(PREF_DISCOVERY_KEY);
-    const sq = Number(window.localStorage.getItem(PREF_QUESTION_COUNT_KEY) || "5");
+    const sq = Number(
+      window.localStorage.getItem(PREF_QUESTION_COUNT_KEY) || "5",
+    );
     if (sc && ["movie", "book", "both"].includes(sc)) setContentFocus(sc);
-    if (sd && ["safe", "balanced", "adventurous"].includes(sd)) setDiscoveryLevel(sd);
-    if (Number.isFinite(sq) && sq >= 3 && sq <= 15) setPreferredQuestionCount(sq);
+    if (sd && ["safe", "balanced", "adventurous"].includes(sd))
+      setDiscoveryLevel(sd);
+    if (Number.isFinite(sq) && sq >= 3 && sq <= 15)
+      setPreferredQuestionCount(sq);
   }, []);
 
   useEffect(() => {
@@ -377,7 +431,8 @@ const SettingsPage = () => {
   useEffect(() => {
     const checkMfa = async () => {
       const { data } = await authService.listMFAFactors();
-      const hasVerified = data?.totp?.some((f: any) => f.status === "verified") ?? false;
+      const hasVerified =
+        data?.totp?.some((f: any) => f.status === "verified") ?? false;
       setMfaEnabled(hasVerified);
       setMfaChecked(true);
     };
@@ -427,14 +482,19 @@ const SettingsPage = () => {
       {/* Navbar */}
       <Navbar>
         <NavBody>
-          <div className="flex w-[320px] shrink-0 items-center"><NavbarLogo /></div>
+          <div className="flex w-[320px] shrink-0 items-center">
+            <NavbarLogo />
+          </div>
           <div className="flex flex-1 justify-center">
             <NavItems items={navItems} className="justify-center px-2" />
           </div>
           <div className="flex w-[320px] shrink-0 items-center justify-end gap-4">
             <ThemeToggle />
-            <button type="button" onClick={handleSignOut}
-              className="text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400">
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400"
+            >
               Sign Out
             </button>
           </div>
@@ -444,20 +504,34 @@ const SettingsPage = () => {
             <NavbarLogo />
             <div className="flex items-center gap-4">
               <ThemeToggle />
-              <MobileNavToggle isOpen={isMobileMenuOpen} onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} />
+              <MobileNavToggle
+                isOpen={isMobileMenuOpen}
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              />
             </div>
           </MobileNavHeader>
           <MobileNavMenu isOpen={isMobileMenuOpen}>
             {navItems.map((item) => (
-              <button key={item.name} type="button"
-                onClick={() => { router.push(item.link); setIsMobileMenuOpen(false); }}
-                className="text-left text-xl font-black tracking-tight text-slate-800 dark:text-slate-100">
+              <button
+                key={item.name}
+                type="button"
+                onClick={() => {
+                  router.push(item.link);
+                  setIsMobileMenuOpen(false);
+                }}
+                className="text-left text-xl font-black tracking-tight text-slate-800 dark:text-slate-100"
+              >
                 {item.name}
               </button>
             ))}
-            <button type="button"
-              onClick={async () => { await handleSignOut(); setIsMobileMenuOpen(false); }}
-              className="text-left text-xl font-black tracking-tight text-rose-600 dark:text-rose-400">
+            <button
+              type="button"
+              onClick={async () => {
+                await handleSignOut();
+                setIsMobileMenuOpen(false);
+              }}
+              className="text-left text-xl font-black tracking-tight text-rose-600 dark:text-rose-400"
+            >
               Sign Out
             </button>
           </MobileNavMenu>
@@ -507,9 +581,12 @@ const SettingsPage = () => {
                 exit={{ opacity: 0, y: -8 }}
                 className={cn(
                   "mb-5 rounded-xl border px-4 py-2.5 text-sm font-medium",
-                  message.type === "success" && "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300",
-                  message.type === "error" && "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-300",
-                  message.type === "info" && "border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300",
+                  message.type === "success" &&
+                    "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300",
+                  message.type === "error" &&
+                    "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-300",
+                  message.type === "info" &&
+                    "border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300",
                 )}
               >
                 {message.text}
@@ -520,9 +597,16 @@ const SettingsPage = () => {
           {/* Section Content */}
           <div className="space-y-4">
             {activeSection === "profile" && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="space-y-4"
+              >
                 <SectionCard>
-                  <SectionHeader title="Profile Details" description="Update your public account details." />
+                  <SectionHeader
+                    title="Profile Details"
+                    description="Update your public account details."
+                  />
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <SettingsInput
                       label="Current Username"
@@ -561,10 +645,17 @@ const SettingsPage = () => {
             )}
 
             {activeSection === "security" && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="space-y-4"
+              >
                 {/* Email */}
                 <SectionCard>
-                  <SectionHeader title="Email Address" description="Update the email associated with your account." />
+                  <SectionHeader
+                    title="Email Address"
+                    description="Update the email associated with your account."
+                  />
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <SettingsInput
                       label="Current Email"
@@ -593,7 +684,10 @@ const SettingsPage = () => {
 
                 {/* Password */}
                 <SectionCard>
-                  <SectionHeader title="Password" description="Change your account password." />
+                  <SectionHeader
+                    title="Password"
+                    description="Change your account password."
+                  />
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <SettingsInput
                       label="New Password"
@@ -628,12 +722,19 @@ const SettingsPage = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="rounded-xl bg-violet-100 p-2 dark:bg-violet-900/30">
-                          <ShieldCheck size={18} className="text-violet-600 dark:text-violet-400" />
+                          <ShieldCheck
+                            size={18}
+                            className="text-violet-600 dark:text-violet-400"
+                          />
                         </div>
                         <div>
-                          <h3 className="text-sm font-bold">Two-Factor Authentication</h3>
+                          <h3 className="text-sm font-bold">
+                            Two-Factor Authentication
+                          </h3>
                           <p className="text-xs text-slate-500 dark:text-slate-400">
-                            {mfaEnabled ? "Your account is protected with 2FA" : "Extra security for your account."}
+                            {mfaEnabled
+                              ? "Your account is protected with 2FA"
+                              : "Extra security for your account."}
                           </p>
                         </div>
                       </div>
@@ -647,7 +748,8 @@ const SettingsPage = () => {
                           onClick={() => setShowMfaPanel(true)}
                           className="flex items-center gap-1 rounded-lg bg-white px-3 py-2 text-xs font-semibold shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50 dark:bg-slate-800 dark:ring-slate-700"
                         >
-                          {mfaEnabled ? "Manage" : "Enable"} <ChevronRight size={12} />
+                          {mfaEnabled ? "Manage" : "Enable"}{" "}
+                          <ChevronRight size={12} />
                         </button>
                       </div>
                     </div>
@@ -684,7 +786,9 @@ const SettingsPage = () => {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
                         <div>
-                          <p className="text-sm font-semibold">{currentBackupEmail}</p>
+                          <p className="text-sm font-semibold">
+                            {currentBackupEmail}
+                          </p>
                           <p className="text-xs text-slate-500 dark:text-slate-400">
                             Active backup email
                           </p>
@@ -742,9 +846,16 @@ const SettingsPage = () => {
             )}
 
             {activeSection === "content" && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="space-y-4"
+              >
                 <SectionCard>
-                  <SectionHeader title="Content Preferences" description="Set your default recommendation behavior." />
+                  <SectionHeader
+                    title="Content Preferences"
+                    description="Set your default recommendation behavior."
+                  />
 
                   <div className="space-y-5">
                     <div>
@@ -805,7 +916,9 @@ const SettingsPage = () => {
                           min={3}
                           max={15}
                           value={preferredQuestionCount}
-                          onChange={(e) => setPreferredQuestionCount(Number(e.target.value))}
+                          onChange={(e) =>
+                            setPreferredQuestionCount(Number(e.target.value))
+                          }
                           className="w-full cursor-pointer accent-indigo-500"
                         />
                         <div className="mt-1.5 flex justify-between text-[10px] font-semibold uppercase tracking-wider text-slate-400">
@@ -832,15 +945,24 @@ const SettingsPage = () => {
             )}
 
             {activeSection === "integrations" && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="space-y-4"
+              >
                 {/* Google */}
                 <SectionCard>
-                  <SectionHeader title="Integrations" description="Connected providers and services." />
+                  <SectionHeader
+                    title="Integrations"
+                    description="Connected providers and services."
+                  />
                   <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
                     <div>
                       <p className="text-sm font-semibold">Google Sign-In</p>
                       <p className="text-xs text-slate-500 dark:text-slate-400">
-                        {isGoogleConnected ? "Connected to your account" : "Not connected"}
+                        {isGoogleConnected
+                          ? "Connected to your account"
+                          : "Not connected"}
                       </p>
                     </div>
                     <span
@@ -920,7 +1042,10 @@ const SettingsPage = () => {
                   <div className="mb-5">
                     <div className="mb-3 flex items-center gap-2">
                       <div className="rounded-xl bg-violet-100 p-2 dark:bg-violet-900/30">
-                        <ShieldCheck size={18} className="text-violet-600 dark:text-violet-400" />
+                        <ShieldCheck
+                          size={18}
+                          className="text-violet-600 dark:text-violet-400"
+                        />
                       </div>
                       <h3 className="text-lg font-bold">Verify Identity</h3>
                     </div>
@@ -980,7 +1105,10 @@ const SettingsPage = () => {
                   <div className="mb-4">
                     <div className="mb-3 flex items-center gap-2">
                       <div className="rounded-xl bg-violet-100 p-2 dark:bg-violet-900/30">
-                        <ShieldCheck size={18} className="text-violet-600 dark:text-violet-400" />
+                        <ShieldCheck
+                          size={18}
+                          className="text-violet-600 dark:text-violet-400"
+                        />
                       </div>
                       <h3 className="text-lg font-bold">Set Up 2FA First</h3>
                     </div>

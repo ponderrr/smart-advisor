@@ -242,7 +242,11 @@ export const EnhancedSpinner: React.FC<{
 export const PageLoadingSweep: React.FC = () => {
   return (
     <>
-      <div className="page-loading-sweep" role="status" aria-label="Loading page" />
+      <div
+        className="page-loading-sweep"
+        role="status"
+        aria-label="Loading page"
+      />
       <div className="page-loading-glow" />
     </>
   );

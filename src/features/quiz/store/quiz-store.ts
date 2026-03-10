@@ -1,7 +1,7 @@
-import { create } from 'zustand';
-import { Answer } from '@/features/quiz/types/answer';
+import { create } from "zustand";
+import { Answer } from "@/features/quiz/types/answer";
 
-export type ContentType = 'movie' | 'book' | 'both';
+export type ContentType = "movie" | "book" | "both";
 
 interface QuizStore {
   contentType: ContentType | null;

@@ -104,7 +104,8 @@ class AuthService {
       if (!trimmedName) {
         return { error: "Please enter your name." };
       }
-      const trimmedUsername = typeof username === "string" ? username.trim() : "";
+      const trimmedUsername =
+        typeof username === "string" ? username.trim() : "";
       if (!trimmedUsername) {
         return { error: "Please enter a username." };
       }
@@ -368,7 +369,9 @@ class AuthService {
       return { error: null };
     } catch (err) {
       console.error("Error resending verification email:", err);
-      return { error: "Failed to resend verification email. Please try again." };
+      return {
+        error: "Failed to resend verification email. Please try again.",
+      };
     }
   }
 
@@ -478,9 +481,15 @@ class AuthService {
   /* -------------------- MFA & SECURITY -------------------- */
   async enrollMFA() {
     try {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
       if (sessionError || !session) {
-        return { error: "You must be signed in to enable MFA. Please sign in again.", data: null };
+        return {
+          error: "You must be signed in to enable MFA. Please sign in again.",
+          data: null,
+        };
       }
 
       const { data, error } = await supabase.auth.mfa.enroll({
@@ -488,7 +497,13 @@ class AuthService {
       });
 
       if (error) {
-        return { error: this.toUserFriendlyError(error.message, "Failed to start MFA enrollment. Please try again."), data: null };
+        return {
+          error: this.toUserFriendlyError(
+            error.message,
+            "Failed to start MFA enrollment. Please try again.",
+          ),
+          data: null,
+        };
       }
 
       // Store MFA factor in database (non-blocking — don't fail enrollment if DB insert fails)
@@ -628,7 +643,10 @@ class AuthService {
       return { data, error: null };
     } catch (err) {
       console.error("Error getting AAL level:", err);
-      return { data: null, error: "Failed to get authenticator assurance level" };
+      return {
+        data: null,
+        error: "Failed to get authenticator assurance level",
+      };
     }
   }
 
@@ -659,9 +677,7 @@ class AuthService {
       for (let i = 0; i < count; i++) {
         const array = new Uint8Array(5);
         crypto.getRandomValues(array);
-        const hex = Array.from(array, (b) =>
-          b.toString(16).padStart(2, "0"),
-        )
+        const hex = Array.from(array, (b) => b.toString(16).padStart(2, "0"))
           .join("")
           .toUpperCase();
         codes.push(`${hex.slice(0, 5)}-${hex.slice(5)}`);
@@ -735,8 +751,7 @@ class AuthService {
         .eq("user_id", user.id)
         .is("used_at", null);
 
-      if (error)
-        return { count: 0, error: "Failed to get backup code count" };
+      if (error) return { count: 0, error: "Failed to get backup code count" };
       return { count: count || 0, error: null };
     } catch (err) {
       return { count: 0, error: "Failed to get backup code count" };
@@ -755,7 +770,9 @@ class AuthService {
       if (!user) return { error: "Not authenticated" };
 
       if (normalizeEmail(email) === normalizeEmail(user.email || "")) {
-        return { error: "Backup email must be different from your primary email" };
+        return {
+          error: "Backup email must be different from your primary email",
+        };
       }
 
       const { error } = await supabase
@@ -771,7 +788,10 @@ class AuthService {
     }
   }
 
-  async getBackupEmail(): Promise<{ email: string | null; error: string | null }> {
+  async getBackupEmail(): Promise<{
+    email: string | null;
+    error: string | null;
+  }> {
     try {
       const {
         data: { user },
@@ -827,13 +847,18 @@ class AuthService {
       if (typeof window !== "undefined") {
         window.sessionStorage.setItem(
           "backup_email_verify",
-          JSON.stringify({ hash: codeHash, expires: Date.now() + 10 * 60 * 1000 }),
+          JSON.stringify({
+            hash: codeHash,
+            expires: Date.now() + 10 * 60 * 1000,
+          }),
         );
       }
 
       // In a production app, you'd send this code via an email service.
       // For now, log it for development purposes.
-      console.info(`[DEV] Backup email verification code for ${email}: ${code}`);
+      console.info(
+        `[DEV] Backup email verification code for ${email}: ${code}`,
+      );
 
       return { error: null };
     } catch (err) {
@@ -846,7 +871,8 @@ class AuthService {
       if (typeof window === "undefined") return { error: "Not available" };
 
       const stored = window.sessionStorage.getItem("backup_email_verify");
-      if (!stored) return { error: "No pending verification. Request a new code." };
+      if (!stored)
+        return { error: "No pending verification. Request a new code." };
 
       const { hash, expires } = JSON.parse(stored);
       if (Date.now() > expires) {
@@ -908,7 +934,8 @@ class AuthService {
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      if (!session) return { error: "No active session. Please sign in again." };
+      if (!session)
+        return { error: "No active session. Please sign in again." };
 
       const response = await fetch("/api/account/delete", {
         method: "POST",
@@ -927,7 +954,9 @@ class AuthService {
       return { error: null };
     } catch (err) {
       console.error("Error deleting account:", err);
-      return { error: "An unexpected error occurred while deleting your account." };
+      return {
+        error: "An unexpected error occurred while deleting your account.",
+      };
     }
   }
 
@@ -936,7 +965,8 @@ class AuthService {
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      if (!session) return { error: "No active session. Please sign in again." };
+      if (!session)
+        return { error: "No active session. Please sign in again." };
 
       const response = await fetch("/api/account/disable", {
         method: "POST",
@@ -955,7 +985,9 @@ class AuthService {
       return { error: null };
     } catch (err) {
       console.error("Error disabling account:", err);
-      return { error: "An unexpected error occurred while disabling your account." };
+      return {
+        error: "An unexpected error occurred while disabling your account.",
+      };
     }
   }
 
