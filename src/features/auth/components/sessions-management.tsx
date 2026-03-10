@@ -61,7 +61,7 @@ export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
     if (error) {
       toast.error(error);
     } else {
-      toast.success("Session revoked");
+      toast.success("You've been signed out of that device");
       setSessions((prev) => prev.filter((s) => s.id !== session.id));
 
       // If revoking current device, sign out and redirect
@@ -86,7 +86,7 @@ export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
     if (error) {
       toast.error(error);
     } else {
-      toast.success("All sessions revoked");
+      toast.success("You've been signed out of all devices");
       router.push("/");
     }
   };

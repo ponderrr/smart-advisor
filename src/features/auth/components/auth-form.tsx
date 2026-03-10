@@ -134,6 +134,7 @@ export const AuthForm = ({
     "mfa-setup": 0,
   });
   const [signupEmail, setSignupEmail] = useState("");
+  const [signupPendingMfa, setSignupPendingMfa] = useState(false);
 
   // MFA challenge state
   const [mfaFactorId, setMfaFactorId] = useState("");
@@ -356,8 +357,9 @@ export const AuthForm = ({
         return result;
       }
 
-      // On Success: Show email verification screen
+      // On Success: Show email verification screen (MFA setup will follow after sign-in)
       setSignupEmail(email);
+      setSignupPendingMfa(true);
       setMode("verify-email");
       return { error: null };
     } finally {
@@ -446,6 +448,7 @@ export const AuthForm = ({
               }}
               isResending={isResendingVerification}
               onBackToSignIn={() => toggleMode("signin")}
+              showMfaHint={signupPendingMfa}
             />
           </motion.div>
         ) : mode === "mfa-challenge" ? (
@@ -998,11 +1001,13 @@ const VerifyEmailScreen = ({
   onResend,
   isResending,
   onBackToSignIn,
+  showMfaHint = false,
 }: {
   email: string;
   onResend: () => Promise<{ error: string | null }>;
   isResending: boolean;
   onBackToSignIn: () => void;
+  showMfaHint?: boolean;
 }) => {
   const [resendMessage, setResendMessage] = useState<string | null>(null);
   const [resendError, setResendError] = useState<string | null>(null);
@@ -1047,6 +1052,16 @@ const VerifyEmailScreen = ({
           . Click the link to activate your account.
         </p>
       </div>
+
+      {showMfaHint && (
+        <div className="flex items-center gap-3 rounded-lg border border-violet-200 bg-violet-50 px-4 py-3 dark:border-violet-800/40 dark:bg-violet-900/20">
+          <ShieldCheck className="h-5 w-5 shrink-0 text-violet-500 dark:text-violet-400" />
+          <p className="text-xs text-slate-600 dark:text-slate-400">
+            <span className="font-semibold text-slate-800 dark:text-slate-200">Next up:</span>{" "}
+            After verifying your email, you'll be able to add two-factor authentication for extra security.
+          </p>
+        </div>
+      )}
 
       {resendMessage && (
         <p className="text-sm text-emerald-600 dark:text-emerald-400">
