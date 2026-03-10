@@ -14,9 +14,11 @@ export interface BannerData {
   message: string;
   type: BannerType;
   visibility: BannerVisibility;
-  active: boolean;
+  is_active: boolean;
   link_url?: string | null;
   link_text?: string | null;
+  starts_at?: string | null;
+  ends_at?: string | null;
 }
 
 const BANNER_DISMISSED_KEY = "smart_advisor_dismissed_banners";
@@ -27,26 +29,22 @@ const bannerConfig: Record<
 > = {
   maintenance: {
     icon: <AlertTriangle size={16} />,
-    bgClass:
-      "bg-amber-600 dark:bg-amber-700",
+    bgClass: "bg-amber-600 dark:bg-amber-700",
     textClass: "text-white",
   },
   feature: {
     icon: <Sparkles size={16} />,
-    bgClass:
-      "bg-indigo-600 dark:bg-indigo-700",
+    bgClass: "bg-indigo-600 dark:bg-indigo-700",
     textClass: "text-white",
   },
   announcement: {
     icon: <Megaphone size={16} />,
-    bgClass:
-      "bg-slate-800 dark:bg-slate-700",
+    bgClass: "bg-slate-800 dark:bg-slate-700",
     textClass: "text-white",
   },
   info: {
     icon: <Info size={16} />,
-    bgClass:
-      "bg-blue-600 dark:bg-blue-700",
+    bgClass: "bg-blue-600 dark:bg-blue-700",
     textClass: "text-white",
   },
 };
@@ -75,20 +73,23 @@ export const SiteBanner = () => {
         const { data, error } = await supabase
           .from("banners")
           .select("*")
-          .eq("active", true)
+          .eq("is_active", true) // Fixed column name
           .order("created_at", { ascending: false });
 
         if (!error && data) {
+          console.log("Fetched banners:", data); // Debug log
           setBanners(data as BannerData[]);
+        } else if (error) {
+          console.error("Error fetching banners:", error);
         }
-      } catch {
-        // Table might not exist yet — fail silently
+      } catch (err) {
+        console.error("Unexpected error fetching banners:", err);
       }
     };
 
     fetchBanners();
 
-    // Subscribe to realtime changes for live updates
+    // Subscribe to realtime changes
     const channel = supabase
       .channel("banners-changes")
       .on(
@@ -120,7 +121,7 @@ export const SiteBanner = () => {
   const isHomepage = pathname === "/";
 
   // Filter banners: site-wide always shown, homepage-only on homepage
-  // Maintenance banners cannot be dismissed (critical alerts)
+  // Maintenance banners cannot be dismissed
   const visibleBanners = banners.filter((banner) => {
     if (banner.visibility === "homepage-only" && !isHomepage) return false;
     if (banner.type !== "maintenance" && dismissed.has(banner.id)) return false;
@@ -129,29 +130,41 @@ export const SiteBanner = () => {
 
   if (visibleBanners.length === 0) return null;
 
-  // Show the first (most recent) visible banner
-  const banner = visibleBanners[0];
-  const config = bannerConfig[banner.type];
-
   return (
-    <StickyBanner
-      className={`${config.bgClass} ${config.textClass}`}
-      hideOnScroll={banner.type !== "maintenance"}
-    >
-      <div className="flex items-center gap-2 text-sm font-medium">
-        {config.icon}
-        <span>{banner.message}</span>
-        {banner.link_url && banner.link_text && (
-          <a
-            href={banner.link_url}
-            className="ml-1 underline underline-offset-2 opacity-90 transition-opacity hover:opacity-100"
-            target="_blank"
-            rel="noreferrer"
+    <>
+      {visibleBanners.map((banner) => {
+        const config = bannerConfig[banner.type];
+        return (
+          <StickyBanner
+            key={banner.id}
+            className={`${config.bgClass} ${config.textClass}`}
+            hideOnScroll={banner.type !== "maintenance"}
           >
-            {banner.link_text}
-          </a>
-        )}
-      </div>
-    </StickyBanner>
+            <div className="flex items-center gap-2 text-sm font-medium">
+              {config.icon}
+              <span>{banner.message}</span>
+              {banner.link_url && banner.link_text && (
+                <a
+                  href={banner.link_url}
+                  className="ml-1 underline underline-offset-2 opacity-90 transition-opacity hover:opacity-100"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {banner.link_text}
+                </a>
+              )}
+              {banner.type !== "maintenance" && banner.is_active && (
+                <button
+                  onClick={() => handleDismiss(banner.id)}
+                  className="ml-auto underline text-xs opacity-80 hover:opacity-100"
+                >
+                  Dismiss
+                </button>
+              )}
+            </div>
+          </StickyBanner>
+        );
+      })}
+    </>
   );
 };
