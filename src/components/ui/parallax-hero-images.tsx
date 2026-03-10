@@ -164,7 +164,10 @@ const ParallaxImage = memo(function ParallaxImage({
 }: ParallaxImageProps) {
   const [displaySrc, setDisplaySrc] = useState(src);
   const [incomingSrc, setIncomingSrc] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const maxOffset = 40;
+
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (!src || src === displaySrc || src === incomingSrc) return;
@@ -199,7 +202,7 @@ const ParallaxImage = memo(function ParallaxImage({
         y: translateY,
         zIndex: Math.round(depth * 10),
       }}
-      initial={{ opacity: 0, scale: 0.95, filter: "blur(14px)" }}
+      initial={mounted ? { opacity: 0, scale: 0.95, filter: "blur(14px)" } : false}
       animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
       transition={{
         duration: 0.7,
