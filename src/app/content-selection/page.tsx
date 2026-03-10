@@ -306,7 +306,7 @@ const ContentSelectionPage = () => {
                   onClick={handleContinue}
                   disabled={isLoading}
                   className={cn(
-                    "inline-flex items-center justify-center gap-2 bg-slate-900 px-6 py-2.5 text-sm font-black tracking-tight text-white disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-100 dark:text-slate-900",
+                    "inline-flex items-center justify-center gap-2 bg-white px-6 py-2.5 text-sm font-black tracking-tight text-black disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-900 dark:text-white",
                   )}
                 >
                   {isLoading ? "Continuing..." : "Continue"}

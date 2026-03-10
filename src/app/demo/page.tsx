@@ -320,7 +320,7 @@ export default function DemoPage() {
               <GlowPillButton
                 onClick={handleNext}
                 className={cn(
-                  "inline-flex items-center justify-center gap-2 bg-slate-900 px-6 py-2.5 text-sm font-black tracking-tight text-white dark:bg-slate-100 dark:text-slate-900",
+                  "inline-flex items-center justify-center gap-2 bg-white px-6 py-2.5 text-sm font-black tracking-tight text-black dark:bg-slate-900 dark:text-white",
                 )}
               >
                 {step === DEMO_QUESTIONS.length - 1 ? "Continue" : "Next"}

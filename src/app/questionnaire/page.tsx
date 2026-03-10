@@ -48,6 +48,21 @@ const QUESTION_OPTION_SETS: Record<"movie" | "book" | "both", string[][]> = {
   ],
 };
 
+const SELECT_ALL_OPTIONS: Record<"movie" | "book" | "both", string[][]> = {
+  movie: [
+    ["Action", "Comedy", "Drama", "Horror", "Sci-Fi", "Romance", "Thriller", "Documentary"],
+    ["Great acting", "Stunning visuals", "Strong plot", "Unique concept", "Emotional depth", "Humor"],
+  ],
+  book: [
+    ["Fantasy", "Mystery", "Sci-Fi", "Romance", "Literary Fiction", "Thriller", "Non-Fiction", "Historical"],
+    ["Rich characters", "Beautiful prose", "Fast plot", "World-building", "Emotional depth", "Humor"],
+  ],
+  both: [
+    ["Action", "Fantasy", "Drama", "Mystery", "Sci-Fi", "Romance", "Thriller", "Comedy"],
+    ["Great characters", "Strong plot", "Unique concept", "Emotional depth", "World-building", "Humor"],
+  ],
+};
+
 const getQuestionOptions = (
   type: "movie" | "book" | "both",
   index: number,
@@ -55,6 +70,92 @@ const getQuestionOptions = (
   const sets = QUESTION_OPTION_SETS[type];
   return sets[index % sets.length];
 };
+
+const getSelectAllOptions = (
+  type: "movie" | "book" | "both",
+  index: number,
+) => {
+  const sets = SELECT_ALL_OPTIONS[type];
+  return sets[index % sets.length];
+};
+
+/* ---------- Bouncing Words Loading Animation ---------- */
+const LOADING_WORDS = ["Analyzing", "your", "profile", "and", "crafting", "personalized", "questions"];
+
+const BouncingWordsLoader = ({ questionCount, contentType }: { questionCount: number; contentType: string | null }) => (
+  <div className="mx-auto flex min-h-[420px] w-full max-w-4xl flex-col justify-center rounded-3xl border border-slate-200/70 bg-white/85 p-6 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
+    <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+      Step 3 of 4
+    </p>
+    <div className="mx-auto mt-5 flex h-20 w-20 items-center justify-center rounded-full border border-indigo-300/70 bg-indigo-50 dark:border-indigo-500/40 dark:bg-indigo-500/10">
+      <motion.svg
+        width="40"
+        height="40"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" strokeWidth="2" className="text-indigo-500/20" />
+        <motion.path
+          d="M4 8H20"
+          stroke="#6366f1"
+          strokeWidth="2"
+          strokeLinecap="round"
+          animate={{ y: [0, 8, 0], opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.path
+          d="M12 12L12 12"
+          stroke="#6366f1"
+          strokeWidth="3"
+          strokeLinecap="round"
+          animate={{ scale: [1, 1.5, 1], opacity: [0, 1, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
+        />
+      </motion.svg>
+    </div>
+
+    <h1 className="mt-4 text-3xl font-black tracking-tighter md:text-4xl">
+      Generating your questions
+    </h1>
+
+    {/* Bouncing words animation */}
+    <div className="mx-auto mt-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
+      {LOADING_WORDS.map((word, i) => (
+        <motion.span
+          key={word}
+          className="text-sm font-semibold text-indigo-600 dark:text-indigo-400"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: [0, 1, 1, 0], y: [12, 0, 0, -8] }}
+          transition={{
+            duration: 2.4,
+            repeat: Infinity,
+            delay: i * 0.18,
+            ease: "easeInOut",
+          }}
+        >
+          {word}
+        </motion.span>
+      ))}
+    </div>
+
+    <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
+      Building {questionCount} personalized prompts for your profile.
+    </p>
+
+    {/* Sweep bar */}
+    <div className="relative mx-auto mt-8 h-12 w-full max-w-md overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-50/80 dark:border-slate-700 dark:bg-slate-950/40">
+      <motion.div
+        className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent"
+        animate={{ x: ["-120%", "340%"] }}
+        transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <div className="relative z-10 flex h-full items-center justify-center text-sm font-semibold text-slate-700 dark:text-slate-200">
+        {contentType?.toUpperCase()} QUESTIONNAIRE
+      </div>
+    </div>
+  </div>
+);
 
 const QuestionnairePage = () => {
   const router = useRouter();
@@ -64,6 +165,7 @@ const QuestionnairePage = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [multiAnswers, setMultiAnswers] = useState<Record<string, string[]>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -127,7 +229,9 @@ const QuestionnairePage = () => {
   }, [contentType, user, router, loadQuestions]);
 
   useEffect(() => {
-    const hasInProgressAnswers = Object.values(answers).some((v) => v.trim().length > 0);
+    const hasInProgressAnswers =
+      Object.values(answers).some((v) => v.trim().length > 0) ||
+      Object.values(multiAnswers).some((arr) => arr.length > 0);
     if (!hasInProgressAnswers || isSubmitting) return;
 
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -137,7 +241,7 @@ const QuestionnairePage = () => {
 
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [answers, isSubmitting]);
+  }, [answers, multiAnswers, isSubmitting]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -155,6 +259,16 @@ const QuestionnairePage = () => {
     }));
   };
 
+  const handleToggleMulti = (questionId: string, option: string) => {
+    setMultiAnswers((prev) => {
+      const current = prev[questionId] ?? [];
+      const next = current.includes(option)
+        ? current.filter((o) => o !== option)
+        : [...current, option];
+      return { ...prev, [questionId]: next };
+    });
+  };
+
   const handlePrevious = () => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex((prev) => prev - 1);
@@ -168,12 +282,24 @@ const QuestionnairePage = () => {
 
     setIsSubmitting(true);
 
-    const formattedAnswers: Answer[] = questions.map((q) => ({
-      id: uuidv4(),
-      question_id: q.id,
-      answer_text: answers[q.id] || "",
-      created_at: new Date().toISOString(),
-    }));
+    const formattedAnswers: Answer[] = questions.map((q) => {
+      if (q.type === "select_all") {
+        const selected = multiAnswers[q.id] ?? [];
+        return {
+          id: uuidv4(),
+          question_id: q.id,
+          answer_text: selected.join(", "),
+          selected_options: selected,
+          created_at: new Date().toISOString(),
+        };
+      }
+      return {
+        id: uuidv4(),
+        question_id: q.id,
+        answer_text: answers[q.id] || "",
+        created_at: new Date().toISOString(),
+      };
+    });
 
     setStoreAnswers(formattedAnswers);
     router.push("/results");
@@ -187,7 +313,22 @@ const QuestionnairePage = () => {
     handleComplete();
   };
 
-  const canProceed = Boolean(currentQuestion && answers[currentQuestion.id]?.trim().length > 0);
+  const canProceed = (() => {
+    if (!currentQuestion) return false;
+    if (currentQuestion.type === "select_all") {
+      return (multiAnswers[currentQuestion.id]?.length ?? 0) > 0;
+    }
+    return (answers[currentQuestion.id]?.trim().length ?? 0) > 0;
+  })();
+
+  // Track select_all option index for cycling through option sets
+  const selectAllIndex = (() => {
+    let count = 0;
+    for (let i = 0; i < currentQuestionIndex; i++) {
+      if (questions[i]?.type === "select_all") count++;
+    }
+    return count;
+  })();
 
   const topBar = (
     <Navbar>
@@ -257,66 +398,7 @@ const QuestionnairePage = () => {
       <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
         {topBar}
         <main className="px-4 pb-20 pt-32 md:pt-36 sm:px-6">
-          <div className="mx-auto flex min-h-[420px] w-full max-w-4xl flex-col justify-center rounded-3xl border border-slate-200/70 bg-white/85 p-6 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-              Step 3 of 4
-            </p>
-            <div className="mx-auto mt-5 flex h-20 w-20 items-center justify-center rounded-full border border-indigo-300/70 bg-indigo-50 dark:border-indigo-500/40 dark:bg-indigo-500/10">
-              <motion.svg
-                width="40"
-                height="40"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                {/* Book/Screen Outline */}
-                <rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" strokeWidth="2" className="text-indigo-500/20" />
-
-                {/* Scanning Beam */}
-                <motion.path
-                  d="M4 8H20"
-                  stroke="#6366f1"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  animate={{
-                    y: [0, 8, 0],
-                    opacity: [0.5, 1, 0.5]
-                  }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                />
-
-                {/* AI Sparkle */}
-                <motion.path
-                  d="M12 12L12 12"
-                  stroke="#6366f1"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  animate={{
-                    scale: [1, 1.5, 1],
-                    opacity: [0, 1, 0]
-                  }}
-                  transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
-                />
-              </motion.svg>
-            </div>
-            <h1 className="mt-4 text-3xl font-black tracking-tighter md:text-4xl">
-              Generating your questions
-            </h1>
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-              Building {questionCount} personalized prompts for your profile.
-            </p>
-
-            <div className="relative mx-auto mt-8 h-12 w-full max-w-md overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-50/80 dark:border-slate-700 dark:bg-slate-950/40">
-              <motion.div
-                className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent"
-                animate={{ x: ["-120%", "340%"] }}
-                transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-              />
-              <div className="relative z-10 flex h-full items-center justify-center text-sm font-semibold text-slate-700 dark:text-slate-200">
-                {contentType?.toUpperCase()} QUESTIONNAIRE
-              </div>
-            </div>
-          </div>
+          <BouncingWordsLoader questionCount={questionCount} contentType={contentType} />
         </main>
       </div>
     );
@@ -360,6 +442,96 @@ const QuestionnairePage = () => {
       </div>
     );
   }
+
+  const renderQuestionBody = () => {
+    if (!currentQuestion) return null;
+    const qType = currentQuestion.type ?? "single_select";
+
+    if (qType === "fill_in_blank") {
+      return (
+        <div className="mt-7">
+          <textarea
+            value={answers[currentQuestion.id] ?? ""}
+            onChange={(e) => handleAnswer(e.target.value)}
+            placeholder={currentQuestion.placeholder ?? "Type your answer here..."}
+            rows={3}
+            className="w-full resize-none rounded-2xl border border-slate-200/80 bg-white px-4 py-3 text-sm font-medium text-slate-900 placeholder-slate-400 outline-none transition-all focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-indigo-500/70"
+          />
+        </div>
+      );
+    }
+
+    if (qType === "select_all") {
+      const options = getSelectAllOptions(contentType ?? "both", selectAllIndex);
+      const selected = multiAnswers[currentQuestion.id] ?? [];
+      return (
+        <>
+          <p className="mt-1 text-xs font-semibold text-indigo-500 dark:text-indigo-400">
+            Select all that apply
+          </p>
+          <div className="mt-5 flex flex-wrap gap-2">
+            {options.map((option) => {
+              const isSelected = selected.includes(option);
+              return (
+                <GlowPillButton
+                  key={option}
+                  onClick={() => handleToggleMulti(currentQuestion.id, option)}
+                  active={isSelected}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-semibold transition-all",
+                    isSelected
+                      ? "border-indigo-400 bg-indigo-50 text-indigo-700 dark:border-indigo-500/70 dark:bg-indigo-500/15 dark:text-indigo-300"
+                      : "border-slate-200/80 bg-white text-slate-700 hover:border-indigo-300 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:border-indigo-500/50",
+                  )}
+                >
+                  {isSelected && <IconCheck className="h-4 w-4" />}
+                  {option}
+                </GlowPillButton>
+              );
+            })}
+          </div>
+        </>
+      );
+    }
+
+    // single_select (default)
+    const options = getQuestionOptions(contentType ?? "both", currentQuestionIndex);
+    return (
+      <div className="mt-7 grid gap-3 sm:grid-cols-2">
+        {options.map((option) => {
+          const selected = answers[currentQuestion.id] === option;
+          return (
+            <GlowPillButton
+              key={option}
+              onClick={() => handleAnswer(option)}
+              active={selected}
+              className={cn(
+                "group flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all",
+                selected
+                  ? "border-indigo-400 bg-indigo-50 text-indigo-700 dark:border-indigo-500/70 dark:bg-indigo-500/15 dark:text-indigo-300"
+                  : "border-slate-200/80 bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200",
+              )}
+            >
+              <span className="text-sm font-semibold sm:text-base">{option}</span>
+              {selected ? (
+                <IconCheck className="h-5 w-5" />
+              ) : (
+                <span className="h-5 w-5 rounded-full border border-slate-300 transition group-hover:border-indigo-300 dark:border-slate-600" />
+              )}
+            </GlowPillButton>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const getSubtitle = () => {
+    if (!currentQuestion) return "";
+    const qType = currentQuestion.type ?? "single_select";
+    if (qType === "fill_in_blank") return "Share your thoughts in your own words.";
+    if (qType === "select_all") return "Choose as many as you like.";
+    return "Pick one so we can tune your recommendations.";
+  };
 
   return (
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
@@ -406,34 +578,10 @@ const QuestionnairePage = () => {
                     {currentQuestion.text}
                   </h1>
                   <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 sm:text-base">
-                    Pick one so we can tune your recommendations.
+                    {getSubtitle()}
                   </p>
 
-                  <div className="mt-7 grid gap-3 sm:grid-cols-2">
-                    {getQuestionOptions(contentType ?? "both", currentQuestionIndex).map((option) => {
-                      const selected = answers[currentQuestion.id] === option;
-                      return (
-                        <GlowPillButton
-                          key={option}
-                          onClick={() => handleAnswer(option)}
-                          active={selected}
-                          className={cn(
-                            "group flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all",
-                            selected
-                              ? "border-indigo-400 bg-indigo-50 text-indigo-700 dark:border-indigo-500/70 dark:bg-indigo-500/15 dark:text-indigo-300"
-                              : "border-slate-200/80 bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200",
-                          )}
-                        >
-                          <span className="text-sm font-semibold sm:text-base">{option}</span>
-                          {selected ? (
-                            <IconCheck className="h-5 w-5" />
-                          ) : (
-                            <span className="h-5 w-5 rounded-full border border-slate-300 transition group-hover:border-indigo-300 dark:border-slate-600" />
-                          )}
-                        </GlowPillButton>
-                      );
-                    })}
-                  </div>
+                  {renderQuestionBody()}
                 </motion.section>
               )}
             </AnimatePresence>
@@ -442,7 +590,7 @@ const QuestionnairePage = () => {
               <GlowPillButton
                 onClick={handleNext}
                 disabled={!canProceed || isSubmitting}
-                className="inline-flex items-center justify-center gap-2 bg-slate-900 px-6 py-2.5 text-sm font-black tracking-tight text-white disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-100 dark:text-slate-900"
+                className="inline-flex items-center justify-center gap-2 bg-white px-6 py-2.5 text-sm font-black tracking-tight text-black disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-900 dark:text-white"
               >
                 {currentQuestionIndex === questions.length - 1 ? "Get Recommendations" : "Next"}
                 <ArrowRight size={16} />

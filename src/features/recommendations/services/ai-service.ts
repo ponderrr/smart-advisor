@@ -110,7 +110,11 @@ export async function generateQuestions(
     if (!data?.questions || !Array.isArray(data.questions)) {
       throw new Error("Invalid response format from question generation");
     }
-    return data.questions;
+    // Ensure each question has a type (edge function may not return it)
+    return data.questions.map((q: any) => ({
+      ...q,
+      type: q.type || "single_select",
+    }));
   } catch (error) {
     console.error("Error generating questions:", error);
     throw error;
