@@ -50,7 +50,7 @@ export function ThemeToggle() {
         "relative group flex items-center justify-center w-10 h-10 rounded-full",
         "border border-slate-200 dark:border-slate-800",
         "bg-white dark:bg-slate-900 overflow-hidden transition-colors duration-500",
-        "hover:border-slate-300 dark:hover:border-slate-700"
+        "hover:border-slate-300 dark:hover:border-slate-700",
       )}
     >
       {/* Liquid Background Fill - Fades and Slides Up */}
@@ -81,7 +81,10 @@ export function ThemeToggle() {
         </AnimatePresence>
       </div>
 
-      <span className="sr-only">Toggle theme to {theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light'}</span>
+      <span className="sr-only">
+        Toggle theme to{" "}
+        {theme === "light" ? "dark" : theme === "dark" ? "system" : "light"}
+      </span>
     </button>
   );
 }

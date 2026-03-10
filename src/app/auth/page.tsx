@@ -40,11 +40,20 @@ const AuthPageContent = () => {
 
   // Only auto-redirect to dashboard if MFA challenge is NOT active
   useEffect(() => {
-    if ((session || user) && !loading && !mfaChallengeActive && !oauthMfaRequired) {
+    if (
+      (session || user) &&
+      !loading &&
+      !mfaChallengeActive &&
+      !oauthMfaRequired
+    ) {
       // Double-check AAL before redirecting
       if (session) {
         getAALLevel().then(({ data }) => {
-          if (data && data.nextLevel === "aal2" && data.currentLevel === "aal1") {
+          if (
+            data &&
+            data.nextLevel === "aal2" &&
+            data.currentLevel === "aal1"
+          ) {
             setMfaChallengeActive(true);
           } else {
             router.push("/dashboard");
@@ -54,7 +63,15 @@ const AuthPageContent = () => {
         router.push("/dashboard");
       }
     }
-  }, [session, user, loading, mfaChallengeActive, oauthMfaRequired, router, getAALLevel]);
+  }, [
+    session,
+    user,
+    loading,
+    mfaChallengeActive,
+    oauthMfaRequired,
+    router,
+    getAALLevel,
+  ]);
 
   return (
     <AuthLayout onLogoClick={() => router.push("/")}>

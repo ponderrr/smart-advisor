@@ -26,7 +26,9 @@ class EnhancedRecommendationsService {
     contentType: "movie" | "book" | "both",
   ): Recommendation {
     const idSeed = `${rec.type || "item"}-${rec.title || "pick"}-${rec.year || "na"}`;
-    const safeId = (rec.id && rec.id.trim()) || `fallback-${idSeed.toLowerCase().replace(/\s+/g, "-")}`;
+    const safeId =
+      (rec.id && rec.id.trim()) ||
+      `fallback-${idSeed.toLowerCase().replace(/\s+/g, "-")}`;
     return {
       id: safeId,
       user_id: rec.user_id || userId,
@@ -49,15 +51,16 @@ class EnhancedRecommendationsService {
   async retryRecommendation(
     questionnaireData: QuestionnaireData,
     userId: string,
-    retryCount = 0
+    retryCount = 0,
   ): Promise<Recommendation[]> {
     try {
       return await this.generateEnhancedRecommendations(
         questionnaireData,
-        userId
+        userId,
       );
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message.toLowerCase() : "";
+      const errorMsg =
+        error instanceof Error ? error.message.toLowerCase() : "";
       const isNonRetryable =
         errorMsg.includes("not authenticated") ||
         errorMsg.includes("unauthorized") ||
@@ -69,7 +72,7 @@ class EnhancedRecommendationsService {
         return this.retryRecommendation(
           questionnaireData,
           userId,
-          retryCount + 1
+          retryCount + 1,
         );
       }
 
@@ -87,19 +90,21 @@ class EnhancedRecommendationsService {
    */
   async generateEnhancedRecommendations(
     questionnaireData: QuestionnaireData,
-    userId: string
+    userId: string,
   ): Promise<Recommendation[]> {
     const { answers, contentType, userAge, userName } = questionnaireData;
 
-    const movieTarget = contentType === "movie" ? 6 : contentType === "both" ? 3 : 0;
-    const bookTarget = contentType === "book" ? 6 : contentType === "both" ? 3 : 0;
+    const movieTarget =
+      contentType === "movie" ? 6 : contentType === "both" ? 3 : 0;
+    const bookTarget =
+      contentType === "book" ? 6 : contentType === "both" ? 3 : 0;
     const totalCalls = contentType === "both" ? 3 : 6;
 
     // Make parallel AI calls to collect multiple recommendations
     const callResults = await Promise.allSettled(
       Array.from({ length: totalCalls }, () =>
-        generateRecommendations(answers, contentType, userAge, userName)
-      )
+        generateRecommendations(answers, contentType, userAge, userName),
+      ),
     );
 
     const movieRecs: Partial<Recommendation>[] = [];
@@ -142,7 +147,9 @@ class EnhancedRecommendationsService {
 
           if (rec.type === "movie") {
             try {
-              const tmdbData = rec.title ? await tmdbService.searchMovie(rec.title) : null;
+              const tmdbData = rec.title
+                ? await tmdbService.searchMovie(rec.title)
+                : null;
               if (tmdbData) {
                 enhancedRec = {
                   ...enhancedRec,
@@ -159,10 +166,9 @@ class EnhancedRecommendationsService {
 
           if (rec.type === "book") {
             try {
-              const bookData = rec.title ? await openLibraryService.searchBook(
-                rec.title,
-                rec.author
-              ) : null;
+              const bookData = rec.title
+                ? await openLibraryService.searchBook(rec.title, rec.author)
+                : null;
               if (bookData) {
                 enhancedRec = {
                   ...enhancedRec,
@@ -184,18 +190,34 @@ class EnhancedRecommendationsService {
             } as any);
 
           if (error) {
-            return this.toRecommendation(enhancedRec as Recommendation, userId, contentType);
+            return this.toRecommendation(
+              enhancedRec as Recommendation,
+              userId,
+              contentType,
+            );
           }
 
           if (savedRec) {
-            return this.toRecommendation(savedRec as Recommendation, userId, contentType);
+            return this.toRecommendation(
+              savedRec as Recommendation,
+              userId,
+              contentType,
+            );
           }
 
-          return this.toRecommendation(enhancedRec as Recommendation, userId, contentType);
+          return this.toRecommendation(
+            enhancedRec as Recommendation,
+            userId,
+            contentType,
+          );
         } catch {
-          return this.toRecommendation(rec as Recommendation, userId, contentType);
+          return this.toRecommendation(
+            rec as Recommendation,
+            userId,
+            contentType,
+          );
         }
-      })
+      }),
     );
 
     return enhancedRecommendations as Recommendation[];

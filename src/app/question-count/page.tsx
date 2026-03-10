@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/features/auth/hooks/use-auth";
-import { useQuizStore } from '@/features/quiz/store/quiz-store';
+import { useQuizStore } from "@/features/quiz/store/quiz-store";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { GlowPillButton } from "@/components/ui/glow-pill-button";
 import {
@@ -26,7 +26,8 @@ const PREF_QUESTION_COUNT_KEY = "smart_advisor_pref_question_count";
 const QuestionCountPage = () => {
   const router = useRouter();
   const { signOut } = useAuth();
-  const { contentType, setQuestionCount: setStoreQuestionCount } = useQuizStore();
+  const { contentType, setQuestionCount: setStoreQuestionCount } =
+    useQuizStore();
   const [questionCount, setQuestionCount] = useState(5);
   const [isLoading, setIsLoading] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -143,7 +144,7 @@ const QuestionCountPage = () => {
         <div className="mx-auto w-full max-w-4xl">
           <div className="mb-8 flex items-center justify-between gap-3">
             <GlowPillButton
-              onClick={() => router.push('/content-selection')}
+              onClick={() => router.push("/content-selection")}
               className="inline-flex items-center gap-2 border-slate-300/80 bg-white/80 px-4 py-2 text-sm font-semibold dark:border-slate-700 dark:bg-slate-900/70"
             >
               <ArrowLeft size={16} />
@@ -176,7 +177,9 @@ const QuestionCountPage = () => {
                 How many questions should we ask?
               </h1>
               <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 sm:text-base">
-                Choose the depth for your {getContentTypeDisplay(contentType as ContentType)} recommendation flow.
+                Choose the depth for your{" "}
+                {getContentTypeDisplay(contentType as ContentType)}{" "}
+                recommendation flow.
               </p>
             </motion.div>
 

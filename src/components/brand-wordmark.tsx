@@ -5,9 +5,17 @@ type BrandWordmarkProps = {
   imageClassName?: string;
 };
 
-export function BrandWordmark({ className, imageClassName }: BrandWordmarkProps) {
+export function BrandWordmark({
+  className,
+  imageClassName,
+}: BrandWordmarkProps) {
   return (
-    <span className={cn("inline-flex shrink-0 items-center whitespace-nowrap", className)}>
+    <span
+      className={cn(
+        "inline-flex shrink-0 items-center whitespace-nowrap",
+        className,
+      )}
+    >
       <img
         src="/svgs/smartadvisor/SmartAdvisor-LM.svg"
         alt="Smart Advisor"

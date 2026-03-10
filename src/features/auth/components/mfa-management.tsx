@@ -40,7 +40,9 @@ export const MfaManagement = ({
   const [verifyCode, setVerifyCode] = useState("");
   const [verifyError, setVerifyError] = useState("");
   const [verifyLoading, setVerifyLoading] = useState(false);
-  const [pendingUnenrollId, setPendingUnenrollId] = useState<string | null>(null);
+  const [pendingUnenrollId, setPendingUnenrollId] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     loadFactors();
@@ -53,7 +55,9 @@ export const MfaManagement = ({
     setLoading(false);
 
     if (error) {
-      toast.error("Couldn't load your security settings — please refresh the page");
+      toast.error(
+        "Couldn't load your security settings — please refresh the page",
+      );
       return;
     }
 

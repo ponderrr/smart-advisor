@@ -66,7 +66,11 @@ export default function ResetPasswordPage() {
               />
             </FormField>
 
-            <FormField label="Confirm New Password" htmlFor="confirm-password" error={error ?? undefined}>
+            <FormField
+              label="Confirm New Password"
+              htmlFor="confirm-password"
+              error={error ?? undefined}
+            >
               <PasswordInput
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}

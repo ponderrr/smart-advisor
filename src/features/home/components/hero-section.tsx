@@ -28,7 +28,8 @@ const shuffle = <T,>(items: T[]) => {
   return arr;
 };
 
-const uniqueUrls = (items: string[]) => Array.from(new Set(items.filter(Boolean)));
+const uniqueUrls = (items: string[]) =>
+  Array.from(new Set(items.filter(Boolean)));
 
 const pickFrame = (pool: string[], current: string[], size: number) => {
   const shuffled = shuffle(pool);
@@ -45,7 +46,15 @@ const HeroSection = () => {
   const recentRef = useRef<string[]>([]);
 
   const words = useMemo(
-    () => ["Movie", "Book", "Story", "Adventure", "Classic", "Masterpiece", "Cult Favorite"],
+    () => [
+      "Movie",
+      "Book",
+      "Story",
+      "Adventure",
+      "Classic",
+      "Masterpiece",
+      "Cult Favorite",
+    ],
     [],
   );
 
@@ -64,10 +73,14 @@ const HeroSection = () => {
         }
 
         const data: HeroMediaResponse = await response.json();
-        const mixed = uniqueUrls(shuffle([...(data.books || []), ...(data.movies || [])]));
+        const mixed = uniqueUrls(
+          shuffle([...(data.books || []), ...(data.movies || [])]),
+        );
 
         if (active && mixed.length > 0) {
-          const unseen = mixed.filter((item) => !recentRef.current.includes(item));
+          const unseen = mixed.filter(
+            (item) => !recentRef.current.includes(item),
+          );
           const prioritized = unseen.length > 0 ? [...unseen, ...mixed] : mixed;
           const nextImages = uniqueUrls(prioritized).slice(0, 14);
           await Promise.allSettled(
@@ -82,8 +95,13 @@ const HeroSection = () => {
             ),
           );
           if (active) {
-            recentRef.current = uniqueUrls([...recentRef.current, ...nextImages]).slice(-120);
-            setMediaPool((prev) => uniqueUrls([...prev, ...mixed]).slice(0, 60));
+            recentRef.current = uniqueUrls([
+              ...recentRef.current,
+              ...nextImages,
+            ]).slice(-120);
+            setMediaPool((prev) =>
+              uniqueUrls([...prev, ...mixed]).slice(0, 60),
+            );
             setHeroImages(nextImages);
           }
         }
@@ -117,7 +135,10 @@ const HeroSection = () => {
             }),
         ),
       );
-      recentRef.current = uniqueUrls([...recentRef.current, ...nextImages]).slice(-120);
+      recentRef.current = uniqueUrls([
+        ...recentRef.current,
+        ...nextImages,
+      ]).slice(-120);
       setHeroImages(nextImages);
     }, 9000);
 
@@ -144,7 +165,10 @@ const HeroSection = () => {
           <br />
           Obsession Across Every
           <br />
-          <FlipWords words={words} className="text-indigo-600 dark:text-indigo-400" />
+          <FlipWords
+            words={words}
+            className="text-indigo-600 dark:text-indigo-400"
+          />
         </motion.div>
 
         <motion.p
@@ -153,8 +177,8 @@ const HeroSection = () => {
           transition={{ delay: 0.4 }}
           className="max-w-xl text-xl text-slate-700 dark:text-slate-300"
         >
-          AI-powered recommendations for movies and books tailored to your unique
-          taste.
+          AI-powered recommendations for movies and books tailored to your
+          unique taste.
         </motion.p>
 
         <div className="mt-6 flex flex-col items-center gap-3">
@@ -168,7 +192,10 @@ const HeroSection = () => {
             as="button"
             className="dark:bg-black bg-white text-black dark:text-white px-14 py-6 text-2xl font-black tracking-tighter"
           >
-            <motion.span whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <motion.span
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
               {user ? "Go to Dashboard" : "Get Started"}
             </motion.span>
           </HoverBorderGradient>
@@ -188,7 +215,9 @@ const HeroSection = () => {
         className="absolute inset-x-0 bottom-8 z-20 flex justify-center"
       >
         <div className="flex flex-col items-center gap-2 text-slate-500 dark:text-slate-400">
-          <span className="text-xs uppercase tracking-[0.2em]">Scroll to Explore</span>
+          <span className="text-xs uppercase tracking-[0.2em]">
+            Scroll to Explore
+          </span>
           <motion.div
             animate={{ y: [0, 6, 0], opacity: [0.65, 1, 0.65] }}
             transition={{ duration: 1.35, repeat: Infinity, ease: "easeInOut" }}

@@ -31,7 +31,7 @@ class DatabaseService {
    * Save a recommendation to the database
    */
   async saveRecommendation(
-    recommendation: Omit<Recommendation, "id" | "created_at">
+    recommendation: Omit<Recommendation, "id" | "created_at">,
   ): Promise<{ data: Recommendation | null; error: string | null }> {
     try {
       const {
@@ -102,7 +102,7 @@ class DatabaseService {
    * Get user recommendations with filtering and sorting
    */
   async getUserRecommendations(
-    filters?: FilterOptions
+    filters?: FilterOptions,
   ): Promise<{ data: Recommendation[]; error: string | null }> {
     try {
       const {
@@ -157,7 +157,7 @@ class DatabaseService {
       if (filters?.offset) {
         query = query.range(
           filters.offset,
-          filters.offset + (filters.limit || 20) - 1
+          filters.offset + (filters.limit || 20) - 1,
         );
       }
 
@@ -203,7 +203,7 @@ class DatabaseService {
             recommendation.description = rec.description as string;
 
           return recommendation;
-        }
+        },
       );
 
       return { data: recommendations, error: null };
@@ -217,7 +217,7 @@ class DatabaseService {
    * Toggle favorite status of a recommendation
    */
   async toggleFavorite(
-    recommendationId: string
+    recommendationId: string,
   ): Promise<{ error: string | null }> {
     try {
       const { data: rec, error: fetchError } = await supabase
@@ -252,7 +252,7 @@ class DatabaseService {
    * Delete a recommendation
    */
   async deleteRecommendation(
-    recommendationId: string
+    recommendationId: string,
   ): Promise<{ error: string | null }> {
     try {
       const { error } = await supabase
@@ -276,7 +276,7 @@ class DatabaseService {
    * Update user profile information
    */
   async updateUserProfile(
-    updates: ProfileUpdates
+    updates: ProfileUpdates,
   ): Promise<{ error: string | null }> {
     try {
       const {
@@ -344,7 +344,7 @@ class DatabaseService {
         movieCount: recommendations.filter((r) => r.type === "movie").length,
         bookCount: recommendations.filter((r) => r.type === "book").length,
         thisMonthCount: recommendations.filter(
-          (r) => new Date(r.created_at) >= startOfMonth
+          (r) => new Date(r.created_at) >= startOfMonth,
         ).length,
       };
 

@@ -1,14 +1,23 @@
-'use client';
+"use client";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useRouter } from 'next/navigation';
-import { RefreshCw, Heart, Star, BookOpen, Film, ArrowRight, Share2, RotateCcw } from "lucide-react";
+import { useRouter } from "next/navigation";
+import {
+  RefreshCw,
+  Heart,
+  Star,
+  BookOpen,
+  Film,
+  ArrowRight,
+  Share2,
+  RotateCcw,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { enhancedRecommendationsService } from "@/features/recommendations/services/enhanced-recommendations-service";
 import { databaseService } from "@/features/recommendations/services/database-service";
 import { Recommendation } from "@/features/recommendations/types/recommendation";
 import { SafeLocalStorage } from "@/utils/localStorage";
-import { useQuizStore } from '@/features/quiz/store/quiz-store';
+import { useQuizStore } from "@/features/quiz/store/quiz-store";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { GlowPillButton } from "@/components/ui/glow-pill-button";
 import {
@@ -57,13 +66,22 @@ const saveGeneratedSession = (sessionId: string) => {
   sessions.add(sessionId);
 
   const sessionsArray = Array.from(sessions);
-  const sessionsToStore = sessionsArray.length > 10 ? sessionsArray.slice(-10) : sessionsArray;
+  const sessionsToStore =
+    sessionsArray.length > 10 ? sessionsArray.slice(-10) : sessionsArray;
 
   SafeLocalStorage.setJSON(GENERATED_SESSIONS_KEY, sessionsToStore);
 };
 
 /* ---------- Loading Animation ---------- */
-const LOADING_WORDS = ["Analyzing", "preferences", "and", "finding", "your", "perfect", "picks"];
+const LOADING_WORDS = [
+  "Analyzing",
+  "preferences",
+  "and",
+  "finding",
+  "your",
+  "perfect",
+  "picks",
+];
 
 const ResultsLoadingState = ({ step }: { step: string }) => (
   <div className="mx-auto flex min-h-[480px] w-full max-w-4xl flex-col justify-center rounded-3xl border border-slate-200/70 bg-white/85 p-6 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
@@ -72,7 +90,16 @@ const ResultsLoadingState = ({ step }: { step: string }) => (
     </p>
     <div className="mx-auto mt-5 flex h-20 w-20 items-center justify-center rounded-full border border-indigo-300/70 bg-indigo-50 dark:border-indigo-500/40 dark:bg-indigo-500/10">
       <motion.svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-        <rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" strokeWidth="2" className="text-indigo-500/20" />
+        <rect
+          x="4"
+          y="4"
+          width="16"
+          height="16"
+          rx="2"
+          stroke="currentColor"
+          strokeWidth="2"
+          className="text-indigo-500/20"
+        />
         <motion.path
           d="M4 8H20"
           stroke="#6366f1"
@@ -103,7 +130,12 @@ const ResultsLoadingState = ({ step }: { step: string }) => (
           className="text-sm font-semibold text-indigo-600 dark:text-indigo-400"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: [0, 1, 1, 0], y: [12, 0, 0, -8] }}
-          transition={{ duration: 2.4, repeat: Infinity, delay: i * 0.18, ease: "easeInOut" }}
+          transition={{
+            duration: 2.4,
+            repeat: Infinity,
+            delay: i * 0.18,
+            ease: "easeInOut",
+          }}
         >
           {word}
         </motion.span>
@@ -133,7 +165,8 @@ const RecommendationCard = ({
   onToggleFavorite: (id: string) => void;
 }) => {
   const matchScore = Math.max(78, 95 - index * 3);
-  const matchLabel = matchScore >= 92 ? "Excellent" : matchScore >= 86 ? "Strong" : "Good";
+  const matchLabel =
+    matchScore >= 92 ? "Excellent" : matchScore >= 86 ? "Strong" : "Good";
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -154,7 +187,11 @@ const RecommendationCard = ({
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-slate-400">
-              {rec.type === "movie" ? <Film size={32} /> : <BookOpen size={32} />}
+              {rec.type === "movie" ? (
+                <Film size={32} />
+              ) : (
+                <BookOpen size={32} />
+              )}
             </div>
           )}
           {/* Type badge */}
@@ -172,9 +209,15 @@ const RecommendationCard = ({
         <div className="flex flex-col p-5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <h2 className="text-xl font-black tracking-tight sm:text-2xl">{rec.title}</h2>
+              <h2 className="text-xl font-black tracking-tight sm:text-2xl">
+                {rec.title}
+              </h2>
               <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                {rec.author ? `By ${rec.author}` : rec.director ? `Directed by ${rec.director}` : ""}
+                {rec.author
+                  ? `By ${rec.author}`
+                  : rec.director
+                    ? `Directed by ${rec.director}`
+                    : ""}
                 {rec.year ? ` · ${rec.year}` : ""}
               </p>
             </div>
@@ -188,7 +231,10 @@ const RecommendationCard = ({
                   : "bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700",
               )}
             >
-              <Heart size={16} fill={rec.is_favorited ? "currentColor" : "none"} />
+              <Heart
+                size={16}
+                fill={rec.is_favorited ? "currentColor" : "none"}
+              />
             </button>
           </div>
 
@@ -258,7 +304,9 @@ const ResultsPage = () => {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [generationStep, setGenerationStep] = useState<string>("Analyzing your answers...");
+  const [generationStep, setGenerationStep] = useState<string>(
+    "Analyzing your answers...",
+  );
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -312,7 +360,7 @@ const ResultsPage = () => {
 
       const questionnaireData = {
         answers,
-        contentType: contentType ?? "both" as const,
+        contentType: contentType ?? ("both" as const),
         userAge: user.age,
         userName: user.name,
       };
@@ -335,7 +383,9 @@ const ResultsPage = () => {
     } catch (err) {
       if (abortController.signal.aborted) return;
       console.error("Error generating recommendations:", err);
-      setError("Failed to generate personalized recommendations. Please try again.");
+      setError(
+        "Failed to generate personalized recommendations. Please try again.",
+      );
     } finally {
       if (!abortController.signal.aborted) {
         setLoading(false);
@@ -368,7 +418,8 @@ const ResultsPage = () => {
     }
 
     const isSameSession = currentSessionRef.current === sessionId;
-    const hasExistingRecommendations = generatedRecommendationsRef.current.length > 0;
+    const hasExistingRecommendations =
+      generatedRecommendationsRef.current.length > 0;
 
     if (isSameSession && hasExistingRecommendations) {
       setRecommendations(generatedRecommendationsRef.current);
@@ -406,7 +457,8 @@ const ResultsPage = () => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (recommendations.length > 0 && !error) {
         e.preventDefault();
-        e.returnValue = "You have unsaved recommendations. Are you sure you want to leave?";
+        e.returnValue =
+          "You have unsaved recommendations. Are you sure you want to leave?";
         return "You have unsaved recommendations. Are you sure you want to leave?";
       }
     };
@@ -450,14 +502,19 @@ const ResultsPage = () => {
     try {
       if (!recommendationId) return;
 
-      const { error: toggleError } = await databaseService.toggleFavorite(recommendationId);
+      const { error: toggleError } =
+        await databaseService.toggleFavorite(recommendationId);
       if (toggleError) {
         toast.error("Couldn't update your favorite — please try again");
       } else {
         const rec = recommendations.find((r) => r.id === recommendationId);
-        toast.success(rec?.is_favorited ? "Removed from favorites" : "Added to favorites");
+        toast.success(
+          rec?.is_favorited ? "Removed from favorites" : "Added to favorites",
+        );
         const updatedRecs = recommendations.map((r) =>
-          r.id === recommendationId ? { ...r, is_favorited: !r.is_favorited } : r,
+          r.id === recommendationId
+            ? { ...r, is_favorited: !r.is_favorited }
+            : r,
         );
         setRecommendations(updatedRecs);
         generatedRecommendationsRef.current = updatedRecs;
@@ -480,7 +537,9 @@ const ResultsPage = () => {
   };
 
   const handleShare = async () => {
-    const titles = recommendations.map((r) => `${r.type === "movie" ? "Movie" : "Book"}: ${r.title}`).join("\n");
+    const titles = recommendations
+      .map((r) => `${r.type === "movie" ? "Movie" : "Book"}: ${r.title}`)
+      .join("\n");
     const text = `My Smart Advisor picks:\n${titles}`;
     if (navigator.share) {
       try {
@@ -534,7 +593,10 @@ const ResultsPage = () => {
             <button
               key={item.name}
               type="button"
-              onClick={() => { router.push(item.link); setIsMobileMenuOpen(false); }}
+              onClick={() => {
+                router.push(item.link);
+                setIsMobileMenuOpen(false);
+              }}
               className="text-left text-xl font-black tracking-tight text-slate-800 dark:text-slate-100"
             >
               {item.name}
@@ -542,7 +604,10 @@ const ResultsPage = () => {
           ))}
           <button
             type="button"
-            onClick={async () => { await handleSignOut(); setIsMobileMenuOpen(false); }}
+            onClick={async () => {
+              await handleSignOut();
+              setIsMobileMenuOpen(false);
+            }}
             className="text-left text-xl font-black tracking-tight text-rose-600 dark:text-rose-400"
           >
             Sign Out
@@ -559,11 +624,17 @@ const ResultsPage = () => {
         <main className="px-4 pb-20 pt-32 md:pt-36 sm:px-6">
           <div className="mx-auto max-w-xl rounded-3xl border border-slate-200/70 bg-white/85 p-8 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
             <div className="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-500/20">
-              <RefreshCw size={24} className="text-indigo-600 dark:text-indigo-400" />
+              <RefreshCw
+                size={24}
+                className="text-indigo-600 dark:text-indigo-400"
+              />
             </div>
-            <h2 className="text-2xl font-black tracking-tight">Generate new recommendations?</h2>
+            <h2 className="text-2xl font-black tracking-tight">
+              Generate new recommendations?
+            </h2>
             <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-              You already generated recommendations for these answers. Generate new ones or view your history.
+              You already generated recommendations for these answers. Generate
+              new ones or view your history.
             </p>
             <div className="mt-6 flex items-center justify-center gap-3">
               <GlowPillButton
@@ -613,8 +684,12 @@ const ResultsPage = () => {
                 className="h-full w-full object-contain"
               />
             </div>
-            <h2 className="text-2xl font-black tracking-tight">Unable to generate recommendations</h2>
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{error}</p>
+            <h2 className="text-2xl font-black tracking-tight">
+              Unable to generate recommendations
+            </h2>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+              {error}
+            </p>
             <div className="mt-6 flex items-center justify-center gap-3">
               <GlowPillButton
                 onClick={handleRetry}
@@ -658,7 +733,9 @@ const ResultsPage = () => {
               Your Recommendations
             </h1>
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-              {recommendations.length} personalized {recommendations.length === 1 ? "pick" : "picks"} based on your answers.
+              {recommendations.length} personalized{" "}
+              {recommendations.length === 1 ? "pick" : "picks"} based on your
+              answers.
             </p>
           </motion.div>
 
@@ -681,7 +758,12 @@ const ResultsPage = () => {
                   </div>
                   <div className="grid gap-4 lg:grid-cols-2">
                     {movieRecs.map((rec, i) => (
-                      <RecommendationCard key={rec.id} rec={rec} index={i} onToggleFavorite={handleToggleFavorite} />
+                      <RecommendationCard
+                        key={rec.id}
+                        rec={rec}
+                        index={i}
+                        onToggleFavorite={handleToggleFavorite}
+                      />
                     ))}
                   </div>
                 </motion.section>
@@ -703,7 +785,12 @@ const ResultsPage = () => {
                   </div>
                   <div className="grid gap-4 lg:grid-cols-2">
                     {bookRecs.map((rec, i) => (
-                      <RecommendationCard key={rec.id} rec={rec} index={i} onToggleFavorite={handleToggleFavorite} />
+                      <RecommendationCard
+                        key={rec.id}
+                        rec={rec}
+                        index={i}
+                        onToggleFavorite={handleToggleFavorite}
+                      />
                     ))}
                   </div>
                 </motion.section>
@@ -712,7 +799,12 @@ const ResultsPage = () => {
           ) : (
             <div className="grid gap-4 lg:grid-cols-2">
               {recommendations.map((rec, i) => (
-                <RecommendationCard key={rec.id} rec={rec} index={i} onToggleFavorite={handleToggleFavorite} />
+                <RecommendationCard
+                  key={rec.id}
+                  rec={rec}
+                  index={i}
+                  onToggleFavorite={handleToggleFavorite}
+                />
               ))}
             </div>
           )}

@@ -8,21 +8,48 @@ export const WarpSpeedSVG = ({ className }: { className?: string }) => (
     className={className}
   >
     <defs>
-      <linearGradient id="bolt-grad" x1="85" y1="50" x2="115" y2="160" gradientUnits="userSpaceOnUse">
+      <linearGradient
+        id="bolt-grad"
+        x1="85"
+        y1="50"
+        x2="115"
+        y2="160"
+        gradientUnits="userSpaceOnUse"
+      >
         <stop offset="0%" stopColor="#f59e0b" />
         <stop offset="100%" stopColor="#ef4444" />
       </linearGradient>
-      <linearGradient id="ring-grad-1" x1="30" y1="30" x2="170" y2="170" gradientUnits="userSpaceOnUse">
+      <linearGradient
+        id="ring-grad-1"
+        x1="30"
+        y1="30"
+        x2="170"
+        y2="170"
+        gradientUnits="userSpaceOnUse"
+      >
         <stop offset="0%" stopColor="#f59e0b" />
         <stop offset="50%" stopColor="#ef4444" />
         <stop offset="100%" stopColor="#8b5cf6" />
       </linearGradient>
-      <linearGradient id="ring-grad-2" x1="170" y1="30" x2="30" y2="170" gradientUnits="userSpaceOnUse">
+      <linearGradient
+        id="ring-grad-2"
+        x1="170"
+        y1="30"
+        x2="30"
+        y2="170"
+        gradientUnits="userSpaceOnUse"
+      >
         <stop offset="0%" stopColor="#6366f1" />
         <stop offset="100%" stopColor="#f59e0b" />
       </linearGradient>
       <filter id="bolt-glow" x="-30%" y="-30%" width="160%" height="160%">
-        <feDropShadow dx="0" dy="0" stdDeviation="5" floodColor="#f59e0b" floodOpacity="0.45" />
+        <feDropShadow
+          dx="0"
+          dy="0"
+          stdDeviation="5"
+          floodColor="#f59e0b"
+          floodOpacity="0.45"
+        />
       </filter>
       <filter id="speed-blur">
         <feGaussianBlur in="SourceGraphic" stdDeviation="0.5" />
@@ -31,7 +58,9 @@ export const WarpSpeedSVG = ({ className }: { className?: string }) => (
 
     {/* Outer spinning ring */}
     <circle
-      cx="100" cy="100" r="72"
+      cx="100"
+      cy="100"
+      r="72"
       stroke="url(#ring-grad-1)"
       strokeWidth="2"
       strokeDasharray="40 20 10 20"
@@ -50,7 +79,9 @@ export const WarpSpeedSVG = ({ className }: { className?: string }) => (
 
     {/* Inner counter-spinning ring */}
     <circle
-      cx="100" cy="100" r="58"
+      cx="100"
+      cy="100"
+      r="58"
       stroke="url(#ring-grad-2)"
       strokeWidth="1.5"
       strokeDasharray="15 25 5 25"
@@ -139,7 +170,12 @@ export const WarpSpeedSVG = ({ className }: { className?: string }) => (
         dur="4s"
         repeatCount="indefinite"
       />
-      <animate attributeName="r" values="3;4;3" dur="2s" repeatCount="indefinite" />
+      <animate
+        attributeName="r"
+        values="3;4;3"
+        dur="2s"
+        repeatCount="indefinite"
+      />
     </circle>
 
     {/* Orbiting dot 2 */}

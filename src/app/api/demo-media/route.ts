@@ -20,24 +20,31 @@ async function fetchBooks(query: string, limit: number): Promise<DemoItem[]> {
   const timeout = setTimeout(() => controller.abort(), 8000);
 
   try {
-    const response = await fetch(url, { cache: "no-store", signal: controller.signal });
+    const response = await fetch(url, {
+      cache: "no-store",
+      signal: controller.signal,
+    });
     clearTimeout(timeout);
     if (!response.ok) throw new Error(`Open Library error ${response.status}`);
     const data = await response.json();
     const docs = Array.isArray(data.docs) ? data.docs : [];
     return docs
       .filter((doc: any) => doc.cover_i && doc.title)
-      .map((doc: any): DemoItem => ({
-        id: doc.key || crypto.randomUUID(),
-        type: "book",
-        title: doc.title,
-        subtitle: Array.isArray(doc.author_name) ? doc.author_name.join(", ") : "Unknown author",
-        description: doc.first_publish_year
-          ? `First published in ${doc.first_publish_year}${doc.number_of_pages_median ? ` · ${doc.number_of_pages_median} pages` : ""}`
-          : "No description available.",
-        image: `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`,
-        infoLink: `https://openlibrary.org${doc.key}`,
-      }))
+      .map(
+        (doc: any): DemoItem => ({
+          id: doc.key || crypto.randomUUID(),
+          type: "book",
+          title: doc.title,
+          subtitle: Array.isArray(doc.author_name)
+            ? doc.author_name.join(", ")
+            : "Unknown author",
+          description: doc.first_publish_year
+            ? `First published in ${doc.first_publish_year}${doc.number_of_pages_median ? ` · ${doc.number_of_pages_median} pages` : ""}`
+            : "No description available.",
+          image: `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`,
+          infoLink: `https://openlibrary.org${doc.key}`,
+        }),
+      )
       .slice(0, limit);
   } catch {
     clearTimeout(timeout);
@@ -45,7 +52,11 @@ async function fetchBooks(query: string, limit: number): Promise<DemoItem[]> {
   }
 }
 
-async function fetchMovies(query: string, apiKey: string, limit: number): Promise<DemoItem[]> {
+async function fetchMovies(
+  query: string,
+  apiKey: string,
+  limit: number,
+): Promise<DemoItem[]> {
   const searchUrl = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(
     query,
   )}&include_adult=false&language=en-US&page=1&api_key=${apiKey}`;
@@ -73,7 +84,9 @@ async function fetchMovies(query: string, apiKey: string, limit: number): Promis
         id: String(item.id),
         type: "movie",
         title: item.title,
-        subtitle: item.release_date ? String(item.release_date).slice(0, 4) : "Movie",
+        subtitle: item.release_date
+          ? String(item.release_date).slice(0, 4)
+          : "Movie",
         description: sanitize(item.overview || "No description available."),
         image: poster,
         infoLink: `https://www.themoviedb.org/movie/${item.id}`,
@@ -101,7 +114,10 @@ export async function GET(request: NextRequest) {
 
     const results = await Promise.allSettled(tasks);
     const fulfilled = results
-      .filter((result): result is PromiseFulfilledResult<DemoItem[]> => result.status === "fulfilled")
+      .filter(
+        (result): result is PromiseFulfilledResult<DemoItem[]> =>
+          result.status === "fulfilled",
+      )
       .map((result) => result.value);
 
     const merged = (() => {
@@ -109,7 +125,10 @@ export async function GET(request: NextRequest) {
       const books = fulfilled.find((set) => set[0]?.type === "book") || [];
       const movies = fulfilled.find((set) => set[0]?.type === "movie") || [];
       const interleaved: DemoItem[] = [];
-      const max = Math.max(Math.min(books.length, 3), Math.min(movies.length, 3));
+      const max = Math.max(
+        Math.min(books.length, 3),
+        Math.min(movies.length, 3),
+      );
       for (let i = 0; i < max; i += 1) {
         if (movies[i]) interleaved.push(movies[i]);
         if (books[i]) interleaved.push(books[i]);

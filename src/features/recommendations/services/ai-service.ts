@@ -9,7 +9,9 @@ import { supabase } from "@/integrations/supabase/client";
 
 function isNonRetryableError(error: unknown): boolean {
   const msg =
-    error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+    error instanceof Error
+      ? error.message.toLowerCase()
+      : String(error).toLowerCase();
   return (
     msg.includes("not authenticated") ||
     msg.includes("unauthorized") ||

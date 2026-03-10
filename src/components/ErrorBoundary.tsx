@@ -62,7 +62,7 @@ export const setupGlobalErrorHandlers = (): (() => void) => {
     console.error("Unhandled promise rejection:", event.reason);
     errorHandlerInstance.handleError(
       new Error(`Unhandled Promise Rejection: ${event.reason}`),
-      { componentStack: "Global Promise Handler" }
+      { componentStack: "Global Promise Handler" },
     );
   };
 
@@ -84,7 +84,7 @@ export const setupGlobalErrorHandlers = (): (() => void) => {
     if (unhandledRejectionHandler) {
       window.removeEventListener(
         "unhandledrejection",
-        unhandledRejectionHandler
+        unhandledRejectionHandler,
       );
       unhandledRejectionHandler = null;
     }
@@ -123,7 +123,7 @@ class ErrorBoundary extends Component<Props, State> {
 
     window.addEventListener(
       GLOBAL_ERROR_EVENT,
-      handleGlobalError as EventListener
+      handleGlobalError as EventListener,
     );
 
     // Store the handler reference for cleanup
@@ -135,7 +135,7 @@ class ErrorBoundary extends Component<Props, State> {
     if ((this as any).globalErrorHandler) {
       window.removeEventListener(
         GLOBAL_ERROR_EVENT,
-        (this as any).globalErrorHandler as EventListener
+        (this as any).globalErrorHandler as EventListener,
       );
     }
   }
@@ -186,10 +186,10 @@ class ErrorBoundary extends Component<Props, State> {
               {errorType === "API Error"
                 ? "There was an issue connecting to our servers. Please check your internet connection and try again."
                 : errorType === "Async Error"
-                ? "An asynchronous operation failed. This might be due to a network issue or server problem."
-                : errorType === "Loading Error"
-                ? "Failed to load application resources. This might be due to a network issue or outdated cache."
-                : "An unexpected error occurred. Please try refreshing the page or contact support if the problem persists."}
+                  ? "An asynchronous operation failed. This might be due to a network issue or server problem."
+                  : errorType === "Loading Error"
+                    ? "Failed to load application resources. This might be due to a network issue or outdated cache."
+                    : "An unexpected error occurred. Please try refreshing the page or contact support if the problem persists."}
             </p>
             <div className="flex gap-4 justify-center">
               <Button

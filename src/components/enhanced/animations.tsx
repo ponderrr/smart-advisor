@@ -8,17 +8,19 @@ export const AnimationUtils = {
   // Stagger children animations
   staggerChildren: (
     children: React.ReactNode,
-    delay = 100
+    delay = 100,
   ): React.ReactElement[] => {
-    return (React.Children.map(children, (child, index) => (
-      <div
-        key={index}
-        className="animate-in fade-in duration-700"
-        style={{ animationDelay: `${index * delay}ms` }}
-      >
-        {child}
-      </div>
-    )) ?? []);
+    return (
+      React.Children.map(children, (child, index) => (
+        <div
+          key={index}
+          className="animate-in fade-in duration-700"
+          style={{ animationDelay: `${index * delay}ms` }}
+        >
+          {child}
+        </div>
+      )) ?? []
+    );
   },
 
   // Fade in animation props
@@ -123,7 +125,7 @@ export const useAnimations = () => {
 export const useStaggeredAnimation = (
   itemCount: number,
   baseDelay = 0,
-  staggerDelay = 100
+  staggerDelay = 100,
 ) => {
   const { shouldAnimate } = useAnimations();
 
@@ -139,7 +141,7 @@ export const useStaggeredAnimation = (
         },
       };
     },
-    [shouldAnimate, baseDelay, staggerDelay]
+    [shouldAnimate, baseDelay, staggerDelay],
   );
 
   return { getItemProps, shouldAnimate };
@@ -167,7 +169,7 @@ export const useInViewAnimation = (options: IntersectionObserverInit = {}) => {
         threshold: 0.1,
         rootMargin: "50px",
         ...options,
-      }
+      },
     );
 
     observer.observe(element);
@@ -201,7 +203,7 @@ export const useScrollAnimation = (threshold = 0.1) => {
       ([entry]) => {
         setIsVisible(entry.isIntersecting);
       },
-      { threshold }
+      { threshold },
     );
 
     if (ref.current) {
@@ -278,7 +280,7 @@ export const combineAnimations = (...animations: (string | undefined)[]) => {
 // Utility function to create keyframe animations dynamically
 export const createKeyframes = (
   name: string,
-  keyframes: Record<string, React.CSSProperties>
+  keyframes: Record<string, React.CSSProperties>,
 ) => {
   const keyframeString = Object.entries(keyframes)
     .map(([key, styles]) => {
@@ -288,7 +290,7 @@ export const createKeyframes = (
             `${prop
               .replace(/([a-z])([A-Z])/g, "$1-$2")
               .replace(/([A-Z])([A-Z][a-z])/g, "$1-$2")
-              .toLowerCase()}: ${value}`
+              .toLowerCase()}: ${value}`,
         )
         .join("; ");
       return `${key} { ${styleString} }`;

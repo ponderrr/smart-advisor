@@ -57,7 +57,11 @@ export const Navbar = ({ children, className }: NavbarProps) => {
   );
 };
 
-export const NavBody = ({ children, className, scrolled = false }: NavBodyProps) => {
+export const NavBody = ({
+  children,
+  className,
+  scrolled = false,
+}: NavBodyProps) => {
   return (
     <motion.div
       data-main-navbar="true"
@@ -82,7 +86,11 @@ export const NavBody = ({ children, className, scrolled = false }: NavBodyProps)
   );
 };
 
-export const NavItems = ({ items, className, scrolled = false }: NavItemsProps) => {
+export const NavItems = ({
+  items,
+  className,
+  scrolled = false,
+}: NavItemsProps) => {
   const handleAnchorClick = (
     event: React.MouseEvent<HTMLElement>,
     link: string,

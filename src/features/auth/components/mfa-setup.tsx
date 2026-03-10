@@ -218,7 +218,8 @@ export const MfaSetup = ({ onComplete, onSkip }: MfaSetupProps) => {
               </div>
               {qrRefreshCountdown > 0 && (
                 <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
-                  QR code refreshes in {Math.floor(qrRefreshCountdown / 60)}:{String(qrRefreshCountdown % 60).padStart(2, "0")}
+                  QR code refreshes in {Math.floor(qrRefreshCountdown / 60)}:
+                  {String(qrRefreshCountdown % 60).padStart(2, "0")}
                 </p>
               )}
             </div>

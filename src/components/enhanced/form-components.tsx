@@ -3,8 +3,7 @@ import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 
 // Enhanced Input Component
-interface EnhancedInputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {
+interface EnhancedInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string;
   success?: boolean;
 }
@@ -20,9 +19,9 @@ export const EnhancedInput = forwardRef<HTMLInputElement, EnhancedInputProps>(
             error
               ? "border-red-500"
               : success
-              ? "border-green-500"
-              : "border-gray-700",
-            className
+                ? "border-green-500"
+                : "border-gray-700",
+            className,
           )}
           {...props}
         />
@@ -33,14 +32,13 @@ export const EnhancedInput = forwardRef<HTMLInputElement, EnhancedInputProps>(
         )}
       </div>
     );
-  }
+  },
 );
 
 EnhancedInput.displayName = "EnhancedInput";
 
 // Enhanced Textarea Component
-interface EnhancedTextareaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+interface EnhancedTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   error?: string;
 }
 
@@ -55,7 +53,7 @@ export const EnhancedTextarea = forwardRef<
         className={cn(
           "form-textarea w-full bg-appPrimary border text-textPrimary text-base font-normal rounded-lg p-4 focus:outline-none transition-all duration-200 resize-vertical min-h-[100px]",
           error ? "border-red-500" : "border-gray-700",
-          className
+          className,
         )}
         {...props}
       />
@@ -71,8 +69,7 @@ export const EnhancedTextarea = forwardRef<
 EnhancedTextarea.displayName = "EnhancedTextarea";
 
 // Enhanced Button Component
-interface EnhancedButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface EnhancedButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "outline" | "ghost";
   size?: "sm" | "md" | "lg";
   loading?: boolean;
@@ -94,7 +91,7 @@ export const EnhancedButton = forwardRef<
       disabled,
       ...props
     },
-    ref
+    ref,
   ) => {
     const baseClasses =
       "enhanced-button relative overflow-hidden font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-2";
@@ -126,7 +123,7 @@ export const EnhancedButton = forwardRef<
           sizeClasses[size],
           glowClass,
           disabled && "opacity-50 cursor-not-allowed",
-          className
+          className,
         )}
         {...props}
       >
@@ -134,7 +131,7 @@ export const EnhancedButton = forwardRef<
         {children}
       </button>
     );
-  }
+  },
 );
 
 EnhancedButton.displayName = "EnhancedButton";
@@ -163,7 +160,7 @@ export const EnhancedProgress: React.FC<EnhancedProgressProps> = ({
       <div
         className={cn(
           "progress-fill h-full rounded-full transition-all duration-300",
-          isHigh && showGlow
+          isHigh && showGlow,
         )}
         style={{ width: `${percentage}%` }}
         data-progress={isHigh ? "high" : "normal"}
@@ -173,8 +170,7 @@ export const EnhancedProgress: React.FC<EnhancedProgressProps> = ({
 };
 
 // Enhanced Select Component (for dropdown menus)
-interface EnhancedSelectProps
-  extends React.SelectHTMLAttributes<HTMLSelectElement> {
+interface EnhancedSelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   error?: string;
   options: { value: string; label: string }[];
 }
@@ -190,7 +186,7 @@ export const EnhancedSelect = forwardRef<
         className={cn(
           "form-input w-full bg-appPrimary border text-textPrimary text-base font-normal rounded-lg p-4 focus:outline-none transition-all duration-200 appearance-none cursor-pointer",
           error ? "border-red-500" : "border-gray-700",
-          className
+          className,
         )}
         {...props}
       >
@@ -252,7 +248,7 @@ export const EnhancedPasswordInput: React.FC<EnhancedPasswordInputProps> = ({
           "form-input w-full bg-appPrimary border text-textPrimary text-base font-normal rounded-lg p-4 focus:outline-none transition-all duration-200",
           showToggle ? "pr-12" : "pr-4", // Add right padding when toggle is shown
           error ? "border-red-500" : "border-gray-700",
-          className
+          className,
         )}
         {...props}
       />
@@ -457,7 +453,7 @@ export const Toast: React.FC<ToastProps> = ({
     <div
       className={cn(
         "toast-enter-active fixed top-4 right-4 z-50 p-4 rounded-lg border-l-4 shadow-lg max-w-md",
-        typeClasses[type]
+        typeClasses[type],
       )}
     >
       <div className="flex items-start gap-3">
@@ -490,6 +486,6 @@ export const Toast: React.FC<ToastProps> = ({
         )}
       </div>
     </div>,
-    document.body
+    document.body,
   );
 };

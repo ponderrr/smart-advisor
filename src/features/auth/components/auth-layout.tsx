@@ -26,7 +26,9 @@ export const AuthLayout = ({ children, onLogoClick }: AuthLayoutProps) => {
             <ThemeToggle />
           </div>
 
-          <div className="flex flex-1 items-start md:items-center">{children}</div>
+          <div className="flex flex-1 items-start md:items-center">
+            {children}
+          </div>
         </section>
 
         <section className="relative hidden overflow-hidden md:block md:min-h-[620px]">

@@ -270,7 +270,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         // Check AAL level — if MFA is enrolled, currentLevel may be aal1 while nextLevel is aal2
         const { data: aalData } = await authService.getAALLevel();
-        if (aalData && aalData.nextLevel === "aal2" && aalData.currentLevel === "aal1") {
+        if (
+          aalData &&
+          aalData.nextLevel === "aal2" &&
+          aalData.currentLevel === "aal1"
+        ) {
           return { error: null, mfaRequired: true };
         }
       }

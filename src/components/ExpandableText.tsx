@@ -27,7 +27,7 @@ export const ExpandableText: React.FC<ExpandableTextProps> = ({
       .replace(/<[^>]*>/g, "") // Remove HTML tags
       .replace(
         /^(SUMMARY:\s*|ABOUT ORIGINAL BOOK:\s*|Plot Summary:\s*|Book Description:\s*)/i,
-        ""
+        "",
       ) // Remove prefixes
       .replace(/^\s+|\s+$/g, "") // Trim whitespace
       .replace(/\s+/g, " "); // Normalize spaces
@@ -64,7 +64,7 @@ export const ExpandableText: React.FC<ExpandableTextProps> = ({
     <div
       className={cn(
         "bg-appPrimary border border-gray-600 rounded-lg p-6", // Increased padding from p-4 to p-6
-        className
+        className,
       )}
     >
       <h3 className="text-textPrimary font-semibold mb-3 text-lg">
@@ -76,7 +76,7 @@ export const ExpandableText: React.FC<ExpandableTextProps> = ({
         ref={textRef}
         className={cn(
           "text-textSecondary leading-relaxed text-base sm:text-lg", // Larger text size
-          !isExpanded && "overflow-hidden"
+          !isExpanded && "overflow-hidden",
         )}
         style={{
           display: !isExpanded ? "-webkit-box" : "block",

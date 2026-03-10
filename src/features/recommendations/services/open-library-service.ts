@@ -19,23 +19,17 @@ export interface BookDetails {
 }
 
 class OpenLibraryService {
-  async searchBook(
-    title: string,
-    author?: string,
-  ): Promise<BookSearchResult> {
+  async searchBook(title: string, author?: string): Promise<BookSearchResult> {
     try {
       const params = new URLSearchParams({ title });
       if (author) {
         params.append("author", author);
       }
 
-      const response = await fetch(
-        `/api/open-library?${params.toString()}`,
-        {
-          method: "GET",
-          cache: "no-store",
-        },
-      );
+      const response = await fetch(`/api/open-library?${params.toString()}`, {
+        method: "GET",
+        cache: "no-store",
+      });
 
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);

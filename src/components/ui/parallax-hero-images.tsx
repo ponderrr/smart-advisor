@@ -12,20 +12,20 @@ import { cn } from "@/lib/utils";
 type ImagePosition = {
   src: string;
   position:
-  | "top-left"
-  | "top-right"
-  | "top-center-left"
-  | "top-center-right"
-  | "mid-left"
-  | "mid-right"
-  | "center-left"
-  | "center-right"
-  | "bottom-left"
-  | "bottom-right"
-  | "bottom-center-left"
-  | "bottom-center-right"
-  | "far-left"
-  | "far-right";
+    | "top-left"
+    | "top-right"
+    | "top-center-left"
+    | "top-center-right"
+    | "mid-left"
+    | "mid-right"
+    | "center-left"
+    | "center-right"
+    | "bottom-left"
+    | "bottom-right"
+    | "bottom-center-left"
+    | "bottom-center-right"
+    | "far-left"
+    | "far-right";
   depth: number;
   delay: number;
 };
@@ -70,8 +70,12 @@ const positionOrder: ImagePosition["position"][] = [
 type DepthVariant = "default" | "edge-focus";
 
 const depthValuesByVariant: Record<DepthVariant, number[]> = {
-  default: [0.3, 0.35, 0.5, 0.55, 0.9, 0.85, 0.6, 0.65, 0.4, 0.45, 0.5, 0.45, 0.25, 0.2],
-  "edge-focus": [0.85, 0.9, 0.55, 0.6, 0.3, 0.35, 0.45, 0.5, 0.8, 0.85, 0.5, 0.55, 0.4, 0.45],
+  default: [
+    0.3, 0.35, 0.5, 0.55, 0.9, 0.85, 0.6, 0.65, 0.4, 0.45, 0.5, 0.45, 0.25, 0.2,
+  ],
+  "edge-focus": [
+    0.85, 0.9, 0.55, 0.6, 0.3, 0.35, 0.45, 0.5, 0.8, 0.85, 0.5, 0.55, 0.4, 0.45,
+  ],
 };
 
 const SPRING_CONFIG = { damping: 25, stiffness: 120 };
@@ -102,7 +106,10 @@ export const ParallaxHeroImages = ({
     const depthValues = depthValuesByVariant[variant];
 
     return positionOrder.map((position, index) => ({
-      src: limitedImages[index] || limitedImages[index % Math.max(1, limitedImages.length)] || "",
+      src:
+        limitedImages[index] ||
+        limitedImages[index % Math.max(1, limitedImages.length)] ||
+        "",
       position,
       depth: depthValues[index],
       delay: index * 0.1,
@@ -202,7 +209,9 @@ const ParallaxImage = memo(function ParallaxImage({
         y: translateY,
         zIndex: Math.round(depth * 10),
       }}
-      initial={mounted ? { opacity: 0, scale: 0.95, filter: "blur(14px)" } : false}
+      initial={
+        mounted ? { opacity: 0, scale: 0.95, filter: "blur(14px)" } : false
+      }
       animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
       transition={{
         duration: 0.7,

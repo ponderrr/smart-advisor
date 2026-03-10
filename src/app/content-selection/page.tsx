@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Check, ArrowLeft, ArrowRight } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
-import { useQuizStore } from '@/features/quiz/store/quiz-store';
+import { useQuizStore } from "@/features/quiz/store/quiz-store";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { GlowPillButton } from "@/components/ui/glow-pill-button";
 import {
@@ -95,8 +95,12 @@ const SelectionCard: React.FC<SelectionCardProps> = ({
       </div>
 
       <div className="p-4 sm:p-5">
-        <h3 className="text-xl font-black tracking-tight sm:text-2xl">{title}</h3>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{description}</p>
+        <h3 className="text-xl font-black tracking-tight sm:text-2xl">
+          {title}
+        </h3>
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+          {description}
+        </p>
       </div>
     </GlowPillButton>
   );
@@ -110,7 +114,9 @@ const ContentSelectionPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showValidationFlash, setShowValidationFlash] = useState(false);
-  const [validationMessage, setValidationMessage] = useState<string | null>(null);
+  const [validationMessage, setValidationMessage] = useState<string | null>(
+    null,
+  );
 
   const navItems = [
     { name: "Dashboard", link: "/dashboard" },
@@ -145,19 +151,22 @@ const ContentSelectionPage = () => {
     {
       id: "movie" as ContentType,
       title: "Movie",
-      description: "Find a movie recommendation that fits your current mood and pace.",
+      description:
+        "Find a movie recommendation that fits your current mood and pace.",
       mediaSrc: "/animations/Popcorn.webm",
     },
     {
       id: "book" as ContentType,
       title: "Book",
-      description: "Get a reading recommendation tailored to your style and interests.",
+      description:
+        "Get a reading recommendation tailored to your style and interests.",
       mediaSrc: "/animations/Books.webm",
     },
     {
       id: "both" as ContentType,
       title: "Both",
-      description: "Get one movie and one book recommendation in the same flow.",
+      description:
+        "Get one movie and one book recommendation in the same flow.",
       mediaSrc: "/animations/Popcorn.webm",
       secondaryMediaSrc: "/animations/Books.webm",
     },

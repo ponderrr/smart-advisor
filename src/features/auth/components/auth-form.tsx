@@ -7,11 +7,7 @@ import {
   useMotionTemplate,
   useMotionValue,
 } from "framer-motion";
-import {
-  IconBrandGoogle,
-  IconEye,
-  IconEyeOff,
-} from "@tabler/icons-react";
+import { IconBrandGoogle, IconEye, IconEyeOff } from "@tabler/icons-react";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -46,11 +42,7 @@ const MODE_HEADINGS = {
     "Get back into your account",
   ],
   "verify-email": ["Check your inbox", "Almost there", "One last step"],
-  "mfa-challenge": [
-    "Verify your identity",
-    "One more step",
-    "Security check",
-  ],
+  "mfa-challenge": ["Verify your identity", "One more step", "Security check"],
   "mfa-setup": [
     "Secure your account",
     "Add extra protection",
@@ -123,9 +115,7 @@ export const AuthForm = ({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isResendingVerification, setIsResendingVerification] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [headingChoice, setHeadingChoice] = useState<
-    Record<AuthMode, number>
-  >({
+  const [headingChoice, setHeadingChoice] = useState<Record<AuthMode, number>>({
     signin: 0,
     signup: 0,
     forgot: 0,
@@ -548,9 +538,9 @@ export const AuthForm = ({
                         }
                         placeholder="••••••••"
                         value={password}
-                        onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                          setPassword(event.target.value)
-                        }
+                        onChange={(
+                          event: React.ChangeEvent<HTMLInputElement>,
+                        ) => setPassword(event.target.value)}
                         showPassword={showPassword}
                         onTogglePassword={() =>
                           setShowPassword((prev) => !prev)
@@ -607,9 +597,9 @@ export const AuthForm = ({
                         id="auth-confirm-password"
                         placeholder="••••••••"
                         value={confirmPassword}
-                        onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                          setConfirmPassword(event.target.value)
-                        }
+                        onChange={(
+                          event: React.ChangeEvent<HTMLInputElement>,
+                        ) => setConfirmPassword(event.target.value)}
                         showPassword={showConfirmPassword}
                         onTogglePassword={() =>
                           setShowConfirmPassword((prev) => !prev)
@@ -828,9 +818,7 @@ const MfaChallengeScreen = ({
             inputMode="numeric"
             maxLength={6}
             value={mfaCode}
-            onChange={(e) =>
-              onMfaCodeChange(e.target.value.replace(/\D/g, ""))
-            }
+            onChange={(e) => onMfaCodeChange(e.target.value.replace(/\D/g, ""))}
             className="w-full rounded-lg border-2 border-slate-200 bg-white px-4 py-4 text-center text-3xl font-bold tracking-[0.4em] text-slate-900 placeholder-slate-300 focus:border-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder-slate-600"
             placeholder="000000"
             autoFocus
@@ -1057,8 +1045,11 @@ const VerifyEmailScreen = ({
         <div className="flex items-center gap-3 rounded-lg border border-violet-200 bg-violet-50 px-4 py-3 dark:border-violet-800/40 dark:bg-violet-900/20">
           <ShieldCheck className="h-5 w-5 shrink-0 text-violet-500 dark:text-violet-400" />
           <p className="text-xs text-slate-600 dark:text-slate-400">
-            <span className="font-semibold text-slate-800 dark:text-slate-200">Next up:</span>{" "}
-            After verifying your email, you'll be able to add two-factor authentication for extra security.
+            <span className="font-semibold text-slate-800 dark:text-slate-200">
+              Next up:
+            </span>{" "}
+            After verifying your email, you'll be able to add two-factor
+            authentication for extra security.
           </p>
         </div>
       )}
@@ -1068,9 +1059,7 @@ const VerifyEmailScreen = ({
           {resendMessage}
         </p>
       )}
-      {resendError && (
-        <p className="text-sm text-red-500">{resendError}</p>
-      )}
+      {resendError && <p className="text-sm text-red-500">{resendError}</p>}
 
       <div className="w-full space-y-3">
         <AuthHoverButton
