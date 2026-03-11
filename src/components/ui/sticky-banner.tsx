@@ -1,61 +1,40 @@
 "use client";
-import React, { SVGProps, useState } from "react";
-import { motion, useMotionValueEvent, useScroll } from "motion/react";
+import React, { SVGProps } from "react";
+import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
 export const StickyBanner = ({
   className,
   children,
-  hideOnScroll = false,
+  onClose,
 }: {
   className?: string;
   children: React.ReactNode;
   hideOnScroll?: boolean;
+  onClose?: () => void;
 }) => {
-  const [open, setOpen] = useState(true);
-  const { scrollY } = useScroll();
-
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    if (hideOnScroll && latest > 40) {
-      setOpen(false);
-    } else {
-      setOpen(true);
-    }
-  });
-
   return (
     <motion.div
       className={cn(
-        "sticky inset-x-0 top-0 z-40 flex min-h-14 w-full items-center justify-center bg-transparent px-4 py-1",
+        "relative flex min-h-10 w-full items-center justify-center px-4 py-2",
         className,
       )}
-      initial={{
-        y: -100,
-        opacity: 0,
-      }}
-      animate={{
-        y: open ? 0 : -100,
-        opacity: open ? 1 : 0,
-      }}
-      transition={{
-        duration: 0.3,
-        ease: "easeInOut",
-      }}
+      initial={{ height: 0, opacity: 0 }}
+      animate={{ height: "auto", opacity: 1 }}
+      exit={{ height: 0, opacity: 0 }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
     >
       {children}
 
-      <motion.button
-        initial={{
-          scale: 0,
-        }}
-        animate={{
-          scale: 1,
-        }}
-        className="absolute top-1/2 right-2 -translate-y-1/2 cursor-pointer"
-        onClick={() => setOpen(!open)}
-      >
-        <CloseIcon className="h-5 w-5 text-white" />
-      </motion.button>
+      {onClose && (
+        <button
+          className="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer rounded-full p-0.5 transition-opacity hover:opacity-80"
+          onClick={onClose}
+          aria-label="Dismiss banner"
+        >
+          <CloseIcon className="h-4 w-4 text-current opacity-70" />
+        </button>
+      )}
     </motion.div>
   );
 };

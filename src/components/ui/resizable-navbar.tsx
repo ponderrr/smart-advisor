@@ -43,7 +43,8 @@ export const Navbar = ({ children, className }: NavbarProps) => {
 
   return (
     <motion.div
-      className={cn("fixed inset-x-0 top-0 z-50 w-full py-4", className)}
+      style={{ top: "var(--site-banner-height, 0px)" }}
+      className={cn("fixed inset-x-0 z-50 w-full py-4", className)}
       initial={false}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.35, ease: "easeOut" }}

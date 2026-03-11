@@ -1,7 +1,5 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { NextResponse, NextRequest } from "next/server";
 
 const friendlyCallbackMessage = (message?: string | null) => {
   const normalized = (message || "").toLowerCase();
@@ -13,6 +11,9 @@ const friendlyCallbackMessage = (message?: string | null) => {
   }
   if (normalized.includes("jwt") || normalized.includes("sub claim")) {
     return "Your session is no longer valid. Please sign in again.";
+  }
+  if (normalized.includes("pkce") || normalized.includes("code verifier")) {
+    return "Your sign-in session expired. Please try again.";
   }
   return message || "We couldn't complete that link. Please try again.";
 };
@@ -29,23 +30,9 @@ export async function GET(request: NextRequest) {
     searchParams.get("error_description") ||
     searchParams.get("errorDescription");
 
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options),
-          );
-        },
-      },
-    },
-  );
+  // Use the shared server client — it reads/writes cookies so the PKCE
+  // code verifier that was stored during signInWithOAuth() is available.
+  const supabase = await createClient();
 
   if (callbackErrorCode) {
     const params = new URLSearchParams({
@@ -60,7 +47,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/auth?${params.toString()}`);
   }
 
-  // Handle OAuth code exchange
+  // Handle OAuth code exchange (Google, GitHub, etc.)
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
@@ -77,6 +64,8 @@ export async function GET(request: NextRequest) {
       }
       return NextResponse.redirect(`${origin}${next}`);
     }
+
+    // Exchange failed — provide a user-friendly error
     const params = new URLSearchParams({
       error: "oauth_exchange_failed",
       error_description: friendlyCallbackMessage(error.message),
@@ -85,17 +74,25 @@ export async function GET(request: NextRequest) {
   }
 
   // Handle email verification / password recovery via token_hash
-  if ((type === "email" || type === "recovery") && tokenHash) {
+  if (
+    (type === "email" || type === "recovery" || type === "signup") &&
+    tokenHash
+  ) {
     const { error } = await supabase.auth.verifyOtp({
       token_hash: tokenHash,
-      type: type as "email" | "recovery",
+      type: type as "email" | "recovery" | "signup",
     });
     if (!error) {
       if (type === "recovery") {
         // redirect directly to reset page so user can update password
         return NextResponse.redirect(`${origin}/auth/reset-password`);
       }
-      return NextResponse.redirect(`${origin}/auth?verified=true`);
+      // Email verified — user now has an active session from verifyOtp.
+      // Redirect through client-side page to signal original tab and proceed.
+      const verifiedParams = new URLSearchParams({ next });
+      return NextResponse.redirect(
+        `${origin}/auth/verified?${verifiedParams.toString()}`,
+      );
     }
     const params = new URLSearchParams({
       error: error.status === 403 ? "otp_expired" : "verification_failed",
