@@ -97,12 +97,24 @@ async function fetchMoviePosters(apiKey: string): Promise<string[]> {
     selectedEndpoints.map(async (endpoint) => {
       const page = Math.floor(Math.random() * 18) + 1;
       const url = `https://api.themoviedb.org/3/${endpoint}&page=${page}&api_key=${apiKey}`;
-      const response = await fetch(url, { next: { revalidate: 0 } });
-      if (!response.ok) {
-        throw new Error(`TMDB error: ${response.status}`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+      try {
+        const response = await fetch(url, {
+          signal: controller.signal,
+          next: { revalidate: 0 },
+        });
+        clearTimeout(timeoutId);
+        if (!response.ok) {
+          return [];
+        }
+        const data = await response.json();
+        return Array.isArray(data.results) ? data.results : [];
+      } catch {
+        clearTimeout(timeoutId);
+        return [];
       }
-      const data = await response.json();
-      return Array.isArray(data.results) ? data.results : [];
     }),
   );
 
@@ -153,7 +165,9 @@ export async function GET() {
 
   return NextResponse.json(payload, {
     headers: {
-      "Cache-Control": "no-store, max-age=0",
+      // Cache for 10 minutes on CDN, serve stale for up to 1 hour while revalidating
+      "Cache-Control":
+        "public, s-maxage=600, stale-while-revalidate=3600",
     },
   });
 }
