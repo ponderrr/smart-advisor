@@ -4,10 +4,35 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
 import { StickyBanner } from "@/components/ui/sticky-banner";
-import { AlertTriangle, Info, Sparkles, Megaphone } from "lucide-react";
+import {
+  AlertTriangle,
+  Info,
+  Sparkles,
+  Megaphone,
+  XCircle,
+  CheckCircle,
+  Siren,
+  Timer,
+  Tag,
+  ArrowUpCircle,
+  Lightbulb,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-export type BannerType = "maintenance" | "feature" | "announcement" | "info";
+export type BannerType =
+  | "info"
+  | "warning"
+  | "error"
+  | "success"
+  | "maintenance"
+  | "feature"
+  | "announcement"
+  | "urgent"
+  | "countdown"
+  | "promotion"
+  | "update"
+  | "tip";
+
 export type BannerVisibility = "site-wide" | "homepage-only";
 
 export interface BannerData {
@@ -20,6 +45,7 @@ export interface BannerData {
   link_text?: string | null;
   starts_at?: string | null;
   ends_at?: string | null;
+  countdown_target?: string | null;
 }
 
 const BANNER_DISMISSED_KEY = "smart_advisor_dismissed_banners";
@@ -28,26 +54,109 @@ const bannerConfig: Record<
   BannerType,
   { icon: React.ReactNode; className: string }
 > = {
-  maintenance: {
-    icon: <AlertTriangle size={14} />,
+  info: {
+    icon: <Info size={13} className="shrink-0" />,
     className:
-      "bg-amber-50 text-amber-900 border-b border-amber-200/60 dark:bg-amber-950/50 dark:text-amber-200 dark:border-amber-800/40",
+      "bg-blue-100/80 text-blue-900 dark:bg-blue-900/40 dark:text-blue-200",
+  },
+  warning: {
+    icon: <AlertTriangle size={13} className="shrink-0" />,
+    className:
+      "bg-amber-100/80 text-amber-900 dark:bg-amber-900/40 dark:text-amber-200",
+  },
+  error: {
+    icon: <XCircle size={13} className="shrink-0" />,
+    className:
+      "bg-red-100/80 text-red-900 dark:bg-red-900/40 dark:text-red-200",
+  },
+  success: {
+    icon: <CheckCircle size={13} className="shrink-0" />,
+    className:
+      "bg-emerald-100/80 text-emerald-900 dark:bg-emerald-900/40 dark:text-emerald-200",
+  },
+  maintenance: {
+    icon: <AlertTriangle size={13} className="shrink-0" />,
+    className:
+      "bg-amber-100/80 text-amber-900 dark:bg-amber-900/40 dark:text-amber-200",
   },
   feature: {
-    icon: <Sparkles size={14} />,
+    icon: <Sparkles size={13} className="shrink-0" />,
     className:
-      "bg-violet-50 text-violet-900 border-b border-violet-200/60 dark:bg-violet-950/50 dark:text-violet-200 dark:border-violet-800/40",
+      "bg-violet-100/80 text-violet-900 dark:bg-violet-900/40 dark:text-violet-200",
   },
   announcement: {
-    icon: <Megaphone size={14} />,
+    icon: <Megaphone size={13} className="shrink-0" />,
     className:
-      "bg-slate-100 text-slate-800 border-b border-slate-200/60 dark:bg-slate-800/50 dark:text-slate-200 dark:border-slate-700/40",
+      "bg-slate-100/80 text-slate-800 dark:bg-slate-800/60 dark:text-slate-200",
   },
-  info: {
-    icon: <Info size={14} />,
+  urgent: {
+    icon: <Siren size={13} className="shrink-0" />,
     className:
-      "bg-blue-50 text-blue-900 border-b border-blue-200/60 dark:bg-blue-950/50 dark:text-blue-200 dark:border-blue-800/40",
+      "bg-red-200/90 text-red-950 dark:bg-red-900/60 dark:text-red-100",
   },
+  countdown: {
+    icon: <Timer size={13} className="shrink-0" />,
+    className:
+      "bg-indigo-100/80 text-indigo-900 dark:bg-indigo-900/40 dark:text-indigo-200",
+  },
+  promotion: {
+    icon: <Tag size={13} className="shrink-0" />,
+    className:
+      "bg-pink-100/80 text-pink-900 dark:bg-pink-900/40 dark:text-pink-200",
+  },
+  update: {
+    icon: <ArrowUpCircle size={13} className="shrink-0" />,
+    className:
+      "bg-cyan-100/80 text-cyan-900 dark:bg-cyan-900/40 dark:text-cyan-200",
+  },
+  tip: {
+    icon: <Lightbulb size={13} className="shrink-0" />,
+    className:
+      "bg-yellow-100/80 text-yellow-900 dark:bg-yellow-900/40 dark:text-yellow-200",
+  },
+};
+
+/** Non-dismissible banner types (critical info users must see) */
+const NON_DISMISSIBLE_TYPES: BannerType[] = ["maintenance", "urgent", "error"];
+
+function useCountdown(target: string | null | undefined) {
+  const [remaining, setRemaining] = useState("");
+
+  useEffect(() => {
+    if (!target) return;
+
+    const update = () => {
+      const diff = new Date(target).getTime() - Date.now();
+      if (diff <= 0) {
+        setRemaining("Now!");
+        return;
+      }
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+
+      const parts: string[] = [];
+      if (d > 0) parts.push(`${d}d`);
+      if (h > 0) parts.push(`${h}h`);
+      parts.push(`${m}m`);
+      parts.push(`${s}s`);
+      setRemaining(parts.join(" "));
+    };
+
+    update();
+    const interval = setInterval(update, 1000);
+    return () => clearInterval(interval);
+  }, [target]);
+
+  return remaining;
+}
+
+const CountdownDisplay = ({ target }: { target: string }) => {
+  const remaining = useCountdown(target);
+  return (
+    <span className="ml-1 tabular-nums font-semibold">{remaining}</span>
+  );
 };
 
 export const SiteBanner = () => {
@@ -122,6 +231,25 @@ export const SiteBanner = () => {
     return () => observer.disconnect();
   }, [banners, dismissed, updateBannerHeight]);
 
+  const isHomepage = pathname === "/";
+
+  const visibleBanners = banners.filter((banner) => {
+    if (banner.visibility === "homepage-only" && !isHomepage) return false;
+    if (
+      !NON_DISMISSIBLE_TYPES.includes(banner.type) &&
+      dismissed.has(banner.id)
+    )
+      return false;
+    return true;
+  });
+
+  // Reset CSS variable when no banners
+  useEffect(() => {
+    if (visibleBanners.length === 0) {
+      document.documentElement.style.setProperty("--site-banner-height", "0px");
+    }
+  }, [visibleBanners.length]);
+
   const handleDismiss = (bannerId: string) => {
     const next = new Set(dismissed);
     next.add(bannerId);
@@ -136,21 +264,6 @@ export const SiteBanner = () => {
     }
   };
 
-  const isHomepage = pathname === "/";
-
-  const visibleBanners = banners.filter((banner) => {
-    if (banner.visibility === "homepage-only" && !isHomepage) return false;
-    if (banner.type !== "maintenance" && dismissed.has(banner.id)) return false;
-    return true;
-  });
-
-  // Reset CSS variable when no banners
-  useEffect(() => {
-    if (visibleBanners.length === 0) {
-      document.documentElement.style.setProperty("--site-banner-height", "0px");
-    }
-  }, [visibleBanners.length]);
-
   return (
     <div ref={containerRef} className="relative z-[60] w-full">
       <AnimatePresence>
@@ -161,25 +274,26 @@ export const SiteBanner = () => {
               key={banner.id}
               className={config.className}
               onClose={
-                banner.type !== "maintenance"
+                !NON_DISMISSIBLE_TYPES.includes(banner.type)
                   ? () => handleDismiss(banner.id)
                   : undefined
               }
             >
-              <div className="flex items-center gap-2 text-xs font-medium">
-                {config.icon}
-                <span>{banner.message}</span>
-                {banner.link_url && banner.link_text && (
-                  <a
-                    href={banner.link_url}
-                    className="ml-1 underline underline-offset-2 opacity-80 transition-opacity hover:opacity-100"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {banner.link_text}
-                  </a>
-                )}
-              </div>
+              {config.icon}
+              <span>{banner.message}</span>
+              {banner.type === "countdown" && banner.countdown_target && (
+                <CountdownDisplay target={banner.countdown_target} />
+              )}
+              {banner.link_url && banner.link_text && (
+                <a
+                  href={banner.link_url}
+                  className="ml-0.5 underline underline-offset-2 opacity-80 transition-opacity hover:opacity-100"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {banner.link_text}
+                </a>
+              )}
             </StickyBanner>
           );
         })}
