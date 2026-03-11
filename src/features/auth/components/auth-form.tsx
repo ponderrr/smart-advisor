@@ -1,21 +1,18 @@
 "use client";
 
 import * as Label from "@radix-ui/react-label";
-import {
-  AnimatePresence,
-  motion,
-  useMotionTemplate,
-  useMotionValue,
-} from "framer-motion";
-import { IconBrandGoogle, IconEye, IconEyeOff } from "@tabler/icons-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { IconBrandGoogle } from "@tabler/icons-react";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ShieldCheck, KeyRound } from "lucide-react";
 import { MfaSetup } from "./mfa-setup";
+import { MfaChallengeScreen } from "./mfa-challenge-screen";
+import { VerifyEmailScreen } from "./verify-email-screen";
+import { FormField, PasswordInput, AuthHoverButton } from "./auth-shared";
 
 export type AuthMode =
   | "signin"
@@ -312,14 +309,12 @@ export const AuthForm = ({
         if (result.error) {
           setErrors({ general: result.error });
         } else if (result.mfaRequired) {
-          // MFA is required — fetch factors and show challenge
           const factorsResult = await onListMFAFactors();
           if (factorsResult.data?.totp?.length > 0) {
             setMfaFactorId(factorsResult.data.totp[0].id);
           }
           setMode("mfa-challenge");
         } else {
-          // Check if user has MFA set up; if not, offer setup
           const factorsResult = await onListMFAFactors();
           const hasVerified = factorsResult.data?.totp?.some(
             (f: any) => f.status === "verified",
@@ -347,7 +342,6 @@ export const AuthForm = ({
         return result;
       }
 
-      // On Success: Show email verification screen (MFA setup will follow after sign-in)
       setSignupEmail(email);
       setSignupPendingMfa(true);
       setMode("verify-email");
@@ -375,7 +369,6 @@ export const AuthForm = ({
           router.replace("/dashboard");
         }
       } else {
-        // Backup code verification
         const trimmed = mfaCode.trim();
         if (!trimmed) {
           setErrors({ general: "Please enter a backup code" });
@@ -652,7 +645,6 @@ export const AuthForm = ({
                 </AuthHoverButton>
               )}
 
-              {/* cooldown warning */}
               {mode === "signup" && signupCooldown && (
                 <p className="text-center text-sm text-red-500">
                   Please wait a moment before trying again.
@@ -763,321 +755,6 @@ export const AuthForm = ({
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
-  );
-};
-
-/* --- MFA CHALLENGE SCREEN --- */
-
-const MfaChallengeScreen = ({
-  mfaCode,
-  onMfaCodeChange,
-  mfaInputMode,
-  onToggleMfaInputMode,
-  onVerify,
-  verifying,
-  error,
-  onBackToSignIn,
-}: {
-  mfaCode: string;
-  onMfaCodeChange: (code: string) => void;
-  mfaInputMode: "totp" | "backup";
-  onToggleMfaInputMode: () => void;
-  onVerify: () => void;
-  verifying: boolean;
-  error: string | null;
-  onBackToSignIn: () => void;
-}) => {
-  const isTotp = mfaInputMode === "totp";
-
-  return (
-    <div className="flex flex-col items-center justify-center space-y-5 py-4 text-center">
-      <div className="rounded-full bg-violet-100 p-4 dark:bg-violet-900/30">
-        {isTotp ? (
-          <ShieldCheck className="h-10 w-10 text-violet-600 dark:text-violet-400" />
-        ) : (
-          <KeyRound className="h-10 w-10 text-violet-600 dark:text-violet-400" />
-        )}
-      </div>
-
-      <div>
-        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-          {isTotp ? "Enter verification code" : "Enter backup code"}
-        </h2>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-          {isTotp
-            ? "Open your authenticator app and enter the 6-digit code."
-            : "Enter one of your pre-generated backup codes."}
-        </p>
-      </div>
-
-      <div className="w-full max-w-xs">
-        {isTotp ? (
-          <input
-            type="text"
-            inputMode="numeric"
-            maxLength={6}
-            value={mfaCode}
-            onChange={(e) => onMfaCodeChange(e.target.value.replace(/\D/g, ""))}
-            className="w-full rounded-lg border-2 border-slate-200 bg-white px-4 py-4 text-center text-3xl font-bold tracking-[0.4em] text-slate-900 placeholder-slate-300 focus:border-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder-slate-600"
-            placeholder="000000"
-            autoFocus
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && mfaCode.length === 6) onVerify();
-            }}
-          />
-        ) : (
-          <input
-            type="text"
-            value={mfaCode}
-            onChange={(e) => onMfaCodeChange(e.target.value)}
-            className="w-full rounded-lg border-2 border-slate-200 bg-white px-4 py-3 text-center font-mono text-lg font-semibold tracking-wider text-slate-900 placeholder-slate-300 uppercase focus:border-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder-slate-600"
-            placeholder="XXXXX-XXXXX"
-            autoFocus
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && mfaCode.trim()) onVerify();
-            }}
-          />
-        )}
-
-        {error && (
-          <p className="mt-2 text-sm font-medium text-red-500">{error}</p>
-        )}
-      </div>
-
-      <div className="w-full max-w-xs space-y-3">
-        <AuthHoverButton
-          type="button"
-          onClick={onVerify}
-          disabled={
-            verifying || (isTotp ? mfaCode.length !== 6 : !mfaCode.trim())
-          }
-          className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-violet-600 text-sm font-semibold text-white transition-all hover:bg-violet-500 disabled:opacity-50"
-        >
-          {verifying ? "Verifying..." : "Verify"}
-        </AuthHoverButton>
-
-        <button
-          type="button"
-          onClick={onToggleMfaInputMode}
-          className="w-full text-sm font-medium text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-        >
-          {isTotp
-            ? "Can't access your authenticator? Use a backup code"
-            : "Use authenticator app instead"}
-        </button>
-
-        <button
-          type="button"
-          onClick={onBackToSignIn}
-          className="text-sm font-semibold text-violet-600 transition-colors hover:text-violet-500 dark:text-violet-400 dark:hover:text-violet-300"
-        >
-          Back to sign in
-        </button>
-      </div>
-    </div>
-  );
-};
-
-/* --- SUBCOMPONENTS --- */
-
-export const FormField = ({
-  label,
-  htmlFor,
-  error,
-  children,
-}: {
-  label: string;
-  htmlFor: string;
-  error?: string;
-  children: React.ReactNode;
-}) => (
-  <div className="space-y-1.5">
-    <Label.Root
-      htmlFor={htmlFor}
-      className={cn(
-        "text-sm font-medium text-slate-700 dark:text-slate-300",
-        error && "text-red-500",
-      )}
-    >
-      {label}
-    </Label.Root>
-    {children}
-    {error && (
-      <p role="alert" className="text-xs text-red-500">
-        {error}
-      </p>
-    )}
-  </div>
-);
-
-export const PasswordInput = ({
-  showPassword,
-  onTogglePassword,
-  className,
-  ...props
-}: any) => {
-  const radius = 100;
-  const [visible, setVisible] = useState(false);
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
-  return (
-    <motion.div
-      style={{
-        background: useMotionTemplate`radial-gradient(${visible ? radius + "px" : "0px"} circle at ${mouseX}px ${mouseY}px, #8b5cf6, transparent 80%)`,
-      }}
-      onMouseMove={({ currentTarget, clientX, clientY }) => {
-        const { left, top } = currentTarget.getBoundingClientRect();
-        mouseX.set(clientX - left);
-        mouseY.set(clientY - top);
-      }}
-      onMouseEnter={() => setVisible(true)}
-      onMouseLeave={() => setVisible(false)}
-      className="group/input relative rounded-lg p-[2px] transition duration-300"
-    >
-      <input
-        type={showPassword ? "text" : "password"}
-        className={cn(
-          "shadow-input flex h-10 w-full rounded-md border-none bg-gray-50 px-3 py-2 pr-10 text-sm text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:bg-zinc-800 dark:text-white",
-          className,
-        )}
-        {...props}
-      />
-      <button
-        type="button"
-        onClick={onTogglePassword}
-        className="absolute inset-y-0 right-1 inline-flex items-center justify-center px-2 text-slate-500 hover:text-slate-900"
-      >
-        {showPassword ? (
-          <IconEyeOff className="h-4 w-4" />
-        ) : (
-          <IconEye className="h-4 w-4" />
-        )}
-      </button>
-    </motion.div>
-  );
-};
-
-export const AuthHoverButton = ({ className, children, ...props }: any) => {
-  const radius = 110;
-  const [visible, setVisible] = useState(false);
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const background = useMotionTemplate`radial-gradient(${visible ? radius + "px" : "0px"} circle at ${mouseX}px ${mouseY}px, rgba(139,92,246,0.5), transparent 80%)`;
-
-  return (
-    <motion.button
-      {...props}
-      onMouseMove={(e: React.MouseEvent) => {
-        const { left, top } = e.currentTarget.getBoundingClientRect();
-        mouseX.set(e.clientX - left);
-        mouseY.set(e.clientY - top);
-      }}
-      onMouseEnter={() => setVisible(true)}
-      onMouseLeave={() => setVisible(false)}
-      style={{ ...props.style, backgroundImage: background }}
-      className={className}
-    >
-      {children}
-    </motion.button>
-  );
-};
-
-const VerifyEmailScreen = ({
-  email,
-  onResend,
-  isResending,
-  onBackToSignIn,
-  showMfaHint = false,
-}: {
-  email: string;
-  onResend: () => Promise<{ error: string | null }>;
-  isResending: boolean;
-  onBackToSignIn: () => void;
-  showMfaHint?: boolean;
-}) => {
-  const [resendMessage, setResendMessage] = useState<string | null>(null);
-  const [resendError, setResendError] = useState<string | null>(null);
-
-  const handleResend = async () => {
-    setResendMessage(null);
-    setResendError(null);
-    const result = await onResend();
-    if (result.error) {
-      setResendError(result.error);
-    } else {
-      setResendMessage("Verification email sent. Check your inbox.");
-    }
-  };
-
-  return (
-    <div className="flex flex-col items-center justify-center space-y-6 py-4 text-center">
-      <div className="rounded-full bg-emerald-100 p-4 dark:bg-emerald-900/30">
-        <svg
-          className="h-10 w-10 text-emerald-600 dark:text-emerald-400"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"
-          />
-        </svg>
-      </div>
-      <div>
-        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-          Verify your email
-        </h2>
-        <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
-          We sent a verification link to{" "}
-          <span className="font-semibold text-slate-800 dark:text-slate-200">
-            {email}
-          </span>
-          . Click the link to activate your account.
-        </p>
-      </div>
-
-      {showMfaHint && (
-        <div className="flex items-center gap-3 rounded-lg border border-violet-200 bg-violet-50 px-4 py-3 dark:border-violet-800/40 dark:bg-violet-900/20">
-          <ShieldCheck className="h-5 w-5 shrink-0 text-violet-500 dark:text-violet-400" />
-          <p className="text-xs text-slate-600 dark:text-slate-400">
-            <span className="font-semibold text-slate-800 dark:text-slate-200">
-              Next up:
-            </span>{" "}
-            After verifying your email, you'll be able to add two-factor
-            authentication for extra security.
-          </p>
-        </div>
-      )}
-
-      {resendMessage && (
-        <p className="text-sm text-emerald-600 dark:text-emerald-400">
-          {resendMessage}
-        </p>
-      )}
-      {resendError && <p className="text-sm text-red-500">{resendError}</p>}
-
-      <div className="w-full space-y-3">
-        <AuthHoverButton
-          type="button"
-          onClick={handleResend}
-          disabled={isResending}
-          className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 transition-all hover:border-violet-400 hover:bg-violet-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-        >
-          {isResending ? "Resending..." : "Resend verification email"}
-        </AuthHoverButton>
-        <button
-          type="button"
-          onClick={onBackToSignIn}
-          className="text-sm font-semibold text-violet-600 transition-colors hover:text-violet-500 dark:text-violet-400 dark:hover:text-violet-300"
-        >
-          Back to sign in
-        </button>
-      </div>
     </div>
   );
 };

@@ -8,7 +8,7 @@ import {
   AuthHoverButton,
   FormField,
   PasswordInput,
-} from "@/features/auth/components/auth-form";
+} from "@/features/auth/components/auth-shared";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
