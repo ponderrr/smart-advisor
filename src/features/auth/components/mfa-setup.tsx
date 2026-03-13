@@ -27,7 +27,7 @@ export const MfaSetup = ({ onComplete, onSkip }: MfaSetupProps) => {
   const [backupCodesCopied, setBackupCodesCopied] = useState(false);
   const [qrRefreshCountdown, setQrRefreshCountdown] = useState(0);
 
-  const QR_REFRESH_INTERVAL = 30; // 5 minutes in seconds
+  const QR_REFRESH_INTERVAL = 30;
 
   const handleRefreshQr = useCallback(async () => {
     const { data, error: enrollError } = await authService.enrollMFA();
