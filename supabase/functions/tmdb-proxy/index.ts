@@ -85,6 +85,7 @@ serve(async (req) => {
 
     let description =
       "A captivating story that will keep you entertained from start to finish.";
+    let genres: string[] = [];
 
     if (detailsResponse.ok) {
       const detailsData = await detailsResponse.json();
@@ -99,6 +100,9 @@ serve(async (req) => {
           description = description.substring(0, 197) + "...";
         }
       }
+      if (Array.isArray(detailsData.genres)) {
+        genres = detailsData.genres.map((g: { name: string }) => g.name);
+      }
     }
 
     const result = {
@@ -112,6 +116,7 @@ serve(async (req) => {
         ? Math.round(movie.vote_average * 10) / 10
         : 7.5,
       description: description,
+      genres: genres,
     };
 
     console.log("Returning movie data:", result);

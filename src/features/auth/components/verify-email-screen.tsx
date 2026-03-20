@@ -35,8 +35,8 @@ export const VerifyEmailScreen = ({
     // Also check on tab focus (handles mobile in-app browsers)
     const handleFocus = async () => {
       try {
-        const { data } = await supabase.auth.getSession();
-        if (data.session) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
           router.replace("/content-selection");
         }
       } catch {

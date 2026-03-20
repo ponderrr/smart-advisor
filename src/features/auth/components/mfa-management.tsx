@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { format } from "date-fns";
 import { authService } from "../services/auth-service";
 import {
   ShieldOff,
@@ -146,7 +147,7 @@ export const MfaManagement = ({
       "",
       ...newBackupCodes,
       "",
-      `Generated: ${new Date().toLocaleDateString()}`,
+      `Generated: ${format(new Date(), "PP")}`,
     ].join("\n");
 
     const blob = new Blob([text], { type: "text/plain" });
@@ -198,7 +199,7 @@ export const MfaManagement = ({
                     {factor.friendly_name || "Authenticator App"}
                   </p>
                   <p className="text-xs text-slate-600 dark:text-slate-400">
-                    Added {new Date(factor.created_at).toLocaleDateString()}
+                    Added {format(new Date(factor.created_at), "PP")}
                   </p>
                 </div>
               </div>

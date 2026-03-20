@@ -25,6 +25,8 @@ export const metadata: Metadata = {
       "Answer a short personality quiz and get a movie or book recommendation tailored specifically to you — powered by Claude AI.",
     images: ["https://smartadvisor.live/images/smart-advisor-preview.png"],
   },
+  metadataBase: new URL("https://smartadvisor.live"),
+  alternates: { canonical: "/" },
   robots: "index, follow",
   icons: {
     icon: { url: "/svgs/smartadvisor/SmartAdvisor.svg", type: "image/svg+xml" },

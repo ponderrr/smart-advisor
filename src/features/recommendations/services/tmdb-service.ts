@@ -2,7 +2,8 @@ export interface MovieSearchResult {
   poster: string;
   year: number;
   rating: number;
-  description: string; // Add description field
+  description: string;
+  genres?: string[];
 }
 
 export interface MovieDetails {

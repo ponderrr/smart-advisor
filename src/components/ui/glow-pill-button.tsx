@@ -6,11 +6,13 @@ import { cn } from "@/lib/utils";
 
 type GlowPillButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   active?: boolean;
+  variant?: "default" | "destructive";
 };
 
 export const GlowPillButton = ({
   className,
   active = false,
+  variant = "default",
   children,
   onDrag: _onDrag,
   onDragStart: _onDragStart,
@@ -22,6 +24,11 @@ export const GlowPillButton = ({
   const [visible, setVisible] = useState(false);
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
+
+  const isDestructive = variant === "destructive";
+  const glowColor = isDestructive
+    ? "rgba(239,68,68,0.45)"
+    : "rgba(139,92,246,0.5)";
 
   const handleMouseMove = (event: React.MouseEvent<HTMLButtonElement>) => {
     props.onMouseMove?.(event);
@@ -48,7 +55,7 @@ export const GlowPillButton = ({
         background: useMotionTemplate`
           radial-gradient(
             ${visible ? radius + "px" : "0px"} circle at ${mouseX}px ${mouseY}px,
-            rgba(139,92,246,0.5),
+            ${glowColor},
             transparent 80%
           )
         `,
@@ -56,8 +63,12 @@ export const GlowPillButton = ({
       className={cn(
         "rounded-full border px-4 py-2 text-sm font-bold transition-all duration-300",
         active
-          ? "border-indigo-500 bg-indigo-500 text-black dark:text-white"
-          : "border-slate-300 bg-white text-slate-700 hover:border-violet-400 hover:bg-white hover:text-violet-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:border-violet-400 dark:hover:bg-slate-900 dark:hover:text-violet-300",
+          ? isDestructive
+            ? "border-red-500 bg-red-500 text-white"
+            : "border-indigo-500 bg-indigo-500 text-black dark:text-white"
+          : isDestructive
+            ? "border-red-300 bg-white text-red-600 hover:border-red-400 hover:bg-red-50 hover:text-red-700 dark:border-red-800 dark:bg-slate-900/70 dark:text-red-400 dark:hover:border-red-600 dark:hover:bg-red-950/30 dark:hover:text-red-300"
+            : "border-slate-300 bg-white text-slate-700 hover:border-violet-400 hover:bg-white hover:text-violet-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:border-violet-400 dark:hover:bg-slate-900 dark:hover:text-violet-300",
         className,
       )}
       {...props}

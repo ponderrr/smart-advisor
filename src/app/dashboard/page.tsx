@@ -1,7 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { useQueryState, parseAsStringLiteral } from "nuqs";
+import * as echarts from "echarts/core";
+import { PieChart as EPieChart } from "echarts/charts";
+import {
+  TooltipComponent,
+  LegendComponent,
+} from "echarts/components";
+import { CanvasRenderer } from "echarts/renderers";
+
+echarts.use([EPieChart, TooltipComponent, LegendComponent, CanvasRenderer]);
 import {
   ArrowRight,
   BookOpen,
@@ -12,15 +23,7 @@ import {
   TrendingUp,
   BarChart3,
 } from "lucide-react";
-import { motion } from "framer-motion";
-import {
-  Bar,
-  BarChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { Recommendation } from "@/features/recommendations/types/recommendation";
 import { databaseService } from "@/features/recommendations/services/database-service";
@@ -45,12 +48,115 @@ const fadeUp = (delay = 0) => ({
   transition: { duration: 0.4, delay, ease: [0.22, 1, 0.36, 1] as const },
 });
 
+const RecommendationModal = ({
+  rec,
+  onClose,
+}: {
+  rec: Recommendation;
+  onClose: () => void;
+}) => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+    onClick={onClose}
+  >
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95, y: 12 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95, y: 12 }}
+      transition={{ duration: 0.2 }}
+      className="relative max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-slate-200/70 bg-white shadow-2xl dark:border-slate-700/60 dark:bg-slate-900"
+      onClick={(e) => e.stopPropagation()}
+    >
+      {rec.poster_url && (
+        <div className="relative aspect-[2/3] max-h-[300px] w-full overflow-hidden rounded-t-3xl bg-slate-200 dark:bg-slate-800">
+          <Image
+            src={rec.poster_url}
+            alt={rec.title}
+            fill
+            sizes="(max-width: 640px) 100vw, 500px"
+            className="object-cover"
+          />
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-5">
+            <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm">
+              {rec.type === "movie" ? <Film size={10} /> : <BookOpen size={10} />}
+              {rec.type}
+            </span>
+          </div>
+        </div>
+      )}
+
+      <div className="p-5">
+        <h2 className="text-2xl font-black tracking-tight">{rec.title}</h2>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          {rec.author ? `By ${rec.author}` : rec.director ? `Directed by ${rec.director}` : ""}
+          {rec.year ? ` · ${rec.year}` : ""}
+        </p>
+
+        {rec.genres?.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {rec.genres.slice(0, 5).map((g) => (
+              <span
+                key={g}
+                className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+              >
+                {g}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {rec.explanation && (
+          <div className="mt-4 rounded-xl border border-indigo-100 bg-indigo-50/50 px-3 py-2.5 dark:border-indigo-500/20 dark:bg-indigo-500/5">
+            <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-300">
+              Why this pick
+            </p>
+            <p className="mt-1 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+              {rec.explanation}
+            </p>
+          </div>
+        )}
+
+        {rec.description && (
+          <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+            {rec.description}
+          </p>
+        )}
+
+        <button
+          type="button"
+          onClick={onClose}
+          className="mt-5 w-full rounded-2xl bg-slate-100 py-2.5 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+        >
+          Close
+        </button>
+      </div>
+    </motion.div>
+  </motion.div>
+);
+
 const DashboardPage = () => {
   const router = useRouter();
   const { user, signOut } = useAuth();
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [selectedRec, setSelectedRec] = useState<Recommendation | null>(null);
+  const dashTabs = ["overview", "picks", "genres"] as const;
+  const [activeTab, setActiveTab] = useQueryState(
+    "tab",
+    parseAsStringLiteral(dashTabs).withDefault("overview"),
+  );
+  const prevTabIdx = useRef(dashTabs.indexOf(activeTab));
+  const slideDir = dashTabs.indexOf(activeTab) >= prevTabIdx.current ? 1 : -1;
+  useEffect(() => {
+    prevTabIdx.current = dashTabs.indexOf(activeTab);
+  }, [activeTab]);
+
+  const chartRef = useRef<HTMLDivElement | null>(null);
+  const chartInstanceRef = useRef<echarts.ECharts | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -106,6 +212,81 @@ const DashboardPage = () => {
     const favorites = recommendations.filter((r) => r.is_favorited).length;
     return { total: recommendations.length, movies, books, favorites };
   }, [recommendations]);
+
+  // Callback ref — initializes ECharts the moment the div mounts in the DOM
+  const initChart = useCallback(
+    (node: HTMLDivElement | null) => {
+      // Dispose previous instance
+      if (chartInstanceRef.current) {
+        chartInstanceRef.current.dispose();
+        chartInstanceRef.current = null;
+      }
+      chartRef.current = node;
+      if (!node || loading || genreChartData.length === 0) return;
+
+      const isDark = document.documentElement.classList.contains("dark");
+      const chart = echarts.init(node);
+      chartInstanceRef.current = chart;
+
+      const palette = [
+        "#6366f1", "#22c55e", "#f59e0b", "#ec4899",
+        "#06b6d4", "#f97316", "#8b5cf6", "#14b8a6",
+      ];
+
+      chart.setOption({
+        tooltip: {
+          trigger: "item",
+          backgroundColor: isDark ? "rgba(15, 23, 42, 0.95)" : "rgba(255,255,255,0.95)",
+          borderColor: isDark ? "rgba(100,116,139,0.3)" : "rgba(203,213,225,0.5)",
+          textStyle: { color: isDark ? "#e2e8f0" : "#334155", fontSize: 12 },
+          formatter: "{b}: {c} ({d}%)",
+        },
+        legend: {
+          orient: "vertical",
+          right: 12,
+          top: "center",
+          textStyle: { color: isDark ? "#94a3b8" : "#64748b", fontSize: 14, fontWeight: 500 },
+          itemWidth: 14,
+          itemHeight: 14,
+          itemGap: 14,
+        },
+        series: [
+          {
+            type: "pie",
+            radius: ["40%", "70%"],
+            center: ["35%", "50%"],
+            avoidLabelOverlap: true,
+            itemStyle: {
+              borderRadius: 6,
+              borderColor: isDark ? "#0f172a" : "#ffffff",
+              borderWidth: 2,
+            },
+            label: { show: false },
+            emphasis: {
+              label: { show: true, fontSize: 13, fontWeight: "bold", color: isDark ? "#e2e8f0" : "#334155" },
+              itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: "rgba(0, 0, 0, 0.2)" },
+            },
+            data: genreChartData.map((d, i) => ({
+              name: d.genre,
+              value: d.total,
+              itemStyle: { color: palette[i % palette.length] },
+            })),
+          },
+        ],
+        animationDuration: 600,
+        animationEasing: "cubicOut",
+      });
+
+      const handleResize = () => chart.resize();
+      window.addEventListener("resize", handleResize);
+
+      // Cleanup on unmount handled by next call with node=null
+      return () => {
+        window.removeEventListener("resize", handleResize);
+      };
+    },
+    [loading, genreChartData],
+  );
 
   const handleSignOut = async () => {
     await signOut();
@@ -180,12 +361,9 @@ const DashboardPage = () => {
       </Navbar>
 
       <main className="px-4 pb-20 pt-28 sm:px-6 md:pt-36">
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-6xl">
           {/* Header */}
-          <motion.div
-            {...fadeUp(0)}
-            className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between"
-          >
+          <div className="mb-6 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
                 Dashboard
@@ -193,7 +371,7 @@ const DashboardPage = () => {
               <h1 className="mt-2 text-4xl font-black tracking-tighter sm:text-5xl">
                 Welcome{user?.name ? `, ${user.name}` : ""}.
               </h1>
-              <p className="mt-2 max-w-xl text-sm text-slate-500 dark:text-slate-400">
+              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
                 Your personalized recommendation hub.
               </p>
             </div>
@@ -211,263 +389,158 @@ const DashboardPage = () => {
                 Start Quiz
               </HoverBorderGradient>
             </div>
-          </motion.div>
+          </div>
 
-          {/* Stats Row */}
-          <motion.div
-            {...fadeUp(0.05)}
-            className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4"
-          >
-            {[
-              {
-                label: "Total Picks",
-                value: stats.total,
-                icon: TrendingUp,
-                color: "text-indigo-500",
-              },
-              {
-                label: "Movies",
-                value: stats.movies,
-                icon: Film,
-                color: "text-violet-500",
-              },
-              {
-                label: "Books",
-                value: stats.books,
-                icon: BookOpen,
-                color: "text-emerald-500",
-              },
-              {
-                label: "Favorites",
-                value: stats.favorites,
-                icon: Sparkles,
-                color: "text-amber-500",
-              },
-            ].map((stat) => (
-              <div
-                key={stat.label}
-                className="rounded-2xl border border-slate-200/70 bg-white/80 p-4 shadow-sm backdrop-blur-sm dark:border-slate-700/60 dark:bg-slate-900/60"
-              >
-                <div className="flex items-center gap-2">
-                  <stat.icon size={15} className={stat.color} />
-                  <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    {stat.label}
-                  </span>
-                </div>
-                <p className="mt-2 text-2xl font-black tracking-tight">
-                  {loading ? "–" : stat.value}
-                </p>
-              </div>
-            ))}
-          </motion.div>
-
-          {/* Quick Actions */}
-          <motion.div
-            {...fadeUp(0.1)}
-            className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3"
-          >
-            {[
-              {
-                title: "Account Settings",
-                desc: "Update profile and preferences.",
-                icon: Settings,
-                href: "/settings",
-              },
-              {
-                title: "Latest Results",
-                desc: "Jump to your latest picks.",
-                icon: Sparkles,
-                href: "/results",
-              },
-              {
-                title: "History",
-                desc: "Browse past recommendations.",
-                icon: Clock,
-                href: "/history",
-              },
-            ].map((card) => (
+          {/* Tab Navigation */}
+          <div className="mb-6 flex gap-1 overflow-x-auto rounded-xl border border-slate-200/70 bg-white/80 p-1 shadow-sm backdrop-blur-sm dark:border-slate-700/60 dark:bg-slate-900/60">
+            {([
+              { id: "overview" as const, label: "Overview", icon: <TrendingUp size={15} /> },
+              { id: "picks" as const, label: "Recent Picks", icon: <Sparkles size={15} /> },
+              { id: "genres" as const, label: "Genres", icon: <BarChart3 size={15} /> },
+            ]).map((tab) => (
               <button
-                key={card.title}
-                onClick={() => router.push(card.href)}
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  "group flex items-start gap-4 rounded-2xl border border-slate-200/70 bg-white/80 p-5 text-left shadow-sm backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md",
-                  "dark:border-slate-700/60 dark:bg-slate-900/60 dark:hover:border-indigo-500/50",
+                  "flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-semibold transition-all",
+                  activeTab === tab.id
+                    ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300"
+                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-200",
                 )}
               >
-                <div className="rounded-xl bg-slate-100 p-2.5 dark:bg-slate-800">
-                  <card.icon
-                    size={18}
-                    className="text-slate-600 dark:text-slate-300"
-                  />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-sm font-bold tracking-tight">
-                    {card.title}
-                  </h3>
-                  <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                    {card.desc}
-                  </p>
-                </div>
-                <ArrowRight
-                  size={14}
-                  className="mt-1 text-slate-400 transition-transform group-hover:translate-x-0.5"
-                />
+                {tab.icon}
+                <span className="hidden sm:inline">{tab.label}</span>
               </button>
             ))}
-          </motion.div>
+          </div>
 
-          {/* Two-column: Chart + Recent */}
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
-            {/* Genre Chart */}
-            <motion.section
-              {...fadeUp(0.15)}
-              className="rounded-2xl border border-slate-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-sm dark:border-slate-700/60 dark:bg-slate-900/60 lg:col-span-2"
-            >
-              <div className="mb-4 flex items-center gap-2">
-                <BarChart3 size={16} className="text-indigo-500" />
-                <h2 className="text-lg font-bold tracking-tight">
-                  Genre Breakdown
-                </h2>
-              </div>
-
-              {loading ? (
-                <div className="flex h-56 items-center justify-center text-sm text-slate-400">
-                  Loading...
-                </div>
-              ) : genreChartData.length === 0 ? (
-                <div className="flex h-56 items-center justify-center text-sm text-slate-400">
-                  Take a quiz to see your genres.
-                </div>
-              ) : (
-                <div className="h-56 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={genreChartData}
-                      margin={{ top: 4, right: 8, left: -24, bottom: 0 }}
-                      barGap={4}
-                    >
-                      <XAxis
-                        dataKey="genre"
-                        tick={{ fill: "currentColor", fontSize: 11 }}
-                        axisLine={false}
-                        tickLine={false}
-                        className="text-slate-500 dark:text-slate-400"
-                      />
-                      <YAxis
-                        allowDecimals={false}
-                        tick={{ fill: "currentColor", fontSize: 11 }}
-                        axisLine={false}
-                        tickLine={false}
-                        className="text-slate-500 dark:text-slate-400"
-                      />
-                      <Tooltip
-                        cursor={{ fill: "rgba(99, 102, 241, 0.06)" }}
-                        contentStyle={{
-                          borderRadius: "12px",
-                          border: "1px solid rgba(148, 163, 184, 0.25)",
-                          background: "rgba(15, 23, 42, 0.92)",
-                          color: "#fff",
-                          fontSize: "12px",
-                          padding: "8px 12px",
-                        }}
-                      />
-                      <Bar
-                        dataKey="movie"
-                        stackId="a"
-                        fill="#6366f1"
-                        radius={[4, 4, 0, 0]}
-                        name="Movies"
-                      />
-                      <Bar
-                        dataKey="book"
-                        stackId="a"
-                        fill="#22c55e"
-                        radius={[4, 4, 0, 0]}
-                        name="Books"
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
-            </motion.section>
-
-            {/* Recent Recommendations */}
-            <motion.section
-              {...fadeUp(0.2)}
-              className="rounded-2xl border border-slate-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-sm dark:border-slate-700/60 dark:bg-slate-900/60 lg:col-span-3"
-            >
-              <div className="mb-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Sparkles size={16} className="text-amber-500" />
-                  <h2 className="text-lg font-bold tracking-tight">
-                    Recent Picks
-                  </h2>
-                </div>
-                <button
-                  onClick={() => router.push("/history")}
-                  className="text-xs font-semibold text-indigo-600 transition-colors hover:text-indigo-500 dark:text-indigo-400"
-                >
-                  See all
-                </button>
-              </div>
-
-              {loading ? (
-                <div className="flex h-56 items-center justify-center text-sm text-slate-400">
-                  Loading...
-                </div>
-              ) : recommendations.length === 0 ? (
-                <div className="flex h-56 flex-col items-center justify-center gap-2 text-center text-sm text-slate-400">
-                  <Sparkles
-                    size={24}
-                    className="text-slate-300 dark:text-slate-600"
-                  />
-                  <p>No recommendations yet. Start a quiz!</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:grid-cols-4">
-                  {recommendations.slice(0, 8).map((rec) => (
-                    <article
-                      key={rec.id}
-                      className="group overflow-hidden rounded-xl border border-slate-100 bg-slate-50 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/40"
-                    >
-                      <div className="relative aspect-[2/3] overflow-hidden bg-slate-200 dark:bg-slate-800">
-                        {rec.poster_url ? (
-                          <img
-                            src={rec.poster_url}
-                            alt={rec.title}
-                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center text-slate-400">
-                            {rec.type === "movie" ? (
-                              <Film size={24} />
-                            ) : (
-                              <BookOpen size={24} />
-                            )}
-                          </div>
-                        )}
-                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-3">
-                          <p className="line-clamp-2 text-sm font-bold leading-tight text-white">
-                            {rec.title}
-                          </p>
-                          <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-white/20 px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-white/90">
-                            {rec.type === "movie" ? (
-                              <Film size={10} />
-                            ) : (
-                              <BookOpen size={10} />
-                            )}
-                            {rec.type}
-                          </span>
-                        </div>
+          {/* Tab Content */}
+          <AnimatePresence mode="wait">
+            {activeTab === "overview" && (
+              <motion.div key="overview" initial={{ opacity: 0, x: slideDir * 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: slideDir * -30 }} transition={{ duration: 0.2 }} className="space-y-4">
+                {/* Stats */}
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                  {[
+                    { label: "Total Picks", value: stats.total, icon: TrendingUp, color: "text-indigo-500" },
+                    { label: "Movies", value: stats.movies, icon: Film, color: "text-violet-500" },
+                    { label: "Books", value: stats.books, icon: BookOpen, color: "text-emerald-500" },
+                    { label: "Favorites", value: stats.favorites, icon: Sparkles, color: "text-amber-500" },
+                  ].map((stat) => (
+                    <div key={stat.label} className="rounded-2xl border border-slate-200/70 bg-white/80 p-4 shadow-sm backdrop-blur-sm dark:border-slate-700/60 dark:bg-slate-900/60">
+                      <div className="flex items-center gap-2">
+                        <stat.icon size={15} className={stat.color} />
+                        <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{stat.label}</span>
                       </div>
-                    </article>
+                      <p className="mt-2 text-2xl font-black tracking-tight">{loading ? "–" : stat.value}</p>
+                    </div>
                   ))}
                 </div>
-              )}
-            </motion.section>
-          </div>
+
+                {/* Quick Actions */}
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  {[
+                    { title: "Account Settings", desc: "Update profile and preferences.", icon: Settings, href: "/settings" },
+                    { title: "Latest Results", desc: "Jump to your latest picks.", icon: Sparkles, href: "/results" },
+                    { title: "History", desc: "Browse past recommendations.", icon: Clock, href: "/history" },
+                  ].map((card) => (
+                    <button key={card.title} onClick={() => router.push(card.href)} className={cn("group flex items-start gap-4 rounded-2xl border border-slate-200/70 bg-white/80 p-5 text-left shadow-sm backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md", "dark:border-slate-700/60 dark:bg-slate-900/60 dark:hover:border-indigo-500/50")}>
+                      <div className="rounded-xl bg-slate-100 p-2.5 dark:bg-slate-800">
+                        <card.icon size={18} className="text-slate-600 dark:text-slate-300" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-sm font-bold tracking-tight">{card.title}</h3>
+                        <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{card.desc}</p>
+                      </div>
+                      <ArrowRight size={14} className="mt-1 text-slate-400 transition-transform group-hover:translate-x-0.5" />
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {activeTab === "picks" && (
+              <motion.div key="picks" initial={{ opacity: 0, x: slideDir * 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: slideDir * -30 }} transition={{ duration: 0.2 }}>
+                <div className="rounded-2xl border border-slate-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-sm dark:border-slate-700/60 dark:bg-slate-900/60">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h2 className="text-lg font-bold tracking-tight">Recent Picks</h2>
+                    <button onClick={() => router.push("/history")} className="text-xs font-semibold text-indigo-600 transition-colors hover:text-indigo-500 dark:text-indigo-400">See all in history</button>
+                  </div>
+                  {loading ? (
+                    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
+                      {[...Array(5)].map((_, i) => (
+                        <div key={i} className="overflow-hidden rounded-xl border border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/40">
+                          <div className="aspect-[2/3] animate-pulse bg-slate-200 dark:bg-slate-800" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : recommendations.length === 0 ? (
+                    <div className="flex h-56 flex-col items-center justify-center gap-2 text-center text-sm text-slate-400">
+                      <Sparkles size={24} className="text-slate-300 dark:text-slate-600" />
+                      <p>No recommendations yet. Start a quiz!</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
+                      {recommendations.slice(0, 15).map((rec) => (
+                        <article key={rec.id} onClick={() => setSelectedRec(rec)} className="group cursor-pointer overflow-hidden rounded-xl border border-slate-100 bg-slate-50 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/40">
+                          <div className="relative aspect-[2/3] overflow-hidden bg-slate-200 dark:bg-slate-800">
+                            {rec.poster_url ? (
+                              <Image src={rec.poster_url} alt={rec.title} fill sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw" className="object-cover transition-transform duration-500 group-hover:scale-105" />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center text-slate-400">
+                                {rec.type === "movie" ? <Film size={24} /> : <BookOpen size={24} />}
+                              </div>
+                            )}
+                            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-3">
+                              <p className="line-clamp-2 text-sm font-bold leading-tight text-white">{rec.title}</p>
+                              <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-white/20 px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-white/90">
+                                {rec.type === "movie" ? <Film size={10} /> : <BookOpen size={10} />}
+                                {rec.type}
+                              </span>
+                            </div>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+
+            {activeTab === "genres" && (
+              <motion.div key="genres" initial={{ opacity: 0, x: slideDir * 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: slideDir * -30 }} transition={{ duration: 0.2 }}>
+                <div className="rounded-2xl border border-slate-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-sm dark:border-slate-700/60 dark:bg-slate-900/60">
+                  <div className="mb-4 flex items-center gap-2">
+                    <BarChart3 size={16} className="text-indigo-500" />
+                    <h2 className="text-lg font-bold tracking-tight">Genre Breakdown</h2>
+                  </div>
+                  {loading ? (
+                    <div className="flex h-72 items-end gap-3 px-4 pb-4">
+                      {[0.6, 0.8, 0.45, 0.7, 0.55, 0.35].map((h, i) => (
+                        <div key={i} className="flex-1 animate-pulse rounded-t-md bg-slate-200 dark:bg-slate-800" style={{ height: `${h * 100}%` }} />
+                      ))}
+                    </div>
+                  ) : genreChartData.length === 0 ? (
+                    <div className="flex h-72 items-center justify-center text-sm text-slate-400">
+                      Take a quiz to see your genres.
+                    </div>
+                  ) : (
+                    <div ref={initChart} className="h-72 w-full" />
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </main>
+
+      <AnimatePresence>
+        {selectedRec && (
+          <RecommendationModal
+            rec={selectedRec}
+            onClose={() => setSelectedRec(null)}
+          />
+        )}
+      </AnimatePresence>
 
       <MfaSetupPrompt userId={user?.id} />
     </div>

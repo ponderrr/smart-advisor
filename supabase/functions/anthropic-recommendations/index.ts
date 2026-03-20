@@ -100,13 +100,29 @@ async function getRecommendation({
   type: "movie" | "book";
   name: string;
   age: number;
-  answers: Record<string, string>;
+  answers: unknown;
   isAdult: boolean;
   systemPrompt: string;
 }) {
-  const answersText = Object.entries(answers)
-    .map(([q, a]) => `Q: ${q}\nA: ${a}`)
-    .join("\n\n");
+  // Handle both Answer[] format (from frontend) and Record<string, string> (legacy)
+  let answersText: string;
+  if (Array.isArray(answers)) {
+    answersText = answers
+      .map((a: { question_text?: string; question_id?: string; answer_text?: string; selected_options?: string[] }) => {
+        const question = a.question_text || a.question_id || "Question";
+        const answer = a.selected_options?.length
+          ? a.selected_options.join(", ")
+          : a.answer_text || "No answer";
+        return `Q: ${question}\nA: ${answer}`;
+      })
+      .join("\n\n");
+  } else if (answers && typeof answers === "object") {
+    answersText = Object.entries(answers as Record<string, string>)
+      .map(([q, a]) => `Q: ${q}\nA: ${a}`)
+      .join("\n\n");
+  } else {
+    answersText = "No answers provided";
+  }
 
   const prompt = `Based on this personality profile, recommend ONE ${type} for ${name} (age ${age}).
 
@@ -124,22 +140,27 @@ Return ONLY a JSON object. No markdown, no explanation. Exact format:
   "title": "Exact title",
   "description": "2-3 sentence synopsis without spoilers",
   "explanation": "2-3 sentences explaining specifically why THIS person will love it, referencing their answers",
-  "genre": "Primary genre",
+  "genres": ["Genre 1", "Genre 2", "Genre 3"],
   "year": 2019,
   "director": ${type === "movie" ? '"Director name"' : "null"},
   "author": ${type === "book" ? '"Author name"' : "null"},
   "rating": 8.4
 }`;
 
+  const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
+  if (!apiKey) {
+    throw new Error("ANTHROPIC_API_KEY is not configured on the server");
+  }
+
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-api-key": Deno.env.get("ANTHROPIC_API_KEY") ?? "",
+      "x-api-key": apiKey,
       "anthropic-version": "2023-06-01",
     },
     body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-4-6",
       max_tokens: 1000,
       system: systemPrompt,
       messages: [{ role: "user", content: prompt }],

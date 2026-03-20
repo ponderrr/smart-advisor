@@ -1,13 +1,4 @@
-"use client";
-
-import React from "react";
 import { Card, CardDescription, CardTitle } from "@/components/cards-demo-3";
-import {
-  PrivateProfileSVG,
-  WarpSpeedSVG,
-  EasyTrustSVG,
-  ChooseBothSVG,
-} from "@/components/animated-svgs";
 
 export default function FeaturesSectionDemo() {
   const cardClassName =
@@ -30,10 +21,16 @@ export default function FeaturesSectionDemo() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {/* 1. Private Profile - Lock with checkmark */}
+          {/* 1. Private Profile */}
           <Card className={cardClassName}>
             <div className="mt-5 h-[10rem] flex items-center justify-center">
-              <PrivateProfileSVG className="h-full w-auto max-w-[180px]" />
+              <video
+                src="/animations/security-status-safe.webm"
+                autoPlay
+                loop
+                muted
+                className="h-full w-auto max-w-[180px]"
+              />
             </div>
             <CardTitle>Private Profile</CardTitle>
             <CardDescription>
@@ -42,10 +39,16 @@ export default function FeaturesSectionDemo() {
             </CardDescription>
           </Card>
 
-          {/* 2. Warp Speed - Lightning bolt with rings */}
+          {/* 2. Warp Speed */}
           <Card className={cardClassName}>
             <div className="mt-5 h-[10rem] flex items-center justify-center">
-              <WarpSpeedSVG className="h-full w-auto max-w-[180px]" />
+              <video
+                src="/animations/time-animation.webm"
+                autoPlay
+                loop
+                muted
+                className="h-full w-auto max-w-[180px]"
+              />
             </div>
             <CardTitle>Warp Speed Results</CardTitle>
             <CardDescription>
@@ -54,10 +57,16 @@ export default function FeaturesSectionDemo() {
             </CardDescription>
           </Card>
 
-          {/* 3. Easy Trust - Shield with star */}
+          {/* 3. Easy Trust */}
           <Card className={cardClassName}>
             <div className="mt-5 h-[10rem] flex items-center justify-center">
-              <EasyTrustSVG className="h-full w-auto max-w-[180px]" />
+              <video
+                src="/animations/error-animation.webm"
+                autoPlay
+                loop
+                muted
+                className="h-full w-auto max-w-[180px]"
+              />
             </div>
             <CardTitle>Easy-To-Trust Picks</CardTitle>
             <CardDescription>
@@ -66,10 +75,16 @@ export default function FeaturesSectionDemo() {
             </CardDescription>
           </Card>
 
-          {/* 4. Choose Both - Book and film */}
+          {/* 4. Choose Both */}
           <Card className={cardClassName}>
             <div className="mt-5 h-[10rem] flex items-center justify-center">
-              <ChooseBothSVG className="h-full w-auto max-w-[280px]" />
+              <video
+                src="/animations/Popcorn.webm"
+                autoPlay
+                loop
+                muted
+                className="h-full w-auto max-w-[280px]"
+              />
             </div>
             <CardTitle>Choose Across Both</CardTitle>
             <CardDescription>

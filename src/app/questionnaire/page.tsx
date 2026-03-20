@@ -124,15 +124,15 @@ const getSelectAllOptions = (
   return sets[index % sets.length];
 };
 
-/* ---------- Bouncing Words Loading Animation ---------- */
-const LOADING_WORDS = [
-  "Analyzing",
-  "your",
-  "profile",
-  "and",
-  "crafting",
-  "personalized",
-  "questions",
+/* ---------- Loading Animation ---------- */
+const QUESTION_LOADING_PHRASES = [
+  "Analyzing your personality profile",
+  "Crafting personalized questions",
+  "Tailoring prompts to your taste",
+  "Building your unique quiz flow",
+  "Matching question styles to you",
+  "Fine-tuning difficulty and tone",
+  "Almost ready — finalizing questions",
 ];
 
 const BouncingWordsLoader = ({
@@ -146,81 +146,44 @@ const BouncingWordsLoader = ({
     <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
       Step 3 of 4
     </p>
-    <div className="mx-auto mt-5 flex h-20 w-20 items-center justify-center rounded-full border border-indigo-300/70 bg-indigo-50 dark:border-indigo-500/40 dark:bg-indigo-500/10">
-      <motion.svg
-        width="40"
-        height="40"
-        viewBox="0 0 24 24"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <rect
-          x="4"
-          y="4"
-          width="16"
-          height="16"
-          rx="2"
-          stroke="currentColor"
-          strokeWidth="2"
-          className="text-indigo-500/20"
-        />
-        <motion.path
-          d="M4 8H20"
-          stroke="#6366f1"
-          strokeWidth="2"
-          strokeLinecap="round"
-          animate={{ y: [0, 8, 0], opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.path
-          d="M12 12L12 12"
-          stroke="#6366f1"
-          strokeWidth="3"
-          strokeLinecap="round"
-          animate={{ scale: [1, 1.5, 1], opacity: [0, 1, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
-        />
-      </motion.svg>
-    </div>
 
-    <h1 className="mt-4 text-3xl font-black tracking-tighter md:text-4xl">
+    <h1 className="mt-6 text-3xl font-black tracking-tighter md:text-4xl">
       Generating your questions
     </h1>
 
-    {/* Bouncing words animation */}
-    <div className="mx-auto mt-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
-      {LOADING_WORDS.map((word, i) => (
-        <motion.span
-          key={word}
-          className="text-sm font-semibold text-indigo-600 dark:text-indigo-400"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: [0, 1, 1, 0], y: [12, 0, 0, -8] }}
-          transition={{
-            duration: 2.4,
-            repeat: Infinity,
-            delay: i * 0.18,
-            ease: "easeInOut",
-          }}
-        >
-          {word}
-        </motion.span>
-      ))}
+    <div className="mx-auto mt-5 h-6 overflow-hidden">
+      <AnimatePresence mode="wait">
+        {QUESTION_LOADING_PHRASES.map((phrase, i) => (
+          <motion.p
+            key={phrase}
+            className="text-sm font-semibold text-indigo-600 dark:text-indigo-400"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: [0, 1, 1, 0], y: [16, 0, 0, -16] }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              delay: i * 3,
+              repeatDelay: (QUESTION_LOADING_PHRASES.length - 1) * 3,
+              ease: "easeInOut",
+            }}
+            style={{
+              position: i === 0 ? "relative" : "absolute",
+              left: 0,
+              right: 0,
+            }}
+          >
+            {phrase}
+          </motion.p>
+        ))}
+      </AnimatePresence>
     </div>
 
-    <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
-      Building {questionCount} personalized prompts for your profile.
-    </p>
-
-    {/* Sweep bar */}
-    <div className="relative mx-auto mt-8 h-12 w-full max-w-md overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-50/80 dark:border-slate-700 dark:bg-slate-950/40">
+    <div className="relative mx-auto mt-6 h-2 w-full max-w-md overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
       <motion.div
-        className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent"
+        className="absolute inset-y-0 left-0 w-1/3 rounded-full bg-gradient-to-r from-transparent via-indigo-500 to-transparent"
         animate={{ x: ["-120%", "340%"] }}
         transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
       />
-      <div className="relative z-10 flex h-full items-center justify-center text-sm font-semibold text-slate-700 dark:text-slate-200">
-        {contentType?.toUpperCase()} QUESTIONNAIRE
-      </div>
     </div>
   </div>
 );
@@ -258,9 +221,10 @@ const QuestionnairePage = () => {
       setError(null);
 
       const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session) {
+        data: { user: sessionUser },
+        error: sessionError,
+      } = await supabase.auth.getUser();
+      if (sessionError || !sessionUser) {
         setError("Your session expired. Please sign in again to continue.");
         return;
       }
@@ -272,7 +236,7 @@ const QuestionnairePage = () => {
           user.age,
           questionCount,
           user.name,
-          1,
+          3,
         );
       } catch (aiErr) {
         console.warn(
@@ -372,6 +336,7 @@ const QuestionnairePage = () => {
         return {
           id: uuidv4(),
           question_id: q.id,
+          question_text: q.text,
           answer_text: selected.join(", "),
           selected_options: selected,
           created_at: new Date().toISOString(),
@@ -380,6 +345,7 @@ const QuestionnairePage = () => {
       return {
         id: uuidv4(),
         question_id: q.id,
+        question_text: q.text,
         answer_text: answers[q.id] || "",
         created_at: new Date().toISOString(),
       };
