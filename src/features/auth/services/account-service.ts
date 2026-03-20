@@ -37,6 +37,7 @@ class AccountService {
 
   async getActiveSessions() {
     try {
+      await supabase.auth.getUser();
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -49,6 +50,8 @@ class AccountService {
 
   async deleteAccount(): Promise<{ error: string | null }> {
     try {
+      // Validate and refresh session before getting the token
+      await supabase.auth.getUser();
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -80,6 +83,7 @@ class AccountService {
 
   async disableAccount(): Promise<{ error: string | null }> {
     try {
+      await supabase.auth.getUser();
       const {
         data: { session },
       } = await supabase.auth.getSession();

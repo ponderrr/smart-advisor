@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+
+const VALIDATION_FLASH_MS = 650;
+const VALIDATION_MESSAGE_MS = 3200;
 import { Check, ArrowLeft, ArrowRight } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useQuizStore } from "@/features/quiz/store/quiz-store";
@@ -128,8 +131,8 @@ const ContentSelectionPage = () => {
     if (!selectedType) {
       setShowValidationFlash(true);
       setValidationMessage("Please select an option before continuing.");
-      window.setTimeout(() => setShowValidationFlash(false), 650);
-      window.setTimeout(() => setValidationMessage(null), 3200);
+      window.setTimeout(() => setShowValidationFlash(false), VALIDATION_FLASH_MS);
+      window.setTimeout(() => setValidationMessage(null), VALIDATION_MESSAGE_MS);
       return;
     }
 

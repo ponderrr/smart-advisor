@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   RefreshCw,
   Heart,
@@ -10,6 +11,8 @@ import {
   ArrowRight,
   Share2,
   RotateCcw,
+  Copy,
+  Mail,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/features/auth/hooks/use-auth";
@@ -73,14 +76,14 @@ const saveGeneratedSession = (sessionId: string) => {
 };
 
 /* ---------- Loading Animation ---------- */
-const LOADING_WORDS = [
-  "Analyzing",
-  "preferences",
-  "and",
-  "finding",
-  "your",
-  "perfect",
-  "picks",
+const LOADING_PHRASES = [
+  "Analyzing your personality profile",
+  "Matching preferences to hidden gems",
+  "Scanning thousands of titles",
+  "Finding your perfect picks",
+  "Cross-referencing genres and moods",
+  "Curating personalized results",
+  "Almost there — finalizing picks",
 ];
 
 const ResultsLoadingState = ({ step }: { step: string }) => (
@@ -88,61 +91,37 @@ const ResultsLoadingState = ({ step }: { step: string }) => (
     <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
       Step 4 of 4
     </p>
-    <div className="mx-auto mt-5 flex h-20 w-20 items-center justify-center rounded-full border border-indigo-300/70 bg-indigo-50 dark:border-indigo-500/40 dark:bg-indigo-500/10">
-      <motion.svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-        <rect
-          x="4"
-          y="4"
-          width="16"
-          height="16"
-          rx="2"
-          stroke="currentColor"
-          strokeWidth="2"
-          className="text-indigo-500/20"
-        />
-        <motion.path
-          d="M4 8H20"
-          stroke="#6366f1"
-          strokeWidth="2"
-          strokeLinecap="round"
-          animate={{ y: [0, 8, 0], opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.path
-          d="M12 12L12 12"
-          stroke="#6366f1"
-          strokeWidth="3"
-          strokeLinecap="round"
-          animate={{ scale: [1, 1.5, 1], opacity: [0, 1, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
-        />
-      </motion.svg>
-    </div>
 
-    <h1 className="mt-4 text-3xl font-black tracking-tighter md:text-4xl">
+    <h1 className="mt-6 text-3xl font-black tracking-tighter md:text-4xl">
       Generating recommendations
     </h1>
 
-    <div className="mx-auto mt-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
-      {LOADING_WORDS.map((word, i) => (
-        <motion.span
-          key={word}
-          className="text-sm font-semibold text-indigo-600 dark:text-indigo-400"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: [0, 1, 1, 0], y: [12, 0, 0, -8] }}
-          transition={{
-            duration: 2.4,
-            repeat: Infinity,
-            delay: i * 0.18,
-            ease: "easeInOut",
-          }}
-        >
-          {word}
-        </motion.span>
-      ))}
+    <div className="mx-auto mt-5 h-6 overflow-hidden">
+      <AnimatePresence mode="wait">
+        {LOADING_PHRASES.map((phrase, i) => (
+          <motion.p
+            key={phrase}
+            className="text-sm font-semibold text-indigo-600 dark:text-indigo-400"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: [0, 1, 1, 0], y: [16, 0, 0, -16] }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              delay: i * 3,
+              repeatDelay: (LOADING_PHRASES.length - 1) * 3,
+              ease: "easeInOut",
+            }}
+            style={{
+              position: i === 0 ? "relative" : "absolute",
+              left: 0,
+              right: 0,
+            }}
+          >
+            {phrase}
+          </motion.p>
+        ))}
+      </AnimatePresence>
     </div>
-
-    <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">{step}</p>
 
     <div className="relative mx-auto mt-6 h-2 w-full max-w-md overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
       <motion.div
@@ -178,12 +157,14 @@ const RecommendationCard = ({
     >
       <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr]">
         {/* Poster */}
-        <div className="relative aspect-[2/3] overflow-hidden bg-slate-200 sm:aspect-auto sm:min-h-[280px] dark:bg-slate-800">
+        <div className="relative aspect-[2/3] overflow-hidden bg-slate-200 sm:aspect-[2/3] dark:bg-slate-800">
           {rec.poster_url ? (
-            <img
+            <Image
               src={rec.poster_url}
               alt={rec.title}
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              fill
+              sizes="(max-width: 640px) 100vw, 180px"
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-slate-400">
@@ -321,12 +302,14 @@ const ResultsPage = () => {
     { name: "Settings", link: "/settings" },
   ];
 
+  // Generate a unique session ID per quiz run using a stable ref
+  const sessionTimestampRef = useRef<number>(Date.now());
   const sessionId = (() => {
     if (!answers || !contentType) return null;
     try {
       const serializedAnswers = safeStringify(answers);
       const userId = user?.id || "anonymous";
-      return `${serializedAnswers}-${contentType}-${userId}`;
+      return `${serializedAnswers}-${contentType}-${userId}-${sessionTimestampRef.current}`;
     } catch {
       return `fallback-session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     }
@@ -536,21 +519,76 @@ const ResultsPage = () => {
     handleGenerateRecommendations();
   };
 
+  const [showShareMenu, setShowShareMenu] = useState(false);
+
+  const buildShareText = () => {
+    const mRecs = recommendations.filter((r) => r.type === "movie");
+    const bRecs = recommendations.filter((r) => r.type === "book");
+    const lines: string[] = ["My Smart Advisor Picks", ""];
+
+    if (mRecs.length > 0) {
+      lines.push("Movies:");
+      mRecs.forEach((r) => {
+        const detail = [r.director && `dir. ${r.director}`, r.year].filter(Boolean).join(", ");
+        lines.push(`  ${r.title}${detail ? ` (${detail})` : ""}`);
+        if (r.genres?.length) lines.push(`  Genres: ${r.genres.join(", ")}`);
+      });
+      lines.push("");
+    }
+
+    if (bRecs.length > 0) {
+      lines.push("Books:");
+      bRecs.forEach((r) => {
+        const detail = [r.author && `by ${r.author}`, r.year].filter(Boolean).join(", ");
+        lines.push(`  ${r.title}${detail ? ` (${detail})` : ""}`);
+        if (r.genres?.length) lines.push(`  Genres: ${r.genres.join(", ")}`);
+      });
+      lines.push("");
+    }
+
+    lines.push("Get your own picks at smartadvisor.app");
+    return lines.join("\n");
+  };
+
   const handleShare = async () => {
-    const titles = recommendations
-      .map((r) => `${r.type === "movie" ? "Movie" : "Book"}: ${r.title}`)
-      .join("\n");
-    const text = `My Smart Advisor picks:\n${titles}`;
+    const text = buildShareText();
+
     if (navigator.share) {
       try {
         await navigator.share({ title: "My Smart Advisor Picks", text });
+        return;
       } catch {
-        // User cancelled
+        // User cancelled — fall through to share menu
       }
-    } else {
-      await navigator.clipboard.writeText(text);
-      toast.success("Your picks have been copied to your clipboard!");
     }
+
+    setShowShareMenu((prev) => !prev);
+  };
+
+  const handleCopyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(buildShareText());
+      toast.success("Copied to clipboard!");
+    } catch {
+      toast.error("Couldn't copy — try again");
+    }
+    setShowShareMenu(false);
+  };
+
+  const handleShareTwitter = () => {
+    const titles = recommendations.map((r) => r.title).join(", ");
+    const text = encodeURIComponent(
+      `Just got my Smart Advisor picks: ${titles}\n\nGet your own at smartadvisor.app`,
+    );
+    window.open(`https://x.com/intent/tweet?text=${text}`, "_blank");
+    setShowShareMenu(false);
+  };
+
+  const handleShareEmail = () => {
+    const subject = encodeURIComponent("My Smart Advisor Picks");
+    const body = encodeURIComponent(buildShareText());
+    window.open(`mailto:?subject=${subject}&body=${body}`, "_blank");
+    setShowShareMenu(false);
   };
 
   if (!contentType || !answers?.length || !user) {
@@ -830,13 +868,58 @@ const ResultsPage = () => {
               View History
               <ArrowRight size={16} />
             </GlowPillButton>
-            <GlowPillButton
-              onClick={handleShare}
-              className="inline-flex w-full items-center justify-center gap-2 border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 sm:w-auto dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
-            >
-              <Share2 size={16} />
-              Share Results
-            </GlowPillButton>
+            <div className="relative">
+              <GlowPillButton
+                onClick={handleShare}
+                className="inline-flex w-full items-center justify-center gap-2 border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 sm:w-auto dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
+              >
+                <Share2 size={16} />
+                Share Results
+              </GlowPillButton>
+
+              <AnimatePresence>
+                {showShareMenu && (
+                  <>
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="fixed inset-0 z-40"
+                      onClick={() => setShowShareMenu(false)}
+                    />
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute bottom-full left-1/2 z-50 mb-2 w-48 -translate-x-1/2 overflow-hidden rounded-xl border border-slate-200/70 bg-white shadow-lg dark:border-slate-700/60 dark:bg-slate-900"
+                    >
+                      <button
+                        onClick={handleCopyToClipboard}
+                        className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
+                      >
+                        <Copy size={14} />
+                        Copy to clipboard
+                      </button>
+                      <button
+                        onClick={handleShareTwitter}
+                        className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
+                      >
+                        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-current"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
+                        Share on X
+                      </button>
+                      <button
+                        onClick={handleShareEmail}
+                        className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
+                      >
+                        <Mail size={14} />
+                        Share via email
+                      </button>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
           </motion.div>
         </div>
       </main>

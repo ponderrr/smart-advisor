@@ -60,6 +60,7 @@ const QuestionCountPage = () => {
       router.push("/questionnaire");
     } catch (error) {
       console.error("Error proceeding to questionnaire:", error);
+    } finally {
       setIsLoading(false);
     }
   };

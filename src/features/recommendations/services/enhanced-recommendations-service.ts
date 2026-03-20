@@ -38,7 +38,15 @@ class EnhancedRecommendationsService {
       author: rec.author,
       year: rec.year,
       rating: rec.rating,
-      genres: Array.isArray(rec.genres) ? rec.genres : [],
+      genres: Array.isArray(rec.genres)
+        ? rec.genres
+        : typeof (rec as Record<string, unknown>).genre === "string" &&
+            (rec as Record<string, unknown>).genre
+          ? ((rec as Record<string, unknown>).genre as string)
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
+          : [],
       poster_url: rec.poster_url,
       explanation: rec.explanation,
       is_favorited: Boolean(rec.is_favorited),
@@ -157,6 +165,10 @@ class EnhancedRecommendationsService {
                   rating: tmdbData.rating || rec.rating,
                   year: tmdbData.year || rec.year,
                   description: enhancedRec.explanation || tmdbData.description,
+                  genres:
+                    enhancedRec.genres && enhancedRec.genres.length > 0
+                      ? enhancedRec.genres
+                      : tmdbData.genres || [],
                 };
               }
             } catch {

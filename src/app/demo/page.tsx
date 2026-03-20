@@ -3,6 +3,9 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+
+const VALIDATION_FLASH_MS = 650;
+const VALIDATION_MESSAGE_MS = 3200;
 import { IconArrowLeft, IconArrowRight, IconCheck } from "@tabler/icons-react";
 
 import {
@@ -23,11 +26,15 @@ import {
 } from "@/components/ui/resizable-navbar";
 import { cn } from "@/lib/utils";
 
+type DemoQuestionType = "single_select" | "select_all" | "fill_in_blank";
+
 type DemoQuestion = {
   id: string;
   title: string;
   subtitle: string;
-  options: string[];
+  type: DemoQuestionType;
+  options?: string[];
+  placeholder?: string;
 };
 
 interface DemoContentCardProps {
@@ -116,31 +123,46 @@ const DEMO_QUESTIONS: DemoQuestion[] = [
     id: "contentType",
     title: "What are you looking for today?",
     subtitle: "Pick one so we can tailor your recommendation flow.",
+    type: "single_select",
     options: ["Movies", "Books", "Both"],
   },
   {
     id: "mood",
     title: "What mood are you in?",
     subtitle: "We use this to shape tone and pacing.",
+    type: "single_select",
     options: ["Comforting", "Suspenseful", "Inspiring", "Mind-bending"],
+  },
+  {
+    id: "genres",
+    title: "Which genres interest you?",
+    subtitle: "Select all that apply.",
+    type: "select_all",
+    options: [
+      "Action",
+      "Fantasy",
+      "Drama",
+      "Mystery",
+      "Sci-Fi",
+      "Romance",
+      "Thriller",
+      "Comedy",
+    ],
   },
   {
     id: "pace",
     title: "How fast should it move?",
     subtitle: "Choose your ideal pace for tonight.",
+    type: "single_select",
     options: ["Slow burn", "Balanced", "Fast and intense"],
   },
   {
-    id: "time",
-    title: "How much time do you have?",
-    subtitle: "This helps us avoid overlong picks.",
-    options: ["Under 2 hours", "2 to 4 hours", "Weekend binge"],
-  },
-  {
-    id: "vibe",
-    title: "Which vibe sounds best tonight?",
-    subtitle: "We use this to fine-tune the final recommendation mix.",
-    options: ["Easy and fun", "Thought-provoking", "Emotional", "High energy"],
+    id: "describe",
+    title: "Describe your perfect recommendation",
+    subtitle: "Share your thoughts in your own words.",
+    type: "fill_in_blank",
+    placeholder:
+      "e.g. Something feel-good with a twist ending, or a slow-paced mystery set in a small town...",
   },
 ];
 
@@ -180,33 +202,64 @@ export default function DemoPage() {
 
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [multiAnswers, setMultiAnswers] = useState<Record<string, string[]>>(
+    {},
+  );
   const [validationMessage, setValidationMessage] = useState<string | null>(
     null,
   );
 
   const current = DEMO_QUESTIONS[step];
   const progress = ((step + 1) / DEMO_QUESTIONS.length) * 100;
-  const hasAnswer = Boolean(answers[current.id]);
+  const hasAnswer = (() => {
+    if (current.type === "select_all") {
+      return (multiAnswers[current.id]?.length ?? 0) > 0;
+    }
+    if (current.type === "fill_in_blank") {
+      return (answers[current.id]?.trim().length ?? 0) > 0;
+    }
+    return Boolean(answers[current.id]);
+  })();
 
   const summary = useMemo(
     () => ({
       contentType: answers.contentType || "Both",
       moods: answers.mood ? [answers.mood] : [],
-      genres: answers.pace ? [answers.pace] : [],
+      genres: multiAnswers.genres ?? (answers.pace ? [answers.pace] : []),
     }),
-    [answers],
+    [answers, multiAnswers],
   );
 
   const handleChoose = (option: string) => {
     setAnswers((prev) => ({ ...prev, [current.id]: option }));
   };
 
+  const handleToggleMulti = (questionId: string, option: string) => {
+    setMultiAnswers((prev) => {
+      const selected = prev[questionId] ?? [];
+      const next = selected.includes(option)
+        ? selected.filter((o) => o !== option)
+        : [...selected, option];
+      return { ...prev, [questionId]: next };
+    });
+  };
+
+  const handleTextInput = (value: string) => {
+    setAnswers((prev) => ({ ...prev, [current.id]: value }));
+  };
+
   const handleNext = () => {
     if (!hasAnswer) {
       setShowValidationFlash(true);
-      setValidationMessage("Please select an option before continuing.");
-      window.setTimeout(() => setShowValidationFlash(false), 650);
-      window.setTimeout(() => setValidationMessage(null), 3200);
+      setValidationMessage(
+        current.type === "fill_in_blank"
+          ? "Please type an answer before continuing."
+          : current.type === "select_all"
+            ? "Please select at least one option before continuing."
+            : "Please select an option before continuing.",
+      );
+      window.setTimeout(() => setShowValidationFlash(false), VALIDATION_FLASH_MS);
+      window.setTimeout(() => setValidationMessage(null), VALIDATION_MESSAGE_MS);
       return;
     }
     if (step < DEMO_QUESTIONS.length - 1) {
@@ -221,6 +274,7 @@ export default function DemoPage() {
       "smart_advisor_demo_answers",
       JSON.stringify({
         ...answers,
+        genres: multiAnswers.genres ?? [],
         contentType: summary.contentType,
       }),
     );
@@ -350,9 +404,52 @@ export default function DemoPage() {
                       />
                     ))}
                   </div>
+                ) : current.type === "fill_in_blank" ? (
+                  <div className="mt-7">
+                    <textarea
+                      value={answers[current.id] ?? ""}
+                      onChange={(e) => handleTextInput(e.target.value)}
+                      placeholder={
+                        current.placeholder ?? "Type your answer here..."
+                      }
+                      rows={3}
+                      className="w-full resize-none rounded-2xl border border-slate-200/80 bg-white px-4 py-3 text-sm font-medium text-slate-900 placeholder-slate-400 outline-none transition-all focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-indigo-500/70"
+                    />
+                  </div>
+                ) : current.type === "select_all" ? (
+                  <>
+                    <p className="mt-1 text-xs font-semibold text-indigo-500 dark:text-indigo-400">
+                      Select all that apply
+                    </p>
+                    <div className="mt-5 flex flex-wrap gap-2">
+                      {current.options?.map((option) => {
+                        const isSelected = (
+                          multiAnswers[current.id] ?? []
+                        ).includes(option);
+                        return (
+                          <GlowPillButton
+                            key={option}
+                            onClick={() =>
+                              handleToggleMulti(current.id, option)
+                            }
+                            active={isSelected}
+                            className={cn(
+                              "inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-semibold transition-all",
+                              isSelected
+                                ? "border-indigo-400 bg-indigo-50 text-indigo-700 dark:border-indigo-500/70 dark:bg-indigo-500/15 dark:text-indigo-300"
+                                : "border-slate-200/80 bg-white text-slate-700 hover:border-indigo-300 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:border-indigo-500/50",
+                            )}
+                          >
+                            {isSelected && <IconCheck className="h-4 w-4" />}
+                            {option}
+                          </GlowPillButton>
+                        );
+                      })}
+                    </div>
+                  </>
                 ) : (
                   <div className="mt-7 grid gap-3 sm:grid-cols-2">
-                    {current.options.map((option) => {
+                    {current.options?.map((option) => {
                       const selected = answers[current.id] === option;
                       return (
                         <GlowPillButton

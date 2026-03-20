@@ -1,6 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, forwardRef } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useRouter } from "next/navigation";
 import {
   CircleOff,
@@ -41,6 +44,33 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 type SettingsSection = "profile" | "security" | "content" | "integrations";
+
+/* ------------------------------------------------------------------ */
+/*  Zod schemas                                                       */
+/* ------------------------------------------------------------------ */
+const profileSchema = z.object({
+  newName: z.string().min(1, "Username is required").trim(),
+  age: z.coerce.number().int().min(13, "Must be at least 13").max(120, "Must be 120 or under").optional().or(z.literal("")),
+});
+
+const emailSchema = z.object({
+  newEmail: z.string().email("Enter a valid email").trim(),
+});
+
+const passwordSchema = z
+  .object({
+    newPassword: z.string().min(8, "At least 8 characters"),
+    confirmPassword: z.string(),
+  })
+  .refine((d) => d.newPassword === d.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+const backupEmailSchema = z.object({
+  backupEmail: z.string().email("Enter a valid email").trim(),
+});
+
 const PREF_CONTENT_KEY = "smart_advisor_pref_content_focus";
 const PREF_DISCOVERY_KEY = "smart_advisor_pref_discovery";
 const PREF_QUESTION_COUNT_KEY = "smart_advisor_pref_question_count";
@@ -81,34 +111,27 @@ const SectionHeader = ({
   </div>
 );
 
-const SettingsInput = ({
-  label,
-  value,
-  onChange,
-  placeholder,
-  type = "text",
-  disabled = false,
-  readOnly = false,
-  icon,
-  ...props
-}: {
-  label: string;
-  value: string;
-  onChange?: (v: string) => void;
-  placeholder?: string;
-  type?: string;
-  disabled?: boolean;
-  readOnly?: boolean;
-  icon?: React.ReactNode;
-} & Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange">) => (
+const SettingsInput = forwardRef<
+  HTMLInputElement,
+  {
+    label: string;
+    value?: string;
+    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    placeholder?: string;
+    type?: string;
+    disabled?: boolean;
+    readOnly?: boolean;
+    icon?: React.ReactNode;
+    error?: string;
+  } & Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange">
+>(({ label, placeholder, type = "text", disabled = false, readOnly = false, icon, error, ...props }, ref) => (
   <label className="block space-y-1.5">
     <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
       {label}
     </span>
     <div className="relative">
       <input
-        value={value}
-        onChange={onChange ? (e) => onChange(e.target.value) : undefined}
+        ref={ref}
         placeholder={placeholder}
         type={type}
         disabled={disabled}
@@ -117,6 +140,7 @@ const SettingsInput = ({
           "w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm transition-colors focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-100 dark:focus:border-indigo-500",
           (disabled || readOnly) &&
             "cursor-not-allowed bg-slate-50 text-slate-500 dark:bg-slate-800/40 dark:text-slate-400",
+          error && "border-red-300 focus:border-red-400 focus:ring-red-500/20 dark:border-red-700",
         )}
         {...props}
       />
@@ -126,8 +150,12 @@ const SettingsInput = ({
         </div>
       )}
     </div>
+    {error && (
+      <p className="text-xs font-medium text-red-500 dark:text-red-400">{error}</p>
+    )}
   </label>
-);
+));
+SettingsInput.displayName = "SettingsInput";
 
 /* ------------------------------------------------------------------ */
 /*  Main settings page                                                */
@@ -138,19 +166,35 @@ const SettingsPage = () => {
   const { user, session, signOut, updateProfile, updateEmail, updatePassword } =
     useAuth();
 
+  const settingsTabs: SettingsSection[] = ["profile", "security", "content", "integrations"];
   const [activeSection, setActiveSection] =
     useState<SettingsSection>("profile");
+  const prevSectionIdx = useRef(0);
+  const sectionSlideDir = settingsTabs.indexOf(activeSection) >= prevSectionIdx.current ? 1 : -1;
+  useEffect(() => {
+    prevSectionIdx.current = settingsTabs.indexOf(activeSection);
+  }, [activeSection]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const [newName, setNewName] = useState("");
-  const [age, setAge] = useState(user?.age ? String(user.age) : "");
-  const [newEmail, setNewEmail] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const profileForm = useForm<z.infer<typeof profileSchema>>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: { newName: "", age: user?.age ?? ("" as any) },
+  });
 
-  const [savingProfile, setSavingProfile] = useState(false);
-  const [savingEmail, setSavingEmail] = useState(false);
-  const [savingPassword, setSavingPassword] = useState(false);
+  const emailForm = useForm<z.infer<typeof emailSchema>>({
+    resolver: zodResolver(emailSchema),
+    defaultValues: { newEmail: "" },
+  });
+
+  const passwordForm = useForm<z.infer<typeof passwordSchema>>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: { newPassword: "", confirmPassword: "" },
+  });
+
+  const backupEmailForm = useForm<z.infer<typeof backupEmailSchema>>({
+    resolver: zodResolver(backupEmailSchema),
+    defaultValues: { backupEmail: "" },
+  });
 
   const [message, setMessage] = useState<{
     text: string;
@@ -163,11 +207,9 @@ const SettingsPage = () => {
   const [showMfaPanel, setShowMfaPanel] = useState(false);
   const [mfaEnabled, setMfaEnabled] = useState(false);
   const [mfaChecked, setMfaChecked] = useState(false);
-  const [backupEmail, setBackupEmail] = useState("");
   const [currentBackupEmail, setCurrentBackupEmail] = useState<string | null>(
     null,
   );
-  const [savingBackupEmail, setSavingBackupEmail] = useState(false);
 
   const showMessage = (
     text: string,
@@ -265,84 +307,48 @@ const SettingsPage = () => {
     router.push("/");
   };
 
-  const handleSaveProfile = async () => {
-    setSavingProfile(true);
+  const handleSaveProfile = profileForm.handleSubmit(async (data) => {
     setMessage(null);
     const verified = await requestVerification("save your profile");
-    if (!verified) {
-      setSavingProfile(false);
-      return;
-    }
-    const trimmedName = newName.trim();
-    if (!trimmedName) {
-      showMessage("New username is required.", "error");
-      setSavingProfile(false);
-      return;
-    }
-    const parsedAge = Number(age);
-    const result = await updateProfile(
-      trimmedName,
-      Number.isFinite(parsedAge) ? parsedAge : 25,
-    );
+    if (!verified) return;
+    const parsedAge = typeof data.age === "number" ? data.age : 25;
+    const result = await updateProfile(data.newName, parsedAge);
     showMessage(
       result.error ?? "Profile updated.",
       result.error ? "error" : "success",
     );
-    setSavingProfile(false);
-  };
+  });
 
-  const handleSaveEmail = async () => {
-    setSavingEmail(true);
+  const handleSaveEmail = emailForm.handleSubmit(async (data) => {
     setMessage(null);
-    if (!newEmail.trim()) {
-      showMessage("New email is required.", "error");
-      setSavingEmail(false);
-      return;
-    }
     if (
       user?.email &&
-      newEmail.trim().toLowerCase() === user.email.trim().toLowerCase()
+      data.newEmail.toLowerCase() === user.email.trim().toLowerCase()
     ) {
       showMessage("New email must be different.", "error");
-      setSavingEmail(false);
       return;
     }
     const verified = await requestVerification("update your email");
-    if (!verified) {
-      setSavingEmail(false);
-      return;
-    }
-    const result = await updateEmail(newEmail);
+    if (!verified) return;
+    const result = await updateEmail(data.newEmail);
     showMessage(
       result.error ?? "Check your inbox to confirm.",
       result.error ? "error" : "success",
     );
-    setSavingEmail(false);
-  };
+  });
 
-  const handleSavePassword = async () => {
-    setSavingPassword(true);
+  const handleSavePassword = passwordForm.handleSubmit(async (data) => {
     setMessage(null);
-    if (newPassword !== confirmPassword) {
-      showMessage("Passwords do not match.", "error");
-      setSavingPassword(false);
-      return;
-    }
     const verified = await requestVerification("change your password");
-    if (!verified) {
-      setSavingPassword(false);
-      return;
-    }
-    const result = await updatePassword(newPassword);
+    if (!verified) return;
+    const result = await updatePassword(data.newPassword);
     if (result.error) {
       showMessage(result.error, "error");
     } else {
       showMessage("Password updated.", "success");
-      setNewPassword("");
-      setConfirmPassword("");
+      passwordForm.reset();
     }
-    setSavingPassword(false);
-  };
+  });
 
   const handleSaveContentPreferences = async () => {
     if (typeof window === "undefined") return;
@@ -424,8 +430,8 @@ const SettingsPage = () => {
   }, [message]);
 
   useEffect(() => {
-    setAge(user?.age ? String(user.age) : "");
-  }, [user?.age]);
+    if (user?.age) profileForm.setValue("age", user.age);
+  }, [user?.age, profileForm]);
 
   // Check MFA status on mount and when panel closes
   useEffect(() => {
@@ -448,27 +454,22 @@ const SettingsPage = () => {
     loadBackupEmail();
   }, []);
 
-  const handleSaveBackupEmail = async () => {
-    if (!backupEmail.trim()) {
-      showMessage("Email is required.", "error");
-      return;
-    }
-    setSavingBackupEmail(true);
-    const { error } = await authService.setBackupEmail(backupEmail.trim());
-    setSavingBackupEmail(false);
+  const handleSaveBackupEmail = backupEmailForm.handleSubmit(async (data) => {
+    const { error } = await authService.setBackupEmail(data.backupEmail);
     if (error) {
       showMessage(error, "error");
     } else {
-      setCurrentBackupEmail(backupEmail.trim());
-      setBackupEmail("");
+      setCurrentBackupEmail(data.backupEmail);
+      backupEmailForm.reset();
       showMessage("Backup email saved.", "success");
     }
-  };
+  });
 
+  const [removingBackupEmail, setRemovingBackupEmail] = useState(false);
   const handleRemoveBackupEmail = async () => {
-    setSavingBackupEmail(true);
+    setRemovingBackupEmail(true);
     const { error } = await authService.removeBackupEmail();
-    setSavingBackupEmail(false);
+    setRemovingBackupEmail(false);
     if (error) {
       showMessage(error, "error");
     } else {
@@ -539,7 +540,7 @@ const SettingsPage = () => {
       </Navbar>
 
       <main className="px-4 pb-20 pt-28 sm:px-6 md:pt-36">
-        <div className="mx-auto max-w-4xl">
+        <div className="mx-auto max-w-6xl">
           {/* Header */}
           <div className="mb-6">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
@@ -595,11 +596,14 @@ const SettingsPage = () => {
           </AnimatePresence>
 
           {/* Section Content */}
-          <div className="space-y-4">
+          <AnimatePresence mode="wait">
             {activeSection === "profile" && (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                key="profile"
+                initial={{ opacity: 0, x: sectionSlideDir * 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: sectionSlideDir * -30 }}
+                transition={{ duration: 0.2 }}
                 className="space-y-4"
               >
                 <SectionCard>
@@ -610,31 +614,31 @@ const SettingsPage = () => {
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <SettingsInput
                       label="Current Username"
-                      value={user?.name || ""}
+                      defaultValue={user?.name || ""}
                       readOnly
                       disabled
                       icon={<CircleOff size={14} />}
                     />
                     <SettingsInput
                       label="New Username"
-                      value={newName}
-                      onChange={setNewName}
                       placeholder="Enter new username"
+                      error={profileForm.formState.errors.newName?.message}
+                      {...profileForm.register("newName")}
                     />
                     <SettingsInput
                       label="Age"
-                      value={age}
-                      onChange={setAge}
                       type="number"
                       placeholder="25"
                       min={13}
                       max={120}
+                      error={profileForm.formState.errors.age?.message}
+                      {...profileForm.register("age")}
                     />
                   </div>
                   <div className="mt-5">
                     <StatefulButton
                       onClick={handleSaveProfile}
-                      state={savingProfile ? "loading" : "idle"}
+                      state={profileForm.formState.isSubmitting ? "loading" : "idle"}
                       className="h-10 min-w-[160px] rounded-full px-6 text-sm font-semibold"
                     >
                       Save Profile
@@ -646,8 +650,11 @@ const SettingsPage = () => {
 
             {activeSection === "security" && (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                key="security"
+                initial={{ opacity: 0, x: sectionSlideDir * 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: sectionSlideDir * -30 }}
+                transition={{ duration: 0.2 }}
                 className="space-y-4"
               >
                 {/* Email */}
@@ -659,22 +666,22 @@ const SettingsPage = () => {
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <SettingsInput
                       label="Current Email"
-                      value={user?.email || ""}
+                      defaultValue={user?.email || ""}
                       readOnly
                       disabled
                       icon={<Mail size={14} />}
                     />
                     <SettingsInput
                       label="New Email"
-                      value={newEmail}
-                      onChange={setNewEmail}
                       placeholder="new@example.com"
+                      error={emailForm.formState.errors.newEmail?.message}
+                      {...emailForm.register("newEmail")}
                     />
                   </div>
                   <div className="mt-5">
                     <StatefulButton
                       onClick={handleSaveEmail}
-                      state={savingEmail ? "loading" : "idle"}
+                      state={emailForm.formState.isSubmitting ? "loading" : "idle"}
                       className="h-10 min-w-[160px] rounded-full px-6 text-sm font-semibold"
                     >
                       Update Email
@@ -691,24 +698,24 @@ const SettingsPage = () => {
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <SettingsInput
                       label="New Password"
-                      value={newPassword}
-                      onChange={setNewPassword}
                       type="password"
                       placeholder="••••••••"
                       icon={<Lock size={14} />}
+                      error={passwordForm.formState.errors.newPassword?.message}
+                      {...passwordForm.register("newPassword")}
                     />
                     <SettingsInput
                       label="Confirm Password"
-                      value={confirmPassword}
-                      onChange={setConfirmPassword}
                       type="password"
                       placeholder="••••••••"
+                      error={passwordForm.formState.errors.confirmPassword?.message}
+                      {...passwordForm.register("confirmPassword")}
                     />
                   </div>
                   <div className="mt-5">
                     <StatefulButton
                       onClick={handleSavePassword}
-                      state={savingPassword ? "loading" : "idle"}
+                      state={passwordForm.formState.isSubmitting ? "loading" : "idle"}
                       className="h-10 min-w-[160px] rounded-full px-6 text-sm font-semibold"
                     >
                       Update Password
@@ -795,7 +802,7 @@ const SettingsPage = () => {
                         </div>
                         <button
                           onClick={handleRemoveBackupEmail}
-                          disabled={savingBackupEmail}
+                          disabled={removingBackupEmail}
                           className="text-xs font-semibold text-red-600 hover:text-red-500 disabled:opacity-50 dark:text-red-400"
                         >
                           Remove
@@ -804,15 +811,15 @@ const SettingsPage = () => {
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <SettingsInput
                           label="Change Backup Email"
-                          value={backupEmail}
-                          onChange={setBackupEmail}
                           placeholder="new-backup@example.com"
                           icon={<Mail size={14} />}
+                          error={backupEmailForm.formState.errors.backupEmail?.message}
+                          {...backupEmailForm.register("backupEmail")}
                         />
                       </div>
                       <StatefulButton
                         onClick={handleSaveBackupEmail}
-                        state={savingBackupEmail ? "loading" : "idle"}
+                        state={backupEmailForm.formState.isSubmitting ? "loading" : "idle"}
                         className="h-10 min-w-[160px] rounded-full px-6 text-sm font-semibold"
                       >
                         Update Backup Email
@@ -823,15 +830,15 @@ const SettingsPage = () => {
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <SettingsInput
                           label="Backup Email"
-                          value={backupEmail}
-                          onChange={setBackupEmail}
                           placeholder="backup@example.com"
                           icon={<Mail size={14} />}
+                          error={backupEmailForm.formState.errors.backupEmail?.message}
+                          {...backupEmailForm.register("backupEmail")}
                         />
                       </div>
                       <StatefulButton
                         onClick={handleSaveBackupEmail}
-                        state={savingBackupEmail ? "loading" : "idle"}
+                        state={backupEmailForm.formState.isSubmitting ? "loading" : "idle"}
                         className="h-10 min-w-[160px] rounded-full px-6 text-sm font-semibold"
                       >
                         Save Backup Email
@@ -847,8 +854,11 @@ const SettingsPage = () => {
 
             {activeSection === "content" && (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                key="content"
+                initial={{ opacity: 0, x: sectionSlideDir * 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: sectionSlideDir * -30 }}
+                transition={{ duration: 0.2 }}
                 className="space-y-4"
               >
                 <SectionCard>
@@ -946,8 +956,11 @@ const SettingsPage = () => {
 
             {activeSection === "integrations" && (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                key="integrations"
+                initial={{ opacity: 0, x: sectionSlideDir * 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: sectionSlideDir * -30 }}
+                transition={{ duration: 0.2 }}
                 className="space-y-4"
               >
                 {/* Google */}
@@ -992,7 +1005,8 @@ const SettingsPage = () => {
                     <GlowPillButton
                       onClick={handleDisableAccount}
                       disabled={accountActionLoading}
-                      className="inline-flex items-center gap-2 border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 disabled:opacity-50 dark:border-red-800 dark:bg-slate-900 dark:text-red-400"
+                      variant="destructive"
+                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold disabled:opacity-50"
                     >
                       <UserMinus size={14} />
                       {accountActionLoading ? "Processing…" : "Disable Account"}
@@ -1000,7 +1014,8 @@ const SettingsPage = () => {
                     <GlowPillButton
                       onClick={handleDeleteAccount}
                       disabled={accountActionLoading}
-                      className="inline-flex items-center gap-2 bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500 disabled:opacity-50"
+                      variant="destructive"
+                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold disabled:opacity-50"
                     >
                       <Trash2 size={14} />
                       {accountActionLoading ? "Processing…" : "Delete Account"}
@@ -1009,7 +1024,7 @@ const SettingsPage = () => {
                 </SectionCard>
               </motion.div>
             )}
-          </div>
+          </AnimatePresence>
         </div>
       </main>
 

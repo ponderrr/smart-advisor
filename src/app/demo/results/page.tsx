@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Film, BookOpen, RotateCcw, Sparkles } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { GlowPillButton } from "@/components/ui/glow-pill-button";
@@ -29,40 +30,46 @@ type DemoItem = {
 };
 
 /* ---------- Loading Animation ---------- */
-const LOADING_WORDS = ["Finding", "your", "perfect", "recommendations"];
+const DEMO_LOADING_PHRASES = [
+  "Searching for your perfect match",
+  "Scanning popular titles",
+  "Cross-referencing your preferences",
+  "Finding hidden gems for you",
+  "Curating personalized results",
+  "Almost there — finalizing picks",
+];
 
 const DemoLoadingState = () => (
   <div className="mx-auto flex min-h-[420px] w-full max-w-4xl flex-col justify-center rounded-3xl border border-slate-200/70 bg-white/85 p-6 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
-    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-indigo-300/70 bg-indigo-50 dark:border-indigo-500/40 dark:bg-indigo-500/10">
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-      >
-        <Sparkles size={28} className="text-indigo-500" />
-      </motion.div>
-    </div>
-
-    <h2 className="mt-4 text-2xl font-black tracking-tight sm:text-3xl">
+    <h2 className="text-2xl font-black tracking-tight sm:text-3xl">
       Generating your results
     </h2>
 
-    <div className="mx-auto mt-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
-      {LOADING_WORDS.map((word, i) => (
-        <motion.span
-          key={word}
-          className="text-sm font-semibold text-indigo-600 dark:text-indigo-400"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: [0, 1, 1, 0], y: [12, 0, 0, -8] }}
-          transition={{
-            duration: 2.4,
-            repeat: Infinity,
-            delay: i * 0.2,
-            ease: "easeInOut",
-          }}
-        >
-          {word}
-        </motion.span>
-      ))}
+    <div className="mx-auto mt-5 h-6 overflow-hidden">
+      <AnimatePresence mode="wait">
+        {DEMO_LOADING_PHRASES.map((phrase, i) => (
+          <motion.p
+            key={phrase}
+            className="text-sm font-semibold text-indigo-600 dark:text-indigo-400"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: [0, 1, 1, 0], y: [16, 0, 0, -16] }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              delay: i * 3,
+              repeatDelay: (DEMO_LOADING_PHRASES.length - 1) * 3,
+              ease: "easeInOut",
+            }}
+            style={{
+              position: i === 0 ? "relative" : "absolute",
+              left: 0,
+              right: 0,
+            }}
+          >
+            {phrase}
+          </motion.p>
+        ))}
+      </AnimatePresence>
     </div>
 
     <div className="relative mx-auto mt-6 h-2 w-full max-w-md overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
@@ -91,20 +98,14 @@ const DemoResultCard = ({ item, index }: { item: DemoItem; index: number }) => {
     >
       <div className="grid grid-cols-1 sm:grid-cols-[160px_1fr]">
         {/* Image */}
-        <div className="relative aspect-[2/3] overflow-hidden bg-slate-200 sm:aspect-auto sm:min-h-[240px] dark:bg-slate-800">
-          <img
+        <div className="relative aspect-[2/3] overflow-hidden bg-slate-200 sm:aspect-[2/3] dark:bg-slate-800">
+          <Image
             src={item.image}
             alt={item.title}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            fill
+            sizes="(max-width: 640px) 100vw, 160px"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
-          <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm">
-            {item.type === "movie" ? (
-              <Film size={10} />
-            ) : (
-              <BookOpen size={10} />
-            )}
-            {item.type}
-          </div>
           <div className="absolute right-3 top-3 rounded-full bg-indigo-600 px-2.5 py-1 text-[10px] font-bold text-white shadow-lg">
             {matchScore}% {matchLabel}
           </div>
@@ -182,8 +183,11 @@ export default function DemoResultsPage() {
             ? "book"
             : "both";
       setContentType(mappedType);
+      const genres = Array.isArray(parsed.genres)
+        ? parsed.genres.join(" ")
+        : "";
       setQuery(
-        `${parsed.contentType || "media"} ${parsed.mood || ""} ${parsed.pace || ""} recommendations`,
+        `${parsed.contentType || "media"} ${parsed.mood || ""} ${genres} ${parsed.pace || ""} recommendations`,
       );
     } catch {
       setQuery("best fiction books");
@@ -320,9 +324,9 @@ export default function DemoResultsPage() {
                     >
                       <div className="mb-4 flex items-center gap-2">
                         <Film size={18} className="text-violet-500" />
-                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                          {movieItems.length}
-                        </span>
+                        <h2 className="text-lg font-bold tracking-tight">
+                          Movies
+                        </h2>
                       </div>
                       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                         {movieItems.map((item, i) => (
@@ -344,9 +348,6 @@ export default function DemoResultsPage() {
                         <h2 className="text-lg font-bold tracking-tight">
                           Books
                         </h2>
-                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                          {bookItems.length}
-                        </span>
                       </div>
                       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                         {bookItems.map((item, i) => (

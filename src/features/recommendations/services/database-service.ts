@@ -273,6 +273,36 @@ class DatabaseService {
   }
 
   /**
+   * Delete all recommendations for the current user
+   */
+  async deleteAllRecommendations(): Promise<{ error: string | null }> {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        return { error: "User not authenticated" };
+      }
+
+      const { error } = await supabase
+        .from("recommendations")
+        .delete()
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.error("Error deleting all recommendations:", error);
+        return { error: error.message };
+      }
+
+      return { error: null };
+    } catch (err) {
+      console.error("Unexpected error deleting all recommendations:", err);
+      return { error: "Failed to delete all recommendations" };
+    }
+  }
+
+  /**
    * Update user profile information
    */
   async updateUserProfile(
@@ -406,6 +436,7 @@ export const {
   getUserRecommendations,
   toggleFavorite,
   deleteRecommendation,
+  deleteAllRecommendations,
   updateUserProfile,
   getUserStats,
   getCurrentUserProfile,

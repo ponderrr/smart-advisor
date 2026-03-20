@@ -16,30 +16,34 @@ export const FormField = ({
   htmlFor: string;
   error?: string;
   children: React.ReactNode;
-}) => (
-  <div className="space-y-1.5">
-    <Label.Root
-      htmlFor={htmlFor}
-      className={cn(
-        "text-sm font-medium text-slate-700 dark:text-slate-300",
-        error && "text-red-500",
+}) => {
+  const errorId = error ? `${htmlFor}-error` : undefined;
+  return (
+    <div className="space-y-1.5">
+      <Label.Root
+        htmlFor={htmlFor}
+        className={cn(
+          "text-sm font-medium text-slate-700 dark:text-slate-300",
+          error && "text-red-500",
+        )}
+      >
+        {label}
+      </Label.Root>
+      {children}
+      {error && (
+        <p id={errorId} role="alert" className="text-xs text-red-500">
+          {error}
+        </p>
       )}
-    >
-      {label}
-    </Label.Root>
-    {children}
-    {error && (
-      <p role="alert" className="text-xs text-red-500">
-        {error}
-      </p>
-    )}
-  </div>
-);
+    </div>
+  );
+};
 
 export const PasswordInput = ({
   showPassword,
   onTogglePassword,
   className,
+  id,
   ...props
 }: any) => {
   const radius = 100;
@@ -62,7 +66,9 @@ export const PasswordInput = ({
       className="group/input relative rounded-lg p-[2px] transition duration-300"
     >
       <input
+        id={id}
         type={showPassword ? "text" : "password"}
+        aria-describedby={id ? `${id}-error` : undefined}
         className={cn(
           "shadow-input flex h-10 w-full rounded-md border-none bg-gray-50 px-3 py-2 pr-10 text-sm text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:bg-zinc-800 dark:text-white",
           className,
@@ -72,7 +78,9 @@ export const PasswordInput = ({
       <button
         type="button"
         onClick={onTogglePassword}
-        className="absolute inset-y-0 right-1 inline-flex items-center justify-center px-2 text-slate-500 hover:text-slate-900"
+        aria-label={showPassword ? "Hide password" : "Show password"}
+        aria-pressed={showPassword}
+        className="absolute inset-y-0 right-1 inline-flex items-center justify-center px-2 text-slate-500 hover:text-slate-900 dark:hover:text-slate-300"
       >
         {showPassword ? (
           <IconEyeOff className="h-4 w-4" />

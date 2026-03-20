@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import { format } from "date-fns";
 import { authService } from "../services/auth-service";
 import { ShieldCheck, ArrowRight, Copy, Check, Download } from "lucide-react";
 import { motion } from "framer-motion";
@@ -39,22 +40,22 @@ export const MfaSetup = ({ onComplete, onSkip }: MfaSetupProps) => {
     }
   }, []);
 
-  // Auto-refresh QR code countdown
+  // Auto-refresh QR code countdown — only runs while on the QR step
   useEffect(() => {
-    if (step !== "qr" || qrRefreshCountdown <= 0) return;
+    if (step !== "qr") return;
 
     const timer = setInterval(() => {
       setQrRefreshCountdown((prev) => {
         if (prev <= 1) {
           handleRefreshQr();
-          return 0;
+          return QR_REFRESH_INTERVAL;
         }
         return prev - 1;
       });
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [step, qrRefreshCountdown, handleRefreshQr]);
+  }, [step, handleRefreshQr]);
 
   const handleEnroll = async () => {
     setLoading(true);
@@ -140,7 +141,7 @@ export const MfaSetup = ({ onComplete, onSkip }: MfaSetupProps) => {
       "",
       ...backupCodes,
       "",
-      `Generated: ${new Date().toLocaleDateString()}`,
+      `Generated: ${format(new Date(), "PP")}`,
     ].join("\n");
 
     const blob = new Blob([text], { type: "text/plain" });
@@ -247,7 +248,10 @@ export const MfaSetup = ({ onComplete, onSkip }: MfaSetupProps) => {
           </div>
 
           <Button
-            onClick={() => setStep("verify")}
+            onClick={() => {
+              setQrRefreshCountdown(0);
+              setStep("verify");
+            }}
             variant="outline"
             className="mt-6 w-full"
           >

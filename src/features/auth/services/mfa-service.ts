@@ -4,15 +4,33 @@ import { toUserFriendlyError } from "./error-messages";
 class MfaService {
   async enroll() {
     try {
+      // Use getUser() to validate the session with the server, not getSession()
+      // which can return stale tokens from local storage
       const {
-        data: { session },
-        error: sessionError,
-      } = await supabase.auth.getSession();
-      if (sessionError || !session) {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+      if (userError || !user) {
         return {
           error: "You must be signed in to enable MFA. Please sign in again.",
           data: null,
         };
+      }
+
+      // Clean up any existing unverified TOTP factors before enrolling
+      // (a previous enrollment attempt that wasn't completed)
+      try {
+        const { data: factors } = await supabase.auth.mfa.listFactors();
+        const unverified = factors?.totp?.filter(
+          (f: any) => f.status === "unverified",
+        );
+        if (unverified?.length) {
+          for (const f of unverified) {
+            await supabase.auth.mfa.unenroll({ factorId: f.id });
+          }
+        }
+      } catch {
+        // Non-critical — proceed with enrollment
       }
 
       const { data, error } = await supabase.auth.mfa.enroll({
@@ -20,6 +38,37 @@ class MfaService {
       });
 
       if (error) {
+        console.error("MFA enroll error:", error.message, error);
+
+        // If there's a conflict with existing factors, try one more time after cleanup
+        if (
+          error.message.includes("already") ||
+          error.message.includes("conflict") ||
+          error.message.includes("exceeded")
+        ) {
+          try {
+            const { data: retryFactors } =
+              await supabase.auth.mfa.listFactors();
+            const allUnverified = retryFactors?.totp?.filter(
+              (f: any) => f.status === "unverified",
+            );
+            if (allUnverified?.length) {
+              for (const f of allUnverified) {
+                await supabase.auth.mfa.unenroll({ factorId: f.id });
+              }
+              // Retry enrollment after cleanup
+              const { data: retryData, error: retryError } =
+                await supabase.auth.mfa.enroll({ factorType: "totp" });
+              if (!retryError && retryData) {
+                // Success on retry — continue with this data
+                return this.finalizeEnroll(retryData, user.id);
+              }
+            }
+          } catch {
+            // Retry failed
+          }
+        }
+
         return {
           error: toUserFriendlyError(
             error.message,
@@ -29,30 +78,28 @@ class MfaService {
         };
       }
 
-      if (data?.id) {
-        try {
-          const {
-            data: { user },
-          } = await supabase.auth.getUser();
-          if (user?.id) {
-            await supabase.from("mfa_factors").insert({
-              user_id: user.id,
-              factor_type: "totp",
-              factor_id: data.id,
-              is_verified: false,
-              enrolled_at: new Date().toISOString(),
-            });
-          }
-        } catch {
-          // Non-critical
-        }
-      }
-
-      return { data, error: null };
+      return this.finalizeEnroll(data, user.id);
     } catch (err) {
       console.error("Error enrolling MFA:", err);
       return { error: "Failed to enroll MFA. Please try again.", data: null };
     }
+  }
+
+  private async finalizeEnroll(data: any, userId: string) {
+    if (data?.id) {
+      try {
+        await supabase.from("mfa_factors").insert({
+          user_id: userId,
+          factor_type: "totp",
+          factor_id: data.id,
+          is_verified: false,
+          enrolled_at: new Date().toISOString(),
+        });
+      } catch {
+        // Non-critical — local tracking only
+      }
+    }
+    return { data, error: null };
   }
 
   async verify(factorId: string, code: string) {

@@ -12,12 +12,14 @@ function isNonRetryableError(error: unknown): boolean {
     error instanceof Error
       ? error.message.toLowerCase()
       : String(error).toLowerCase();
+
+  // Only treat session/auth errors as non-retryable, NOT Anthropic API key errors
+  if (msg.includes("anthropic api error")) return false;
+
   return (
     msg.includes("not authenticated") ||
-    msg.includes("unauthorized") ||
-    msg.includes("401") ||
-    msg.includes("403") ||
-    msg.includes("forbidden")
+    msg.includes("session is not authorized") ||
+    msg.includes("session expired")
   );
 }
 
@@ -73,14 +75,16 @@ export async function generateQuestions(
   userName: string = "User",
 ): Promise<Question[]> {
   try {
-    // Get user session for authentication
+    // Validate session exists (getUser() actually verifies with Supabase)
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+    if (authError || !user) {
       throw new Error("User not authenticated");
     }
 
+    // supabase.functions.invoke automatically sends the session token
     const { data, error } = await supabase.functions.invoke(
       "anthropic-questions",
       {
@@ -90,17 +94,26 @@ export async function generateQuestions(
           age: userAge,
           questionCount,
         },
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
       },
     );
 
     if (error) {
+      // Log full error details for debugging
+      console.error("Edge function error object:", {
+        name: error?.name,
+        message: error?.message,
+        context: error?.context,
+        status: error?.context?.status,
+        statusText: error?.context?.statusText,
+      });
+
       const errorDetail = await extractEdgeFunctionError(error);
+      console.error("Extracted error detail:", errorDetail);
+
       if (
-        errorDetail.includes("401") ||
-        errorDetail.toLowerCase().includes("unauthorized")
+        errorDetail.includes("session is not authorized") ||
+        errorDetail.includes("not authenticated") ||
+        errorDetail.includes("session expired")
       ) {
         throw new Error(
           "Your session is not authorized for question generation.",
@@ -112,10 +125,24 @@ export async function generateQuestions(
     if (!data?.questions || !Array.isArray(data.questions)) {
       throw new Error("Invalid response format from question generation");
     }
-    // Ensure each question has a type (edge function may not return it)
+
+    const validTypes = ["single_select", "select_all", "fill_in_blank"];
+
+    // Map edge function response to the frontend Question shape
     return data.questions.map((q: any) => ({
-      ...q,
-      type: q.type || "single_select",
+      id: q.id,
+      text: q.text || q.question || "",
+      type: validTypes.includes(q.type) ? q.type : "single_select",
+      content_type: contentType,
+      user_age_range:
+        userAge < 18
+          ? "under_18"
+          : userAge < 30
+            ? "18_29"
+            : userAge < 50
+              ? "30_49"
+              : "50_plus",
+      placeholder: q.placeholder,
     }));
   } catch (error) {
     console.error("Error generating questions:", error);
@@ -133,14 +160,16 @@ export async function generateRecommendations(
   userName: string = "User",
 ): Promise<RecommendationData> {
   try {
-    // Get user session for authentication
+    // Validate session exists
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+    if (authError || !user) {
       throw new Error("User not authenticated");
     }
 
+    // supabase.functions.invoke automatically sends the session token
     const { data, error } = await supabase.functions.invoke(
       "anthropic-recommendations",
       {
@@ -149,9 +178,6 @@ export async function generateRecommendations(
           contentType,
           name: userName,
           age: userAge,
-        },
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
         },
       },
     );

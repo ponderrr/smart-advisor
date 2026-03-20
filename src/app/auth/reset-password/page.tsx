@@ -10,10 +10,14 @@ import {
   PasswordInput,
 } from "@/features/auth/components/auth-shared";
 
+const REDIRECT_DELAY = 3000;
+
 export default function ResetPasswordPage() {
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -33,7 +37,7 @@ export default function ResetPasswordPage() {
       setError(error);
     } else {
       setSuccess(true);
-      setTimeout(() => router.push("/auth"), 3000);
+      setTimeout(() => router.push("/auth"), REDIRECT_DELAY);
     }
   };
 
@@ -59,10 +63,11 @@ export default function ResetPasswordPage() {
 
             <FormField label="New Password" htmlFor="new-password">
               <PasswordInput
+                id="new-password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                showPassword={false}
-                onTogglePassword={() => {}}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+                showPassword={showPassword}
+                onTogglePassword={() => setShowPassword((p) => !p)}
               />
             </FormField>
 
@@ -72,10 +77,11 @@ export default function ResetPasswordPage() {
               error={error ?? undefined}
             >
               <PasswordInput
+                id="confirm-password"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                showPassword={false}
-                onTogglePassword={() => {}}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
+                showPassword={showConfirm}
+                onTogglePassword={() => setShowConfirm((p) => !p)}
               />
             </FormField>
 

@@ -4,6 +4,7 @@ import { AuthProvider } from "@/features/auth/hooks/use-auth";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
 import { useState } from "react";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { SiteBanner } from "@/components/site-banner";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
@@ -24,16 +25,18 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <SiteBanner />
-          <div className="min-h-screen bg-background font-sans antialiased">
-            {children}
-          </div>
-          <Toaster />
-        </AuthProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
+    <NuqsAdapter>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <SiteBanner />
+            <div className="min-h-screen bg-background font-sans antialiased">
+              {children}
+            </div>
+            <Toaster />
+          </AuthProvider>
+        </QueryClientProvider>
+      </ThemeProvider>
+    </NuqsAdapter>
   );
 }
