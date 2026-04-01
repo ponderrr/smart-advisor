@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toUserFriendlyError } from "./error-messages";
+import { MFAEnrollData, MFAFactor } from "@/features/auth/types/mfa";
 
 class MfaService {
   async enroll() {
@@ -22,7 +23,7 @@ class MfaService {
       try {
         const { data: factors } = await supabase.auth.mfa.listFactors();
         const unverified = factors?.totp?.filter(
-          (f: any) => f.status === "unverified",
+          (f: MFAFactor) => f.status === "unverified",
         );
         if (unverified?.length) {
           for (const f of unverified) {
@@ -50,7 +51,7 @@ class MfaService {
             const { data: retryFactors } =
               await supabase.auth.mfa.listFactors();
             const allUnverified = retryFactors?.totp?.filter(
-              (f: any) => f.status === "unverified",
+              (f: MFAFactor) => f.status === "unverified",
             );
             if (allUnverified?.length) {
               for (const f of allUnverified) {
@@ -85,7 +86,7 @@ class MfaService {
     }
   }
 
-  private async finalizeEnroll(data: any, userId: string) {
+  private async finalizeEnroll(data: MFAEnrollData, userId: string) {
     if (data?.id) {
       try {
         await supabase.from("mfa_factors").insert({

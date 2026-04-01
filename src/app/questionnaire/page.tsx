@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { IconCheck } from "@tabler/icons-react";
@@ -208,11 +208,11 @@ const QuestionnairePage = () => {
   const [error, setError] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const navItems = [
+  const navItems = useMemo(() => [
     { name: "Dashboard", link: "/dashboard" },
     { name: "History", link: "/history" },
     { name: "Settings", link: "/settings" },
-  ];
+  ], []);
 
   const loadQuestions = useCallback(async () => {
     if (!contentType || !user) return;
@@ -288,10 +288,10 @@ const QuestionnairePage = () => {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [answers, multiAnswers, isSubmitting]);
 
-  const handleSignOut = async () => {
+  const handleSignOut = useCallback(async () => {
     await signOut();
     router.push("/");
-  };
+  }, [signOut, router]);
 
   const currentQuestion = questions[currentQuestionIndex];
   const progress =
@@ -299,15 +299,15 @@ const QuestionnairePage = () => {
       ? ((currentQuestionIndex + 1) / questions.length) * 100
       : 0;
 
-  const handleAnswer = (answer: string) => {
+  const handleAnswer = useCallback((answer: string) => {
     if (!currentQuestion) return;
     setAnswers((prev) => ({
       ...prev,
       [currentQuestion.id]: answer,
     }));
-  };
+  }, [currentQuestion]);
 
-  const handleToggleMulti = (questionId: string, option: string) => {
+  const handleToggleMulti = useCallback((questionId: string, option: string) => {
     setMultiAnswers((prev) => {
       const current = prev[questionId] ?? [];
       const next = current.includes(option)
@@ -315,7 +315,7 @@ const QuestionnairePage = () => {
         : [...current, option];
       return { ...prev, [questionId]: next };
     });
-  };
+  }, []);
 
   const handlePrevious = () => {
     if (currentQuestionIndex > 0) {
@@ -372,13 +372,13 @@ const QuestionnairePage = () => {
   })();
 
   // Track select_all option index for cycling through option sets
-  const selectAllIndex = (() => {
+  const selectAllIndex = useMemo(() => {
     let count = 0;
     for (let i = 0; i < currentQuestionIndex; i++) {
       if (questions[i]?.type === "select_all") count++;
     }
     return count;
-  })();
+  }, [questions, currentQuestionIndex]);
 
   const topBar = (
     <Navbar>
@@ -447,7 +447,7 @@ const QuestionnairePage = () => {
     return (
       <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
         {topBar}
-        <main className="px-4 pb-20 pt-32 md:pt-36 sm:px-6">
+        <main className="px-3 pb-20 pt-28 sm:px-6 md:pt-36">
           <BouncingWordsLoader
             questionCount={questionCount}
             contentType={contentType}
@@ -461,7 +461,7 @@ const QuestionnairePage = () => {
     return (
       <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
         {topBar}
-        <main className="px-4 pb-20 pt-32 md:pt-36 sm:px-6">
+        <main className="px-3 pb-20 pt-28 sm:px-6 md:pt-36">
           <div className="mx-auto flex min-h-[420px] w-full max-w-4xl flex-col justify-center rounded-3xl border border-slate-200/70 bg-white/85 p-6 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
             <div className="mx-auto mb-5 flex h-24 w-24 items-center justify-center overflow-hidden">
               <video
@@ -562,7 +562,7 @@ const QuestionnairePage = () => {
       currentQuestionIndex,
     );
     return (
-      <div className="mt-7 grid gap-3 sm:grid-cols-2">
+      <div className="mt-5 grid gap-2 sm:mt-7 sm:gap-3 sm:grid-cols-2">
         {options.map((option) => {
           const selected = answers[currentQuestion.id] === option;
           return (
@@ -605,9 +605,9 @@ const QuestionnairePage = () => {
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
       {topBar}
 
-      <main className="px-4 pb-20 pt-32 md:pt-36 sm:px-6">
+      <main className="px-3 pb-20 pt-28 sm:px-6 md:pt-36">
         <div className="mx-auto w-full max-w-4xl">
-          <div className="mb-8 flex items-center justify-between gap-3">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-2 sm:mb-8 sm:gap-3">
             <GlowPillButton
               onClick={handlePrevious}
               className="inline-flex items-center gap-2 border-slate-300/80 bg-white/80 px-4 py-2 text-sm font-semibold dark:border-slate-700 dark:bg-slate-900/70"
@@ -623,7 +623,7 @@ const QuestionnairePage = () => {
             </p>
           </div>
 
-          <div className="mb-8 h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
+          <div className="mb-6 h-2 w-full sm:mb-8 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
             <motion.div
               className="h-full rounded-full bg-indigo-500"
               initial={false}
@@ -632,7 +632,7 @@ const QuestionnairePage = () => {
             />
           </div>
 
-          <div className="rounded-3xl border border-slate-200/70 bg-white/85 p-6 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
+          <div className="rounded-2xl border border-slate-200/70 bg-white/85 p-4 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:rounded-3xl sm:p-8">
             <AnimatePresence mode="wait" initial={false}>
               {currentQuestion && (
                 <motion.section
@@ -654,7 +654,7 @@ const QuestionnairePage = () => {
               )}
             </AnimatePresence>
 
-            <div className="mt-8 flex items-center justify-end">
+            <div className="mt-6 flex items-center justify-end sm:mt-8">
               <GlowPillButton
                 onClick={handleNext}
                 disabled={!canProceed || isSubmitting}

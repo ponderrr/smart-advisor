@@ -222,6 +222,7 @@ const Index = () => {
               muted
               playsInline
               preload="metadata"
+              aria-label="Demo showing how Smart Advisor works"
               className="w-full aspect-video object-cover"
             />
           </div>
@@ -301,6 +302,7 @@ const Index = () => {
                   <button
                     type="button"
                     onClick={() => setOpenFaq(isOpen ? null : index)}
+                    aria-expanded={isOpen}
                     className={cn(
                       "flex w-full items-center justify-between px-5 py-4 text-left transition-colors",
                       isOpen
@@ -364,7 +366,7 @@ const Index = () => {
             </a>
           </div>
 
-          <nav className="mt-8">
+          <nav aria-label="Footer navigation" className="mt-8">
             <ul className="flex flex-col items-center justify-center gap-4 text-sm font-medium text-slate-700 dark:text-slate-300 md:flex-row md:gap-8">
               {[
                 { label: "How It Works", href: "#how-it-works" },

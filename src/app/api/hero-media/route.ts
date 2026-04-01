@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { openLibraryCoverUrl, tmdbPosterUrl } from "@/lib/api-helpers";
+import { API_URLS, FETCH_TIMEOUT_MS } from "@/lib/constants";
 
 type HeroMediaResponse = {
   books: string[];
@@ -8,6 +10,17 @@ type HeroMediaResponse = {
     movies: "ok" | "error";
   };
 };
+
+interface OpenLibraryWork {
+  cover_id?: number;
+  title?: string;
+  key?: string;
+}
+
+interface TMDBResult {
+  poster_path?: string;
+  id?: number;
+}
 
 const BOOK_SUBJECTS = [
   "fiction",
@@ -48,18 +61,15 @@ const shuffle = <T>(items: T[]) => {
 const uniqueUrls = (items: string[]) =>
   Array.from(new Set(items.filter(Boolean)));
 
-const pickPoster = (posterPath: string | null | undefined) =>
-  posterPath ? `https://image.tmdb.org/t/p/w500${posterPath}` : null;
-
 async function fetchBookCovers(): Promise<string[]> {
   const selectedSubjects = pickRandomUnique(BOOK_SUBJECTS, 2);
   const offset = Math.floor(Math.random() * 30);
 
   const responses = await Promise.all(
     selectedSubjects.map(async (subject) => {
-      const url = `https://openlibrary.org/subjects/${subject}.json?limit=20&offset=${offset}`;
+      const url = `${API_URLS.OPEN_LIBRARY_SUBJECTS}/${subject}.json?limit=20&offset=${offset}`;
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
       try {
         const response = await fetch(url, {
@@ -76,11 +86,8 @@ async function fetchBookCovers(): Promise<string[]> {
         const works = Array.isArray(data?.works) ? data.works : [];
 
         return works
-          .filter((w: any) => w.cover_id && w.cover_id > 0)
-          .map(
-            (w: any) =>
-              `https://covers.openlibrary.org/b/id/${w.cover_id}-M.jpg`,
-          );
+          .filter((w: OpenLibraryWork) => w.cover_id && w.cover_id > 0)
+          .map((w: OpenLibraryWork) => openLibraryCoverUrl(w.cover_id!, "M"));
       } catch {
         clearTimeout(timeoutId);
         return [];
@@ -96,9 +103,9 @@ async function fetchMoviePosters(apiKey: string): Promise<string[]> {
   const responses = await Promise.all(
     selectedEndpoints.map(async (endpoint) => {
       const page = Math.floor(Math.random() * 18) + 1;
-      const url = `https://api.themoviedb.org/3/${endpoint}&page=${page}&api_key=${apiKey}`;
+      const url = `${API_URLS.TMDB_BASE}/${endpoint}&page=${page}&api_key=${apiKey}`;
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
       try {
         const response = await fetch(url, {
@@ -120,7 +127,9 @@ async function fetchMoviePosters(apiKey: string): Promise<string[]> {
 
   const posters = responses
     .flat()
-    .map((item: any) => pickPoster(item?.poster_path))
+    .map((item: TMDBResult) =>
+      item?.poster_path ? tmdbPosterUrl(item.poster_path) : null,
+    )
     .filter(Boolean) as string[];
 
   return shuffle(uniqueUrls(posters)).slice(0, 10);
@@ -165,7 +174,6 @@ export async function GET() {
 
   return NextResponse.json(payload, {
     headers: {
-      // Cache for 10 minutes on CDN, serve stale for up to 1 hour while revalidating
       "Cache-Control":
         "public, s-maxage=600, stale-while-revalidate=3600",
     },

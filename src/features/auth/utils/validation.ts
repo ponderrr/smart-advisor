@@ -2,7 +2,7 @@
  * Debounce hook for preventing rapid successive function calls
  * Used to prevent HTTP 429 "too many requests" errors
  */
-export function createDebounce<T extends (...args: any[]) => Promise<any>>(
+export function createDebounce<T extends (...args: unknown[]) => Promise<unknown>>(
   fn: T,
   delayMs: number = 1000,
 ): T {

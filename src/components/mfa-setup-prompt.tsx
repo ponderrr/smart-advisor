@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ShieldCheck, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { authService } from "@/features/auth/services/auth-service";
+import { MFAFactor } from "@/features/auth/types/mfa";
 
 const MFA_PROMPT_KEY = "smart_advisor_mfa_prompt_dismissed_at";
 const MFA_PROMPT_INTERVAL_DAYS = 7;
@@ -24,7 +25,7 @@ export const MfaSetupPrompt = ({ userId }: MfaSetupPromptProps) => {
       // Check if MFA is already enabled
       const { data } = await authService.listMFAFactors();
       const hasVerified =
-        data?.totp?.some((f: any) => f.status === "verified") ?? false;
+        data?.totp?.some((f: MFAFactor) => f.status === "verified") ?? false;
 
       if (hasVerified) return; // MFA already enabled, no prompt needed
 
@@ -67,6 +68,7 @@ export const MfaSetupPrompt = ({ userId }: MfaSetupPromptProps) => {
           <div className="rounded-2xl border border-slate-200/70 bg-white/95 p-5 shadow-xl backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/95">
             <button
               onClick={handleDismiss}
+              aria-label="Dismiss MFA setup prompt"
               className="absolute right-3 top-3 text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-200"
             >
               <X size={16} />

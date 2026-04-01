@@ -8,6 +8,16 @@ type BookProxyResponse = {
   openLibraryUrl: string | null;
 };
 
+interface OpenLibraryDoc {
+  cover_i?: number;
+  title?: string;
+  first_publish_year?: number;
+  author_name?: string[];
+  key?: string;
+  ratings_average?: number;
+  first_sentence?: string[];
+}
+
 const DEFAULT_BOOK: BookProxyResponse = {
   cover:
     "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=600&fit=crop",
@@ -75,7 +85,7 @@ export async function GET(req: NextRequest) {
 
     // Only include books with covers
     const withCovers = docs.filter(
-      (doc: any) => doc.cover_i && doc.cover_i > 0,
+      (doc: OpenLibraryDoc) => doc.cover_i && doc.cover_i > 0,
     );
 
     if (withCovers.length === 0) {

@@ -42,7 +42,8 @@ export const Navbar = ({ children, className }: NavbarProps) => {
   });
 
   return (
-    <motion.div
+    <motion.nav
+      aria-label="Main navigation"
       style={{ top: "var(--site-banner-height, 0px)" }}
       className={cn("fixed inset-x-0 z-50 w-full py-4", className)}
       initial={false}
@@ -51,10 +52,10 @@ export const Navbar = ({ children, className }: NavbarProps) => {
     >
       {React.Children.map(children, (child) =>
         React.isValidElement(child)
-          ? React.cloneElement(child as React.ReactElement<any>, { scrolled })
+          ? React.cloneElement(child as React.ReactElement<{ scrolled: boolean }>, { scrolled })
           : child,
       )}
-    </motion.div>
+    </motion.nav>
   );
 };
 
@@ -159,7 +160,13 @@ export const NavItems = ({
   );
 };
 
-export const MobileNav = ({ children, className, scrolled = false }: any) => (
+interface MobileNavProps {
+  children: React.ReactNode;
+  className?: string;
+  scrolled?: boolean;
+}
+
+export const MobileNav = ({ children, className, scrolled = false }: MobileNavProps) => (
   <motion.div
     initial={false}
     animate={{
@@ -180,16 +187,19 @@ export const MobileNav = ({ children, className, scrolled = false }: any) => (
   </motion.div>
 );
 
-export const MobileNavHeader = ({ children, className }: any) => (
+export const MobileNavHeader = ({ children, className }: { children: React.ReactNode; className?: string }) => (
   <div className={cn("flex w-full items-center justify-between", className)}>
     {children}
   </div>
 );
 
-export const MobileNavMenu = ({ children, isOpen }: any) => (
+export const MobileNavMenu = ({ children, isOpen }: { children: React.ReactNode; isOpen: boolean }) => (
   <AnimatePresence>
     {isOpen && (
       <motion.div
+        id="mobile-nav-menu"
+        role="menu"
+        aria-label="Mobile navigation menu"
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -12 }}
@@ -202,11 +212,13 @@ export const MobileNavMenu = ({ children, isOpen }: any) => (
   </AnimatePresence>
 );
 
-export const MobileNavToggle = ({ isOpen, onClick }: any) => (
+export const MobileNavToggle = ({ isOpen, onClick }: { isOpen: boolean; onClick: () => void }) => (
   <button
     onClick={onClick}
     className="rounded-full p-2 text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
     aria-label={isOpen ? "Close menu" : "Open menu"}
+    aria-expanded={isOpen}
+    aria-controls="mobile-nav-menu"
   >
     {isOpen ? <IconX /> : <IconMenu2 />}
   </button>
@@ -215,6 +227,7 @@ export const MobileNavToggle = ({ isOpen, onClick }: any) => (
 export const NavbarLogo = () => (
   <Link
     href="/"
+    aria-label="Smart Advisor home"
     onClick={(event) => {
       if (typeof window !== "undefined" && window.location.pathname === "/") {
         event.preventDefault();
@@ -227,6 +240,6 @@ export const NavbarLogo = () => (
   </Link>
 );
 
-export const NavbarButton = ({ children, ...props }: any) => (
+export const NavbarButton = ({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
   <button {...props}>{children}</button>
 );

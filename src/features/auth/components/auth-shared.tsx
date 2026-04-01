@@ -39,13 +39,18 @@ export const FormField = ({
   );
 };
 
+interface PasswordInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  showPassword: boolean;
+  onTogglePassword: () => void;
+}
+
 export const PasswordInput = ({
   showPassword,
   onTogglePassword,
   className,
   id,
   ...props
-}: any) => {
+}: PasswordInputProps) => {
   const radius = 100;
   const [visible, setVisible] = useState(false);
   const mouseX = useMotionValue(0);
@@ -92,7 +97,7 @@ export const PasswordInput = ({
   );
 };
 
-export const AuthHoverButton = ({ className, children, ...props }: any) => {
+export const AuthHoverButton = ({ className, children, onDrag: _onDrag, onDragStart: _onDragStart, onDragEnd: _onDragEnd, onAnimationStart: _onAnimationStart, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => {
   const radius = 110;
   const [visible, setVisible] = useState(false);
   const mouseX = useMotionValue(0);

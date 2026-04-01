@@ -84,7 +84,41 @@ const RecommendationModal = ({
 }: {
   rec: Recommendation;
   onClose: () => void;
-}) => (
+}) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key === "Tab" && modalRef.current) {
+        const focusable = modalRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    modalRef.current?.focus();
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  return (
   <motion.div
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
@@ -93,11 +127,16 @@ const RecommendationModal = ({
     onClick={onClose}
   >
     <motion.div
+      ref={modalRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Details for ${rec.title}`}
+      tabIndex={-1}
       initial={{ opacity: 0, scale: 0.95, y: 12 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95, y: 12 }}
       transition={{ duration: 0.2 }}
-      className="relative max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-slate-200/70 bg-white shadow-2xl dark:border-slate-700/60 dark:bg-slate-900"
+      className="relative max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-slate-200/70 bg-white shadow-2xl dark:border-slate-700/60 dark:bg-slate-900 focus:outline-none"
       onClick={(e) => e.stopPropagation()}
     >
       {rec.poster_url && (
@@ -165,7 +204,8 @@ const RecommendationModal = ({
       </div>
     </motion.div>
   </motion.div>
-);
+  );
+};
 
 const AccountHistoryPage = () => {
   const router = useRouter();
@@ -463,6 +503,7 @@ const AccountHistoryPage = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortMode)}
+                aria-label="Sort recommendations"
                 className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
               >
                 {sortOptions.map((opt) => (

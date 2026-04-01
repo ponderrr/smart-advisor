@@ -129,7 +129,7 @@ export async function generateQuestions(
     const validTypes = ["single_select", "select_all", "fill_in_blank"];
 
     // Map edge function response to the frontend Question shape
-    return data.questions.map((q: any) => ({
+    return data.questions.map((q: Record<string, string>) => ({
       id: q.id,
       text: q.text || q.question || "",
       type: validTypes.includes(q.type) ? q.type : "single_select",

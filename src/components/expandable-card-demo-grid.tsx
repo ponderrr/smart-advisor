@@ -44,7 +44,7 @@ export default function ExpandableCardDemo() {
       </AnimatePresence>
       <AnimatePresence>
         {active && typeof active === "object" ? (
-          <div className="fixed inset-0  grid place-items-center z-[100]">
+          <div className="fixed inset-0  grid place-items-center z-[100]" role="dialog" aria-modal="true" aria-label="Expanded card details">
             <motion.button
               key={`button-${active.title}-${id}`}
               layout
@@ -62,6 +62,7 @@ export default function ExpandableCardDemo() {
               }}
               className="flex absolute top-2 right-2 lg:hidden items-center justify-center bg-white rounded-full h-6 w-6"
               onClick={() => setActive(null)}
+              aria-label="Close expanded card"
             >
               <CloseIcon />
             </motion.button>
