@@ -3,16 +3,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { useQueryState, parseAsStringLiteral } from "nuqs";
-import * as echarts from "echarts/core";
-import { PieChart as EPieChart } from "echarts/charts";
-import {
-  TooltipComponent,
-  LegendComponent,
-} from "echarts/components";
-import { CanvasRenderer } from "echarts/renderers";
 
-echarts.use([EPieChart, TooltipComponent, LegendComponent, CanvasRenderer]);
+const GenrePieChart = dynamic(() => import("@/components/genre-pie-chart"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-72 items-center justify-center text-sm text-slate-400">
+      Loading chart...
+    </div>
+  ),
+});
 import {
   ArrowRight,
   BookOpen,
@@ -42,19 +43,48 @@ import {
 import { cn } from "@/lib/utils";
 import { MfaSetupPrompt } from "@/components/mfa-setup-prompt";
 
-const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 18 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.4, delay, ease: [0.22, 1, 0.36, 1] as const },
-});
-
 const RecommendationModal = ({
   rec,
   onClose,
 }: {
   rec: Recommendation;
   onClose: () => void;
-}) => (
+}) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key === "Tab" && modalRef.current) {
+        const focusable = modalRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    // Focus the modal container on mount
+    modalRef.current?.focus();
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  return (
   <motion.div
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
@@ -63,11 +93,16 @@ const RecommendationModal = ({
     onClick={onClose}
   >
     <motion.div
+      ref={modalRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Details for ${rec.title}`}
+      tabIndex={-1}
       initial={{ opacity: 0, scale: 0.95, y: 12 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95, y: 12 }}
       transition={{ duration: 0.2 }}
-      className="relative max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-slate-200/70 bg-white shadow-2xl dark:border-slate-700/60 dark:bg-slate-900"
+      className="relative max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-slate-200/70 bg-white shadow-2xl dark:border-slate-700/60 dark:bg-slate-900 focus:outline-none"
       onClick={(e) => e.stopPropagation()}
     >
       {rec.poster_url && (
@@ -135,7 +170,8 @@ const RecommendationModal = ({
       </div>
     </motion.div>
   </motion.div>
-);
+  );
+};
 
 const DashboardPage = () => {
   const router = useRouter();
@@ -154,9 +190,6 @@ const DashboardPage = () => {
   useEffect(() => {
     prevTabIdx.current = dashTabs.indexOf(activeTab);
   }, [activeTab]);
-
-  const chartRef = useRef<HTMLDivElement | null>(null);
-  const chartInstanceRef = useRef<echarts.ECharts | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -213,91 +246,16 @@ const DashboardPage = () => {
     return { total: recommendations.length, movies, books, favorites };
   }, [recommendations]);
 
-  // Callback ref — initializes ECharts the moment the div mounts in the DOM
-  const initChart = useCallback(
-    (node: HTMLDivElement | null) => {
-      // Dispose previous instance
-      if (chartInstanceRef.current) {
-        chartInstanceRef.current.dispose();
-        chartInstanceRef.current = null;
-      }
-      chartRef.current = node;
-      if (!node || loading || genreChartData.length === 0) return;
-
-      const isDark = document.documentElement.classList.contains("dark");
-      const chart = echarts.init(node);
-      chartInstanceRef.current = chart;
-
-      const palette = [
-        "#6366f1", "#22c55e", "#f59e0b", "#ec4899",
-        "#06b6d4", "#f97316", "#8b5cf6", "#14b8a6",
-      ];
-
-      chart.setOption({
-        tooltip: {
-          trigger: "item",
-          backgroundColor: isDark ? "rgba(15, 23, 42, 0.95)" : "rgba(255,255,255,0.95)",
-          borderColor: isDark ? "rgba(100,116,139,0.3)" : "rgba(203,213,225,0.5)",
-          textStyle: { color: isDark ? "#e2e8f0" : "#334155", fontSize: 12 },
-          formatter: "{b}: {c} ({d}%)",
-        },
-        legend: {
-          orient: "vertical",
-          right: 12,
-          top: "center",
-          textStyle: { color: isDark ? "#94a3b8" : "#64748b", fontSize: 14, fontWeight: 500 },
-          itemWidth: 14,
-          itemHeight: 14,
-          itemGap: 14,
-        },
-        series: [
-          {
-            type: "pie",
-            radius: ["40%", "70%"],
-            center: ["35%", "50%"],
-            avoidLabelOverlap: true,
-            itemStyle: {
-              borderRadius: 6,
-              borderColor: isDark ? "#0f172a" : "#ffffff",
-              borderWidth: 2,
-            },
-            label: { show: false },
-            emphasis: {
-              label: { show: true, fontSize: 13, fontWeight: "bold", color: isDark ? "#e2e8f0" : "#334155" },
-              itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: "rgba(0, 0, 0, 0.2)" },
-            },
-            data: genreChartData.map((d, i) => ({
-              name: d.genre,
-              value: d.total,
-              itemStyle: { color: palette[i % palette.length] },
-            })),
-          },
-        ],
-        animationDuration: 600,
-        animationEasing: "cubicOut",
-      });
-
-      const handleResize = () => chart.resize();
-      window.addEventListener("resize", handleResize);
-
-      // Cleanup on unmount handled by next call with node=null
-      return () => {
-        window.removeEventListener("resize", handleResize);
-      };
-    },
-    [loading, genreChartData],
-  );
-
-  const handleSignOut = async () => {
+  const handleSignOut = useCallback(async () => {
     await signOut();
     router.push("/");
-  };
+  }, [signOut, router]);
 
-  const navItems = [
+  const navItems = useMemo(() => [
     { name: "Dashboard", link: "/dashboard" },
     { name: "History", link: "/history" },
     { name: "Settings", link: "/settings" },
-  ];
+  ], []);
 
   return (
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
@@ -392,7 +350,7 @@ const DashboardPage = () => {
           </div>
 
           {/* Tab Navigation */}
-          <div className="mb-6 flex gap-1 overflow-x-auto rounded-xl border border-slate-200/70 bg-white/80 p-1 shadow-sm backdrop-blur-sm dark:border-slate-700/60 dark:bg-slate-900/60">
+          <div className="mb-4 flex gap-1 overflow-x-auto rounded-xl border sm:mb-6 border-slate-200/70 bg-white/80 p-1 shadow-sm backdrop-blur-sm dark:border-slate-700/60 dark:bg-slate-900/60">
             {([
               { id: "overview" as const, label: "Overview", icon: <TrendingUp size={15} /> },
               { id: "picks" as const, label: "Recent Picks", icon: <Sparkles size={15} /> },
@@ -419,14 +377,14 @@ const DashboardPage = () => {
             {activeTab === "overview" && (
               <motion.div key="overview" initial={{ opacity: 0, x: slideDir * 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: slideDir * -30 }} transition={{ duration: 0.2 }} className="space-y-4">
                 {/* Stats */}
-                <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
                   {[
                     { label: "Total Picks", value: stats.total, icon: TrendingUp, color: "text-indigo-500" },
                     { label: "Movies", value: stats.movies, icon: Film, color: "text-violet-500" },
                     { label: "Books", value: stats.books, icon: BookOpen, color: "text-emerald-500" },
                     { label: "Favorites", value: stats.favorites, icon: Sparkles, color: "text-amber-500" },
                   ].map((stat) => (
-                    <div key={stat.label} className="rounded-2xl border border-slate-200/70 bg-white/80 p-4 shadow-sm backdrop-blur-sm dark:border-slate-700/60 dark:bg-slate-900/60">
+                    <div key={stat.label} className="rounded-2xl border border-slate-200/70 bg-white/80 p-3 shadow-sm backdrop-blur-sm sm:p-4 dark:border-slate-700/60 dark:bg-slate-900/60">
                       <div className="flex items-center gap-2">
                         <stat.icon size={15} className={stat.color} />
                         <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{stat.label}</span>
@@ -437,7 +395,7 @@ const DashboardPage = () => {
                 </div>
 
                 {/* Quick Actions */}
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3">
                   {[
                     { title: "Account Settings", desc: "Update profile and preferences.", icon: Settings, href: "/settings" },
                     { title: "Latest Results", desc: "Jump to your latest picks.", icon: Sparkles, href: "/results" },
@@ -466,7 +424,7 @@ const DashboardPage = () => {
                     <button onClick={() => router.push("/history")} className="text-xs font-semibold text-indigo-600 transition-colors hover:text-indigo-500 dark:text-indigo-400">See all in history</button>
                   </div>
                   {loading ? (
-                    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
+                    <div className="grid grid-cols-2 gap-2 sm:gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                       {[...Array(5)].map((_, i) => (
                         <div key={i} className="overflow-hidden rounded-xl border border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/40">
                           <div className="aspect-[2/3] animate-pulse bg-slate-200 dark:bg-slate-800" />
@@ -479,7 +437,7 @@ const DashboardPage = () => {
                       <p>No recommendations yet. Start a quiz!</p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
+                    <div className="grid grid-cols-2 gap-2 sm:gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                       {recommendations.slice(0, 15).map((rec) => (
                         <article key={rec.id} onClick={() => setSelectedRec(rec)} className="group cursor-pointer overflow-hidden rounded-xl border border-slate-100 bg-slate-50 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/40">
                           <div className="relative aspect-[2/3] overflow-hidden bg-slate-200 dark:bg-slate-800">
@@ -524,7 +482,7 @@ const DashboardPage = () => {
                       Take a quiz to see your genres.
                     </div>
                   ) : (
-                    <div ref={initChart} className="h-72 w-full" />
+                    <GenrePieChart data={genreChartData} />
                   )}
                 </div>
               </motion.div>

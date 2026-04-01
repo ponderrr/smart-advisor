@@ -205,6 +205,7 @@ const RecommendationCard = ({
             <button
               type="button"
               onClick={() => onToggleFavorite(rec.id)}
+              aria-label={rec.is_favorited ? `Remove ${rec.title} from favorites` : `Add ${rec.title} to favorites`}
               className={cn(
                 "shrink-0 rounded-full p-2 transition-all",
                 rec.is_favorited

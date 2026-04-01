@@ -91,6 +91,7 @@ export const ExpandableText: React.FC<ExpandableTextProps> = ({
       {isTruncated && (
         <button
           onClick={() => setIsExpanded(!isExpanded)}
+          aria-expanded={isExpanded}
           className="mt-3 text-appAccent hover:text-indigo-400 text-sm sm:text-base font-medium transition-colors duration-200 enhanced-button" // Increased margin and font size
         >
           {isExpanded ? "Read Less" : "Read More"}

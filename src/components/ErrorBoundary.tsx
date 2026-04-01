@@ -97,6 +97,10 @@ export const setupGlobalErrorHandlers = (): (() => void) => {
 };
 
 class ErrorBoundary extends Component<Props, State> {
+  private globalErrorHandler:
+    | ((event: CustomEvent<GlobalErrorEventDetail>) => void)
+    | null = null;
+
   public state: State = {
     hasError: false,
   };
@@ -127,15 +131,15 @@ class ErrorBoundary extends Component<Props, State> {
     );
 
     // Store the handler reference for cleanup
-    (this as any).globalErrorHandler = handleGlobalError;
+    this.globalErrorHandler = handleGlobalError;
   }
 
   public componentWillUnmount() {
     // Remove global error event listener
-    if ((this as any).globalErrorHandler) {
+    if (this.globalErrorHandler) {
       window.removeEventListener(
         GLOBAL_ERROR_EVENT,
-        (this as any).globalErrorHandler as EventListener,
+        this.globalErrorHandler as EventListener,
       );
     }
   }

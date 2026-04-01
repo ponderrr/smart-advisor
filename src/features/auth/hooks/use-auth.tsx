@@ -8,6 +8,11 @@ import {
 import { User as SupabaseUser, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@/features/auth/types/user";
+import {
+  MFAEnrollData,
+  MFAListFactorsData,
+  AALData,
+} from "@/features/auth/types/mfa";
 import { authService } from "@/features/auth/services/auth-service";
 import { sessionManagementService } from "@/features/auth/services/session-management";
 
@@ -40,17 +45,23 @@ interface AuthContextType {
   ) => Promise<{ error: string | null }>;
   updateEmail: (email: string) => Promise<{ error: string | null }>;
   updatePassword: (password: string) => Promise<{ error: string | null }>;
-  enrollMFA: () => Promise<{ data?: any; error: string | null }>;
+  enrollMFA: () => Promise<{
+    data?: MFAEnrollData | null;
+    error: string | null;
+  }>;
   verifyMFA: (
     factorId: string,
     code: string,
-  ) => Promise<{ data?: any; error: string | null }>;
+  ) => Promise<{ data?: unknown; error: string | null }>;
   unenrollMFA: (factorId: string) => Promise<{ error: string | null }>;
-  listMFAFactors: () => Promise<{ data?: any; error: string | null }>;
+  listMFAFactors: () => Promise<{
+    data?: MFAListFactorsData | null;
+    error: string | null;
+  }>;
   signOutAllDevices: () => Promise<{ error: string | null }>;
   deleteAccount: () => Promise<{ error: string | null }>;
   disableAccount: () => Promise<{ error: string | null }>;
-  getAALLevel: () => Promise<{ data?: any; error: string | null }>;
+  getAALLevel: () => Promise<{ data?: AALData | null; error: string | null }>;
   generateBackupCodes: () => Promise<{
     codes: string[];
     error: string | null;

@@ -199,7 +199,7 @@ class EnhancedRecommendationsService {
             await databaseService.saveRecommendation({
               ...enhancedRec,
               user_id: userId,
-            } as any);
+            } as Omit<Recommendation, "id" | "created_at">);
 
           if (error) {
             return this.toRecommendation(

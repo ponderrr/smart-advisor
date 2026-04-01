@@ -61,6 +61,7 @@ export const FileUpload = ({
           ref={fileInputRef}
           id="file-upload-handle"
           type="file"
+          aria-label="Upload file"
           onChange={(e) => handleFileChange(Array.from(e.target.files || []))}
           className="hidden"
         />

@@ -13,6 +13,7 @@ import { MfaSetup } from "./mfa-setup";
 import { MfaChallengeScreen } from "./mfa-challenge-screen";
 import { VerifyEmailScreen } from "./verify-email-screen";
 import { FormField, PasswordInput, AuthHoverButton } from "./auth-shared";
+import { MFAFactor, MFAListFactorsData } from "../types/mfa";
 
 export type AuthMode =
   | "signin"
@@ -72,8 +73,8 @@ interface AuthFormProps {
   onVerifyMFA: (
     factorId: string,
     code: string,
-  ) => Promise<{ data?: any; error: string | null }>;
-  onListMFAFactors: () => Promise<{ data?: any; error: string | null }>;
+  ) => Promise<{ data?: unknown; error: string | null }>;
+  onListMFAFactors: () => Promise<{ data?: MFAListFactorsData | null; error: string | null }>;
   onVerifyBackupCode: (code: string) => Promise<{ error: string | null }>;
   initialMfaRequired?: boolean;
   onMfaChallengeResolved?: () => void;
@@ -134,7 +135,7 @@ export const AuthForm = ({
     if (initialMfaRequired && !mfaFactorId) {
       setMode("mfa-challenge");
       onListMFAFactors().then((result) => {
-        if (result.data?.totp?.length > 0) {
+        if (result.data?.totp && result.data.totp.length > 0) {
           setMfaFactorId(result.data.totp[0].id);
         }
       });
@@ -310,14 +311,14 @@ export const AuthForm = ({
           setErrors({ general: result.error });
         } else if (result.mfaRequired) {
           const factorsResult = await onListMFAFactors();
-          if (factorsResult.data?.totp?.length > 0) {
+          if (factorsResult.data?.totp && factorsResult.data.totp.length > 0) {
             setMfaFactorId(factorsResult.data.totp[0].id);
           }
           setMode("mfa-challenge");
         } else {
           const factorsResult = await onListMFAFactors();
           const hasVerified = factorsResult.data?.totp?.some(
-            (f: any) => f.status === "verified",
+            (f: MFAFactor) => f.status === "verified",
           );
           if (!hasVerified) {
             setMode("mfa-setup");

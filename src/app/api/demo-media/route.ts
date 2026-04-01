@@ -1,4 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  searchOpenLibraryDocs,
+  openLibraryCoverUrl,
+  searchTmdbMovies,
+  discoverTmdbMovies,
+  tmdbPosterUrl,
+  tmdbWebUrl,
+  sanitizeHtml,
+  type TmdbMovieResult,
+} from "@/lib/api-helpers";
+import { API_URLS } from "@/lib/constants";
 
 type DemoItem = {
   id: string;
@@ -10,46 +21,25 @@ type DemoItem = {
   infoLink: string;
 };
 
-const sanitize = (text: string) => text.replace(/<[^>]*>/g, "").trim();
-
 async function fetchBooks(query: string, limit: number): Promise<DemoItem[]> {
-  const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(
-    query,
-  )}&limit=${Math.max(limit * 2, 12)}&fields=key,title,author_name,first_publish_year,cover_i,number_of_pages_median`;
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 8000);
-
-  try {
-    const response = await fetch(url, {
-      cache: "no-store",
-      signal: controller.signal,
-    });
-    clearTimeout(timeout);
-    if (!response.ok) throw new Error(`Open Library error ${response.status}`);
-    const data = await response.json();
-    const docs = Array.isArray(data.docs) ? data.docs : [];
-    return docs
-      .filter((doc: any) => doc.cover_i && doc.title)
-      .map(
-        (doc: any): DemoItem => ({
-          id: doc.key || crypto.randomUUID(),
-          type: "book",
-          title: doc.title,
-          subtitle: Array.isArray(doc.author_name)
-            ? doc.author_name.join(", ")
-            : "Unknown author",
-          description: doc.first_publish_year
-            ? `First published in ${doc.first_publish_year}${doc.number_of_pages_median ? ` · ${doc.number_of_pages_median} pages` : ""}`
-            : "No description available.",
-          image: `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`,
-          infoLink: `https://openlibrary.org${doc.key}`,
-        }),
-      )
-      .slice(0, limit);
-  } catch {
-    clearTimeout(timeout);
-    return [];
-  }
+  const docs = await searchOpenLibraryDocs(query, limit);
+  return docs
+    .map(
+      (doc): DemoItem => ({
+        id: doc.key || crypto.randomUUID(),
+        type: "book",
+        title: doc.title!,
+        subtitle: Array.isArray(doc.author_name)
+          ? doc.author_name.join(", ")
+          : "Unknown author",
+        description: doc.first_publish_year
+          ? `First published in ${doc.first_publish_year}${doc.number_of_pages_median ? ` · ${doc.number_of_pages_median} pages` : ""}`
+          : "No description available.",
+        image: openLibraryCoverUrl(doc.cover_i!),
+        infoLink: `${API_URLS.OPEN_LIBRARY_BASE}${doc.key}`,
+      }),
+    )
+    .slice(0, limit);
 }
 
 async function fetchMovies(
@@ -57,27 +47,16 @@ async function fetchMovies(
   apiKey: string,
   limit: number,
 ): Promise<DemoItem[]> {
-  const searchUrl = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(
-    query,
-  )}&include_adult=false&language=en-US&page=1&api_key=${apiKey}`;
-  const response = await fetch(searchUrl, { cache: "no-store" });
-  if (!response.ok) throw new Error(`TMDB error ${response.status}`);
-  const data = await response.json();
-  let items = Array.isArray(data.results) ? data.results : [];
+  let items: TmdbMovieResult[] = await searchTmdbMovies(query, apiKey);
 
   if (items.length === 0) {
-    const discoverUrl = `https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=en-US&sort_by=popularity.desc&page=1&api_key=${apiKey}`;
-    const discoverResponse = await fetch(discoverUrl, { cache: "no-store" });
-    if (discoverResponse.ok) {
-      const discoverData = await discoverResponse.json();
-      items = Array.isArray(discoverData.results) ? discoverData.results : [];
-    }
+    items = await discoverTmdbMovies(apiKey);
   }
 
   return items
-    .map((item: any): DemoItem | null => {
+    .map((item): DemoItem | null => {
       const poster = item?.poster_path
-        ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
+        ? tmdbPosterUrl(item.poster_path)
         : null;
       if (!item?.title || !poster) return null;
       return {
@@ -87,12 +66,12 @@ async function fetchMovies(
         subtitle: item.release_date
           ? String(item.release_date).slice(0, 4)
           : "Movie",
-        description: sanitize(item.overview || "No description available."),
+        description: sanitizeHtml(item.overview || "No description available."),
         image: poster,
-        infoLink: `https://www.themoviedb.org/movie/${item.id}`,
+        infoLink: tmdbWebUrl(item.id),
       };
     })
-    .filter((item: DemoItem | null): item is DemoItem => Boolean(item))
+    .filter((item): item is DemoItem => Boolean(item))
     .slice(0, limit);
 }
 

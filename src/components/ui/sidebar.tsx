@@ -87,6 +87,8 @@ export const DesktopSidebar = ({
   return (
     <>
       <motion.div
+        role="navigation"
+        aria-label="Sidebar navigation"
         className={cn(
           "h-full px-4 py-4 hidden  md:flex md:flex-col bg-neutral-100 dark:bg-neutral-800 w-[300px] shrink-0",
           className,
@@ -119,10 +121,16 @@ export const MobileSidebar = ({
         {...props}
       >
         <div className="flex justify-end z-20 w-full">
-          <IconMenu2
-            className="text-neutral-800 dark:text-neutral-200"
+          <button
+            type="button"
+            aria-label="Open sidebar"
             onClick={() => setOpen(!open)}
-          />
+            className="p-1"
+          >
+            <IconMenu2
+              className="text-neutral-800 dark:text-neutral-200"
+            />
+          </button>
         </div>
         <AnimatePresence>
           {open && (
@@ -139,12 +147,14 @@ export const MobileSidebar = ({
                 className,
               )}
             >
-              <div
+              <button
+                type="button"
+                aria-label="Close sidebar"
                 className="absolute right-10 top-10 z-50 text-neutral-800 dark:text-neutral-200"
                 onClick={() => setOpen(!open)}
               >
                 <IconX />
-              </div>
+              </button>
               {children}
             </motion.div>
           )}
@@ -181,6 +191,7 @@ export const SidebarLink = ({
   return (
     <a
       href={link.href}
+      aria-label={link.label}
       className={cn(
         "flex items-center justify-start gap-2 group/sidebar py-2",
         className,

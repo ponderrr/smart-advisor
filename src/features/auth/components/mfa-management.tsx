@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { authService } from "../services/auth-service";
+import { MFAFactor } from "../types/mfa";
 import {
   ShieldOff,
   ShieldCheck,
@@ -27,7 +28,7 @@ export const MfaManagement = ({
   mfaEnabled,
   onMfaStatusChange,
 }: MfaManagementProps) => {
-  const [factors, setFactors] = useState<any[]>([]);
+  const [factors, setFactors] = useState<MFAFactor[]>([]);
   const [loading, setLoading] = useState(false);
   const [unenrollingId, setUnenrollingId] = useState<string | null>(null);
   const [backupCodeCount, setBackupCodeCount] = useState<number | null>(null);
