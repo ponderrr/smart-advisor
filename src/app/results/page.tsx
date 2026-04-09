@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/features/auth/hooks/use-auth";
+import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import { enhancedRecommendationsService } from "@/features/recommendations/services/enhanced-recommendations-service";
 import { databaseService } from "@/features/recommendations/services/database-service";
 import { Recommendation } from "@/features/recommendations/types/recommendation";
@@ -282,6 +283,7 @@ const RecommendationCard = ({
 const ResultsPage = () => {
   const router = useRouter();
   const { user, signOut } = useAuth();
+  const { ready } = useRequireAuth();
   const { contentType, answers, reset } = useQuizStore();
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -592,8 +594,22 @@ const ResultsPage = () => {
     setShowShareMenu(false);
   };
 
+  if (!ready) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
+      </div>
+    );
+  }
+
   if (!contentType || !answers?.length || !user) {
-    return null;
+    // Missing quiz state — redirect to start a new quiz
+    router.replace("/content-selection");
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
+      </div>
+    );
   }
 
   const topBar = (

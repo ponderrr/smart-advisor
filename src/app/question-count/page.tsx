@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/features/auth/hooks/use-auth";
+import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import { useQuizStore } from "@/features/quiz/store/quiz-store";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { GlowPillButton } from "@/components/ui/glow-pill-button";
@@ -26,6 +27,7 @@ const PREF_QUESTION_COUNT_KEY = "smart_advisor_pref_question_count";
 const QuestionCountPage = () => {
   const router = useRouter();
   const { signOut } = useAuth();
+  const { ready } = useRequireAuth();
   const { contentType, setQuestionCount: setStoreQuestionCount } =
     useQuizStore();
   const [questionCount, setQuestionCount] = useState(5);
@@ -76,7 +78,13 @@ const QuestionCountPage = () => {
     { name: "Settings", link: "/settings" },
   ];
 
-  if (!contentType) return null;
+  if (!ready || !contentType) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">

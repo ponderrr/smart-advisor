@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/features/auth/hooks/use-auth";
+import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
+import { AnimatedTabs } from "@/components/ui/animated-tabs";
 import { authService } from "@/features/auth/services/auth-service";
 import { MFAFactor } from "@/features/auth/types/mfa";
 import {
@@ -166,6 +168,7 @@ const SettingsPage = () => {
   const router = useRouter();
   const { user, session, signOut, updateProfile, updateEmail, updatePassword } =
     useAuth();
+  const { ready } = useRequireAuth();
 
   const settingsTabs: SettingsSection[] = ["profile", "security", "content", "integrations"];
   const [activeSection, setActiveSection] =
@@ -179,7 +182,7 @@ const SettingsPage = () => {
 
   const profileForm = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
-    defaultValues: { newName: "", age: user?.age ?? (undefined as unknown as number) },
+    defaultValues: { newName: user?.name ?? "", age: user?.age ?? 18 },
   });
 
   const emailForm = useForm<z.infer<typeof emailSchema>>({
@@ -431,8 +434,9 @@ const SettingsPage = () => {
   }, [message]);
 
   useEffect(() => {
+    if (user?.name) profileForm.setValue("newName", user.name);
     if (user?.age) profileForm.setValue("age", user.age);
-  }, [user?.age, profileForm]);
+  }, [user?.name, user?.age, profileForm]);
 
   // Check MFA status on mount and when panel closes
   useEffect(() => {
@@ -478,6 +482,14 @@ const SettingsPage = () => {
       showMessage("Backup email removed.", "success");
     }
   };
+
+  if (!ready) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
@@ -556,23 +568,11 @@ const SettingsPage = () => {
           </div>
 
           {/* Tab Navigation */}
-          <div className="mb-6 flex gap-1 overflow-x-auto rounded-xl border border-slate-200/70 bg-white/80 p-1 shadow-sm backdrop-blur-sm dark:border-slate-700/60 dark:bg-slate-900/60">
-            {sectionTabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveSection(tab.id)}
-                className={cn(
-                  "flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-semibold transition-all",
-                  activeSection === tab.id
-                    ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300"
-                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-200",
-                )}
-              >
-                {tab.icon}
-                <span className="hidden sm:inline">{tab.label}</span>
-              </button>
-            ))}
-          </div>
+          <AnimatedTabs
+            tabs={sectionTabs}
+            activeTab={activeSection}
+            onTabChange={(tab) => setActiveSection(tab as SettingsSection)}
+          />
 
           {/* Toast Message */}
           <AnimatePresence>

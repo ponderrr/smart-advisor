@@ -26,6 +26,8 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/features/auth/hooks/use-auth";
+import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
+import { AnimatedTabs } from "@/components/ui/animated-tabs";
 import { Recommendation } from "@/features/recommendations/types/recommendation";
 import { databaseService } from "@/features/recommendations/services/database-service";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -173,9 +175,16 @@ const RecommendationModal = ({
   );
 };
 
+const AuthSpinner = () => (
+  <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
+    <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
+  </div>
+);
+
 const DashboardPage = () => {
   const router = useRouter();
   const { user, signOut } = useAuth();
+  const { ready } = useRequireAuth();
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -256,6 +265,8 @@ const DashboardPage = () => {
     { name: "History", link: "/history" },
     { name: "Settings", link: "/settings" },
   ], []);
+
+  if (!ready) return <AuthSpinner />;
 
   return (
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
@@ -350,27 +361,15 @@ const DashboardPage = () => {
           </div>
 
           {/* Tab Navigation */}
-          <div className="mb-4 flex gap-1 overflow-x-auto rounded-xl border sm:mb-6 border-slate-200/70 bg-white/80 p-1 shadow-sm backdrop-blur-sm dark:border-slate-700/60 dark:bg-slate-900/60">
-            {([
+          <AnimatedTabs
+            tabs={[
               { id: "overview" as const, label: "Overview", icon: <TrendingUp size={15} /> },
               { id: "picks" as const, label: "Recent Picks", icon: <Sparkles size={15} /> },
               { id: "genres" as const, label: "Genres", icon: <BarChart3 size={15} /> },
-            ]).map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  "flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-semibold transition-all",
-                  activeTab === tab.id
-                    ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300"
-                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-200",
-                )}
-              >
-                {tab.icon}
-                <span className="hidden sm:inline">{tab.label}</span>
-              </button>
-            ))}
-          </div>
+            ]}
+            activeTab={activeTab}
+            onTabChange={(tab) => setActiveTab(tab)}
+          />
 
           {/* Tab Content */}
           <AnimatePresence mode="wait">
@@ -398,7 +397,7 @@ const DashboardPage = () => {
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3">
                   {[
                     { title: "Account Settings", desc: "Update profile and preferences.", icon: Settings, href: "/settings" },
-                    { title: "Latest Results", desc: "Jump to your latest picks.", icon: Sparkles, href: "/results" },
+                    { title: "Latest Results", desc: "Jump to your latest picks.", icon: Sparkles, href: "/history" },
                     { title: "History", desc: "Browse past recommendations.", icon: Clock, href: "/history" },
                   ].map((card) => (
                     <button key={card.title} onClick={() => router.push(card.href)} className={cn("group flex items-start gap-4 rounded-2xl border border-slate-200/70 bg-white/80 p-5 text-left shadow-sm backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md", "dark:border-slate-700/60 dark:bg-slate-900/60 dark:hover:border-indigo-500/50")}>

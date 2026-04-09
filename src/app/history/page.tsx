@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/features/auth/hooks/use-auth";
+import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
+import { AnimatedTabs } from "@/components/ui/animated-tabs";
 import {
   databaseService,
   FilterOptions,
@@ -210,6 +212,7 @@ const RecommendationModal = ({
 const AccountHistoryPage = () => {
   const router = useRouter();
   const { signOut } = useAuth();
+  const { ready } = useRequireAuth();
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -354,6 +357,14 @@ const AccountHistoryPage = () => {
     };
   }, [recommendations]);
 
+  if (!ready) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
       <Navbar>
@@ -459,28 +470,16 @@ const AccountHistoryPage = () => {
           </div>
 
           {/* Tab Navigation */}
-          <div className="mb-6 flex gap-1 overflow-x-auto rounded-xl border border-slate-200/70 bg-white/80 p-1 shadow-sm backdrop-blur-sm dark:border-slate-700/60 dark:bg-slate-900/60">
-            {([
-              { value: "all" as const, label: "All", icon: <LayoutGrid size={15} /> },
-              { value: "movies" as const, label: "Movies", icon: <Film size={15} /> },
-              { value: "books" as const, label: "Books", icon: <BookOpen size={15} /> },
-              { value: "favorites" as const, label: "Favorites", icon: <Star size={15} /> },
-            ]).map((tab) => (
-              <button
-                key={tab.value}
-                onClick={() => setFilter(tab.value)}
-                className={cn(
-                  "flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-semibold transition-all",
-                  filter === tab.value
-                    ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300"
-                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-200",
-                )}
-              >
-                {tab.icon}
-                <span className="hidden sm:inline">{tab.label}</span>
-              </button>
-            ))}
-          </div>
+          <AnimatedTabs
+            tabs={[
+              { id: "all" as const, label: "All", icon: <LayoutGrid size={15} /> },
+              { id: "movies" as const, label: "Movies", icon: <Film size={15} /> },
+              { id: "books" as const, label: "Books", icon: <BookOpen size={15} /> },
+              { id: "favorites" as const, label: "Favorites", icon: <Star size={15} /> },
+            ]}
+            activeTab={filter}
+            onTabChange={(tab) => setFilter(tab)}
+          />
 
           {/* Stats + Sort */}
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

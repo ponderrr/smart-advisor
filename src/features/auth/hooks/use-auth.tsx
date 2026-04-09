@@ -58,6 +58,10 @@ interface AuthContextType {
     data?: MFAListFactorsData | null;
     error: string | null;
   }>;
+  mfaPending: boolean;
+  clearMfaPending: () => void;
+  sessionExpired: boolean;
+  clearSessionExpired: () => void;
   signOutAllDevices: () => Promise<{ error: string | null }>;
   deleteAccount: () => Promise<{ error: string | null }>;
   disableAccount: () => Promise<{ error: string | null }>;
@@ -128,6 +132,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const [signupCooldown, setSignupCooldown] = useState(false);
+  const [mfaPending, setMfaPending] = useState(false);
+  const [sessionExpired, setSessionExpired] = useState(false);
 
   const fetchUserProfile = async (
     _supabaseUser: SupabaseUser,
@@ -187,6 +193,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setSession(session);
 
           if (event === "SIGNED_IN" && session?.user) {
+            setSessionExpired(false);
             fetchUserProfile(session.user, abortController.signal);
             // Ensure a session record exists for Active Sessions tracking
             if (typeof window !== "undefined" && session.access_token) {
@@ -202,6 +209,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
           } else if (event === "TOKEN_REFRESHED" && session?.user) {
             setSession(session);
+          } else if (event === "SIGNED_OUT") {
+            // If user had a session before, mark as expired (vs explicit sign out)
+            const hadSession = !!user;
+            setUser(null);
+            setLoading(false);
+            if (hadSession) {
+              setSessionExpired(true);
+            }
           } else if (!session?.user) {
             setUser(null);
             setLoading(false);
@@ -286,6 +301,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           aalData.nextLevel === "aal2" &&
           aalData.currentLevel === "aal1"
         ) {
+          // Set mfaPending BEFORE returning so React batches it with
+          // setLoading(false) in the finally block — this prevents the
+          // auth page redirect useEffect from firing during the gap.
+          setMfaPending(true);
           return { error: null, mfaRequired: true };
         }
       }
@@ -367,6 +386,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setError(result.error);
       } else {
         clearSessionPreference();
+        setMfaPending(false);
+        setSessionExpired(false);
         setUser(null);
         setSession(null);
         setLoading(false); // Explicitly set loading to false on sign out
@@ -542,6 +563,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const result = await authService.verifyMFA(factorId, code);
       if (result.error) {
         setError(result.error);
+      } else {
+        setMfaPending(false);
       }
       return result;
     } catch (error) {
@@ -695,6 +718,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const result = await authService.verifyBackupCode(code);
       if (result.error) {
         setError(result.error);
+      } else {
+        setMfaPending(false);
       }
       return result;
     } catch (error) {
@@ -726,12 +751,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return authService.removeBackupEmail();
   };
 
+  const clearMfaPending = () => setMfaPending(false);
+  const clearSessionExpired = () => setSessionExpired(false);
+
   const value = {
     user,
     session,
     loading,
     error,
     signupCooldown,
+    mfaPending,
+    clearMfaPending,
+    sessionExpired,
+    clearSessionExpired,
     signIn,
     signUp,
     signOut,

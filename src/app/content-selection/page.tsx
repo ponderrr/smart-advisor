@@ -8,6 +8,7 @@ const VALIDATION_FLASH_MS = 650;
 const VALIDATION_MESSAGE_MS = 3200;
 import { Check, ArrowLeft, ArrowRight } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
+import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import { useQuizStore } from "@/features/quiz/store/quiz-store";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { GlowPillButton } from "@/components/ui/glow-pill-button";
@@ -112,6 +113,7 @@ const SelectionCard: React.FC<SelectionCardProps> = ({
 const ContentSelectionPage = () => {
   const router = useRouter();
   const { signOut } = useAuth();
+  const { ready } = useRequireAuth();
   const { setContentType } = useQuizStore();
   const [selectedType, setSelectedType] = useState<ContentType>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -182,6 +184,14 @@ const ContentSelectionPage = () => {
       setSelectedType(storedContent as ContentType);
     }
   }, []);
+
+  if (!ready) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
