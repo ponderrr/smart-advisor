@@ -78,6 +78,7 @@ interface AuthFormProps {
   onVerifyBackupCode: (code: string) => Promise<{ error: string | null }>;
   initialMfaRequired?: boolean;
   onMfaChallengeResolved?: () => void;
+  onMfaChallengeStarted?: () => void;
 }
 
 export const AuthForm = ({
@@ -95,6 +96,7 @@ export const AuthForm = ({
   onVerifyBackupCode,
   initialMfaRequired = false,
   onMfaChallengeResolved,
+  onMfaChallengeStarted,
 }: AuthFormProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -310,6 +312,8 @@ export const AuthForm = ({
         if (result.error) {
           setErrors({ general: result.error });
         } else if (result.mfaRequired) {
+          // Signal parent BEFORE async work to block redirect immediately
+          onMfaChallengeStarted?.();
           const factorsResult = await onListMFAFactors();
           if (factorsResult.data?.totp && factorsResult.data.totp.length > 0) {
             setMfaFactorId(factorsResult.data.totp[0].id);
