@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
-import { useVirtualizer } from "@tanstack/react-virtual";
+import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { useQueryState, parseAsStringLiteral } from "nuqs";
 import Image from "next/image";
 import {
@@ -16,7 +16,6 @@ import {
   Star,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import { AnimatedTabs } from "@/components/ui/animated-tabs";
 import {
@@ -24,19 +23,10 @@ import {
   FilterOptions,
 } from "@/features/recommendations/services/database-service";
 import { Recommendation } from "@/features/recommendations/types/recommendation";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { GlowPillButton } from "@/components/ui/glow-pill-button";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
-import {
-  Navbar,
-  NavBody,
-  NavItems,
-  MobileNav,
-  NavbarLogo,
-  MobileNavHeader,
-  MobileNavToggle,
-  MobileNavMenu,
-} from "@/components/ui/resizable-navbar";
+import { PageLoader } from "@/components/ui/loader";
+import { AppNavbar } from "@/components/app-navbar";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -211,11 +201,9 @@ const RecommendationModal = ({
 
 const AccountHistoryPage = () => {
   const router = useRouter();
-  const { signOut } = useAuth();
   const { ready } = useRequireAuth();
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const historyTabs = ["all", "movies", "books", "favorites"] as const;
   const [filter, setFilter] = useQueryState(
     "filter",
@@ -229,8 +217,9 @@ const AccountHistoryPage = () => {
   const [sortBy, setSortBy] = useState<SortMode>("newest");
   const [selectedRec, setSelectedRec] = useState<Recommendation | null>(null);
 
-  // Virtual scroll setup
-  const scrollRef = useRef<HTMLDivElement>(null);
+  // Virtual scroll setup — uses the window scroll so the global navbar's
+  // scroll-blur logic still fires on this page.
+  const listRef = useRef<HTMLDivElement>(null);
   const [colCount, setColCount] = useState(2);
 
   useEffect(() => {
@@ -247,18 +236,14 @@ const AccountHistoryPage = () => {
 
   const rowCount = Math.ceil(recommendations.length / colCount);
 
-  const rowVirtualizer = useVirtualizer({
+  const rowVirtualizer = useWindowVirtualizer({
     count: rowCount,
-    getScrollElement: () => scrollRef.current,
-    estimateSize: () => 420,
+    // Card = aspect-[2/3] poster (≈ 1.5× column width) + ~150px content + padding.
+    // Use a generous estimate so the card body never gets clipped at any breakpoint.
+    estimateSize: () => 600,
     overscan: 3,
+    scrollMargin: listRef.current?.offsetTop ?? 0,
   });
-
-  const historyNavItems = [
-    { name: "Dashboard", link: "/dashboard" },
-    { name: "History", link: "/history" },
-    { name: "Settings", link: "/settings" },
-  ];
 
   useEffect(() => {
     const loadRecommendations = async () => {
@@ -289,11 +274,6 @@ const AccountHistoryPage = () => {
 
     loadRecommendations();
   }, [filter, sortBy]);
-
-  const handleSignOut = async () => {
-    await signOut();
-    router.push("/");
-  };
 
   const handleToggleFavorite = async (recommendationId: string) => {
     const { error } = await databaseService.toggleFavorite(recommendationId);
@@ -358,75 +338,12 @@ const AccountHistoryPage = () => {
   }, [recommendations]);
 
   if (!ready) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
-      </div>
-    );
+    return <PageLoader text="Loading..." />;
   }
 
   return (
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
-      <Navbar>
-        <NavBody>
-          <div className="flex w-[320px] shrink-0 items-center">
-            <NavbarLogo />
-          </div>
-
-          <div className="flex flex-1 justify-center">
-            <NavItems items={historyNavItems} className="justify-center px-2" />
-          </div>
-
-          <div className="flex w-[320px] shrink-0 items-center justify-end gap-4">
-            <ThemeToggle />
-            <button
-              type="button"
-              onClick={handleSignOut}
-              className="text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400"
-            >
-              Sign Out
-            </button>
-          </div>
-        </NavBody>
-
-        <MobileNav>
-          <MobileNavHeader>
-            <NavbarLogo />
-            <div className="flex items-center gap-4">
-              <ThemeToggle />
-              <MobileNavToggle
-                isOpen={isMobileMenuOpen}
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              />
-            </div>
-          </MobileNavHeader>
-          <MobileNavMenu isOpen={isMobileMenuOpen}>
-            {historyNavItems.map((item) => (
-              <button
-                key={item.name}
-                type="button"
-                onClick={() => {
-                  router.push(item.link);
-                  setIsMobileMenuOpen(false);
-                }}
-                className="text-left text-xl font-black tracking-tight text-slate-800 dark:text-slate-100"
-              >
-                {item.name}
-              </button>
-            ))}
-            <button
-              type="button"
-              onClick={async () => {
-                await handleSignOut();
-                setIsMobileMenuOpen(false);
-              }}
-              className="text-left text-xl font-black tracking-tight text-rose-600 dark:text-rose-400"
-            >
-              Sign Out
-            </button>
-          </MobileNavMenu>
-        </MobileNav>
-      </Navbar>
+      <AppNavbar />
 
       <main className="px-4 pb-20 pt-28 sm:px-6 md:pt-36">
         <div className="mx-auto max-w-6xl">
@@ -541,10 +458,7 @@ const AccountHistoryPage = () => {
               </GlowPillButton>
             </div>
           ) : (
-            <div
-              ref={scrollRef}
-              className="h-[calc(100vh-340px)] overflow-auto"
-            >
+            <div ref={listRef}>
               <div
                 className="relative w-full"
                 style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
@@ -558,7 +472,7 @@ const AccountHistoryPage = () => {
                       className="absolute left-0 top-0 grid w-full gap-3"
                       style={{
                         height: `${virtualRow.size}px`,
-                        transform: `translateY(${virtualRow.start}px)`,
+                        transform: `translateY(${virtualRow.start - (rowVirtualizer.options.scrollMargin ?? 0)}px)`,
                         gridTemplateColumns: `repeat(${colCount}, 1fr)`,
                       }}
                     >

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import dynamic from "next/dynamic";
@@ -30,18 +30,9 @@ import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import { AnimatedTabs } from "@/components/ui/animated-tabs";
 import { Recommendation } from "@/features/recommendations/types/recommendation";
 import { databaseService } from "@/features/recommendations/services/database-service";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
-import {
-  Navbar,
-  NavBody,
-  NavItems,
-  MobileNav,
-  NavbarLogo,
-  MobileNavHeader,
-  MobileNavToggle,
-  MobileNavMenu,
-} from "@/components/ui/resizable-navbar";
+import { PageLoader } from "@/components/ui/loader";
+import { AppNavbar } from "@/components/app-navbar";
 import { cn } from "@/lib/utils";
 import { MfaSetupPrompt } from "@/components/mfa-setup-prompt";
 
@@ -175,19 +166,12 @@ const RecommendationModal = ({
   );
 };
 
-const AuthSpinner = () => (
-  <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
-    <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
-  </div>
-);
-
 const DashboardPage = () => {
   const router = useRouter();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const { ready } = useRequireAuth();
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [selectedRec, setSelectedRec] = useState<Recommendation | null>(null);
   const dashTabs = ["overview", "picks", "genres"] as const;
   const [activeTab, setActiveTab] = useQueryState(
@@ -255,79 +239,11 @@ const DashboardPage = () => {
     return { total: recommendations.length, movies, books, favorites };
   }, [recommendations]);
 
-  const handleSignOut = useCallback(async () => {
-    await signOut();
-    router.push("/");
-  }, [signOut, router]);
-
-  const navItems = useMemo(() => [
-    { name: "Dashboard", link: "/dashboard" },
-    { name: "History", link: "/history" },
-    { name: "Settings", link: "/settings" },
-  ], []);
-
-  if (!ready) return <AuthSpinner />;
+  if (!ready) return <PageLoader text="Loading..." />;
 
   return (
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
-      {/* Navbar */}
-      <Navbar>
-        <NavBody>
-          <div className="flex w-[320px] shrink-0 items-center">
-            <NavbarLogo />
-          </div>
-          <div className="flex flex-1 justify-center">
-            <NavItems items={navItems} className="justify-center px-2" />
-          </div>
-          <div className="flex w-[320px] shrink-0 items-center justify-end gap-4">
-            <ThemeToggle />
-            <button
-              type="button"
-              onClick={handleSignOut}
-              className="text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400"
-            >
-              Sign Out
-            </button>
-          </div>
-        </NavBody>
-        <MobileNav>
-          <MobileNavHeader>
-            <NavbarLogo />
-            <div className="flex items-center gap-4">
-              <ThemeToggle />
-              <MobileNavToggle
-                isOpen={isMobileMenuOpen}
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              />
-            </div>
-          </MobileNavHeader>
-          <MobileNavMenu isOpen={isMobileMenuOpen}>
-            {navItems.map((item) => (
-              <button
-                key={item.name}
-                type="button"
-                onClick={() => {
-                  router.push(item.link);
-                  setIsMobileMenuOpen(false);
-                }}
-                className="text-left text-xl font-black tracking-tight text-slate-800 dark:text-slate-100"
-              >
-                {item.name}
-              </button>
-            ))}
-            <button
-              type="button"
-              onClick={async () => {
-                await handleSignOut();
-                setIsMobileMenuOpen(false);
-              }}
-              className="text-left text-xl font-black tracking-tight text-rose-600 dark:text-rose-400"
-            >
-              Sign Out
-            </button>
-          </MobileNavMenu>
-        </MobileNav>
-      </Navbar>
+      <AppNavbar />
 
       <main className="px-4 pb-20 pt-28 sm:px-6 md:pt-36">
         <div className="mx-auto max-w-6xl">

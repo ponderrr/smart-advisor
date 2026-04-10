@@ -106,45 +106,63 @@ async function getRecommendation({
 }) {
   // Handle both Answer[] format (from frontend) and Record<string, string> (legacy)
   let answersText: string;
+  let answerCount = 0;
   if (Array.isArray(answers)) {
     answersText = answers
       .map((a: { question_text?: string; question_id?: string; answer_text?: string; selected_options?: string[] }) => {
         const question = a.question_text || a.question_id || "Question";
         const answer = a.selected_options?.length
           ? a.selected_options.join(", ")
-          : a.answer_text || "No answer";
-        return `Q: ${question}\nA: ${answer}`;
+          : a.answer_text || "(skipped)";
+        return `- ${question}\n  → ${answer}`;
       })
-      .join("\n\n");
+      .join("\n");
+    answerCount = answers.length;
   } else if (answers && typeof answers === "object") {
-    answersText = Object.entries(answers as Record<string, string>)
-      .map(([q, a]) => `Q: ${q}\nA: ${a}`)
-      .join("\n\n");
+    const entries = Object.entries(answers as Record<string, string>);
+    answersText = entries.map(([q, a]) => `- ${q}\n  → ${a}`).join("\n");
+    answerCount = entries.length;
   } else {
-    answersText = "No answers provided";
+    answersText = "(none)";
   }
 
-  const prompt = `Based on this personality profile, recommend ONE ${type} for ${name} (age ${age}).
+  if (answerCount === 0) {
+    throw new Error("No answers were provided for recommendation generation");
+  }
 
-Their answers:
+  const prompt = `${name} just finished a personalized quiz (${answerCount} questions). The quiz answers below ARE their personality profile — that's all the data you get and it's all the data you need. Do not ask for more, do not say it's incomplete, do not hedge.
+
+QUIZ ANSWERS (this IS the profile):
 ${answersText}
 
-${
-  isAdult
-    ? `This is an adult. You may recommend content with mature themes if it genuinely fits their profile.`
-    : `This is a minor. Recommend age-appropriate content only.`
-}
+AGE: ${age} ${isAdult ? "(adult — mature themes are fair game when they fit)" : "(minor — keep it age-appropriate)"}
 
-Return ONLY a JSON object. No markdown, no explanation. Exact format:
+Recommend ONE ${type} that fits these specific answers.
+
+HARD RULES for the response:
+- The "explanation" MUST quote or reference at least one specific answer from the list above. Do not write generic blurbs.
+- The "explanation" MUST NOT contain phrases like "without clear profile data", "without more information", "based on limited info", "I'm going with a safe pick", or any similar disclaimer. The profile is complete.
+- Pick something specific and confident, not safe and obvious.
+- "description" is a synopsis of the work itself (no spoilers). It must be different from "explanation".
+- "match_score" is YOUR honest 0-100 assessment of fit. Use this rubric strictly:
+  • 95-100: rare. Only when the pick hits at least 3 of their specific answers and there's almost nothing in the work that fights what they said they want.
+  • 85-94: strong. Hits multiple specific answers and feels clearly tailored to them.
+  • 75-84: solid. Aligns with the broad strokes (genre/mood/pace) but compromises on at least one preference.
+  • 65-74: soft. Plausible but reaches; you're betting on something they didn't directly ask for.
+  • Below 65: only when it's the best of a weak set — never default here.
+  Do NOT cluster scores around 90-92. If you'd score every pick the same, you're not being honest. Vary based on actual fit.
+
+Return ONLY a JSON object — no markdown fences, no commentary, no preamble. Exact shape:
 {
   "title": "Exact title",
   "description": "2-3 sentence synopsis without spoilers",
-  "explanation": "2-3 sentences explaining specifically why THIS person will love it, referencing their answers",
+  "explanation": "2-3 sentences referencing their actual answers and why this fits them",
   "genres": ["Genre 1", "Genre 2", "Genre 3"],
   "year": 2019,
   "director": ${type === "movie" ? '"Director name"' : "null"},
   "author": ${type === "book" ? '"Author name"' : "null"},
-  "rating": 8.4
+  "rating": 8.4,
+  "match_score": 87
 }`;
 
   const apiKey = Deno.env.get("ANTHROPIC_API_KEY");

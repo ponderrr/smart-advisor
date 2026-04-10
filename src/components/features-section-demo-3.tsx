@@ -1,4 +1,45 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import { Card, CardDescription, CardTitle } from "@/components/cards-demo-3";
+
+/**
+ * AutoVideo — wrapper around <video> that explicitly calls .play() on mount.
+ *
+ * Some browsers (notably Safari and Firefox under certain conditions) refuse
+ * to start the autoplay attribute when React first renders, then happily play
+ * once the page is revisited from cache. Calling .play() inside a useEffect
+ * after hydration forces the playback to start on the very first paint.
+ */
+const AutoVideo = (props: React.VideoHTMLAttributes<HTMLVideoElement>) => {
+  const ref = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    // Defensive: make sure muted is set as a property, not just an attribute,
+    // so the autoplay policy actually allows playback.
+    el.muted = true;
+    const promise = el.play();
+    if (promise && typeof promise.catch === "function") {
+      promise.catch(() => {
+        // Ignore — some browsers reject the play() promise on hidden tabs etc.
+      });
+    }
+  }, []);
+
+  return (
+    <video
+      ref={ref}
+      autoPlay
+      loop
+      muted
+      playsInline
+      preload="auto"
+      {...props}
+    />
+  );
+};
 
 export default function FeaturesSectionDemo() {
   const cardClassName =
@@ -11,8 +52,11 @@ export default function FeaturesSectionDemo() {
     >
       <div className="mx-auto max-w-7xl">
         <div className="mb-10 text-center md:mb-12">
-          <h2 className="mx-auto max-w-5xl text-4xl font-black tracking-tighter text-slate-900 dark:text-slate-100 md:text-5xl">
-            Why Use Smart Advisor
+          <p className="text-xs font-black uppercase tracking-[0.22em] text-indigo-500 dark:text-indigo-400">
+            Why Smart Advisor
+          </p>
+          <h2 className="mx-auto mt-3 max-w-5xl text-4xl font-black tracking-tighter text-slate-900 dark:text-slate-100 md:text-5xl">
+            Built for picks you can trust
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-sm text-slate-600 md:text-base dark:text-slate-300">
             Private by design, fast by default, and open source so you can see
@@ -24,11 +68,8 @@ export default function FeaturesSectionDemo() {
           {/* 1. Private Profile */}
           <Card className={cardClassName}>
             <div className="mt-5 h-[10rem] flex items-center justify-center">
-              <video
+              <AutoVideo
                 src="/animations/security-status-safe.webm"
-                autoPlay
-                loop
-                muted
                 className="h-full w-auto max-w-[180px]"
               />
             </div>
@@ -42,11 +83,8 @@ export default function FeaturesSectionDemo() {
           {/* 2. Warp Speed */}
           <Card className={cardClassName}>
             <div className="mt-5 h-[10rem] flex items-center justify-center">
-              <video
+              <AutoVideo
                 src="/animations/time-animation.webm"
-                autoPlay
-                loop
-                muted
                 className="h-full w-auto max-w-[180px]"
               />
             </div>
@@ -60,11 +98,8 @@ export default function FeaturesSectionDemo() {
           {/* 3. Easy Trust */}
           <Card className={cardClassName}>
             <div className="mt-5 h-[10rem] flex items-center justify-center">
-              <video
-                src="/animations/error-animation.webm"
-                autoPlay
-                loop
-                muted
+              <AutoVideo
+                src="/animations/LOCK-WITH-GREEN-TICK.webm"
                 className="h-full w-auto max-w-[180px]"
               />
             </div>
@@ -77,13 +112,14 @@ export default function FeaturesSectionDemo() {
 
           {/* 4. Choose Both */}
           <Card className={cardClassName}>
-            <div className="mt-5 h-[10rem] flex items-center justify-center">
-              <video
+            <div className="mt-5 flex h-[10rem] items-center justify-center gap-3">
+              <AutoVideo
                 src="/animations/Popcorn.webm"
-                autoPlay
-                loop
-                muted
-                className="h-full w-auto max-w-[280px]"
+                className="h-full w-auto max-w-[120px]"
+              />
+              <AutoVideo
+                src="/animations/Books.webm"
+                className="h-full w-auto max-w-[120px]"
               />
             </div>
             <CardTitle>Choose Across Both</CardTitle>

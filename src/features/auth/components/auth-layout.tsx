@@ -21,7 +21,7 @@ export const AuthLayout = ({ children, onLogoClick }: AuthLayoutProps) => {
               className="inline-flex items-center rounded-full px-1 py-1 transition-opacity hover:opacity-80"
               aria-label="Go to home"
             >
-              <BrandWordmark imageClassName="h-8 md:h-9" />
+              <BrandWordmark imageClassName="h-11 md:h-12" />
             </button>
             <ThemeToggle />
           </div>

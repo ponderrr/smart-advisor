@@ -265,7 +265,10 @@ export const SiteBanner = () => {
   };
 
   return (
-    <div ref={containerRef} className="relative z-[60] w-full">
+    <div
+      ref={containerRef}
+      className="fixed inset-x-0 top-0 z-[60] w-full"
+    >
       <AnimatePresence>
         {visibleBanners.map((banner) => {
           const config = bannerConfig[banner.type];

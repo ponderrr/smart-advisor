@@ -78,17 +78,32 @@ Requirements:
   - "select_all" — the user picks multiple answers (use for genre/preference lists, 1-2 per quiz)
   - "fill_in_blank" — the user types a free-text answer (use for open-ended questions, 1 per quiz)
 
+CRITICAL RULES FOR OPTIONS:
+- Every "single_select" question MUST include an "options" array with EXACTLY 4 distinct, short answer choices that directly answer the question text.
+- Every "select_all" question MUST include an "options" array with 6 to 8 distinct, short answer choices that the user could plausibly multi-select.
+- "fill_in_blank" questions MUST NOT include an "options" array. Include a "placeholder" string with a short example answer instead.
+- Options must be specific to the question — generic "Yes / No / Maybe" answers are forbidden unless the question literally calls for them.
+- Each option must be 1-5 words. No long sentences.
+
 Return ONLY a JSON array. No markdown, no explanation, no preamble. Example format:
 [
   {
     "id": "q1",
     "text": "If you could live inside any fictional world for a week, where would you go and why?",
-    "type": "fill_in_blank"
+    "type": "fill_in_blank",
+    "placeholder": "e.g. Middle-earth — to walk through the Shire"
   },
   {
     "id": "q2",
     "text": "What kind of story hooks you the fastest?",
-    "type": "single_select"
+    "type": "single_select",
+    "options": ["A surprising twist", "A character you can't look away from", "A vivid world", "A burning question"]
+  },
+  {
+    "id": "q3",
+    "text": "Which themes pull you in? Pick any that resonate.",
+    "type": "select_all",
+    "options": ["Found family", "Coming of age", "Mystery & intrigue", "Survival", "Forbidden love", "Redemption", "Power & politics"]
   }
 ]`;
 
@@ -121,6 +136,27 @@ Return ONLY a JSON array. No markdown, no explanation, no preamble. Example form
     const content = data.content[0]?.text ?? "[]";
     const clean = content.replace(/```json|```/g, "").trim();
     const questions = JSON.parse(clean);
+
+    if (!Array.isArray(questions) || questions.length === 0) {
+      throw new Error("AI returned no questions");
+    }
+
+    for (const q of questions) {
+      if (!q || typeof q.text !== "string" || typeof q.type !== "string") {
+        throw new Error("AI returned a malformed question");
+      }
+      if (q.type === "single_select" || q.type === "select_all") {
+        if (
+          !Array.isArray(q.options) ||
+          q.options.length < 4 ||
+          q.options.some((o: unknown) => typeof o !== "string" || !o.trim())
+        ) {
+          throw new Error(
+            `AI question "${q.text}" is missing valid options`,
+          );
+        }
+      }
+    }
 
     return new Response(JSON.stringify({ questions }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

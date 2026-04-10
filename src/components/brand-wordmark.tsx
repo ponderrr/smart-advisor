@@ -19,12 +19,12 @@ export function BrandWordmark({
       <img
         src="/svgs/smartadvisor/SmartAdvisor-LM.svg"
         alt="Smart Advisor"
-        className={cn("h-8 w-auto shrink-0 dark:hidden", imageClassName)}
+        className={cn("h-10 w-auto shrink-0 dark:hidden", imageClassName)}
       />
       <img
         src="/svgs/smartadvisor/SmartAdvisor-DM.svg"
         alt="Smart Advisor"
-        className={cn("hidden h-8 w-auto shrink-0 dark:block", imageClassName)}
+        className={cn("hidden h-10 w-auto shrink-0 dark:block", imageClassName)}
       />
     </span>
   );

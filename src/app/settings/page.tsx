@@ -30,19 +30,10 @@ import {
   MfaManagement,
   SessionsManagement,
 } from "@/features/auth/components";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import { GlowPillButton } from "@/components/ui/glow-pill-button";
-import {
-  Navbar,
-  NavBody,
-  NavItems,
-  MobileNav,
-  NavbarLogo,
-  MobileNavHeader,
-  MobileNavToggle,
-  MobileNavMenu,
-} from "@/components/ui/resizable-navbar";
+import { PageLoader } from "@/components/ui/loader";
+import { AppNavbar } from "@/components/app-navbar";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -166,7 +157,7 @@ SettingsInput.displayName = "SettingsInput";
 
 const SettingsPage = () => {
   const router = useRouter();
-  const { user, session, signOut, updateProfile, updateEmail, updatePassword } =
+  const { user, session, updateProfile, updateEmail, updatePassword } =
     useAuth();
   const { ready } = useRequireAuth();
 
@@ -178,7 +169,6 @@ const SettingsPage = () => {
   useEffect(() => {
     prevSectionIdx.current = settingsTabs.indexOf(activeSection);
   }, [activeSection]);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const profileForm = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
@@ -282,12 +272,6 @@ const SettingsPage = () => {
     }
   }, [verifyCode, closeVerifyModal]);
 
-  const navItems = [
-    { name: "Dashboard", link: "/dashboard" },
-    { name: "History", link: "/history" },
-    { name: "Settings", link: "/settings" },
-  ];
-
   const sectionTabs: {
     id: SettingsSection;
     label: string;
@@ -305,11 +289,6 @@ const SettingsPage = () => {
       []) as string[];
     return provider === "google" || providers.includes("google");
   })();
-
-  const handleSignOut = async () => {
-    await signOut();
-    router.push("/");
-  };
 
   const handleSaveProfile = profileForm.handleSubmit(async (data) => {
     setMessage(null);
@@ -484,73 +463,12 @@ const SettingsPage = () => {
   };
 
   if (!ready) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
-      </div>
-    );
+    return <PageLoader text="Loading..." />;
   }
 
   return (
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
-      {/* Navbar */}
-      <Navbar>
-        <NavBody>
-          <div className="flex w-[320px] shrink-0 items-center">
-            <NavbarLogo />
-          </div>
-          <div className="flex flex-1 justify-center">
-            <NavItems items={navItems} className="justify-center px-2" />
-          </div>
-          <div className="flex w-[320px] shrink-0 items-center justify-end gap-4">
-            <ThemeToggle />
-            <button
-              type="button"
-              onClick={handleSignOut}
-              className="text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400"
-            >
-              Sign Out
-            </button>
-          </div>
-        </NavBody>
-        <MobileNav>
-          <MobileNavHeader>
-            <NavbarLogo />
-            <div className="flex items-center gap-4">
-              <ThemeToggle />
-              <MobileNavToggle
-                isOpen={isMobileMenuOpen}
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              />
-            </div>
-          </MobileNavHeader>
-          <MobileNavMenu isOpen={isMobileMenuOpen}>
-            {navItems.map((item) => (
-              <button
-                key={item.name}
-                type="button"
-                onClick={() => {
-                  router.push(item.link);
-                  setIsMobileMenuOpen(false);
-                }}
-                className="text-left text-xl font-black tracking-tight text-slate-800 dark:text-slate-100"
-              >
-                {item.name}
-              </button>
-            ))}
-            <button
-              type="button"
-              onClick={async () => {
-                await handleSignOut();
-                setIsMobileMenuOpen(false);
-              }}
-              className="text-left text-xl font-black tracking-tight text-rose-600 dark:text-rose-400"
-            >
-              Sign Out
-            </button>
-          </MobileNavMenu>
-        </MobileNav>
-      </Navbar>
+      <AppNavbar />
 
       <main className="px-4 pb-20 pt-28 sm:px-6 md:pt-36">
         <div className="mx-auto max-w-6xl">

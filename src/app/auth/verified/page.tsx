@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { PageLoader } from "@/components/ui/loader";
 
 const VerifiedContent = () => {
   const router = useRouter();
@@ -32,7 +33,7 @@ const VerifiedContent = () => {
 };
 
 const VerifiedPage = () => (
-  <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" /></div>}>
+  <Suspense fallback={<PageLoader text="Loading..." />}>
     <VerifiedContent />
   </Suspense>
 );

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 const VALIDATION_FLASH_MS = 650;
 const VALIDATION_MESSAGE_MS = 3200;
@@ -12,30 +12,18 @@ import {
   useQuizStore,
   type ContentType,
 } from "@/features/quiz/store/quiz-store";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { GlowPillButton } from "@/components/ui/glow-pill-button";
 import {
-  Navbar,
-  NavBody,
-  NavItems,
-  MobileNav,
-  NavbarLogo,
-  MobileNavHeader,
-  MobileNavToggle,
-  MobileNavMenu,
-} from "@/components/ui/resizable-navbar";
+  QuestionCard,
+  hasQuestionAnswer,
+  type QuestionValue,
+} from "@/features/quiz/components/question-card";
+import {
+  buildDemoQuiz,
+  type DemoQuestion,
+} from "@/features/quiz/utils/demo-questions";
+import { GlowPillButton } from "@/components/ui/glow-pill-button";
+import { AppNavbar } from "@/components/app-navbar";
 import { cn } from "@/lib/utils";
-
-type DemoQuestionType = "single_select" | "select_all" | "fill_in_blank";
-
-type DemoQuestion = {
-  id: string;
-  title: string;
-  subtitle: string;
-  type: DemoQuestionType;
-  options?: string[];
-  placeholder?: string;
-};
 
 interface DemoContentCardProps {
   title: string;
@@ -118,54 +106,6 @@ const DemoContentCard = ({
   );
 };
 
-const DEMO_QUESTIONS: DemoQuestion[] = [
-  {
-    id: "contentType",
-    title: "What are you looking for today?",
-    subtitle: "Pick one so we can tailor your recommendation flow.",
-    type: "single_select",
-    options: ["Movies", "Books", "Both"],
-  },
-  {
-    id: "mood",
-    title: "What mood are you in?",
-    subtitle: "We use this to shape tone and pacing.",
-    type: "single_select",
-    options: ["Comforting", "Suspenseful", "Inspiring", "Mind-bending"],
-  },
-  {
-    id: "genres",
-    title: "Which genres interest you?",
-    subtitle: "Select all that apply.",
-    type: "select_all",
-    options: [
-      "Action",
-      "Fantasy",
-      "Drama",
-      "Mystery",
-      "Sci-Fi",
-      "Romance",
-      "Thriller",
-      "Comedy",
-    ],
-  },
-  {
-    id: "pace",
-    title: "How fast should it move?",
-    subtitle: "Choose your ideal pace for tonight.",
-    type: "single_select",
-    options: ["Slow burn", "Balanced", "Fast and intense"],
-  },
-  {
-    id: "describe",
-    title: "Describe your perfect recommendation",
-    subtitle: "Share your thoughts in your own words.",
-    type: "fill_in_blank",
-    placeholder:
-      "e.g. Something feel-good with a twist ending, or a slow-paced mystery set in a small town...",
-  },
-];
-
 const DEMO_CONTENT_CARDS = [
   {
     option: "Movies",
@@ -200,53 +140,41 @@ export default function DemoPage() {
   const router = useRouter();
   const { setContentType, setQuestionCount, setFilters } = useQuizStore();
 
+  const [questions] = useState<DemoQuestion[]>(() => buildDemoQuiz());
   const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [multiAnswers, setMultiAnswers] = useState<Record<string, string[]>>(
-    {},
-  );
+  const [answers, setAnswers] = useState<Record<string, QuestionValue>>({});
   const [validationMessage, setValidationMessage] = useState<string | null>(
     null,
   );
 
-  const current = DEMO_QUESTIONS[step];
-  const progress = ((step + 1) / DEMO_QUESTIONS.length) * 100;
-  const hasAnswer = (() => {
-    if (current.type === "select_all") {
-      return (multiAnswers[current.id]?.length ?? 0) > 0;
-    }
-    if (current.type === "fill_in_blank") {
-      return (answers[current.id]?.trim().length ?? 0) > 0;
-    }
-    return Boolean(answers[current.id]);
-  })();
+  const current = questions[step];
+  const progress = ((step + 1) / questions.length) * 100;
+  const hasAnswer = hasQuestionAnswer(answers[current.id]);
 
-  const summary = useMemo(
-    () => ({
-      contentType: answers.contentType || "Both",
-      moods: answers.mood ? [answers.mood] : [],
-      genres: multiAnswers.genres ?? (answers.pace ? [answers.pace] : []),
-    }),
-    [answers, multiAnswers],
-  );
-
-  const handleChoose = (option: string) => {
-    setAnswers((prev) => ({ ...prev, [current.id]: option }));
-  };
-
-  const handleToggleMulti = (questionId: string, option: string) => {
-    setMultiAnswers((prev) => {
-      const selected = prev[questionId] ?? [];
-      const next = selected.includes(option)
-        ? selected.filter((o) => o !== option)
-        : [...selected, option];
-      return { ...prev, [questionId]: next };
-    });
-  };
-
-  const handleTextInput = (value: string) => {
+  const setAnswer = (value: QuestionValue) => {
     setAnswers((prev) => ({ ...prev, [current.id]: value }));
   };
+
+  const summary = useMemo(() => {
+    const contentType = answers.contentType;
+    const allGenreValues = questions
+      .filter((q) => q.type === "select_all")
+      .flatMap((q) => {
+        const v = answers[q.id];
+        return Array.isArray(v) ? v : [];
+      });
+    const allMoodValues = questions
+      .filter(
+        (q) => q.type === "single_select" && q.id !== "contentType",
+      )
+      .map((q) => answers[q.id])
+      .filter((v): v is string => typeof v === "string" && v.length > 0);
+    return {
+      contentType: typeof contentType === "string" ? contentType : "Both",
+      moods: allMoodValues,
+      genres: allGenreValues,
+    };
+  }, [answers, questions]);
 
   const handleNext = () => {
     if (!hasAnswer) {
@@ -262,7 +190,7 @@ export default function DemoPage() {
       window.setTimeout(() => setValidationMessage(null), VALIDATION_MESSAGE_MS);
       return;
     }
-    if (step < DEMO_QUESTIONS.length - 1) {
+    if (step < questions.length - 1) {
       setStep((prev) => prev + 1);
       return;
     }
@@ -270,12 +198,23 @@ export default function DemoPage() {
     setContentType(mapContentType(summary.contentType));
     setQuestionCount(5);
     setFilters({ genres: summary.genres, moods: summary.moods });
+
+    // Build a payload that includes the actual question text for each
+    // answer so the demo recommendations API has full context.
+    const answerPayload = questions
+      .filter((q) => q.id !== "contentType")
+      .map((q) => ({
+        id: q.id,
+        title: q.title,
+        type: q.type,
+        value: answers[q.id] ?? (q.type === "select_all" ? [] : ""),
+      }));
+
     sessionStorage.setItem(
       "smart_advisor_demo_answers",
       JSON.stringify({
-        ...answers,
-        genres: multiAnswers.genres ?? [],
         contentType: summary.contentType,
+        answers: answerPayload,
       }),
     );
     router.push("/demo/results");
@@ -293,55 +232,24 @@ export default function DemoPage() {
     setStep((prev) => prev - 1);
   };
   const [showValidationFlash, setShowValidationFlash] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const navItems = [
-    { name: "How It Works", link: "/#how-it-works" },
-    { name: "FAQ", link: "/#faq" },
-  ];
 
   return (
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
-      <Navbar>
-        <NavBody>
-          <div className="flex min-w-0 flex-1 items-center">
-            <NavbarLogo />
-          </div>
-          <div className="flex shrink-0 justify-center px-6">
-            <NavItems items={navItems} className="justify-center px-2" />
-          </div>
-          <div className="flex min-w-0 flex-1 items-center justify-end gap-4">
-            <ThemeToggle />
-          </div>
-        </NavBody>
-        <MobileNav>
-          <MobileNavHeader>
-            <NavbarLogo />
-            <div className="flex items-center gap-4">
-              <ThemeToggle />
-              <MobileNavToggle
-                isOpen={isMobileMenuOpen}
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              />
-            </div>
-          </MobileNavHeader>
-          <MobileNavMenu isOpen={isMobileMenuOpen}>
-            {navItems.map((item) => (
-              <button
-                key={item.name}
-                type="button"
-                onClick={() => {
-                  router.push(item.link);
-                  setIsMobileMenuOpen(false);
-                }}
-                className="text-left text-xl font-black tracking-tight text-slate-800 dark:text-slate-100"
-              >
-                {item.name}
-              </button>
-            ))}
-          </MobileNavMenu>
-        </MobileNav>
-      </Navbar>
+      <link
+        rel="preload"
+        href="/animations/Popcorn.webm"
+        as="fetch"
+        type="video/webm"
+        crossOrigin="anonymous"
+      />
+      <link
+        rel="preload"
+        href="/animations/Books.webm"
+        as="fetch"
+        type="video/webm"
+        crossOrigin="anonymous"
+      />
+      <AppNavbar />
 
       <main className="px-4 pb-20 pt-32 md:pt-36 sm:px-6">
         <div className="mx-auto w-full max-w-4xl">
@@ -354,7 +262,7 @@ export default function DemoPage() {
               Back
             </GlowPillButton>
             <p className="text-base font-extrabold tracking-wide text-slate-800 dark:text-slate-100 md:text-lg">
-              {step + 1} out of {DEMO_QUESTIONS.length} questions
+              {step + 1} out of {questions.length} questions
             </p>
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
               Demo Survey
@@ -370,114 +278,48 @@ export default function DemoPage() {
             />
           </div>
 
-          <div className="rounded-3xl border border-slate-200/70 bg-white/85 p-6 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={current.id}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.22 }}
-              >
-                <h1 className="text-2xl font-black tracking-tight sm:text-3xl">
-                  {current.title}
-                </h1>
-                <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 sm:text-base">
-                  {current.subtitle}
-                </p>
-
-                {current.id === "contentType" ? (
-                  <div className="mt-7 grid grid-cols-1 gap-4 md:grid-cols-3">
-                    {DEMO_CONTENT_CARDS.map((card) => (
-                      <DemoContentCard
-                        key={card.option}
-                        title={card.title}
-                        description={card.description}
-                        mediaSrc={card.mediaSrc}
-                        secondaryMediaSrc={
-                          "secondaryMediaSrc" in card
-                            ? card.secondaryMediaSrc
-                            : undefined
-                        }
-                        isSelected={answers[current.id] === card.option}
-                        onClick={() => handleChoose(card.option)}
-                      />
-                    ))}
-                  </div>
-                ) : current.type === "fill_in_blank" ? (
-                  <div className="mt-7">
-                    <textarea
-                      value={answers[current.id] ?? ""}
-                      onChange={(e) => handleTextInput(e.target.value)}
-                      placeholder={
-                        current.placeholder ?? "Type your answer here..."
-                      }
-                      rows={3}
-                      className="w-full resize-none rounded-2xl border border-slate-200/80 bg-white px-4 py-3 text-sm font-medium text-slate-900 placeholder-slate-400 outline-none transition-all focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-indigo-500/70"
-                    />
-                  </div>
-                ) : current.type === "select_all" ? (
-                  <>
-                    <p className="mt-1 text-xs font-semibold text-indigo-500 dark:text-indigo-400">
-                      Select all that apply
-                    </p>
-                    <div className="mt-5 flex flex-wrap gap-2">
-                      {current.options?.map((option) => {
-                        const isSelected = (
-                          multiAnswers[current.id] ?? []
-                        ).includes(option);
-                        return (
-                          <GlowPillButton
-                            key={option}
-                            onClick={() =>
-                              handleToggleMulti(current.id, option)
+          <motion.div
+            layout
+            transition={{ layout: { duration: 0.32, ease: [0.22, 1, 0.36, 1] } }}
+            className="rounded-3xl border border-slate-200/70 bg-white/85 p-6 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8"
+          >
+            <motion.div
+              key={current.id}
+              initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ duration: 0.28, ease: "easeOut" }}
+            >
+              <QuestionCard
+                  title={current.title}
+                  subtitle={current.subtitle}
+                  type={current.type}
+                  options={current.options}
+                  placeholder={current.placeholder}
+                  value={answers[current.id]}
+                  onChange={setAnswer}
+                  bodyOverride={
+                    current.id === "contentType" ? (
+                      <div className="mt-7 grid grid-cols-1 gap-4 md:grid-cols-3">
+                        {DEMO_CONTENT_CARDS.map((card) => (
+                          <DemoContentCard
+                            key={card.option}
+                            title={card.title}
+                            description={card.description}
+                            mediaSrc={card.mediaSrc}
+                            secondaryMediaSrc={
+                              "secondaryMediaSrc" in card
+                                ? card.secondaryMediaSrc
+                                : undefined
                             }
-                            active={isSelected}
-                            className={cn(
-                              "inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-semibold transition-all",
-                              isSelected
-                                ? "border-indigo-400 bg-indigo-50 text-indigo-700 dark:border-indigo-500/70 dark:bg-indigo-500/15 dark:text-indigo-300"
-                                : "border-slate-200/80 bg-white text-slate-700 hover:border-indigo-300 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:border-indigo-500/50",
-                            )}
-                          >
-                            {isSelected && <IconCheck className="h-4 w-4" />}
-                            {option}
-                          </GlowPillButton>
-                        );
-                      })}
-                    </div>
-                  </>
-                ) : (
-                  <div className="mt-7 grid gap-3 sm:grid-cols-2">
-                    {current.options?.map((option) => {
-                      const selected = answers[current.id] === option;
-                      return (
-                        <GlowPillButton
-                          key={option}
-                          onClick={() => handleChoose(option)}
-                          active={selected}
-                          className={cn(
-                            "group flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all",
-                            selected
-                              ? "border-indigo-400 bg-indigo-50 text-indigo-700 dark:border-indigo-500/70 dark:bg-indigo-500/15 dark:text-indigo-300"
-                              : "border-slate-200/80 bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200",
-                          )}
-                        >
-                          <span className="text-sm font-semibold sm:text-base">
-                            {option}
-                          </span>
-                          {selected ? (
-                            <IconCheck className="h-5 w-5" />
-                          ) : (
-                            <span className="h-5 w-5 rounded-full border border-slate-300 transition group-hover:border-indigo-300 dark:border-slate-600" />
-                          )}
-                        </GlowPillButton>
-                      );
-                    })}
-                  </div>
-                )}
-              </motion.div>
-            </AnimatePresence>
+                            isSelected={answers[current.id] === card.option}
+                            onClick={() => setAnswer(card.option)}
+                          />
+                        ))}
+                      </div>
+                    ) : undefined
+                  }
+              />
+            </motion.div>
 
             <div className="mt-8 flex items-center justify-end">
               <motion.div
@@ -494,7 +336,7 @@ export default function DemoPage() {
                     "inline-flex items-center justify-center gap-2 bg-white px-6 py-2.5 text-sm font-black tracking-tight text-black dark:bg-slate-900 dark:text-white",
                   )}
                 >
-                  {step === DEMO_QUESTIONS.length - 1 ? "Continue" : "Next"}
+                  {step === questions.length - 1 ? "Continue" : "Next"}
                   <IconArrowRight className="h-4 w-4" />
                 </GlowPillButton>
               </motion.div>
@@ -504,7 +346,7 @@ export default function DemoPage() {
                 {validationMessage}
               </p>
             ) : null}
-          </div>
+          </motion.div>
         </div>
       </main>
     </div>

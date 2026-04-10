@@ -7,21 +7,11 @@ import { motion } from "framer-motion";
 const VALIDATION_FLASH_MS = 650;
 const VALIDATION_MESSAGE_MS = 3200;
 import { Check, ArrowLeft, ArrowRight } from "lucide-react";
-import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import { useQuizStore } from "@/features/quiz/store/quiz-store";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { GlowPillButton } from "@/components/ui/glow-pill-button";
-import {
-  Navbar,
-  NavBody,
-  NavItems,
-  MobileNav,
-  NavbarLogo,
-  MobileNavHeader,
-  MobileNavToggle,
-  MobileNavMenu,
-} from "@/components/ui/resizable-navbar";
+import { PageLoader } from "@/components/ui/loader";
+import { AppNavbar } from "@/components/app-navbar";
 import { cn } from "@/lib/utils";
 
 type ContentType = "movie" | "book" | "both" | null;
@@ -112,22 +102,14 @@ const SelectionCard: React.FC<SelectionCardProps> = ({
 
 const ContentSelectionPage = () => {
   const router = useRouter();
-  const { signOut } = useAuth();
   const { ready } = useRequireAuth();
   const { setContentType } = useQuizStore();
   const [selectedType, setSelectedType] = useState<ContentType>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showValidationFlash, setShowValidationFlash] = useState(false);
   const [validationMessage, setValidationMessage] = useState<string | null>(
     null,
   );
-
-  const navItems = [
-    { name: "Dashboard", link: "/dashboard" },
-    { name: "History", link: "/history" },
-    { name: "Settings", link: "/settings" },
-  ];
 
   const handleContinue = () => {
     if (!selectedType) {
@@ -145,11 +127,6 @@ const ContentSelectionPage = () => {
 
   const handleBack = () => {
     router.push("/dashboard");
-  };
-
-  const handleSignOut = async () => {
-    await signOut();
-    router.push("/");
   };
 
   const cards = [
@@ -186,72 +163,12 @@ const ContentSelectionPage = () => {
   }, []);
 
   if (!ready) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
-      </div>
-    );
+    return <PageLoader text="Loading..." />;
   }
 
   return (
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
-      <Navbar>
-        <NavBody>
-          <div className="flex w-[320px] shrink-0 items-center">
-            <NavbarLogo />
-          </div>
-          <div className="flex flex-1 justify-center">
-            <NavItems items={navItems} className="justify-center px-2" />
-          </div>
-          <div className="flex w-[320px] shrink-0 items-center justify-end gap-4">
-            <ThemeToggle />
-            <button
-              type="button"
-              onClick={handleSignOut}
-              className="text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400"
-            >
-              Sign Out
-            </button>
-          </div>
-        </NavBody>
-        <MobileNav>
-          <MobileNavHeader>
-            <NavbarLogo />
-            <div className="flex items-center gap-4">
-              <ThemeToggle />
-              <MobileNavToggle
-                isOpen={isMobileMenuOpen}
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              />
-            </div>
-          </MobileNavHeader>
-          <MobileNavMenu isOpen={isMobileMenuOpen}>
-            {navItems.map((item) => (
-              <button
-                key={item.name}
-                type="button"
-                onClick={() => {
-                  router.push(item.link);
-                  setIsMobileMenuOpen(false);
-                }}
-                className="text-left text-xl font-black tracking-tight text-slate-800 dark:text-slate-100"
-              >
-                {item.name}
-              </button>
-            ))}
-            <button
-              type="button"
-              onClick={async () => {
-                await handleSignOut();
-                setIsMobileMenuOpen(false);
-              }}
-              className="text-left text-xl font-black tracking-tight text-rose-600 dark:text-rose-400"
-            >
-              Sign Out
-            </button>
-          </MobileNavMenu>
-        </MobileNav>
-      </Navbar>
+      <AppNavbar />
 
       <main className="px-4 pb-20 pt-32 md:pt-36 sm:px-6">
         <div className="mx-auto w-full max-w-4xl">

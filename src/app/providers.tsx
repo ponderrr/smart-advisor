@@ -30,7 +30,10 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <SiteBanner />
-            <div className="min-h-screen bg-background font-sans antialiased">
+            <div
+              className="min-h-screen bg-background font-sans antialiased transition-[padding] duration-300 ease-in-out"
+              style={{ paddingTop: "var(--site-banner-height, 0px)" }}
+            >
               {children}
             </div>
             <Toaster />
