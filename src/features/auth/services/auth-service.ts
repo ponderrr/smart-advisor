@@ -128,20 +128,50 @@ class AuthService {
 
   /* -------------------- SIGNIN -------------------- */
   async signIn(
-    email: string,
+    identifier: string,
     password: string,
   ): Promise<{ error: string | null }> {
-    return this.signInDebounce(email, password);
+    return this.signInDebounce(identifier, password);
+  }
+
+  /**
+   * Resolves an identifier to an email address.
+   * - If it looks like an email, normalize and return it.
+   * - Otherwise, look it up in profiles.username and return the linked email.
+   * Returns null if no match (to be reported as a generic invalid-credentials error).
+   */
+  private async _resolveIdentifierToEmail(
+    identifier: string,
+  ): Promise<string | null> {
+    const trimmed = identifier.trim();
+    if (!trimmed) return null;
+
+    if (trimmed.includes("@")) {
+      const normalized = normalizeEmail(trimmed);
+      return isValidEmail(normalized) ? normalized : null;
+    }
+
+    // Username path: look up the profile by username (case-insensitive).
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("email")
+      .ilike("username", trimmed)
+      .limit(1)
+      .maybeSingle();
+
+    if (error || !data?.email) return null;
+    return normalizeEmail(data.email);
   }
 
   private async _signInImpl(
-    email: string,
+    identifier: string,
     password: string,
   ): Promise<{ error: string | null }> {
     try {
-      const normalizedEmail = normalizeEmail(email);
-      if (!isValidEmail(normalizedEmail)) {
-        return { error: "Please enter a valid email address." };
+      const normalizedEmail = await this._resolveIdentifierToEmail(identifier);
+      if (!normalizedEmail) {
+        // Generic error so we don't leak which usernames exist.
+        return { error: "Invalid email/username or password." };
       }
 
       const { data, error } = await supabase.auth.signInWithPassword({
