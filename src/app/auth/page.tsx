@@ -4,6 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { AuthForm, AuthLayout } from "@/features/auth/components";
+import { PageLoader } from "@/components/ui/loader";
 
 const AuthPageContent = () => {
   const router = useRouter();
@@ -124,7 +125,7 @@ const AuthPageContent = () => {
 };
 
 const AuthPage = () => (
-  <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" /></div>}>
+  <Suspense fallback={<PageLoader text="Loading..." />}>
     <AuthPageContent />
   </Suspense>
 );

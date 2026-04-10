@@ -93,8 +93,8 @@ class EnhancedRecommendationsService {
   }
 
   /**
-   * Determines target counts: 6 for single type, 3+3 for both.
-   * Makes parallel AI calls, deduplicates by title, enriches, and saves.
+   * Determines target counts: always 3 of each requested type.
+   * Makes parallel AI calls with extra buffer to survive title-dedup, enriches, and saves.
    */
   async generateEnhancedRecommendations(
     questionnaireData: QuestionnaireData,
@@ -102,11 +102,11 @@ class EnhancedRecommendationsService {
   ): Promise<Recommendation[]> {
     const { answers, contentType, userAge, userName } = questionnaireData;
 
-    const movieTarget =
-      contentType === "movie" ? 6 : contentType === "both" ? 3 : 0;
-    const bookTarget =
-      contentType === "book" ? 6 : contentType === "both" ? 3 : 0;
-    const totalCalls = contentType === "both" ? 3 : 6;
+    const movieTarget = contentType === "book" ? 0 : 3;
+    const bookTarget = contentType === "movie" ? 0 : 3;
+    // Each call returns 1 of each requested type. Run 5 in parallel so dedup
+    // has buffer to still hit 3 unique results per type.
+    const totalCalls = 5;
 
     // Make parallel AI calls to collect multiple recommendations
     const callResults = await Promise.allSettled(
@@ -164,7 +164,7 @@ class EnhancedRecommendationsService {
                   poster_url: tmdbData.poster || rec.poster_url,
                   rating: tmdbData.rating || rec.rating,
                   year: tmdbData.year || rec.year,
-                  description: enhancedRec.explanation || tmdbData.description,
+                  description: tmdbData.description || enhancedRec.description,
                   genres:
                     enhancedRec.genres && enhancedRec.genres.length > 0
                       ? enhancedRec.genres
@@ -182,12 +182,15 @@ class EnhancedRecommendationsService {
                 ? await openLibraryService.searchBook(rec.title, rec.author)
                 : null;
               if (bookData) {
+                // Prefer the AI's description — OpenLibrary often returns a
+                // generic "engaging and thought-provoking read" placeholder
+                // that would override a much better synopsis from Anthropic.
                 enhancedRec = {
                   ...enhancedRec,
                   poster_url: bookData.cover || rec.poster_url,
                   rating: bookData.rating || rec.rating,
                   year: bookData.year || rec.year,
-                  description: enhancedRec.explanation || bookData.description,
+                  description: enhancedRec.description || bookData.description,
                 };
               }
             } catch {

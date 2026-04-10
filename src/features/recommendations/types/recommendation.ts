@@ -14,4 +14,6 @@ export interface Recommendation {
   content_type: "movie" | "book" | "both";
   created_at: string;
   description?: string;
+  /** AI-supplied 0-100 fit score. Falls back to a stable hash of id when missing. */
+  match_score?: number;
 }

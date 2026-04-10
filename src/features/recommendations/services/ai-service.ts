@@ -129,10 +129,13 @@ export async function generateQuestions(
     const validTypes = ["single_select", "select_all", "fill_in_blank"];
 
     // Map edge function response to the frontend Question shape
-    return data.questions.map((q: Record<string, string>) => ({
-      id: q.id,
-      text: q.text || q.question || "",
-      type: validTypes.includes(q.type) ? q.type : "single_select",
+    return data.questions.map((q: Record<string, unknown>) => ({
+      id: typeof q.id === "string" ? q.id : "",
+      text: (typeof q.text === "string" ? q.text : (q.question as string)) ?? "",
+      type:
+        typeof q.type === "string" && validTypes.includes(q.type)
+          ? (q.type as Question["type"])
+          : "single_select",
       content_type: contentType,
       user_age_range:
         userAge < 18
@@ -142,7 +145,12 @@ export async function generateQuestions(
             : userAge < 50
               ? "30_49"
               : "50_plus",
-      placeholder: q.placeholder,
+      options: Array.isArray(q.options)
+        ? (q.options as unknown[]).filter(
+            (o): o is string => typeof o === "string",
+          )
+        : undefined,
+      placeholder: typeof q.placeholder === "string" ? q.placeholder : undefined,
     }));
   } catch (error) {
     console.error("Error generating questions:", error);

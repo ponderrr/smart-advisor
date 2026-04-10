@@ -30,13 +30,16 @@ interface NavItemsProps {
 }
 
 export const Navbar = ({ children, className }: NavbarProps) => {
+  // Pages start transparent at the top and only blur once the user actively
+  // scrolls past the threshold. Pages that can't scroll stay transparent
+  // forever, matching the home-page hero look on every page.
   const [scrolled, setScrolled] = useState(false);
   const { scrollY } = useScroll();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     setScrolled((prev) => {
-      if (latest > 72) return true;
-      if (latest < 20) return false;
+      if (latest > 8) return true;
+      if (latest < 4) return false;
       return prev;
     });
   });
@@ -236,7 +239,7 @@ export const NavbarLogo = () => (
     }}
     className="group inline-flex shrink-0 items-center pr-3 transition-opacity hover:opacity-85"
   >
-    <BrandWordmark imageClassName="h-8 md:h-9" />
+    <BrandWordmark imageClassName="h-10 md:h-11" />
   </Link>
 );
 

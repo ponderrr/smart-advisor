@@ -13,6 +13,7 @@ import {
   RotateCcw,
   Copy,
   Mail,
+  ChevronDown,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/features/auth/hooks/use-auth";
@@ -20,20 +21,15 @@ import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import { enhancedRecommendationsService } from "@/features/recommendations/services/enhanced-recommendations-service";
 import { databaseService } from "@/features/recommendations/services/database-service";
 import { Recommendation } from "@/features/recommendations/types/recommendation";
+import {
+  deriveMatchScore,
+  MATCH_TONE_CLASSES,
+} from "@/features/recommendations/utils/match-score";
 import { SafeLocalStorage } from "@/utils/localStorage";
 import { useQuizStore } from "@/features/quiz/store/quiz-store";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { GlowPillButton } from "@/components/ui/glow-pill-button";
-import {
-  Navbar,
-  NavBody,
-  NavItems,
-  MobileNav,
-  NavbarLogo,
-  MobileNavHeader,
-  MobileNavToggle,
-  MobileNavMenu,
-} from "@/components/ui/resizable-navbar";
+import { LoaderFive, PageLoader } from "@/components/ui/loader";
+import { AppNavbar } from "@/components/app-navbar";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -77,60 +73,9 @@ const saveGeneratedSession = (sessionId: string) => {
 };
 
 /* ---------- Loading Animation ---------- */
-const LOADING_PHRASES = [
-  "Analyzing your personality profile",
-  "Matching preferences to hidden gems",
-  "Scanning thousands of titles",
-  "Finding your perfect picks",
-  "Cross-referencing genres and moods",
-  "Curating personalized results",
-  "Almost there — finalizing picks",
-];
-
-const ResultsLoadingState = ({ step }: { step: string }) => (
-  <div className="mx-auto flex min-h-[480px] w-full max-w-4xl flex-col justify-center rounded-3xl border border-slate-200/70 bg-white/85 p-6 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
-    <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-      Step 4 of 4
-    </p>
-
-    <h1 className="mt-6 text-3xl font-black tracking-tighter md:text-4xl">
-      Generating recommendations
-    </h1>
-
-    <div className="mx-auto mt-5 h-6 overflow-hidden">
-      <AnimatePresence mode="wait">
-        {LOADING_PHRASES.map((phrase, i) => (
-          <motion.p
-            key={phrase}
-            className="text-sm font-semibold text-indigo-600 dark:text-indigo-400"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: [0, 1, 1, 0], y: [16, 0, 0, -16] }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              delay: i * 3,
-              repeatDelay: (LOADING_PHRASES.length - 1) * 3,
-              ease: "easeInOut",
-            }}
-            style={{
-              position: i === 0 ? "relative" : "absolute",
-              left: 0,
-              right: 0,
-            }}
-          >
-            {phrase}
-          </motion.p>
-        ))}
-      </AnimatePresence>
-    </div>
-
-    <div className="relative mx-auto mt-6 h-2 w-full max-w-md overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
-      <motion.div
-        className="absolute inset-y-0 left-0 w-1/3 rounded-full bg-gradient-to-r from-transparent via-indigo-500 to-transparent"
-        animate={{ x: ["-120%", "340%"] }}
-        transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-      />
-    </div>
+const ResultsLoadingState = ({ step: _step }: { step: string }) => (
+  <div className="mx-auto flex min-h-[480px] w-full max-w-4xl flex-col items-center justify-center rounded-3xl border border-slate-200/70 bg-white/85 p-6 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
+    <LoaderFive text="Crafting your recommendations..." />
   </div>
 );
 
@@ -144,10 +89,23 @@ const RecommendationCard = ({
   index: number;
   onToggleFavorite: (id: string) => void;
 }) => {
-  const matchScore = Math.max(78, 95 - index * 3);
-  const matchLabel =
-    matchScore >= 92 ? "Excellent" : matchScore >= 86 ? "Strong" : "Good";
   const [expanded, setExpanded] = useState(false);
+  const [isClamped, setIsClamped] = useState(false);
+  const descRef = useRef<HTMLParagraphElement>(null);
+  const explanation = rec.explanation ?? "";
+  const description = rec.description ?? "";
+  const showDescription = description.length > 0 && description !== explanation;
+  const { score: matchScore, tone: matchTone } = deriveMatchScore(rec);
+
+  // Measure whether the description is actually being clipped by the
+  // line-clamp. Only run when collapsed; while expanded we keep the previous
+  // result so the chevron doesn't disappear mid-toggle.
+  useEffect(() => {
+    if (expanded || !showDescription) return;
+    const el = descRef.current;
+    if (!el) return;
+    setIsClamped(el.scrollHeight > el.clientHeight + 1);
+  }, [expanded, showDescription, description]);
 
   return (
     <motion.article
@@ -182,8 +140,13 @@ const RecommendationCard = ({
             {rec.type}
           </div>
           {/* Match badge */}
-          <div className="absolute right-3 top-3 rounded-full bg-indigo-600 px-2.5 py-1 text-[10px] font-bold text-white shadow-lg">
-            {matchScore}% {matchLabel}
+          <div
+            className={cn(
+              "absolute right-3 top-3 rounded-full px-2.5 py-1 text-[10px] font-bold shadow-sm backdrop-blur-sm",
+              MATCH_TONE_CLASSES[matchTone],
+            )}
+          >
+            {matchScore}% match
           </div>
         </div>
 
@@ -240,35 +203,50 @@ const RecommendationCard = ({
           </div>
 
           {/* Explanation */}
-          {rec.explanation && (
+          {explanation && (
             <div className="mt-3 rounded-xl border border-indigo-100 bg-indigo-50/50 px-3 py-2.5 dark:border-indigo-500/20 dark:bg-indigo-500/5">
               <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-300">
                 Why this pick
               </p>
               <p className="mt-1 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-                {rec.explanation}
+                {explanation}
               </p>
             </div>
           )}
 
-          {/* Description (expandable) */}
-          {rec.description && (
+          {/* Description (expandable) — only when distinct from explanation */}
+          {showDescription && (
             <div className="mt-3">
               <p
-                className={cn(
-                  "text-sm leading-relaxed text-slate-600 dark:text-slate-400",
-                  !expanded && "line-clamp-3",
-                )}
+                ref={descRef}
+                className="overflow-hidden text-sm leading-relaxed text-slate-600 dark:text-slate-400"
+                style={
+                  expanded
+                    ? undefined
+                    : {
+                        display: "-webkit-box",
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: "vertical",
+                      }
+                }
               >
-                {rec.description}
+                {description}
               </p>
-              {rec.description.length > 150 && (
+              {isClamped && (
                 <button
                   type="button"
-                  onClick={() => setExpanded(!expanded)}
-                  className="mt-1 text-xs font-semibold text-indigo-600 transition-colors hover:text-indigo-500 dark:text-indigo-400"
+                  onClick={() => setExpanded((prev) => !prev)}
+                  aria-label={expanded ? "Show less" : "Show more"}
+                  aria-expanded={expanded}
+                  className="mt-1 inline-flex h-7 w-7 items-center justify-center rounded-full text-indigo-600 transition-colors hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10"
                 >
-                  {expanded ? "Show less" : "Read more"}
+                  <ChevronDown
+                    size={16}
+                    className={cn(
+                      "transition-transform duration-200",
+                      expanded && "rotate-180",
+                    )}
+                  />
                 </button>
               )}
             </div>
@@ -282,7 +260,7 @@ const RecommendationCard = ({
 /* ---------- Main Results Page ---------- */
 const ResultsPage = () => {
   const router = useRouter();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const { ready } = useRequireAuth();
   const { contentType, answers, reset } = useQuizStore();
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
@@ -292,18 +270,11 @@ const ResultsPage = () => {
     "Analyzing your answers...",
   );
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const currentSessionRef = useRef<string | null>(null);
   const generatedRecommendationsRef = useRef<Recommendation[]>([]);
   const isInitialLoadRef = useRef(true);
   const abortControllerRef = useRef<AbortController | null>(null);
-
-  const navItems = [
-    { name: "Dashboard", link: "/dashboard" },
-    { name: "History", link: "/history" },
-    { name: "Settings", link: "/settings" },
-  ];
 
   // Generate a unique session ID per quiz run using a stable ref
   const sessionTimestampRef = useRef<number>(Date.now());
@@ -466,11 +437,6 @@ const ResultsPage = () => {
     };
   }, []);
 
-  const handleSignOut = async () => {
-    await signOut();
-    router.push("/");
-  };
-
   const handleGetAnother = () => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -595,82 +561,16 @@ const ResultsPage = () => {
   };
 
   if (!ready) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
-      </div>
-    );
+    return <PageLoader text="Loading..." />;
   }
 
   if (!contentType || !answers?.length || !user) {
     // Missing quiz state — redirect to start a new quiz
     router.replace("/content-selection");
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
-      </div>
-    );
+    return <PageLoader text="Loading..." />;
   }
 
-  const topBar = (
-    <Navbar>
-      <NavBody>
-        <div className="flex w-[320px] shrink-0 items-center">
-          <NavbarLogo />
-        </div>
-        <div className="flex flex-1 justify-center">
-          <NavItems items={navItems} className="justify-center px-2" />
-        </div>
-        <div className="flex w-[320px] shrink-0 items-center justify-end gap-4">
-          <ThemeToggle />
-          <button
-            type="button"
-            onClick={handleSignOut}
-            className="text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400"
-          >
-            Sign Out
-          </button>
-        </div>
-      </NavBody>
-      <MobileNav>
-        <MobileNavHeader>
-          <NavbarLogo />
-          <div className="flex items-center gap-4">
-            <ThemeToggle />
-            <MobileNavToggle
-              isOpen={isMobileMenuOpen}
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            />
-          </div>
-        </MobileNavHeader>
-        <MobileNavMenu isOpen={isMobileMenuOpen}>
-          {navItems.map((item) => (
-            <button
-              key={item.name}
-              type="button"
-              onClick={() => {
-                router.push(item.link);
-                setIsMobileMenuOpen(false);
-              }}
-              className="text-left text-xl font-black tracking-tight text-slate-800 dark:text-slate-100"
-            >
-              {item.name}
-            </button>
-          ))}
-          <button
-            type="button"
-            onClick={async () => {
-              await handleSignOut();
-              setIsMobileMenuOpen(false);
-            }}
-            className="text-left text-xl font-black tracking-tight text-rose-600 dark:text-rose-400"
-          >
-            Sign Out
-          </button>
-        </MobileNavMenu>
-      </MobileNav>
-    </Navbar>
-  );
+  const topBar = <AppNavbar />;
 
   if (showConfirmDialog) {
     return (
@@ -811,7 +711,7 @@ const ResultsPage = () => {
                       {movieRecs.length}
                     </span>
                   </div>
-                  <div className="grid gap-4 lg:grid-cols-2">
+                  <div className="grid gap-5">
                     {movieRecs.map((rec, i) => (
                       <RecommendationCard
                         key={rec.id}
@@ -838,7 +738,7 @@ const ResultsPage = () => {
                       {bookRecs.length}
                     </span>
                   </div>
-                  <div className="grid gap-4 lg:grid-cols-2">
+                  <div className="grid gap-5">
                     {bookRecs.map((rec, i) => (
                       <RecommendationCard
                         key={rec.id}
@@ -852,7 +752,7 @@ const ResultsPage = () => {
               )}
             </>
           ) : (
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid gap-5">
               {recommendations.map((rec, i) => (
                 <RecommendationCard
                   key={rec.id}

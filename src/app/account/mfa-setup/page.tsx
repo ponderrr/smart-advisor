@@ -4,7 +4,7 @@ import { useAuth } from "@/features/auth/hooks/use-auth";
 import { MfaSetup } from "@/features/auth/components/mfa-setup";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Loader } from "lucide-react";
+import { PageLoader } from "@/components/ui/loader";
 
 export default function MfaSetupPage() {
   const router = useRouter();
@@ -22,11 +22,7 @@ export default function MfaSetupPage() {
   }, [mounted, loading, session, router]);
 
   if (!mounted || loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader className="h-8 w-8 animate-spin text-slate-400" />
-      </div>
-    );
+    return <PageLoader text="Loading..." />;
   }
 
   if (!user || !session) {

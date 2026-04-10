@@ -22,7 +22,7 @@ const NotFound = () => {
           onClick={handleGoHome}
           className="inline-flex items-center cursor-pointer hover:opacity-80 transition-opacity duration-200"
         >
-          <BrandWordmark imageClassName="h-8" />
+          <BrandWordmark imageClassName="h-11" />
         </button>
       </header>
 

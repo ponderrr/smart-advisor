@@ -1,22 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Film, BookOpen, RotateCcw, Sparkles } from "lucide-react";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { GlowPillButton } from "@/components/ui/glow-pill-button";
+import { motion } from "framer-motion";
 import {
-  Navbar,
-  NavBody,
-  NavItems,
-  MobileNav,
-  NavbarLogo,
-  MobileNavHeader,
-  MobileNavToggle,
-  MobileNavMenu,
-} from "@/components/ui/resizable-navbar";
+  ArrowRight,
+  Film,
+  BookOpen,
+  RotateCcw,
+  Sparkles,
+  ChevronDown,
+} from "lucide-react";
+import { GlowPillButton } from "@/components/ui/glow-pill-button";
+import { LoaderFive } from "@/components/ui/loader";
+import {
+  deriveMatchScore,
+  MATCH_TONE_CLASSES,
+} from "@/features/recommendations/utils/match-score";
+import { AppNavbar } from "@/components/app-navbar";
 import { cn } from "@/lib/utils";
 
 type DemoItem = {
@@ -27,67 +29,40 @@ type DemoItem = {
   description: string;
   image: string;
   infoLink: string;
+  reason?: string;
+  match_score?: number;
+};
+
+type DemoAnswerPayload = {
+  id: string;
+  title: string;
+  type: "single_select" | "select_all" | "fill_in_blank";
+  value: string | string[];
 };
 
 /* ---------- Loading Animation ---------- */
-const DEMO_LOADING_PHRASES = [
-  "Searching for your perfect match",
-  "Scanning popular titles",
-  "Cross-referencing your preferences",
-  "Finding hidden gems for you",
-  "Curating personalized results",
-  "Almost there — finalizing picks",
-];
-
 const DemoLoadingState = () => (
-  <div className="mx-auto flex min-h-[420px] w-full max-w-4xl flex-col justify-center rounded-3xl border border-slate-200/70 bg-white/85 p-6 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
-    <h2 className="text-2xl font-black tracking-tight sm:text-3xl">
-      Generating your results
-    </h2>
-
-    <div className="mx-auto mt-5 h-6 overflow-hidden">
-      <AnimatePresence mode="wait">
-        {DEMO_LOADING_PHRASES.map((phrase, i) => (
-          <motion.p
-            key={phrase}
-            className="text-sm font-semibold text-indigo-600 dark:text-indigo-400"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: [0, 1, 1, 0], y: [16, 0, 0, -16] }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              delay: i * 3,
-              repeatDelay: (DEMO_LOADING_PHRASES.length - 1) * 3,
-              ease: "easeInOut",
-            }}
-            style={{
-              position: i === 0 ? "relative" : "absolute",
-              left: 0,
-              right: 0,
-            }}
-          >
-            {phrase}
-          </motion.p>
-        ))}
-      </AnimatePresence>
-    </div>
-
-    <div className="relative mx-auto mt-6 h-2 w-full max-w-md overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
-      <motion.div
-        className="absolute inset-y-0 left-0 w-1/3 rounded-full bg-gradient-to-r from-transparent via-indigo-500 to-transparent"
-        animate={{ x: ["-120%", "340%"] }}
-        transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-      />
-    </div>
+  <div className="mx-auto flex min-h-[420px] w-full max-w-4xl flex-col items-center justify-center rounded-3xl border border-slate-200/70 bg-white/85 p-6 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
+    <LoaderFive text="Finding your perfect picks..." />
   </div>
 );
 
 /* ---------- Demo Result Card ---------- */
 const DemoResultCard = ({ item, index }: { item: DemoItem; index: number }) => {
   const [expanded, setExpanded] = useState(false);
-  const matchScore = Math.max(78, 95 - index * 3);
-  const matchLabel =
-    matchScore >= 92 ? "Excellent" : matchScore >= 86 ? "Strong" : "Good";
+  const [isClamped, setIsClamped] = useState(false);
+  const descRef = useRef<HTMLParagraphElement>(null);
+  const reason = item.reason ?? "";
+  const description = item.description ?? "";
+  const showDescription = description.length > 0 && description !== reason;
+  const { score: matchScore, tone: matchTone } = deriveMatchScore(item);
+
+  useEffect(() => {
+    if (expanded || !showDescription) return;
+    const el = descRef.current;
+    if (!el) return;
+    setIsClamped(el.scrollHeight > el.clientHeight + 1);
+  }, [expanded, showDescription, description]);
 
   return (
     <motion.article
@@ -96,48 +71,87 @@ const DemoResultCard = ({ item, index }: { item: DemoItem; index: number }) => {
       transition={{ duration: 0.3, delay: index * 0.06 }}
       className="group overflow-hidden rounded-3xl border border-slate-200/70 bg-white/85 shadow-sm backdrop-blur-md transition-all duration-200 hover:shadow-md dark:border-slate-700/60 dark:bg-slate-900/65"
     >
-      <div className="grid grid-cols-1 sm:grid-cols-[160px_1fr]">
+      <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr]">
         {/* Image */}
         <div className="relative aspect-[2/3] overflow-hidden bg-slate-200 sm:aspect-[2/3] dark:bg-slate-800">
           <Image
             src={item.image}
             alt={item.title}
             fill
-            sizes="(max-width: 640px) 100vw, 160px"
+            sizes="(max-width: 640px) 100vw, 180px"
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
-          <div className="absolute right-3 top-3 rounded-full bg-indigo-600 px-2.5 py-1 text-[10px] font-bold text-white shadow-lg">
-            {matchScore}% {matchLabel}
+          {/* Type badge */}
+          <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm">
+            {item.type === "movie" ? <Film size={10} /> : <BookOpen size={10} />}
+            {item.type}
+          </div>
+          {/* Match badge */}
+          <div
+            className={cn(
+              "absolute right-3 top-3 rounded-full px-2.5 py-1 text-[10px] font-bold shadow-sm backdrop-blur-sm",
+              MATCH_TONE_CLASSES[matchTone],
+            )}
+          >
+            {matchScore}% match
           </div>
         </div>
 
         {/* Content */}
-        <div className="flex flex-col p-4 sm:p-5">
-          <h3 className="text-lg font-black tracking-tight line-clamp-2 sm:text-xl">
+        <div className="flex flex-col p-5">
+          <h3 className="text-xl font-black tracking-tight line-clamp-2 sm:text-2xl">
             {item.title}
           </h3>
           <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
             {item.subtitle}
           </p>
 
-          {item.description && (
-            <p
-              className={cn(
-                "mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400",
-                !expanded && "line-clamp-3",
-              )}
-            >
-              {item.description}
-            </p>
+          {reason && (
+            <div className="mt-3 rounded-xl border border-indigo-100 bg-indigo-50/50 px-3 py-2.5 dark:border-indigo-500/20 dark:bg-indigo-500/5">
+              <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-300">
+                Why this pick
+              </p>
+              <p className="mt-1 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                {reason}
+              </p>
+            </div>
           )}
-          {item.description && item.description.length > 120 && (
-            <button
-              type="button"
-              onClick={() => setExpanded(!expanded)}
-              className="mt-1 self-start text-xs font-semibold text-indigo-600 transition-colors hover:text-indigo-500 dark:text-indigo-400"
-            >
-              {expanded ? "Show less" : "Read more"}
-            </button>
+
+          {showDescription && (
+            <div className="mt-3">
+              <p
+                ref={descRef}
+                className="overflow-hidden text-sm leading-relaxed text-slate-600 dark:text-slate-400"
+                style={
+                  expanded
+                    ? undefined
+                    : {
+                        display: "-webkit-box",
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: "vertical",
+                      }
+                }
+              >
+                {description}
+              </p>
+              {isClamped && (
+                <button
+                  type="button"
+                  onClick={() => setExpanded((prev) => !prev)}
+                  aria-label={expanded ? "Show less" : "Show more"}
+                  aria-expanded={expanded}
+                  className="mt-1 inline-flex h-7 w-7 items-center justify-center rounded-full text-indigo-600 transition-colors hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10"
+                >
+                  <ChevronDown
+                    size={16}
+                    className={cn(
+                      "transition-transform duration-200",
+                      expanded && "rotate-180",
+                    )}
+                  />
+                </button>
+              )}
+            </div>
           )}
 
           <a
@@ -160,57 +174,89 @@ export default function DemoResultsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<DemoItem[]>([]);
-  const [query, setQuery] = useState("best fiction books");
   const [contentType, setContentType] = useState<"book" | "movie" | "both">(
     "both",
   );
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const navItems = [
-    { name: "How It Works", link: "/#how-it-works" },
-    { name: "FAQ", link: "/#faq" },
-  ];
-
+  const [error, setError] = useState<{ kind: "limit" | "generic"; message: string } | null>(
+    null,
+  );
   useEffect(() => {
-    const raw = sessionStorage.getItem("smart_advisor_demo_answers");
-    if (!raw) return;
-    try {
-      const parsed = JSON.parse(raw) as Record<string, string>;
-      const mappedType =
+    let active = true;
+
+    const loadRecommendations = async () => {
+      const raw = sessionStorage.getItem("smart_advisor_demo_answers");
+      if (!raw) {
+        router.replace("/demo");
+        return;
+      }
+
+      let parsed: { contentType?: string; answers?: DemoAnswerPayload[] };
+      try {
+        parsed = JSON.parse(raw);
+      } catch {
+        router.replace("/demo");
+        return;
+      }
+
+      const normalizedType: "movie" | "book" | "both" =
         parsed.contentType === "Movies"
           ? "movie"
           : parsed.contentType === "Books"
             ? "book"
             : "both";
-      setContentType(mappedType);
-      const genres = Array.isArray(parsed.genres)
-        ? parsed.genres.join(" ")
-        : "";
-      setQuery(
-        `${parsed.contentType || "media"} ${parsed.mood || ""} ${genres} ${parsed.pace || ""} recommendations`,
-      );
-    } catch {
-      setQuery("best fiction books");
-    }
-  }, []);
+      if (active) setContentType(normalizedType);
 
-  useEffect(() => {
-    let active = true;
-
-    const loadMedia = async () => {
       const start = Date.now();
-      if (active) setLoading(true);
       try {
-        const response = await fetch(
-          `/api/demo-media?type=${contentType}&q=${encodeURIComponent(query)}`,
-          { cache: "no-store" },
-        );
+        const response = await fetch("/api/demo-recommendations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contentType: normalizedType,
+            answers: parsed.answers ?? [],
+          }),
+          cache: "no-store",
+        });
+
+        if (response.status === 429) {
+          const data = await response.json().catch(() => ({}));
+          if (active) {
+            setError({
+              kind: "limit",
+              message:
+                data?.message ??
+                "You have used your free demo runs for today. Sign up to keep going.",
+            });
+            setItems([]);
+          }
+          return;
+        }
+
+        if (!response.ok) {
+          if (active) {
+            setError({
+              kind: "generic",
+              message: "We could not generate your demo recommendations. Please try again.",
+            });
+            setItems([]);
+          }
+          return;
+        }
+
         const data = await response.json();
         if (active) {
           setItems(Array.isArray(data.items) ? data.items : []);
+          setError(null);
         }
-      } catch (error) {
-        console.error("Failed to load demo results:", error);
+      } catch (e) {
+        console.error("Failed to load demo results:", e);
+        if (active) {
+          setError({
+            kind: "generic",
+            message: "We could not generate your demo recommendations. Please try again.",
+          });
+          setItems([]);
+        }
       } finally {
         const elapsed = Date.now() - start;
         const minDelay = 1400;
@@ -221,11 +267,11 @@ export default function DemoResultsPage() {
       }
     };
 
-    loadMedia();
+    loadRecommendations();
     return () => {
       active = false;
     };
-  }, [query, contentType]);
+  }, [router]);
 
   const movieItems = items.filter((i) => i.type === "movie");
   const bookItems = items.filter((i) => i.type === "book");
@@ -239,51 +285,47 @@ export default function DemoResultsPage() {
 
   return (
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
-      <Navbar>
-        <NavBody>
-          <div className="flex min-w-0 flex-1 items-center">
-            <NavbarLogo />
-          </div>
-          <div className="flex shrink-0 justify-center px-6">
-            <NavItems items={navItems} className="justify-center px-2" />
-          </div>
-          <div className="flex min-w-0 flex-1 items-center justify-end gap-4">
-            <ThemeToggle />
-          </div>
-        </NavBody>
-        <MobileNav>
-          <MobileNavHeader>
-            <NavbarLogo />
-            <div className="flex items-center gap-4">
-              <ThemeToggle />
-              <MobileNavToggle
-                isOpen={isMobileMenuOpen}
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              />
-            </div>
-          </MobileNavHeader>
-          <MobileNavMenu isOpen={isMobileMenuOpen}>
-            {navItems.map((item) => (
-              <button
-                key={item.name}
-                type="button"
-                onClick={() => {
-                  router.push(item.link);
-                  setIsMobileMenuOpen(false);
-                }}
-                className="text-left text-xl font-black tracking-tight text-slate-800 dark:text-slate-100"
-              >
-                {item.name}
-              </button>
-            ))}
-          </MobileNavMenu>
-        </MobileNav>
-      </Navbar>
+      <AppNavbar />
 
       <main className="px-4 pb-20 pt-32 md:pt-36 sm:px-6">
         <div className="mx-auto w-full max-w-6xl">
           {loading ? (
             <DemoLoadingState />
+          ) : error ? (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="mx-auto max-w-2xl rounded-3xl border border-slate-200/70 bg-white/85 p-8 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65"
+            >
+              <h2 className="text-2xl font-black tracking-tight sm:text-3xl">
+                {error.kind === "limit"
+                  ? "You hit the demo limit"
+                  : "Something went wrong"}
+              </h2>
+              <p className="mx-auto mt-3 max-w-md text-sm text-slate-600 dark:text-slate-300">
+                {error.message}
+              </p>
+              <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                {error.kind === "limit" ? (
+                  <GlowPillButton
+                    onClick={() => router.push("/auth")}
+                    className="inline-flex w-full items-center justify-center gap-2 bg-white px-6 py-3 text-sm font-black text-black sm:w-auto dark:bg-slate-900 dark:text-white"
+                  >
+                    Sign up to continue
+                    <ArrowRight size={16} />
+                  </GlowPillButton>
+                ) : (
+                  <GlowPillButton
+                    onClick={() => router.push("/demo")}
+                    className="inline-flex w-full items-center justify-center gap-2 bg-white px-6 py-3 text-sm font-black text-black sm:w-auto dark:bg-slate-900 dark:text-white"
+                  >
+                    <RotateCcw size={16} />
+                    Try again
+                  </GlowPillButton>
+                )}
+              </div>
+            </motion.div>
           ) : (
             <>
               {/* Title */}
@@ -328,7 +370,7 @@ export default function DemoResultsPage() {
                           Movies
                         </h2>
                       </div>
-                      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                      <div className="grid gap-5">
                         {movieItems.map((item, i) => (
                           <DemoResultCard key={item.id} item={item} index={i} />
                         ))}
@@ -349,7 +391,7 @@ export default function DemoResultsPage() {
                           Books
                         </h2>
                       </div>
-                      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                      <div className="grid gap-5">
                         {bookItems.map((item, i) => (
                           <DemoResultCard key={item.id} item={item} index={i} />
                         ))}
@@ -358,7 +400,7 @@ export default function DemoResultsPage() {
                   )}
                 </>
               ) : (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-5">
                   {items.map((item, i) => (
                     <DemoResultCard key={item.id} item={item} index={i} />
                   ))}

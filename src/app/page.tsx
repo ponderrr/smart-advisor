@@ -1,57 +1,128 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
-import { IconBrandGithub, IconChevronDown } from "@tabler/icons-react";
-import { useAuth } from "@/features/auth/hooks/use-auth";
-import { AnimatedTestimonials } from "@/components/ui/animated-testimonials";
+import {
+  IconBrandGithub,
+  IconChevronDown,
+  IconLayoutGrid,
+  IconAdjustmentsHorizontal,
+  IconMessageCircleQuestion,
+  IconSparkles,
+} from "@tabler/icons-react";
 import { LinkPreview } from "@/components/ui/link-preview";
-import { BrandWordmark } from "@/components/brand-wordmark";
-import { ThemeToggle } from "@/components/theme-toggle";
 import FeaturesSectionDemo from "@/components/features-section-demo-3";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
-import {
-  Navbar,
-  NavBody,
-  NavItems,
-  MobileNav,
-  NavbarLogo,
-  MobileNavHeader,
-  MobileNavToggle,
-  MobileNavMenu,
-} from "@/components/ui/resizable-navbar";
+import { AppNavbar } from "@/components/app-navbar";
 import { HeroSection } from "@/features/home/components";
 import { cn } from "@/lib/utils";
 import { faqItems, logoSets, teamMembers } from "@/features/home/data";
 
+const HOW_IT_WORKS_STEPS = [
+  {
+    Icon: IconLayoutGrid,
+    title: "Pick your format",
+    description:
+      "Tell us if you're in the mood for a movie, a book, or both. We tailor the rest of the flow to whichever you choose.",
+  },
+  {
+    Icon: IconAdjustmentsHorizontal,
+    title: "Set your depth",
+    description:
+      "Choose how many questions you want to answer — a quick taste check or a deep dive, your call.",
+  },
+  {
+    Icon: IconMessageCircleQuestion,
+    title: "Answer a personalized quiz",
+    description:
+      "Our AI generates fresh questions tuned to your age and content type. No two quizzes are the same.",
+  },
+  {
+    Icon: IconSparkles,
+    title: "Get your picks",
+    description:
+      "Real recommendations with a match score and a written reason for why each one fits you specifically.",
+  },
+] as const;
+
+const HowItWorksSection = () => (
+  <section
+    id="how-it-works"
+    className="scroll-mt-32 px-6 py-24 bg-slate-50 dark:bg-slate-950"
+  >
+    <div className="mx-auto max-w-6xl">
+      <div className="text-center">
+        <p className="text-xs font-black uppercase tracking-[0.22em] text-indigo-500 dark:text-indigo-400">
+          How It Works
+        </p>
+        <h2 className="mt-3 text-4xl font-black tracking-tighter md:text-5xl">
+          From indecision to a great pick in four steps
+        </h2>
+        <p className="mx-auto mt-4 max-w-2xl text-slate-600 dark:text-slate-400">
+          A faster way to land on a watch or read worth your time.
+        </p>
+      </div>
+
+      {/* Card grid with a subtle horizontal connector behind them */}
+      <div className="relative mt-16">
+        {/* Horizontal flow line behind the cards (desktop only) */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-12 right-12 top-12 hidden h-px bg-gradient-to-r from-transparent via-indigo-200/80 to-transparent lg:block dark:via-indigo-500/30"
+        />
+
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {HOW_IT_WORKS_STEPS.map((step, index) => {
+            const Icon = step.Icon;
+            return (
+              <motion.div
+                key={step.title}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{
+                  duration: 0.5,
+                  delay: index * 0.1,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+                className="group relative"
+              >
+                {/* Gradient border that brightens on hover */}
+                <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-indigo-200/40 via-transparent to-violet-200/30 opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:from-indigo-500/30 dark:via-transparent dark:to-violet-500/20" />
+
+                <div className="relative flex h-full flex-col rounded-3xl border border-slate-200/70 bg-white/85 p-7 shadow-sm backdrop-blur-md transition-all duration-300 group-hover:-translate-y-1 group-hover:border-indigo-200 group-hover:shadow-lg dark:border-slate-700/60 dark:bg-slate-900/65 dark:group-hover:border-indigo-500/40">
+                  {/* Step number — large, gradient, sits in the corner */}
+                  <span className="absolute right-6 top-6 bg-gradient-to-br from-indigo-500 to-violet-500 bg-clip-text text-5xl font-black leading-none tracking-tighter text-transparent opacity-30 transition-opacity duration-300 group-hover:opacity-100 dark:from-indigo-400 dark:to-violet-400">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+
+                  {/* Icon in a tinted square */}
+                  <div className="relative inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100/60 text-indigo-600 shadow-inner ring-1 ring-indigo-200/60 dark:from-indigo-500/20 dark:to-indigo-500/5 dark:text-indigo-300 dark:ring-indigo-500/30">
+                    <Icon size={26} strokeWidth={1.75} />
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="mt-6 text-xl font-black tracking-tight text-slate-900 dark:text-slate-100">
+                    {step.title}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                    {step.description}
+                  </p>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
 const Index = () => {
-  const router = useRouter();
-  const { user, signOut } = useAuth();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-
-  const handleGetStarted = () =>
-    user ? router.push("/dashboard") : router.push("/auth");
-
-  const handleSignOut = async () => {
-    await signOut();
-    router.push("/");
-  };
-
-  const homeNavItems = user
-    ? [
-        { name: "Dashboard", link: "/dashboard" },
-        { name: "History", link: "/history" },
-        { name: "Settings", link: "/settings" },
-      ]
-    : [
-        { name: "How It Works", link: "#how-it-works" },
-        { name: "Why Smart Advisor", link: "#why-smart-advisor" },
-        { name: "Powered By", link: "#powered-by" },
-        { name: "Our Team", link: "#meet-the-team" },
-        { name: "FAQ", link: "#faq" },
-      ];
 
   const smoothScrollToSection = (selector: string) => {
     const section = document.querySelector(selector) as HTMLElement | null;
@@ -66,168 +137,13 @@ const Index = () => {
 
   return (
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
-      {/* Navbar */}
-      <Navbar>
-        <NavBody>
-          <div className="flex min-w-0 flex-1 items-center">
-            <NavbarLogo />
-          </div>
-
-          <div className="flex shrink-0 justify-center px-6">
-            <NavItems items={homeNavItems} className="justify-center px-2" />
-          </div>
-
-          <div className="flex min-w-0 flex-1 items-center justify-end gap-4">
-            <ThemeToggle />
-
-            {user && (
-              <HoverBorderGradient
-                onClick={() => router.push("/dashboard")}
-                idleColor="17, 24, 39"
-                darkIdleColor="255, 255, 255"
-                highlightColor="139, 92, 246"
-                darkHighlightColor="167, 139, 250"
-                containerClassName="rounded-full"
-                className="whitespace-nowrap bg-white px-6 py-2.5 text-base font-black leading-none tracking-tighter text-black dark:bg-black dark:text-white"
-              >
-                Dashboard
-              </HoverBorderGradient>
-            )}
-
-            {user && (
-              <button
-                type="button"
-                onClick={handleSignOut}
-                className="text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400"
-              >
-                Sign Out
-              </button>
-            )}
-
-            {!user && (
-              <HoverBorderGradient
-                onClick={handleGetStarted}
-                idleColor="17, 24, 39"
-                darkIdleColor="255, 255, 255"
-                highlightColor="139, 92, 246"
-                darkHighlightColor="167, 139, 250"
-                containerClassName="rounded-full"
-                className="whitespace-nowrap bg-white px-6 py-2.5 text-base font-black leading-none tracking-tighter text-black dark:bg-black dark:text-white"
-              >
-                Get Started
-              </HoverBorderGradient>
-            )}
-          </div>
-        </NavBody>
-
-        <MobileNav>
-          <MobileNavHeader>
-            <NavbarLogo />
-            <div className="flex items-center gap-4">
-              <ThemeToggle />
-              <MobileNavToggle
-                isOpen={isMobileMenuOpen}
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              />
-            </div>
-          </MobileNavHeader>
-
-          <MobileNavMenu isOpen={isMobileMenuOpen}>
-            {homeNavItems.map((item) => (
-              <button
-                key={item.name}
-                type="button"
-                onClick={() => {
-                  if (item.link.startsWith("#")) {
-                    smoothScrollToSection(item.link);
-                  } else {
-                    router.push(item.link);
-                  }
-                  setIsMobileMenuOpen(false);
-                }}
-                className="text-left text-xl font-black tracking-tight text-slate-800 dark:text-slate-100"
-              >
-                {item.name}
-              </button>
-            ))}
-
-            {!user && (
-              <HoverBorderGradient
-                onClick={handleGetStarted}
-                idleColor="17, 24, 39"
-                darkIdleColor="255, 255, 255"
-                highlightColor="139, 92, 246"
-                darkHighlightColor="167, 139, 250"
-                containerClassName="mt-2 w-full rounded-full"
-                className="w-full py-4 text-center text-xs font-black uppercase tracking-widest"
-              >
-                Get Started
-              </HoverBorderGradient>
-            )}
-
-            {user && (
-              <HoverBorderGradient
-                onClick={() => {
-                  router.push("/dashboard");
-                  setIsMobileMenuOpen(false);
-                }}
-                idleColor="17, 24, 39"
-                darkIdleColor="255, 255, 255"
-                highlightColor="139, 92, 246"
-                darkHighlightColor="167, 139, 250"
-                containerClassName="mt-2 w-full rounded-full"
-                className="w-full py-4 text-center text-xs font-black uppercase tracking-widest"
-              >
-                Dashboard
-              </HoverBorderGradient>
-            )}
-
-            {user && (
-              <button
-                type="button"
-                onClick={async () => {
-                  await handleSignOut();
-                  setIsMobileMenuOpen(false);
-                }}
-                className="text-left text-xl font-black tracking-tight text-rose-600 dark:text-rose-400"
-              >
-                Sign Out
-              </button>
-            )}
-          </MobileNavMenu>
-        </MobileNav>
-      </Navbar>
+      <AppNavbar />
 
       {/* Hero Section */}
       <HeroSection />
 
       {/* HOW IT WORKS SECTION */}
-      <section
-        id="how-it-works"
-        className="scroll-mt-32 py-24 px-6 bg-slate-50 dark:bg-slate-950"
-      >
-        <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-4xl font-black tracking-tight md:text-5xl">
-            How It Works
-          </h2>
-          <p className="mt-4 text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-            A faster way to go from indecision to a great watch or read.
-          </p>
-
-          <div className="mt-12 max-w-4xl mx-auto rounded-3xl overflow-hidden shadow-2xl border-8 border-white dark:border-slate-800">
-            <video
-              src="/animations/security-status-safe.webm"
-              autoPlay
-              loop
-              muted
-              playsInline
-              preload="metadata"
-              aria-label="Demo showing how Smart Advisor works"
-              className="w-full aspect-video object-cover"
-            />
-          </div>
-        </div>
-      </section>
+      <HowItWorksSection />
 
       {/* Features Section */}
       <FeaturesSectionDemo />
@@ -236,10 +152,13 @@ const Index = () => {
       <section id="powered-by" className="scroll-mt-32 px-6 py-24 md:py-32">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12 text-center md:mb-16">
-            <h2 className="mb-4 mt-5 text-4xl font-black tracking-tighter text-slate-900 dark:text-slate-100 md:text-5xl">
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-indigo-500 dark:text-indigo-400">
               Powered By
+            </p>
+            <h2 className="mt-3 text-4xl font-black tracking-tighter text-slate-900 dark:text-slate-100 md:text-5xl">
+              Built on trusted infrastructure
             </h2>
-            <p className="mx-auto max-w-3xl text-base text-slate-600 dark:text-slate-400 md:whitespace-nowrap md:text-lg">
+            <p className="mx-auto mt-4 max-w-3xl text-base text-slate-600 dark:text-slate-400 md:whitespace-nowrap md:text-lg">
               Trusted services that help Smart Advisor stay fast, dependable,
               and helpful.
             </p>
@@ -249,16 +168,81 @@ const Index = () => {
       </section>
 
       {/* Meet The Team */}
-      <section id="meet-the-team" className="scroll-mt-32 px-6 py-24 md:py-32">
-        <div className="mx-auto max-w-6xl text-center">
-          <h2 className="mb-24 text-4xl font-black tracking-tighter md:text-5xl">
-            Meet the Team
-          </h2>
-          <AnimatedTestimonials
-            testimonials={teamMembers}
-            autoplay
-            showArrows={false}
-          />
+      <section
+        id="meet-the-team"
+        className="relative scroll-mt-32 overflow-hidden px-6 py-24 md:py-32"
+      >
+        {/* Light grid background — horizontal + vertical guide lines */}
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.06)_1px,transparent_1px)] bg-[size:48px_48px] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)]"
+        />
+        {/* Soft radial mask so the grid fades at the edges */}
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,rgba(248,250,252,0.95)_85%)] dark:bg-[radial-gradient(ellipse_at_center,transparent_30%,rgba(2,6,23,0.95)_85%)]"
+        />
+
+        <div className="relative mx-auto max-w-6xl">
+          <div className="text-center">
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-indigo-500 dark:text-indigo-400">
+              The People
+            </p>
+            <h2 className="mt-3 text-4xl font-black tracking-tighter md:text-5xl">
+              Meet the Team
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-slate-600 dark:text-slate-400">
+              The folks behind Smart Advisor.
+            </p>
+          </div>
+
+          <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {teamMembers.map((member, index) => (
+              <motion.article
+                key={member.name}
+                // SSR-safe initial style — matches the framer initial state so
+                // the first paint is already hidden, no visible→hidden→visible
+                // flicker on hydration.
+                style={{ opacity: 0, transform: "translateY(16px)" }}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.25 }}
+                transition={{
+                  duration: 0.45,
+                  delay: index * 0.08,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+                className="group relative flex flex-col overflow-hidden rounded-3xl border border-slate-200/70 bg-white/85 p-6 shadow-sm backdrop-blur-md transition-[border,box-shadow,transform] duration-300 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-lg dark:border-slate-700/60 dark:bg-slate-900/65 dark:hover:border-indigo-500/40"
+              >
+                {/* Photo */}
+                <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800">
+                  <Image
+                    src={member.src}
+                    alt={member.name}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    priority
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+
+                {/* Name + role */}
+                <div className="mt-5">
+                  <h3 className="text-xl font-black tracking-tight text-slate-900 dark:text-slate-100">
+                    {member.name}
+                  </h3>
+                  <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-indigo-600 dark:text-indigo-400">
+                    {member.designation}
+                  </p>
+                </div>
+
+                {/* Quote */}
+                <p className="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                  &ldquo;{member.quote}&rdquo;
+                </p>
+              </motion.article>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -266,8 +250,11 @@ const Index = () => {
       <section id="faq" className="scroll-mt-32 px-6 py-24 md:py-28">
         <div className="mx-auto max-w-3xl">
           <div className="mb-10 text-center">
-            <h2 className="text-4xl font-black tracking-tighter md:text-5xl">
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-indigo-500 dark:text-indigo-400">
               FAQ
+            </p>
+            <h2 className="mt-3 text-4xl font-black tracking-tighter md:text-5xl">
+              Questions, answered
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-sm text-slate-600 dark:text-slate-400 md:text-base">
               Questions before you get started? Reach out at{" "}
@@ -348,25 +335,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="px-6 py-14">
         <div className="mx-auto max-w-7xl">
-          <div className="flex justify-center">
-            <a
-              href="/"
-              onClick={(event) => {
-                if (
-                  typeof window !== "undefined" &&
-                  window.location.pathname === "/"
-                ) {
-                  event.preventDefault();
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }
-              }}
-              className="group inline-flex items-center transition-opacity hover:opacity-85"
-            >
-              <BrandWordmark imageClassName="h-10 md:h-11" />
-            </a>
-          </div>
-
-          <nav aria-label="Footer navigation" className="mt-8">
+          <nav aria-label="Footer navigation">
             <ul className="flex flex-col items-center justify-center gap-4 text-sm font-medium text-slate-700 dark:text-slate-300 md:flex-row md:gap-8">
               {[
                 { label: "How It Works", href: "#how-it-works" },
