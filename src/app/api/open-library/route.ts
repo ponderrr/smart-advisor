@@ -30,15 +30,13 @@ const DEFAULT_BOOK: BookProxyResponse = {
 
 const parseDescription = (raw?: string) => {
   if (!raw) return DEFAULT_BOOK.description;
-  const cleaned = raw.replace(/<[^>]*>/g, "");
-  const sentences = cleaned
-    .split(/[.!?]+/)
-    .map((s) => s.trim())
-    .filter(Boolean);
-  if (sentences.length === 0) return DEFAULT_BOOK.description;
-  const candidate =
-    sentences.slice(0, 3).join(". ") + (sentences.length > 3 ? "." : "");
-  return candidate.length > 220 ? `${candidate.slice(0, 217)}...` : candidate;
+  // Strip Markdown link syntax and HTML tags but keep the full text — let
+  // the UI line-clamp it as needed instead of truncating at the source.
+  const cleaned = raw
+    .replace(/<[^>]*>/g, "")
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .trim();
+  return cleaned || DEFAULT_BOOK.description;
 };
 
 // Simple in-memory cache (per-serverless-instance)

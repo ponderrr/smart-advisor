@@ -238,8 +238,10 @@ export const AuthForm = ({
   const validate = () => {
     const nextErrors: Record<string, string> = {};
     if (!email) {
-      nextErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      nextErrors.email =
+        mode === "signin" ? "Email or username is required" : "Email is required";
+    } else if (mode !== "signin" && !/\S+@\S+\.\S+/.test(email)) {
+      // Sign-in accepts username too — only enforce email format for signup/forgot.
       nextErrors.email = "Enter a valid email";
     }
 
@@ -498,15 +500,17 @@ export const AuthForm = ({
               noValidate
             >
               <FormField
-                label="Email"
+                label={mode === "signin" ? "Email or username" : "Email"}
                 htmlFor="auth-email"
                 error={errors.email}
               >
                 <Input
                   id="auth-email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder="you@example.com"
+                  type={mode === "signin" ? "text" : "email"}
+                  autoComplete={mode === "signin" ? "username" : "email"}
+                  placeholder={
+                    mode === "signin" ? "you@example.com or username" : "you@example.com"
+                  }
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   className="focus-visible:ring-slate-400 dark:focus-visible:ring-slate-500"

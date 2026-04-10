@@ -16,13 +16,17 @@ import {
   ShieldCheck,
   Mail,
   Lock,
-  ChevronRight,
   X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
-import { AnimatedTabs } from "@/components/ui/animated-tabs";
+import {
+  SidebarNavItem,
+  SidebarNavGroup,
+  SidebarUser,
+  SidebarNavShell,
+} from "@/components/sidebar-nav";
 import { authService } from "@/features/auth/services/auth-service";
 import { MFAFactor } from "@/features/auth/types/mfa";
 import {
@@ -150,6 +154,7 @@ const SettingsInput = forwardRef<
   </label>
 ));
 SettingsInput.displayName = "SettingsInput";
+
 
 /* ------------------------------------------------------------------ */
 /*  Main settings page                                                */
@@ -485,12 +490,48 @@ const SettingsPage = () => {
             </p>
           </div>
 
-          {/* Tab Navigation */}
-          <AnimatedTabs
-            tabs={sectionTabs}
-            activeTab={activeSection}
-            onTabChange={(tab) => setActiveSection(tab as SettingsSection)}
-          />
+          {/* Sidebar + content layout */}
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6">
+            <SidebarNavShell>
+              <nav aria-label="Account sections" className="flex-1">
+                <SidebarNavGroup label="Account" />
+                {sectionTabs
+                  .filter((tab) => tab.id === "profile" || tab.id === "security")
+                  .map((tab) => (
+                    <SidebarNavItem
+                      key={tab.id}
+                      icon={tab.icon}
+                      label={tab.label}
+                      active={activeSection === tab.id}
+                      onClick={() => setActiveSection(tab.id)}
+                    />
+                  ))}
+
+                <SidebarNavGroup label="App" />
+                {sectionTabs
+                  .filter(
+                    (tab) => tab.id === "content" || tab.id === "integrations",
+                  )
+                  .map((tab) => (
+                    <SidebarNavItem
+                      key={tab.id}
+                      icon={tab.icon}
+                      label={tab.label}
+                      active={activeSection === tab.id}
+                      onClick={() => setActiveSection(tab.id)}
+                    />
+                  ))}
+              </nav>
+
+              <div className="mt-6">
+                <SidebarUser
+                  name={user?.name ?? ""}
+                  email={user?.email ?? ""}
+                />
+              </div>
+            </SidebarNavShell>
+
+            <div className="min-w-0 flex-1">
 
           {/* Toast Message */}
           <AnimatePresence>
@@ -554,11 +595,11 @@ const SettingsPage = () => {
                       {...profileForm.register("age")}
                     />
                   </div>
-                  <div className="mt-5">
+                  <div className="mt-5 flex justify-end">
                     <StatefulButton
                       onClick={handleSaveProfile}
                       state={profileForm.formState.isSubmitting ? "loading" : "idle"}
-                      className="h-10 min-w-[160px] rounded-full px-6 text-sm font-semibold"
+                      className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
                     >
                       Save Profile
                     </StatefulButton>
@@ -579,29 +620,37 @@ const SettingsPage = () => {
                 {/* Email */}
                 <SectionCard>
                   <SectionHeader
-                    title="Email Address"
-                    description="Update the email associated with your account."
+                    title="Email"
+                    description="The address you use to sign in."
                   />
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <SettingsInput
-                      label="Current Email"
-                      defaultValue={user?.email || ""}
-                      readOnly
-                      disabled
-                      icon={<Mail size={14} />}
-                    />
-                    <SettingsInput
-                      label="New Email"
-                      placeholder="new@example.com"
-                      error={emailForm.formState.errors.newEmail?.message}
-                      {...emailForm.register("newEmail")}
-                    />
+
+                  <div className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-slate-200/70 bg-slate-50 px-4 py-3 dark:border-slate-700/60 dark:bg-slate-800/40">
+                    <div className="flex min-w-0 items-center gap-2.5">
+                      <Mail
+                        size={16}
+                        className="shrink-0 text-slate-400 dark:text-slate-500"
+                      />
+                      <span className="truncate text-sm font-semibold text-slate-700 dark:text-slate-200">
+                        {user?.email || "—"}
+                      </span>
+                    </div>
+                    <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                      Current
+                    </span>
                   </div>
-                  <div className="mt-5">
+
+                  <SettingsInput
+                    label="New email"
+                    placeholder="new@example.com"
+                    error={emailForm.formState.errors.newEmail?.message}
+                    {...emailForm.register("newEmail")}
+                  />
+
+                  <div className="mt-5 flex justify-end">
                     <StatefulButton
                       onClick={handleSaveEmail}
                       state={emailForm.formState.isSubmitting ? "loading" : "idle"}
-                      className="h-10 min-w-[160px] rounded-full px-6 text-sm font-semibold"
+                      className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
                     >
                       Update Email
                     </StatefulButton>
@@ -612,7 +661,7 @@ const SettingsPage = () => {
                 <SectionCard>
                   <SectionHeader
                     title="Password"
-                    description="Change your account password."
+                    description="Pick a new password — at least 8 characters."
                   />
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <SettingsInput
@@ -627,58 +676,73 @@ const SettingsPage = () => {
                       label="Confirm Password"
                       type="password"
                       placeholder="••••••••"
+                      icon={<Lock size={14} />}
                       error={passwordForm.formState.errors.confirmPassword?.message}
                       {...passwordForm.register("confirmPassword")}
                     />
                   </div>
-                  <div className="mt-5">
+                  <div className="mt-5 flex justify-end">
                     <StatefulButton
                       onClick={handleSavePassword}
                       state={passwordForm.formState.isSubmitting ? "loading" : "idle"}
-                      className="h-10 min-w-[160px] rounded-full px-6 text-sm font-semibold"
+                      className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
                     >
                       Update Password
                     </StatefulButton>
                   </div>
                 </SectionCard>
 
-                {/* MFA */}
+                {/* MFA — same SectionHeader pattern as the others */}
                 <SectionCard>
                   {!showMfaPanel ? (
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="rounded-xl bg-violet-100 p-2 dark:bg-violet-900/30">
+                    <>
+                      <SectionHeader
+                        title="Two-Factor Authentication"
+                        description="An extra step at sign-in to keep your account secure."
+                      />
+
+                      <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/70 bg-slate-50 px-4 py-3 dark:border-slate-700/60 dark:bg-slate-800/40">
+                        <div className="flex items-center gap-2.5">
                           <ShieldCheck
-                            size={18}
-                            className="text-violet-600 dark:text-violet-400"
+                            size={16}
+                            className={cn(
+                              "shrink-0",
+                              mfaEnabled
+                                ? "text-emerald-500 dark:text-emerald-400"
+                                : "text-slate-400 dark:text-slate-500",
+                            )}
                           />
+                          <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                            {mfaChecked
+                              ? mfaEnabled
+                                ? "Two-factor is on"
+                                : "Two-factor is off"
+                              : "Checking…"}
+                          </span>
                         </div>
-                        <div>
-                          <h3 className="text-sm font-bold">
-                            Two-Factor Authentication
-                          </h3>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">
-                            {mfaEnabled
-                              ? "Your account is protected with 2FA"
-                              : "Extra security for your account."}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {mfaChecked && mfaEnabled && (
-                          <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-                            ENABLED
+                        {mfaChecked && (
+                          <span
+                            className={cn(
+                              "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider",
+                              mfaEnabled
+                                ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                                : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400",
+                            )}
+                          >
+                            {mfaEnabled ? "Enabled" : "Disabled"}
                           </span>
                         )}
-                        <button
-                          onClick={() => setShowMfaPanel(true)}
-                          className="flex items-center gap-1 rounded-lg bg-white px-3 py-2 text-xs font-semibold shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50 dark:bg-slate-800 dark:ring-slate-700"
-                        >
-                          {mfaEnabled ? "Manage" : "Enable"}{" "}
-                          <ChevronRight size={12} />
-                        </button>
                       </div>
-                    </div>
+
+                      <div className="mt-5 flex justify-end">
+                        <StatefulButton
+                          onClick={() => setShowMfaPanel(true)}
+                          className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
+                        >
+                          {mfaEnabled ? "Manage two-factor" : "Enable two-factor"}
+                        </StatefulButton>
+                      </div>
+                    </>
                   ) : (
                     <div>
                       <button
@@ -706,64 +770,50 @@ const SettingsPage = () => {
                 <SectionCard>
                   <SectionHeader
                     title="Backup Email"
-                    description="Set a recovery email for account verification when your authenticator is unavailable."
+                    description="A recovery address used when your authenticator is unavailable."
                   />
-                  {currentBackupEmail ? (
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
-                        <div>
-                          <p className="text-sm font-semibold">
-                            {currentBackupEmail}
-                          </p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">
-                            Active backup email
-                          </p>
-                        </div>
-                        <button
-                          onClick={handleRemoveBackupEmail}
-                          disabled={removingBackupEmail}
-                          className="text-xs font-semibold text-red-600 hover:text-red-500 disabled:opacity-50 dark:text-red-400"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <SettingsInput
-                          label="Change Backup Email"
-                          placeholder="new-backup@example.com"
-                          icon={<Mail size={14} />}
-                          error={backupEmailForm.formState.errors.backupEmail?.message}
-                          {...backupEmailForm.register("backupEmail")}
+
+                  {currentBackupEmail && (
+                    <div className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-slate-200/70 bg-slate-50 px-4 py-3 dark:border-slate-700/60 dark:bg-slate-800/40">
+                      <div className="flex min-w-0 items-center gap-2.5">
+                        <Mail
+                          size={16}
+                          className="shrink-0 text-slate-400 dark:text-slate-500"
                         />
+                        <span className="truncate text-sm font-semibold text-slate-700 dark:text-slate-200">
+                          {currentBackupEmail}
+                        </span>
                       </div>
-                      <StatefulButton
-                        onClick={handleSaveBackupEmail}
-                        state={backupEmailForm.formState.isSubmitting ? "loading" : "idle"}
-                        className="h-10 min-w-[160px] rounded-full px-6 text-sm font-semibold"
+                      <button
+                        onClick={handleRemoveBackupEmail}
+                        disabled={removingBackupEmail}
+                        className="shrink-0 text-xs font-semibold text-rose-600 transition-colors hover:text-rose-500 disabled:opacity-50 dark:text-rose-400"
                       >
-                        Update Backup Email
-                      </StatefulButton>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <SettingsInput
-                          label="Backup Email"
-                          placeholder="backup@example.com"
-                          icon={<Mail size={14} />}
-                          error={backupEmailForm.formState.errors.backupEmail?.message}
-                          {...backupEmailForm.register("backupEmail")}
-                        />
-                      </div>
-                      <StatefulButton
-                        onClick={handleSaveBackupEmail}
-                        state={backupEmailForm.formState.isSubmitting ? "loading" : "idle"}
-                        className="h-10 min-w-[160px] rounded-full px-6 text-sm font-semibold"
-                      >
-                        Save Backup Email
-                      </StatefulButton>
+                        Remove
+                      </button>
                     </div>
                   )}
+
+                  <SettingsInput
+                    label={currentBackupEmail ? "Change to" : "Backup email"}
+                    placeholder={
+                      currentBackupEmail
+                        ? "new-backup@example.com"
+                        : "backup@example.com"
+                    }
+                    error={backupEmailForm.formState.errors.backupEmail?.message}
+                    {...backupEmailForm.register("backupEmail")}
+                  />
+
+                  <div className="mt-5 flex justify-end">
+                    <StatefulButton
+                      onClick={handleSaveBackupEmail}
+                      state={backupEmailForm.formState.isSubmitting ? "loading" : "idle"}
+                      className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
+                    >
+                      {currentBackupEmail ? "Update Backup" : "Save Backup"}
+                    </StatefulButton>
+                  </div>
                 </SectionCard>
 
                 {/* Sessions */}
@@ -858,16 +908,16 @@ const SettingsPage = () => {
                     </div>
                   </div>
 
-                  <div className="mt-5 flex items-center gap-3">
-                    <StatefulButton
-                      onClick={handleSaveContentPreferences}
-                      className="h-10 min-w-[200px] rounded-full px-6 text-sm font-semibold"
-                    >
-                      Save Preferences
-                    </StatefulButton>
+                  <div className="mt-5 flex flex-wrap items-center justify-end gap-3">
                     <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
                       Applies on next quiz
                     </span>
+                    <StatefulButton
+                      onClick={handleSaveContentPreferences}
+                      className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
+                    >
+                      Save Preferences
+                    </StatefulButton>
                   </div>
                 </SectionCard>
               </motion.div>
@@ -944,6 +994,8 @@ const SettingsPage = () => {
               </motion.div>
             )}
           </AnimatePresence>
+            </div>
+          </div>
         </div>
       </main>
 

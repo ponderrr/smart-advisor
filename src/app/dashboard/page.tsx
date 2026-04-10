@@ -27,7 +27,12 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
-import { AnimatedTabs } from "@/components/ui/animated-tabs";
+import {
+  SidebarNavItem,
+  SidebarNavGroup,
+  SidebarUser,
+  SidebarNavShell,
+} from "@/components/sidebar-nav";
 import { Recommendation } from "@/features/recommendations/types/recommendation";
 import { databaseService } from "@/features/recommendations/services/database-service";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
@@ -276,17 +281,35 @@ const DashboardPage = () => {
             </div>
           </div>
 
-          {/* Tab Navigation */}
-          <AnimatedTabs
-            tabs={[
-              { id: "overview" as const, label: "Overview", icon: <TrendingUp size={15} /> },
-              { id: "picks" as const, label: "Recent Picks", icon: <Sparkles size={15} /> },
-              { id: "genres" as const, label: "Genres", icon: <BarChart3 size={15} /> },
-            ]}
-            activeTab={activeTab}
-            onTabChange={(tab) => setActiveTab(tab)}
-          />
+          {/* Sidebar + content layout */}
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6">
+            <SidebarNavShell>
+              <nav aria-label="Dashboard views" className="flex-1">
+                <SidebarNavGroup label="Views" />
+                {[
+                  { id: "overview" as const, label: "Overview", icon: <TrendingUp size={16} /> },
+                  { id: "picks" as const, label: "Recent Picks", icon: <Sparkles size={16} /> },
+                  { id: "genres" as const, label: "Genres", icon: <BarChart3 size={16} /> },
+                ].map((tab) => (
+                  <SidebarNavItem
+                    key={tab.id}
+                    icon={tab.icon}
+                    label={tab.label}
+                    active={activeTab === tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                  />
+                ))}
+              </nav>
 
+              <div className="mt-6">
+                <SidebarUser
+                  name={user?.name ?? ""}
+                  email={user?.email ?? ""}
+                />
+              </div>
+            </SidebarNavShell>
+
+            <div className="min-w-0 flex-1">
           {/* Tab Content */}
           <AnimatePresence mode="wait">
             {activeTab === "overview" && (
@@ -403,6 +426,8 @@ const DashboardPage = () => {
               </motion.div>
             )}
           </AnimatePresence>
+            </div>
+          </div>
         </div>
       </main>
 

@@ -92,26 +92,31 @@ export function AppNavbar() {
         <div className="flex min-w-0 flex-1 items-center justify-end gap-4">
           <ThemeToggle />
 
-          <HoverBorderGradient
-            onClick={handlePrimary}
-            idleColor="17, 24, 39"
-            darkIdleColor="255, 255, 255"
-            highlightColor="139, 92, 246"
-            darkHighlightColor="167, 139, 250"
-            containerClassName="rounded-full"
-            className="whitespace-nowrap bg-white px-6 py-2.5 text-base font-black leading-none tracking-tighter text-black dark:bg-black dark:text-white"
-          >
-            {primaryLabel}
-          </HoverBorderGradient>
-
-          {user && !useMarketingVariant && (
-            <button
-              type="button"
-              onClick={handleSignOut}
-              className="text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400"
+          {/* Marketing variant gets the gradient CTA. Logged-in app pages
+              show only the Sign Out text — Dashboard already lives in the
+              centered nav items, so a second CTA is redundant. */}
+          {useMarketingVariant ? (
+            <HoverBorderGradient
+              onClick={handlePrimary}
+              idleColor="17, 24, 39"
+              darkIdleColor="255, 255, 255"
+              highlightColor="139, 92, 246"
+              darkHighlightColor="167, 139, 250"
+              containerClassName="rounded-full"
+              className="whitespace-nowrap bg-white px-6 py-2.5 text-base font-black leading-none tracking-tighter text-black dark:bg-black dark:text-white"
             >
-              Sign Out
-            </button>
+              {primaryLabel}
+            </HoverBorderGradient>
+          ) : (
+            user && (
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400"
+              >
+                Sign Out
+              </button>
+            )
           )}
         </div>
       </NavBody>
@@ -143,20 +148,22 @@ export function AppNavbar() {
             </button>
           ))}
 
-          <HoverBorderGradient
-            onClick={() => {
-              handlePrimary();
-              setIsMobileMenuOpen(false);
-            }}
-            idleColor="17, 24, 39"
-            darkIdleColor="255, 255, 255"
-            highlightColor="139, 92, 246"
-            darkHighlightColor="167, 139, 250"
-            containerClassName="mt-2 w-full rounded-full"
-            className="w-full py-4 text-center text-xs font-black uppercase tracking-widest"
-          >
-            {primaryLabel}
-          </HoverBorderGradient>
+          {useMarketingVariant && (
+            <HoverBorderGradient
+              onClick={() => {
+                handlePrimary();
+                setIsMobileMenuOpen(false);
+              }}
+              idleColor="17, 24, 39"
+              darkIdleColor="255, 255, 255"
+              highlightColor="139, 92, 246"
+              darkHighlightColor="167, 139, 250"
+              containerClassName="mt-2 w-full rounded-full"
+              className="w-full py-4 text-center text-xs font-black uppercase tracking-widest"
+            >
+              {primaryLabel}
+            </HoverBorderGradient>
+          )}
 
           {user && !useMarketingVariant && (
             <button

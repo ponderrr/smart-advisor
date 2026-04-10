@@ -16,8 +16,14 @@ import {
   Star,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
-import { AnimatedTabs } from "@/components/ui/animated-tabs";
+import {
+  SidebarNavItem,
+  SidebarNavGroup,
+  SidebarUser,
+  SidebarNavShell,
+} from "@/components/sidebar-nav";
 import {
   databaseService,
   FilterOptions,
@@ -201,6 +207,7 @@ const RecommendationModal = ({
 
 const AccountHistoryPage = () => {
   const router = useRouter();
+  const { user } = useAuth();
   const { ready } = useRequireAuth();
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -238,9 +245,10 @@ const AccountHistoryPage = () => {
 
   const rowVirtualizer = useWindowVirtualizer({
     count: rowCount,
-    // Card = aspect-[2/3] poster (≈ 1.5× column width) + ~150px content + padding.
-    // Use a generous estimate so the card body never gets clipped at any breakpoint.
-    estimateSize: () => 600,
+    // Reasonable seed value — measureElement on each row replaces this with
+    // the actual rendered height as soon as the row is on screen, so the
+    // initial estimate only needs to be in the ballpark.
+    estimateSize: () => 440,
     overscan: 3,
     scrollMargin: listRef.current?.offsetTop ?? 0,
   });
@@ -386,17 +394,36 @@ const AccountHistoryPage = () => {
             </div>
           </div>
 
-          {/* Tab Navigation */}
-          <AnimatedTabs
-            tabs={[
-              { id: "all" as const, label: "All", icon: <LayoutGrid size={15} /> },
-              { id: "movies" as const, label: "Movies", icon: <Film size={15} /> },
-              { id: "books" as const, label: "Books", icon: <BookOpen size={15} /> },
-              { id: "favorites" as const, label: "Favorites", icon: <Star size={15} /> },
-            ]}
-            activeTab={filter}
-            onTabChange={(tab) => setFilter(tab)}
-          />
+          {/* Sidebar + content layout */}
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6">
+            <SidebarNavShell>
+              <nav aria-label="History filters" className="flex-1">
+                <SidebarNavGroup label="Filters" />
+                {[
+                  { id: "all" as const, label: "All", icon: <LayoutGrid size={16} /> },
+                  { id: "movies" as const, label: "Movies", icon: <Film size={16} /> },
+                  { id: "books" as const, label: "Books", icon: <BookOpen size={16} /> },
+                  { id: "favorites" as const, label: "Favorites", icon: <Star size={16} /> },
+                ].map((tab) => (
+                  <SidebarNavItem
+                    key={tab.id}
+                    icon={tab.icon}
+                    label={tab.label}
+                    active={filter === tab.id}
+                    onClick={() => setFilter(tab.id)}
+                  />
+                ))}
+              </nav>
+
+              <div className="mt-6">
+                <SidebarUser
+                  name={user?.name ?? ""}
+                  email={user?.email ?? ""}
+                />
+              </div>
+            </SidebarNavShell>
+
+            <div className="min-w-0 flex-1">
 
           {/* Stats + Sort */}
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -450,12 +477,6 @@ const AccountHistoryPage = () => {
               <p className="mx-auto mt-2 max-w-xl text-sm text-slate-600 dark:text-slate-400">
                 Try a different filter or generate a fresh recommendation set.
               </p>
-              <GlowPillButton
-                onClick={() => router.push("/content-selection")}
-                className="mt-5 bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white"
-              >
-                Start New Quiz
-              </GlowPillButton>
             </div>
           ) : (
             <div ref={listRef}>
@@ -469,9 +490,12 @@ const AccountHistoryPage = () => {
                   return (
                     <div
                       key={virtualRow.key}
-                      className="absolute left-0 top-0 grid w-full gap-3"
+                      data-index={virtualRow.index}
+                      ref={(el) => {
+                        if (el) rowVirtualizer.measureElement(el);
+                      }}
+                      className="absolute left-0 top-0 grid w-full items-start gap-2 pb-2"
                       style={{
-                        height: `${virtualRow.size}px`,
                         transform: `translateY(${virtualRow.start - (rowVirtualizer.options.scrollMargin ?? 0)}px)`,
                         gridTemplateColumns: `repeat(${colCount}, 1fr)`,
                       }}
@@ -511,28 +535,28 @@ const AccountHistoryPage = () => {
                               </div>
                             </div>
                           </div>
-                          <div className="p-3">
-                            <p className="line-clamp-3 text-xs text-slate-600 dark:text-slate-300">
+                          <div className="px-3 py-2.5">
+                            <p className="line-clamp-2 text-[11px] leading-snug text-slate-600 dark:text-slate-300">
                               {rec.explanation || rec.description || `A tailored ${rec.type} recommendation based on your recent quiz choices.`}
                             </p>
-                            <div className="mt-4 flex items-center justify-between">
+                            <div className="mt-2.5 flex items-center justify-between">
                               <GlowPillButton
                                 onClick={() => handleToggleFavorite(rec.id)}
+                                aria-label={rec.is_favorited ? "Remove from favorites" : "Add to favorites"}
                                 className={cn(
-                                  "inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold",
+                                  "inline-flex h-7 w-7 items-center justify-center rounded-full p-0",
                                   rec.is_favorited ? "bg-rose-500 text-white" : "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
                                 )}
                               >
-                                <Heart size={12} fill={rec.is_favorited ? "currentColor" : "none"} />
-                                Favorite
+                                <Heart size={13} fill={rec.is_favorited ? "currentColor" : "none"} />
                               </GlowPillButton>
                               <GlowPillButton
                                 onClick={() => handleDeleteRecommendation(rec.id)}
                                 variant="destructive"
-                                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold"
+                                aria-label="Delete"
+                                className="inline-flex h-7 w-7 items-center justify-center rounded-full p-0"
                               >
-                                <Trash2 size={12} />
-                                Delete
+                                <Trash2 size={13} />
                               </GlowPillButton>
                             </div>
                           </div>
@@ -546,6 +570,8 @@ const AccountHistoryPage = () => {
           )}
           </motion.div>
           </AnimatePresence>
+            </div>
+          </div>
         </div>
       </main>
 
