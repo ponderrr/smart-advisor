@@ -35,7 +35,7 @@ import {
   SessionsManagement,
 } from "@/features/auth/components";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
-import { GlowPillButton } from "@/components/ui/glow-pill-button";
+import { PillButton } from "@/components/ui/pill-button";
 import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
 import { cn } from "@/lib/utils";
@@ -70,7 +70,7 @@ const backupEmailSchema = z.object({
 });
 
 const PREF_CONTENT_KEY = "smart_advisor_pref_content_focus";
-const PREF_DISCOVERY_KEY = "smart_advisor_pref_discovery";
+const PREF_CONTENT_TONE_KEY = "smart_advisor_pref_content_tone";
 const PREF_QUESTION_COUNT_KEY = "smart_advisor_pref_question_count";
 
 /* ------------------------------------------------------------------ */
@@ -162,8 +162,15 @@ SettingsInput.displayName = "SettingsInput";
 
 const SettingsPage = () => {
   const router = useRouter();
-  const { user, session, updateProfile, updateEmail, updatePassword } =
-    useAuth();
+  const {
+    user,
+    session,
+    updateProfile,
+    updateEmail,
+    updatePassword,
+    uploadAvatar,
+    removeAvatar,
+  } = useAuth();
   const { ready } = useRequireAuth();
 
   const settingsTabs: SettingsSection[] = ["profile", "security", "content", "integrations"];
@@ -200,7 +207,9 @@ const SettingsPage = () => {
     type: "success" | "error" | "info";
   } | null>(null);
   const [contentFocus, setContentFocus] = useState("both");
-  const [discoveryLevel, setDiscoveryLevel] = useState("balanced");
+  const [contentTone, setContentTone] = useState<"standard" | "family">(
+    "standard",
+  );
   const [preferredQuestionCount, setPreferredQuestionCount] = useState(5);
   const [accountActionLoading, setAccountActionLoading] = useState(false);
   const [showMfaPanel, setShowMfaPanel] = useState(false);
@@ -209,6 +218,36 @@ const SettingsPage = () => {
   const [currentBackupEmail, setCurrentBackupEmail] = useState<string | null>(
     null,
   );
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    // Reset so re-selecting the same file still fires onChange.
+    event.target.value = "";
+    if (!file) return;
+    setAvatarUploading(true);
+    const result = await uploadAvatar(file);
+    setAvatarUploading(false);
+    if (result.error) {
+      showMessage(result.error, "error");
+    } else {
+      showMessage("Profile picture updated.", "success");
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    setAvatarUploading(true);
+    const result = await removeAvatar();
+    setAvatarUploading(false);
+    if (result.error) {
+      showMessage(result.error, "error");
+    } else {
+      showMessage("Profile picture removed.", "success");
+    }
+  };
 
   const showMessage = (
     text: string,
@@ -343,7 +382,7 @@ const SettingsPage = () => {
     const verified = await requestVerification("save content preferences");
     if (!verified) return;
     window.localStorage.setItem(PREF_CONTENT_KEY, contentFocus);
-    window.localStorage.setItem(PREF_DISCOVERY_KEY, discoveryLevel);
+    window.localStorage.setItem(PREF_CONTENT_TONE_KEY, contentTone);
     window.localStorage.setItem(
       PREF_QUESTION_COUNT_KEY,
       String(preferredQuestionCount),
@@ -400,13 +439,12 @@ const SettingsPage = () => {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const sc = window.localStorage.getItem(PREF_CONTENT_KEY);
-    const sd = window.localStorage.getItem(PREF_DISCOVERY_KEY);
+    const st = window.localStorage.getItem(PREF_CONTENT_TONE_KEY);
     const sq = Number(
       window.localStorage.getItem(PREF_QUESTION_COUNT_KEY) || "5",
     );
     if (sc && ["movie", "book", "both"].includes(sc)) setContentFocus(sc);
-    if (sd && ["safe", "balanced", "adventurous"].includes(sd))
-      setDiscoveryLevel(sd);
+    if (st === "standard" || st === "family") setContentTone(st);
     if (Number.isFinite(sq) && sq >= 3 && sq <= 15)
       setPreferredQuestionCount(sq);
   }, []);
@@ -527,6 +565,7 @@ const SettingsPage = () => {
                 <SidebarUser
                   name={user?.name ?? ""}
                   email={user?.email ?? ""}
+                  avatarUrl={user?.avatar_url}
                 />
               </div>
             </SidebarNavShell>
@@ -566,6 +605,64 @@ const SettingsPage = () => {
                 transition={{ duration: 0.2 }}
                 className="space-y-4"
               >
+                {/* Profile picture */}
+                <SectionCard>
+                  <SectionHeader
+                    title="Profile picture"
+                    description="Upload an image to show across the app. JPG, PNG, GIF, or WEBP up to 5 MB."
+                  />
+                  <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+                    {user?.avatar_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={user.avatar_url}
+                        alt={user.name || "Avatar"}
+                        className="h-20 w-20 shrink-0 rounded-2xl object-cover ring-2 ring-slate-200/70 dark:ring-slate-700/60"
+                      />
+                    ) : (
+                      <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-indigo-500 text-2xl font-black text-white ring-2 ring-slate-200/70 dark:ring-slate-700/60">
+                        {(user?.name || user?.email || "?")
+                          .charAt(0)
+                          .toUpperCase()}
+                      </div>
+                    )}
+
+                    <div className="flex flex-1 flex-col gap-2">
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => avatarInputRef.current?.click()}
+                          disabled={avatarUploading}
+                          className="h-10 rounded-full border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-800/70"
+                        >
+                          {avatarUploading
+                            ? "Uploading…"
+                            : user?.avatar_url
+                              ? "Change picture"
+                              : "Upload picture"}
+                        </button>
+                        {user?.avatar_url && (
+                          <button
+                            type="button"
+                            onClick={handleRemoveAvatar}
+                            disabled={avatarUploading}
+                            className="h-10 rounded-full px-4 text-sm font-semibold text-rose-600 transition-colors hover:bg-rose-50 disabled:opacity-60 dark:text-rose-400 dark:hover:bg-rose-500/10"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                      <input
+                        ref={avatarInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleAvatarFileChange}
+                      />
+                    </div>
+                  </div>
+                </SectionCard>
+
                 <SectionCard>
                   <SectionHeader
                     title="Profile Details"
@@ -847,34 +944,54 @@ const SettingsPage = () => {
                           { id: "book", label: "Books" },
                           { id: "both", label: "Both" },
                         ].map((opt) => (
-                          <GlowPillButton
+                          <PillButton
                             key={opt.id}
                             onClick={() => setContentFocus(opt.id)}
                             active={contentFocus === opt.id}
                             className="px-4 py-2 text-sm font-semibold"
                           >
                             {opt.label}
-                          </GlowPillButton>
+                          </PillButton>
                         ))}
                       </div>
                     </div>
 
                     <div>
                       <p className="mb-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                        Discovery Level
+                        Content tone
                       </p>
-                      <div className="flex flex-wrap gap-2">
-                        {["safe", "balanced", "adventurous"].map((level) => (
-                          <GlowPillButton
-                            key={level}
-                            onClick={() => setDiscoveryLevel(level)}
-                            active={discoveryLevel === level}
-                            className="px-4 py-2 text-sm font-semibold capitalize"
-                          >
-                            {level}
-                          </GlowPillButton>
-                        ))}
-                      </div>
+                      {(user?.age ?? 0) < 18 ? (
+                        <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800/40 dark:text-slate-300">
+                          Recommendations are kept age-appropriate based on
+                          your age ({user?.age ?? "—"}). Adults can choose
+                          between standard and family-friendly tones.
+                        </div>
+                      ) : (
+                        <div className="flex flex-wrap gap-2">
+                          {(
+                            [
+                              { id: "standard", label: "Standard" },
+                              { id: "family", label: "Family-friendly" },
+                            ] as const
+                          ).map((opt) => (
+                            <PillButton
+                              key={opt.id}
+                              onClick={() => setContentTone(opt.id)}
+                              active={contentTone === opt.id}
+                              className="px-4 py-2 text-sm font-semibold"
+                            >
+                              {opt.label}
+                            </PillButton>
+                          ))}
+                        </div>
+                      )}
+                      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                        {(user?.age ?? 0) < 18
+                          ? "Locked: under-18 accounts always get age-appropriate picks."
+                          : contentTone === "family"
+                            ? "Picks stay light. No mature themes, dark content, or sexual content."
+                            : "Full personality. The AI may suggest dark, complex, or mature picks when they fit you."}
+                      </p>
                     </div>
 
                     <div>
@@ -971,7 +1088,7 @@ const SettingsPage = () => {
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-3">
-                    <GlowPillButton
+                    <PillButton
                       onClick={handleDisableAccount}
                       disabled={accountActionLoading}
                       variant="destructive"
@@ -979,8 +1096,8 @@ const SettingsPage = () => {
                     >
                       <UserMinus size={14} />
                       {accountActionLoading ? "Processing…" : "Disable Account"}
-                    </GlowPillButton>
-                    <GlowPillButton
+                    </PillButton>
+                    <PillButton
                       onClick={handleDeleteAccount}
                       disabled={accountActionLoading}
                       variant="destructive"
@@ -988,7 +1105,7 @@ const SettingsPage = () => {
                     >
                       <Trash2 size={14} />
                       {accountActionLoading ? "Processing…" : "Delete Account"}
-                    </GlowPillButton>
+                    </PillButton>
                   </div>
                 </SectionCard>
               </motion.div>

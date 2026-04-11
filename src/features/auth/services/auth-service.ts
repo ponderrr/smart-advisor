@@ -392,11 +392,13 @@ class AuthService {
           id: data.user.id,
           email: data.user.email || "",
           name: profile.name,
+          username: profile.username || undefined,
           age: profile.age,
           created_at: profile.created_at,
           mfa_enabled: profile.mfa_enabled,
           last_login: profile.last_login,
           backup_email: profile.backup_email || undefined,
+          avatar_url: profile.avatar_url || undefined,
         },
         error: null,
       };
@@ -427,6 +429,92 @@ class AuthService {
     } catch (err) {
       console.error("Unexpected error updating profile:", err);
       return { error: "An unexpected error occurred while updating profile" };
+    }
+  }
+
+  /**
+   * Uploads a file to the avatars storage bucket and saves the public URL
+   * to profiles.avatar_url. Returns the new public URL on success.
+   */
+  async uploadAvatar(
+    file: File,
+  ): Promise<{ url: string | null; error: string | null }> {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return { url: null, error: "Not signed in." };
+
+      if (!file.type.startsWith("image/")) {
+        return { url: null, error: "Please choose an image file." };
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        return { url: null, error: "Image must be 5 MB or smaller." };
+      }
+
+      // Convention: avatars/{userId}/avatar.{ext}. Always overwrite to keep
+      // a single canonical avatar object per user (also avoids leaking old
+      // files behind public URLs).
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `${user.id}/avatar.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (uploadError) {
+        console.error("Avatar upload error:", uploadError);
+        return { url: null, error: toUserFriendlyError(uploadError.message) };
+      }
+
+      // Cache-bust the public URL so the new image shows up immediately.
+      const { data: pub } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(path);
+      const url = `${pub.publicUrl}?t=${Date.now()}`;
+
+      const { error: dbError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: url, updated_at: new Date().toISOString() })
+        .eq("id", user.id);
+      if (dbError) {
+        return { url: null, error: toUserFriendlyError(dbError.message) };
+      }
+
+      return { url, error: null };
+    } catch (err) {
+      console.error("Unexpected error uploading avatar:", err);
+      return { url: null, error: "Failed to upload avatar." };
+    }
+  }
+
+  async removeAvatar(): Promise<{ error: string | null }> {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return { error: "Not signed in." };
+
+      // Best-effort delete of any existing avatar files. Storage list is
+      // bounded to the user's folder by RLS so this is safe.
+      const { data: files } = await supabase.storage
+        .from("avatars")
+        .list(user.id);
+      if (files?.length) {
+        await supabase.storage
+          .from("avatars")
+          .remove(files.map((f) => `${user.id}/${f.name}`));
+      }
+
+      const { error } = await supabase
+        .from("profiles")
+        .update({ avatar_url: null, updated_at: new Date().toISOString() })
+        .eq("id", user.id);
+      if (error) return { error: toUserFriendlyError(error.message) };
+
+      return { error: null };
+    } catch (err) {
+      console.error("Unexpected error removing avatar:", err);
+      return { error: "Failed to remove avatar." };
     }
   }
 

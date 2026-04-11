@@ -35,7 +35,8 @@ serve(async (req) => {
       });
     }
 
-    const { name, age, questionCount, contentType } = await req.json();
+    const { name, age, questionCount, contentType, contentTone } =
+      await req.json();
 
     if (!name || !age || !questionCount) {
       return new Response(
@@ -47,8 +48,12 @@ serve(async (req) => {
       );
     }
 
+    // Adults can opt into family-friendly tone; minors are always locked.
     const isAdult = age >= 18;
-    const systemPrompt = isAdult ? ADULT_SYSTEM_PROMPT : MINOR_SYSTEM_PROMPT;
+    const familyFriendly = !isAdult || contentTone === "family";
+    const systemPrompt = familyFriendly
+      ? MINOR_SYSTEM_PROMPT
+      : ADULT_SYSTEM_PROMPT;
 
     const contentContext =
       contentType === "movie"
@@ -61,10 +66,10 @@ serve(async (req) => {
 The goal is to understand their personality and taste deeply enough to recommend ${contentContext} they'll love.
 
 ${
-  isAdult
-    ? `Since they are an adult, you may include 1-2 questions about preferences for mature themes
-(dark content, sexuality in storytelling, moral complexity, horror intensity, etc).
-Frame these naturally and matter-of-factly.`
+  !familyFriendly
+    ? `Since they are an adult who hasn't opted into family-friendly mode, you may include
+1-2 questions about preferences for mature themes (dark content, sexuality in storytelling,
+moral complexity, horror intensity, etc). Frame these naturally and matter-of-factly.`
     : ""
 }
 

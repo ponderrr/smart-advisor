@@ -12,7 +12,7 @@ import {
   Sparkles,
   ChevronDown,
 } from "lucide-react";
-import { GlowPillButton } from "@/components/ui/glow-pill-button";
+import { PillButton } from "@/components/ui/pill-button";
 import { LoaderFive } from "@/components/ui/loader";
 import {
   deriveMatchScore,
@@ -308,21 +308,21 @@ export default function DemoResultsPage() {
               </p>
               <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
                 {error.kind === "limit" ? (
-                  <GlowPillButton
+                  <PillButton
                     onClick={() => router.push("/auth")}
                     className="inline-flex w-full items-center justify-center gap-2 bg-white px-6 py-3 text-sm font-black text-black sm:w-auto dark:bg-slate-900 dark:text-white"
                   >
                     Sign up to continue
                     <ArrowRight size={16} />
-                  </GlowPillButton>
+                  </PillButton>
                 ) : (
-                  <GlowPillButton
+                  <PillButton
                     onClick={() => router.push("/demo")}
                     className="inline-flex w-full items-center justify-center gap-2 bg-white px-6 py-3 text-sm font-black text-black sm:w-auto dark:bg-slate-900 dark:text-white"
                   >
                     <RotateCcw size={16} />
                     Try again
-                  </GlowPillButton>
+                  </PillButton>
                 )}
               </div>
             </motion.div>
@@ -426,20 +426,20 @@ export default function DemoResultsPage() {
                   over time, and unlock AI-powered personalized recommendations.
                 </p>
                 <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                  <GlowPillButton
+                  <PillButton
                     onClick={() => router.push("/auth")}
                     className="inline-flex w-full items-center justify-center gap-2 bg-white px-6 py-3 text-sm font-black text-black sm:w-auto dark:bg-slate-900 dark:text-white"
                   >
                     Sign up to continue
                     <ArrowRight size={16} />
-                  </GlowPillButton>
-                  <GlowPillButton
+                  </PillButton>
+                  <PillButton
                     onClick={() => router.push("/demo")}
                     className="inline-flex w-full items-center justify-center gap-2 border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 sm:w-auto dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
                   >
                     <RotateCcw size={16} />
                     Retake Demo
-                  </GlowPillButton>
+                  </PillButton>
                 </div>
               </motion.div>
             </>

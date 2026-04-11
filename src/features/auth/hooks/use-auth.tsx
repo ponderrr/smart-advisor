@@ -45,6 +45,10 @@ interface AuthContextType {
   ) => Promise<{ error: string | null }>;
   updateEmail: (email: string) => Promise<{ error: string | null }>;
   updatePassword: (password: string) => Promise<{ error: string | null }>;
+  uploadAvatar: (
+    file: File,
+  ) => Promise<{ url: string | null; error: string | null }>;
+  removeAvatar: () => Promise<{ error: string | null }>;
   enrollMFA: () => Promise<{
     data?: MFAEnrollData | null;
     error: string | null;
@@ -492,6 +496,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const uploadAvatar = async (file: File) => {
+    if (!user) return { url: null, error: "Not signed in." };
+    const result = await authService.uploadAvatar(file);
+    if (result.url && !result.error) {
+      setUser({ ...user, avatar_url: result.url });
+    }
+    return result;
+  };
+
+  const removeAvatar = async () => {
+    if (!user) return { error: "Not signed in." };
+    const result = await authService.removeAvatar();
+    if (!result.error) {
+      setUser({ ...user, avatar_url: undefined });
+    }
+    return result;
+  };
+
   const updateEmail = async (email: string) => {
     try {
       setLoading(true);
@@ -774,6 +796,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     updateProfile,
     updateEmail,
     updatePassword,
+    uploadAvatar,
+    removeAvatar,
     enrollMFA,
     verifyMFA,
     unenrollMFA,

@@ -31,7 +31,7 @@
     "@radix-ui/react-toast": "^1.2.1",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.50.0",
-    "@tabler/icons-react": "^3.38.0",
+    "@tabler/icons-react": "^3.41.1",
     "@tanstack/react-query": "^5.56.2",
     "@tanstack/react-virtual": "^3.13.23",
     "@types/uuid": "^10.0.0",

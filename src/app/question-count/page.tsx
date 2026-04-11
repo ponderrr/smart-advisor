@@ -6,7 +6,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import { useQuizStore } from "@/features/quiz/store/quiz-store";
-import { GlowPillButton } from "@/components/ui/glow-pill-button";
+import { PillButton } from "@/components/ui/pill-button";
 import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
 import { cn } from "@/lib/utils";
@@ -66,13 +66,13 @@ const QuestionCountPage = () => {
       <main className="px-4 pb-20 pt-32 md:pt-36 sm:px-6">
         <div className="mx-auto w-full max-w-4xl">
           <div className="mb-8 flex items-center justify-between gap-3">
-            <GlowPillButton
+            <PillButton
               onClick={() => router.push("/content-selection")}
               className="inline-flex items-center gap-2 border-slate-300/80 bg-white/80 px-4 py-2 text-sm font-semibold dark:border-slate-700 dark:bg-slate-900/70"
             >
               <ArrowLeft size={16} />
               Back
-            </GlowPillButton>
+            </PillButton>
             <p className="text-base font-extrabold tracking-wide text-slate-800 dark:text-slate-100 md:text-lg">
               Step 2 of 4
             </p>
@@ -141,7 +141,7 @@ const QuestionCountPage = () => {
             </div>
 
             <div className="mt-8 flex items-center justify-end">
-              <GlowPillButton
+              <PillButton
                 onClick={handleContinue}
                 disabled={isLoading}
                 className={cn(
@@ -150,7 +150,7 @@ const QuestionCountPage = () => {
               >
                 {isLoading ? "Continuing..." : "Continue"}
                 <ArrowRight size={16} />
-              </GlowPillButton>
+              </PillButton>
             </div>
           </div>
         </div>
