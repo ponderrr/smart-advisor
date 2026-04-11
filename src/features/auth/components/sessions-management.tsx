@@ -5,10 +5,31 @@ import { useRouter } from "next/navigation";
 import { sessionManagementService } from "../services/session-management";
 import { authService } from "../services/auth-service";
 import { LogOut, Smartphone, Globe, LogOutIcon } from "lucide-react";
+import {
+  IconBrandChrome,
+  IconBrandFirefox,
+  IconBrandSafari,
+  IconBrandEdge,
+  IconBrandOpera,
+} from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { formatLastActivity } from "../utils/device";
+
+/**
+ * Maps a session's browser_name to a brand-specific icon component.
+ * Falls back to Globe for unknown browsers.
+ */
+const getBrowserIcon = (browserName?: string) => {
+  const name = (browserName ?? "").toLowerCase();
+  if (name.includes("chrome") && !name.includes("chromium")) return IconBrandChrome;
+  if (name.includes("firefox")) return IconBrandFirefox;
+  if (name.includes("safari") && !name.includes("chrome")) return IconBrandSafari;
+  if (name.includes("edge") || name.includes("edg")) return IconBrandEdge;
+  if (name.includes("opera") || name.includes("opr")) return IconBrandOpera;
+  return Globe;
+};
 
 interface Session {
   id: string;
@@ -137,7 +158,9 @@ export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
         </div>
       ) : (
         <div className="space-y-3">
-          {sessions.map((session) => (
+          {sessions.map((session) => {
+            const BrowserIcon = getBrowserIcon(session.browser_name);
+            return (
             <div
               key={session.id}
               className={`flex items-start justify-between rounded-lg border px-4 py-4 transition-colors ${
@@ -151,7 +174,7 @@ export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
                   {session.device_type === "mobile" ? (
                     <Smartphone className="h-5 w-5 text-slate-600 dark:text-slate-400" />
                   ) : (
-                    <Globe className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                    <BrowserIcon className="h-5 w-5 text-slate-600 dark:text-slate-400" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -193,7 +216,8 @@ export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
                 )}
               </Button>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </Card>

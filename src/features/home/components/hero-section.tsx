@@ -7,7 +7,7 @@ import { IconChevronsDown } from "@tabler/icons-react";
 import { FlipWords } from "@/components/ui/flip-words";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { ParallaxHeroImages } from "@/components/ui/parallax-hero-images";
-import { GlowPillButton } from "@/components/ui/glow-pill-button";
+import { PillButton } from "@/components/ui/pill-button";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type HeroMediaResponse = {
@@ -199,12 +199,12 @@ const HeroSection = () => {
               {user ? "Go to Dashboard" : "Get Started"}
             </motion.span>
           </HoverBorderGradient>
-          <GlowPillButton
+          <PillButton
             onClick={handleSecondaryCta}
             className="border-slate-300/80 bg-white/70 px-7 py-3 text-sm font-bold tracking-wide text-slate-700 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200"
           >
             {user ? "View History" : "Try a Demo"}
-          </GlowPillButton>
+          </PillButton>
         </div>
       </div>
 

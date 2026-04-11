@@ -29,7 +29,7 @@ import {
   FilterOptions,
 } from "@/features/recommendations/services/database-service";
 import { Recommendation } from "@/features/recommendations/types/recommendation";
-import { GlowPillButton } from "@/components/ui/glow-pill-button";
+import { PillButton } from "@/components/ui/pill-button";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
@@ -370,14 +370,14 @@ const AccountHistoryPage = () => {
             </div>
             <div className="flex items-center gap-3">
               {recommendations.length > 0 && (
-                <GlowPillButton
+                <PillButton
                   onClick={handleClearAll}
                   variant="destructive"
                   className="inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold"
                 >
                   <Trash2 size={14} />
                   Clear All
-                </GlowPillButton>
+                </PillButton>
               )}
               <HoverBorderGradient
                 onClick={() => router.push("/content-selection")}
@@ -419,6 +419,7 @@ const AccountHistoryPage = () => {
                 <SidebarUser
                   name={user?.name ?? ""}
                   email={user?.email ?? ""}
+                  avatarUrl={user?.avatar_url}
                 />
               </div>
             </SidebarNavShell>
@@ -540,7 +541,7 @@ const AccountHistoryPage = () => {
                               {rec.explanation || rec.description || `A tailored ${rec.type} recommendation based on your recent quiz choices.`}
                             </p>
                             <div className="mt-2.5 flex items-center justify-between">
-                              <GlowPillButton
+                              <PillButton
                                 onClick={() => handleToggleFavorite(rec.id)}
                                 aria-label={rec.is_favorited ? "Remove from favorites" : "Add to favorites"}
                                 className={cn(
@@ -549,15 +550,15 @@ const AccountHistoryPage = () => {
                                 )}
                               >
                                 <Heart size={13} fill={rec.is_favorited ? "currentColor" : "none"} />
-                              </GlowPillButton>
-                              <GlowPillButton
+                              </PillButton>
+                              <PillButton
                                 onClick={() => handleDeleteRecommendation(rec.id)}
                                 variant="destructive"
                                 aria-label="Delete"
                                 className="inline-flex h-7 w-7 items-center justify-center rounded-full p-0"
                               >
                                 <Trash2 size={13} />
-                              </GlowPillButton>
+                              </PillButton>
                             </div>
                           </div>
                         </article>

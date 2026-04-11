@@ -665,7 +665,6 @@ export const AuthForm = ({
                 type="submit"
                 onClick={handleAction}
                 disabled={buttonDisabled}
-                hoverGlow
                 className="mt-1"
               >
                 {actionLabel}

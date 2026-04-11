@@ -61,15 +61,25 @@ export function SidebarNavGroup({ label }: { label: string }) {
 type SidebarUserProps = {
   name: string;
   email: string;
+  avatarUrl?: string;
 };
 
-export function SidebarUser({ name, email }: SidebarUserProps) {
+export function SidebarUser({ name, email, avatarUrl }: SidebarUserProps) {
   const initial = (name || email || "?").charAt(0).toUpperCase();
   return (
     <div className="flex items-center gap-3 border-t border-slate-200/70 px-3 pt-4 dark:border-slate-700/60">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-500 text-sm font-black text-white">
-        {initial}
-      </span>
+      {avatarUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={avatarUrl}
+          alt={name || "Avatar"}
+          className="h-9 w-9 shrink-0 rounded-full object-cover"
+        />
+      ) : (
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-500 text-sm font-black text-white">
+          {initial}
+        </span>
+      )}
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-bold text-slate-800 dark:text-slate-100">
           {name || "User"}

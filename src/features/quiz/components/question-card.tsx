@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { IconCheck } from "@tabler/icons-react";
 
-import { GlowPillButton } from "@/components/ui/glow-pill-button";
+import { PillButton } from "@/components/ui/pill-button";
 import { cn } from "@/lib/utils";
 
 export type QuestionType = "single_select" | "select_all" | "fill_in_blank";
@@ -93,7 +93,7 @@ function QuestionBody({
         {options?.map((option) => {
           const isSelected = selected.includes(option);
           return (
-            <GlowPillButton
+            <PillButton
               key={option}
               onClick={() => toggle(option)}
               active={isSelected}
@@ -106,7 +106,7 @@ function QuestionBody({
             >
               {isSelected && <IconCheck className="h-4 w-4" />}
               {option}
-            </GlowPillButton>
+            </PillButton>
           );
         })}
       </div>
@@ -120,7 +120,7 @@ function QuestionBody({
       {options?.map((option) => {
         const selected = selectedValue === option;
         return (
-          <GlowPillButton
+          <PillButton
             key={option}
             onClick={() => onChange(option)}
             active={selected}
@@ -137,7 +137,7 @@ function QuestionBody({
             ) : (
               <span className="h-5 w-5 rounded-full border border-slate-300 transition group-hover:border-indigo-300 dark:border-slate-600" />
             )}
-          </GlowPillButton>
+          </PillButton>
         );
       })}
     </div>

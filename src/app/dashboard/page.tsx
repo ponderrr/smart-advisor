@@ -305,6 +305,7 @@ const DashboardPage = () => {
                 <SidebarUser
                   name={user?.name ?? ""}
                   email={user?.email ?? ""}
+                  avatarUrl={user?.avatar_url}
                 />
               </div>
             </SidebarNavShell>

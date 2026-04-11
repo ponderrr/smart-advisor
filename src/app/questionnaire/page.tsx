@@ -16,7 +16,7 @@ import {
   hasQuestionAnswer,
   type QuestionValue,
 } from "@/features/quiz/components/question-card";
-import { GlowPillButton } from "@/components/ui/glow-pill-button";
+import { PillButton } from "@/components/ui/pill-button";
 import { LoaderFive, PageLoader } from "@/components/ui/loader";
 import { supabase } from "@/integrations/supabase/client";
 import { AppNavbar } from "@/components/app-navbar";
@@ -233,18 +233,18 @@ const QuestionnairePage = () => {
               {error}
             </p>
             <div className="mt-6 flex items-center justify-center gap-3">
-              <GlowPillButton
+              <PillButton
                 onClick={loadQuestions}
                 className="bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-black dark:text-white"
               >
                 Try Again
-              </GlowPillButton>
-              <GlowPillButton
+              </PillButton>
+              <PillButton
                 onClick={() => router.push("/question-count")}
                 className="border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
               >
                 Back
-              </GlowPillButton>
+              </PillButton>
             </div>
           </div>
         </main>
@@ -268,13 +268,13 @@ const QuestionnairePage = () => {
       <main className="px-3 pb-20 pt-28 sm:px-6 md:pt-36">
         <div className="mx-auto w-full max-w-4xl">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-2 sm:mb-8 sm:gap-3">
-            <GlowPillButton
+            <PillButton
               onClick={handlePrevious}
               className="inline-flex items-center gap-2 border-slate-300/80 bg-white/80 px-4 py-2 text-sm font-semibold dark:border-slate-700 dark:bg-slate-900/70"
             >
               <ArrowLeft size={16} />
               Back
-            </GlowPillButton>
+            </PillButton>
             <p className="text-base font-extrabold tracking-wide text-slate-800 dark:text-slate-100 md:text-lg">
               {currentQuestionIndex + 1} out of {questions.length} questions
             </p>
@@ -317,7 +317,7 @@ const QuestionnairePage = () => {
             )}
 
             <div className="mt-6 flex items-center justify-end sm:mt-8">
-              <GlowPillButton
+              <PillButton
                 onClick={handleNext}
                 disabled={!canProceed || isSubmitting}
                 className="inline-flex items-center justify-center gap-2 bg-white px-6 py-2.5 text-sm font-black tracking-tight text-black disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-900 dark:text-white"
@@ -326,7 +326,7 @@ const QuestionnairePage = () => {
                   ? "Get Recommendations"
                   : "Next"}
                 <ArrowRight size={16} />
-              </GlowPillButton>
+              </PillButton>
             </div>
           </motion.div>
         </div>

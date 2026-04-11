@@ -21,7 +21,7 @@ import {
   buildDemoQuiz,
   type DemoQuestion,
 } from "@/features/quiz/utils/demo-questions";
-import { GlowPillButton } from "@/components/ui/glow-pill-button";
+import { PillButton } from "@/components/ui/pill-button";
 import { AppNavbar } from "@/components/app-navbar";
 import { cn } from "@/lib/utils";
 
@@ -43,7 +43,7 @@ const DemoContentCard = ({
   onClick,
 }: DemoContentCardProps) => {
   return (
-    <GlowPillButton
+    <PillButton
       onClick={onClick}
       active={isSelected}
       className={cn(
@@ -102,7 +102,7 @@ const DemoContentCard = ({
           {description}
         </p>
       </div>
-    </GlowPillButton>
+    </PillButton>
   );
 };
 
@@ -254,13 +254,13 @@ export default function DemoPage() {
       <main className="px-4 pb-20 pt-32 md:pt-36 sm:px-6">
         <div className="mx-auto w-full max-w-4xl">
           <div className="mb-8 flex items-center justify-between gap-3">
-            <GlowPillButton
+            <PillButton
               onClick={handleBack}
               className="inline-flex items-center gap-2 border-slate-300/80 bg-white/80 px-4 py-2 text-sm font-semibold dark:border-slate-700 dark:bg-slate-900/70"
             >
               <IconArrowLeft className="h-4 w-4" />
               Back
-            </GlowPillButton>
+            </PillButton>
             <p className="text-base font-extrabold tracking-wide text-slate-800 dark:text-slate-100 md:text-lg">
               {step + 1} out of {questions.length} questions
             </p>
@@ -330,7 +330,7 @@ export default function DemoPage() {
                 }
                 transition={{ duration: 0.45 }}
               >
-                <GlowPillButton
+                <PillButton
                   onClick={handleNext}
                   className={cn(
                     "inline-flex items-center justify-center gap-2 bg-white px-6 py-2.5 text-sm font-black tracking-tight text-black dark:bg-slate-900 dark:text-white",
@@ -338,7 +338,7 @@ export default function DemoPage() {
                 >
                   {step === questions.length - 1 ? "Continue" : "Next"}
                   <IconArrowRight className="h-4 w-4" />
-                </GlowPillButton>
+                </PillButton>
               </motion.div>
             </div>
             {validationMessage ? (

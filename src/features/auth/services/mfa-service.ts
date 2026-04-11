@@ -18,58 +18,44 @@ class MfaService {
         };
       }
 
-      // Clean up any existing unverified TOTP factors before enrolling
-      // (a previous enrollment attempt that wasn't completed)
+      // Inspect existing factors before attempting to enroll.
       try {
         const { data: factors } = await supabase.auth.mfa.listFactors();
-        const unverified = factors?.totp?.filter(
-          (f: MFAFactor) => f.status === "unverified",
-        );
-        if (unverified?.length) {
-          for (const f of unverified) {
+        const totpFactors = (factors?.totp ?? []) as unknown as MFAFactor[];
+
+        // If there's already a VERIFIED factor, MFA is enabled. Bail out
+        // with a clear message instead of trying to enroll a duplicate.
+        const verified = totpFactors.find((f) => f.status === "verified");
+        if (verified) {
+          return {
+            error:
+              "Two-factor authentication is already enabled on this account. Disable it first if you want to re-enroll.",
+            data: null,
+          };
+        }
+
+        // Clean up any unverified factors left behind by aborted attempts.
+        for (const f of totpFactors) {
+          if (f.status === "unverified") {
             await supabase.auth.mfa.unenroll({ factorId: f.id });
           }
         }
       } catch {
-        // Non-critical — proceed with enrollment
+        // Non-critical — proceed with enrollment.
       }
+
+      // Pass an explicit, unique friendly name. Supabase enforces uniqueness
+      // even for empty strings, which was causing the "factor with the
+      // friendly name '' for this user already exists" error.
+      const friendlyName = `Smart Advisor TOTP ${Date.now()}`;
 
       const { data, error } = await supabase.auth.mfa.enroll({
         factorType: "totp",
+        friendlyName,
       });
 
       if (error) {
         console.error("MFA enroll error:", error.message, error);
-
-        // If there's a conflict with existing factors, try one more time after cleanup
-        if (
-          error.message.includes("already") ||
-          error.message.includes("conflict") ||
-          error.message.includes("exceeded")
-        ) {
-          try {
-            const { data: retryFactors } =
-              await supabase.auth.mfa.listFactors();
-            const allUnverified = retryFactors?.totp?.filter(
-              (f: MFAFactor) => f.status === "unverified",
-            );
-            if (allUnverified?.length) {
-              for (const f of allUnverified) {
-                await supabase.auth.mfa.unenroll({ factorId: f.id });
-              }
-              // Retry enrollment after cleanup
-              const { data: retryData, error: retryError } =
-                await supabase.auth.mfa.enroll({ factorType: "totp" });
-              if (!retryError && retryData) {
-                // Success on retry — continue with this data
-                return this.finalizeEnroll(retryData, user.id);
-              }
-            }
-          } catch {
-            // Retry failed
-          }
-        }
-
         return {
           error: toUserFriendlyError(
             error.message,

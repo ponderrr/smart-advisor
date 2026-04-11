@@ -33,7 +33,7 @@ serve(async (req) => {
       });
     }
 
-    const { name, age, answers, contentType } = await req.json();
+    const { name, age, answers, contentType, contentTone } = await req.json();
 
     if (!name || !age || !answers) {
       return new Response(
@@ -45,13 +45,21 @@ serve(async (req) => {
       );
     }
 
+    // Adults can opt into family-friendly mode; minors are always locked.
     const isAdult = age >= 18;
-    const systemPrompt = isAdult ? ADULT_SYSTEM_PROMPT : MINOR_SYSTEM_PROMPT;
+    const familyFriendly = !isAdult || contentTone === "family";
+    const systemPrompt = familyFriendly
+      ? MINOR_SYSTEM_PROMPT
+      : ADULT_SYSTEM_PROMPT;
 
     const wantsMovies = contentType === "movie" || contentType === "both";
     const wantsBooks = contentType === "book" || contentType === "both";
 
     const recommendations = [];
+
+    // Treat the user as "adult mode" only when they're actually an adult
+    // AND they haven't opted into family-friendly tone.
+    const allowMature = !familyFriendly;
 
     if (wantsMovies) {
       const movieRec = await getRecommendation({
@@ -59,7 +67,7 @@ serve(async (req) => {
         name,
         age,
         answers,
-        isAdult,
+        isAdult: allowMature,
         systemPrompt,
       });
       recommendations.push({ type: "movie", ...movieRec });
@@ -71,7 +79,7 @@ serve(async (req) => {
         name,
         age,
         answers,
-        isAdult,
+        isAdult: allowMature,
         systemPrompt,
       });
       recommendations.push({ type: "book", ...bookRec });

@@ -47,7 +47,9 @@ export const FileUpload = ({
     multiple: false,
     noClick: true,
     onDrop: handleFileChange,
-    onDropRejected: () => {},
+    onDropRejected: (error) => {
+      console.log(error);
+    },
   });
 
   return (
@@ -61,7 +63,6 @@ export const FileUpload = ({
           ref={fileInputRef}
           id="file-upload-handle"
           type="file"
-          aria-label="Upload file"
           onChange={(e) => handleFileChange(Array.from(e.target.files || []))}
           className="hidden"
         />

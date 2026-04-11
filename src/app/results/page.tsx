@@ -27,7 +27,7 @@ import {
 } from "@/features/recommendations/utils/match-score";
 import { SafeLocalStorage } from "@/utils/localStorage";
 import { useQuizStore } from "@/features/quiz/store/quiz-store";
-import { GlowPillButton } from "@/components/ui/glow-pill-button";
+import { PillButton } from "@/components/ui/pill-button";
 import { LoaderFive, PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
 import { cn } from "@/lib/utils";
@@ -592,18 +592,18 @@ const ResultsPage = () => {
               new ones or view your history.
             </p>
             <div className="mt-6 flex items-center justify-center gap-3">
-              <GlowPillButton
+              <PillButton
                 onClick={handleCancelGeneration}
                 className="border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
               >
                 Go to History
-              </GlowPillButton>
-              <GlowPillButton
+              </PillButton>
+              <PillButton
                 onClick={handleConfirmGeneration}
                 className="bg-white px-5 py-2.5 text-sm font-black text-black dark:bg-slate-900 dark:text-white"
               >
                 Generate New
-              </GlowPillButton>
+              </PillButton>
             </div>
           </div>
         </main>
@@ -646,18 +646,18 @@ const ResultsPage = () => {
               {error}
             </p>
             <div className="mt-6 flex items-center justify-center gap-3">
-              <GlowPillButton
+              <PillButton
                 onClick={handleRetry}
                 className="bg-white px-5 py-2.5 text-sm font-black text-black dark:bg-slate-900 dark:text-white"
               >
                 Try Again
-              </GlowPillButton>
-              <GlowPillButton
+              </PillButton>
+              <PillButton
                 onClick={() => router.push("/content-selection")}
                 className="border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
               >
                 Retake Quiz
-              </GlowPillButton>
+              </PillButton>
             </div>
           </div>
         </main>
@@ -771,28 +771,28 @@ const ResultsPage = () => {
             transition={{ duration: 0.3, delay: 0.15 }}
             className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row"
           >
-            <GlowPillButton
+            <PillButton
               onClick={handleGetAnother}
               className="inline-flex w-full items-center justify-center gap-2 bg-white px-6 py-3 text-sm font-black text-black sm:w-auto dark:bg-slate-900 dark:text-white"
             >
               <RotateCcw size={16} />
               Retake Quiz
-            </GlowPillButton>
-            <GlowPillButton
+            </PillButton>
+            <PillButton
               onClick={() => router.push("/history")}
               className="inline-flex w-full items-center justify-center gap-2 border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 sm:w-auto dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
             >
               View History
               <ArrowRight size={16} />
-            </GlowPillButton>
+            </PillButton>
             <div className="relative">
-              <GlowPillButton
+              <PillButton
                 onClick={handleShare}
                 className="inline-flex w-full items-center justify-center gap-2 border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 sm:w-auto dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
               >
                 <Share2 size={16} />
                 Share Results
-              </GlowPillButton>
+              </PillButton>
 
               <AnimatePresence>
                 {showShareMenu && (

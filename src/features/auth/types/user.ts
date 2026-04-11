@@ -8,4 +8,5 @@ export interface User {
   mfa_enabled?: boolean;
   last_login?: string;
   backup_email?: string;
+  avatar_url?: string;
 }

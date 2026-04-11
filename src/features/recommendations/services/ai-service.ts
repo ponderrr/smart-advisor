@@ -7,6 +7,13 @@ import { Question } from "@/features/quiz/types/question";
 import { Answer } from "@/features/quiz/types/answer";
 import { supabase } from "@/integrations/supabase/client";
 
+/** Reads the user's saved content tone from localStorage. */
+const getContentTone = (): "standard" | "family" => {
+  if (typeof window === "undefined") return "standard";
+  const value = window.localStorage.getItem("smart_advisor_pref_content_tone");
+  return value === "family" ? "family" : "standard";
+};
+
 function isNonRetryableError(error: unknown): boolean {
   const msg =
     error instanceof Error
@@ -93,6 +100,7 @@ export async function generateQuestions(
           name: userName,
           age: userAge,
           questionCount,
+          contentTone: getContentTone(),
         },
       },
     );
@@ -186,6 +194,7 @@ export async function generateRecommendations(
           contentType,
           name: userName,
           age: userAge,
+          contentTone: getContentTone(),
         },
       },
     );
