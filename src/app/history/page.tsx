@@ -216,11 +216,10 @@ const AccountHistoryPage = () => {
     "filter",
     parseAsStringLiteral(historyTabs).withDefault("all"),
   );
-  const prevFilterIdx = useRef(0);
-  const filterSlideDir = historyTabs.indexOf(filter) >= prevFilterIdx.current ? 1 : -1;
-  useEffect(() => {
-    prevFilterIdx.current = historyTabs.indexOf(filter);
-  }, [filter]);
+  // Filter transitions always slide rightward — entering content starts on
+  // the left and moves to center — so the motion feels consistent regardless
+  // of which filter the user came from.
+  const filterSlideDir = -1;
   const [sortBy, setSortBy] = useState<SortMode>("newest");
   const [selectedRec, setSelectedRec] = useState<Recommendation | null>(null);
 
@@ -525,11 +524,7 @@ const AccountHistoryPage = () => {
                             )}
                             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-4">
                               <p className="line-clamp-2 text-base font-black tracking-tight text-white">{rec.title}</p>
-                              <div className="mt-2 flex items-center justify-between">
-                                <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-1 text-[11px] uppercase tracking-[0.12em] text-white">
-                                  {rec.type === "movie" ? <Film size={12} /> : <BookOpen size={12} />}
-                                  {rec.type}
-                                </span>
+                              <div className="mt-2 flex items-center justify-end">
                                 <span className="text-xs text-white/80">
                                   {formatDistanceToNow(new Date(rec.created_at), { addSuffix: true })}
                                 </span>

@@ -1,11 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { LogOut, Monitor, Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { cn } from "@/lib/utils";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Navbar,
   NavBody,
@@ -90,10 +100,12 @@ export function AppNavbar() {
         </div>
 
         <div className="flex min-w-0 flex-1 items-center justify-end gap-4">
-          <ThemeToggle />
+          {/* Logged-in users get the theme switcher inside the avatar
+              dropdown, so the navbar only shows it for marketing visitors. */}
+          {useMarketingVariant && <ThemeToggle />}
 
           {/* Marketing variant gets the gradient CTA. Logged-in app pages
-              show only the Sign Out text — Dashboard already lives in the
+              show an avatar dropdown — Dashboard already lives in the
               centered nav items, so a second CTA is redundant. */}
           {useMarketingVariant ? (
             <HoverBorderGradient
@@ -108,15 +120,7 @@ export function AppNavbar() {
               {primaryLabel}
             </HoverBorderGradient>
           ) : (
-            user && (
-              <button
-                type="button"
-                onClick={handleSignOut}
-                className="text-sm font-bold tracking-tight text-slate-700 transition-colors hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400"
-              >
-                Sign Out
-              </button>
-            )
+            user && <UserAvatarMenu />
           )}
         </div>
       </NavBody>
@@ -180,5 +184,169 @@ export function AppNavbar() {
         </MobileNavMenu>
       </MobileNav>
     </Navbar>
+  );
+}
+
+/**
+ * UserAvatarMenu — circular avatar trigger that opens a dropdown with the
+ * user's identity, quick links, and sign out. Lives inside AppNavbar so the
+ * scroll-aware navbar styling propagates without extra wiring.
+ */
+function UserAvatarMenu() {
+  const router = useRouter();
+  const { user, signOut } = useAuth();
+
+  if (!user) return null;
+
+  const displayName = user.name || user.username || user.email;
+  const initial = (displayName || "?").charAt(0).toUpperCase();
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.push("/");
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          aria-label="Account menu"
+          className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200/80 shadow-sm ring-offset-2 transition-transform duration-200 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-slate-700/70 dark:ring-offset-slate-950"
+        >
+          {user.avatar_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={user.avatar_url}
+              alt={displayName}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-500 to-violet-500 text-sm font-black text-white">
+              {initial}
+            </span>
+          )}
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="end"
+        sideOffset={10}
+        className="w-60 rounded-2xl border border-slate-200/80 bg-white/95 p-2 shadow-xl backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/95"
+      >
+        <div className="flex items-center gap-3 px-2 py-2">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full">
+            {user.avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={user.avatar_url}
+                alt={displayName}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-500 to-violet-500 text-sm font-black text-white">
+                {initial}
+              </span>
+            )}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-bold tracking-tight text-slate-900 dark:text-slate-100">
+              {displayName}
+            </p>
+            <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+              {user.email}
+            </p>
+          </div>
+        </div>
+        <DropdownMenuSeparator className="bg-slate-200/80 dark:bg-slate-700/60" />
+        <ThemeSwitcherRow />
+        <DropdownMenuSeparator className="bg-slate-200/80 dark:bg-slate-700/60" />
+        <DropdownMenuItem
+          onSelect={handleSignOut}
+          className="cursor-pointer gap-2.5 rounded-xl px-2.5 py-2 text-sm font-semibold text-rose-600 focus:bg-rose-50 focus:text-rose-700 dark:text-rose-400 dark:focus:bg-rose-500/10 dark:focus:text-rose-300"
+        >
+          <LogOut size={16} />
+          Sign Out
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+/**
+ * ThemeSwitcherRow — segmented Light / Dark / System control rendered inside
+ * the avatar dropdown. Uses plain buttons (not DropdownMenuItem) so picking a
+ * theme doesn't auto-close the menu.
+ */
+function ThemeSwitcherRow() {
+  const [mounted, setMounted] = useState(false);
+  const { theme, setTheme } = useTheme();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Each option mirrors the standalone ThemeToggle's color language so the
+  // active theme reads at a glance — orange for light, indigo for dark, and
+  // a cool blue for system.
+  const options = [
+    {
+      value: "light",
+      label: "Light",
+      Icon: Sun,
+      activeBg: "bg-orange-50",
+      activeIcon: "text-orange-600",
+      activeText: "text-orange-900",
+    },
+    {
+      value: "dark",
+      label: "Dark",
+      Icon: Moon,
+      activeBg: "bg-indigo-950",
+      activeIcon: "text-indigo-400",
+      activeText: "text-indigo-100",
+    },
+    {
+      value: "system",
+      label: "System",
+      Icon: Monitor,
+      activeBg: "bg-blue-50 dark:bg-blue-950/40",
+      activeIcon: "text-blue-500",
+      activeText: "text-blue-900 dark:text-blue-100",
+    },
+  ] as const;
+
+  // Until mounted, next-themes can't tell us the resolved value — render the
+  // row in a neutral state so SSR and client markup match.
+  const active = mounted ? theme : undefined;
+
+  return (
+    <div className="px-2 py-2">
+      <p className="px-1 pb-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">
+        Theme
+      </p>
+      <div className="flex gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800/60">
+        {options.map(({ value, label, Icon, activeBg, activeIcon, activeText }) => {
+          const isActive = active === value;
+          return (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setTheme(value)}
+              aria-pressed={isActive}
+              aria-label={`${label} theme`}
+              className={cn(
+                "flex flex-1 items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-xs font-bold transition-colors",
+                isActive
+                  ? cn(activeBg, activeText, "shadow-sm")
+                  : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200",
+              )}
+            >
+              <Icon size={13} className={isActive ? activeIcon : undefined} />
+              {label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }

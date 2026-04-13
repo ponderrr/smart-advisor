@@ -75,6 +75,13 @@ export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
   };
 
   const handleRevokeSession = async (session: Session) => {
+    const promptMessage = session.is_current_device
+      ? "Sign out of this device? You'll be returned to the home page."
+      : `Sign out of ${session.device_name}? That session will lose access immediately.`;
+    if (!window.confirm(promptMessage)) {
+      return;
+    }
+
     setRevoking(session.id);
     const { error } = await sessionManagementService.revokeSession(session.id);
     setRevoking(null);

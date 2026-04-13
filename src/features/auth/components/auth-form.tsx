@@ -2,7 +2,6 @@
 
 import * as Label from "@radix-ui/react-label";
 import { AnimatePresence, motion } from "framer-motion";
-import { IconBrandGoogle } from "@tabler/icons-react";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -58,7 +57,6 @@ interface AuthFormProps {
     password: string,
     rememberFor30Days: boolean,
   ) => Promise<{ error: string | null; mfaRequired?: boolean }>;
-  onGoogleSignIn: () => Promise<{ error: string | null }>;
   onSignUp: (
     email: string,
     password: string,
@@ -87,7 +85,6 @@ export const AuthForm = ({
   signupCooldown = false,
   onClearError,
   onSignIn,
-  onGoogleSignIn,
   onSignUp,
   onResetPassword,
   onResendVerificationEmail,
@@ -707,27 +704,6 @@ export const AuthForm = ({
                         Forgot Password?
                       </button>
                     </div>
-
-                    <div className="relative py-1">
-                      <div className="h-px w-full bg-gradient-to-r from-transparent via-slate-300 to-transparent dark:via-slate-700" />
-                      <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white px-3 text-xs uppercase text-slate-500 dark:bg-slate-900 dark:text-slate-400">
-                        or
-                      </span>
-                    </div>
-
-                    <AuthHoverButton
-                      type="button"
-                      onClick={async () => {
-                        resetFeedback();
-                        const result = await onGoogleSignIn();
-                        if (result.error) setErrors({ general: result.error });
-                      }}
-                      className="shadow-input inline-flex h-10 w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 transition-all hover:border-violet-400 hover:bg-violet-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-                      disabled={buttonDisabled}
-                    >
-                      <IconBrandGoogle className="h-4 w-4" />
-                      <span>Continue with Google</span>
-                    </AuthHoverButton>
                   </motion.div>
                 )}
               </AnimatePresence>

@@ -11,7 +11,6 @@ const AuthPageContent = () => {
   const searchParams = useSearchParams();
   const {
     signIn,
-    signInWithGoogle,
     signUp,
     resetPassword,
     resendVerificationEmail,
@@ -105,7 +104,6 @@ const AuthPageContent = () => {
         authError={effectiveAuthError}
         signupCooldown={signupCooldown}
         onSignIn={signIn}
-        onGoogleSignIn={signInWithGoogle}
         onSignUp={signUp}
         onResetPassword={resetPassword}
         onResendVerificationEmail={resendVerificationEmail}
