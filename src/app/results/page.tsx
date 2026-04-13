@@ -15,7 +15,7 @@ import {
   Mail,
   ChevronDown,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import { enhancedRecommendationsService } from "@/features/recommendations/services/enhanced-recommendations-service";
@@ -684,7 +684,7 @@ const ResultsPage = () => {
             <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
               Step 4 of 4
             </p>
-            <h1 className="mt-2 text-4xl font-black tracking-tighter sm:text-5xl">
+            <h1 className="mt-2 text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl">
               Your Recommendations
             </h1>
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">

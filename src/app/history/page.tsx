@@ -15,7 +15,7 @@ import {
   LayoutGrid,
   Star,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import {
@@ -360,7 +360,7 @@ const AccountHistoryPage = () => {
               <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
                 History
               </p>
-              <h1 className="mt-2 text-4xl font-black tracking-tighter sm:text-5xl">
+              <h1 className="mt-2 text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl">
                 Your Recommendation Library
               </h1>
               <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
@@ -506,8 +506,17 @@ const AccountHistoryPage = () => {
                           className="group overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-slate-700/70 dark:bg-slate-900/65"
                         >
                           <div
-                            className="relative aspect-[2/3] cursor-pointer overflow-hidden bg-slate-200 dark:bg-slate-800"
+                            role="button"
+                            tabIndex={0}
+                            aria-label={`Open details for ${rec.title}`}
+                            className="relative aspect-[2/3] cursor-pointer overflow-hidden bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:bg-slate-800 dark:focus-visible:ring-offset-slate-950"
                             onClick={() => setSelectedRec(rec)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                setSelectedRec(rec);
+                              }
+                            }}
                           >
                             {rec.poster_url ? (
                               <Image

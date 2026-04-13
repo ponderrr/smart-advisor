@@ -24,7 +24,7 @@ import {
   TrendingUp,
   BarChart3,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import {
@@ -265,7 +265,7 @@ const DashboardPage = () => {
               <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
                 Dashboard
               </p>
-              <h1 className="mt-2 text-4xl font-black tracking-tighter sm:text-5xl">
+              <h1 className="mt-2 text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl">
                 Welcome{user?.name ? `, ${user.name}` : ""}.
               </h1>
               <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
@@ -482,8 +482,16 @@ const DashboardPage = () => {
                           {recommendations.slice(0, 15).map((rec) => (
                             <article
                               key={rec.id}
+                              role="button"
+                              tabIndex={0}
                               onClick={() => setSelectedRec(rec)}
-                              className="group cursor-pointer overflow-hidden rounded-xl border border-slate-100 bg-slate-50 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/40"
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                  e.preventDefault();
+                                  setSelectedRec(rec);
+                                }
+                              }}
+                              className="group cursor-pointer overflow-hidden rounded-xl border border-slate-100 bg-slate-50 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:border-slate-800 dark:bg-slate-900/40 dark:focus-visible:ring-offset-slate-950"
                             >
                               <div className="relative aspect-[2/3] overflow-hidden bg-slate-200 dark:bg-slate-800">
                                 {rec.poster_url ? (

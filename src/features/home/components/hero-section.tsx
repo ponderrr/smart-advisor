@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/features/auth/hooks/use-auth";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { IconChevronsDown } from "@tabler/icons-react";
 import { FlipWords } from "@/components/ui/flip-words";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
@@ -151,37 +151,40 @@ const HeroSection = () => {
     user ? router.push("/history") : router.push("/demo");
 
   return (
-    <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-slate-50 transition-colors duration-300 dark:bg-slate-950">
-      <ParallaxHeroImages images={heroImages} />
+    <section className="relative flex min-h-screen min-h-[100svh] w-full items-center justify-center overflow-hidden bg-slate-50 px-4 py-24 transition-colors duration-300 sm:px-6 sm:py-28 dark:bg-slate-950">
+      <ParallaxHeroImages
+        images={heroImages}
+        className="hidden md:block"
+      />
 
-      <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center gap-8 px-4 text-center">
-        <motion.div
+      <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center gap-6 text-center sm:gap-8">
+        <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-5xl md:text-7xl font-black tracking-tight text-slate-900 dark:text-slate-50"
+          className="text-[1.75rem] font-black leading-[1.05] tracking-tighter text-slate-900 sm:text-5xl sm:tracking-tight md:text-6xl lg:text-7xl dark:text-slate-50"
         >
-          Discover Your Next Favorite
-          <br />
-          Obsession Across Every
-          <br />
-          <FlipWords
-            words={words}
-            className="text-indigo-600 dark:text-indigo-400"
-          />
-        </motion.div>
+          <span className="block">Discover Your Next Favorite</span>
+          <span className="block">Obsession Across Every</span>
+          <span className="flex justify-center">
+            <FlipWords
+              words={words}
+              className="text-indigo-600 dark:text-indigo-400"
+            />
+          </span>
+        </motion.h1>
 
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="max-w-xl text-xl text-slate-700 dark:text-slate-300"
+          className="max-w-md text-base text-slate-700 sm:max-w-xl sm:text-xl dark:text-slate-300"
         >
           AI-powered recommendations for movies and books tailored to your
           unique taste.
         </motion.p>
 
-        <div className="mt-6 flex flex-col items-center gap-3">
+        <div className="mt-2 flex w-full flex-col items-center gap-3 sm:mt-6">
           <HoverBorderGradient
             onClick={handlePrimaryCta}
             idleColor="17, 24, 39"
@@ -190,7 +193,7 @@ const HeroSection = () => {
             darkHighlightColor="167, 139, 250"
             containerClassName="rounded-full"
             as="button"
-            className="dark:bg-black bg-white text-black dark:text-white px-14 py-6 text-2xl font-black tracking-tighter"
+            className="bg-white px-10 py-4 text-lg font-black tracking-tighter text-black sm:px-14 sm:py-6 sm:text-2xl dark:bg-black dark:text-white"
           >
             <motion.span
               whileHover={{ scale: 1.02 }}
@@ -201,7 +204,7 @@ const HeroSection = () => {
           </HoverBorderGradient>
           <PillButton
             onClick={handleSecondaryCta}
-            className="border-slate-300/80 bg-white/70 px-7 py-3 text-sm font-bold tracking-wide text-slate-700 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200"
+            className="border-slate-300/80 bg-white/70 px-6 py-2.5 text-sm font-bold tracking-wide text-slate-700 sm:px-7 sm:py-3 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200"
           >
             {user ? "View History" : "Try a Demo"}
           </PillButton>
@@ -212,7 +215,7 @@ const HeroSection = () => {
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.8, duration: 0.5 }}
-        className="absolute inset-x-0 bottom-8 z-20 flex justify-center"
+        className="absolute inset-x-0 bottom-6 z-20 hidden justify-center sm:bottom-8 sm:flex"
       >
         <div className="flex flex-col items-center gap-2 text-slate-500 dark:text-slate-400">
           <span className="text-xs uppercase tracking-[0.2em]">

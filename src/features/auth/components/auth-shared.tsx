@@ -1,7 +1,7 @@
 "use client";
 
 import * as Label from "@radix-ui/react-label";
-import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
+import { motion, useMotionTemplate, useMotionValue } from "motion/react";
 import { IconEye, IconEyeOff } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -85,7 +85,7 @@ export const PasswordInput = ({
         onClick={onTogglePassword}
         aria-label={showPassword ? "Hide password" : "Show password"}
         aria-pressed={showPassword}
-        className="absolute inset-y-0 right-1 inline-flex items-center justify-center px-2 text-slate-500 hover:text-slate-900 dark:hover:text-slate-300"
+        className="absolute inset-y-0 right-1 inline-flex items-center justify-center px-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
       >
         {showPassword ? (
           <IconEyeOff className="h-4 w-4" />

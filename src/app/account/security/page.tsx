@@ -65,7 +65,7 @@ export default function AccountSecurityPage() {
           <SessionsManagement userId={user.id} />
 
           {/* Security Tips */}
-          <div className="rounded-lg border border-blue-200 bg-blue-50 p-6 dark:border-blue-900/30 dark:bg-blue-900/20">
+          <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 sm:p-6 dark:border-blue-900/30 dark:bg-blue-900/20">
             <h3 className="font-semibold text-blue-900 dark:text-blue-200 mb-3">
               Security Tips
             </h3>

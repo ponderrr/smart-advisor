@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import { useQuizStore } from "@/features/quiz/store/quiz-store";
 import { PillButton } from "@/components/ui/pill-button";
@@ -108,7 +108,7 @@ const QuestionCountPage = () => {
 
             <div className="mt-4 rounded-2xl border border-slate-200/80 bg-slate-50/70 px-4 py-5 dark:border-slate-700 dark:bg-slate-950/40">
               <div className="mb-4 text-center">
-                <div className="text-6xl font-black tracking-tight text-indigo-600 dark:text-indigo-400">
+                <div className="text-5xl font-black tracking-tight text-indigo-600 sm:text-6xl dark:text-indigo-400">
                   {questionCount}
                 </div>
                 <p className="mt-2 text-lg font-black tracking-tight text-slate-700 dark:text-slate-200 sm:text-xl">

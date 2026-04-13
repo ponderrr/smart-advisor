@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { format } from "date-fns";
 import { authService } from "../services/auth-service";
 import { ShieldCheck, ArrowRight, Copy, Check, Download } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -189,7 +189,7 @@ export const MfaSetup = ({ onComplete, onSkip }: MfaSetupProps) => {
             {onSkip && (
               <button
                 onClick={onSkip}
-                className="w-full text-sm font-medium text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+                className="w-full text-sm font-medium text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
               >
                 Skip for now
               </button>
@@ -236,7 +236,7 @@ export const MfaSetup = ({ onComplete, onSkip }: MfaSetupProps) => {
               </code>
               <button
                 onClick={handleCopySecret}
-                className="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+                className="text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
               >
                 {copied ? (
                   <Check className="h-4 w-4 text-green-500" />
@@ -303,7 +303,7 @@ export const MfaSetup = ({ onComplete, onSkip }: MfaSetupProps) => {
               setError(null);
               setStep("qr");
             }}
-            className="mt-3 text-sm font-medium text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+            className="mt-3 text-sm font-medium text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
           >
             Back to QR Code
           </button>

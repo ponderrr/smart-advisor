@@ -69,7 +69,6 @@ export function SidebarUser({ name, email, avatarUrl }: SidebarUserProps) {
   return (
     <div className="flex items-center gap-3 border-t border-slate-200/70 px-3 pt-4 dark:border-slate-700/60">
       {avatarUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={avatarUrl}
           alt={name || "Avatar"}

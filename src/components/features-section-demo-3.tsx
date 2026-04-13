@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import {
   IconLock,
   IconBolt,
@@ -302,23 +302,23 @@ export default function FeaturesSectionDemo() {
   return (
     <section
       id="why-smart-advisor"
-      className="scroll-mt-32 px-6 py-20 md:py-24"
+      className="scroll-mt-32 px-4 py-16 sm:px-6 sm:py-20 md:py-24"
     >
       <div className="mx-auto max-w-7xl">
-        <div className="mb-10 text-center md:mb-12">
+        <div className="mb-8 text-center sm:mb-10 md:mb-12">
           <p className="text-xs font-black uppercase tracking-[0.22em] text-indigo-500 dark:text-indigo-400">
             Why Smart Advisor
           </p>
-          <h2 className="mx-auto mt-3 max-w-5xl text-4xl font-black tracking-tighter text-slate-900 dark:text-slate-100 md:text-5xl">
+          <h2 className="mx-auto mt-3 max-w-5xl text-3xl font-black tracking-tighter text-slate-900 dark:text-slate-100 sm:text-4xl md:text-5xl">
             Built for picks you can trust
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-sm text-slate-600 md:text-base dark:text-slate-300">
+          <p className="mx-auto mt-4 max-w-2xl text-sm text-slate-600 dark:text-slate-300 md:text-base">
             Private by design, fast by default, and open source so you can see
             how it works.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
           {FEATURES.map((feature, index) => {
             const Skeleton = feature.Skeleton;
             return (
@@ -333,16 +333,17 @@ export default function FeaturesSectionDemo() {
                   ease: [0.22, 1, 0.36, 1],
                 }}
                 className={cn(
-                  "group relative flex flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 p-6 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-lg dark:border-slate-700/70 dark:bg-slate-900/65 dark:hover:border-indigo-500/40",
+                  "group relative flex flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-lg sm:p-6 dark:border-slate-700/70 dark:bg-slate-900/65 dark:hover:border-indigo-500/40",
                   feature.wide
-                    ? "md:col-span-2 md:flex-row md:items-stretch md:gap-6"
-                    : "md:col-span-1",
+                    ? "lg:col-span-2 lg:flex-row lg:items-stretch lg:gap-6"
+                    : "lg:col-span-1",
                 )}
               >
                 <div
                   className={cn(
                     "relative w-full overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100/50 dark:from-slate-900/80 dark:to-slate-800/40 [mask-image:linear-gradient(to_bottom,transparent_0%,black_15%,black_85%,transparent_100%)]",
-                    feature.wide ? "h-52 md:h-auto md:w-1/2" : "h-52",
+                    "h-44 sm:h-48 md:h-52",
+                    feature.wide && "lg:h-auto lg:w-1/2",
                   )}
                 >
                   <Skeleton />
@@ -351,14 +352,14 @@ export default function FeaturesSectionDemo() {
                   className={cn(
                     "mt-5",
                     feature.wide &&
-                      "md:mt-0 md:flex md:w-1/2 md:flex-col md:justify-center",
+                      "lg:mt-0 lg:flex lg:w-1/2 lg:flex-col lg:justify-center",
                   )}
                 >
                   <p className="font-mono text-xs font-bold tracking-[0.2em] text-slate-400 dark:text-slate-500">
                     {String(index + 1).padStart(2, "0")}
                   </p>
                   <div className="mt-2 h-px w-10 bg-gradient-to-r from-indigo-400 to-violet-400" />
-                  <h3 className="mt-4 text-xl font-black tracking-tight text-slate-900 dark:text-slate-100">
+                  <h3 className="mt-4 text-lg font-black tracking-tight text-slate-900 sm:text-xl dark:text-slate-100">
                     {feature.title}
                   </h3>
                   <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
