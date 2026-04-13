@@ -18,7 +18,7 @@ import {
   Lock,
   X,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import {
@@ -511,7 +511,7 @@ const SettingsPage = () => {
             <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
               Settings
             </p>
-            <h1 className="mt-2 text-4xl font-black tracking-tighter sm:text-5xl">
+            <h1 className="mt-2 text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl">
               Account Settings
             </h1>
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
@@ -604,7 +604,6 @@ const SettingsPage = () => {
                   />
                   <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
                     {user?.avatar_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={user.avatar_url}
                         alt={user.name || "Avatar"}

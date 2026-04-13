@@ -215,7 +215,6 @@ function UserAvatarMenu() {
           className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200/80 shadow-sm ring-offset-2 transition-transform duration-200 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-slate-700/70 dark:ring-offset-slate-950"
         >
           {user.avatar_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={user.avatar_url}
               alt={displayName}
@@ -236,7 +235,6 @@ function UserAvatarMenu() {
         <div className="flex items-center gap-3 px-2 py-2">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full">
             {user.avatar_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={user.avatar_url}
                 alt={displayName}

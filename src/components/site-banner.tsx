@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "motion/react";
 import { StickyBanner } from "@/components/ui/sticky-banner";
 import {
   AlertTriangle,

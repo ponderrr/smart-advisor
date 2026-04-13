@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import { generateQuestionsWithRetry } from "@/features/recommendations/services/ai-service";

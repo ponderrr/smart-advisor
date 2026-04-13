@@ -6,7 +6,7 @@ import {
   useSpring,
   useTransform,
   MotionValue,
-} from "framer-motion";
+} from "motion/react";
 import { cn } from "@/lib/utils";
 
 type ImagePosition = {

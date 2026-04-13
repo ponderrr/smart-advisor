@@ -7,7 +7,7 @@ import {
   AnimatePresence,
   useMotionValueEvent,
   useScroll,
-} from "framer-motion";
+} from "motion/react";
 import React, { useState } from "react";
 import { BrandWordmark } from "@/components/brand-wordmark";
 import Link from "next/link";

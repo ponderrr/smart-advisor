@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import {
   IconBrandGithub,
   IconChevronDown,
@@ -49,30 +49,30 @@ const HOW_IT_WORKS_STEPS = [
 const HowItWorksSection = () => (
   <section
     id="how-it-works"
-    className="scroll-mt-32 px-6 py-24 bg-slate-50 dark:bg-slate-950"
+    className="scroll-mt-32 bg-slate-50 px-4 py-16 sm:px-6 sm:py-20 md:py-24 dark:bg-slate-950"
   >
     <div className="mx-auto max-w-6xl">
       <div className="text-center">
         <p className="text-xs font-black uppercase tracking-[0.22em] text-indigo-500 dark:text-indigo-400">
           How It Works
         </p>
-        <h2 className="mt-3 text-4xl font-black tracking-tighter md:text-5xl">
+        <h2 className="mt-3 text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl">
           From indecision to a great pick in four steps
         </h2>
-        <p className="mx-auto mt-4 max-w-2xl text-slate-600 dark:text-slate-400">
+        <p className="mx-auto mt-4 max-w-2xl text-sm text-slate-600 sm:text-base dark:text-slate-400">
           A faster way to land on a watch or read worth your time.
         </p>
       </div>
 
       {/* Card grid with a subtle horizontal connector behind them */}
-      <div className="relative mt-16">
+      <div className="relative mt-10 sm:mt-12 md:mt-16">
         {/* Horizontal flow line behind the cards (desktop only) */}
         <div
           aria-hidden
           className="pointer-events-none absolute left-12 right-12 top-12 hidden h-px bg-gradient-to-r from-transparent via-indigo-200/80 to-transparent lg:block dark:via-indigo-500/30"
         />
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
           {HOW_IT_WORKS_STEPS.map((step, index) => {
             const Icon = step.Icon;
             return (
@@ -91,24 +91,24 @@ const HowItWorksSection = () => (
                 {/* Gradient border that brightens on hover */}
                 <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-indigo-200/40 via-transparent to-violet-200/30 opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:from-indigo-500/30 dark:via-transparent dark:to-violet-500/20" />
 
-                <div className="relative flex h-full flex-col rounded-3xl border border-slate-200/70 bg-white/85 p-7 shadow-sm backdrop-blur-md transition-all duration-300 group-hover:-translate-y-1 group-hover:border-indigo-200 group-hover:shadow-lg dark:border-slate-700/60 dark:bg-slate-900/65 dark:group-hover:border-indigo-500/40">
+                <div className="relative flex h-full flex-col rounded-3xl border border-slate-200/70 bg-white/85 p-5 shadow-sm backdrop-blur-md transition-all duration-300 group-hover:-translate-y-1 group-hover:border-indigo-200 group-hover:shadow-lg sm:p-6 md:p-7 dark:border-slate-700/60 dark:bg-slate-900/65 dark:group-hover:border-indigo-500/40">
                   {/* Step number — large, gradient, sits in the corner */}
-                  <span className="absolute right-6 top-6 bg-gradient-to-br from-indigo-500 to-violet-500 bg-clip-text text-5xl font-black leading-none tracking-tighter text-transparent opacity-30 transition-opacity duration-300 group-hover:opacity-100 dark:from-indigo-400 dark:to-violet-400">
+                  <span className="absolute right-5 top-5 bg-gradient-to-br from-indigo-500 to-violet-500 bg-clip-text text-4xl font-black leading-none tracking-tighter text-transparent opacity-30 transition-opacity duration-300 group-hover:opacity-100 sm:right-6 sm:top-6 sm:text-5xl dark:from-indigo-400 dark:to-violet-400">
                     {String(index + 1).padStart(2, "0")}
                   </span>
 
                   {/* Icon in a tinted square */}
-                  <div className="relative inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100/60 text-indigo-600 shadow-inner ring-1 ring-indigo-200/60 dark:from-indigo-500/20 dark:to-indigo-500/5 dark:text-indigo-300 dark:ring-indigo-500/30">
-                    <Icon size={26} strokeWidth={1.75} />
+                  <div className="relative inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100/60 text-indigo-600 shadow-inner ring-1 ring-indigo-200/60 sm:h-14 sm:w-14 dark:from-indigo-500/20 dark:to-indigo-500/5 dark:text-indigo-300 dark:ring-indigo-500/30">
+                    <Icon size={24} strokeWidth={1.75} />
                   </div>
 
                   {/* Title */}
-                  <h3 className="mt-6 text-xl font-black tracking-tight text-slate-900 dark:text-slate-100">
+                  <h3 className="mt-5 text-lg font-black tracking-tight text-slate-900 sm:mt-6 sm:text-xl dark:text-slate-100">
                     {step.title}
                   </h3>
 
                   {/* Description */}
-                  <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600 sm:mt-3 dark:text-slate-400">
                     {step.description}
                   </p>
                 </div>
@@ -149,16 +149,19 @@ const Index = () => {
       <FeaturesSectionDemo />
 
       {/* Powered By */}
-      <section id="powered-by" className="scroll-mt-32 px-6 py-24 md:py-32">
+      <section
+        id="powered-by"
+        className="scroll-mt-32 px-4 py-16 sm:px-6 sm:py-20 md:py-24 lg:py-28"
+      >
         <div className="mx-auto max-w-6xl">
-          <div className="mb-12 text-center md:mb-16">
+          <div className="mb-8 text-center sm:mb-10 md:mb-14">
             <p className="text-xs font-black uppercase tracking-[0.22em] text-indigo-500 dark:text-indigo-400">
               Powered By
             </p>
-            <h2 className="mt-3 text-4xl font-black tracking-tighter text-slate-900 dark:text-slate-100 md:text-5xl">
+            <h2 className="mt-3 text-3xl font-black tracking-tighter text-slate-900 sm:text-4xl md:text-5xl dark:text-slate-100">
               Built on trusted infrastructure
             </h2>
-            <p className="mx-auto mt-4 max-w-3xl text-base text-slate-600 dark:text-slate-400 md:whitespace-nowrap md:text-lg">
+            <p className="mx-auto mt-4 max-w-3xl text-sm text-slate-600 sm:text-base md:whitespace-nowrap md:text-lg dark:text-slate-400">
               Trusted services that help Smart Advisor stay fast, dependable,
               and helpful.
             </p>
@@ -170,7 +173,7 @@ const Index = () => {
       {/* Meet The Team */}
       <section
         id="meet-the-team"
-        className="relative scroll-mt-32 overflow-hidden px-6 py-24 md:py-32"
+        className="relative scroll-mt-32 overflow-hidden px-4 py-16 sm:px-6 sm:py-20 md:py-24 lg:py-28"
       >
         {/* Light grid background — horizontal + vertical guide lines */}
         <div
@@ -188,15 +191,15 @@ const Index = () => {
             <p className="text-xs font-black uppercase tracking-[0.22em] text-indigo-500 dark:text-indigo-400">
               The People
             </p>
-            <h2 className="mt-3 text-4xl font-black tracking-tighter md:text-5xl">
+            <h2 className="mt-3 text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl">
               Meet the Team
             </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-slate-600 dark:text-slate-400">
+            <p className="mx-auto mt-4 max-w-2xl text-sm text-slate-600 sm:text-base dark:text-slate-400">
               The folks behind Smart Advisor.
             </p>
           </div>
 
-          <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-10 grid grid-cols-1 gap-4 sm:mt-12 sm:grid-cols-2 sm:gap-5 md:mt-16 md:gap-6 lg:grid-cols-3">
             {teamMembers.map((member, index) => (
               <motion.article
                 key={member.name}
@@ -212,7 +215,7 @@ const Index = () => {
                   delay: index * 0.08,
                   ease: [0.22, 1, 0.36, 1],
                 }}
-                className="group relative flex flex-col overflow-hidden rounded-3xl border border-slate-200/70 bg-white/85 p-6 shadow-sm backdrop-blur-md transition-[border,box-shadow,transform] duration-300 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-lg dark:border-slate-700/60 dark:bg-slate-900/65 dark:hover:border-indigo-500/40"
+                className="group relative flex flex-col overflow-hidden rounded-3xl border border-slate-200/70 bg-white/85 p-5 shadow-sm backdrop-blur-md transition-[border,box-shadow,transform] duration-300 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-lg sm:p-6 dark:border-slate-700/60 dark:bg-slate-900/65 dark:hover:border-indigo-500/40"
               >
                 {/* Photo */}
                 <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800">
@@ -227,8 +230,8 @@ const Index = () => {
                 </div>
 
                 {/* Name + role */}
-                <div className="mt-5">
-                  <h3 className="text-xl font-black tracking-tight text-slate-900 dark:text-slate-100">
+                <div className="mt-4 sm:mt-5">
+                  <h3 className="text-lg font-black tracking-tight text-slate-900 sm:text-xl dark:text-slate-100">
                     {member.name}
                   </h3>
                   <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-indigo-600 dark:text-indigo-400">
@@ -237,7 +240,7 @@ const Index = () => {
                 </div>
 
                 {/* Quote */}
-                <p className="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:mt-4 dark:text-slate-400">
                   &ldquo;{member.quote}&rdquo;
                 </p>
               </motion.article>
@@ -247,20 +250,23 @@ const Index = () => {
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="scroll-mt-32 px-6 py-24 md:py-28">
+      <section
+        id="faq"
+        className="scroll-mt-32 px-4 py-16 sm:px-6 sm:py-20 md:py-24 lg:py-28"
+      >
         <div className="mx-auto max-w-3xl">
-          <div className="mb-10 text-center">
+          <div className="mb-8 text-center sm:mb-10">
             <p className="text-xs font-black uppercase tracking-[0.22em] text-indigo-500 dark:text-indigo-400">
               FAQ
             </p>
-            <h2 className="mt-3 text-4xl font-black tracking-tighter md:text-5xl">
+            <h2 className="mt-3 text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl">
               Questions, answered
             </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-sm text-slate-600 dark:text-slate-400 md:text-base">
+            <p className="mx-auto mt-4 max-w-2xl break-words text-sm text-slate-600 dark:text-slate-400 md:text-base">
               Questions before you get started? Reach out at{" "}
               <a
                 href="mailto:support@smartadvisor.live"
-                className="text-blue-600 underline underline-offset-2 dark:text-blue-400"
+                className="break-all text-blue-600 underline underline-offset-2 dark:text-blue-400"
               >
                 support@smartadvisor.live
               </a>{" "}
@@ -291,13 +297,13 @@ const Index = () => {
                     onClick={() => setOpenFaq(isOpen ? null : index)}
                     aria-expanded={isOpen}
                     className={cn(
-                      "flex w-full items-center justify-between px-5 py-4 text-left transition-colors",
+                      "flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition-colors sm:px-5 sm:py-4",
                       isOpen
                         ? "bg-slate-100 dark:bg-slate-800/80"
                         : "bg-white dark:bg-slate-900/60",
                     )}
                   >
-                    <span className="pr-4 text-sm font-semibold text-slate-900 dark:text-slate-100 md:text-base">
+                    <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 md:text-base">
                       {item.question}
                     </span>
                     <IconChevronDown
@@ -319,7 +325,7 @@ const Index = () => {
                         }}
                         className="overflow-hidden"
                       >
-                        <p className="bg-white px-5 pb-5 pt-1 text-sm leading-relaxed text-slate-600 dark:bg-slate-900/60 dark:text-slate-300">
+                        <p className="bg-white px-4 pb-4 pt-1 text-sm leading-relaxed text-slate-600 sm:px-5 sm:pb-5 dark:bg-slate-900/60 dark:text-slate-300">
                           {item.answer}
                         </p>
                       </motion.div>
@@ -333,10 +339,10 @@ const Index = () => {
       </section>
 
       {/* Footer */}
-      <footer className="px-6 py-14">
+      <footer className="px-4 py-10 sm:px-6 sm:py-14">
         <div className="mx-auto max-w-7xl">
           <nav aria-label="Footer navigation">
-            <ul className="flex flex-col items-center justify-center gap-4 text-sm font-medium text-slate-700 dark:text-slate-300 md:flex-row md:gap-8">
+            <ul className="flex flex-col items-center justify-center gap-3 text-sm font-medium text-slate-700 sm:gap-4 md:flex-row md:gap-8 dark:text-slate-300">
               {[
                 { label: "How It Works", href: "#how-it-works" },
                 { label: "Why Smart Advisor", href: "#why-smart-advisor" },
@@ -357,11 +363,11 @@ const Index = () => {
             </ul>
           </nav>
 
-          <div className="mt-10 grid grid-cols-1 items-center gap-5 text-xs text-slate-500 dark:text-slate-400 md:grid-cols-3">
+          <div className="mt-8 grid grid-cols-1 items-center gap-4 text-xs text-slate-500 sm:mt-10 sm:gap-5 md:grid-cols-3 dark:text-slate-400">
             <p className="text-center md:text-left">
               © 2026 Smart Advisor. All rights reserved.
             </p>
-            <div className="whitespace-nowrap text-center text-sm text-slate-700 dark:text-slate-300">
+            <div className="text-center text-sm text-slate-700 md:whitespace-nowrap dark:text-slate-300">
               Built with{" "}
               <LinkPreview
                 url="https://react.dev"

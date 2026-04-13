@@ -15,42 +15,40 @@ const NotFound = () => {
   };
 
   return (
-    <div className="bg-appPrimary text-textPrimary font-inter min-h-screen">
-      {/* Header */}
-      <header className="h-[72px] flex items-center justify-between px-6 md:px-12 bg-appPrimary">
+    <div className="min-h-[100svh] bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+      <header className="flex h-[72px] items-center justify-between px-4 sm:px-6 md:px-12">
         <button
           onClick={handleGoHome}
-          className="inline-flex items-center cursor-pointer hover:opacity-80 transition-opacity duration-200"
+          className="inline-flex cursor-pointer items-center transition-opacity duration-200 hover:opacity-80"
         >
           <BrandWordmark imageClassName="h-11" />
         </button>
       </header>
 
-      {/* Main Content */}
-      <main className="flex flex-col items-center justify-center px-6 pt-[120px] pb-[100px]">
+      <main className="flex flex-col items-center justify-center px-4 pb-[100px] pt-[80px] sm:px-6 sm:pt-[120px]">
         <div className="max-w-[600px] text-center">
-          <h1 className="text-6xl md:text-8xl font-bold text-textPrimary mb-6">
+          <h1 className="mb-6 text-6xl font-bold tracking-tighter md:text-8xl">
             404
           </h1>
-          <h2 className="text-2xl md:text-3xl font-semibold text-textPrimary mb-4">
+          <h2 className="mb-4 text-2xl font-semibold md:text-3xl">
             Page Not Found
           </h2>
-          <p className="text-lg text-textSecondary mb-12 leading-relaxed">
-            Sorry, the page you're looking for doesn't exist. It might have been
-            moved, deleted, or you entered the wrong URL.
+          <p className="mb-12 text-base leading-relaxed text-slate-600 sm:text-lg dark:text-slate-400">
+            Sorry, the page you&apos;re looking for doesn&apos;t exist. It might
+            have been moved, deleted, or you entered the wrong URL.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
             <button
               onClick={handleGoBack}
-              className="flex items-center justify-center gap-2 bg-appSecondary text-textPrimary border border-gray-700 px-6 py-3 rounded-lg hover:bg-gray-600 transition-all duration-200"
+              className="flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-6 py-3 text-slate-900 transition-colors duration-200 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
             >
               <ArrowLeft size={20} />
               Go Back
             </button>
             <button
               onClick={handleGoHome}
-              className="flex items-center justify-center gap-2 bg-appAccent text-white px-6 py-3 rounded-lg hover:bg-opacity-90 transition-all duration-200"
+              className="flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-6 py-3 text-white transition-colors duration-200 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-400"
             >
               <Home size={20} />
               Go Home
