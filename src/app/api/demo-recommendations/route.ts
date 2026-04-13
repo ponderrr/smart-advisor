@@ -86,6 +86,27 @@ function getServiceClient() {
   return createClient(url, key, { auth: { persistSession: false } });
 }
 
+const MAX_ANSWERS = 50;
+const MAX_FIELD_LEN = 500;
+const ALLOWED_TYPES = new Set(["single_select", "select_all", "fill_in_blank"]);
+
+function isValidAnswer(x: unknown): x is DemoAnswer {
+  if (!x || typeof x !== "object") return false;
+  const a = x as Record<string, unknown>;
+  if (typeof a.id !== "string" || a.id.length > MAX_FIELD_LEN) return false;
+  if (typeof a.title !== "string" || a.title.length > MAX_FIELD_LEN) return false;
+  if (typeof a.type !== "string" || !ALLOWED_TYPES.has(a.type)) return false;
+  if (typeof a.value === "string") {
+    return a.value.length <= MAX_FIELD_LEN;
+  }
+  if (Array.isArray(a.value)) {
+    return a.value.every(
+      (v) => typeof v === "string" && v.length <= MAX_FIELD_LEN,
+    );
+  }
+  return false;
+}
+
 function formatAnswersForPrompt(answers: DemoAnswer[]): string {
   return answers
     .map((a) => {
@@ -359,20 +380,35 @@ export async function POST(request: NextRequest) {
   }
 
   const contentType = normalizeContentType(body.contentType);
-  const answers = Array.isArray(body.answers) ? body.answers : [];
-  if (answers.length === 0) {
+  const rawAnswers = Array.isArray(body.answers) ? body.answers : [];
+  if (rawAnswers.length === 0) {
     return NextResponse.json(
       { error: "No answers provided" },
       { status: 400 },
     );
   }
+  if (rawAnswers.length > MAX_ANSWERS) {
+    return NextResponse.json(
+      { error: "Too many answers" },
+      { status: 400 },
+    );
+  }
+  if (!rawAnswers.every(isValidAnswer)) {
+    return NextResponse.json(
+      { error: "Invalid answer format" },
+      { status: 400 },
+    );
+  }
+  const answers = rawAnswers as DemoAnswer[];
 
   // 2. Rate limit (fail closed if Supabase is unreachable — this route costs money per call).
-  // Skipped entirely in dev so local testing/screen recordings aren't capped.
-  const isDev = process.env.NODE_ENV !== "production";
+  // Only bypass when DISABLE_RATE_LIMIT is explicitly set (e.g. local dev or
+  // screen-recording sessions). NODE_ENV alone isn't enough — preview deploys
+  // run with NODE_ENV=production but still shouldn't be gated unless opted in.
+  const bypassRateLimit = process.env.DISABLE_RATE_LIMIT === "true";
   let newCount: number | null = null;
 
-  if (!isDev) {
+  if (!bypassRateLimit) {
     const supabase = getServiceClient();
     if (!supabase) {
       return NextResponse.json(
@@ -417,7 +453,7 @@ export async function POST(request: NextRequest) {
     aiItems = await callAnthropic(buildPrompt(contentType, answers));
   } catch (error) {
     console.error("demo-recommendations: Anthropic call failed", error);
-    if (isDev) {
+    if (bypassRateLimit) {
       console.warn(
         "demo-recommendations: using dev mock items (Anthropic unavailable)",
       );

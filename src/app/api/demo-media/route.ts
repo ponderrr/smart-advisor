@@ -75,9 +75,15 @@ async function fetchMovies(
     .slice(0, limit);
 }
 
+const MAX_QUERY_LEN = 200;
+
 export async function GET(request: NextRequest) {
   const contentType = request.nextUrl.searchParams.get("type") || "both";
-  const query = request.nextUrl.searchParams.get("q") || "best recommendations";
+  const rawQuery = request.nextUrl.searchParams.get("q");
+  if (rawQuery && rawQuery.length > MAX_QUERY_LEN) {
+    return NextResponse.json({ items: [] }, { status: 400 });
+  }
+  const query = rawQuery || "best recommendations";
 
   const tmdbKey = process.env.TMDB_API_KEY;
 

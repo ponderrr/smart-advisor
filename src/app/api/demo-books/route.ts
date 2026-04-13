@@ -14,8 +14,14 @@ type DemoBook = {
   infoLink: string;
 };
 
+const MAX_QUERY_LEN = 200;
+
 export async function GET(request: NextRequest) {
-  const q = request.nextUrl.searchParams.get("q") || "best fiction books";
+  const rawQ = request.nextUrl.searchParams.get("q");
+  if (rawQ && rawQ.length > MAX_QUERY_LEN) {
+    return NextResponse.json({ books: [] }, { status: 400 });
+  }
+  const q = rawQ || "best fiction books";
 
   try {
     const docs = await searchOpenLibraryDocs(q, 6);

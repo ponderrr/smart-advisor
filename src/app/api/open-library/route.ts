@@ -43,12 +43,17 @@ const parseDescription = (raw?: string) => {
 const cache = new Map<string, { data: BookProxyResponse; expiry: number }>();
 const CACHE_TTL = 1000 * 60 * 30; // 30 minutes
 
+const MAX_QUERY_LEN = 200;
+
 export async function GET(req: NextRequest) {
   try {
     const title = req.nextUrl.searchParams.get("title")?.trim();
     const author = req.nextUrl.searchParams.get("author")?.trim();
 
     if (!title) {
+      return NextResponse.json(DEFAULT_BOOK);
+    }
+    if (title.length > MAX_QUERY_LEN || (author && author.length > MAX_QUERY_LEN)) {
       return NextResponse.json(DEFAULT_BOOK);
     }
 
