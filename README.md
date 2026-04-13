@@ -1,6 +1,10 @@
 <div align="center">
 
-<img src="public/svgs/smartadvisor/SmartAdvisor.svg" width="80" height="80" alt="Smart Advisor" />
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="public/svgs/smartadvisor/SmartAdvisor-DM.svg">
+  <source media="(prefers-color-scheme: light)" srcset="public/svgs/smartadvisor/SmartAdvisor-LM.svg">
+  <img src="public/svgs/smartadvisor/SmartAdvisor.svg" width="96" height="96" alt="Smart Advisor" />
+</picture>
 
 # Smart Advisor
 
@@ -12,10 +16,11 @@ AI-powered movie & book recommendations tailored to who you actually are.
 ![Supabase](https://img.shields.io/badge/supabase-postgres%20%2B%20edge%20functions-3ECF8E?logo=supabase&logoColor=white)
 ![Claude](https://img.shields.io/badge/claude-sonnet%204-D97757?logo=anthropic&logoColor=white)
 ![Vercel](https://img.shields.io/badge/vercel-deployed-000000?logo=vercel&logoColor=white)
+![Tests](https://img.shields.io/badge/tests-vitest-6E9F18?logo=vitest&logoColor=white)
 
-[Live Demo](https://smartadvisor.live) · [Setup Guide](docs/SETUP.md) · [Report Bug](https://github.com/ponderrr/smart-advisor/issues)
+[Live Demo](https://smartadvisor.live) · [Setup Guide](docs/SETUP.md) · [Auth Docs](docs/AUTHENTICATION.md) · [Report Bug](https://github.com/ponderrr/smart-advisor/issues)
 
-<img src="public/images/smart-advisor-preview.png" width="720" alt="Smart Advisor preview" />
+<img src="public/images/smart-advisor-screenshot.png" width="820" alt="Smart Advisor screenshot" />
 
 </div>
 
@@ -68,25 +73,34 @@ New users can also **try a demo quiz** without signing up — a 5-question surve
 | **Real cover art** | TMDB and Open Library APIs fetch actual posters and covers. |
 | **Two-factor authentication** | TOTP-based MFA with backup codes and backup email recovery. |
 | **Device & session management** | View active sessions across devices, revoke individually or globally. |
-| **Demo quiz** | Try the recommendation flow without creating an account. |
+| **Avatar uploads** | Drag-and-drop avatar with client-side crop, stored in Supabase Storage with RLS-scoped access. |
+| **Demo quiz** | Try the recommendation flow without an account — rate-limited per IP via `demo_quota`. |
 | **Full auth with PKCE** | Supabase Auth with email confirmation, Google OAuth, and PKCE flow. |
 | **MFA-gated sensitive changes** | Profile, email, password, and account changes require MFA verification. |
 | **Zero exposed secrets** | All API keys live in Supabase Edge Function secrets, never the frontend. |
 | **Row Level Security** | Every DB query is scoped to the authenticated user at the Postgres level. |
 | **Recommendation history** | All picks saved to account with favorites and filters. |
+| **Hardened frontend** | CSP + strict security headers, Zod-validated inputs, typed env parsing, global error boundary. |
+| **Tested + CI-gated** | Vitest unit tests run in CI alongside `tsc --noEmit` and ESLint on every push. |
 
 ## Tech Stack
 
 | Layer | Technology | Why |
 |-------|-----------|-----|
-| Frontend | Next.js 16 + React 19 + TypeScript | App Router, SSR-ready auth, file-based routing |
-| Styling | Tailwind CSS + Radix UI | Utility-first CSS, accessible primitives |
+| Frontend | Next.js 16 + React 18 + TypeScript (strict) | App Router, SSR-ready auth, file-based routing |
+| Styling | Tailwind CSS + Radix UI + shadcn/ui | Utility-first CSS, accessible primitives, dark mode via `next-themes` |
+| Animation | Motion (Framer) | Scroll-linked hero + bento grid transitions |
+| State | Zustand + TanStack Query | Lightweight quiz store; cached server state for recs/history |
+| Forms & validation | React Hook Form + Zod | Typed schemas shared between form and edge-function payloads |
 | Auth | Supabase Auth (PKCE + MFA) | Email/password, Google OAuth, TOTP two-factor |
 | Database | Supabase Postgres | RLS enforced at DB level, not app level |
+| Storage | Supabase Storage | Avatar uploads scoped by RLS |
 | Edge Functions | Supabase Deno runtime | Server-side secrets, low latency, JWT verification |
-| AI | Anthropic Claude Sonnet 4 | Better nuanced reasoning for taste-based recommendations |
+| AI | Anthropic Claude Sonnet 4 | Nuanced reasoning for taste-based recommendations |
 | Movie data | TMDB API | Industry-standard movie metadata and poster images |
-| Book data | Open Library API | Cover art and metadata for millions of titles (no API key required) |
+| Book data | Open Library API | Cover art and metadata for millions of titles (no API key) |
+| Testing | Vitest + Testing Library + jsdom | Unit and component tests, run in CI |
+| Analytics | Vercel Analytics + Speed Insights | Real-user web vitals and traffic, no third-party cookies |
 | Hosting | Vercel | Zero-config Next.js deploys with automatic routing |
 
 ## Project Structure
@@ -160,19 +174,24 @@ smart-advisor/
 │
 ├── supabase/
 │   ├── functions/
-│   │   ├── anthropic-questions/     # Claude generates personality quiz (JWT required)
-│   │   ├── anthropic-recommendations/ # Claude generates recommendations (JWT required)
-│   │   └── tmdb-proxy/              # Movie metadata + poster URLs (public)
+│   │   ├── anthropic-questions/         # Claude generates personality quiz (JWT required)
+│   │   ├── anthropic-recommendations/   # Claude generates recommendations (JWT required)
+│   │   └── tmdb-proxy/                  # Movie metadata + poster URLs (public)
 │   └── migrations/
-│       ├── 20250101000000_canonical_schema.sql      # Core tables, RLS, indexes
-│       ├── 20250307100000_add_mfa_and_sessions.sql  # MFA factors + session tracking
-│       ├── 20250307200000_add_backup_codes.sql      # Backup codes for MFA recovery
-│       └── 20250307300000_add_backup_email.sql      # Backup email for recovery
+│       ├── 20250101000000_canonical_schema.sql        # Core tables, RLS, indexes
+│       ├── 20250307100000_add_mfa_and_sessions.sql    # MFA factors + session tracking
+│       ├── 20250307200000_add_backup_codes.sql        # Backup codes for MFA recovery
+│       ├── 20250307300000_add_backup_email.sql        # Backup email for recovery
+│       ├── 20250310000000_add_banners_table.sql       # Admin/system banners
+│       ├── 20250311000000_expand_banner_types.sql     # Banner type + priority columns
+│       ├── 20260410000000_add_demo_quota.sql          # Per-IP rate limiting for demo quiz
+│       └── 20260411000000_add_avatars.sql             # Avatar storage bucket + RLS policies
 │
 ├── public/
-│   ├── images/                      # Photos, preview screenshots
+│   ├── images/                      # Photos, screenshots
 │   └── svgs/smartadvisor/           # Brand wordmark + icon SVGs (light/dark)
-├── docs/                            # Setup guide, auth documentation
+├── docs/                            # SETUP.md, AUTHENTICATION.md
+├── .github/workflows/               # CI: typecheck, lint, tests
 └── .env.example                     # All required variables documented
 ```
 
@@ -184,8 +203,17 @@ cd smart-advisor
 npm install
 cp .env.example .env.local
 # Fill in NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY
-npm run dev
-# http://localhost:3000
+npm run dev           # http://localhost:3000
+```
+
+Other scripts:
+
+```bash
+npm run build         # production build
+npm run typecheck     # tsc --noEmit (strict)
+npm run lint          # eslint
+npm test              # vitest run
+npm run test:watch    # vitest watch mode
 ```
 
 For the full guide — including Supabase project setup, database migrations, edge function deployment, and production secrets — see **[docs/SETUP.md](docs/SETUP.md)**.
@@ -203,7 +231,11 @@ For the full guide — including Supabase project setup, database migrations, ed
 
 ## Security Model
 
-All API keys (Anthropic, TMDB) are server-side only — they live in Supabase Edge Function secrets and are never bundled into the frontend. Row Level Security is enforced at the Postgres level: every `SELECT`, `INSERT`, `UPDATE`, and `DELETE` on `profiles`, `recommendations`, `sessions`, `mfa_factors`, and `backup_codes` is scoped to `auth.uid()`, so even a compromised client cannot access another user's data. Authentication uses the PKCE flow with cookie-based sessions managed by `@supabase/ssr` and Next.js middleware. Two-factor authentication uses TOTP (RFC 6238) with SHA-256 hashed backup codes as a recovery mechanism. Sensitive account changes (profile, email, password, disable/delete) require MFA verification — either a TOTP code or completing MFA enrollment. The `NEXT_PUBLIC_SUPABASE_ANON_KEY` exposed in the frontend is intentionally public; it can only access data that RLS policies explicitly allow for the authenticated user.
+All API keys (Anthropic, TMDB) are server-side only — they live in Supabase Edge Function secrets and are never bundled into the frontend. Row Level Security is enforced at the Postgres level: every `SELECT`, `INSERT`, `UPDATE`, and `DELETE` on `profiles`, `recommendations`, `sessions`, `mfa_factors`, `backup_codes`, and `avatars` is scoped to `auth.uid()`, so even a compromised client cannot access another user's data. Authentication uses the PKCE flow with cookie-based sessions managed by `@supabase/ssr` and Next.js middleware. Two-factor authentication uses TOTP (RFC 6238) with SHA-256 hashed backup codes as a recovery mechanism. Sensitive account changes (profile, email, password, disable/delete) require MFA verification — either a TOTP code or completing MFA enrollment. The frontend ships a strict Content Security Policy and the usual hardening headers (`X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, HSTS), all user input is validated through Zod schemas, and environment variables are parsed through a typed loader that fails fast at boot. The `NEXT_PUBLIC_SUPABASE_ANON_KEY` exposed in the frontend is intentionally public; it can only access data that RLS policies explicitly allow for the authenticated user.
+
+## Testing & CI
+
+Vitest runs colocated unit tests (`src/**/*.test.ts{,x}`) against a jsdom environment with Testing Library. GitHub Actions runs `typecheck`, `lint`, and `test` on every push and pull request — a red check blocks merge. See `.github/workflows/ci.yml`.
 
 ## Deployment
 
@@ -214,8 +246,9 @@ Vercel handles the frontend — it auto-detects Next.js and handles routing auto
 - [ ] Social sharing — let users share a recommendation card with friends
 - [ ] More content types — podcasts, TV shows, video games
 - [ ] Recommendation comparison — side-by-side view of past picks
-- [ ] Rate limiting on edge functions to prevent abuse at scale
+- [ ] Rate limiting on edge functions (currently only the demo quiz is quota-gated)
 - [ ] Backup email verification via transactional email service
+- [ ] E2E coverage with Playwright for the critical auth + quiz paths
 
 ## License
 
