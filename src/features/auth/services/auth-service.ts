@@ -245,37 +245,6 @@ class AuthService {
     }
   }
 
-  /* -------------------- GOOGLE OAUTH -------------------- */
-  async signInWithGoogle(): Promise<{ error: string | null }> {
-    try {
-      const redirectTo =
-        typeof window !== "undefined"
-          ? `${window.location.origin}/auth/callback`
-          : "https://smartadvisor.live/auth/callback";
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo,
-          // Stay in the same tab so the PKCE code verifier cookie persists.
-          // Opening a new tab would lose the verifier and cause
-          // "PKCE code verifier not found in storage" errors.
-          skipBrowserRedirect: false,
-        },
-      });
-      if (error)
-        return {
-          error: toUserFriendlyError(
-            error.message,
-            "Unable to continue with Google sign-in.",
-          ),
-        };
-      return { error: null };
-    } catch (err) {
-      console.error("Unexpected error during Google sign-in:", err);
-      return { error: "Unable to continue with Google sign-in." };
-    }
-  }
-
   /* -------------------- PASSWORD & EMAIL -------------------- */
   async resetPassword(email: string): Promise<{ error: string | null }> {
     try {

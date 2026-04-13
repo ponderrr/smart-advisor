@@ -35,7 +35,6 @@ interface AuthContextType {
   ) => Promise<{ error: string | null }>;
   signupCooldown: boolean;
   signOut: () => Promise<{ error: string | null }>;
-  signInWithGoogle: () => Promise<{ error: string | null }>;
   resetPassword: (email: string) => Promise<{ error: string | null }>;
   resendVerificationEmail: (email: string) => Promise<{ error: string | null }>;
   clearError: () => void;
@@ -429,26 +428,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const signInWithGoogle = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const result = await authService.signInWithGoogle();
-      if (result.error) {
-        setError(result.error);
-      }
-      return result;
-    } catch (error) {
-      console.error("Error signing in with Google:", error);
-      const errorMessage =
-        error instanceof Error ? error.message : "An unexpected error occurred";
-      setError(errorMessage);
-      return { error: errorMessage };
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const resendVerificationEmail = async (email: string) => {
     try {
       setLoading(true);
@@ -789,7 +768,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     signIn,
     signUp,
     signOut,
-    signInWithGoogle,
     resetPassword,
     resendVerificationEmail,
     clearError,

@@ -164,7 +164,6 @@ const SettingsPage = () => {
   const router = useRouter();
   const {
     user,
-    session,
     updateProfile,
     updateEmail,
     updatePassword,
@@ -176,11 +175,10 @@ const SettingsPage = () => {
   const settingsTabs: SettingsSection[] = ["profile", "security", "content", "integrations"];
   const [activeSection, setActiveSection] =
     useState<SettingsSection>("profile");
-  const prevSectionIdx = useRef(0);
-  const sectionSlideDir = settingsTabs.indexOf(activeSection) >= prevSectionIdx.current ? 1 : -1;
-  useEffect(() => {
-    prevSectionIdx.current = settingsTabs.indexOf(activeSection);
-  }, [activeSection]);
+  // Section transitions always slide rightward — entering content starts on
+  // the left and moves to center — so the motion feels consistent regardless
+  // of which tab the user came from.
+  const sectionSlideDir = -1;
 
   const profileForm = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
@@ -326,13 +324,6 @@ const SettingsPage = () => {
     { id: "content", label: "Content", icon: <SlidersHorizontal size={15} /> },
     { id: "integrations", label: "Integrations", icon: <Link2 size={15} /> },
   ];
-
-  const isGoogleConnected = (() => {
-    const provider = session?.user?.app_metadata?.provider;
-    const providers = (session?.user?.app_metadata?.providers ||
-      []) as string[];
-    return provider === "google" || providers.includes("google");
-  })();
 
   const handleSaveProfile = profileForm.handleSubmit(async (data) => {
     setMessage(null);
@@ -1049,31 +1040,18 @@ const SettingsPage = () => {
                 transition={{ duration: 0.2 }}
                 className="space-y-4"
               >
-                {/* Google */}
                 <SectionCard>
                   <SectionHeader
                     title="Integrations"
                     description="Connected providers and services."
                   />
-                  <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
-                    <div>
-                      <p className="text-sm font-semibold">Google Sign-In</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
-                        {isGoogleConnected
-                          ? "Connected to your account"
-                          : "Not connected"}
-                      </p>
-                    </div>
-                    <span
-                      className={cn(
-                        "rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider",
-                        isGoogleConnected
-                          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-                          : "bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300",
-                      )}
-                    >
-                      {isGoogleConnected ? "Connected" : "Inactive"}
-                    </span>
+                  <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/60 p-8 text-center dark:border-slate-700/70 dark:bg-slate-800/40">
+                    <p className="text-xl font-bold tracking-tight text-slate-700 dark:text-slate-200">
+                      No integrations available yet
+                    </p>
+                    <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
+                      Third-party connections will show up here once they go live.
+                    </p>
                   </div>
                 </SectionCard>
 

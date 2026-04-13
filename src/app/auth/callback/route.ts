@@ -47,7 +47,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/auth?${params.toString()}`);
   }
 
-  // Handle OAuth code exchange (Google, GitHub, etc.)
+  // Handle PKCE code exchange (used by Supabase email confirmation /
+  // magic-link flows when configured for the SSR auth client).
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
