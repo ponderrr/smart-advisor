@@ -26,7 +26,23 @@ describe("isValidEmail", () => {
 
 describe("isValidPassword", () => {
   it("requires at least 8 characters", () => {
-    expect(isValidPassword("1234567")).toBe(false);
-    expect(isValidPassword("12345678")).toBe(true);
+    expect(isValidPassword("Aa1!567")).toBe(false);
+    expect(isValidPassword("Aa1!5678")).toBe(true);
+  });
+
+  it("requires an uppercase letter", () => {
+    expect(isValidPassword("aa1!5678")).toBe(false);
+  });
+
+  it("requires a lowercase letter", () => {
+    expect(isValidPassword("AA1!5678")).toBe(false);
+  });
+
+  it("requires a number", () => {
+    expect(isValidPassword("Aaaa!bcd")).toBe(false);
+  });
+
+  it("requires a special character", () => {
+    expect(isValidPassword("Aa12345678")).toBe(false);
   });
 });

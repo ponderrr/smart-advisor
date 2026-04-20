@@ -1,6 +1,7 @@
 import {
   useState,
   useEffect,
+  useRef,
   createContext,
   useContext,
   ReactNode,
@@ -137,6 +138,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [signupCooldown, setSignupCooldown] = useState(false);
   const [mfaPending, setMfaPending] = useState(false);
   const [sessionExpired, setSessionExpired] = useState(false);
+  // Supabase fires SIGNED_IN during signUp() before we sign the user back out
+  // to force email verification. Ignore auth events while signup is in flight
+  // so the transient session doesn't leak into state and trigger a redirect.
+  const signupInProgressRef = useRef(false);
 
   const fetchUserProfile = async (
     _supabaseUser: SupabaseUser,
@@ -192,6 +197,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           data: { subscription: sub },
         } = supabase.auth.onAuthStateChange(async (event, session) => {
           if (!mounted || abortController.signal.aborted) return;
+          if (signupInProgressRef.current) return;
 
           setSession(session);
 
@@ -337,6 +343,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return { error: msg };
     }
 
+    signupInProgressRef.current = true;
     try {
       setLoading(true);
       setError(null);
@@ -361,7 +368,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
       } else {
         clearSessionPreference();
-        await supabase.auth.signOut();
         setUser(null);
         setSession(null);
       }
@@ -374,6 +380,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setError(errorMessage);
       return { error: errorMessage };
     } finally {
+      signupInProgressRef.current = false;
       setLoading(false);
     }
   };

@@ -54,8 +54,28 @@ export function isValidEmail(email: string): boolean {
 }
 
 /**
- * Validate password strength
+ * Password strength rules. The single source of truth for both client-side
+ * validation and the live requirements popover shown in the auth UI.
+ */
+export interface PasswordRule {
+  label: string;
+  test: (password: string) => boolean;
+}
+
+export const PASSWORD_RULES: ReadonlyArray<PasswordRule> = [
+  { label: "At least 8 characters", test: (p) => p.length >= 8 },
+  { label: "One uppercase letter (A–Z)", test: (p) => /[A-Z]/.test(p) },
+  { label: "One lowercase letter (a–z)", test: (p) => /[a-z]/.test(p) },
+  { label: "One number (0–9)", test: (p) => /\d/.test(p) },
+  {
+    label: "One special character (!@#$…)",
+    test: (p) => /[^a-zA-Z0-9]/.test(p),
+  },
+];
+
+/**
+ * Validate password strength against all PASSWORD_RULES.
  */
 export function isValidPassword(password: string): boolean {
-  return password.length >= 8;
+  return PASSWORD_RULES.every((rule) => rule.test(password));
 }

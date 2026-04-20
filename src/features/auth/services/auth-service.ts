@@ -103,6 +103,20 @@ class AuthService {
         };
       if (!authData.user) return { error: "Failed to create user account" };
 
+      // Supabase returns a user with an empty `identities` array when the
+      // email is already registered (email-confirmation enabled). Detect and
+      // surface a clear message instead of silently "succeeding".
+      if (
+        Array.isArray(authData.user.identities) &&
+        authData.user.identities.length === 0
+      ) {
+        await supabase.auth.signOut();
+        return {
+          error:
+            "An account already exists for this email. Try signing in instead.",
+        };
+      }
+
       if (authData.session || authData.user.email_confirmed_at) {
         const { error: profileError } = await supabase.from("profiles").upsert(
           [
@@ -276,9 +290,15 @@ class AuthService {
         typeof window !== "undefined"
           ? window.location.origin
           : "https://smartadvisor.live";
+      // Route through /auth/callback (which must be in the Supabase
+      // Redirect URLs allowlist). The callback exchanges the code for a
+      // recovery session, then redirects to /auth/reset-password.
+      const redirectTo = `${origin}/auth/callback?next=${encodeURIComponent(
+        "/auth/reset-password",
+      )}`;
       const { error } = await supabase.auth.resetPasswordForEmail(
         normalizedEmail,
-        { redirectTo: `${origin}/auth/reset-password` },
+        { redirectTo },
       );
       if (error) return { error: toUserFriendlyError(error.message) };
       return { error: null };

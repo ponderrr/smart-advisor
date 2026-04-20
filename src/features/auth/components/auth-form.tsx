@@ -6,12 +6,18 @@ import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { MfaSetup } from "./mfa-setup";
 import { MfaChallengeScreen } from "./mfa-challenge-screen";
 import { VerifyEmailScreen } from "./verify-email-screen";
-import { FormField, PasswordInput, AuthHoverButton } from "./auth-shared";
+import {
+  AuthHoverButton,
+  FieldRequirements,
+  FormField,
+  PasswordInput,
+} from "./auth-shared";
+import { PASSWORD_RULES, isValidPassword } from "../utils/validation";
 import { MFAFactor, MFAListFactorsData } from "../types/mfa";
 
 export type AuthMode =
@@ -109,6 +115,7 @@ export const AuthForm = ({
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [rememberFor30Days, setRememberFor30Days] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitAttempted, setSubmitAttempted] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isResendingVerification, setIsResendingVerification] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -128,6 +135,93 @@ export const AuthForm = ({
   const [mfaCode, setMfaCode] = useState("");
   const [mfaInputMode, setMfaInputMode] = useState<"totp" | "backup">("totp");
   const [mfaVerifying, setMfaVerifying] = useState(false);
+
+  // Signup requirement-popover focus state + anchors
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [usernameFocused, setUsernameFocused] = useState(false);
+  const [ageFocused, setAgeFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
+  const [confirmPasswordFocused, setConfirmPasswordFocused] = useState(false);
+  const emailAnchorRef = useRef<HTMLDivElement>(null);
+  const usernameAnchorRef = useRef<HTMLDivElement>(null);
+  const ageAnchorRef = useRef<HTMLDivElement>(null);
+  const passwordAnchorRef = useRef<HTMLDivElement>(null);
+  const confirmPasswordAnchorRef = useRef<HTMLDivElement>(null);
+
+  const trimmedEmail = email.trim();
+  const emailRules = useMemo(
+    () => [
+      { label: "Contains @", met: trimmedEmail.includes("@") },
+      {
+        label: "Has a domain (example.com)",
+        met: /^\S+@\S+\.\S+$/.test(trimmedEmail),
+      },
+    ],
+    [trimmedEmail],
+  );
+
+  const parsedAge = Number(age);
+  const ageRules = useMemo(
+    () => [
+      { label: "Whole number", met: age.length > 0 && /^\d+$/.test(age) },
+      {
+        label: "Between 13 and 120",
+        met:
+          age.length > 0 &&
+          Number.isFinite(parsedAge) &&
+          parsedAge >= 13 &&
+          parsedAge <= 120,
+      },
+    ],
+    [age, parsedAge],
+  );
+
+  const trimmedUsername = username.trim();
+  const usernameRules = useMemo(
+    () => [
+      {
+        label: "2–24 characters",
+        met: trimmedUsername.length >= 2 && trimmedUsername.length <= 24,
+      },
+      {
+        label: "Letters, numbers, dots, dashes, or underscores",
+        met:
+          trimmedUsername.length > 0 &&
+          /^[a-zA-Z0-9._-]+$/.test(trimmedUsername),
+      },
+    ],
+    [trimmedUsername],
+  );
+  const passwordRules = useMemo(
+    () =>
+      PASSWORD_RULES.map((rule) => ({
+        label: rule.label,
+        met: rule.test(password),
+      })),
+    [password],
+  );
+  const confirmPasswordRules = useMemo(
+    () => [
+      {
+        label: "Matches your password",
+        met: confirmPassword.length > 0 && confirmPassword === password,
+      },
+    ],
+    [confirmPassword, password],
+  );
+
+  const emailAllMet = emailRules.every((r) => r.met);
+  const usernameAllMet = usernameRules.every((r) => r.met);
+  const ageAllMet = ageRules.every((r) => r.met);
+  const passwordAllMet = passwordRules.every((r) => r.met);
+  const confirmAllMet = confirmPasswordRules.every((r) => r.met);
+
+  // Per-mode "is this field OK?" helpers so sign-in / forgot / signup share the
+  // red-label-plus-banner pattern with appropriate strictness.
+  const emailMetForMode =
+    mode === "signin" ? trimmedEmail.length > 0 : emailAllMet;
+  const passwordMetForMode =
+    mode === "signin" ? password.length > 0 : passwordAllMet;
 
   // When initialMfaRequired changes to true (e.g. OAuth callback), load factors
   useEffect(() => {
@@ -207,6 +301,7 @@ export const AuthForm = ({
 
   const resetFeedback = () => {
     setErrors({});
+    setSubmitAttempted(false);
     setSuccessMessage(null);
     onClearError();
   };
@@ -245,8 +340,8 @@ export const AuthForm = ({
     if (mode === "signin" || mode === "signup") {
       if (!password) {
         nextErrors.password = "Password is required";
-      } else if (mode === "signup" && password.length < 6) {
-        nextErrors.password = "Use at least 6 characters";
+      } else if (mode === "signup" && !isValidPassword(password)) {
+        nextErrors.password = "Password does not meet all requirements";
       }
     }
 
@@ -279,6 +374,10 @@ export const AuthForm = ({
       }
     }
 
+    if (Object.keys(nextErrors).length > 0) {
+      nextErrors.general = "Please fix the highlighted fields.";
+    }
+
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   };
@@ -288,8 +387,10 @@ export const AuthForm = ({
     resetFeedback();
 
     if (!validate()) {
+      setSubmitAttempted(true);
       return { error: "Please correct the highlighted fields" };
     }
+    setSubmitAttempted(false);
 
     setSubmitting(true);
 
@@ -496,23 +597,40 @@ export const AuthForm = ({
               className="mt-6 space-y-4"
               noValidate
             >
-              <FormField
-                label={mode === "signin" ? "Email or username" : "Email"}
-                htmlFor="auth-email"
-                error={errors.email}
-              >
-                <Input
-                  id="auth-email"
-                  type={mode === "signin" ? "text" : "email"}
-                  autoComplete={mode === "signin" ? "username" : "email"}
-                  placeholder={
-                    mode === "signin" ? "you@example.com or username" : "you@example.com"
+              <div>
+                <div ref={emailAnchorRef}>
+                  <FormField
+                    label={mode === "signin" ? "Email or username" : "Email"}
+                    htmlFor="auth-email"
+                    invalid={submitAttempted && !emailMetForMode}
+                  >
+                    <Input
+                      id="auth-email"
+                      type={mode === "signin" ? "text" : "email"}
+                      autoComplete={mode === "signin" ? "username" : "email"}
+                      placeholder={
+                        mode === "signin"
+                          ? "you@example.com or username"
+                          : "you@example.com"
+                      }
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      onFocus={() => setEmailFocused(true)}
+                      onBlur={() => setEmailFocused(false)}
+                      className="focus-visible:ring-slate-400 dark:focus-visible:ring-slate-500"
+                    />
+                  </FormField>
+                </div>
+                <FieldRequirements
+                  rules={emailRules}
+                  visible={
+                    (mode === "signup" || mode === "forgot") &&
+                    (emailFocused || (submitAttempted && !emailAllMet))
                   }
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  className="focus-visible:ring-slate-400 dark:focus-visible:ring-slate-500"
+                  anchorRef={emailAnchorRef}
+                  title="Email requirements"
                 />
-              </FormField>
+              </div>
 
               <AnimatePresence initial={false}>
                 {(mode === "signin" || mode === "signup") && (
@@ -521,31 +639,45 @@ export const AuthForm = ({
                     initial={{ opacity: 0, height: 0, y: -4 }}
                     animate={{ opacity: 1, height: "auto", y: 0 }}
                     exit={{ opacity: 0, height: 0, y: -4 }}
-                    transition={{ duration: 0.2, ease: "easeOut" }}
+                    transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
                   >
-                    <FormField
-                      label="Password"
-                      htmlFor="auth-password"
-                      error={errors.password}
-                    >
-                      <PasswordInput
-                        id="auth-password"
-                        autoComplete={
-                          mode === "signin"
-                            ? "current-password"
-                            : "new-password"
-                        }
-                        placeholder="••••••••"
-                        value={password}
-                        onChange={(
-                          event: React.ChangeEvent<HTMLInputElement>,
-                        ) => setPassword(event.target.value)}
-                        showPassword={showPassword}
-                        onTogglePassword={() =>
-                          setShowPassword((prev) => !prev)
-                        }
-                      />
-                    </FormField>
+                    <div ref={passwordAnchorRef}>
+                      <FormField
+                        label="Password"
+                        htmlFor="auth-password"
+                        invalid={submitAttempted && !passwordMetForMode}
+                      >
+                        <PasswordInput
+                          id="auth-password"
+                          autoComplete={
+                            mode === "signin"
+                              ? "current-password"
+                              : "new-password"
+                          }
+                          placeholder="••••••••"
+                          value={password}
+                          onChange={(
+                            event: React.ChangeEvent<HTMLInputElement>,
+                          ) => setPassword(event.target.value)}
+                          onFocus={() => setPasswordFocused(true)}
+                          onBlur={() => setPasswordFocused(false)}
+                          showPassword={showPassword}
+                          onTogglePassword={() =>
+                            setShowPassword((prev) => !prev)
+                          }
+                        />
+                      </FormField>
+                    </div>
+                    <FieldRequirements
+                      rules={passwordRules}
+                      visible={
+                        mode === "signup" &&
+                        (passwordFocused ||
+                          (submitAttempted && !passwordAllMet))
+                      }
+                      anchorRef={passwordAnchorRef}
+                      title="Password requirements"
+                    />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -557,54 +689,105 @@ export const AuthForm = ({
                     initial={{ opacity: 0, height: 0, y: -4 }}
                     animate={{ opacity: 1, height: "auto", y: 0 }}
                     exit={{ opacity: 0, height: 0, y: -4 }}
+                    transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
                     className="space-y-4"
                   >
-                    <FormField
-                      label="Username"
-                      htmlFor="auth-username"
-                      error={errors.username}
-                    >
-                      <Input
-                        id="auth-username"
-                        type="text"
-                        placeholder="yourname"
-                        value={username}
-                        onChange={(event) => setUsername(event.target.value)}
-                      />
-                    </FormField>
-
-                    <FormField
-                      label="Age"
-                      htmlFor="auth-age"
-                      error={errors.age}
-                    >
-                      <Input
-                        id="auth-age"
-                        type="number"
-                        placeholder="18"
-                        value={age}
-                        onChange={(event) => setAge(event.target.value)}
-                      />
-                    </FormField>
-
-                    <FormField
-                      label="Confirm password"
-                      htmlFor="auth-confirm-password"
-                      error={errors.confirmPassword}
-                    >
-                      <PasswordInput
-                        id="auth-confirm-password"
-                        placeholder="••••••••"
-                        value={confirmPassword}
-                        onChange={(
-                          event: React.ChangeEvent<HTMLInputElement>,
-                        ) => setConfirmPassword(event.target.value)}
-                        showPassword={showConfirmPassword}
-                        onTogglePassword={() =>
-                          setShowConfirmPassword((prev) => !prev)
+                    <div>
+                      <div ref={usernameAnchorRef}>
+                        <FormField
+                          label="Username"
+                          htmlFor="auth-username"
+                          invalid={submitAttempted && !usernameAllMet}
+                        >
+                          <Input
+                            id="auth-username"
+                            type="text"
+                            placeholder="yourname"
+                            value={username}
+                            maxLength={24}
+                            onChange={(event) => setUsername(event.target.value)}
+                            onFocus={() => setUsernameFocused(true)}
+                            onBlur={() => setUsernameFocused(false)}
+                          />
+                        </FormField>
+                      </div>
+                      <FieldRequirements
+                        rules={usernameRules}
+                        visible={
+                          usernameFocused ||
+                          (submitAttempted && !usernameAllMet)
                         }
+                        anchorRef={usernameAnchorRef}
+                        title="Username requirements"
                       />
-                    </FormField>
+                    </div>
+
+                    <div>
+                      <div ref={ageAnchorRef}>
+                        <FormField
+                          label="Age"
+                          htmlFor="auth-age"
+                          invalid={submitAttempted && !ageAllMet}
+                        >
+                          <Input
+                            id="auth-age"
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            placeholder="18"
+                            maxLength={3}
+                            value={age}
+                            onChange={(event) =>
+                              setAge(event.target.value.replace(/\D/g, ""))
+                            }
+                            onFocus={() => setAgeFocused(true)}
+                            onBlur={() => setAgeFocused(false)}
+                          />
+                        </FormField>
+                      </div>
+                      <FieldRequirements
+                        rules={ageRules}
+                        visible={
+                          ageFocused || (submitAttempted && !ageAllMet)
+                        }
+                        anchorRef={ageAnchorRef}
+                        title="Age requirements"
+                      />
+                    </div>
+
+                    <div>
+                      <div ref={confirmPasswordAnchorRef}>
+                        <FormField
+                          label="Confirm password"
+                          htmlFor="auth-confirm-password"
+                          invalid={submitAttempted && !confirmAllMet}
+                        >
+                          <PasswordInput
+                            id="auth-confirm-password"
+                            placeholder="••••••••"
+                            value={confirmPassword}
+                            onChange={(
+                              event: React.ChangeEvent<HTMLInputElement>,
+                            ) => setConfirmPassword(event.target.value)}
+                            onFocus={() => setConfirmPasswordFocused(true)}
+                            onBlur={() => setConfirmPasswordFocused(false)}
+                            showPassword={showConfirmPassword}
+                            onTogglePassword={() =>
+                              setShowConfirmPassword((prev) => !prev)
+                            }
+                          />
+                        </FormField>
+                      </div>
+                      <FieldRequirements
+                        rules={confirmPasswordRules}
+                        visible={
+                          confirmPasswordFocused ||
+                          (submitAttempted && !confirmAllMet)
+                        }
+                        anchorRef={confirmPasswordAnchorRef}
+                        title="Confirm password"
+                      />
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -651,14 +834,13 @@ export const AuthForm = ({
                 </AuthHoverButton>
               )}
 
-              {mode === "signup" && signupCooldown && (
+              {mode === "signup" && signupCooldown && !formError && (
                 <p className="text-center text-sm text-red-500">
                   Please wait a moment before trying again.
                 </p>
               )}
 
               <StatefulButton
-                key={`stateful-${mode}`}
                 type="submit"
                 onClick={handleAction}
                 disabled={buttonDisabled}
@@ -674,6 +856,7 @@ export const AuthForm = ({
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
                     className="overflow-hidden space-y-4 pt-1"
                   >
                     <div className="flex items-center gap-2 rounded-lg px-1 py-1">

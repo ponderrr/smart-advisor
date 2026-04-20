@@ -26,6 +26,13 @@ export function toUserFriendlyError(
   if (message.includes("email not confirmed")) {
     return "Please verify your email before signing in.";
   }
+  if (
+    message.includes("user already registered") ||
+    message.includes("already registered") ||
+    message.includes("already been registered")
+  ) {
+    return "An account already exists for this email. Try signing in instead.";
+  }
   if (message.includes("invalid login credentials")) {
     return "Invalid email or password. Please try again.";
   }

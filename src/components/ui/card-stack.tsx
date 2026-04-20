@@ -15,10 +15,12 @@ export const CardStack = ({
   items,
   offset,
   scaleFactor,
+  maxVisible,
 }: {
   items: Card[];
   offset?: number;
   scaleFactor?: number;
+  maxVisible?: number;
 }) => {
   const CARD_OFFSET = offset || 10;
   const SCALE_FACTOR = scaleFactor || 0.06;
@@ -42,6 +44,9 @@ export const CardStack = ({
   return (
     <div className="relative  h-60 w-60 md:h-60 md:w-96">
       {cards.map((card, index) => {
+        const isHidden = maxVisible !== undefined && index >= maxVisible;
+        const displayIndex =
+          maxVisible !== undefined ? Math.min(index, maxVisible) : index;
         return (
           <motion.div
             key={card.id}
@@ -50,9 +55,10 @@ export const CardStack = ({
               transformOrigin: "top center",
             }}
             animate={{
-              top: index * -CARD_OFFSET,
-              scale: 1 - index * SCALE_FACTOR, // decrease scale for cards that are behind
+              top: displayIndex * -CARD_OFFSET,
+              scale: 1 - displayIndex * SCALE_FACTOR, // decrease scale for cards that are behind
               zIndex: cards.length - index, //  decrease z-index for the cards that are behind
+              opacity: isHidden ? 0 : 1,
             }}
           >
             <div className="font-normal text-neutral-700 dark:text-neutral-200">
