@@ -421,13 +421,18 @@ export const AuthForm = ({
           setMode("mfa-challenge");
         } else {
           const factorsResult = await onListMFAFactors();
-          const hasVerified = factorsResult.data?.totp?.some(
+          const verifiedFactor = factorsResult.data?.totp?.find(
             (f: MFAFactor) => f.status === "verified",
           );
-          if (!hasVerified) {
+          if (!verifiedFactor) {
             setMode("mfa-setup");
           } else {
-            router.replace("/dashboard");
+            // Verified TOTP factor exists but the AAL check didn't mark MFA
+            // required. Treat as MFA-required rather than silently bypassing
+            // the challenge.
+            onMfaChallengeStarted?.();
+            setMfaFactorId(verifiedFactor.id);
+            setMode("mfa-challenge");
           }
         }
         return result;

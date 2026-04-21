@@ -115,6 +115,20 @@ const clearSessionPreference = () => {
 const shouldKeepExistingSession = () => {
   if (typeof window === "undefined") return false;
 
+  // The user just finished an auth round-trip in this tab (email verification
+  // or OAuth callback). Signing them back out here would send them to /auth
+  // and undo the flow. Mark the tab as volatile so they stay signed in at
+  // least until they close it.
+  const pathname = window.location.pathname;
+  if (pathname === "/auth/verified" || pathname === "/auth/callback") {
+    try {
+      window.sessionStorage.setItem(VOLATILE_SESSION_KEY, "1");
+    } catch {
+      // Ignore storage errors — worst case we fall through to the check below.
+    }
+    return true;
+  }
+
   const volatileSession =
     window.sessionStorage.getItem(VOLATILE_SESSION_KEY) === "1";
   const rememberUntilRaw = window.localStorage.getItem(REMEMBER_UNTIL_KEY);
