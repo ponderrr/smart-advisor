@@ -188,16 +188,16 @@ class AuthService {
       return isValidEmail(normalized) ? normalized : null;
     }
 
-    // Username path: look up the profile by username (case-insensitive).
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("email")
-      .ilike("username", trimmed)
-      .limit(1)
-      .maybeSingle();
+    // Username path: use the SECURITY DEFINER RPC so the lookup works for
+    // unauthenticated clients (the profiles table is RLS-locked to the owner).
+    const { data, error } = await supabase.rpc("get_email_for_username", {
+      p_username: trimmed,
+    });
 
-    if (error || !data?.email) return null;
-    return normalizeEmail(data.email);
+    if (error || !data) return null;
+    const email = typeof data === "string" ? data : null;
+    if (!email) return null;
+    return normalizeEmail(email);
   }
 
   private async _signInImpl(
