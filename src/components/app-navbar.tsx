@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { LogOut, Monitor, Moon, Sun } from "lucide-react";
+import { LogOut, MonitorSmartphone, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
+import { motion } from "motion/react";
 
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -306,7 +307,8 @@ function ThemeSwitcherRow() {
     {
       value: "system",
       label: "System",
-      Icon: Monitor,
+      Icon: MonitorSmartphone,
+      hint: "Matches your device setting",
       activeBg: "bg-blue-50 dark:bg-blue-950/40",
       activeIcon: "text-blue-500",
       activeText: "text-blue-900 dark:text-blue-100",
@@ -322,8 +324,10 @@ function ThemeSwitcherRow() {
       <p className="px-1 pb-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">
         Theme
       </p>
-      <div className="flex gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800/60">
-        {options.map(({ value, label, Icon, activeBg, activeIcon, activeText }) => {
+      <div className="relative flex rounded-full bg-slate-100 p-1 dark:bg-slate-800/60">
+        {options.map((option) => {
+          const { value, label, Icon, activeBg, activeIcon, activeText } = option;
+          const hint = "hint" in option ? option.hint : undefined;
           const isActive = active === value;
           return (
             <button
@@ -331,16 +335,41 @@ function ThemeSwitcherRow() {
               type="button"
               onClick={() => setTheme(value)}
               aria-pressed={isActive}
-              aria-label={`${label} theme`}
+              aria-label={hint ? `${label} theme — ${hint}` : `${label} theme`}
+              title={hint}
               className={cn(
-                "flex flex-1 items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-xs font-bold transition-colors",
+                "relative flex flex-1 items-center justify-center gap-1 rounded-full px-2 py-2 text-xs transition-colors",
                 isActive
-                  ? cn(activeBg, activeText, "shadow-sm")
-                  : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200",
+                  ? cn(activeText, "font-semibold")
+                  : "font-medium text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200",
               )}
             >
-              <Icon size={13} className={isActive ? activeIcon : undefined} />
-              {label}
+              {isActive && (
+                <motion.span
+                  layoutId="theme-switcher-pill"
+                  aria-hidden
+                  className={cn(
+                    "absolute inset-0 -z-0 rounded-full shadow-sm",
+                    activeBg,
+                  )}
+                  transition={{
+                    type: "spring",
+                    stiffness: 420,
+                    damping: 34,
+                    mass: 0.8,
+                  }}
+                />
+              )}
+              <span className="relative z-10 flex items-center gap-1">
+                <Icon
+                  size={13}
+                  strokeWidth={isActive ? 2.5 : 2}
+                  className={cn(
+                    isActive ? activeIcon : "opacity-70",
+                  )}
+                />
+                {label}
+              </span>
             </button>
           );
         })}
