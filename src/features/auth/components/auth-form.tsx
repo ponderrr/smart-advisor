@@ -223,7 +223,9 @@ export const AuthForm = ({
   const passwordMetForMode =
     mode === "signin" ? password.length > 0 : passwordAllMet;
 
-  // When initialMfaRequired changes to true (e.g. OAuth callback), load factors
+  // When initialMfaRequired changes to true (e.g. OAuth callback), load factors.
+  // Intentionally effect-trigger on `initialMfaRequired` only — `onListMFAFactors`
+  // isn't memoized in the parent, and `mfaFactorId` is only read as a guard.
   useEffect(() => {
     if (initialMfaRequired && !mfaFactorId) {
       setMode("mfa-challenge");
@@ -233,6 +235,7 @@ export const AuthForm = ({
         }
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialMfaRequired]);
 
   useEffect(() => {

@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, forwardRef } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  forwardRef,
+} from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -34,6 +41,11 @@ import {
   MfaManagement,
   SessionsManagement,
 } from "@/features/auth/components";
+import { FieldRequirements } from "@/features/auth/components/auth-shared";
+import {
+  PASSWORD_RULES,
+  isValidPassword,
+} from "@/features/auth/utils/validation";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import { PillButton } from "@/components/ui/pill-button";
 import { PageLoader } from "@/components/ui/loader";
@@ -48,7 +60,13 @@ type SettingsSection = "profile" | "security" | "content" | "integrations";
 /* ------------------------------------------------------------------ */
 const profileSchema = z.object({
   newName: z.string().min(1, "Username is required").trim(),
-  age: z.coerce.number().int().min(13, "Must be at least 13").max(120, "Must be 120 or under").optional().or(z.literal("")),
+  age: z.coerce
+    .number()
+    .int()
+    .min(13, "Must be at least 13")
+    .max(120, "Must be 120 or under")
+    .optional()
+    .or(z.literal("")),
 });
 
 const emailSchema = z.object({
@@ -57,7 +75,9 @@ const emailSchema = z.object({
 
 const passwordSchema = z
   .object({
-    newPassword: z.string().min(8, "At least 8 characters"),
+    newPassword: z
+      .string()
+      .refine(isValidPassword, "Password doesn't meet all requirements"),
     confirmPassword: z.string(),
   })
   .refine((d) => d.newPassword === d.confirmPassword, {
@@ -122,39 +142,55 @@ const SettingsInput = forwardRef<
     icon?: React.ReactNode;
     error?: string;
   } & Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange">
->(({ label, placeholder, type = "text", disabled = false, readOnly = false, icon, error, ...props }, ref) => (
-  <label className="block space-y-1.5">
-    <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-      {label}
-    </span>
-    <div className="relative">
-      <input
-        ref={ref}
-        placeholder={placeholder}
-        type={type}
-        disabled={disabled}
-        readOnly={readOnly}
-        className={cn(
-          "w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm transition-colors focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-100 dark:focus:border-indigo-500",
-          (disabled || readOnly) &&
-            "cursor-not-allowed bg-slate-50 text-slate-500 dark:bg-slate-800/40 dark:text-slate-400",
-          error && "border-red-300 focus:border-red-400 focus:ring-red-500/20 dark:border-red-700",
+>(
+  (
+    {
+      label,
+      placeholder,
+      type = "text",
+      disabled = false,
+      readOnly = false,
+      icon,
+      error,
+      ...props
+    },
+    ref,
+  ) => (
+    <label className="block space-y-1.5">
+      <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        {label}
+      </span>
+      <div className="relative">
+        <input
+          ref={ref}
+          placeholder={placeholder}
+          type={type}
+          disabled={disabled}
+          readOnly={readOnly}
+          className={cn(
+            "w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm transition-colors focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-100 dark:focus:border-indigo-500",
+            (disabled || readOnly) &&
+              "cursor-not-allowed bg-slate-50 text-slate-500 dark:bg-slate-800/40 dark:text-slate-400",
+            error &&
+              "border-red-300 focus:border-red-400 focus:ring-red-500/20 dark:border-red-700",
+          )}
+          {...props}
+        />
+        {icon && (
+          <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+            {icon}
+          </div>
         )}
-        {...props}
-      />
-      {icon && (
-        <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
-          {icon}
-        </div>
+      </div>
+      {error && (
+        <p className="text-xs font-medium text-red-500 dark:text-red-400">
+          {error}
+        </p>
       )}
-    </div>
-    {error && (
-      <p className="text-xs font-medium text-red-500 dark:text-red-400">{error}</p>
-    )}
-  </label>
-));
+    </label>
+  ),
+);
 SettingsInput.displayName = "SettingsInput";
-
 
 /* ------------------------------------------------------------------ */
 /*  Main settings page                                                */
@@ -172,7 +208,12 @@ const SettingsPage = () => {
   } = useAuth();
   const { ready } = useRequireAuth();
 
-  const settingsTabs: SettingsSection[] = ["profile", "security", "content", "integrations"];
+  const settingsTabs: SettingsSection[] = [
+    "profile",
+    "security",
+    "content",
+    "integrations",
+  ];
   const [activeSection, setActiveSection] =
     useState<SettingsSection>("profile");
   // Section transitions always slide rightward — entering content starts on
@@ -211,8 +252,34 @@ const SettingsPage = () => {
   const [preferredQuestionCount, setPreferredQuestionCount] = useState(5);
   const [accountActionLoading, setAccountActionLoading] = useState(false);
   const [showMfaPanel, setShowMfaPanel] = useState(false);
+  const [mfaSetupModalOpen, setMfaSetupModalOpen] = useState(false);
   const [mfaEnabled, setMfaEnabled] = useState(false);
   const [mfaChecked, setMfaChecked] = useState(false);
+  const [newPasswordFocused, setNewPasswordFocused] = useState(false);
+  const [confirmPasswordFocused, setConfirmPasswordFocused] = useState(false);
+  const newPasswordAnchorRef = useRef<HTMLDivElement>(null);
+  const confirmPasswordAnchorRef = useRef<HTMLDivElement>(null);
+  const watchedNewPassword = passwordForm.watch("newPassword");
+  const watchedConfirmPassword = passwordForm.watch("confirmPassword");
+  const newPasswordRules = useMemo(
+    () =>
+      PASSWORD_RULES.map((rule) => ({
+        label: rule.label,
+        met: rule.test(watchedNewPassword || ""),
+      })),
+    [watchedNewPassword],
+  );
+  const confirmPasswordRules = useMemo(
+    () => [
+      {
+        label: "Matches your password",
+        met:
+          !!watchedConfirmPassword &&
+          watchedConfirmPassword === watchedNewPassword,
+      },
+    ],
+    [watchedConfirmPassword, watchedNewPassword],
+  );
   const [currentBackupEmail, setCurrentBackupEmail] = useState<string | null>(
     null,
   );
@@ -299,7 +366,9 @@ const SettingsPage = () => {
     setVerifyLoading(true);
     setVerifyError("");
     const { data: factors } = await authService.listMFAFactors();
-    const factor = factors?.totp?.find((f: MFAFactor) => f.status === "verified");
+    const factor = factors?.totp?.find(
+      (f: MFAFactor) => f.status === "verified",
+    );
     if (!factor) {
       setVerifyError("No verified MFA factor found");
       setVerifyLoading(false);
@@ -525,7 +594,9 @@ const SettingsPage = () => {
               <nav aria-label="Account sections" className="flex-1">
                 <SidebarNavGroup label="Account" />
                 {sectionTabs
-                  .filter((tab) => tab.id === "profile" || tab.id === "security")
+                  .filter(
+                    (tab) => tab.id === "profile" || tab.id === "security",
+                  )
                   .map((tab) => (
                     <SidebarNavItem
                       key={tab.id}
@@ -562,532 +633,591 @@ const SettingsPage = () => {
             </SidebarNavShell>
 
             <div className="min-w-0 flex-1">
-
-          {/* Toast Message */}
-          <AnimatePresence>
-            {message && (
-              <motion.div
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                className={cn(
-                  "mb-5 rounded-xl border px-4 py-2.5 text-sm font-medium",
-                  message.type === "success" &&
-                    "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300",
-                  message.type === "error" &&
-                    "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-300",
-                  message.type === "info" &&
-                    "border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300",
-                )}
-              >
-                {message.text}
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Section Content */}
-          <AnimatePresence mode="wait">
-            {activeSection === "profile" && (
-              <motion.div
-                key="profile"
-                initial={{ opacity: 0, x: sectionSlideDir * 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: sectionSlideDir * -30 }}
-                transition={{ duration: 0.2 }}
-                className="space-y-4"
-              >
-                {/* Profile picture */}
-                <SectionCard>
-                  <SectionHeader
-                    title="Profile picture"
-                    description="Upload an image to show across the app. JPG, PNG, GIF, or WEBP up to 5 MB."
-                  />
-                  <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-                    {user?.avatar_url ? (
-                      <img
-                        src={user.avatar_url}
-                        alt={user.name || "Avatar"}
-                        className="h-20 w-20 shrink-0 rounded-2xl object-cover ring-2 ring-slate-200/70 dark:ring-slate-700/60"
-                      />
-                    ) : (
-                      <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-indigo-500 text-2xl font-black text-white ring-2 ring-slate-200/70 dark:ring-slate-700/60">
-                        {(user?.name || user?.email || "?")
-                          .charAt(0)
-                          .toUpperCase()}
-                      </div>
+              {/* Toast Message */}
+              <AnimatePresence>
+                {message && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    className={cn(
+                      "mb-5 rounded-xl border px-4 py-2.5 text-sm font-medium",
+                      message.type === "success" &&
+                        "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300",
+                      message.type === "error" &&
+                        "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-300",
+                      message.type === "info" &&
+                        "border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300",
                     )}
+                  >
+                    {message.text}
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-                    <div className="flex flex-1 flex-col gap-2">
-                      <div className="flex flex-wrap gap-2">
-                        <button
-                          type="button"
-                          onClick={() => avatarInputRef.current?.click()}
-                          disabled={avatarUploading}
-                          className="h-10 rounded-full border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-800/70"
-                        >
-                          {avatarUploading
-                            ? "Uploading…"
-                            : user?.avatar_url
-                              ? "Change picture"
-                              : "Upload picture"}
-                        </button>
-                        {user?.avatar_url && (
-                          <button
-                            type="button"
-                            onClick={handleRemoveAvatar}
-                            disabled={avatarUploading}
-                            className="h-10 rounded-full px-4 text-sm font-semibold text-rose-600 transition-colors hover:bg-rose-50 disabled:opacity-60 dark:text-rose-400 dark:hover:bg-rose-500/10"
-                          >
-                            Remove
-                          </button>
-                        )}
-                      </div>
-                      <input
-                        ref={avatarInputRef}
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleAvatarFileChange}
-                      />
-                    </div>
-                  </div>
-                </SectionCard>
-
-                <SectionCard>
-                  <SectionHeader
-                    title="Profile Details"
-                    description="Update your public account details."
-                  />
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <SettingsInput
-                      label="Current Username"
-                      defaultValue={user?.name || ""}
-                      readOnly
-                      disabled
-                      icon={<CircleOff size={14} />}
-                    />
-                    <SettingsInput
-                      label="New Username"
-                      placeholder="Enter new username"
-                      error={profileForm.formState.errors.newName?.message}
-                      {...profileForm.register("newName")}
-                    />
-                    <SettingsInput
-                      label="Age"
-                      type="number"
-                      placeholder="25"
-                      min={13}
-                      max={120}
-                      error={profileForm.formState.errors.age?.message}
-                      {...profileForm.register("age")}
-                    />
-                  </div>
-                  <div className="mt-5 flex justify-end">
-                    <StatefulButton
-                      onClick={handleSaveProfile}
-                      state={profileForm.formState.isSubmitting ? "loading" : "idle"}
-                      className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
-                    >
-                      Save Profile
-                    </StatefulButton>
-                  </div>
-                </SectionCard>
-              </motion.div>
-            )}
-
-            {activeSection === "security" && (
-              <motion.div
-                key="security"
-                initial={{ opacity: 0, x: sectionSlideDir * 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: sectionSlideDir * -30 }}
-                transition={{ duration: 0.2 }}
-                className="space-y-4"
-              >
-                {/* Email */}
-                <SectionCard>
-                  <SectionHeader
-                    title="Email"
-                    description="The address you use to sign in."
-                  />
-
-                  <div className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-slate-200/70 bg-slate-50 px-4 py-3 dark:border-slate-700/60 dark:bg-slate-800/40">
-                    <div className="flex min-w-0 items-center gap-2.5">
-                      <Mail
-                        size={16}
-                        className="shrink-0 text-slate-400 dark:text-slate-500"
-                      />
-                      <span className="truncate text-sm font-semibold text-slate-700 dark:text-slate-200">
-                        {user?.email || "—"}
-                      </span>
-                    </div>
-                    <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-                      Current
-                    </span>
-                  </div>
-
-                  <SettingsInput
-                    label="New email"
-                    placeholder="new@example.com"
-                    error={emailForm.formState.errors.newEmail?.message}
-                    {...emailForm.register("newEmail")}
-                  />
-
-                  <div className="mt-5 flex justify-end">
-                    <StatefulButton
-                      onClick={handleSaveEmail}
-                      state={emailForm.formState.isSubmitting ? "loading" : "idle"}
-                      className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
-                    >
-                      Update Email
-                    </StatefulButton>
-                  </div>
-                </SectionCard>
-
-                {/* Password */}
-                <SectionCard>
-                  <SectionHeader
-                    title="Password"
-                    description="Pick a new password — at least 8 characters."
-                  />
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <SettingsInput
-                      label="New Password"
-                      type="password"
-                      placeholder="••••••••"
-                      icon={<Lock size={14} />}
-                      error={passwordForm.formState.errors.newPassword?.message}
-                      {...passwordForm.register("newPassword")}
-                    />
-                    <SettingsInput
-                      label="Confirm Password"
-                      type="password"
-                      placeholder="••••••••"
-                      icon={<Lock size={14} />}
-                      error={passwordForm.formState.errors.confirmPassword?.message}
-                      {...passwordForm.register("confirmPassword")}
-                    />
-                  </div>
-                  <div className="mt-5 flex justify-end">
-                    <StatefulButton
-                      onClick={handleSavePassword}
-                      state={passwordForm.formState.isSubmitting ? "loading" : "idle"}
-                      className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
-                    >
-                      Update Password
-                    </StatefulButton>
-                  </div>
-                </SectionCard>
-
-                {/* MFA — same SectionHeader pattern as the others */}
-                <SectionCard>
-                  {!showMfaPanel ? (
-                    <>
+              {/* Section Content */}
+              <AnimatePresence mode="wait">
+                {activeSection === "profile" && (
+                  <motion.div
+                    key="profile"
+                    initial={{ opacity: 0, x: sectionSlideDir * 30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: sectionSlideDir * -30 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-4"
+                  >
+                    {/* Profile picture */}
+                    <SectionCard>
                       <SectionHeader
-                        title="Two-Factor Authentication"
-                        description="An extra step at sign-in to keep your account secure."
+                        title="Profile picture"
+                        description="Upload an image to show across the app. JPG, PNG, GIF, or WEBP up to 5 MB."
+                      />
+                      <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+                        {user?.avatar_url ? (
+                          <img
+                            src={user.avatar_url}
+                            alt={user.name || "Avatar"}
+                            className="h-20 w-20 shrink-0 rounded-2xl object-cover ring-2 ring-slate-200/70 dark:ring-slate-700/60"
+                          />
+                        ) : (
+                          <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-indigo-500 text-2xl font-black text-white ring-2 ring-slate-200/70 dark:ring-slate-700/60">
+                            {(user?.name || user?.email || "?")
+                              .charAt(0)
+                              .toUpperCase()}
+                          </div>
+                        )}
+
+                        <div className="flex flex-1 flex-col gap-2">
+                          <div className="flex flex-wrap gap-2">
+                            <button
+                              type="button"
+                              onClick={() => avatarInputRef.current?.click()}
+                              disabled={avatarUploading}
+                              className="h-10 rounded-full border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-800/70"
+                            >
+                              {avatarUploading
+                                ? "Uploading…"
+                                : user?.avatar_url
+                                  ? "Change picture"
+                                  : "Upload picture"}
+                            </button>
+                            {user?.avatar_url && (
+                              <button
+                                type="button"
+                                onClick={handleRemoveAvatar}
+                                disabled={avatarUploading}
+                                className="h-10 rounded-full px-4 text-sm font-semibold text-rose-600 transition-colors hover:bg-rose-50 disabled:opacity-60 dark:text-rose-400 dark:hover:bg-rose-500/10"
+                              >
+                                Remove
+                              </button>
+                            )}
+                          </div>
+                          <input
+                            ref={avatarInputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleAvatarFileChange}
+                          />
+                        </div>
+                      </div>
+                    </SectionCard>
+
+                    <SectionCard>
+                      <SectionHeader
+                        title="Profile Details"
+                        description="Update your public account details."
+                      />
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <SettingsInput
+                          label="Current Username"
+                          defaultValue={user?.name || ""}
+                          readOnly
+                          disabled
+                          icon={<CircleOff size={14} />}
+                        />
+                        <SettingsInput
+                          label="New Username"
+                          placeholder="Enter new username"
+                          error={profileForm.formState.errors.newName?.message}
+                          {...profileForm.register("newName")}
+                        />
+                        <SettingsInput
+                          label="Age"
+                          type="number"
+                          placeholder="25"
+                          min={13}
+                          max={120}
+                          error={profileForm.formState.errors.age?.message}
+                          {...profileForm.register("age")}
+                        />
+                      </div>
+                      <div className="mt-5 flex justify-end">
+                        <StatefulButton
+                          onClick={handleSaveProfile}
+                          state={
+                            profileForm.formState.isSubmitting
+                              ? "loading"
+                              : "idle"
+                          }
+                          className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
+                        >
+                          Save Profile
+                        </StatefulButton>
+                      </div>
+                    </SectionCard>
+                  </motion.div>
+                )}
+
+                {activeSection === "security" && (
+                  <motion.div
+                    key="security"
+                    initial={{ opacity: 0, x: sectionSlideDir * 30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: sectionSlideDir * -30 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-4"
+                  >
+                    {/* Email */}
+                    <SectionCard>
+                      <SectionHeader
+                        title="Email"
+                        description="The address you use to sign in."
                       />
 
-                      <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/70 bg-slate-50 px-4 py-3 dark:border-slate-700/60 dark:bg-slate-800/40">
-                        <div className="flex items-center gap-2.5">
-                          <ShieldCheck
+                      <div className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-slate-200/70 bg-slate-50 px-4 py-3 dark:border-slate-700/60 dark:bg-slate-800/40">
+                        <div className="flex min-w-0 items-center gap-2.5">
+                          <Mail
                             size={16}
-                            className={cn(
-                              "shrink-0",
-                              mfaEnabled
-                                ? "text-emerald-500 dark:text-emerald-400"
-                                : "text-slate-400 dark:text-slate-500",
-                            )}
+                            className="shrink-0 text-slate-400 dark:text-slate-500"
                           />
-                          <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                            {mfaChecked
-                              ? mfaEnabled
-                                ? "Two-factor is on"
-                                : "Two-factor is off"
-                              : "Checking…"}
+                          <span className="truncate text-sm font-semibold text-slate-700 dark:text-slate-200">
+                            {user?.email || "—"}
                           </span>
                         </div>
-                        {mfaChecked && (
-                          <span
-                            className={cn(
-                              "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider",
-                              mfaEnabled
-                                ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-                                : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400",
-                            )}
-                          >
-                            {mfaEnabled ? "Enabled" : "Disabled"}
-                          </span>
-                        )}
+                        <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                          Current
+                        </span>
                       </div>
+
+                      <SettingsInput
+                        label="New email"
+                        placeholder="new@example.com"
+                        error={emailForm.formState.errors.newEmail?.message}
+                        {...emailForm.register("newEmail")}
+                      />
 
                       <div className="mt-5 flex justify-end">
                         <StatefulButton
-                          onClick={() => setShowMfaPanel(true)}
+                          onClick={handleSaveEmail}
+                          state={
+                            emailForm.formState.isSubmitting
+                              ? "loading"
+                              : "idle"
+                          }
                           className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
                         >
-                          {mfaEnabled ? "Manage two-factor" : "Enable two-factor"}
+                          Update Email
                         </StatefulButton>
                       </div>
-                    </>
-                  ) : (
-                    <div>
-                      <button
-                        onClick={() => setShowMfaPanel(false)}
-                        className="mb-4 text-xs font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-                      >
-                        &larr; Back to Security
-                      </button>
-                      {mfaEnabled ? (
-                        <MfaManagement
-                          mfaEnabled={mfaEnabled}
-                          onMfaStatusChange={() => setShowMfaPanel(false)}
-                        />
-                      ) : (
-                        <MfaSetup
-                          onComplete={() => setShowMfaPanel(false)}
-                          onSkip={() => setShowMfaPanel(false)}
-                        />
-                      )}
-                    </div>
-                  )}
-                </SectionCard>
+                    </SectionCard>
 
-                {/* Backup Email */}
-                <SectionCard>
-                  <SectionHeader
-                    title="Backup Email"
-                    description="A recovery address used when your authenticator is unavailable."
-                  />
-
-                  {currentBackupEmail && (
-                    <div className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-slate-200/70 bg-slate-50 px-4 py-3 dark:border-slate-700/60 dark:bg-slate-800/40">
-                      <div className="flex min-w-0 items-center gap-2.5">
-                        <Mail
-                          size={16}
-                          className="shrink-0 text-slate-400 dark:text-slate-500"
-                        />
-                        <span className="truncate text-sm font-semibold text-slate-700 dark:text-slate-200">
-                          {currentBackupEmail}
-                        </span>
+                    {/* Password */}
+                    <SectionCard>
+                      <SectionHeader
+                        title="Password"
+                        description="Pick a new password."
+                      />
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div>
+                          <div ref={newPasswordAnchorRef}>
+                            <SettingsInput
+                              label="New Password"
+                              type="password"
+                              placeholder="••••••••"
+                              icon={<Lock size={14} />}
+                              error={
+                                passwordForm.formState.errors.newPassword
+                                  ?.message
+                              }
+                              {...passwordForm.register("newPassword", {
+                                onBlur: () => setNewPasswordFocused(false),
+                              })}
+                              onFocus={() => setNewPasswordFocused(true)}
+                            />
+                          </div>
+                          <FieldRequirements
+                            rules={newPasswordRules}
+                            visible={newPasswordFocused}
+                            anchorRef={newPasswordAnchorRef}
+                            title="Password requirements"
+                          />
+                        </div>
+                        <div>
+                          <div ref={confirmPasswordAnchorRef}>
+                            <SettingsInput
+                              label="Confirm Password"
+                              type="password"
+                              placeholder="••••••••"
+                              icon={<Lock size={14} />}
+                              error={
+                                passwordForm.formState.errors.confirmPassword
+                                  ?.message
+                              }
+                              {...passwordForm.register("confirmPassword", {
+                                onBlur: () => setConfirmPasswordFocused(false),
+                              })}
+                              onFocus={() => setConfirmPasswordFocused(true)}
+                            />
+                          </div>
+                          <FieldRequirements
+                            rules={confirmPasswordRules}
+                            visible={confirmPasswordFocused}
+                            anchorRef={confirmPasswordAnchorRef}
+                            title="Confirm password"
+                          />
+                        </div>
                       </div>
-                      <button
-                        onClick={handleRemoveBackupEmail}
-                        disabled={removingBackupEmail}
-                        className="shrink-0 text-xs font-semibold text-rose-600 transition-colors hover:text-rose-500 disabled:opacity-50 dark:text-rose-400"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  )}
-
-                  <SettingsInput
-                    label={currentBackupEmail ? "Change to" : "Backup email"}
-                    placeholder={
-                      currentBackupEmail
-                        ? "new-backup@example.com"
-                        : "backup@example.com"
-                    }
-                    error={backupEmailForm.formState.errors.backupEmail?.message}
-                    {...backupEmailForm.register("backupEmail")}
-                  />
-
-                  <div className="mt-5 flex justify-end">
-                    <StatefulButton
-                      onClick={handleSaveBackupEmail}
-                      state={backupEmailForm.formState.isSubmitting ? "loading" : "idle"}
-                      className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
-                    >
-                      {currentBackupEmail ? "Update Backup" : "Save Backup"}
-                    </StatefulButton>
-                  </div>
-                </SectionCard>
-
-                {/* Sessions */}
-                {user?.id && <SessionsManagement userId={user.id} />}
-              </motion.div>
-            )}
-
-            {activeSection === "content" && (
-              <motion.div
-                key="content"
-                initial={{ opacity: 0, x: sectionSlideDir * 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: sectionSlideDir * -30 }}
-                transition={{ duration: 0.2 }}
-                className="space-y-4"
-              >
-                <SectionCard>
-                  <SectionHeader
-                    title="Content Preferences"
-                    description="Set your default recommendation behavior."
-                  />
-
-                  <div className="space-y-5">
-                    <div>
-                      <p className="mb-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                        Recommendation Type
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {[
-                          { id: "movie", label: "Movies" },
-                          { id: "book", label: "Books" },
-                          { id: "both", label: "Both" },
-                        ].map((opt) => (
-                          <PillButton
-                            key={opt.id}
-                            onClick={() => setContentFocus(opt.id)}
-                            active={contentFocus === opt.id}
-                            className="px-4 py-2 text-sm font-semibold"
-                          >
-                            {opt.label}
-                          </PillButton>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <p className="mb-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                        Content tone
-                      </p>
-                      {(user?.age ?? 0) < 18 ? (
-                        <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800/40 dark:text-slate-300">
-                          Recommendations are kept age-appropriate based on
-                          your age ({user?.age ?? "—"}). Adults can choose
-                          between standard and family-friendly tones.
-                        </div>
-                      ) : (
-                        <div className="flex flex-wrap gap-2">
-                          {(
-                            [
-                              { id: "standard", label: "Standard" },
-                              { id: "family", label: "Family-friendly" },
-                            ] as const
-                          ).map((opt) => (
-                            <PillButton
-                              key={opt.id}
-                              onClick={() => setContentTone(opt.id)}
-                              active={contentTone === opt.id}
-                              className="px-4 py-2 text-sm font-semibold"
-                            >
-                              {opt.label}
-                            </PillButton>
-                          ))}
-                        </div>
-                      )}
-                      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                        {(user?.age ?? 0) < 18
-                          ? "Locked: under-18 accounts always get age-appropriate picks."
-                          : contentTone === "family"
-                            ? "Picks stay light. No mature themes, dark content, or sexual content."
-                            : "Full personality. The AI may suggest dark, complex, or mature picks when they fit you."}
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="mb-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                        Questions per quiz
-                      </p>
-                      <div className="max-w-sm rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
-                        <div className="mb-3 flex items-center justify-between">
-                          <span className="text-sm text-slate-600 dark:text-slate-300">
-                            Count
-                          </span>
-                          <span className="inline-flex min-w-[60px] items-center justify-center rounded-full bg-indigo-600 px-2.5 py-0.5 text-sm font-bold text-white">
-                            {preferredQuestionCount}
-                          </span>
-                        </div>
-                        <input
-                          type="range"
-                          min={3}
-                          max={15}
-                          value={preferredQuestionCount}
-                          onChange={(e) =>
-                            setPreferredQuestionCount(Number(e.target.value))
+                      <div className="mt-5 flex justify-end">
+                        <StatefulButton
+                          onClick={handleSavePassword}
+                          state={
+                            passwordForm.formState.isSubmitting
+                              ? "loading"
+                              : "idle"
                           }
-                          className="w-full cursor-pointer accent-indigo-500"
-                        />
-                        <div className="mt-1.5 flex justify-between text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                          <span>3</span>
-                          <span>15</span>
+                          className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
+                        >
+                          Update Password
+                        </StatefulButton>
+                      </div>
+                    </SectionCard>
+
+                    {/* MFA — same SectionHeader pattern as the others */}
+                    <SectionCard>
+                      {!showMfaPanel ? (
+                        <>
+                          <SectionHeader
+                            title="Two-Factor Authentication"
+                            description="An extra step at sign-in to keep your account secure."
+                          />
+
+                          <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/70 bg-slate-50 px-4 py-3 dark:border-slate-700/60 dark:bg-slate-800/40">
+                            <div className="flex items-center gap-2.5">
+                              <ShieldCheck
+                                size={16}
+                                className={cn(
+                                  "shrink-0",
+                                  mfaEnabled
+                                    ? "text-emerald-500 dark:text-emerald-400"
+                                    : "text-slate-400 dark:text-slate-500",
+                                )}
+                              />
+                              <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                                {mfaChecked
+                                  ? mfaEnabled
+                                    ? "Two-factor is on"
+                                    : "Two-factor is off"
+                                  : "Checking…"}
+                              </span>
+                            </div>
+                            {mfaChecked && (
+                              <span
+                                className={cn(
+                                  "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider",
+                                  mfaEnabled
+                                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                                    : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400",
+                                )}
+                              >
+                                {mfaEnabled ? "Enabled" : "Disabled"}
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="mt-5 flex justify-end">
+                            <StatefulButton
+                              onClick={() => {
+                                if (mfaEnabled) {
+                                  setShowMfaPanel(true);
+                                } else {
+                                  setMfaSetupModalOpen(true);
+                                }
+                              }}
+                              className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
+                            >
+                              {mfaEnabled
+                                ? "Manage two-factor"
+                                : "Enable two-factor"}
+                            </StatefulButton>
+                          </div>
+                        </>
+                      ) : (
+                        <div>
+                          <button
+                            onClick={() => setShowMfaPanel(false)}
+                            className="mb-4 text-xs font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                          >
+                            &larr; Back to Security
+                          </button>
+                          <MfaManagement
+                            mfaEnabled={mfaEnabled}
+                            onMfaStatusChange={() => setShowMfaPanel(false)}
+                          />
+                        </div>
+                      )}
+                    </SectionCard>
+
+                    {/* Backup Email */}
+                    <SectionCard>
+                      <SectionHeader
+                        title="Backup Email"
+                        description="A recovery address used when your authenticator is unavailable."
+                      />
+
+                      {currentBackupEmail && (
+                        <div className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-slate-200/70 bg-slate-50 px-4 py-3 dark:border-slate-700/60 dark:bg-slate-800/40">
+                          <div className="flex min-w-0 items-center gap-2.5">
+                            <Mail
+                              size={16}
+                              className="shrink-0 text-slate-400 dark:text-slate-500"
+                            />
+                            <span className="truncate text-sm font-semibold text-slate-700 dark:text-slate-200">
+                              {currentBackupEmail}
+                            </span>
+                          </div>
+                          <button
+                            onClick={handleRemoveBackupEmail}
+                            disabled={removingBackupEmail}
+                            className="shrink-0 text-xs font-semibold text-rose-600 transition-colors hover:text-rose-500 disabled:opacity-50 dark:text-rose-400"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      )}
+
+                      <SettingsInput
+                        label={
+                          currentBackupEmail ? "Change to" : "Backup email"
+                        }
+                        placeholder={
+                          currentBackupEmail
+                            ? "new-backup@example.com"
+                            : "backup@example.com"
+                        }
+                        error={
+                          backupEmailForm.formState.errors.backupEmail?.message
+                        }
+                        {...backupEmailForm.register("backupEmail")}
+                      />
+
+                      <div className="mt-5 flex justify-end">
+                        <StatefulButton
+                          onClick={handleSaveBackupEmail}
+                          state={
+                            backupEmailForm.formState.isSubmitting
+                              ? "loading"
+                              : "idle"
+                          }
+                          className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
+                        >
+                          {currentBackupEmail ? "Update Backup" : "Save Backup"}
+                        </StatefulButton>
+                      </div>
+                    </SectionCard>
+
+                    {/* Sessions */}
+                    {user?.id && <SessionsManagement userId={user.id} />}
+                  </motion.div>
+                )}
+
+                {activeSection === "content" && (
+                  <motion.div
+                    key="content"
+                    initial={{ opacity: 0, x: sectionSlideDir * 30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: sectionSlideDir * -30 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-4"
+                  >
+                    <SectionCard>
+                      <SectionHeader
+                        title="Content Preferences"
+                        description="Set your default recommendation behavior."
+                      />
+
+                      <div className="space-y-5">
+                        <div>
+                          <p className="mb-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            Recommendation Type
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {[
+                              { id: "movie", label: "Movies" },
+                              { id: "book", label: "Books" },
+                              { id: "both", label: "Both" },
+                            ].map((opt) => (
+                              <PillButton
+                                key={opt.id}
+                                onClick={() => setContentFocus(opt.id)}
+                                active={contentFocus === opt.id}
+                                className="px-4 py-2 text-sm font-semibold"
+                              >
+                                {opt.label}
+                              </PillButton>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <p className="mb-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            Content tone
+                          </p>
+                          {(user?.age ?? 0) < 18 ? (
+                            <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800/40 dark:text-slate-300">
+                              Recommendations are kept age-appropriate based on
+                              your age ({user?.age ?? "—"}). Adults can choose
+                              between standard and family-friendly tones.
+                            </div>
+                          ) : (
+                            <div className="flex flex-wrap gap-2">
+                              {(
+                                [
+                                  { id: "standard", label: "Standard" },
+                                  { id: "family", label: "Family-friendly" },
+                                ] as const
+                              ).map((opt) => (
+                                <PillButton
+                                  key={opt.id}
+                                  onClick={() => setContentTone(opt.id)}
+                                  active={contentTone === opt.id}
+                                  className="px-4 py-2 text-sm font-semibold"
+                                >
+                                  {opt.label}
+                                </PillButton>
+                              ))}
+                            </div>
+                          )}
+                          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                            {(user?.age ?? 0) < 18
+                              ? "Locked: under-18 accounts always get age-appropriate picks."
+                              : contentTone === "family"
+                                ? "Picks stay light. No mature themes, dark content, or sexual content."
+                                : "Full personality. The AI may suggest dark, complex, or mature picks when they fit you."}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="mb-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            Questions per quiz
+                          </p>
+                          <div className="max-w-sm rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+                            <div className="mb-3 flex items-center justify-between">
+                              <span className="text-sm text-slate-600 dark:text-slate-300">
+                                Count
+                              </span>
+                              <span className="inline-flex min-w-[60px] items-center justify-center rounded-full bg-indigo-600 px-2.5 py-0.5 text-sm font-bold text-white">
+                                {preferredQuestionCount}
+                              </span>
+                            </div>
+                            <input
+                              type="range"
+                              min={3}
+                              max={15}
+                              value={preferredQuestionCount}
+                              onChange={(e) =>
+                                setPreferredQuestionCount(
+                                  Number(e.target.value),
+                                )
+                              }
+                              className="w-full cursor-pointer accent-indigo-500"
+                            />
+                            <div className="mt-1.5 flex justify-between text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                              <span>3</span>
+                              <span>15</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
 
-                  <div className="mt-5 flex flex-wrap items-center justify-end gap-3">
-                    <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
-                      Applies on next quiz
-                    </span>
-                    <StatefulButton
-                      onClick={handleSaveContentPreferences}
-                      className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
-                    >
-                      Save Preferences
-                    </StatefulButton>
-                  </div>
-                </SectionCard>
-              </motion.div>
-            )}
+                      <div className="mt-5 flex flex-wrap items-center justify-end gap-3">
+                        <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                          Applies on next quiz
+                        </span>
+                        <StatefulButton
+                          onClick={handleSaveContentPreferences}
+                          className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
+                        >
+                          Save Preferences
+                        </StatefulButton>
+                      </div>
+                    </SectionCard>
+                  </motion.div>
+                )}
 
-            {activeSection === "integrations" && (
-              <motion.div
-                key="integrations"
-                initial={{ opacity: 0, x: sectionSlideDir * 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: sectionSlideDir * -30 }}
-                transition={{ duration: 0.2 }}
-                className="space-y-4"
-              >
-                <SectionCard>
-                  <SectionHeader
-                    title="Integrations"
-                    description="Connected providers and services."
-                  />
-                  <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/60 p-8 text-center dark:border-slate-700/70 dark:bg-slate-800/40">
-                    <p className="text-xl font-bold tracking-tight text-slate-700 dark:text-slate-200">
-                      No integrations available yet
-                    </p>
-                    <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
-                      Third-party connections will show up here once they go live.
-                    </p>
-                  </div>
-                </SectionCard>
+                {activeSection === "integrations" && (
+                  <motion.div
+                    key="integrations"
+                    initial={{ opacity: 0, x: sectionSlideDir * 30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: sectionSlideDir * -30 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-4"
+                  >
+                    <SectionCard>
+                      <SectionHeader
+                        title="Integrations"
+                        description="Connected providers and services."
+                      />
+                      <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/60 p-8 text-center dark:border-slate-700/70 dark:bg-slate-800/40">
+                        <p className="text-xl font-bold tracking-tight text-slate-700 dark:text-slate-200">
+                          No integrations available yet
+                        </p>
+                        <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
+                          Third-party connections will show up here once they go
+                          live.
+                        </p>
+                      </div>
+                    </SectionCard>
 
-                {/* Danger Zone */}
-                <SectionCard className="!border-red-200/70 dark:!border-red-900/40">
-                  <div className="mb-4">
-                    <h2 className="text-lg font-bold text-red-700 dark:text-red-400">
-                      Danger Zone
-                    </h2>
-                    <p className="mt-0.5 text-xs text-red-600/80 dark:text-red-300/70">
-                      These actions are irreversible. Proceed carefully.
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-3">
-                    <PillButton
-                      onClick={handleDisableAccount}
-                      disabled={accountActionLoading}
-                      variant="destructive"
-                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold disabled:opacity-50"
-                    >
-                      <UserMinus size={14} />
-                      {accountActionLoading ? "Processing…" : "Disable Account"}
-                    </PillButton>
-                    <PillButton
-                      onClick={handleDeleteAccount}
-                      disabled={accountActionLoading}
-                      variant="destructive"
-                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold disabled:opacity-50"
-                    >
-                      <Trash2 size={14} />
-                      {accountActionLoading ? "Processing…" : "Delete Account"}
-                    </PillButton>
-                  </div>
-                </SectionCard>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                    {/* Danger Zone */}
+                    <SectionCard className="!border-red-200/70 dark:!border-red-900/40">
+                      <div className="mb-4">
+                        <h2 className="text-lg font-bold text-red-700 dark:text-red-400">
+                          Danger Zone
+                        </h2>
+                        <p className="mt-0.5 text-xs text-red-600/80 dark:text-red-300/70">
+                          These actions are irreversible. Proceed carefully.
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-3">
+                        <PillButton
+                          onClick={handleDisableAccount}
+                          disabled={accountActionLoading}
+                          variant="destructive"
+                          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold disabled:opacity-50"
+                        >
+                          <UserMinus size={14} />
+                          {accountActionLoading
+                            ? "Processing…"
+                            : "Disable Account"}
+                        </PillButton>
+                        <PillButton
+                          onClick={handleDeleteAccount}
+                          disabled={accountActionLoading}
+                          variant="destructive"
+                          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold disabled:opacity-50"
+                        >
+                          <Trash2 size={14} />
+                          {accountActionLoading
+                            ? "Processing…"
+                            : "Delete Account"}
+                        </PillButton>
+                      </div>
+                    </SectionCard>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>
@@ -1206,6 +1336,7 @@ const SettingsPage = () => {
                   </div>
 
                   <MfaSetup
+                    skipIntro
                     onComplete={() => {
                       setMfaEnabled(true);
                       closeVerifyModal(true);
@@ -1214,6 +1345,45 @@ const SettingsPage = () => {
                   />
                 </>
               )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {mfaSetupModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+            onClick={() => setMfaSetupModalOpen(false)}
+          >
+            <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-label="Set up two-factor authentication"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative mx-4 max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-slate-200/70 bg-white shadow-xl dark:border-slate-700/60 dark:bg-slate-900"
+            >
+              <button
+                onClick={() => setMfaSetupModalOpen(false)}
+                aria-label="Close two-factor setup"
+                className="absolute right-4 top-4 z-10 text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-200"
+              >
+                <X size={18} />
+              </button>
+              <MfaSetup
+                skipIntro
+                onComplete={() => {
+                  setMfaEnabled(true);
+                  setMfaSetupModalOpen(false);
+                }}
+                onSkip={() => setMfaSetupModalOpen(false)}
+              />
             </motion.div>
           </motion.div>
         )}

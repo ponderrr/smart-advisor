@@ -1,7 +1,22 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+const MAINTENANCE_ALLOWLIST = ["/maintenance", "/api/health"];
+
 export async function proxy(request: NextRequest) {
+  if (process.env.MAINTENANCE_MODE === "true") {
+    const { pathname } = request.nextUrl;
+    const isAllowed = MAINTENANCE_ALLOWLIST.some(
+      (path) => pathname === path || pathname.startsWith(`${path}/`),
+    );
+    if (!isAllowed) {
+      return NextResponse.rewrite(new URL("/maintenance", request.url), {
+        status: 503,
+        headers: { "Retry-After": "3600" },
+      });
+    }
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
