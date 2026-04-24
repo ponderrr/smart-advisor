@@ -3,6 +3,11 @@
   "private": true,
   "version": "1.0.0",
   "description": "AI-powered personalized movie and book recommendation engine built with React, TypeScript, and Supabase",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ponderrr/smart-advisor.git"
+  },
   "type": "module",
   "scripts": {
     "dev": "next dev --webpack",
