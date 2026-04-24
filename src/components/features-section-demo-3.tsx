@@ -326,14 +326,15 @@ export default function FeaturesSectionDemo() {
                 key={feature.title}
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-80px" }}
+                viewport={{ once: true, amount: 0.15 }}
                 transition={{
                   duration: 0.5,
                   delay: index * 0.08,
                   ease: [0.22, 1, 0.36, 1],
                 }}
+                style={{ opacity: 0, transform: "translateY(24px)" }}
                 className={cn(
-                  "group relative flex flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-lg sm:p-6 dark:border-slate-700/70 dark:bg-slate-900/65 dark:hover:border-indigo-500/40",
+                  "group relative flex flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-md hover:border-indigo-200 hover:shadow-lg sm:p-6 dark:border-slate-700/70 dark:bg-slate-900/65 dark:hover:border-indigo-500/40",
                   feature.wide
                     ? "lg:col-span-2 lg:flex-row lg:items-stretch lg:gap-6"
                     : "lg:col-span-1",
