@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { format } from "date-fns";
 import { authService } from "../services/auth-service";
 import { ShieldCheck, ArrowRight, Copy, Check, Download } from "lucide-react";
@@ -11,12 +11,18 @@ import { toast } from "sonner";
 interface MfaSetupProps {
   onComplete: () => void;
   onSkip?: () => void;
+  skipIntro?: boolean;
 }
 
 type SetupStep = "intro" | "qr" | "verify" | "backup-codes";
 
-export const MfaSetup = ({ onComplete, onSkip }: MfaSetupProps) => {
+export const MfaSetup = ({
+  onComplete,
+  onSkip,
+  skipIntro = false,
+}: MfaSetupProps) => {
   const [step, setStep] = useState<SetupStep>("intro");
+  const autoEnrolledRef = useRef(false);
   const [qrCode, setQrCode] = useState<string>("");
   const [secret, setSecret] = useState<string>("");
   const [factorId, setFactorId] = useState<string>("");
@@ -26,38 +32,8 @@ export const MfaSetup = ({ onComplete, onSkip }: MfaSetupProps) => {
   const [copied, setCopied] = useState(false);
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
   const [backupCodesCopied, setBackupCodesCopied] = useState(false);
-  const [qrRefreshCountdown, setQrRefreshCountdown] = useState(0);
 
-  const QR_REFRESH_INTERVAL = 30;
-
-  const handleRefreshQr = useCallback(async () => {
-    const { data, error: enrollError } = await authService.enrollMFA();
-    if (!enrollError && data?.totp?.qr_code && data?.id) {
-      setQrCode(data.totp.qr_code);
-      setSecret(data.totp.secret || "");
-      setFactorId(data.id);
-      setQrRefreshCountdown(QR_REFRESH_INTERVAL);
-    }
-  }, []);
-
-  // Auto-refresh QR code countdown — only runs while on the QR step
-  useEffect(() => {
-    if (step !== "qr") return;
-
-    const timer = setInterval(() => {
-      setQrRefreshCountdown((prev) => {
-        if (prev <= 1) {
-          handleRefreshQr();
-          return QR_REFRESH_INTERVAL;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [step, handleRefreshQr]);
-
-  const handleEnroll = async () => {
+  const handleEnroll = useCallback(async () => {
     setLoading(true);
     setError(null);
     const { data, error: enrollError } = await authService.enrollMFA();
@@ -73,10 +49,16 @@ export const MfaSetup = ({ onComplete, onSkip }: MfaSetupProps) => {
       setQrCode(data.totp.qr_code);
       setSecret(data.totp.secret || "");
       setFactorId(data.id);
-      setQrRefreshCountdown(QR_REFRESH_INTERVAL);
       setStep("qr");
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (skipIntro && !autoEnrolledRef.current) {
+      autoEnrolledRef.current = true;
+      handleEnroll();
+    }
+  }, [skipIntro, handleEnroll]);
 
   const handleVerify = async () => {
     if (code.length !== 6) {
@@ -165,37 +147,86 @@ export const MfaSetup = ({ onComplete, onSkip }: MfaSetupProps) => {
       </motion.div>
 
       {step === "intro" && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-md"
-        >
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-            Secure your account
-          </h2>
-          <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
-            Add an extra layer of security with Two-Factor Authentication (2FA).
-            You'll need to enter a code from your phone during sign in.
-          </p>
-          <div className="mt-8 w-full space-y-3">
-            <Button
-              onClick={handleEnroll}
-              disabled={loading}
-              size="lg"
-              className="w-full"
-            >
-              {loading ? "Setting up..." : "Set up 2FA"}
-            </Button>
-            {onSkip && (
-              <button
-                onClick={onSkip}
-                className="w-full text-sm font-medium text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-              >
-                Skip for now
-              </button>
+        skipIntro ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="w-full max-w-md"
+          >
+            {error ? (
+              <>
+                <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                  Couldn&apos;t start setup
+                </h2>
+                <p className="mt-3 text-sm text-red-500">{error}</p>
+                <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+                  <Button
+                    onClick={() => {
+                      setError(null);
+                      handleEnroll();
+                    }}
+                    disabled={loading}
+                    size="lg"
+                    className="flex-1"
+                  >
+                    {loading ? "Retrying..." : "Try again"}
+                  </Button>
+                  {onSkip && (
+                    <Button
+                      onClick={onSkip}
+                      variant="outline"
+                      size="lg"
+                      className="flex-1"
+                    >
+                      Close
+                    </Button>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                  Setting up two-factor...
+                </h2>
+                <div className="mt-6 flex justify-center">
+                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
+                </div>
+              </>
             )}
-          </div>
-        </motion.div>
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="w-full max-w-md"
+          >
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+              Secure your account
+            </h2>
+            <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
+              Add an extra layer of security with Two-Factor Authentication (2FA).
+              You'll need to enter a code from your phone during sign in.
+            </p>
+            <div className="mt-8 w-full space-y-3">
+              <Button
+                onClick={handleEnroll}
+                disabled={loading}
+                size="lg"
+                className="w-full"
+              >
+                {loading ? "Setting up..." : "Set up 2FA"}
+              </Button>
+              {onSkip && (
+                <button
+                  onClick={onSkip}
+                  className="w-full text-sm font-medium text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                >
+                  Skip for now
+                </button>
+              )}
+            </div>
+          </motion.div>
+        )
       )}
 
       {step === "qr" && (
@@ -217,12 +248,6 @@ export const MfaSetup = ({ onComplete, onSkip }: MfaSetupProps) => {
               <div className="flex justify-center rounded-xl border-4 border-white bg-white p-3 shadow-xl">
                 <img src={qrCode} alt="MFA QR Code" className="h-48 w-48" />
               </div>
-              {qrRefreshCountdown > 0 && (
-                <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
-                  QR code refreshes in {Math.floor(qrRefreshCountdown / 60)}:
-                  {String(qrRefreshCountdown % 60).padStart(2, "0")}
-                </p>
-              )}
             </div>
           )}
 
@@ -248,14 +273,11 @@ export const MfaSetup = ({ onComplete, onSkip }: MfaSetupProps) => {
           </div>
 
           <Button
-            onClick={() => {
-              setQrRefreshCountdown(0);
-              setStep("verify");
-            }}
+            onClick={() => setStep("verify")}
             variant="outline"
             className="mt-6 w-full"
           >
-            I've scanned it <ArrowRight className="ml-2 h-4 w-4" />
+            I&apos;ve scanned it <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </motion.div>
       )}

@@ -15,7 +15,12 @@ const NotFound = () => {
   };
 
   return (
-    <div className="min-h-[100svh] bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <div className="relative min-h-[100svh] overflow-hidden bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+      <div
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.12),_transparent_60%)] dark:bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.18),_transparent_60%)]"
+        aria-hidden
+      />
+
       <header className="flex h-[72px] items-center justify-between px-4 sm:px-6 md:px-12">
         <button
           onClick={handleGoHome}
@@ -25,20 +30,23 @@ const NotFound = () => {
         </button>
       </header>
 
-      <main className="flex flex-col items-center justify-center px-4 pb-[100px] pt-[80px] sm:px-6 sm:pt-[120px]">
-        <div className="max-w-[600px] text-center">
-          <h1 className="mb-6 text-6xl font-bold tracking-tighter md:text-8xl">
+      <main className="flex flex-col items-center justify-center px-4 pb-[100px] pt-[40px] sm:px-6 sm:pt-[60px]">
+        <div className="w-full text-center">
+          <h1 className="mb-4 bg-gradient-to-b from-slate-900 to-slate-500 bg-clip-text text-[clamp(5rem,22vw,11rem)] font-bold leading-none tracking-tighter text-transparent dark:from-slate-100 dark:to-slate-500">
             404
           </h1>
-          <h2 className="mb-4 text-2xl font-semibold md:text-3xl">
-            Page Not Found
+
+          <h2 className="mb-5 text-3xl font-bold leading-tight tracking-tight sm:text-4xl md:text-5xl">
+            This scene didn&apos;t make the cut.
           </h2>
-          <p className="mb-12 text-base leading-relaxed text-slate-600 sm:text-lg dark:text-slate-400">
-            Sorry, the page you&apos;re looking for doesn&apos;t exist. It might
-            have been moved, deleted, or you entered the wrong URL.
+
+          <p className="mx-auto max-w-[600px] text-base leading-relaxed text-slate-600 sm:text-lg dark:text-slate-400">
+            The page you&apos;re looking for wandered off between takes. Maybe
+            a typo in the URL, maybe it got left on the cutting room floor.
+            Either way, let&apos;s get you back.
           </p>
 
-          <div className="flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
+          <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
             <button
               onClick={handleGoBack}
               className="flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-6 py-3 text-slate-900 transition-colors duration-200 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"

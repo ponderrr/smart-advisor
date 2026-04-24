@@ -13,7 +13,6 @@ import {
 } from "@tabler/icons-react";
 import { LinkPreview } from "@/components/ui/link-preview";
 import FeaturesSectionDemo from "@/components/features-section-demo-3";
-import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { AppNavbar } from "@/components/app-navbar";
 import { HeroSection } from "@/features/home/components";
 import { cn } from "@/lib/utils";

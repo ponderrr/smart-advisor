@@ -74,19 +74,33 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/auth?${params.toString()}`);
   }
 
-  // Handle email verification / password recovery via token_hash
+  // Handle email verification / password recovery / email change / magic link
+  const VERIFIABLE_TYPES = [
+    "email",
+    "recovery",
+    "signup",
+    "email_change",
+    "magiclink",
+  ] as const;
+  type VerifiableType = (typeof VERIFIABLE_TYPES)[number];
+
   if (
-    (type === "email" || type === "recovery" || type === "signup") &&
+    type &&
+    (VERIFIABLE_TYPES as readonly string[]).includes(type) &&
     tokenHash
   ) {
     const { error } = await supabase.auth.verifyOtp({
       token_hash: tokenHash,
-      type: type as "email" | "recovery" | "signup",
+      type: type as VerifiableType,
     });
     if (!error) {
       if (type === "recovery") {
         // redirect directly to reset page so user can update password
         return NextResponse.redirect(`${origin}/auth/reset-password`);
+      }
+      if (type === "email_change") {
+        // confirmed email change — send user back to account settings
+        return NextResponse.redirect(`${origin}/account?email_changed=true`);
       }
       // Email verified — user now has an active session from verifyOtp.
       // Redirect through client-side page to signal original tab and proceed.
@@ -101,4 +115,12 @@ export async function GET(request: NextRequest) {
     });
     return NextResponse.redirect(`${origin}/auth?${params.toString()}`);
   }
+
+  // Fallback: no code, no token_hash — malformed or expired link.
+  const params = new URLSearchParams({
+    error: "missing_params",
+    error_description:
+      "That link is missing information or has already been used. Please request a new one.",
+  });
+  return NextResponse.redirect(`${origin}/auth?${params.toString()}`);
 }
