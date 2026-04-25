@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   version="1.1"
+   width="4in"
+   height="1.66667in"
+   viewBox="100 100 950 320"
+   id="svg5"
+   sodipodi:docname="SmartAdvisor-LM.svg"
+   inkscape:version="1.4.3 (0d15f75042, 2025-12-25)"
+   inkscape:export-filename="../Documents/Personal Code Projects/Portfolio/site-react/public/images/SmartAdvisor-LM.png"
+   inkscape:export-xdpi="1228.7975"
+   inkscape:export-ydpi="1228.7975"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <sodipodi:namedview
+     id="namedview5"
+     pagecolor="#505050"
+     bordercolor="#ffffff"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="1"
+     inkscape:deskcolor="#505050"
+     inkscape:document-units="in"
+     inkscape:zoom="2"
+     inkscape:cx="92.25"
+     inkscape:cy="123.25"
+     inkscape:window-width="2560"
+     inkscape:window-height="1374"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg5">
+    <inkscape:page
+       x="0"
+       y="0"
+       width="1200"
+       height="500"
+       id="page2"
+       margin="0"
+       bleed="0" />
+  </sodipodi:namedview>
+  <title
+     id="title1">SmartADvisorLM</title>
+  <defs
+     id="defs1" />
+  <text
+     id="text0"
+     x="247.3569"
+     y="267.47504"
+     opacity="1"
+     fill="#000000"
+     style="font-weight:700;font-size:171.939px;font-family:'Bitstream Vera Sans';letter-spacing:0px;stroke-width:2.77321"
+     inkscape:label="Smart"><tspan
+       x="247.3569"
+       y="267.47504"
+       id="tspan2"
+       style="stroke-width:2.77321"><tspan
+         size="29491"
+         id="tspan1"
+         style="stroke-width:2.77321">SMART</tspan></tspan></text>
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:title>SmartADvisorLM</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <text
+     id="text6"
+     x="167.59315"
+     y="392.82809"
+     opacity="1"
+     fill="#000000"
+     style="font-weight:700;font-size:171.939px;font-family:'Bitstream Vera Sans';letter-spacing:0px;stroke-width:2.77321"
+     inkscape:label="Advisor"><tspan
+       x="167.59315"
+       y="392.82809"
+       id="tspan6"
+       style="fill:#6366f1;fill-opacity:1;stroke-width:2.77321">ADVISOR</tspan></text>
+</svg>

@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "lib": ["deno.window", "dom"]
+  },
+  "tasks": {
+    "serve": "supabase functions serve anthropic-recommendations --no-verify-jwt"
+  }
+}

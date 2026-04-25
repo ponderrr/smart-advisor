@@ -1,12 +1,12 @@
 project_id = "buwtnkxkrtpnouompkap"
 [functions.anthropic-questions]
 enabled = true
-verify_jwt = true
+verify_jwt = false
 entrypoint = "./functions/anthropic-questions/index.ts"
 
 [functions.anthropic-recommendations]
 enabled = true
-verify_jwt = true
+verify_jwt = false
 entrypoint = "./functions/anthropic-recommendations/index.ts"
 
 [functions.tmdb-proxy]

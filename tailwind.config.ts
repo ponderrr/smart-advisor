@@ -1,13 +1,13 @@
 import type { Config } from "tailwindcss";
 import tailwindcssAnimate from "tailwindcss-animate";
 
-export default {
+const config = {
   darkMode: ["class"],
   content: [
-    "./pages/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
-    "./app/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}",
+    "./pages/**/*.{ts,tsx,js,jsx,mdx}",
+    "./components/**/*.{ts,tsx,js,jsx,mdx}",
+    "./app/**/*.{ts,tsx,js,jsx,mdx}",
+    "./src/**/*.{ts,tsx,js,jsx,mdx}",
   ],
   prefix: "",
   theme: {
@@ -20,7 +20,7 @@ export default {
     },
     extend: {
       colors: {
-        // Existing Shadcn/UI colors
+        // Shadcn/UI System Colors
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -54,45 +54,22 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
-        },
-        // Smart Advisor custom colors
+        // Smart Advisor Custom Brand Colors
         appPrimary: "#0A0A0A",
         appSecondary: "#1A1A1A",
         appAccent: "#6366F1",
         textPrimary: "#FFFFFF",
         textSecondary: "#A1A1AA",
         textTertiary: "#71717A",
-        emerald: {
-          500: "#10B981",
-          600: "#059669",
-        },
-        amber: {
-          500: "#F59E0B",
-        },
-        red: {
-          500: "#EF4444",
-        },
-        indigo: {
-          500: "#6366F1",
-          900: "#1E1B4B",
-        },
-        gray: {
-          500: "#6B7280",
-          600: "#4B5563",
-          700: "#374151",
-        },
+        emerald: { 500: "#10B981", 600: "#059669" },
+        amber: { 500: "#F59E0B" },
+        red: { 500: "#EF4444" },
+        indigo: { 500: "#6366F1", 900: "#1E1B4B" },
+        gray: { 500: "#6B7280", 600: "#4B5563", 700: "#374151" },
       },
       fontFamily: {
-        inter: ["Inter", "sans-serif"],
+        sans: ["var(--font-inter)", "ui-sans-serif", "system-ui", "sans-serif"],
+        inter: ["var(--font-inter)", "sans-serif"],
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -101,27 +78,28 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        // Aceternity "Move" Keyframes
+        move: {
+          "0%": { transform: "translateX(-200px)" },
+          "100%": { transform: "translateX(200px)" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        // Aceternity "Move" Animation
+        move: "move 5s linear infinite",
       },
     },
   },
   plugins: [tailwindcssAnimate],
 } satisfies Config;
+
+export default config;
