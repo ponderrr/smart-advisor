@@ -100,9 +100,24 @@ export const NavItems = ({
     event: React.MouseEvent<HTMLElement>,
     link: string,
   ) => {
-    if (!link.startsWith("#")) return;
+    // Resolve the in-page hash this link is targeting. We accept both
+    // bare "#section" and homepage-relative "/#section" forms; the second
+    // one only counts when we're already on "/", otherwise we let the
+    // <Link> handle navigation across pages.
+    let hash: string | null = null;
+    if (link.startsWith("#")) {
+      hash = link;
+    } else if (
+      link.startsWith("/#") &&
+      typeof window !== "undefined" &&
+      window.location.pathname === "/"
+    ) {
+      hash = link.slice(1);
+    }
+    if (!hash) return;
+
     event.preventDefault();
-    const section = document.querySelector(link) as HTMLElement | null;
+    const section = document.querySelector(hash) as HTMLElement | null;
     if (!section) return;
 
     const navbar = document.querySelector(
@@ -115,6 +130,10 @@ export const NavItems = ({
       top: Math.max(0, top),
       behavior: "smooth",
     });
+
+    // Replace (don't append) the hash so the URL stays clean even after
+    // hopping between sections.
+    window.history.replaceState(null, "", hash);
   };
 
   return (
@@ -140,7 +159,15 @@ export const NavItems = ({
           className: linkClassName,
         };
 
-        if (item.link.startsWith("#")) {
+        // Same-page anchor: use a button that scrolls + tidies the hash.
+        // Cross-page anchor: let <Link> handle navigation normally.
+        const isSamePageAnchor =
+          item.link.startsWith("#") ||
+          (item.link.startsWith("/#") &&
+            typeof window !== "undefined" &&
+            window.location.pathname === "/");
+
+        if (isSamePageAnchor) {
           return (
             <motion.button
               key={idx}
@@ -235,6 +262,11 @@ export const NavbarLogo = () => (
       if (typeof window !== "undefined" && window.location.pathname === "/") {
         event.preventDefault();
         window.scrollTo({ top: 0, behavior: "smooth" });
+        // Clear any leftover #section so the URL doesn't keep growing
+        // hashes as the user moves between sections + back to top.
+        if (window.location.hash) {
+          window.history.replaceState(null, "", "/");
+        }
       }
     }}
     className="group inline-flex shrink-0 items-center pr-3 transition-opacity hover:opacity-85"
