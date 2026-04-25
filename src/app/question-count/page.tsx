@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { motion } from "motion/react";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import { useQuizStore } from "@/features/quiz/store/quiz-store";
 import { PillButton } from "@/components/ui/pill-button";
 import { PageLoader } from "@/components/ui/loader";
-import { AppNavbar } from "@/components/app-navbar";
+import { QuizStepShell } from "@/features/quiz/components/quiz-step-shell";
 import { cn } from "@/lib/utils";
 
 type ContentType = "movie" | "book" | "both";
@@ -60,102 +60,87 @@ const QuestionCountPage = () => {
   }
 
   return (
-    <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
-      <AppNavbar />
+    <QuizStepShell
+      category="Quiz setup"
+      stepLabel="Step 2 of 4"
+      progress={50}
+      onBack={() => router.push("/content-selection")}
+    >
+      <div className="rounded-3xl border border-slate-200/70 bg-white/85 p-6 shadow-sm backdrop-blur-md sm:p-8 dark:border-slate-700/60 dark:bg-slate-900/65">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.22 }}
+        >
+          <h1 className="text-2xl font-black tracking-tight sm:text-3xl">
+            How many questions should we ask?
+          </h1>
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 sm:text-base">
+            Choose the depth for your{" "}
+            {getContentTypeDisplay(contentType as ContentType)}{" "}
+            recommendation flow.
+          </p>
+        </motion.div>
 
-      <main className="px-4 pb-20 pt-32 md:pt-36 sm:px-6">
-        <div className="mx-auto w-full max-w-4xl">
-          <div className="mb-8 flex items-center justify-between gap-3">
-            <PillButton
-              onClick={() => router.push("/content-selection")}
-              className="inline-flex items-center gap-2 border-slate-300/80 bg-white/80 px-4 py-2 text-sm font-semibold dark:border-slate-700 dark:bg-slate-900/70"
-            >
-              <ArrowLeft size={16} />
-              Back
-            </PillButton>
-            <p className="text-base font-extrabold tracking-wide text-slate-800 dark:text-slate-100 md:text-lg">
-              Step 2 of 4
-            </p>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-              Quiz Setup
-            </p>
-          </div>
-
-          <div className="mb-8 h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
+        <div className="mt-6 rounded-2xl border border-slate-200/80 bg-gradient-to-br from-indigo-50/60 via-white to-violet-50/60 px-4 py-6 sm:px-6 sm:py-8 dark:border-slate-700/70 dark:from-indigo-500/5 dark:via-slate-900/40 dark:to-violet-500/5">
+          <div className="mb-5 text-center">
             <motion.div
-              className="h-full rounded-full bg-indigo-500"
-              initial={false}
-              animate={{ width: "50%" }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            />
-          </div>
-
-          <div className="rounded-3xl border border-slate-200/70 bg-white/85 p-6 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.22 }}
+              key={questionCount}
+              initial={{ scale: 0.9, opacity: 0.7 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+              className="bg-gradient-to-br from-indigo-500 to-violet-500 bg-clip-text text-6xl font-black tracking-tighter text-transparent sm:text-7xl"
             >
-              <h1 className="text-2xl font-black tracking-tight sm:text-3xl">
-                How many questions should we ask?
-              </h1>
-              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 sm:text-base">
-                Choose the depth for your{" "}
-                {getContentTypeDisplay(contentType as ContentType)}{" "}
-                recommendation flow.
-              </p>
+              {questionCount}
             </motion.div>
-
-            <div className="mt-4 rounded-2xl border border-slate-200/80 bg-slate-50/70 px-4 py-5 dark:border-slate-700 dark:bg-slate-950/40">
-              <div className="mb-4 text-center">
-                <div className="text-5xl font-black tracking-tight text-indigo-600 sm:text-6xl dark:text-indigo-400">
-                  {questionCount}
-                </div>
-                <p className="mt-2 text-lg font-black tracking-tight text-slate-700 dark:text-slate-200 sm:text-xl">
-                  {questionCount === 1 ? "Question" : "Questions"}
-                </p>
-              </div>
-
-              <input
-                type="range"
-                min={3}
-                max={15}
-                value={questionCount}
-                onChange={(e) => setQuestionCount(parseInt(e.target.value, 10))}
-                className="w-full cursor-pointer accent-indigo-500"
-              />
-
-              <motion.p
-                key={questionCount}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.2 }}
-                className="mt-3 text-center text-lg font-black tracking-tight text-slate-700 dark:text-slate-200 sm:text-xl"
-              >
-                {questionCount <= 5
-                  ? "Quick and focused"
-                  : questionCount <= 10
-                    ? "Balanced depth"
-                    : "Comprehensive detail"}
-              </motion.p>
-            </div>
-
-            <div className="mt-8 flex items-center justify-end">
-              <PillButton
-                onClick={handleContinue}
-                disabled={isLoading}
-                className={cn(
-                  "inline-flex items-center justify-center gap-2 bg-white px-7 py-3 text-sm font-black tracking-tight text-black disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-900 dark:text-white",
-                )}
-              >
-                {isLoading ? "Continuing..." : "Continue"}
-                <ArrowRight size={16} />
-              </PillButton>
-            </div>
+            <p className="mt-1 text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+              {questionCount === 1 ? "Question" : "Questions"}
+            </p>
           </div>
+
+          <input
+            type="range"
+            min={3}
+            max={15}
+            value={questionCount}
+            onChange={(e) => setQuestionCount(parseInt(e.target.value, 10))}
+            aria-label="Number of questions"
+            className="w-full cursor-pointer accent-indigo-500"
+          />
+          <div className="mt-1 flex justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+            <span>3</span>
+            <span>15</span>
+          </div>
+
+          <motion.p
+            key={`label-${questionCount}`}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+            className="mt-4 text-center text-base font-bold tracking-tight text-slate-700 dark:text-slate-200 sm:text-lg"
+          >
+            {questionCount <= 5
+              ? "Quick and focused"
+              : questionCount <= 10
+                ? "Balanced depth"
+                : "Comprehensive detail"}
+          </motion.p>
         </div>
-      </main>
-    </div>
+
+        <div className="mt-8 flex items-center justify-end">
+          <PillButton
+            onClick={handleContinue}
+            disabled={isLoading}
+            className={cn(
+              "inline-flex items-center justify-center gap-2 bg-white px-7 py-3 text-sm font-black tracking-tight text-black disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-900 dark:text-white",
+            )}
+          >
+            {isLoading ? "Continuing..." : "Continue"}
+            <ArrowRight size={16} />
+          </PillButton>
+        </div>
+      </div>
+    </QuizStepShell>
   );
 };
 

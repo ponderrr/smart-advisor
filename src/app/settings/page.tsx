@@ -24,6 +24,10 @@ import {
   Mail,
   Lock,
   X,
+  Check,
+  Film,
+  BookOpen,
+  Sparkles,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
@@ -123,7 +127,7 @@ const SectionHeader = ({
   description: string;
 }) => (
   <div className="mb-5">
-    <h2 className="text-xl font-bold tracking-tight">{title}</h2>
+    <h2 className="text-xl font-black tracking-tight sm:text-2xl">{title}</h2>
     <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
       {description}
     </p>
@@ -1090,38 +1094,121 @@ const SettingsPage = () => {
                         description="Set your default recommendation behavior."
                       />
 
-                      <div className="space-y-5">
+                      <div className="space-y-6">
                         <div>
-                          <p className="mb-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                            Recommendation Type
+                          <p className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+                            Recommendation type
                           </p>
-                          <div className="flex flex-wrap gap-2">
-                            {[
-                              { id: "movie", label: "Movies" },
-                              { id: "book", label: "Books" },
-                              { id: "both", label: "Both" },
-                            ].map((opt) => (
-                              <PillButton
-                                key={opt.id}
-                                onClick={() => setContentFocus(opt.id)}
-                                active={contentFocus === opt.id}
-                                className="px-4 py-2 text-sm font-semibold"
-                              >
-                                {opt.label}
-                              </PillButton>
-                            ))}
+                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                            {(
+                              [
+                                {
+                                  id: "movie",
+                                  label: "Movies",
+                                  eyebrow: "On screen",
+                                  icon: <Film size={14} />,
+                                },
+                                {
+                                  id: "book",
+                                  label: "Books",
+                                  eyebrow: "On the shelf",
+                                  icon: <BookOpen size={14} />,
+                                },
+                                {
+                                  id: "both",
+                                  label: "Both",
+                                  eyebrow: "One of each",
+                                  icon: <Sparkles size={14} />,
+                                },
+                              ] as const
+                            ).map((opt) => {
+                              const active = contentFocus === opt.id;
+                              return (
+                                <button
+                                  key={opt.id}
+                                  type="button"
+                                  onClick={() => setContentFocus(opt.id)}
+                                  aria-pressed={active}
+                                  className={cn(
+                                    "group relative overflow-hidden rounded-2xl border bg-white/85 p-4 text-left shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:bg-slate-900/65 dark:focus-visible:ring-offset-slate-950",
+                                    active
+                                      ? "border-transparent shadow-indigo-500/15 ring-2 ring-indigo-500/70 dark:ring-indigo-400/70"
+                                      : "border-slate-200/70 hover:border-slate-300 dark:border-slate-700/60 dark:hover:border-slate-600/80",
+                                  )}
+                                >
+                                  <span
+                                    aria-hidden="true"
+                                    className={cn(
+                                      "pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-500/[0.06] via-transparent to-violet-500/[0.06] transition-opacity duration-300 dark:from-indigo-400/[0.08] dark:to-violet-400/[0.08]",
+                                      active ? "opacity-100" : "opacity-0",
+                                    )}
+                                  />
+                                  <div
+                                    className={cn(
+                                      "absolute right-3 top-3 inline-flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-md shadow-indigo-500/30 transition-all duration-300",
+                                      active
+                                        ? "scale-100 opacity-100"
+                                        : "scale-50 opacity-0",
+                                    )}
+                                  >
+                                    <Check size={12} strokeWidth={3} />
+                                  </div>
+                                  <div className="relative flex items-center gap-2">
+                                    <span
+                                      className={cn(
+                                        "flex h-7 w-7 items-center justify-center rounded-full transition-colors duration-300",
+                                        active
+                                          ? "bg-indigo-500 text-white"
+                                          : "bg-slate-100 text-slate-500 group-hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-slate-700",
+                                      )}
+                                    >
+                                      {opt.icon}
+                                    </span>
+                                    <p
+                                      className={cn(
+                                        "text-[10px] font-black uppercase tracking-[0.18em] transition-colors duration-300",
+                                        active
+                                          ? "text-indigo-600 dark:text-indigo-400"
+                                          : "text-slate-400 dark:text-slate-500",
+                                      )}
+                                    >
+                                      {opt.eyebrow}
+                                    </p>
+                                  </div>
+                                  <p className="relative mt-1.5 text-base font-black tracking-tight">
+                                    {opt.label}
+                                  </p>
+                                </button>
+                              );
+                            })}
                           </div>
                         </div>
 
                         <div>
-                          <p className="mb-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                          <p className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
                             Content tone
                           </p>
                           {(user?.age ?? 0) < 18 ? (
-                            <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800/40 dark:text-slate-300">
-                              Recommendations are kept age-appropriate based on
-                              your age ({user?.age ?? "—"}). Adults can choose
-                              between standard and family-friendly tones.
+                            <div className="relative overflow-hidden rounded-2xl border border-indigo-200/60 bg-gradient-to-br from-indigo-50/80 via-white to-violet-50/60 p-4 dark:border-indigo-500/30 dark:from-indigo-500/10 dark:via-slate-900/40 dark:to-violet-500/10">
+                              <span
+                                aria-hidden="true"
+                                className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-indigo-400 to-violet-500"
+                              />
+                              <div className="flex items-center gap-2 pl-2">
+                                <ShieldCheck
+                                  size={14}
+                                  className="text-indigo-600 dark:text-indigo-400"
+                                />
+                                <p className="text-[11px] font-black uppercase tracking-[0.16em] text-indigo-700 dark:text-indigo-300">
+                                  Age-locked
+                                </p>
+                              </div>
+                              <p className="mt-2 pl-2 text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+                                Recommendations are kept age-appropriate based
+                                on your age ({user?.age ?? "—"}). Adults can
+                                choose between standard and family-friendly
+                                tones.
+                              </p>
                             </div>
                           ) : (
                             <div className="flex flex-wrap gap-2">
@@ -1142,27 +1229,47 @@ const SettingsPage = () => {
                               ))}
                             </div>
                           )}
-                          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                            {(user?.age ?? 0) < 18
-                              ? "Locked: under-18 accounts always get age-appropriate picks."
-                              : contentTone === "family"
+                          {(user?.age ?? 0) >= 18 && (
+                            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                              {contentTone === "family"
                                 ? "Picks stay light. No mature themes, dark content, or sexual content."
                                 : "Full personality. The AI may suggest dark, complex, or mature picks when they fit you."}
-                          </p>
+                            </p>
+                          )}
                         </div>
 
                         <div>
-                          <p className="mb-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                          <p className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
                             Questions per quiz
                           </p>
-                          <div className="max-w-sm rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
-                            <div className="mb-3 flex items-center justify-between">
-                              <span className="text-sm text-slate-600 dark:text-slate-300">
-                                Count
-                              </span>
-                              <span className="inline-flex min-w-[60px] items-center justify-center rounded-full bg-indigo-600 px-2.5 py-0.5 text-sm font-bold text-white">
-                                {preferredQuestionCount}
-                              </span>
+                          <div className="rounded-2xl border border-slate-200/80 bg-gradient-to-br from-indigo-50/60 via-white to-violet-50/60 p-5 dark:border-slate-700/70 dark:from-indigo-500/5 dark:via-slate-900/40 dark:to-violet-500/5">
+                            <div className="mb-4 flex items-end justify-between gap-4">
+                              <div>
+                                <motion.p
+                                  key={preferredQuestionCount}
+                                  initial={{ scale: 0.9, opacity: 0.7 }}
+                                  animate={{ scale: 1, opacity: 1 }}
+                                  transition={{
+                                    duration: 0.18,
+                                    ease: "easeOut",
+                                  }}
+                                  className="bg-gradient-to-br from-indigo-500 to-violet-500 bg-clip-text text-5xl font-black tracking-tighter text-transparent leading-none"
+                                >
+                                  {preferredQuestionCount}
+                                </motion.p>
+                                <p className="mt-1 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                                  {preferredQuestionCount === 1
+                                    ? "Question"
+                                    : "Questions"}
+                                </p>
+                              </div>
+                              <p className="text-sm font-bold tracking-tight text-slate-700 dark:text-slate-200">
+                                {preferredQuestionCount <= 5
+                                  ? "Quick and focused"
+                                  : preferredQuestionCount <= 10
+                                    ? "Balanced depth"
+                                    : "Comprehensive detail"}
+                              </p>
                             </div>
                             <input
                               type="range"
@@ -1174,9 +1281,10 @@ const SettingsPage = () => {
                                   Number(e.target.value),
                                 )
                               }
+                              aria-label="Default questions per quiz"
                               className="w-full cursor-pointer accent-indigo-500"
                             />
-                            <div className="mt-1.5 flex justify-between text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                            <div className="mt-1 flex justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                               <span>3</span>
                               <span>15</span>
                             </div>
@@ -1213,13 +1321,17 @@ const SettingsPage = () => {
                         title="Integrations"
                         description="Connected providers and services."
                       />
-                      <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/60 p-8 text-center dark:border-slate-700/70 dark:bg-slate-800/40">
-                        <p className="text-xl font-bold tracking-tight text-slate-700 dark:text-slate-200">
+                      <div className="rounded-2xl border border-dashed border-slate-300/80 bg-gradient-to-br from-slate-50/80 via-white to-slate-50/40 p-10 text-center dark:border-slate-700/70 dark:from-slate-900/40 dark:via-slate-900/20 dark:to-slate-900/40">
+                        <Link2
+                          className="mx-auto h-10 w-10 text-slate-300 dark:text-slate-600"
+                          aria-hidden="true"
+                        />
+                        <p className="mt-4 text-xl font-black tracking-tight text-slate-700 dark:text-slate-200">
                           No integrations available yet
                         </p>
                         <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
-                          Third-party connections will show up here once they go
-                          live.
+                          Third-party connections will show up here once they
+                          go live.
                         </p>
                       </div>
                     </SectionCard>
@@ -1227,10 +1339,10 @@ const SettingsPage = () => {
                     {/* Danger Zone */}
                     <SectionCard className="!border-red-200/70 dark:!border-red-900/40">
                       <div className="mb-4">
-                        <h2 className="text-lg font-bold text-red-700 dark:text-red-400">
-                          Danger Zone
+                        <h2 className="text-xl font-black tracking-tight text-red-700 sm:text-2xl dark:text-red-400">
+                          Danger zone
                         </h2>
-                        <p className="mt-0.5 text-xs text-red-600/80 dark:text-red-300/70">
+                        <p className="mt-1 text-sm text-red-600/80 dark:text-red-300/70">
                           These actions are irreversible. Proceed carefully.
                         </p>
                       </div>

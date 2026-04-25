@@ -5,6 +5,7 @@ import { MfaSetup } from "@/features/auth/components/mfa-setup";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PageLoader } from "@/components/ui/loader";
+import { AppNavbar } from "@/components/app-navbar";
 
 export default function MfaSetupPage() {
   const router = useRouter();
@@ -30,17 +31,21 @@ export default function MfaSetupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 px-4">
-      <div className="w-full max-w-md">
-        <MfaSetup
-          onComplete={() => {
-            router.push("/account/security");
-          }}
-          onSkip={() => {
-            router.push("/dashboard");
-          }}
-        />
-      </div>
+    <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
+      <AppNavbar />
+
+      <main className="flex items-start justify-center px-4 pb-20 pt-28 sm:px-6 md:pt-36">
+        <div className="w-full max-w-md">
+          <MfaSetup
+            onComplete={() => {
+              router.push("/account/security");
+            }}
+            onSkip={() => {
+              router.push("/dashboard");
+            }}
+          />
+        </div>
+      </main>
     </div>
   );
 }

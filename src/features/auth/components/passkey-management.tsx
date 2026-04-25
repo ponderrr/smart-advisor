@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import { format, formatDistanceToNowStrict } from "date-fns";
-import { Fingerprint, KeyRound, Loader, Pencil, ShieldCheck, Trash2, X } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
+import { Fingerprint, KeyRound, Loader, Pencil, ShieldCheck, Trash2 } from "lucide-react";
+import { motion } from "motion/react";
+import { Dialog } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
@@ -265,123 +265,82 @@ export const PasskeyManagement = () => {
         </StatefulButton>
       </div>
 
-      {typeof window !== "undefined" &&
-        createPortal(
-          <AnimatePresence>
-            {verifyTarget && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-                onClick={() => {
-                  if (verifyLoading) return;
-                  setVerifyTarget(null);
+      <Dialog
+        open={!!verifyTarget}
+        onClose={() => setVerifyTarget(null)}
+        ariaLabel="Verify to remove passkey"
+        size="sm"
+        disableClose={verifyLoading}
+      >
+        <div className="flex flex-col items-center p-6 text-center">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="mb-6 rounded-2xl bg-gradient-to-br from-violet-100 to-indigo-100 p-4 dark:from-violet-900/30 dark:to-indigo-900/30"
+          >
+            <ShieldCheck className="h-10 w-10 text-violet-600 dark:text-violet-400" />
+          </motion.div>
+
+          <div className="w-full max-w-md">
+            <h2 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100">
+              Confirm with your authenticator
+            </h2>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+              This is your last passkey. Enter your 6-digit authenticator
+              code to remove it.
+            </p>
+
+            <div className="mt-6 w-full">
+              <input
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={6}
+                value={verifyCode}
+                onChange={(e) => {
+                  setVerifyCode(
+                    e.target.value.replace(/\D/g, "").slice(0, 6),
+                  );
+                  setVerifyError("");
                 }}
-              >
-                <motion.div
-                  role="dialog"
-                  aria-modal="true"
-                  aria-label="Verify to remove passkey"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  onClick={(e) => e.stopPropagation()}
-                  className="relative mx-4 max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-slate-200/70 bg-white shadow-xl dark:border-slate-700/60 dark:bg-slate-900"
-                >
-                  <button
-                    onClick={() => {
-                      if (verifyLoading) return;
-                      setVerifyTarget(null);
-                    }}
-                    aria-label="Close"
-                    disabled={verifyLoading}
-                    className="absolute right-4 top-4 z-10 text-slate-400 transition-colors hover:text-slate-600 disabled:opacity-50 dark:hover:text-slate-200"
-                  >
-                    <X size={18} />
-                  </button>
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") void handleVerifyAndRemove();
+                }}
+                placeholder="000000"
+                autoFocus
+                disabled={verifyLoading}
+                className="w-full rounded-lg border-2 border-slate-200 bg-white px-4 py-4 text-center text-4xl font-bold tracking-[0.4em] text-slate-900 placeholder-slate-300 focus:border-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/10 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder-slate-600"
+              />
+              {verifyError && (
+                <p className="mt-2 text-sm font-medium text-red-500">
+                  {verifyError}
+                </p>
+              )}
+            </div>
 
-                  <div className="flex flex-col items-center p-6 text-center">
-                    <motion.div
-                      initial={{ scale: 0.9, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      className="mb-6 rounded-2xl bg-gradient-to-br from-violet-100 to-indigo-100 p-4 dark:from-violet-900/30 dark:to-indigo-900/30"
-                    >
-                      <ShieldCheck className="h-10 w-10 text-violet-600 dark:text-violet-400" />
-                    </motion.div>
+            <Button
+              onClick={() => void handleVerifyAndRemove()}
+              disabled={verifyCode.length !== 6 || verifyLoading}
+              size="lg"
+              className="mt-6 w-full bg-red-600 hover:bg-red-500"
+            >
+              {verifyLoading ? (
+                <Loader className="h-4 w-4 animate-spin" />
+              ) : (
+                "Verify & remove passkey"
+              )}
+            </Button>
 
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="w-full max-w-md"
-                    >
-                      <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                        Confirm with your authenticator
-                      </h2>
-                      <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-                        This is your last passkey. Enter your 6-digit
-                        authenticator code to remove it.
-                      </p>
-
-                      <div className="mt-6 w-full">
-                        <input
-                          type="text"
-                          inputMode="numeric"
-                          autoComplete="one-time-code"
-                          maxLength={6}
-                          value={verifyCode}
-                          onChange={(e) => {
-                            setVerifyCode(
-                              e.target.value.replace(/\D/g, "").slice(0, 6),
-                            );
-                            setVerifyError("");
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") void handleVerifyAndRemove();
-                          }}
-                          placeholder="000000"
-                          autoFocus
-                          disabled={verifyLoading}
-                          className="w-full rounded-lg border-2 border-slate-200 bg-white px-4 py-4 text-center text-4xl font-bold tracking-[0.4em] text-slate-900 placeholder-slate-300 focus:border-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/10 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder-slate-600"
-                        />
-                        {verifyError && (
-                          <p className="mt-2 text-sm font-medium text-red-500">
-                            {verifyError}
-                          </p>
-                        )}
-                      </div>
-
-                      <Button
-                        onClick={() => void handleVerifyAndRemove()}
-                        disabled={verifyCode.length !== 6 || verifyLoading}
-                        size="lg"
-                        className="mt-6 w-full bg-red-600 hover:bg-red-500"
-                      >
-                        {verifyLoading ? (
-                          <Loader className="h-4 w-4 animate-spin" />
-                        ) : (
-                          "Verify & remove passkey"
-                        )}
-                      </Button>
-
-                      <button
-                        onClick={() => {
-                          if (verifyLoading) return;
-                          setVerifyTarget(null);
-                        }}
-                        disabled={verifyLoading}
-                        className="mt-3 text-sm font-medium text-slate-500 transition-colors hover:text-slate-700 disabled:opacity-60 dark:text-slate-400 dark:hover:text-slate-200"
-                      >
-                        Cancel
-                      </button>
-                    </motion.div>
-                  </div>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>,
-          document.body,
-        )}
+            <button
+              onClick={() => setVerifyTarget(null)}
+              disabled={verifyLoading}
+              className="mt-3 text-sm font-medium text-slate-500 transition-colors hover:text-slate-700 disabled:opacity-60 dark:text-slate-400 dark:hover:text-slate-200"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </Dialog>
 
       <RenameDialog
         open={renameTarget !== null}
@@ -407,47 +366,20 @@ export const PasskeyManagement = () => {
         }}
       />
 
-      {typeof window !== "undefined" &&
-        createPortal(
-          <AnimatePresence>
-            {setupOpen && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-                onClick={() => setSetupOpen(false)}
-              >
-                <motion.div
-                  role="dialog"
-                  aria-modal="true"
-                  aria-label="Add a passkey"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  onClick={(e) => e.stopPropagation()}
-                  className="relative mx-4 max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-slate-200/70 bg-white shadow-xl dark:border-slate-700/60 dark:bg-slate-900"
-                >
-                  <button
-                    onClick={() => setSetupOpen(false)}
-                    aria-label="Close passkey setup"
-                    className="absolute right-4 top-4 z-10 text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-200"
-                  >
-                    <X size={18} />
-                  </button>
-                  <PasskeySetup
-                    onComplete={() => {
-                      setSetupOpen(false);
-                      void load();
-                    }}
-                    onSkip={() => setSetupOpen(false)}
-                  />
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>,
-          document.body,
-        )}
+      <Dialog
+        open={setupOpen}
+        onClose={() => setSetupOpen(false)}
+        ariaLabel="Add a passkey"
+        size="sm"
+      >
+        <PasskeySetup
+          onComplete={() => {
+            setSetupOpen(false);
+            void load();
+          }}
+          onSkip={() => setSetupOpen(false)}
+        />
+      </Dialog>
     </>
   );
 };

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
@@ -16,6 +16,7 @@ import {
   hasQuestionAnswer,
   type QuestionValue,
 } from "@/features/quiz/components/question-card";
+import { QuizStepShell } from "@/features/quiz/components/quiz-step-shell";
 import { PillButton } from "@/components/ui/pill-button";
 import { PageLoader } from "@/components/ui/loader";
 import { supabase } from "@/integrations/supabase/client";
@@ -313,76 +314,51 @@ const QuestionnairePage = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
-      {topBar}
-
-      <main className="px-3 pb-20 pt-28 sm:px-6 md:pt-36">
-        <div className="mx-auto w-full max-w-4xl">
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-2 sm:mb-8 sm:gap-3">
-            <PillButton
-              onClick={handlePrevious}
-              className="inline-flex items-center gap-2 border-slate-300/80 bg-white/80 px-4 py-2 text-sm font-semibold dark:border-slate-700 dark:bg-slate-900/70"
-            >
-              <ArrowLeft size={16} />
-              Back
-            </PillButton>
-            <p className="text-base font-extrabold tracking-wide text-slate-800 dark:text-slate-100 md:text-lg">
-              {currentQuestionIndex + 1} out of {questions.length} questions
-            </p>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-              Live Quiz
-            </p>
-          </div>
-
-          <div className="mb-6 h-2 w-full sm:mb-8 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
-            <motion.div
-              className="h-full rounded-full bg-indigo-500"
-              initial={false}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            />
-          </div>
-
-          <motion.div
-            layout
-            transition={{ layout: { duration: 0.32, ease: [0.22, 1, 0.36, 1] } }}
-            className="rounded-2xl border border-slate-200/70 bg-white/85 p-4 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:rounded-3xl sm:p-8"
+    <QuizStepShell
+      category="Live quiz"
+      stepLabel={`Question ${currentQuestionIndex + 1} of ${questions.length}`}
+      progress={progress}
+      onBack={handlePrevious}
+      backLabel={currentQuestionIndex > 0 ? "Previous" : "Back"}
+    >
+      <motion.div
+        layout
+        transition={{ layout: { duration: 0.32, ease: [0.22, 1, 0.36, 1] } }}
+        className="rounded-2xl border border-slate-200/70 bg-white/85 p-4 shadow-sm backdrop-blur-md sm:rounded-3xl sm:p-8 dark:border-slate-700/60 dark:bg-slate-900/65"
+      >
+        {currentQuestion && (
+          <motion.section
+            key={currentQuestion.id}
+            initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: 0.28, ease: "easeOut" }}
           >
-            {currentQuestion && (
-              <motion.section
-                key={currentQuestion.id}
-                initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                transition={{ duration: 0.28, ease: "easeOut" }}
-              >
-                <QuestionCard
-                  title={currentQuestion.text}
-                  subtitle={getSubtitle()}
-                  type={currentQuestion.type ?? "single_select"}
-                  options={currentOptions}
-                  placeholder={currentQuestion.placeholder}
-                  value={answers[currentQuestion.id]}
-                  onChange={handleAnswer}
-                />
-              </motion.section>
-            )}
+            <QuestionCard
+              title={currentQuestion.text}
+              subtitle={getSubtitle()}
+              type={currentQuestion.type ?? "single_select"}
+              options={currentOptions}
+              placeholder={currentQuestion.placeholder}
+              value={answers[currentQuestion.id]}
+              onChange={handleAnswer}
+            />
+          </motion.section>
+        )}
 
-            <div className="mt-6 flex items-center justify-end sm:mt-8">
-              <PillButton
-                onClick={handleNext}
-                disabled={!canProceed || isSubmitting}
-                className="inline-flex items-center justify-center gap-2 bg-white px-6 py-2.5 text-sm font-black tracking-tight text-black disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-900 dark:text-white"
-              >
-                {currentQuestionIndex === questions.length - 1
-                  ? "Get Recommendations"
-                  : "Next"}
-                <ArrowRight size={16} />
-              </PillButton>
-            </div>
-          </motion.div>
+        <div className="mt-6 flex items-center justify-end sm:mt-8">
+          <PillButton
+            onClick={handleNext}
+            disabled={!canProceed || isSubmitting}
+            className="inline-flex items-center justify-center gap-2 bg-white px-6 py-2.5 text-sm font-black tracking-tight text-black disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-900 dark:text-white"
+          >
+            {currentQuestionIndex === questions.length - 1
+              ? "Get Recommendations"
+              : "Next"}
+            <ArrowRight size={16} />
+          </PillButton>
         </div>
-      </main>
-    </div>
+      </motion.div>
+    </QuizStepShell>
   );
 };
 

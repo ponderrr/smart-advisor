@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
 import {
@@ -16,7 +16,15 @@ import FeaturesSectionDemo from "@/components/features-section-demo-3";
 import { AppNavbar } from "@/components/app-navbar";
 import { HeroSection } from "@/features/home/components";
 import { cn } from "@/lib/utils";
-import { faqItems, logoSets, teamMembers } from "@/features/home/data";
+import {
+  FAQ_CATEGORIES,
+  type FaqCategory,
+  faqItems,
+  logoSets,
+  teamMembers,
+} from "@/features/home/data";
+
+type FaqFilter = "all" | FaqCategory;
 
 const HOW_IT_WORKS_STEPS = [
   {
@@ -121,7 +129,16 @@ const HowItWorksSection = () => (
 );
 
 const Index = () => {
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [openFaq, setOpenFaq] = useState<string | null>(null);
+  const [faqFilter, setFaqFilter] = useState<FaqFilter>("all");
+
+  const filteredFaq = useMemo(
+    () =>
+      faqFilter === "all"
+        ? faqItems
+        : faqItems.filter((item) => item.category === faqFilter),
+    [faqFilter],
+  );
 
   const smoothScrollToSection = (selector: string) => {
     const section = document.querySelector(selector) as HTMLElement | null;
@@ -283,57 +300,129 @@ const Index = () => {
             </p>
           </div>
 
-          <div className="space-y-3">
-            {faqItems.map((item, index) => {
-              const isOpen = openFaq === index;
+          <div
+            role="tablist"
+            aria-label="FAQ categories"
+            className="mb-8 flex flex-wrap justify-center gap-2"
+          >
+            {(
+              [
+                { id: "all" as const, label: "All" },
+                ...FAQ_CATEGORIES.map((c) => ({ id: c.id, label: c.label })),
+              ] as { id: FaqFilter; label: string }[]
+            ).map((opt) => {
+              const active = faqFilter === opt.id;
               return (
-                <div
-                  key={item.question}
-                  className="overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-700/70"
+                <button
+                  key={opt.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => {
+                    setFaqFilter(opt.id);
+                    setOpenFaq(null);
+                  }}
+                  className={cn(
+                    "rounded-full border px-4 py-1.5 text-xs font-bold tracking-tight transition-all duration-200 active:scale-[0.98] sm:text-sm",
+                    active
+                      ? "border-indigo-500 bg-indigo-500 text-white shadow-md shadow-indigo-500/20"
+                      : "border-slate-200 bg-white/70 text-slate-600 hover:border-slate-300 hover:bg-white dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/60",
+                  )}
                 >
-                  <button
-                    type="button"
-                    onClick={() => setOpenFaq(isOpen ? null : index)}
-                    aria-expanded={isOpen}
-                    className={cn(
-                      "flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition-colors sm:px-5 sm:py-4",
-                      isOpen
-                        ? "bg-slate-100 dark:bg-slate-800/80"
-                        : "bg-white dark:bg-slate-900/60",
-                    )}
-                  >
-                    <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 md:text-base">
-                      {item.question}
-                    </span>
-                    <IconChevronDown
-                      className={cn(
-                        "h-5 w-5 shrink-0 text-slate-500 transition-transform duration-300",
-                        isOpen && "rotate-180",
-                      )}
-                    />
-                  </button>
-                  <AnimatePresence initial={false}>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{
-                          duration: 0.25,
-                          ease: [0.22, 1, 0.36, 1],
-                        }}
-                        className="overflow-hidden"
-                      >
-                        <p className="bg-white px-4 pb-4 pt-1 text-sm leading-relaxed text-slate-600 sm:px-5 sm:pb-5 dark:bg-slate-900/60 dark:text-slate-300">
-                          {item.answer}
-                        </p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
+                  {opt.label}
+                </button>
               );
             })}
           </div>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={faqFilter}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-3"
+            >
+              {filteredFaq.map((item) => {
+                const isOpen = openFaq === item.question;
+                const categoryLabel =
+                  FAQ_CATEGORIES.find((c) => c.id === item.category)?.label ??
+                  "";
+                return (
+                  <div
+                    key={item.question}
+                    className={cn(
+                      "group relative overflow-hidden rounded-2xl border bg-white/80 shadow-sm backdrop-blur-md transition-all duration-300 dark:bg-slate-900/65",
+                      isOpen
+                        ? "border-indigo-300/80 shadow-indigo-500/10 dark:border-indigo-500/40"
+                        : "border-slate-200/80 hover:border-slate-300 hover:shadow-md dark:border-slate-700/70 dark:hover:border-slate-600/80",
+                    )}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        "absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-indigo-400 to-violet-500 transition-opacity duration-300",
+                        isOpen ? "opacity-100" : "opacity-0",
+                      )}
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setOpenFaq(isOpen ? null : item.question)
+                      }
+                      aria-expanded={isOpen}
+                      className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left transition-colors sm:px-6 sm:py-5"
+                    >
+                      <span className="min-w-0 flex-1">
+                        {faqFilter === "all" && (
+                          <span className="mb-1 block text-[10px] font-black uppercase tracking-[0.16em] text-indigo-500 dark:text-indigo-400">
+                            {categoryLabel}
+                          </span>
+                        )}
+                        <span className="block text-sm font-bold tracking-tight text-slate-900 dark:text-slate-100 md:text-base">
+                          {item.question}
+                        </span>
+                      </span>
+                      <span
+                        className={cn(
+                          "flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-300",
+                          isOpen
+                            ? "bg-indigo-500 text-white"
+                            : "bg-slate-100 text-slate-500 group-hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-slate-700",
+                        )}
+                      >
+                        <IconChevronDown
+                          className={cn(
+                            "h-4 w-4 transition-transform duration-300",
+                            isOpen && "rotate-180",
+                          )}
+                        />
+                      </span>
+                    </button>
+                    <AnimatePresence initial={false}>
+                      {isOpen && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{
+                            duration: 0.25,
+                            ease: [0.22, 1, 0.36, 1],
+                          }}
+                          className="overflow-hidden"
+                        >
+                          <p className="px-5 pb-5 pt-0 text-sm leading-relaxed text-slate-600 sm:px-6 sm:pb-6 sm:text-[15px] dark:text-slate-300">
+                            {item.answer}
+                          </p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </section>
 

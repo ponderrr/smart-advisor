@@ -36,6 +36,7 @@ Smart Advisor is a full-stack recommendation engine that builds a taste profile 
 4. **Take the quiz** — Claude generates personality-driven questions tailored to your age (scenario-based, preference comparisons, emotional responses)
 5. **Get your pick** — Claude reads your full answer profile and returns one movie and/or one book with a personalized explanation, enriched with real posters and metadata from TMDB and Open Library
 6. **Save and revisit** — every recommendation is persisted to your account with favorites and history
+7. **Log what you watch/read** — drop a finished pick into your library with a thumbs rating and a one-line reaction; future quizzes use it as a taste signal so the AI learns what actually landed
 
 New users can also **try a demo quiz** without signing up — a 5-question survey that generates real-time recommendations from TMDB and Open Library.
 
@@ -80,6 +81,7 @@ New users can also **try a demo quiz** without signing up — a 5-question surve
 | **Zero exposed secrets** | All API keys live in Supabase Edge Function secrets, never the frontend. |
 | **Row Level Security** | Every DB query is scoped to the authenticated user at the Postgres level. |
 | **Recommendation history** | All picks saved to account with favorites and filters. |
+| **Personal library** | Log titles as Finished / In progress / Wishlist with a thumbs rating and one-line reaction. Reactions feed back into the recommendation prompt as a taste signal. |
 | **Hardened frontend** | CSP + strict security headers, Zod-validated inputs, typed env parsing, global error boundary. |
 | **Tested + CI-gated** | Vitest unit tests run in CI alongside `tsc --noEmit` and ESLint on every push. |
 
@@ -132,6 +134,7 @@ smart-advisor/
 │   ├── results/page.tsx             # AI recommendation display + favorites
 │   ├── dashboard/page.tsx           # User dashboard
 │   ├── history/page.tsx             # Saved picks and favorites
+│   ├── library/page.tsx             # Watched/read log with status, rating, reaction
 │   └── api/
 │       ├── open-library/route.ts    # Open Library search proxy
 │       ├── hero-media/route.ts      # Hero section media fetcher
@@ -159,6 +162,10 @@ smart-advisor/
 │   │       ├── tmdb-service.ts      # TMDB proxy client
 │   │       ├── open-library-service.ts  # Open Library client (replaces Google Books)
 │   │       └── database-service.ts  # Recommendation CRUD + favorites
+│   ├── library/
+│   │   ├── components/log-to-library-button.tsx  # Modal log button used on results + history
+│   │   ├── services/library-service.ts           # CRUD for user_library + recentRated taste signal
+│   │   └── types/library.ts                      # LibraryItem, status/rating enums, tone tokens
 │   └── home/
 │       ├── components/hero-section.tsx  # Animated hero with dynamic book/movie covers
 │       └── data/homepage.ts         # Homepage content data
@@ -185,7 +192,9 @@ smart-advisor/
 │       ├── 20250310000000_add_banners_table.sql       # Admin/system banners
 │       ├── 20250311000000_expand_banner_types.sql     # Banner type + priority columns
 │       ├── 20260410000000_add_demo_quota.sql          # Per-IP rate limiting for demo quiz
-│       └── 20260411000000_add_avatars.sql             # Avatar storage bucket + RLS policies
+│       ├── 20260411000000_add_avatars.sql             # Avatar storage bucket + RLS policies
+│       ├── 20260428000000_add_user_library.sql        # user_library table + RLS for watched/read log
+│       └── 20260429000000_fix_user_library_unique_index.sql  # Plain unique index for ON CONFLICT upserts
 │
 ├── public/
 │   ├── images/                      # Photos, screenshots

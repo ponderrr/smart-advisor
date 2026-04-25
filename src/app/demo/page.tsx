@@ -6,7 +6,7 @@ import { motion } from "motion/react";
 
 const VALIDATION_FLASH_MS = 650;
 const VALIDATION_MESSAGE_MS = 3200;
-import { IconArrowLeft, IconArrowRight, IconCheck } from "@tabler/icons-react";
+import { IconArrowRight, IconCheck } from "@tabler/icons-react";
 
 import {
   useQuizStore,
@@ -21,8 +21,8 @@ import {
   buildDemoQuiz,
   type DemoQuestion,
 } from "@/features/quiz/utils/demo-questions";
+import { QuizStepShell } from "@/features/quiz/components/quiz-step-shell";
 import { PillButton } from "@/components/ui/pill-button";
-import { AppNavbar } from "@/components/app-navbar";
 import { cn } from "@/lib/utils";
 
 interface DemoContentCardProps {
@@ -234,7 +234,7 @@ export default function DemoPage() {
   const [showValidationFlash, setShowValidationFlash] = useState(false);
 
   return (
-    <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
+    <>
       <link
         rel="preload"
         href="/animations/Popcorn.webm"
@@ -249,106 +249,83 @@ export default function DemoPage() {
         type="video/webm"
         crossOrigin="anonymous"
       />
-      <AppNavbar />
-
-      <main className="px-4 pb-20 pt-32 md:pt-36 sm:px-6">
-        <div className="mx-auto w-full max-w-4xl">
-          <div className="mb-8 flex items-center justify-between gap-3">
-            <PillButton
-              onClick={handleBack}
-              className="inline-flex items-center gap-2 border-slate-300/80 bg-white/80 px-4 py-2 text-sm font-semibold dark:border-slate-700 dark:bg-slate-900/70"
-            >
-              <IconArrowLeft className="h-4 w-4" />
-              Back
-            </PillButton>
-            <p className="text-base font-extrabold tracking-wide text-slate-800 dark:text-slate-100 md:text-lg">
-              {step + 1} out of {questions.length} questions
-            </p>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-              Demo Survey
-            </p>
-          </div>
-
-          <div className="mb-8 h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
-            <motion.div
-              className="h-full rounded-full bg-indigo-500"
-              initial={false}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            />
-          </div>
-
+      <QuizStepShell
+        category="Demo quiz"
+        stepLabel={`Question ${step + 1} of ${questions.length}`}
+        progress={progress}
+        onBack={handleBack}
+        backLabel={step === 0 ? "Home" : "Previous"}
+      >
+        <motion.div
+          layout
+          transition={{ layout: { duration: 0.32, ease: [0.22, 1, 0.36, 1] } }}
+          className="rounded-3xl border border-slate-200/70 bg-white/85 p-6 shadow-sm backdrop-blur-md sm:p-8 dark:border-slate-700/60 dark:bg-slate-900/65"
+        >
           <motion.div
-            layout
-            transition={{ layout: { duration: 0.32, ease: [0.22, 1, 0.36, 1] } }}
-            className="rounded-3xl border border-slate-200/70 bg-white/85 p-6 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8"
+            key={current.id}
+            initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: 0.28, ease: "easeOut" }}
           >
-            <motion.div
-              key={current.id}
-              initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ duration: 0.28, ease: "easeOut" }}
-            >
-              <QuestionCard
-                  title={current.title}
-                  subtitle={current.subtitle}
-                  type={current.type}
-                  options={current.options}
-                  placeholder={current.placeholder}
-                  value={answers[current.id]}
-                  onChange={setAnswer}
-                  bodyOverride={
-                    current.id === "contentType" ? (
-                      <div className="mt-7 grid grid-cols-1 gap-4 md:grid-cols-3">
-                        {DEMO_CONTENT_CARDS.map((card) => (
-                          <DemoContentCard
-                            key={card.option}
-                            title={card.title}
-                            description={card.description}
-                            mediaSrc={card.mediaSrc}
-                            secondaryMediaSrc={
-                              "secondaryMediaSrc" in card
-                                ? card.secondaryMediaSrc
-                                : undefined
-                            }
-                            isSelected={answers[current.id] === card.option}
-                            onClick={() => setAnswer(card.option)}
-                          />
-                        ))}
-                      </div>
-                    ) : undefined
-                  }
-              />
-            </motion.div>
-
-            <div className="mt-8 flex items-center justify-end">
-              <motion.div
-                animate={
-                  showValidationFlash
-                    ? { scale: [1, 1.03, 0.99, 1], x: [0, -4, 4, 0] }
-                    : { scale: 1, x: 0 }
-                }
-                transition={{ duration: 0.45 }}
-              >
-                <PillButton
-                  onClick={handleNext}
-                  className={cn(
-                    "inline-flex items-center justify-center gap-2 bg-white px-6 py-2.5 text-sm font-black tracking-tight text-black dark:bg-slate-900 dark:text-white",
-                  )}
-                >
-                  {step === questions.length - 1 ? "Continue" : "Next"}
-                  <IconArrowRight className="h-4 w-4" />
-                </PillButton>
-              </motion.div>
-            </div>
-            {validationMessage ? (
-              <p className="mt-3 text-right text-xs font-semibold text-red-500 dark:text-red-400">
-                {validationMessage}
-              </p>
-            ) : null}
+            <QuestionCard
+              title={current.title}
+              subtitle={current.subtitle}
+              type={current.type}
+              options={current.options}
+              placeholder={current.placeholder}
+              value={answers[current.id]}
+              onChange={setAnswer}
+              bodyOverride={
+                current.id === "contentType" ? (
+                  <div className="mt-7 grid grid-cols-1 gap-4 md:grid-cols-3">
+                    {DEMO_CONTENT_CARDS.map((card) => (
+                      <DemoContentCard
+                        key={card.option}
+                        title={card.title}
+                        description={card.description}
+                        mediaSrc={card.mediaSrc}
+                        secondaryMediaSrc={
+                          "secondaryMediaSrc" in card
+                            ? card.secondaryMediaSrc
+                            : undefined
+                        }
+                        isSelected={answers[current.id] === card.option}
+                        onClick={() => setAnswer(card.option)}
+                      />
+                    ))}
+                  </div>
+                ) : undefined
+              }
+            />
           </motion.div>
-        </div>
-      </main>
-    </div>
+
+          <div className="mt-8 flex items-center justify-end">
+            <motion.div
+              animate={
+                showValidationFlash
+                  ? { scale: [1, 1.03, 0.99, 1], x: [0, -4, 4, 0] }
+                  : { scale: 1, x: 0 }
+              }
+              transition={{ duration: 0.45 }}
+            >
+              <PillButton
+                onClick={handleNext}
+                className={cn(
+                  "inline-flex items-center justify-center gap-2 bg-white px-6 py-2.5 text-sm font-black tracking-tight text-black dark:bg-slate-900 dark:text-white",
+                )}
+              >
+                {step === questions.length - 1 ? "Continue" : "Next"}
+                <IconArrowRight className="h-4 w-4" />
+              </PillButton>
+            </motion.div>
+          </div>
+          {validationMessage ? (
+            <p className="mt-3 text-right text-xs font-semibold text-red-500 dark:text-red-400">
+              {validationMessage}
+            </p>
+          ) : null}
+        </motion.div>
+      </QuizStepShell>
+    </>
   );
 }
