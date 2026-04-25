@@ -611,15 +611,22 @@ export const AuthForm = ({
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               transition={{ duration: 0.28, ease: "easeOut" }}
             >
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
+                {mode === "signin"
+                  ? "Sign in"
+                  : mode === "signup"
+                    ? "Create account"
+                    : "Reset password"}
+              </p>
               <h1
                 className={cn(
-                  "text-3xl font-black tracking-tight text-slate-900 dark:text-slate-100",
+                  "mt-2 text-3xl font-black tracking-tighter text-slate-900 sm:text-4xl dark:text-slate-100",
                   mode === "forgot" && "whitespace-nowrap text-2xl sm:text-3xl",
                 )}
               >
                 {heading}
               </h1>
-              <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-400">
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
                 {mode === "signin"
                   ? "Sign in to continue your recommendation journey."
                   : mode === "signup"
@@ -886,17 +893,34 @@ export const AuthForm = ({
               </StatefulButton>
 
               {mode === "signin" && passkeySupported && (
-                <button
-                  type="button"
-                  onClick={handlePasskeySignIn}
-                  disabled={passkeySigningIn || buttonDisabled}
-                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white/60 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-violet-400 hover:bg-violet-50/60 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-violet-500 dark:hover:bg-violet-900/20 dark:hover:text-violet-300"
-                >
-                  <Fingerprint className="h-4 w-4" />
-                  {passkeySigningIn
-                    ? "Waiting for passkey..."
-                    : "Sign in with a passkey"}
-                </button>
+                <div className="mt-3">
+                  <div className="relative my-3 flex items-center">
+                    <span
+                      aria-hidden="true"
+                      className="h-px flex-1 bg-slate-200 dark:bg-slate-700"
+                    />
+                    <span className="px-3 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">
+                      or
+                    </span>
+                    <span
+                      aria-hidden="true"
+                      className="h-px flex-1 bg-slate-200 dark:bg-slate-700"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handlePasskeySignIn}
+                    disabled={passkeySigningIn || buttonDisabled}
+                    className="group flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white/80 px-5 py-2.5 text-sm font-bold tracking-tight text-slate-700 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-400 hover:bg-violet-50/80 hover:text-violet-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200 dark:hover:border-violet-500/60 dark:hover:bg-violet-900/20 dark:hover:text-violet-300"
+                  >
+                    <Fingerprint
+                      className="h-4 w-4 transition-transform duration-200 group-hover:scale-110"
+                    />
+                    {passkeySigningIn
+                      ? "Waiting for passkey..."
+                      : "Sign in with a passkey"}
+                  </button>
+                </div>
               )}
 
               <AnimatePresence initial={false}>
@@ -941,12 +965,14 @@ export const AuthForm = ({
                 )}
               </AnimatePresence>
 
-              <p className="pt-1 text-center text-sm text-slate-600 dark:text-slate-400">
-                {mode === "forgot"
-                  ? "Remembered your password?"
-                  : mode === "signup"
-                    ? "Already have an account?"
-                    : "Don't have an account?"}{" "}
+              <div className="pt-2 text-center">
+                <span className="text-sm text-slate-500 dark:text-slate-400">
+                  {mode === "forgot"
+                    ? "Remembered your password?"
+                    : mode === "signup"
+                      ? "Already have an account?"
+                      : "Don't have an account?"}
+                </span>{" "}
                 <button
                   type="button"
                   onClick={() =>
@@ -958,7 +984,7 @@ export const AuthForm = ({
                           : "signup",
                     )
                   }
-                  className="font-semibold text-violet-600 transition-colors hover:text-violet-500 dark:text-violet-400 dark:hover:text-violet-300"
+                  className="text-sm font-black tracking-tight text-violet-600 underline-offset-2 transition-colors hover:text-violet-500 hover:underline disabled:opacity-60 dark:text-violet-400 dark:hover:text-violet-300"
                   disabled={buttonDisabled}
                 >
                   {mode === "forgot"
@@ -967,7 +993,7 @@ export const AuthForm = ({
                       ? "Sign in"
                       : "Sign up"}
                 </button>
-              </p>
+              </div>
             </form>
           </motion.div>
         )}
