@@ -593,9 +593,10 @@ const DashboardPage = () => {
                           <button
                             type="button"
                             onClick={() => router.push("/library")}
-                            className="text-[11px] font-bold tracking-tight text-indigo-600 transition-colors hover:text-indigo-500 dark:text-indigo-400"
+                            className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 bg-white/80 px-3 py-1.5 text-xs font-bold tracking-tight text-slate-700 transition-colors hover:border-slate-300 hover:bg-white dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200 dark:hover:bg-slate-800/70"
                           >
                             View all
+                            <ArrowRight size={12} />
                           </button>
                         </div>
                         {libraryItems.length === 0 ? (
