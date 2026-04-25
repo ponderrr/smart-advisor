@@ -229,6 +229,20 @@ const DashboardPage = () => {
     : false;
   const topGenre = genreChartData[0] ?? null;
 
+  const picksTabs = ["all", "movies", "books", "favorites"] as const;
+  type PicksFilter = (typeof picksTabs)[number];
+  const [picksFilter, setPicksFilter] = useState<PicksFilter>("all");
+
+  const filteredPicks = useMemo(() => {
+    if (picksFilter === "movies")
+      return recommendations.filter((r) => r.type === "movie");
+    if (picksFilter === "books")
+      return recommendations.filter((r) => r.type === "book");
+    if (picksFilter === "favorites")
+      return recommendations.filter((r) => r.is_favorited);
+    return recommendations;
+  }, [recommendations, picksFilter]);
+
   /**
    * Pick a single contextual nudge based on user state. Order matters —
    * we surface the most actionable next step first.
@@ -728,89 +742,195 @@ const DashboardPage = () => {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: slideDir * -30 }}
                     transition={{ duration: 0.2 }}
+                    className="space-y-4"
                   >
-                    <div className="rounded-2xl border border-slate-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-sm dark:border-slate-700/60 dark:bg-slate-900/60">
-                      <div className="mb-4 flex items-center justify-between">
-                        <h2 className="text-lg font-bold tracking-tight">
-                          Recent Picks
-                        </h2>
-                        <button
-                          onClick={() => router.push("/history")}
-                          className="text-xs font-semibold text-indigo-600 transition-colors hover:text-indigo-500 dark:text-indigo-400"
-                        >
-                          See all in history
-                        </button>
+                    {/* Filter pills + see-all */}
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div
+                        role="tablist"
+                        aria-label="Recent picks filter"
+                        className="flex flex-wrap gap-2"
+                      >
+                        {(
+                          [
+                            { id: "all", label: "All" },
+                            { id: "movies", label: "Movies" },
+                            { id: "books", label: "Books" },
+                            { id: "favorites", label: "Favorites" },
+                          ] as { id: PicksFilter; label: string }[]
+                        ).map((opt) => {
+                          const active = picksFilter === opt.id;
+                          return (
+                            <button
+                              key={opt.id}
+                              type="button"
+                              role="tab"
+                              aria-selected={active}
+                              onClick={() => setPicksFilter(opt.id)}
+                              className={cn(
+                                "rounded-full border px-3.5 py-1.5 text-xs font-bold tracking-tight transition-all duration-200 active:scale-[0.98]",
+                                active
+                                  ? "border-indigo-500 bg-indigo-500 text-white shadow-sm shadow-indigo-500/20"
+                                  : "border-slate-200 bg-white/70 text-slate-600 hover:border-slate-300 hover:bg-white dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/60",
+                              )}
+                            >
+                              {opt.label}
+                            </button>
+                          );
+                        })}
                       </div>
-                      {loading ? (
-                        <div className="grid grid-cols-2 gap-2 sm:gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                          {[...Array(5)].map((_, i) => (
-                            <div
-                              key={i}
-                              className="overflow-hidden rounded-xl border border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/40"
-                            >
-                              <div className="aspect-[2/3] animate-pulse bg-slate-200 dark:bg-slate-800" />
-                            </div>
-                          ))}
-                        </div>
-                      ) : recommendations.length === 0 ? (
-                        <div className="flex h-56 flex-col items-center justify-center gap-3 px-6 text-center text-slate-500 dark:text-slate-400">
-                          <p className="text-xl font-bold tracking-tight">
-                            No recommendations yet. Start a quiz!
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="grid grid-cols-2 gap-2 sm:gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                          {recommendations.slice(0, 15).map((rec) => (
-                            <article
-                              key={rec.id}
-                              role="button"
-                              tabIndex={0}
-                              onClick={() => setSelectedRec(rec)}
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter" || e.key === " ") {
-                                  e.preventDefault();
-                                  setSelectedRec(rec);
-                                }
-                              }}
-                              className="group cursor-pointer overflow-hidden rounded-xl border border-slate-100 bg-slate-50 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:border-slate-800 dark:bg-slate-900/40 dark:focus-visible:ring-offset-slate-950"
-                            >
-                              <div className="relative aspect-[2/3] overflow-hidden bg-slate-200 dark:bg-slate-800">
-                                {rec.poster_url ? (
-                                  <Image
-                                    src={rec.poster_url}
-                                    alt={rec.title}
-                                    fill
-                                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-                                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                                  />
-                                ) : (
-                                  <div className="flex h-full w-full items-center justify-center text-slate-400">
-                                    {rec.type === "movie" ? (
-                                      <Film size={24} />
-                                    ) : (
-                                      <BookOpen size={24} />
-                                    )}
-                                  </div>
-                                )}
-                                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-3">
-                                  <p className="line-clamp-2 text-sm font-bold leading-tight text-white">
-                                    {rec.title}
-                                  </p>
-                                  <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-white/20 px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-white/90">
-                                    {rec.type === "movie" ? (
-                                      <Film size={10} />
-                                    ) : (
-                                      <BookOpen size={10} />
-                                    )}
-                                    {rec.type}
-                                  </span>
-                                </div>
-                              </div>
-                            </article>
-                          ))}
-                        </div>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => router.push("/history")}
+                        className="group inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white/80 px-4 py-1.5 text-xs font-bold tracking-tight text-slate-700 shadow-sm backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-white hover:text-indigo-700 hover:shadow-md dark:border-slate-700/70 dark:bg-slate-900/65 dark:text-slate-200 dark:hover:border-indigo-500/60 dark:hover:bg-slate-800/70 dark:hover:text-indigo-300"
+                      >
+                        See all in history
+                        <ArrowRight
+                          size={12}
+                          className="transition-transform duration-200 group-hover:translate-x-0.5"
+                        />
+                      </button>
                     </div>
+
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={picksFilter}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        transition={{ duration: 0.18 }}
+                      >
+                        {loading ? (
+                          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                            {[...Array(10)].map((_, i) => (
+                              <div
+                                key={i}
+                                className="overflow-hidden rounded-2xl border border-slate-200/70 bg-white/60 dark:border-slate-700/60 dark:bg-slate-900/40"
+                              >
+                                <div className="aspect-[2/3] animate-pulse bg-slate-200 dark:bg-slate-800" />
+                              </div>
+                            ))}
+                          </div>
+                        ) : filteredPicks.length === 0 ? (
+                          <div className="rounded-3xl border border-dashed border-slate-300/80 bg-gradient-to-br from-indigo-50/50 via-white to-violet-50/50 p-12 text-center dark:border-slate-700/70 dark:from-indigo-500/5 dark:via-slate-900/40 dark:to-violet-500/5">
+                            <Sparkles
+                              className="mx-auto h-10 w-10 text-indigo-300 dark:text-indigo-500/60"
+                              aria-hidden="true"
+                            />
+                            <h3 className="mt-4 text-2xl font-black tracking-tight">
+                              {recommendations.length === 0
+                                ? "No picks yet"
+                                : "Nothing matches that filter"}
+                            </h3>
+                            <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
+                              {recommendations.length === 0
+                                ? "Take a quiz and your picks will collect here."
+                                : "Try a different filter or take a new quiz."}
+                            </p>
+                            {recommendations.length === 0 && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  router.push("/content-selection")
+                                }
+                                className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-black tracking-tight text-white transition-colors hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+                              >
+                                <Sparkles size={14} />
+                                Start quiz
+                              </button>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                            {filteredPicks.slice(0, 15).map((rec) => {
+                              const inLibrary = loggedTitleKeys.has(
+                                `${rec.type}::${rec.title.toLowerCase()}`,
+                              );
+                              return (
+                                <article
+                                  key={rec.id}
+                                  role="button"
+                                  tabIndex={0}
+                                  onClick={() => setSelectedRec(rec)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter" || e.key === " ") {
+                                      e.preventDefault();
+                                      setSelectedRec(rec);
+                                    }
+                                  }}
+                                  className="group relative cursor-pointer overflow-hidden rounded-2xl border border-slate-200/70 bg-white/80 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:border-slate-700/60 dark:bg-slate-900/65 dark:focus-visible:ring-offset-slate-950"
+                                >
+                                  <div className="relative aspect-[2/3] overflow-hidden bg-slate-200 dark:bg-slate-800">
+                                    {rec.poster_url ? (
+                                      <Image
+                                        src={rec.poster_url}
+                                        alt={rec.title}
+                                        fill
+                                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                      />
+                                    ) : (
+                                      <div className="flex h-full w-full items-center justify-center text-slate-400">
+                                        {rec.type === "movie" ? (
+                                          <Film size={24} />
+                                        ) : (
+                                          <BookOpen size={24} />
+                                        )}
+                                      </div>
+                                    )}
+
+                                    {/* Status badges, top-right */}
+                                    <div className="absolute right-2 top-2 flex flex-col gap-1.5">
+                                      {rec.is_favorited && (
+                                        <span
+                                          aria-label="Favorited"
+                                          className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-rose-500 text-white shadow-md shadow-rose-500/30"
+                                        >
+                                          <Heart
+                                            size={11}
+                                            fill="currentColor"
+                                          />
+                                        </span>
+                                      )}
+                                      {inLibrary && (
+                                        <span
+                                          aria-label="In your library"
+                                          className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-white shadow-md shadow-emerald-500/30"
+                                        >
+                                          <BookCheck size={11} />
+                                        </span>
+                                      )}
+                                    </div>
+
+                                    {/* Title overlay */}
+                                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent p-3">
+                                      <p className="line-clamp-2 text-sm font-black tracking-tight leading-tight text-white">
+                                        {rec.title}
+                                      </p>
+                                      <div className="mt-1 flex items-center gap-1.5">
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white/95 backdrop-blur-sm">
+                                          {rec.type === "movie" ? (
+                                            <Film size={9} />
+                                          ) : (
+                                            <BookOpen size={9} />
+                                          )}
+                                          {rec.type}
+                                        </span>
+                                        {rec.year && (
+                                          <span className="text-[9px] font-bold text-white/70">
+                                            {rec.year}
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </article>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </motion.div>
+                    </AnimatePresence>
                   </motion.div>
                 )}
 
