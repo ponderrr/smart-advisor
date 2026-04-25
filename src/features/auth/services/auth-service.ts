@@ -552,6 +552,7 @@ class AuthService {
   enrollMFA = (friendlyName?: string) => mfaService.enroll(friendlyName);
   verifyMFA = (f: string, c: string) => mfaService.verify(f, c);
   unenrollMFA = (f: string) => mfaService.unenroll(f);
+  renameMFAFactor = (f: string, n: string) => mfaService.rename(f, n);
   listMFAFactors = () => mfaService.listFactors();
   getAALLevel = () => mfaService.getAALLevel();
 

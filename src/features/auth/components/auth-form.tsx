@@ -78,6 +78,7 @@ interface AuthFormProps {
   initialMfaRequired?: boolean;
   onMfaChallengeResolved?: () => void;
   onMfaChallengeStarted?: () => void;
+  onPasskeySignedIn?: () => void;
 }
 
 export const AuthForm = ({
@@ -95,6 +96,7 @@ export const AuthForm = ({
   initialMfaRequired = false,
   onMfaChallengeResolved,
   onMfaChallengeStarted,
+  onPasskeySignedIn,
 }: AuthFormProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -481,6 +483,9 @@ export const AuthForm = ({
         setErrors({ general: error });
         return;
       }
+      // Tell the parent to suppress the AAL elevation check that would
+      // otherwise race our redirect and flash the MFA challenge screen.
+      onPasskeySignedIn?.();
       router.replace("/dashboard");
     } finally {
       setPasskeySigningIn(false);

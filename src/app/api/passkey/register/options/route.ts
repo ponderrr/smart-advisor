@@ -14,7 +14,37 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // Best-effort: read the proposed name early so we can reject a duplicate
+  // before kicking off the WebAuthn ceremony (otherwise the user does Touch
+  // ID for nothing). Body is optional — old clients still work.
+  let proposedName: string | undefined;
+  try {
+    const body = (await req.json()) as { device_name?: unknown };
+    if (typeof body?.device_name === "string") {
+      proposedName = body.device_name.trim() || undefined;
+    }
+  } catch {
+    // No body / invalid JSON — fall through to legacy behavior.
+  }
+
   const admin = getAdminClient();
+
+  if (proposedName) {
+    const { data: clash } = await admin
+      .from("user_passkeys")
+      .select("id")
+      .eq("user_id", user.id)
+      .ilike("device_name", proposedName)
+      .limit(1)
+      .maybeSingle();
+    if (clash) {
+      return NextResponse.json(
+        { error: "You already have a passkey with that name." },
+        { status: 409 },
+      );
+    }
+  }
+
   const { data: existing } = await admin
     .from("user_passkeys")
     .select("credential_id, transports")

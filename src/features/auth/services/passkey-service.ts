@@ -87,11 +87,28 @@ class PasskeyService {
       return { error: "You must be signed in to add a passkey." };
     }
 
+    // Mirrors mfa-service.enroll: when the user leaves the name blank we
+    // synthesize a date-stamped label so each row in the list stays
+    // distinguishable instead of N copies of "Passkey". The unique index
+    // excludes blank names; this keeps every saved row inside it.
+    const trimmed = deviceName?.trim();
+    const datePart = new Date().toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    });
+    const finalName = trimmed || `Passkey · ${datePart}`;
+
     let optionsRes: Response;
     try {
       optionsRes = await fetch("/api/passkey/register/options", {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ device_name: finalName }),
       });
     } catch {
       return { error: "Network error. Please try again." };
@@ -125,7 +142,7 @@ class PasskeyService {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ response: attestation, deviceName }),
+        body: JSON.stringify({ response: attestation, deviceName: finalName }),
       });
     } catch {
       return { error: "Network error. Please try again." };
@@ -250,6 +267,46 @@ class PasskeyService {
     }
 
     return { data: json?.passkeys ?? [], error: null };
+  }
+
+  async rename(
+    id: string,
+    deviceName: string,
+  ): Promise<{ error: string | null }> {
+    const trimmed = deviceName.trim();
+    if (!trimmed) return { error: "Name cannot be empty." };
+    if (trimmed.length > 60) {
+      return { error: "Name is too long (60 character max)." };
+    }
+
+    const token = await getAccessToken();
+    if (!token) return { error: "You must be signed in." };
+
+    let res: Response;
+    try {
+      res = await fetch(`/api/passkey/${encodeURIComponent(id)}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ device_name: trimmed }),
+      });
+    } catch {
+      return { error: "Network error. Please try again." };
+    }
+
+    const json = (await res.json().catch(() => null)) as
+      | { ok?: true; device_name?: string; error?: string }
+      | null;
+
+    if (!res.ok) {
+      return {
+        error: readErrorMessage(json, "Couldn't rename the passkey."),
+      };
+    }
+
+    return { error: null };
   }
 
   async remove(id: string): Promise<{ error: string | null }> {

@@ -167,6 +167,41 @@ class MfaService {
     }
   }
 
+  async rename(factorId: string, newName: string) {
+    const trimmed = newName.trim();
+    if (!trimmed) return { error: "Name cannot be empty." };
+    if (trimmed.length > 64) {
+      return { error: "Name is too long (64 character max)." };
+    }
+
+    try {
+      const { data, error } = await supabase.rpc("rename_mfa_factor", {
+        p_factor_id: factorId,
+        p_new_name: trimmed,
+      });
+
+      if (error) {
+        // Postgres unique-constraint violation surfaces as 23505. Supabase
+        // rejects duplicate friendly_names per user, so translate that to
+        // a plain English message.
+        if ((error as { code?: string }).code === "23505") {
+          return { error: "You already have an authenticator with that name." };
+        }
+        return { error: toUserFriendlyError(error.message) };
+      }
+
+      // RPC returns FOUND — false means nothing matched (wrong id or not yours).
+      if (data === false) {
+        return { error: "Authenticator not found." };
+      }
+
+      return { error: null };
+    } catch (err) {
+      console.error("Error renaming MFA factor:", err);
+      return { error: "Failed to rename authenticator. Please try again." };
+    }
+  }
+
   async listFactors() {
     try {
       const { data, error } = await supabase.auth.mfa.listFactors();
