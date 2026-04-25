@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { sessionManagementService } from "../services/session-management";
 import { authService } from "../services/auth-service";
-import { LogOut, Smartphone, Globe, LogOutIcon } from "lucide-react";
+import { Loader, LogOut, Smartphone, Globe, LogOutIcon } from "lucide-react";
 import {
   IconBrandChrome,
   IconBrandFirefox,
@@ -12,9 +12,8 @@ import {
   IconBrandEdge,
   IconBrandOpera,
 } from "@tabler/icons-react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 import { formatLastActivity } from "../utils/device";
 
 /**
@@ -121,112 +120,137 @@ export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
 
   if (loading) {
     return (
-      <Card className="p-6">
-        <div className="flex items-center justify-center py-8">
-          <div className="animate-spin">
-            <Smartphone className="h-5 w-5 text-slate-400" />
-          </div>
+      <>
+        <div className="mb-5">
+          <h2 className="text-xl font-black tracking-tight sm:text-2xl">Active sessions</h2>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            Manage devices currently signed in to your account.
+          </p>
         </div>
-      </Card>
+        <div className="flex items-center justify-center rounded-xl border border-slate-200/70 bg-slate-50 py-8 dark:border-slate-700/60 dark:bg-slate-800/40">
+          <Smartphone className="h-5 w-5 animate-spin text-slate-400" />
+        </div>
+      </>
     );
   }
 
+  const hasSessions = sessions.length > 0;
+
   return (
-    <Card className="p-6">
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-            Active Sessions
-          </h3>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            Manage your active sessions and devices. Sign out to revoke access.
-          </p>
+    <>
+      <div className="mb-5">
+        <h2 className="text-xl font-black tracking-tight sm:text-2xl">
+          Active sessions
+        </h2>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          Manage devices currently signed in to your account. Sign out to
+          revoke access.
+        </p>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200/70 bg-slate-50 px-4 py-3 dark:border-slate-700/60 dark:bg-slate-800/40">
+        <div className="flex items-center gap-2.5">
+          <Globe
+            size={16}
+            className={
+              hasSessions
+                ? "shrink-0 text-emerald-500 dark:text-emerald-400"
+                : "shrink-0 text-slate-400 dark:text-slate-500"
+            }
+          />
+          <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+            {hasSessions
+              ? `${sessions.length} device${sessions.length === 1 ? "" : "s"} signed in`
+              : "No active sessions"}
+          </span>
         </div>
         {sessions.length > 1 && (
-          <Button
-            variant="ghost"
-            size="sm"
+          <button
+            type="button"
             onClick={handleRevokeAll}
             disabled={signingOutAll}
-            className="text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/20"
+            className="group inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-white px-3 py-1.5 text-xs font-bold tracking-tight text-red-600 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-red-300 hover:bg-red-50 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 dark:border-red-500/30 dark:bg-slate-900/60 dark:text-red-400 dark:hover:border-red-500/60 dark:hover:bg-red-500/10"
           >
-            <LogOutIcon className="h-4 w-4 mr-2" />
-            {signingOutAll ? "Signing out..." : "Sign Out All"}
-          </Button>
+            <LogOutIcon className="h-3.5 w-3.5 transition-transform duration-200 group-hover:-translate-x-0.5" />
+            {signingOutAll ? "Signing out…" : "Sign out all"}
+          </button>
         )}
       </div>
 
-      {sessions.length === 0 ? (
-        <div className="text-center py-8">
-          <Smartphone className="h-12 w-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-          <p className="text-slate-600 dark:text-slate-400">
+      {!hasSessions ? (
+        <div className="mt-4 rounded-xl border border-dashed border-slate-200 bg-white/60 px-6 py-8 text-center dark:border-slate-700/60 dark:bg-slate-900/40">
+          <Smartphone
+            className="mx-auto mb-2 h-8 w-8 text-slate-300 dark:text-slate-600"
+            aria-hidden="true"
+          />
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             No active sessions found
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="mt-4 space-y-3">
           {sessions.map((session) => {
             const BrowserIcon = getBrowserIcon(session.browser_name);
             return (
-            <div
-              key={session.id}
-              className={`flex items-start justify-between rounded-lg border px-4 py-4 transition-colors ${
-                session.is_current_device
-                  ? "border-blue-200 bg-blue-50 dark:border-blue-900/30 dark:bg-blue-900/20"
-                  : "border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-900/50"
-              }`}
-            >
-              <div className="flex items-start gap-3 flex-1">
-                <div className="mt-1">
-                  {session.device_type === "mobile" ? (
-                    <Smartphone className="h-5 w-5 text-slate-600 dark:text-slate-400" />
-                  ) : (
-                    <BrowserIcon className="h-5 w-5 text-slate-600 dark:text-slate-400" />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="font-semibold text-slate-900 dark:text-slate-100 truncate">
-                      {session.device_name}
-                    </p>
-                    {session.is_current_device && (
-                      <span className="inline-block px-2 py-1 text-xs font-semibold text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30 rounded-full whitespace-nowrap">
-                        Current
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                    {session.os_name} &bull; {session.browser_name}{" "}
-                    {session.browser_version}
-                  </p>
-                  {session.ip_address && (
-                    <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
-                      IP: {session.ip_address}
-                    </p>
-                  )}
-                  <p className="text-xs text-slate-500 dark:text-slate-500 mt-2">
-                    Last active: {formatLastActivity(session.last_activity)}
-                  </p>
-                </div>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleRevokeSession(session)}
-                disabled={revoking === session.id || signingOutAll}
-                className="text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/20 ml-2"
-              >
-                {revoking === session.id ? (
-                  <span className="h-4 w-4 animate-spin">&#8987;</span>
-                ) : (
-                  <LogOut className="h-4 w-4" />
+              <div
+                key={session.id}
+                className={cn(
+                  "flex items-start justify-between gap-3 rounded-xl border px-4 py-3 transition-colors",
+                  session.is_current_device
+                    ? "border-emerald-200/70 bg-emerald-50/60 dark:border-emerald-500/30 dark:bg-emerald-500/10"
+                    : "border-slate-200/70 bg-white dark:border-slate-700/60 dark:bg-slate-900/40",
                 )}
-              </Button>
-            </div>
+              >
+                <div className="flex min-w-0 flex-1 items-start gap-3">
+                  {session.device_type === "mobile" ? (
+                    <Smartphone className="mt-0.5 h-5 w-5 shrink-0 text-slate-600 dark:text-slate-400" />
+                  ) : (
+                    <BrowserIcon className="mt-0.5 h-5 w-5 shrink-0 text-slate-600 dark:text-slate-400" />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
+                        {session.device_name}
+                      </p>
+                      {session.is_current_device && (
+                        <span className="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">
+                          Current
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                      {session.os_name} · {session.browser_name}{" "}
+                      {session.browser_version}
+                    </p>
+                    {session.ip_address && (
+                      <p className="text-xs text-slate-400 dark:text-slate-500">
+                        IP {session.ip_address}
+                      </p>
+                    )}
+                    <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+                      Last active {formatLastActivity(session.last_activity)}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleRevokeSession(session)}
+                  disabled={revoking === session.id || signingOutAll}
+                  aria-label={`Sign out of ${session.device_name}`}
+                  title={`Sign out of ${session.device_name}`}
+                  className="shrink-0 inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200/80 bg-white text-red-600 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-red-300 hover:bg-red-50 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 dark:border-slate-700/70 dark:bg-slate-900/60 dark:text-red-400 dark:hover:border-red-500/60 dark:hover:bg-red-500/10"
+                >
+                  {revoking === session.id ? (
+                    <Loader className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <LogOut className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
             );
           })}
         </div>
       )}
-    </Card>
+    </>
   );
 };

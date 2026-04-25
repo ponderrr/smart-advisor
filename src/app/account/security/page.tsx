@@ -55,7 +55,7 @@ export default function AccountSecurityPage() {
             <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
               Account · Security
             </p>
-            <h1 className="mt-2 text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl">
+            <h1 className="mt-2 text-2xl font-black tracking-tighter sm:text-3xl md:text-4xl lg:text-5xl">
               Lock things down
             </h1>
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
@@ -65,18 +65,22 @@ export default function AccountSecurityPage() {
           </div>
 
           <div className="space-y-6">
-            <MfaManagement
-              mfaEnabled={user.mfa_enabled || false}
-              onMfaStatusChange={() => {
-                // Trigger a refresh if needed
-              }}
-            />
+            <div className="rounded-3xl border border-slate-200/70 bg-white/85 p-6 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
+              <MfaManagement
+                mfaEnabled={user.mfa_enabled || false}
+                onMfaStatusChange={() => {
+                  // Trigger a refresh if needed
+                }}
+              />
+            </div>
 
             <div className="rounded-3xl border border-slate-200/70 bg-white/85 p-6 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
               <PasskeyManagement />
             </div>
 
-            <SessionsManagement userId={user.id} />
+            <div className="rounded-3xl border border-slate-200/70 bg-white/85 p-6 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
+              <SessionsManagement userId={user.id} />
+            </div>
 
             <div className="relative overflow-hidden rounded-3xl border border-indigo-200/60 bg-gradient-to-br from-indigo-50/80 via-white to-violet-50/60 p-5 sm:p-6 dark:border-indigo-500/30 dark:from-indigo-500/10 dark:via-slate-900/40 dark:to-violet-500/10">
               <span
