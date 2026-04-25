@@ -39,6 +39,7 @@ import { MFAFactor } from "@/features/auth/types/mfa";
 import {
   MfaSetup,
   MfaManagement,
+  PasskeyManagement,
   SessionsManagement,
 } from "@/features/auth/components";
 import { FieldRequirements } from "@/features/auth/components/auth-shared";
@@ -1004,6 +1005,11 @@ const SettingsPage = () => {
                           />
                         </div>
                       )}
+                    </SectionCard>
+
+                    {/* Passkeys */}
+                    <SectionCard>
+                      <PasskeyManagement />
                     </SectionCard>
 
                     {/* Backup Email */}

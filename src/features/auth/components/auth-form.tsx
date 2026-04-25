@@ -18,6 +18,8 @@ import {
 } from "./auth-shared";
 import { PASSWORD_RULES, isValidPassword } from "../utils/validation";
 import { MFAFactor, MFAListFactorsData } from "../types/mfa";
+import { passkeyService } from "../services/passkey-service";
+import { Fingerprint } from "lucide-react";
 
 export type AuthMode =
   | "signin"
@@ -127,6 +129,14 @@ export const AuthForm = ({
   const [mfaCode, setMfaCode] = useState("");
   const [mfaInputMode, setMfaInputMode] = useState<"totp" | "backup">("totp");
   const [mfaVerifying, setMfaVerifying] = useState(false);
+
+  // Passkey sign-in state
+  const [passkeySupported, setPasskeySupported] = useState(false);
+  const [passkeySigningIn, setPasskeySigningIn] = useState(false);
+
+  useEffect(() => {
+    setPasskeySupported(passkeyService.browserSupported());
+  }, []);
 
   // Signup requirement-popover focus state + anchors
   const [emailFocused, setEmailFocused] = useState(false);
@@ -449,6 +459,31 @@ export const AuthForm = ({
       return { error: null };
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handlePasskeySignIn = async () => {
+    resetFeedback();
+    const identifier = email.trim();
+    if (!identifier) {
+      setErrors({
+        email: "Email or username is required",
+        general: "Enter your email or username to use a passkey.",
+      });
+      setSubmitAttempted(true);
+      return;
+    }
+
+    setPasskeySigningIn(true);
+    try {
+      const { error } = await passkeyService.signIn(identifier);
+      if (error) {
+        setErrors({ general: error });
+        return;
+      }
+      router.replace("/dashboard");
+    } finally {
+      setPasskeySigningIn(false);
     }
   };
 
@@ -844,6 +879,20 @@ export const AuthForm = ({
               >
                 {actionLabel}
               </StatefulButton>
+
+              {mode === "signin" && passkeySupported && (
+                <button
+                  type="button"
+                  onClick={handlePasskeySignIn}
+                  disabled={passkeySigningIn || buttonDisabled}
+                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white/60 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-violet-400 hover:bg-violet-50/60 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-violet-500 dark:hover:bg-violet-900/20 dark:hover:text-violet-300"
+                >
+                  <Fingerprint className="h-4 w-4" />
+                  {passkeySigningIn
+                    ? "Waiting for passkey..."
+                    : "Sign in with a passkey"}
+                </button>
+              )}
 
               <AnimatePresence initial={false}>
                 {(mode === "signin" || mode === "signup") && (

@@ -10,7 +10,6 @@ import {
   Copy,
   Check,
   Download,
-  KeyRound,
   Smartphone,
 } from "lucide-react";
 import { motion } from "motion/react";
@@ -252,30 +251,6 @@ export const MfaSetup = ({
           </p>
 
           <div className="mt-6 space-y-3 text-left">
-            <button
-              type="button"
-              disabled
-              aria-disabled="true"
-              className="relative flex w-full cursor-not-allowed items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 opacity-70 dark:border-slate-700 dark:bg-slate-900/40"
-            >
-              <div className="shrink-0 rounded-lg bg-violet-100 p-2 dark:bg-violet-900/30">
-                <KeyRound className="h-5 w-5 text-violet-600 dark:text-violet-400" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="font-semibold text-slate-900 dark:text-slate-100">
-                    Passkey
-                  </p>
-                  <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:bg-slate-700 dark:text-slate-300">
-                    Coming soon
-                  </span>
-                </div>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  Use Touch ID, Face ID, Windows Hello, or a hardware key.
-                </p>
-              </div>
-            </button>
-
             <button
               type="button"
               onClick={() => {
