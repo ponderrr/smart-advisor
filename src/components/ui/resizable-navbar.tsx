@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { IconMenu2, IconX } from "@tabler/icons-react";
 import {
   motion,
   AnimatePresence,
@@ -242,17 +241,48 @@ export const MobileNavMenu = ({ children, isOpen }: { children: React.ReactNode;
   </AnimatePresence>
 );
 
-export const MobileNavToggle = ({ isOpen, onClick }: { isOpen: boolean; onClick: () => void }) => (
-  <button
-    onClick={onClick}
-    className="rounded-full p-2 text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
-    aria-label={isOpen ? "Close menu" : "Open menu"}
-    aria-expanded={isOpen}
-    aria-controls="mobile-nav-menu"
-  >
-    {isOpen ? <IconX /> : <IconMenu2 />}
-  </button>
-);
+export const MobileNavToggle = ({
+  isOpen,
+  onClick,
+}: {
+  isOpen: boolean;
+  onClick: () => void;
+}) => {
+  const transition = {
+    duration: 0.3,
+    ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
+  };
+  const lineClass = "absolute left-0 h-0.5 w-6 rounded-full bg-current";
+  return (
+    <button
+      onClick={onClick}
+      className="rounded-full p-2 text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+      aria-label={isOpen ? "Close menu" : "Open menu"}
+      aria-expanded={isOpen}
+      aria-controls="mobile-nav-menu"
+    >
+      <span className="relative block h-6 w-6">
+        <motion.span
+          className={cn(lineClass, "top-[5px]")}
+          animate={isOpen ? { rotate: 45, y: 6 } : { rotate: 0, y: 0 }}
+          transition={transition}
+        />
+        <motion.span
+          className={cn(lineClass, "top-[11px]")}
+          animate={
+            isOpen ? { opacity: 0, scaleX: 0 } : { opacity: 1, scaleX: 1 }
+          }
+          transition={transition}
+        />
+        <motion.span
+          className={cn(lineClass, "top-[17px]")}
+          animate={isOpen ? { rotate: -45, y: -6 } : { rotate: 0, y: 0 }}
+          transition={transition}
+        />
+      </span>
+    </button>
+  );
+};
 
 export const NavbarLogo = () => (
   <Link
