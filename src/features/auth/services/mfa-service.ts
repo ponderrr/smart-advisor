@@ -2,6 +2,30 @@ import { supabase } from "@/integrations/supabase/client";
 import { toUserFriendlyError } from "./error-messages";
 import { MFAEnrollData, MFAFactor } from "@/features/auth/types/mfa";
 
+/** Best-effort device label from the browser user-agent. Falls back to
+ *  "This device" when detection fails (e.g. bots, exotic UAs, or SSR). */
+const describeCurrentDevice = (): string => {
+  if (typeof navigator === "undefined") return "This device";
+  const ua = navigator.userAgent || "";
+
+  let os = "Device";
+  if (/iPhone/i.test(ua)) os = "iPhone";
+  else if (/iPad/i.test(ua)) os = "iPad";
+  else if (/Android/i.test(ua)) os = "Android";
+  else if (/Mac OS X|Macintosh/i.test(ua)) os = "Mac";
+  else if (/Windows/i.test(ua)) os = "Windows";
+  else if (/Linux/i.test(ua)) os = "Linux";
+
+  let browser = "";
+  if (/Edg\//i.test(ua)) browser = "Edge";
+  else if (/OPR\/|Opera/i.test(ua)) browser = "Opera";
+  else if (/Chrome\//i.test(ua) && !/Chromium/i.test(ua)) browser = "Chrome";
+  else if (/Firefox\//i.test(ua)) browser = "Firefox";
+  else if (/Safari\//i.test(ua)) browser = "Safari";
+
+  return browser ? `${os} · ${browser}` : os;
+};
+
 class MfaService {
   async enroll() {
     try {
@@ -18,23 +42,11 @@ class MfaService {
         };
       }
 
-      // Inspect existing factors before attempting to enroll.
+      // Clean up any unverified factors left behind by aborted attempts so
+      // the next enroll call starts fresh.
       try {
         const { data: factors } = await supabase.auth.mfa.listFactors();
         const totpFactors = (factors?.totp ?? []) as unknown as MFAFactor[];
-
-        // If there's already a VERIFIED factor, MFA is enabled. Bail out
-        // with a clear message instead of trying to enroll a duplicate.
-        const verified = totpFactors.find((f) => f.status === "verified");
-        if (verified) {
-          return {
-            error:
-              "Two-factor authentication is already enabled on this account. Disable it first if you want to re-enroll.",
-            data: null,
-          };
-        }
-
-        // Clean up any unverified factors left behind by aborted attempts.
         for (const f of totpFactors) {
           if (f.status === "unverified") {
             await supabase.auth.mfa.unenroll({ factorId: f.id });
@@ -44,10 +56,18 @@ class MfaService {
         // Non-critical — proceed with enrollment.
       }
 
-      // Pass an explicit, unique friendly name. Supabase enforces uniqueness
-      // even for empty strings, which was causing the "factor with the
-      // friendly name '' for this user already exists" error.
-      const friendlyName = `Smart Advisor TOTP ${Date.now()}`;
+      // Label factors by device so users can tell authenticators apart.
+      // Supabase rejects duplicate friendly_names per user, so include the
+      // time-of-day — a user adding two authenticators from the same device
+      // on the same day would otherwise collide.
+      const device = describeCurrentDevice();
+      const datePart = new Date().toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      });
+      const friendlyName = `${device} · ${datePart}`;
 
       const { data, error } = await supabase.auth.mfa.enroll({
         factorType: "totp",

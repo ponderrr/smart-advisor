@@ -252,9 +252,13 @@ const SettingsPage = () => {
   const [preferredQuestionCount, setPreferredQuestionCount] = useState(5);
   const [accountActionLoading, setAccountActionLoading] = useState(false);
   const [showMfaPanel, setShowMfaPanel] = useState(false);
-  const [mfaSetupModalOpen, setMfaSetupModalOpen] = useState(false);
+  const [mfaSetupModal, setMfaSetupModal] = useState<{
+    open: boolean;
+    isAdditional: boolean;
+  }>({ open: false, isAdditional: false });
   const [mfaEnabled, setMfaEnabled] = useState(false);
   const [mfaChecked, setMfaChecked] = useState(false);
+  const [mfaPanelKey, setMfaPanelKey] = useState(0);
   const [newPasswordFocused, setNewPasswordFocused] = useState(false);
   const [confirmPasswordFocused, setConfirmPasswordFocused] = useState(false);
   const newPasswordAnchorRef = useRef<HTMLDivElement>(null);
@@ -941,7 +945,10 @@ const SettingsPage = () => {
                                 if (mfaEnabled) {
                                   setShowMfaPanel(true);
                                 } else {
-                                  setMfaSetupModalOpen(true);
+                                  setMfaSetupModal({
+                                    open: true,
+                                    isAdditional: false,
+                                  });
                                 }
                               }}
                               className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
@@ -961,8 +968,15 @@ const SettingsPage = () => {
                             &larr; Back to Security
                           </button>
                           <MfaManagement
+                            key={mfaPanelKey}
                             mfaEnabled={mfaEnabled}
                             onMfaStatusChange={() => setShowMfaPanel(false)}
+                            onAddAuthenticator={() =>
+                              setMfaSetupModal({
+                                open: true,
+                                isAdditional: true,
+                              })
+                            }
                           />
                         </div>
                       )}
@@ -1351,13 +1365,15 @@ const SettingsPage = () => {
       </AnimatePresence>
 
       <AnimatePresence>
-        {mfaSetupModalOpen && (
+        {mfaSetupModal.open && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-            onClick={() => setMfaSetupModalOpen(false)}
+            onClick={() =>
+              setMfaSetupModal((prev) => ({ ...prev, open: false }))
+            }
           >
             <motion.div
               role="dialog"
@@ -1370,7 +1386,9 @@ const SettingsPage = () => {
               className="relative mx-4 max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-slate-200/70 bg-white shadow-xl dark:border-slate-700/60 dark:bg-slate-900"
             >
               <button
-                onClick={() => setMfaSetupModalOpen(false)}
+                onClick={() =>
+                  setMfaSetupModal((prev) => ({ ...prev, open: false }))
+                }
                 aria-label="Close two-factor setup"
                 className="absolute right-4 top-4 z-10 text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-200"
               >
@@ -1378,11 +1396,15 @@ const SettingsPage = () => {
               </button>
               <MfaSetup
                 skipIntro
+                skipBackupCodes={mfaSetupModal.isAdditional}
                 onComplete={() => {
                   setMfaEnabled(true);
-                  setMfaSetupModalOpen(false);
+                  setMfaSetupModal({ open: false, isAdditional: false });
+                  setMfaPanelKey((k) => k + 1);
                 }}
-                onSkip={() => setMfaSetupModalOpen(false)}
+                onSkip={() =>
+                  setMfaSetupModal({ open: false, isAdditional: false })
+                }
               />
             </motion.div>
           </motion.div>
