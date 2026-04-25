@@ -5,6 +5,7 @@ import Image from "next/image";
 import {
   RefreshCw,
   Heart,
+  Sparkles,
   Star,
   BookOpen,
   Film,
@@ -28,7 +29,10 @@ import {
 import { SafeLocalStorage } from "@/utils/localStorage";
 import { useQuizStore } from "@/features/quiz/store/quiz-store";
 import { PillButton } from "@/components/ui/pill-button";
+import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
+import { SectionHeader } from "@/components/section-header";
 import { LogToLibraryButton } from "@/features/library/components/log-to-library-button";
+import { libraryService } from "@/features/library/services/library-service";
 import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
 import { cn } from "@/lib/utils";
@@ -138,10 +142,12 @@ const ResultsLoadingState = ({ step: _step }: { step: string }) => {
 const RecommendationCard = ({
   rec,
   index,
+  alreadyLogged,
   onToggleFavorite,
 }: {
   rec: Recommendation;
   index: number;
+  alreadyLogged: boolean;
   onToggleFavorite: (id: string) => void;
 }) => {
   const [expanded, setExpanded] = useState(false);
@@ -152,9 +158,6 @@ const RecommendationCard = ({
   const showDescription = description.length > 0 && description !== explanation;
   const { score: matchScore, tone: matchTone } = deriveMatchScore(rec);
 
-  // Measure whether the description is actually being clipped by the
-  // line-clamp. Only run when collapsed; while expanded we keep the previous
-  // result so the chevron doesn't disappear mid-toggle.
   useEffect(() => {
     if (expanded || !showDescription) return;
     const el = descRef.current;
@@ -167,17 +170,17 @@ const RecommendationCard = ({
       initial={{ opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.32, delay: index * 0.06 }}
-      className="group overflow-hidden rounded-3xl border border-slate-200/70 bg-white/85 shadow-sm backdrop-blur-md transition-all duration-200 hover:shadow-md dark:border-slate-700/60 dark:bg-slate-900/65"
+      className="group overflow-hidden rounded-3xl border border-slate-200/70 bg-white/85 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-700/60 dark:bg-slate-900/65"
     >
-      <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr]">
+      <div className="grid grid-cols-1 sm:grid-cols-[168px_1fr]">
         {/* Poster */}
-        <div className="relative aspect-[2/3] overflow-hidden bg-slate-200 sm:aspect-[2/3] dark:bg-slate-800">
+        <div className="relative aspect-[2/3] overflow-hidden bg-slate-200 dark:bg-slate-800">
           {rec.poster_url ? (
             <Image
               src={rec.poster_url}
               alt={rec.title}
               fill
-              sizes="(max-width: 640px) 100vw, 180px"
+              sizes="(max-width: 640px) 100vw, 168px"
               className="object-cover transition-transform duration-500 group-hover:scale-105"
             />
           ) : (
@@ -189,12 +192,10 @@ const RecommendationCard = ({
               )}
             </div>
           )}
-          {/* Type badge */}
           <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm">
             {rec.type === "movie" ? <Film size={10} /> : <BookOpen size={10} />}
             {rec.type}
           </div>
-          {/* Match badge */}
           <div
             className={cn(
               "absolute right-3 top-3 rounded-full px-2.5 py-1 text-[10px] font-bold shadow-sm backdrop-blur-sm",
@@ -206,8 +207,8 @@ const RecommendationCard = ({
         </div>
 
         {/* Content */}
-        <div className="flex flex-col p-5">
-          <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-col p-5 sm:p-6">
+          <div className="flex items-start justify-between gap-4">
             <div className="min-w-0 flex-1">
               <h2 className="text-xl font-black tracking-tight sm:text-2xl">
                 {rec.title}
@@ -221,41 +222,8 @@ const RecommendationCard = ({
                 {rec.year ? ` · ${rec.year}` : ""}
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() => onToggleFavorite(rec.id)}
-              aria-label={rec.is_favorited ? `Remove ${rec.title} from favorites` : `Add ${rec.title} to favorites`}
-              className={cn(
-                "shrink-0 rounded-full p-2 transition-all",
-                rec.is_favorited
-                  ? "bg-rose-500 text-white shadow-md"
-                  : "bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700",
-              )}
-            >
-              <Heart
-                size={16}
-                fill={rec.is_favorited ? "currentColor" : "none"}
-              />
-            </button>
-          </div>
-
-          {/* Rating + Genres row */}
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            {typeof rec.rating === "number" && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                <Star size={12} className="fill-current" />
-                {rec.rating}
-              </span>
-            )}
-            {rec.genres?.slice(0, 3).map((g) => (
-              <span
-                key={g}
-                className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300"
-              >
-                {g}
-              </span>
-            ))}
-            <div className="ml-auto">
+            {/* Action group — favorite + log together */}
+            <div className="flex shrink-0 items-center gap-2">
               <LogToLibraryButton
                 medium={rec.type}
                 title={rec.title}
@@ -263,25 +231,79 @@ const RecommendationCard = ({
                 year={rec.year ?? null}
                 poster_url={rec.poster_url ?? null}
                 source_recommendation_id={rec.id}
+                initialLogged={alreadyLogged}
               />
+              <button
+                type="button"
+                onClick={() => onToggleFavorite(rec.id)}
+                aria-label={
+                  rec.is_favorited
+                    ? `Remove ${rec.title} from favorites`
+                    : `Add ${rec.title} to favorites`
+                }
+                className={cn(
+                  "rounded-full p-2 transition-all active:scale-[0.95]",
+                  rec.is_favorited
+                    ? "bg-rose-500 text-white shadow-md"
+                    : "bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700",
+                )}
+              >
+                <Heart
+                  size={16}
+                  fill={rec.is_favorited ? "currentColor" : "none"}
+                />
+              </button>
             </div>
           </div>
 
-          {/* Explanation */}
+          {/* Metadata row — rating + genres only, log button is now up top */}
+          {(typeof rec.rating === "number" || rec.genres?.length) && (
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              {typeof rec.rating === "number" && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                  <Star size={12} className="fill-current" />
+                  {rec.rating}
+                </span>
+              )}
+              {rec.genres?.slice(0, 4).map((g) => (
+                <span
+                  key={g}
+                  className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                >
+                  {g}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* "Why this pick" — promoted: gradient accent border, larger leading,
+              sparkles glyph to flag it as the AI's voice. */}
           {explanation && (
-            <div className="mt-3 rounded-xl border border-indigo-100 bg-indigo-50/50 px-3 py-2.5 dark:border-indigo-500/20 dark:bg-indigo-500/5">
-              <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-300">
-                Why this pick
-              </p>
-              <p className="mt-1 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+            <div className="relative mt-4 overflow-hidden rounded-2xl border border-indigo-200/60 bg-gradient-to-br from-indigo-50/80 via-white to-violet-50/60 p-4 dark:border-indigo-500/30 dark:from-indigo-500/10 dark:via-slate-900/40 dark:to-violet-500/10">
+              <span
+                aria-hidden="true"
+                className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-indigo-400 to-violet-500"
+              />
+              <div className="flex items-center gap-2 pl-2">
+                <Sparkles
+                  size={14}
+                  className="text-indigo-600 dark:text-indigo-400"
+                />
+                <p className="text-[11px] font-black uppercase tracking-[0.16em] text-indigo-700 dark:text-indigo-300">
+                  Why this pick
+                </p>
+              </div>
+              <p className="mt-2 pl-2 text-[15px] leading-relaxed text-slate-700 dark:text-slate-200">
                 {explanation}
               </p>
             </div>
           )}
 
-          {/* Description (expandable) — only when distinct from explanation */}
           {showDescription && (
-            <div className="mt-3">
+            <div className="mt-4 border-t border-slate-100 pt-4 dark:border-slate-800">
+              <p className="mb-1.5 text-[11px] font-black uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">
+                About
+              </p>
               <p
                 ref={descRef}
                 className="overflow-hidden text-sm leading-relaxed text-slate-600 dark:text-slate-400"
@@ -303,10 +325,11 @@ const RecommendationCard = ({
                   onClick={() => setExpanded((prev) => !prev)}
                   aria-label={expanded ? "Show less" : "Show more"}
                   aria-expanded={expanded}
-                  className="mt-1 inline-flex h-7 w-7 items-center justify-center rounded-full text-indigo-600 transition-colors hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10"
+                  className="mt-2 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-indigo-600 transition-colors hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10"
                 >
+                  {expanded ? "Show less" : "Show more"}
                   <ChevronDown
-                    size={16}
+                    size={12}
                     className={cn(
                       "transition-transform duration-200",
                       expanded && "rotate-180",
@@ -329,6 +352,9 @@ const ResultsPage = () => {
   const { ready } = useRequireAuth();
   const { contentType, answers, reset } = useQuizStore();
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [loggedTitleKeys, setLoggedTitleKeys] = useState<Set<string>>(
+    () => new Set(),
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [generationStep, setGenerationStep] = useState<string>(
@@ -474,6 +500,21 @@ const ResultsPage = () => {
     wasSessionGenerated,
     handleGenerateRecommendations,
   ]);
+
+  useEffect(() => {
+    if (!ready) return;
+    void libraryService.list().then(({ data }) => {
+      setLoggedTitleKeys(
+        new Set(data.map((i) => `${i.medium}::${i.title.toLowerCase()}`)),
+      );
+    });
+  }, [ready]);
+
+  const isAlreadyLogged = useCallback(
+    (rec: Recommendation): boolean =>
+      loggedTitleKeys.has(`${rec.type}::${rec.title.toLowerCase()}`),
+    [loggedTitleKeys],
+  );
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -747,15 +788,16 @@ const ResultsPage = () => {
             className="mb-8"
           >
             <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
-              Step 4 of 4
+              Your picks
             </p>
             <h1 className="mt-2 text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl">
-              Your Recommendations
+              Hand-picked for you
             </h1>
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
               {recommendations.length} personalized{" "}
-              {recommendations.length === 1 ? "pick" : "picks"} based on your
-              answers.
+              {recommendations.length === 1 ? "pick" : "picks"} from the AI,
+              with the reasoning behind each. Log one to your library to nudge
+              future picks.
             </p>
           </motion.div>
 
@@ -767,21 +809,22 @@ const ResultsPage = () => {
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: 0.05 }}
-                  className="mb-8"
+                  className="mb-10"
                 >
-                  <div className="mb-4 flex items-center gap-2">
-                    <Film size={18} className="text-violet-500" />
-                    <h2 className="text-lg font-bold tracking-tight">Movies</h2>
-                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                      {movieRecs.length}
-                    </span>
-                  </div>
+                  <SectionHeader
+                    icon={<Film size={14} />}
+                    eyebrow="Movie"
+                    title="On screen"
+                    count={movieRecs.length}
+                    accent="violet"
+                  />
                   <div className="grid gap-5">
                     {movieRecs.map((rec, i) => (
                       <RecommendationCard
                         key={rec.id}
                         rec={rec}
                         index={i}
+                        alreadyLogged={isAlreadyLogged(rec)}
                         onToggleFavorite={handleToggleFavorite}
                       />
                     ))}
@@ -794,21 +837,22 @@ const ResultsPage = () => {
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: 0.1 }}
-                  className="mb-8"
+                  className="mb-10"
                 >
-                  <div className="mb-4 flex items-center gap-2">
-                    <BookOpen size={18} className="text-emerald-500" />
-                    <h2 className="text-lg font-bold tracking-tight">Books</h2>
-                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                      {bookRecs.length}
-                    </span>
-                  </div>
+                  <SectionHeader
+                    icon={<BookOpen size={14} />}
+                    eyebrow="Book"
+                    title="On the shelf"
+                    count={bookRecs.length}
+                    accent="emerald"
+                  />
                   <div className="grid gap-5">
                     {bookRecs.map((rec, i) => (
                       <RecommendationCard
                         key={rec.id}
                         rec={rec}
                         index={i}
+                        alreadyLogged={isAlreadyLogged(rec)}
                         onToggleFavorite={handleToggleFavorite}
                       />
                     ))}
@@ -823,6 +867,7 @@ const ResultsPage = () => {
                   key={rec.id}
                   rec={rec}
                   index={i}
+                  alreadyLogged={isAlreadyLogged(rec)}
                   onToggleFavorite={handleToggleFavorite}
                 />
               ))}
@@ -834,15 +879,20 @@ const ResultsPage = () => {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.15 }}
-            className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row"
+            className="mt-12 flex flex-col items-center justify-center gap-3 sm:flex-row"
           >
-            <PillButton
+            <HoverBorderGradient
               onClick={handleGetAnother}
-              className="inline-flex w-full items-center justify-center gap-2 bg-white px-6 py-3 text-sm font-black text-black sm:w-auto dark:bg-slate-900 dark:text-white"
+              idleColor="17, 24, 39"
+              darkIdleColor="255, 255, 255"
+              highlightColor="99, 102, 241"
+              darkHighlightColor="129, 140, 248"
+              containerClassName="rounded-full w-full sm:w-auto"
+              className="flex w-full items-center justify-center gap-2 whitespace-nowrap bg-white px-6 py-3 text-sm font-black leading-none tracking-tight text-black sm:w-auto dark:bg-black dark:text-white"
             >
               <RotateCcw size={16} />
               Retake Quiz
-            </PillButton>
+            </HoverBorderGradient>
             <PillButton
               onClick={() => router.push("/history")}
               className="inline-flex w-full items-center justify-center gap-2 border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 sm:w-auto dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
@@ -850,7 +900,7 @@ const ResultsPage = () => {
               View History
               <ArrowRight size={16} />
             </PillButton>
-            <div className="relative">
+            <div className="relative w-full sm:w-auto">
               <PillButton
                 onClick={handleShare}
                 className="inline-flex w-full items-center justify-center gap-2 border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 sm:w-auto dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"

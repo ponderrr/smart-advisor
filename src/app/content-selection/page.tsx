@@ -6,12 +6,12 @@ import { motion } from "motion/react";
 
 const VALIDATION_FLASH_MS = 650;
 const VALIDATION_MESSAGE_MS = 3200;
-import { Check, ArrowLeft, ArrowRight } from "lucide-react";
+import { Check, ArrowRight, Film, BookOpen, Sparkles } from "lucide-react";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import { useQuizStore } from "@/features/quiz/store/quiz-store";
 import { PillButton } from "@/components/ui/pill-button";
 import { PageLoader } from "@/components/ui/loader";
-import { AppNavbar } from "@/components/app-navbar";
+import { QuizStepShell } from "@/features/quiz/components/quiz-step-shell";
 import { cn } from "@/lib/utils";
 
 type ContentType = "movie" | "book" | "both" | null;
@@ -19,8 +19,10 @@ const PREF_CONTENT_KEY = "smart_advisor_pref_content_focus";
 
 interface SelectionCardProps {
   id: ContentType;
+  eyebrow: string;
   title: string;
   description: string;
+  icon: React.ReactNode;
   mediaSrc: string;
   secondaryMediaSrc?: string;
   isSelected: boolean;
@@ -29,31 +31,56 @@ interface SelectionCardProps {
 
 const SelectionCard: React.FC<SelectionCardProps> = ({
   id,
+  eyebrow,
   title,
   description,
+  icon,
   mediaSrc,
   secondaryMediaSrc,
   isSelected,
   onClick,
 }) => {
   return (
-    <PillButton
+    <button
+      type="button"
       onClick={() => onClick(id)}
-      active={isSelected}
+      aria-pressed={isSelected}
       className={cn(
-        "relative w-full overflow-hidden rounded-3xl border p-0 text-left shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-1",
+        "group relative w-full overflow-hidden rounded-3xl border bg-white/85 text-left shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:bg-slate-900/65 dark:focus-visible:ring-offset-slate-950",
         isSelected
-          ? "border-indigo-500 bg-white shadow-lg dark:border-indigo-400 dark:bg-slate-900/70"
-          : "border-slate-200/80 bg-white/80 hover:border-indigo-300 hover:shadow-md dark:border-slate-700/70 dark:bg-slate-900/65 dark:hover:border-indigo-500/60",
+          ? "border-transparent shadow-indigo-500/15"
+          : "border-slate-200/70 hover:border-slate-300 dark:border-slate-700/60 dark:hover:border-slate-600/80",
       )}
     >
-      {isSelected && (
-        <div className="absolute right-3 top-3 z-10 inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-500 text-white shadow-md">
-          <Check size={16} />
-        </div>
-      )}
+      {/* Gradient accent ring when selected — sits on top of the card border. */}
+      <span
+        aria-hidden="true"
+        className={cn(
+          "pointer-events-none absolute inset-0 rounded-3xl transition-opacity duration-300",
+          isSelected
+            ? "opacity-100 ring-2 ring-indigo-500/70 dark:ring-indigo-400/70"
+            : "opacity-0",
+        )}
+      />
+      <span
+        aria-hidden="true"
+        className={cn(
+          "pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-indigo-500/[0.06] via-transparent to-violet-500/[0.06] transition-opacity duration-300 dark:from-indigo-400/[0.08] dark:to-violet-400/[0.08]",
+          isSelected ? "opacity-100" : "opacity-0",
+        )}
+      />
 
-      <div className="relative aspect-[16/9] overflow-hidden bg-slate-200 dark:bg-slate-800">
+      {/* Selected check chip */}
+      <div
+        className={cn(
+          "absolute right-3 top-3 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-lg shadow-indigo-500/30 transition-all duration-300",
+          isSelected ? "scale-100 opacity-100" : "scale-50 opacity-0",
+        )}
+      >
+        <Check size={16} strokeWidth={3} />
+      </div>
+
+      <div className="relative aspect-[16/10] overflow-hidden bg-slate-100 dark:bg-slate-800/80">
         {secondaryMediaSrc ? (
           <div className="grid h-full w-full grid-cols-2 gap-1 p-1">
             <video
@@ -63,7 +90,7 @@ const SelectionCard: React.FC<SelectionCardProps> = ({
               muted
               playsInline
               preload="auto"
-              className="h-full w-full rounded-lg object-cover"
+              className="h-full w-full rounded-2xl object-cover"
             />
             <video
               src={secondaryMediaSrc}
@@ -72,7 +99,7 @@ const SelectionCard: React.FC<SelectionCardProps> = ({
               muted
               playsInline
               preload="auto"
-              className="h-full w-full rounded-lg object-cover"
+              className="h-full w-full rounded-2xl object-cover"
             />
           </div>
         ) : (
@@ -83,20 +110,42 @@ const SelectionCard: React.FC<SelectionCardProps> = ({
             muted
             playsInline
             preload="auto"
-            className="h-full w-full object-contain p-2"
+            className="h-full w-full object-contain p-3 transition-transform duration-500 group-hover:scale-105"
           />
         )}
       </div>
 
-      <div className="p-4 sm:p-5">
-        <h3 className="text-xl font-black tracking-tight sm:text-2xl">
+      <div className="relative p-5">
+        <div className="flex items-center gap-2">
+          <span
+            className={cn(
+              "flex h-7 w-7 items-center justify-center rounded-full transition-colors duration-300",
+              isSelected
+                ? "bg-indigo-500 text-white"
+                : "bg-slate-100 text-slate-500 group-hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-slate-700",
+            )}
+          >
+            {icon}
+          </span>
+          <p
+            className={cn(
+              "text-[10px] font-black uppercase tracking-[0.18em] transition-colors duration-300",
+              isSelected
+                ? "text-indigo-600 dark:text-indigo-400"
+                : "text-slate-400 dark:text-slate-500",
+            )}
+          >
+            {eyebrow}
+          </p>
+        </div>
+        <h3 className="mt-2 text-xl font-black tracking-tight sm:text-2xl">
           {title}
         </h3>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+        <p className="mt-1.5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
           {description}
         </p>
       </div>
-    </PillButton>
+    </button>
   );
 };
 
@@ -132,23 +181,27 @@ const ContentSelectionPage = () => {
   const cards = [
     {
       id: "movie" as ContentType,
+      eyebrow: "On screen",
       title: "Movie",
       description:
-        "Find a movie recommendation that fits your current mood and pace.",
+        "A film tuned to your current mood and pace.",
+      icon: <Film size={14} />,
       mediaSrc: "/animations/Popcorn.webm",
     },
     {
       id: "book" as ContentType,
+      eyebrow: "On the shelf",
       title: "Book",
-      description:
-        "Get a reading recommendation tailored to your style and interests.",
+      description: "A read tailored to your style and interests.",
+      icon: <BookOpen size={14} />,
       mediaSrc: "/animations/Books.webm",
     },
     {
       id: "both" as ContentType,
-      title: "Both",
-      description:
-        "Get one movie and one book recommendation in the same flow.",
+      eyebrow: "Both",
+      title: "One of each",
+      description: "A movie and a book picked together in one go.",
+      icon: <Sparkles size={14} />,
       mediaSrc: "/animations/Popcorn.webm",
       secondaryMediaSrc: "/animations/Books.webm",
     },
@@ -167,98 +220,72 @@ const ContentSelectionPage = () => {
   }
 
   return (
-    <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
-      <AppNavbar />
+    <QuizStepShell
+      category="Quiz setup"
+      stepLabel="Step 1 of 4"
+      progress={25}
+      onBack={handleBack}
+      backLabel="Dashboard"
+    >
+      <div className="rounded-3xl border border-slate-200/70 bg-white/85 p-6 shadow-sm backdrop-blur-md sm:p-8 dark:border-slate-700/60 dark:bg-slate-900/65">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.22 }}
+        >
+          <h1 className="text-2xl font-black tracking-tight sm:text-3xl">
+            What would you like a recommendation for?
+          </h1>
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 sm:text-base">
+            Pick one so we can tailor your recommendation flow.
+          </p>
 
-      <main className="px-4 pb-20 pt-32 md:pt-36 sm:px-6">
-        <div className="mx-auto w-full max-w-4xl">
-          {/* Demo-style header bar */}
-          <div className="mb-8 flex items-center justify-between gap-3">
+          <div className="mt-7 grid grid-cols-1 gap-4 md:grid-cols-3">
+            {cards.map((card) => (
+              <SelectionCard
+                key={card.id}
+                id={card.id}
+                eyebrow={card.eyebrow}
+                title={card.title}
+                description={card.description}
+                icon={card.icon}
+                mediaSrc={card.mediaSrc}
+                secondaryMediaSrc={card.secondaryMediaSrc}
+                isSelected={selectedType === card.id}
+                onClick={setSelectedType}
+              />
+            ))}
+          </div>
+        </motion.div>
+
+        <div className="mt-8 flex items-center justify-end">
+          <motion.div
+            animate={
+              showValidationFlash
+                ? { scale: [1, 1.03, 0.99, 1], x: [0, -4, 4, 0] }
+                : { scale: 1, x: 0 }
+            }
+            transition={{ duration: 0.45 }}
+          >
             <PillButton
-              onClick={handleBack}
-              className="inline-flex items-center gap-2 border-slate-300/80 bg-white/80 px-4 py-2 text-sm font-semibold dark:border-slate-700 dark:bg-slate-900/70"
+              onClick={handleContinue}
+              disabled={isLoading}
+              className={cn(
+                "inline-flex items-center justify-center gap-2 bg-white px-6 py-2.5 text-sm font-black tracking-tight text-black disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-900 dark:text-white",
+              )}
             >
-              <ArrowLeft size={16} />
-              Back
+              {isLoading ? "Continuing..." : "Continue"}
+              <ArrowRight size={16} />
             </PillButton>
-            <p className="text-base font-extrabold tracking-wide text-slate-800 dark:text-slate-100 md:text-lg">
-              Step 1 of 4
-            </p>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-              Quiz Setup
-            </p>
-          </div>
-
-          {/* Progress bar */}
-          <div className="mb-8 h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
-            <motion.div
-              className="h-full rounded-full bg-indigo-500"
-              initial={false}
-              animate={{ width: "25%" }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            />
-          </div>
-
-          {/* Card container */}
-          <div className="rounded-3xl border border-slate-200/70 bg-white/85 p-6 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.22 }}
-            >
-              <h1 className="text-2xl font-black tracking-tight sm:text-3xl">
-                What would you like a recommendation for?
-              </h1>
-              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 sm:text-base">
-                Pick one so we can tailor your recommendation flow.
-              </p>
-
-              <div className="mt-7 grid grid-cols-1 gap-4 md:grid-cols-3">
-                {cards.map((card) => (
-                  <SelectionCard
-                    key={card.id}
-                    id={card.id}
-                    title={card.title}
-                    description={card.description}
-                    mediaSrc={card.mediaSrc}
-                    secondaryMediaSrc={card.secondaryMediaSrc}
-                    isSelected={selectedType === card.id}
-                    onClick={setSelectedType}
-                  />
-                ))}
-              </div>
-            </motion.div>
-
-            <div className="mt-8 flex items-center justify-end">
-              <motion.div
-                animate={
-                  showValidationFlash
-                    ? { scale: [1, 1.03, 0.99, 1], x: [0, -4, 4, 0] }
-                    : { scale: 1, x: 0 }
-                }
-                transition={{ duration: 0.45 }}
-              >
-                <PillButton
-                  onClick={handleContinue}
-                  disabled={isLoading}
-                  className={cn(
-                    "inline-flex items-center justify-center gap-2 bg-white px-6 py-2.5 text-sm font-black tracking-tight text-black disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-900 dark:text-white",
-                  )}
-                >
-                  {isLoading ? "Continuing..." : "Continue"}
-                  <ArrowRight size={16} />
-                </PillButton>
-              </motion.div>
-            </div>
-            {validationMessage ? (
-              <p className="mt-3 text-right text-xs font-semibold text-red-500 dark:text-red-400">
-                {validationMessage}
-              </p>
-            ) : null}
-          </div>
+          </motion.div>
         </div>
-      </main>
-    </div>
+        {validationMessage ? (
+          <p className="mt-3 text-right text-xs font-semibold text-red-500 dark:text-red-400">
+            {validationMessage}
+          </p>
+        ) : null}
+      </div>
+    </QuizStepShell>
   );
 };
 

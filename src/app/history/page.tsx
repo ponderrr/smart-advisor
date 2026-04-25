@@ -39,6 +39,8 @@ import {
 import { LogToLibraryButton } from "@/features/library/components/log-to-library-button";
 import { PillButton } from "@/components/ui/pill-button";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
+import { Dialog } from "@/components/ui/dialog";
+import { WhyThisPick } from "@/components/why-this-pick";
 import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
 import { cn } from "@/lib/utils";
@@ -93,59 +95,12 @@ const RecommendationModal = ({
   libraryEntry: LibraryItem | null;
   onClose: () => void;
 }) => {
-  const modalRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-        return;
-      }
-      if (e.key === "Tab" && modalRef.current) {
-        const focusable = modalRef.current.querySelectorAll<HTMLElement>(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        );
-        if (focusable.length === 0) return;
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
-        if (e.shiftKey) {
-          if (document.activeElement === first) {
-            e.preventDefault();
-            last.focus();
-          }
-        } else {
-          if (document.activeElement === last) {
-            e.preventDefault();
-            first.focus();
-          }
-        }
-      }
-    };
-    document.addEventListener("keydown", handleKeyDown);
-    modalRef.current?.focus();
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
-
   return (
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    exit={{ opacity: 0 }}
-    className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
-    onClick={onClose}
-  >
-    <motion.div
-      ref={modalRef}
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Details for ${rec.title}`}
-      tabIndex={-1}
-      initial={{ opacity: 0, scale: 0.95, y: 12 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95, y: 12 }}
-      transition={{ duration: 0.2 }}
-      className="relative max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-slate-200/70 bg-white shadow-2xl dark:border-slate-700/60 dark:bg-slate-900 focus:outline-none"
-      onClick={(e) => e.stopPropagation()}
+    <Dialog
+      open={true}
+      onClose={onClose}
+      ariaLabel={`Details for ${rec.title}`}
+      hideCloseButton
     >
       {rec.poster_url && (
         <div className="relative aspect-[2/3] max-h-[300px] w-full overflow-hidden rounded-t-3xl bg-slate-200 dark:bg-slate-800">
@@ -168,7 +123,11 @@ const RecommendationModal = ({
       <div className="p-5">
         <h2 className="text-2xl font-black tracking-tight">{rec.title}</h2>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          {rec.author ? `By ${rec.author}` : rec.director ? `Directed by ${rec.director}` : ""}
+          {rec.author
+            ? `By ${rec.author}`
+            : rec.director
+              ? `Directed by ${rec.director}`
+              : ""}
           {rec.year ? ` · ${rec.year}` : ""}
         </p>
 
@@ -186,14 +145,7 @@ const RecommendationModal = ({
         )}
 
         {rec.explanation && (
-          <div className="mt-4 rounded-xl border border-indigo-100 bg-indigo-50/50 px-3 py-2.5 dark:border-indigo-500/20 dark:bg-indigo-500/5">
-            <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-300">
-              Why this pick
-            </p>
-            <p className="mt-1 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-              {rec.explanation}
-            </p>
-          </div>
+          <WhyThisPick text={rec.explanation} className="mt-4" />
         )}
 
         {rec.description && (
@@ -231,6 +183,7 @@ const RecommendationModal = ({
             year={rec.year ?? null}
             poster_url={rec.poster_url ?? null}
             source_recommendation_id={rec.id}
+            initialLogged={!!libraryEntry}
           />
           <button
             type="button"
@@ -241,8 +194,7 @@ const RecommendationModal = ({
           </button>
         </div>
       </div>
-    </motion.div>
-  </motion.div>
+    </Dialog>
   );
 };
 
@@ -653,15 +605,13 @@ const AccountHistoryPage = () => {
         </div>
       </main>
 
-      <AnimatePresence>
-        {selectedRec && (
-          <RecommendationModal
-            rec={selectedRec}
-            libraryEntry={matchLibrary(selectedRec)}
-            onClose={() => setSelectedRec(null)}
-          />
-        )}
-      </AnimatePresence>
+      {selectedRec && (
+        <RecommendationModal
+          rec={selectedRec}
+          libraryEntry={matchLibrary(selectedRec)}
+          onClose={() => setSelectedRec(null)}
+        />
+      )}
     </div>
   );
 };

@@ -17,10 +17,8 @@ import {
   ThumbsDown,
   ThumbsUp,
   Trash2,
-  X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
@@ -42,6 +40,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { PillButton } from "@/components/ui/pill-button";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
+import { Dialog } from "@/components/ui/dialog";
 import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
 import { cn } from "@/lib/utils";
@@ -461,41 +460,16 @@ const EditDialog = ({ target, onClose, onSaved }: EditDialogProps) => {
     onClose();
   };
 
-  if (typeof window === "undefined") return null;
-
-  return createPortal(
-    <AnimatePresence>
+  return (
+    <Dialog
+      open={!!target}
+      onClose={onClose}
+      ariaLabel="Edit library entry"
+      size="sm"
+      disableClose={saving}
+    >
       {target && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
-          onClick={() => {
-            if (saving) return;
-            onClose();
-          }}
-        >
-          <motion.div
-            role="dialog"
-            aria-modal="true"
-            initial={{ opacity: 0, scale: 0.95, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 12 }}
-            transition={{ duration: 0.2 }}
-            onClick={(e) => e.stopPropagation()}
-            className="relative max-h-[85vh] w-full max-w-md overflow-y-auto rounded-3xl border border-slate-200/70 bg-white shadow-2xl dark:border-slate-700/60 dark:bg-slate-900"
-          >
-            <button
-              onClick={onClose}
-              aria-label="Close"
-              disabled={saving}
-              className="absolute right-4 top-4 z-10 text-slate-400 transition-colors hover:text-slate-600 disabled:opacity-50 dark:hover:text-slate-200"
-            >
-              <X size={18} />
-            </button>
-
-            <div className="flex flex-col items-center p-6 text-center">
+        <div className="flex flex-col items-center p-6 text-center">
               <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
@@ -613,11 +587,8 @@ const EditDialog = ({ target, onClose, onSaved }: EditDialogProps) => {
                   Cancel
                 </button>
               </div>
-            </div>
-          </motion.div>
-        </motion.div>
+        </div>
       )}
-    </AnimatePresence>,
-    document.body,
+    </Dialog>
   );
 };

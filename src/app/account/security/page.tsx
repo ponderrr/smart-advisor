@@ -6,8 +6,9 @@ import { MfaManagement } from "@/features/auth/components/mfa-management";
 import { PasskeyManagement } from "@/features/auth/components/passkey-management";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { PageLoader } from "@/components/ui/loader";
+import { AppNavbar } from "@/components/app-navbar";
 
 export default function AccountSecurityPage() {
   const router = useRouter();
@@ -33,66 +34,85 @@ export default function AccountSecurityPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
-      <div className="container mx-auto px-4 py-12 max-w-2xl">
-        {/* Header */}
-        <div className="mb-8">
-          <Button
-            variant="ghost"
+    <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
+      <AppNavbar />
+
+      <main className="px-4 pb-20 pt-28 sm:px-6 md:pt-36">
+        <div className="mx-auto w-full max-w-3xl">
+          <button
+            type="button"
             onClick={() => router.back()}
-            className="mb-4"
+            className="group mb-6 inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-3 py-2 text-xs font-bold tracking-tight text-slate-700 shadow-sm backdrop-blur-md transition-all duration-200 hover:-translate-x-0.5 hover:border-slate-300 hover:bg-white sm:text-sm dark:border-slate-700/70 dark:bg-slate-900/65 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800/70"
           >
-            ← Back
-          </Button>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-            Account Security
-          </h1>
-          <p className="mt-2 text-slate-600 dark:text-slate-400">
-            Manage your authentication methods and active sessions
-          </p>
-        </div>
+            <ArrowLeft
+              size={14}
+              className="transition-transform duration-200 group-hover:-translate-x-0.5"
+            />
+            Back
+          </button>
 
-        {/* Content */}
-        <div className="space-y-6">
-          {/* MFA Management */}
-          <MfaManagement
-            mfaEnabled={user.mfa_enabled || false}
-            onMfaStatusChange={() => {
-              // Trigger a refresh if needed
-            }}
-          />
-
-          {/* Passkeys */}
-          <div className="rounded-lg border bg-card p-6 shadow-sm">
-            <PasskeyManagement />
+          <div className="mb-8">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
+              Account · Security
+            </p>
+            <h1 className="mt-2 text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl">
+              Lock things down
+            </h1>
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+              Manage two-factor authentication, passkeys, and active sessions
+              across your devices.
+            </p>
           </div>
 
-          {/* Sessions Management */}
-          <SessionsManagement userId={user.id} />
+          <div className="space-y-6">
+            <MfaManagement
+              mfaEnabled={user.mfa_enabled || false}
+              onMfaStatusChange={() => {
+                // Trigger a refresh if needed
+              }}
+            />
 
-          {/* Security Tips */}
-          <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 sm:p-6 dark:border-blue-900/30 dark:bg-blue-900/20">
-            <h3 className="font-semibold text-blue-900 dark:text-blue-200 mb-3">
-              Security Tips
-            </h3>
-            <ul className="space-y-2 text-sm text-blue-800 dark:text-blue-300">
-              <li>
-                ✓ Enable 2FA for an extra layer of protection against
-                unauthorized access
-              </li>
-              <li>
-                ✓ Review active sessions regularly and sign out devices you
-                don't recognize
-              </li>
-              <li>✓ Use a strong, unique password and update it regularly</li>
-              <li>
-                ✓ Be cautious with login links and only sign in from trusted
-                devices
-              </li>
-            </ul>
+            <div className="rounded-3xl border border-slate-200/70 bg-white/85 p-6 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
+              <PasskeyManagement />
+            </div>
+
+            <SessionsManagement userId={user.id} />
+
+            <div className="relative overflow-hidden rounded-3xl border border-indigo-200/60 bg-gradient-to-br from-indigo-50/80 via-white to-violet-50/60 p-5 sm:p-6 dark:border-indigo-500/30 dark:from-indigo-500/10 dark:via-slate-900/40 dark:to-violet-500/10">
+              <span
+                aria-hidden="true"
+                className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-indigo-400 to-violet-500"
+              />
+              <div className="flex items-center gap-2 pl-2">
+                <ShieldCheck
+                  size={14}
+                  className="text-indigo-600 dark:text-indigo-400"
+                />
+                <p className="text-[11px] font-black uppercase tracking-[0.16em] text-indigo-700 dark:text-indigo-300">
+                  Security tips
+                </p>
+              </div>
+              <ul className="mt-3 space-y-1.5 pl-2 text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+                <li>
+                  Enable 2FA for an extra layer of protection against
+                  unauthorized access.
+                </li>
+                <li>
+                  Review active sessions regularly and sign out devices you
+                  don&apos;t recognize.
+                </li>
+                <li>
+                  Use a strong, unique password and update it regularly.
+                </li>
+                <li>
+                  Be cautious with login links and only sign in from trusted
+                  devices.
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
