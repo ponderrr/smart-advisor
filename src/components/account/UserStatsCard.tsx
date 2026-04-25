@@ -1,7 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { databaseService, UserStats } from "@/services/database";
+import {
+  databaseService,
+  UserStats,
+} from "@/features/recommendations/services/database-service";
 import { Heart, Film, Book, Calendar, TrendingUp } from "lucide-react";
 
 const UserStatsCard = () => {

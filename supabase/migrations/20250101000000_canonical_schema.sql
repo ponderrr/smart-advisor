@@ -9,6 +9,7 @@
 CREATE TABLE public.profiles (
   id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
   name TEXT NOT NULL,
+  username TEXT,
   age INTEGER NOT NULL CHECK (age >= 1 AND age <= 120),
   email TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),

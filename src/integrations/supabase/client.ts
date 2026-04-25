@@ -1,40 +1,10 @@
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
-import { Database } from "@/integrations/supabase/types";
+import { createBrowserClient } from "@supabase/ssr";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-let _supabase: SupabaseClient<Database> | null = null;
-
-function getSupabaseClient(): SupabaseClient<Database> {
-  if (_supabase) return _supabase;
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error(
-      "Missing Supabase environment variables. Please check NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env file"
-    );
-  }
-
-  _supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-      flowType: 'pkce'
-    },
-    realtime: {
-      params: {
-        eventsPerSecond: 10,
-      },
-    },
-  });
-
-  return _supabase;
-}
-
-export const supabase = new Proxy({} as SupabaseClient<Database>, {
-  get(_, prop) {
-    return (getSupabaseClient() as any)[prop];
-  },
-});
+// Browser-only singleton.
+// Server code (Route Handlers, Server Components, middleware) must use
+// createClient() from "@/lib/supabase/server" instead — that version
+// reads/writes cookies so the PKCE code verifier survives across requests.
+export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);

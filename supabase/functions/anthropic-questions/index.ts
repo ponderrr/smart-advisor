@@ -2,7 +2,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
 };
 
 const MINOR_SYSTEM_PROMPT = `You are Smart Advisor, a warm and enthusiastic entertainment companion.
@@ -34,55 +35,97 @@ serve(async (req) => {
       });
     }
 
-    const { name, age, questionCount, contentType } = await req.json();
+    const { name, age, questionCount, contentType, contentTone } =
+      await req.json();
 
     if (!name || !age || !questionCount) {
-      return new Response(JSON.stringify({ error: "Missing required fields" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: "Missing required fields" }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
+    // Adults can opt into family-friendly tone; minors are always locked.
     const isAdult = age >= 18;
-    const systemPrompt = isAdult ? ADULT_SYSTEM_PROMPT : MINOR_SYSTEM_PROMPT;
+    const familyFriendly = !isAdult || contentTone === "family";
+    const systemPrompt = familyFriendly
+      ? MINOR_SYSTEM_PROMPT
+      : ADULT_SYSTEM_PROMPT;
 
-    const contentContext = contentType === "movie"
-      ? "movies only"
-      : contentType === "book"
-      ? "books only"
-      : "both movies and books";
+    const contentContext =
+      contentType === "movie"
+        ? "movies only"
+        : contentType === "book"
+          ? "books only"
+          : "both movies and books";
 
     const userPrompt = `Generate exactly ${questionCount} personalized quiz questions for ${name}, age ${age}.
 The goal is to understand their personality and taste deeply enough to recommend ${contentContext} they'll love.
 
-${isAdult ? `Since they are an adult, you may include 1-2 questions about preferences for mature themes
-(dark content, sexuality in storytelling, moral complexity, horror intensity, etc).
-Frame these naturally and matter-of-factly.` : ""}
+${
+  !familyFriendly
+    ? `Since they are an adult who hasn't opted into family-friendly mode, you may include
+1-2 questions about preferences for mature themes (dark content, sexuality in storytelling,
+moral complexity, horror intensity, etc). Frame these naturally and matter-of-factly.`
+    : ""
+}
 
 Requirements:
 - Each question must be unique and reveal something meaningful about their taste
 - Mix question types: hypothetical scenarios, preference comparisons, emotional responses
 - Questions should feel like a fun conversation, not a form
 - Vary the format so they don't feel repetitive
+- Use a mix of these question types:
+  - "single_select" — the user picks one answer (most questions should be this type)
+  - "select_all" — the user picks multiple answers (use for genre/preference lists, 1-2 per quiz)
+  - "fill_in_blank" — the user types a free-text answer (use for open-ended questions, 1 per quiz)
+
+CRITICAL RULES FOR OPTIONS:
+- Every "single_select" question MUST include an "options" array with EXACTLY 4 distinct, short answer choices that directly answer the question text.
+- Every "select_all" question MUST include an "options" array with 6 to 8 distinct, short answer choices that the user could plausibly multi-select.
+- "fill_in_blank" questions MUST NOT include an "options" array. Include a "placeholder" string with a short example answer instead.
+- Options must be specific to the question — generic "Yes / No / Maybe" answers are forbidden unless the question literally calls for them.
+- Each option must be 1-5 words. No long sentences.
 
 Return ONLY a JSON array. No markdown, no explanation, no preamble. Example format:
 [
   {
     "id": "q1",
-    "question": "If you could live inside any fictional world for a week, where would you go and why?",
-    "type": "open"
+    "text": "If you could live inside any fictional world for a week, where would you go and why?",
+    "type": "fill_in_blank",
+    "placeholder": "e.g. Middle-earth — to walk through the Shire"
+  },
+  {
+    "id": "q2",
+    "text": "What kind of story hooks you the fastest?",
+    "type": "single_select",
+    "options": ["A surprising twist", "A character you can't look away from", "A vivid world", "A burning question"]
+  },
+  {
+    "id": "q3",
+    "text": "Which themes pull you in? Pick any that resonate.",
+    "type": "select_all",
+    "options": ["Found family", "Coming of age", "Mystery & intrigue", "Survival", "Forbidden love", "Redemption", "Power & politics"]
   }
 ]`;
+
+    const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
+    if (!apiKey) {
+      throw new Error("ANTHROPIC_API_KEY is not configured on the server");
+    }
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": Deno.env.get("ANTHROPIC_API_KEY") ?? "",
+        "x-api-key": apiKey,
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-sonnet-4-6",
         max_tokens: 2000,
         system: systemPrompt,
         messages: [{ role: "user", content: userPrompt }],
@@ -98,6 +141,27 @@ Return ONLY a JSON array. No markdown, no explanation, no preamble. Example form
     const content = data.content[0]?.text ?? "[]";
     const clean = content.replace(/```json|```/g, "").trim();
     const questions = JSON.parse(clean);
+
+    if (!Array.isArray(questions) || questions.length === 0) {
+      throw new Error("AI returned no questions");
+    }
+
+    for (const q of questions) {
+      if (!q || typeof q.text !== "string" || typeof q.type !== "string") {
+        throw new Error("AI returned a malformed question");
+      }
+      if (q.type === "single_select" || q.type === "select_all") {
+        if (
+          !Array.isArray(q.options) ||
+          q.options.length < 4 ||
+          q.options.some((o: unknown) => typeof o !== "string" || !o.trim())
+        ) {
+          throw new Error(
+            `AI question "${q.text}" is missing valid options`,
+          );
+        }
+      }
+    }
 
     return new Response(JSON.stringify({ questions }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
