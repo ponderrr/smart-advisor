@@ -1,8 +1,0 @@
-{
-  "compilerOptions": {
-    "lib": ["deno.window", "dom"]
-  },
-  "tasks": {
-    "serve": "supabase functions serve google-books-proxy --no-verify-jwt"
-  }
-}
