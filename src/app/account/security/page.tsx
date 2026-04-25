@@ -3,6 +3,7 @@
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { SessionsManagement } from "@/features/auth/components/sessions-management";
 import { MfaManagement } from "@/features/auth/components/mfa-management";
+import { PasskeyManagement } from "@/features/auth/components/passkey-management";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -60,6 +61,11 @@ export default function AccountSecurityPage() {
               // Trigger a refresh if needed
             }}
           />
+
+          {/* Passkeys */}
+          <div className="rounded-lg border bg-card p-6 shadow-sm">
+            <PasskeyManagement />
+          </div>
 
           {/* Sessions Management */}
           <SessionsManagement userId={user.id} />
