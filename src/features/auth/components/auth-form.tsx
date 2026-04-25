@@ -596,11 +596,11 @@ export const AuthForm = ({
     <div
       className={cn(
         "mx-auto w-full max-w-md overflow-hidden rounded-2xl border border-slate-200/70 bg-white/85 p-5 shadow-sm backdrop-blur-md transition-all duration-300 dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-6",
-        mode === "signup" && "min-h-[620px]",
-        mode === "signin" && "min-h-[500px]",
-        mode === "forgot" && "min-h-[430px]",
-        mode === "verify-email" && "min-h-[400px]",
-        mode === "mfa-challenge" && "min-h-[440px]",
+        mode === "signup" && "md:min-h-[620px]",
+        mode === "signin" && "md:min-h-[500px]",
+        mode === "forgot" && "md:min-h-[430px]",
+        mode === "verify-email" && "md:min-h-[400px]",
+        mode === "mfa-challenge" && "md:min-h-[440px]",
       )}
     >
       <AnimatePresence mode="wait">
