@@ -64,7 +64,7 @@ const sortOptions: { value: SortMode; label: string }[] = [
 
 const HistoryShimmerLoader = () => {
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
       {[...Array(10)].map((_, i) => (
         <div
           key={i}
@@ -255,6 +255,7 @@ const AccountHistoryPage = () => {
     const update = () => {
       const w = window.innerWidth;
       if (w >= 1280) setColCount(5);
+      else if (w >= 1024) setColCount(4);
       else if (w >= 768) setColCount(3);
       else setColCount(2);
     };
@@ -383,7 +384,7 @@ const AccountHistoryPage = () => {
               <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
                 History
               </p>
-              <h1 className="mt-2 text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl">
+              <h1 className="mt-2 text-2xl font-black tracking-tighter sm:text-3xl md:text-4xl lg:text-5xl">
                 Your suggestion history
               </h1>
               <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">

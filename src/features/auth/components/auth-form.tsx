@@ -131,6 +131,7 @@ export const AuthForm = ({
   const [mfaCode, setMfaCode] = useState("");
   const [mfaInputMode, setMfaInputMode] = useState<"totp" | "backup">("totp");
   const [mfaVerifying, setMfaVerifying] = useState(false);
+  const [mfaSuccess, setMfaSuccess] = useState(false);
 
   // Passkey sign-in state
   const [passkeySupported, setPasskeySupported] = useState(false);
@@ -508,6 +509,33 @@ export const AuthForm = ({
     }
   };
 
+  /**
+   * Friendlier copy for the noisy error strings the auth APIs return on a
+   * wrong/expired code. Falls back to the raw error for anything we don't
+   * recognize so unusual cases (network errors, etc.) still surface.
+   */
+  const friendlyMfaError = (raw: string, mode: "totp" | "backup") => {
+    const normalized = raw.toLowerCase();
+    if (normalized.includes("expired")) {
+      return mode === "totp"
+        ? "That code expired. Wait for a new one in your authenticator and try again."
+        : "That backup code is no longer valid.";
+    }
+    if (
+      normalized.includes("invalid") ||
+      normalized.includes("incorrect") ||
+      normalized.includes("doesn't match") ||
+      normalized.includes("does not match") ||
+      normalized.includes("not match") ||
+      normalized.includes("wrong")
+    ) {
+      return mode === "totp"
+        ? "That code didn't match. Double-check your authenticator and try again."
+        : "That backup code didn't match. Each code only works once.";
+    }
+    return raw;
+  };
+
   const handleMfaVerify = async () => {
     resetFeedback();
     setMfaVerifying(true);
@@ -520,10 +548,14 @@ export const AuthForm = ({
         }
         const result = await onVerifyMFA(mfaFactorId, mfaCode);
         if (result.error) {
-          setErrors({ general: result.error });
+          setErrors({ general: friendlyMfaError(result.error, "totp") });
+          setMfaCode("");
         } else {
+          setMfaSuccess(true);
           onMfaChallengeResolved?.();
-          router.replace("/dashboard");
+          // Brief confirmation before the redirect so the verify success
+          // doesn't feel like a silent flash.
+          setTimeout(() => router.replace("/dashboard"), 2800);
         }
       } else {
         const trimmed = mfaCode.trim();
@@ -533,10 +565,12 @@ export const AuthForm = ({
         }
         const result = await onVerifyBackupCode(trimmed);
         if (result.error) {
-          setErrors({ general: result.error });
+          setErrors({ general: friendlyMfaError(result.error, "backup") });
+          setMfaCode("");
         } else {
+          setMfaSuccess(true);
           onMfaChallengeResolved?.();
-          router.replace("/dashboard");
+          setTimeout(() => router.replace("/dashboard"), 2800);
         }
       }
     } finally {
@@ -610,6 +644,7 @@ export const AuthForm = ({
               }}
               onVerify={handleMfaVerify}
               verifying={mfaVerifying}
+              success={mfaSuccess}
               error={formError}
               onBackToSignIn={() => toggleMode("signin")}
             />
