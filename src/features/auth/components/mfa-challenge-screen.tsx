@@ -1,7 +1,9 @@
 "use client";
 
-import { ShieldCheck, KeyRound } from "lucide-react";
+import { ShieldCheck, KeyRound, Check } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import { AuthHoverButton } from "./auth-shared";
+import { cn } from "@/lib/utils";
 
 export const MfaChallengeScreen = ({
   mfaCode,
@@ -10,6 +12,7 @@ export const MfaChallengeScreen = ({
   onToggleMfaInputMode,
   onVerify,
   verifying,
+  success = false,
   error,
   onBackToSignIn,
 }: {
@@ -19,10 +22,39 @@ export const MfaChallengeScreen = ({
   onToggleMfaInputMode: () => void;
   onVerify: () => void;
   verifying: boolean;
+  /** Renders a green confirmation state for the brief window between
+   *  successful verification and the dashboard redirect. */
+  success?: boolean;
   error: string | null;
   onBackToSignIn: () => void;
 }) => {
   const isTotp = mfaInputMode === "totp";
+
+  if (success) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
+        className="flex flex-col items-center justify-center space-y-5 py-8 text-center"
+      >
+        <div className="rounded-full bg-emerald-100 p-4 dark:bg-emerald-900/30">
+          <Check
+            className="h-10 w-10 text-emerald-600 dark:text-emerald-400"
+            strokeWidth={3}
+          />
+        </div>
+        <div>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+            Verified
+          </h2>
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            Taking you to your dashboard…
+          </p>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center space-y-5 py-4 text-center">
@@ -53,7 +85,12 @@ export const MfaChallengeScreen = ({
             maxLength={6}
             value={mfaCode}
             onChange={(e) => onMfaCodeChange(e.target.value.replace(/\D/g, ""))}
-            className="w-full rounded-lg border-2 border-slate-200 bg-white px-4 py-4 text-center text-3xl font-bold tracking-[0.4em] text-slate-900 placeholder-slate-300 focus:border-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder-slate-600"
+            className={cn(
+              "w-full rounded-lg border-2 bg-white px-4 py-4 text-center text-3xl font-bold tracking-[0.4em] text-slate-900 placeholder-slate-300 transition-colors focus:outline-none focus:ring-4 dark:bg-slate-900 dark:text-white dark:placeholder-slate-600",
+              error
+                ? "border-red-400 focus:border-red-500 focus:ring-red-500/15 dark:border-red-500/60"
+                : "border-slate-200 focus:border-violet-500 focus:ring-violet-500/10 dark:border-slate-700",
+            )}
             placeholder="000000"
             autoFocus
             onKeyDown={(e) => {
@@ -65,7 +102,12 @@ export const MfaChallengeScreen = ({
             type="text"
             value={mfaCode}
             onChange={(e) => onMfaCodeChange(e.target.value)}
-            className="w-full rounded-lg border-2 border-slate-200 bg-white px-4 py-3 text-center font-mono text-lg font-semibold tracking-wider text-slate-900 placeholder-slate-300 uppercase focus:border-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder-slate-600"
+            className={cn(
+              "w-full rounded-lg border-2 bg-white px-4 py-3 text-center font-mono text-lg font-semibold tracking-wider text-slate-900 placeholder-slate-300 uppercase transition-colors focus:outline-none focus:ring-4 dark:bg-slate-900 dark:text-white dark:placeholder-slate-600",
+              error
+                ? "border-red-400 focus:border-red-500 focus:ring-red-500/15 dark:border-red-500/60"
+                : "border-slate-200 focus:border-violet-500 focus:ring-violet-500/10 dark:border-slate-700",
+            )}
             placeholder="XXXXX-XXXXX"
             autoFocus
             onKeyDown={(e) => {
@@ -74,9 +116,21 @@ export const MfaChallengeScreen = ({
           />
         )}
 
-        {error && (
-          <p className="mt-2 text-sm font-medium text-red-500">{error}</p>
-        )}
+        <AnimatePresence initial={false} mode="wait">
+          {error && (
+            <motion.p
+              key={error}
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.18 }}
+              role="alert"
+              className="mt-2 text-sm font-semibold text-red-500"
+            >
+              {error}
+            </motion.p>
+          )}
+        </AnimatePresence>
       </div>
 
       <div className="w-full max-w-xs space-y-3">

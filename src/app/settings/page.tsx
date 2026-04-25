@@ -613,8 +613,8 @@ const SettingsPage = () => {
             <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
               Settings
             </p>
-            <h1 className="mt-2 text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl">
-              Account Settings
+            <h1 className="mt-2 text-2xl font-black tracking-tighter sm:text-3xl md:text-4xl lg:text-5xl">
+              Account settings
             </h1>
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
               Manage your profile, security, and preferences.
@@ -758,19 +758,19 @@ const SettingsPage = () => {
 
                     <SectionCard>
                       <SectionHeader
-                        title="Profile Details"
+                        title="Profile details"
                         description="Update your public account details."
                       />
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <SettingsInput
-                          label="Current Username"
+                          label="Current username"
                           defaultValue={user?.name || ""}
                           readOnly
                           disabled
                           icon={<CircleOff size={14} />}
                         />
                         <SettingsInput
-                          label="New Username"
+                          label="New username"
                           placeholder="Enter new username"
                           error={profileForm.formState.errors.newName?.message}
                           {...profileForm.register("newName")}
@@ -795,7 +795,7 @@ const SettingsPage = () => {
                           }
                           className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
                         >
-                          Save Profile
+                          Save changes
                         </StatefulButton>
                       </div>
                     </SectionCard>
@@ -865,7 +865,7 @@ const SettingsPage = () => {
                         <div>
                           <div ref={newPasswordAnchorRef}>
                             <SettingsInput
-                              label="New Password"
+                              label="New password"
                               type="password"
                               placeholder="••••••••"
                               icon={<Lock size={14} />}
@@ -889,7 +889,7 @@ const SettingsPage = () => {
                         <div>
                           <div ref={confirmPasswordAnchorRef}>
                             <SettingsInput
-                              label="Confirm Password"
+                              label="Confirm password"
                               type="password"
                               placeholder="••••••••"
                               icon={<Lock size={14} />}
@@ -931,7 +931,7 @@ const SettingsPage = () => {
                       {!showMfaPanel ? (
                         <>
                           <SectionHeader
-                            title="Two-Factor Authentication"
+                            title="Two-factor authentication"
                             description="An extra step at sign-in to keep your account secure."
                           />
 
@@ -989,25 +989,17 @@ const SettingsPage = () => {
                           </div>
                         </>
                       ) : (
-                        <div>
-                          <button
-                            onClick={() => setShowMfaPanel(false)}
-                            className="mb-4 text-xs font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-                          >
-                            &larr; Back to Security
-                          </button>
-                          <MfaManagement
-                            key={mfaPanelKey}
-                            mfaEnabled={mfaEnabled}
-                            onMfaStatusChange={() => setShowMfaPanel(false)}
-                            onAddAuthenticator={() =>
-                              setMfaSetupModal({
-                                open: true,
-                                isAdditional: true,
-                              })
-                            }
-                          />
-                        </div>
+                        <MfaManagement
+                          key={mfaPanelKey}
+                          mfaEnabled={mfaEnabled}
+                          onMfaStatusChange={() => setShowMfaPanel(false)}
+                          onAddAuthenticator={() =>
+                            setMfaSetupModal({
+                              open: true,
+                              isAdditional: true,
+                            })
+                          }
+                        />
                       )}
                     </SectionCard>
 
@@ -1019,7 +1011,7 @@ const SettingsPage = () => {
                     {/* Backup Email */}
                     <SectionCard>
                       <SectionHeader
-                        title="Backup Email"
+                        title="Backup email"
                         description="A recovery address used when your authenticator is unavailable."
                       />
 
@@ -1069,13 +1061,17 @@ const SettingsPage = () => {
                           }
                           className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
                         >
-                          {currentBackupEmail ? "Update Backup" : "Save Backup"}
+                          {currentBackupEmail ? "Update backup" : "Save backup"}
                         </StatefulButton>
                       </div>
                     </SectionCard>
 
                     {/* Sessions */}
-                    {user?.id && <SessionsManagement userId={user.id} />}
+                    {user?.id && (
+                      <SectionCard>
+                        <SessionsManagement userId={user.id} />
+                      </SectionCard>
+                    )}
                   </motion.div>
                 )}
 
@@ -1090,7 +1086,7 @@ const SettingsPage = () => {
                   >
                     <SectionCard>
                       <SectionHeader
-                        title="Content Preferences"
+                        title="Content preferences"
                         description="Set your default recommendation behavior."
                       />
 
