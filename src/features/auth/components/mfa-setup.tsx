@@ -26,7 +26,13 @@ interface MfaSetupProps {
   skipBackupCodes?: boolean;
 }
 
-type SetupStep = "intro" | "method" | "qr" | "verify" | "backup-codes";
+type SetupStep =
+  | "intro"
+  | "method"
+  | "name"
+  | "qr"
+  | "verify"
+  | "backup-codes";
 
 export const MfaSetup = ({
   onComplete,
@@ -44,11 +50,12 @@ export const MfaSetup = ({
   const [copied, setCopied] = useState(false);
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
   const [backupCodesCopied, setBackupCodesCopied] = useState(false);
+  const [deviceName, setDeviceName] = useState("");
 
-  const handleEnroll = useCallback(async () => {
+  const handleEnroll = useCallback(async (name?: string) => {
     setLoading(true);
     setError(null);
-    const { data, error: enrollError } = await authService.enrollMFA();
+    const { data, error: enrollError } = await authService.enrollMFA(name);
     setLoading(false);
 
     if (enrollError) {
@@ -161,11 +168,13 @@ export const MfaSetup = ({
       ? skipIntro
         ? null
         : "intro"
-      : step === "qr"
+      : step === "name"
         ? "method"
-        : step === "verify"
-          ? "qr"
-          : null;
+        : step === "qr"
+          ? "name"
+          : step === "verify"
+            ? "qr"
+            : null;
 
   const handleBack = () => {
     if (!backTarget) return;
@@ -269,7 +278,10 @@ export const MfaSetup = ({
 
             <button
               type="button"
-              onClick={handleEnroll}
+              onClick={() => {
+                setError(null);
+                setStep("name");
+              }}
               disabled={loading}
               className="flex w-full items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 text-left transition-colors hover:border-violet-400 hover:bg-violet-50/50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900/40 dark:hover:border-violet-500 dark:hover:bg-violet-900/10"
             >
@@ -304,6 +316,55 @@ export const MfaSetup = ({
               Cancel
             </button>
           )}
+        </motion.div>
+      )}
+
+      {step === "name" && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-md"
+        >
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+            Name this authenticator
+          </h2>
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            Use the device that will hold the code — that way you can tell
+            authenticators apart later.
+          </p>
+
+          <div className="mt-6 text-left">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              Device name
+            </label>
+            <input
+              type="text"
+              value={deviceName}
+              onChange={(e) => setDeviceName(e.target.value.slice(0, 40))}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !loading) handleEnroll(deviceName);
+              }}
+              placeholder="e.g., iPhone, Work phone"
+              autoFocus
+              className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm transition-colors focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-100"
+            />
+            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+              Leave blank to use a generic label.
+            </p>
+          </div>
+
+          {error && (
+            <p className="mt-3 text-sm font-medium text-red-500">{error}</p>
+          )}
+
+          <Button
+            onClick={() => handleEnroll(deviceName)}
+            disabled={loading}
+            size="lg"
+            className="mt-6 w-full"
+          >
+            {loading ? "Setting up..." : "Continue"}
+          </Button>
         </motion.div>
       )}
 

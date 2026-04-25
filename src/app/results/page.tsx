@@ -28,7 +28,7 @@ import {
 import { SafeLocalStorage } from "@/utils/localStorage";
 import { useQuizStore } from "@/features/quiz/store/quiz-store";
 import { PillButton } from "@/components/ui/pill-button";
-import { LoaderFive, PageLoader } from "@/components/ui/loader";
+import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -73,11 +73,65 @@ const saveGeneratedSession = (sessionId: string) => {
 };
 
 /* ---------- Loading Animation ---------- */
-const ResultsLoadingState = ({ step: _step }: { step: string }) => (
-  <div className="mx-auto flex min-h-[480px] w-full max-w-4xl flex-col items-center justify-center rounded-3xl border border-slate-200/70 bg-white/85 p-6 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
-    <LoaderFive text="Crafting your recommendations..." />
-  </div>
-);
+const LOADING_MESSAGES = [
+  "Flipping through your answers...",
+  "Consulting the algorithm...",
+  "Cross-referencing great taste...",
+  "Digging through movie shelves...",
+  "Searching the library stacks...",
+  "Hunting for hidden gems...",
+  "Matching moods and genres...",
+  "Dusting off forgotten classics...",
+  "Checking against your history...",
+  "Weighing the shortlist...",
+  "Narrowing down the picks...",
+  "Running it by our AI once more...",
+  "Polishing each recommendation...",
+  "Adding the finishing touches...",
+] as const;
+
+const ResultsLoadingState = ({ step: _step }: { step: string }) => {
+  const [messageIndex, setMessageIndex] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setMessageIndex((i) => (i + 1) % LOADING_MESSAGES.length);
+    }, 3800);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <div className="mx-auto flex min-h-[480px] w-full max-w-4xl flex-col items-center justify-center rounded-3xl border border-slate-200/70 bg-white/85 p-6 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
+      <div
+        className="mb-6 flex items-center justify-center gap-2"
+        aria-hidden
+      >
+        <span className="h-3 w-3 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.3s]" />
+        <span className="h-3 w-3 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.15s]" />
+        <span className="h-3 w-3 animate-bounce rounded-full bg-indigo-500" />
+      </div>
+
+      <div
+        className="flex min-h-[1.75rem] items-center justify-center"
+        role="status"
+        aria-live="polite"
+      >
+        <AnimatePresence mode="wait">
+          <motion.p
+            key={messageIndex}
+            initial={{ opacity: 0, y: 6, filter: "blur(4px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            exit={{ opacity: 0, y: -6, filter: "blur(4px)" }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className="text-base font-semibold text-slate-700 dark:text-slate-200"
+          >
+            {LOADING_MESSAGES[messageIndex]}
+          </motion.p>
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+};
 
 /* ---------- Recommendation Card ---------- */
 const RecommendationCard = ({

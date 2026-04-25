@@ -549,7 +549,7 @@ class AuthService {
   updatePasswordWithTicket = (p: string) =>
     accountService.updatePasswordWithTicket(p);
 
-  enrollMFA = () => mfaService.enroll();
+  enrollMFA = (friendlyName?: string) => mfaService.enroll(friendlyName);
   verifyMFA = (f: string, c: string) => mfaService.verify(f, c);
   unenrollMFA = (f: string) => mfaService.unenroll(f);
   listMFAFactors = () => mfaService.listFactors();
