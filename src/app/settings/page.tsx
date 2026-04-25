@@ -221,6 +221,17 @@ const SettingsPage = () => {
   // of which tab the user came from.
   const sectionSlideDir = -1;
 
+  // Switching sections when scrolled would otherwise snap the window up,
+  // since the newly rendered section is often shorter than the previous one.
+  // Animate the scroll so the change feels continuous.
+  const changeSection = (id: SettingsSection) => {
+    if (id === activeSection) return;
+    setActiveSection(id);
+    if (typeof window !== "undefined" && window.scrollY > 0) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   const profileForm = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
     defaultValues: { newName: user?.name ?? "", age: user?.age ?? 18 },
@@ -386,6 +397,19 @@ const SettingsPage = () => {
       closeVerifyModal(true);
     }
   }, [verifyCode, closeVerifyModal]);
+
+  // Auto-submit the verify modal once six digits are in (TOTP mode only —
+  // the enroll mode inside this modal has its own input).
+  useEffect(() => {
+    if (
+      verifyModal.open &&
+      verifyModal.mode === "totp" &&
+      verifyCode.length === 6 &&
+      !verifyLoading
+    ) {
+      handleVerifySubmit();
+    }
+  }, [verifyCode, verifyModal.open, verifyModal.mode, verifyLoading, handleVerifySubmit]);
 
   const sectionTabs: {
     id: SettingsSection;
@@ -607,7 +631,7 @@ const SettingsPage = () => {
                       icon={tab.icon}
                       label={tab.label}
                       active={activeSection === tab.id}
-                      onClick={() => setActiveSection(tab.id)}
+                      onClick={() => changeSection(tab.id)}
                     />
                   ))}
 
@@ -622,7 +646,7 @@ const SettingsPage = () => {
                       icon={tab.icon}
                       label={tab.label}
                       active={activeSection === tab.id}
-                      onClick={() => setActiveSection(tab.id)}
+                      onClick={() => changeSection(tab.id)}
                     />
                   ))}
               </nav>

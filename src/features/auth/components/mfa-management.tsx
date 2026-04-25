@@ -65,6 +65,20 @@ export const MfaManagement = ({
     loadBackupCodeCount();
   }, []);
 
+  // Auto-submit once six digits are in. Re-runs whenever verifyCode changes,
+  // so a failed attempt followed by a correction triggers another verify.
+  useEffect(() => {
+    if (
+      verifyModalOpen &&
+      verifyCode.length === 6 &&
+      !verifyLoading &&
+      pendingUnenrollId
+    ) {
+      handleVerifyAndUnenroll();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [verifyCode, verifyModalOpen]);
+
   const loadFactors = async () => {
     setLoading(true);
     const { data, error } = await authService.listMFAFactors();

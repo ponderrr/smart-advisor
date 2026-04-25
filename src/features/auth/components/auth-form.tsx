@@ -8,7 +8,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { MfaSetup } from "./mfa-setup";
 import { MfaChallengeScreen } from "./mfa-challenge-screen";
 import { VerifyEmailScreen } from "./verify-email-screen";
 import {
@@ -25,8 +24,7 @@ export type AuthMode =
   | "signup"
   | "forgot"
   | "verify-email"
-  | "mfa-challenge"
-  | "mfa-setup";
+  | "mfa-challenge";
 
 const MODE_HEADINGS = {
   signin: [
@@ -46,11 +44,6 @@ const MODE_HEADINGS = {
   ],
   "verify-email": ["Check your inbox", "Almost there", "One last step"],
   "mfa-challenge": ["Verify your identity", "One more step", "Security check"],
-  "mfa-setup": [
-    "Secure your account",
-    "Add extra protection",
-    "Enable two-factor auth",
-  ],
 } as const;
 
 interface AuthFormProps {
@@ -125,7 +118,6 @@ export const AuthForm = ({
     forgot: 0,
     "verify-email": 0,
     "mfa-challenge": 0,
-    "mfa-setup": 0,
   });
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPendingMfa, setSignupPendingMfa] = useState(false);
@@ -248,9 +240,6 @@ export const AuthForm = ({
       ),
       "mfa-challenge": Math.floor(
         Math.random() * MODE_HEADINGS["mfa-challenge"].length,
-      ),
-      "mfa-setup": Math.floor(
-        Math.random() * MODE_HEADINGS["mfa-setup"].length,
       ),
     });
   }, []);
@@ -423,20 +412,19 @@ export const AuthForm = ({
           }
           setMode("mfa-challenge");
         } else {
+          // Safety net: if a verified TOTP factor exists but the AAL check
+          // didn't mark MFA required, still present the challenge rather than
+          // silently bypassing it.
           const factorsResult = await onListMFAFactors();
           const verifiedFactor = factorsResult.data?.totp?.find(
             (f: MFAFactor) => f.status === "verified",
           );
-          if (!verifiedFactor) {
-            setMode("mfa-setup");
-          } else {
-            // Verified TOTP factor exists but the AAL check didn't mark MFA
-            // required. Treat as MFA-required rather than silently bypassing
-            // the challenge.
+          if (verifiedFactor) {
             onMfaChallengeStarted?.();
             setMfaFactorId(verifiedFactor.id);
             setMode("mfa-challenge");
           }
+          // No verified factor → let the parent redirect to dashboard.
         }
         return result;
       }
@@ -500,6 +488,20 @@ export const AuthForm = ({
     }
   };
 
+  // Auto-submit the MFA challenge when six TOTP digits are present. Backup
+  // codes aren't a fixed length, so we only do this for TOTP.
+  useEffect(() => {
+    if (
+      mode === "mfa-challenge" &&
+      mfaInputMode === "totp" &&
+      mfaCode.length === 6 &&
+      !mfaVerifying
+    ) {
+      handleMfaVerify();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mfaCode, mfaInputMode, mode]);
+
   return (
     <div
       className={cn(
@@ -509,24 +511,10 @@ export const AuthForm = ({
         mode === "forgot" && "min-h-[430px]",
         mode === "verify-email" && "min-h-[400px]",
         mode === "mfa-challenge" && "min-h-[440px]",
-        mode === "mfa-setup" && "min-h-[500px]",
       )}
     >
       <AnimatePresence mode="wait">
-        {mode === "mfa-setup" ? (
-          <motion.div
-            key="mfa-setup"
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -10 }}
-            className="flex flex-col h-full"
-          >
-            <MfaSetup
-              onComplete={() => router.replace("/dashboard")}
-              onSkip={() => router.replace("/dashboard")}
-            />
-          </motion.div>
-        ) : mode === "verify-email" ? (
+        {mode === "verify-email" ? (
           <motion.div
             key="verify-email"
             initial={{ opacity: 0, x: 10 }}

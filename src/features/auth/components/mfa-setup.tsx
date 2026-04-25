@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { format } from "date-fns";
 import { authService } from "../services/auth-service";
 import {
@@ -64,6 +64,14 @@ export const MfaSetup = ({
       setStep("qr");
     }
   }, []);
+
+  // Auto-submit when six digits are present on the verify step.
+  useEffect(() => {
+    if (step === "verify" && code.length === 6 && !loading && factorId) {
+      handleVerify();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code, step]);
 
   const handleVerify = async () => {
     if (code.length !== 6) {
