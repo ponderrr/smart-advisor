@@ -68,7 +68,8 @@ const config = {
         gray: { 500: "#6B7280", 600: "#4B5563", 700: "#374151" },
       },
       fontFamily: {
-        inter: ["Inter", "sans-serif"],
+        sans: ["var(--font-inter)", "ui-sans-serif", "system-ui", "sans-serif"],
+        inter: ["var(--font-inter)", "sans-serif"],
       },
       borderRadius: {
         lg: "var(--radius)",
