@@ -33,7 +33,17 @@ const MarqueeRow = ({
         transition={{ duration, ease: "linear", repeat: Infinity }}
       >
         {loop.map((src, i) => (
-          <div key={`${src}-${i}`} className="shrink-0 pr-3 sm:pr-4">
+          <motion.div
+            key={`${src}-${i}`}
+            className="shrink-0 pr-3 sm:pr-4"
+            initial={{ opacity: 0, filter: "blur(6px)" }}
+            animate={{ opacity: 1, filter: "blur(0px)" }}
+            transition={{
+              duration: 0.55,
+              delay: (i % images.length) * 0.06,
+              ease: [0.25, 0.1, 0.25, 1],
+            }}
+          >
             <div className="relative aspect-[2/3] h-28 overflow-hidden rounded-lg opacity-70 ring-1 ring-black/10 sm:h-36 md:h-44 dark:opacity-55 dark:ring-white/10">
               <img
                 src={src}
@@ -43,7 +53,7 @@ const MarqueeRow = ({
                 className="absolute inset-0 h-full w-full object-cover"
               />
             </div>
-          </div>
+          </motion.div>
         ))}
       </motion.div>
     </div>
