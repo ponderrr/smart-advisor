@@ -16,7 +16,9 @@ import {
   Download,
   X,
   Plus,
+  Pencil,
 } from "lucide-react";
+import { RenameDialog } from "./rename-dialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
@@ -59,6 +61,9 @@ export const MfaManagement = ({
   const [pendingUnenrollId, setPendingUnenrollId] = useState<string | null>(
     null,
   );
+
+  // Rename dialog
+  const [renameTarget, setRenameTarget] = useState<MFAFactor | null>(null);
 
   useEffect(() => {
     loadFactors();
@@ -221,10 +226,10 @@ export const MfaManagement = ({
               key={factor.id}
               className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-900/50"
             >
-              <div className="flex items-center gap-3">
-                <ShieldCheck className="h-5 w-5 text-green-600 dark:text-green-400" />
-                <div>
-                  <p className="font-medium text-slate-900 dark:text-slate-100">
+              <div className="flex min-w-0 flex-1 items-center gap-3">
+                <ShieldCheck className="h-5 w-5 shrink-0 text-green-600 dark:text-green-400" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-medium text-slate-900 dark:text-slate-100">
                     {prettifyFactorName(factor.friendly_name)}
                   </p>
                   <p className="text-xs text-slate-600 dark:text-slate-400">
@@ -232,19 +237,30 @@ export const MfaManagement = ({
                   </p>
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleUnenroll(factor.id)}
-                disabled={unenrollingId === factor.id}
-                className="text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/20"
-              >
-                {unenrollingId === factor.id ? (
-                  <Loader className="h-4 w-4 animate-spin" />
-                ) : (
-                  <ShieldOff className="h-4 w-4" />
-                )}
-              </Button>
+              <div className="flex shrink-0 items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setRenameTarget(factor)}
+                  aria-label={`Rename ${prettifyFactorName(factor.friendly_name)}`}
+                  className="text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleUnenroll(factor.id)}
+                  disabled={unenrollingId === factor.id}
+                  className="text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/20"
+                >
+                  {unenrollingId === factor.id ? (
+                    <Loader className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <ShieldOff className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
             </div>
           ))}
 
@@ -376,6 +392,27 @@ export const MfaManagement = ({
           <Button disabled>{loading ? "Loading..." : "Enable 2FA"}</Button>
         </div>
       )}
+
+      <RenameDialog
+        open={renameTarget !== null}
+        onClose={() => setRenameTarget(null)}
+        title="Rename authenticator"
+        description="Pick a name that makes the device easy to spot in your list."
+        fieldLabel="Authenticator name"
+        initialName={prettifyFactorName(renameTarget?.friendly_name)}
+        successMessage="Authenticator renamed"
+        maxLength={64}
+        placeholder="e.g., iPhone, Work phone"
+        onSave={async (name) => {
+          if (!renameTarget) return { error: "No authenticator selected" };
+          const result = await authService.renameMFAFactor(
+            renameTarget.id,
+            name,
+          );
+          if (!result.error) await loadFactors();
+          return result;
+        }}
+      />
 
       {typeof window !== "undefined" && createPortal(
         <AnimatePresence>

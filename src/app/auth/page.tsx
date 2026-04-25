@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { AuthForm, AuthLayout } from "@/features/auth/components";
@@ -32,6 +32,11 @@ const AuthPageContent = () => {
 
   // Track whether MFA challenge UI is showing (blocks dashboard redirect)
   const [mfaChallengeActive, setMfaChallengeActive] = useState(false);
+
+  // Set immediately before a passkey-driven router.replace so the next
+  // run of the AAL effect skips elevation (which would otherwise flash
+  // the MFA challenge screen). Ref so it doesn't retrigger renders.
+  const skipNextAalCheckRef = useRef(false);
 
   // Check for mfa_required param from OAuth callback
   const oauthMfaRequired = searchParams?.get("mfa_required") === "true";
@@ -66,6 +71,14 @@ const AuthPageContent = () => {
       !oauthMfaRequired &&
       !mfaPending
     ) {
+      // Passkey just signed in — skip the AAL elevation that would
+      // otherwise flash the MFA challenge before our redirect lands.
+      if (skipNextAalCheckRef.current) {
+        skipNextAalCheckRef.current = false;
+        router.push("/dashboard");
+        return;
+      }
+
       // Double-check AAL before redirecting
       if (session) {
         getAALLevel().then(({ data, error }) => {
@@ -117,6 +130,9 @@ const AuthPageContent = () => {
           clearMfaPending();
         }}
         onMfaChallengeStarted={() => setMfaChallengeActive(true)}
+        onPasskeySignedIn={() => {
+          skipNextAalCheckRef.current = true;
+        }}
       />
     </AuthLayout>
   );

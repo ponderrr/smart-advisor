@@ -57,6 +57,14 @@ export function toUserFriendlyError(
   if (message.includes("invalid totp") || message.includes("invalid otp")) {
     return "Invalid authentication code. Please try again.";
   }
+  if (
+    message.includes("friendly_name") &&
+    (message.includes("already") ||
+      message.includes("duplicate") ||
+      message.includes("conflict"))
+  ) {
+    return "You already have an authenticator with that name.";
+  }
 
   return fallback;
 }

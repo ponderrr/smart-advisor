@@ -94,6 +94,14 @@ export async function POST(req: NextRequest) {
   });
 
   if (error) {
+    // 23505 = unique_violation. Hits when two tabs race the same name, or
+    // when the early check in register/options was bypassed.
+    if ((error as { code?: string }).code === "23505") {
+      return NextResponse.json(
+        { error: "You already have a passkey with that name." },
+        { status: 409 },
+      );
+    }
     console.error("[passkey/register/verify] insert failed", error);
     return NextResponse.json(
       { error: "Couldn't save the passkey. Please try again." },
