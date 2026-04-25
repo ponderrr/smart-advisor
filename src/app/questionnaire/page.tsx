@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import { generateQuestionsWithRetry } from "@/features/recommendations/services/ai-service";
@@ -17,16 +17,67 @@ import {
   type QuestionValue,
 } from "@/features/quiz/components/question-card";
 import { PillButton } from "@/components/ui/pill-button";
-import { LoaderFive, PageLoader } from "@/components/ui/loader";
+import { PageLoader } from "@/components/ui/loader";
 import { supabase } from "@/integrations/supabase/client";
 import { AppNavbar } from "@/components/app-navbar";
 
 /* ---------- Loading Animation ---------- */
-const QuestionLoader = () => (
-  <div className="mx-auto flex min-h-[420px] w-full max-w-4xl flex-col items-center justify-center rounded-3xl border border-slate-200/70 bg-white/85 p-6 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
-    <LoaderFive text="Generating your questions..." />
-  </div>
-);
+const QUESTION_LOADING_MESSAGES = [
+  "Thinking up good questions...",
+  "Picking your angle...",
+  "Tailoring to your taste...",
+  "Calibrating for your vibe...",
+  "Finding the right starting point...",
+  "Drafting the quiz...",
+  "Stirring in a twist or two...",
+  "Sharpening the details...",
+  "Cutting the boring ones...",
+  "Double-checking the flow...",
+  "Almost ready for you...",
+] as const;
+
+const QuestionLoader = () => {
+  const [messageIndex, setMessageIndex] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setMessageIndex((i) => (i + 1) % QUESTION_LOADING_MESSAGES.length);
+    }, 3800);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <div className="mx-auto flex min-h-[420px] w-full max-w-4xl flex-col items-center justify-center rounded-3xl border border-slate-200/70 bg-white/85 p-6 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
+      <div
+        className="mb-6 flex items-center justify-center gap-2"
+        aria-hidden
+      >
+        <span className="h-3 w-3 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.3s]" />
+        <span className="h-3 w-3 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.15s]" />
+        <span className="h-3 w-3 animate-bounce rounded-full bg-indigo-500" />
+      </div>
+
+      <div
+        className="flex min-h-[1.75rem] items-center justify-center"
+        role="status"
+        aria-live="polite"
+      >
+        <AnimatePresence mode="wait">
+          <motion.p
+            key={messageIndex}
+            initial={{ opacity: 0, y: 6, filter: "blur(4px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            exit={{ opacity: 0, y: -6, filter: "blur(4px)" }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className="text-base font-semibold text-slate-700 dark:text-slate-200"
+          >
+            {QUESTION_LOADING_MESSAGES[messageIndex]}
+          </motion.p>
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+};
 
 const QuestionnairePage = () => {
   const router = useRouter();

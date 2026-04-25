@@ -51,25 +51,33 @@ export function LoaderFive({ text, className }: LoaderFiveProps) {
 }
 
 type PageLoaderProps = {
+  /** Used only as the accessible label — the UI is dots-only to keep route
+   *  transitions visually quiet. */
   text?: string;
   className?: string;
 };
 
 /**
- * PageLoader — full-screen centered LoaderFive.
+ * PageLoader — full-screen three-dot loader.
  *
  * Drop-in replacement for the centered `animate-spin` route-level loaders.
  * Same min-h-screen + slate background as the rest of the app shells.
  */
-export function PageLoader({ text = "Loading...", className }: PageLoaderProps) {
+export function PageLoader({ text = "Loading", className }: PageLoaderProps) {
   return (
     <div
+      role="status"
+      aria-label={text}
       className={cn(
         "flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950",
         className,
       )}
     >
-      <LoaderFive text={text} />
+      <div className="flex items-center justify-center gap-2" aria-hidden>
+        <span className="h-3 w-3 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.3s]" />
+        <span className="h-3 w-3 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.15s]" />
+        <span className="h-3 w-3 animate-bounce rounded-full bg-indigo-500" />
+      </div>
     </div>
   );
 }

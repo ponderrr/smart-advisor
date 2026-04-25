@@ -93,8 +93,9 @@ class EnhancedRecommendationsService {
   }
 
   /**
-   * Determines target counts: always 3 of each requested type.
-   * Makes parallel AI calls with extra buffer to survive title-dedup, enriches, and saves.
+   * Target counts: always 3 total picks regardless of contentType.
+   * For "both" we split 2 movies + 1 book. Fires parallel calls with dedup
+   * buffer and falls back to sequential retries if any calls fail silently.
    */
   async generateEnhancedRecommendations(
     questionnaireData: QuestionnaireData,
@@ -102,28 +103,25 @@ class EnhancedRecommendationsService {
   ): Promise<Recommendation[]> {
     const { answers, contentType, userAge, userName } = questionnaireData;
 
-    const movieTarget = contentType === "book" ? 0 : 3;
-    const bookTarget = contentType === "movie" ? 0 : 3;
-    // Each call returns 1 of each requested type. Run 5 in parallel so dedup
-    // has buffer to still hit 3 unique results per type.
-    const totalCalls = 5;
-
-    // Make parallel AI calls to collect multiple recommendations
-    const callResults = await Promise.allSettled(
-      Array.from({ length: totalCalls }, () =>
-        generateRecommendations(answers, contentType, userAge, userName),
-      ),
-    );
+    let movieTarget: number;
+    let bookTarget: number;
+    if (contentType === "movie") {
+      movieTarget = 3;
+      bookTarget = 0;
+    } else if (contentType === "book") {
+      movieTarget = 0;
+      bookTarget = 3;
+    } else {
+      movieTarget = 2;
+      bookTarget = 1;
+    }
 
     const movieRecs: Partial<Recommendation>[] = [];
     const bookRecs: Partial<Recommendation>[] = [];
     const seenMovieTitles = new Set<string>();
     const seenBookTitles = new Set<string>();
 
-    for (const result of callResults) {
-      if (result.status !== "fulfilled") continue;
-      const data = result.value;
-
+    const ingest = (data: Awaited<ReturnType<typeof generateRecommendations>>) => {
       if (data.movieRecommendation && movieRecs.length < movieTarget) {
         const title = data.movieRecommendation.title.toLowerCase().trim();
         if (!seenMovieTitles.has(title)) {
@@ -131,13 +129,54 @@ class EnhancedRecommendationsService {
           movieRecs.push({ ...data.movieRecommendation, type: "movie" });
         }
       }
-
       if (data.bookRecommendation && bookRecs.length < bookTarget) {
         const title = data.bookRecommendation.title.toLowerCase().trim();
         if (!seenBookTitles.has(title)) {
           seenBookTitles.add(title);
           bookRecs.push({ ...data.bookRecommendation, type: "book" });
         }
+      }
+    };
+
+    const atTarget = () =>
+      movieRecs.length >= movieTarget && bookRecs.length >= bookTarget;
+
+    // First pass: parallel calls sized to the target plus a small dedup buffer.
+    const parallelCalls = movieTarget + bookTarget + 2;
+    const callResults = await Promise.allSettled(
+      Array.from({ length: parallelCalls }, () =>
+        generateRecommendations(answers, contentType, userAge, userName),
+      ),
+    );
+
+    let failures = 0;
+    for (const result of callResults) {
+      if (result.status !== "fulfilled") {
+        failures++;
+        continue;
+      }
+      ingest(result.value);
+    }
+    if (failures > 0) {
+      console.warn(
+        `[recommendations] ${failures}/${parallelCalls} AI calls failed in parallel pass`,
+      );
+    }
+
+    // Fallback: sequential retries if silent failures or over-aggressive dedup
+    // left us short. Bounded so a persistent outage can still fail fast.
+    const maxExtraCalls = 3;
+    for (let i = 0; i < maxExtraCalls && !atTarget(); i++) {
+      try {
+        const data = await generateRecommendations(
+          answers,
+          contentType,
+          userAge,
+          userName,
+        );
+        ingest(data);
+      } catch (err) {
+        console.warn("[recommendations] fallback AI call failed:", err);
       }
     }
 

@@ -2,32 +2,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toUserFriendlyError } from "./error-messages";
 import { MFAEnrollData, MFAFactor } from "@/features/auth/types/mfa";
 
-/** Best-effort device label from the browser user-agent. Falls back to
- *  "This device" when detection fails (e.g. bots, exotic UAs, or SSR). */
-const describeCurrentDevice = (): string => {
-  if (typeof navigator === "undefined") return "This device";
-  const ua = navigator.userAgent || "";
-
-  let os = "Device";
-  if (/iPhone/i.test(ua)) os = "iPhone";
-  else if (/iPad/i.test(ua)) os = "iPad";
-  else if (/Android/i.test(ua)) os = "Android";
-  else if (/Mac OS X|Macintosh/i.test(ua)) os = "Mac";
-  else if (/Windows/i.test(ua)) os = "Windows";
-  else if (/Linux/i.test(ua)) os = "Linux";
-
-  let browser = "";
-  if (/Edg\//i.test(ua)) browser = "Edge";
-  else if (/OPR\/|Opera/i.test(ua)) browser = "Opera";
-  else if (/Chrome\//i.test(ua) && !/Chromium/i.test(ua)) browser = "Chrome";
-  else if (/Firefox\//i.test(ua)) browser = "Firefox";
-  else if (/Safari\//i.test(ua)) browser = "Safari";
-
-  return browser ? `${os} · ${browser}` : os;
-};
-
 class MfaService {
-  async enroll() {
+  async enroll(friendlyName?: string) {
     try {
       // Use getUser() to validate the session with the server, not getSession()
       // which can return stale tokens from local storage
@@ -56,22 +32,22 @@ class MfaService {
         // Non-critical — proceed with enrollment.
       }
 
-      // Label factors by device so users can tell authenticators apart.
-      // Supabase rejects duplicate friendly_names per user, so include the
-      // time-of-day — a user adding two authenticators from the same device
-      // on the same day would otherwise collide.
-      const device = describeCurrentDevice();
+      // We can't auto-detect the *phone* the code lives on — navigator.userAgent
+      // describes this browser. So the caller supplies a user-typed name
+      // (e.g. "iPhone"), and we append the time-of-day since Supabase rejects
+      // duplicate friendly_names per user.
+      const trimmed = friendlyName?.trim();
       const datePart = new Date().toLocaleString("en-US", {
         month: "short",
         day: "numeric",
         hour: "numeric",
         minute: "2-digit",
       });
-      const friendlyName = `${device} · ${datePart}`;
+      const label = `${trimmed || "Authenticator"} · ${datePart}`;
 
       const { data, error } = await supabase.auth.mfa.enroll({
         factorType: "totp",
-        friendlyName,
+        friendlyName: label,
       });
 
       if (error) {
