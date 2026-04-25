@@ -80,9 +80,35 @@ const SelectionCard: React.FC<SelectionCardProps> = ({
         <Check size={16} strokeWidth={3} />
       </div>
 
-      <div className="relative aspect-[16/10] overflow-hidden bg-slate-100 dark:bg-slate-800/80">
-        {secondaryMediaSrc ? (
-          <div className="grid h-full w-full grid-cols-2 gap-1 p-1">
+      {/*
+        Mobile uses a horizontal layout (square thumbnail + content) so three
+        cards don't push the page far below the fold. Desktop (md+) keeps the
+        vertical layout with the wide 16:10 video preview.
+      */}
+      <div className="flex md:block">
+        <div className="relative aspect-square w-28 shrink-0 overflow-hidden bg-slate-100 sm:w-32 md:aspect-[16/10] md:w-full dark:bg-slate-800/80">
+          {secondaryMediaSrc ? (
+            <div className="grid h-full w-full grid-cols-2 gap-1 p-1">
+              <video
+                src={mediaSrc}
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="auto"
+                className="h-full w-full rounded-xl object-cover md:rounded-2xl"
+              />
+              <video
+                src={secondaryMediaSrc}
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="auto"
+                className="h-full w-full rounded-xl object-cover md:rounded-2xl"
+              />
+            </div>
+          ) : (
             <video
               src={mediaSrc}
               autoPlay
@@ -90,60 +116,41 @@ const SelectionCard: React.FC<SelectionCardProps> = ({
               muted
               playsInline
               preload="auto"
-              className="h-full w-full rounded-2xl object-cover"
+              className="h-full w-full object-contain p-2 transition-transform duration-500 group-hover:scale-105 md:p-3"
             />
-            <video
-              src={secondaryMediaSrc}
-              autoPlay
-              loop
-              muted
-              playsInline
-              preload="auto"
-              className="h-full w-full rounded-2xl object-cover"
-            />
-          </div>
-        ) : (
-          <video
-            src={mediaSrc}
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="auto"
-            className="h-full w-full object-contain p-3 transition-transform duration-500 group-hover:scale-105"
-          />
-        )}
-      </div>
+          )}
+        </div>
 
-      <div className="relative p-5">
-        <div className="flex items-center gap-2">
-          <span
-            className={cn(
-              "flex h-7 w-7 items-center justify-center rounded-full transition-colors duration-300",
-              isSelected
-                ? "bg-indigo-500 text-white"
-                : "bg-slate-100 text-slate-500 group-hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-slate-700",
-            )}
-          >
-            {icon}
-          </span>
-          <p
-            className={cn(
-              "text-[10px] font-black uppercase tracking-[0.18em] transition-colors duration-300",
-              isSelected
-                ? "text-indigo-600 dark:text-indigo-400"
-                : "text-slate-400 dark:text-slate-500",
-            )}
-          >
-            {eyebrow}
+        <div className="relative flex-1 p-4 md:p-5">
+          <div className="flex items-center gap-2">
+            <span
+              className={cn(
+                "flex h-7 w-7 items-center justify-center rounded-full transition-colors duration-300",
+                isSelected
+                  ? "bg-indigo-500 text-white"
+                  : "bg-slate-100 text-slate-500 group-hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-slate-700",
+              )}
+            >
+              {icon}
+            </span>
+            <p
+              className={cn(
+                "text-[10px] font-black uppercase tracking-[0.18em] transition-colors duration-300",
+                isSelected
+                  ? "text-indigo-600 dark:text-indigo-400"
+                  : "text-slate-400 dark:text-slate-500",
+              )}
+            >
+              {eyebrow}
+            </p>
+          </div>
+          <h3 className="mt-2 text-lg font-black tracking-tight sm:text-xl md:text-2xl">
+            {title}
+          </h3>
+          <p className="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-300 md:mt-1.5">
+            {description}
           </p>
         </div>
-        <h3 className="mt-2 text-xl font-black tracking-tight sm:text-2xl">
-          {title}
-        </h3>
-        <p className="mt-1.5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-          {description}
-        </p>
       </div>
     </button>
   );
@@ -227,20 +234,20 @@ const ContentSelectionPage = () => {
       onBack={handleBack}
       backLabel="Dashboard"
     >
-      <div className="rounded-3xl border border-slate-200/70 bg-white/85 p-6 shadow-sm backdrop-blur-md sm:p-8 dark:border-slate-700/60 dark:bg-slate-900/65">
+      <div className="rounded-3xl border border-slate-200/70 bg-white/85 p-4 shadow-sm backdrop-blur-md sm:p-6 md:p-8 dark:border-slate-700/60 dark:bg-slate-900/65">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.22 }}
         >
-          <h1 className="text-2xl font-black tracking-tight sm:text-3xl">
+          <h1 className="text-xl font-black tracking-tight sm:text-2xl md:text-3xl">
             What would you like a recommendation for?
           </h1>
-          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 sm:text-base">
+          <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-400 sm:text-base">
             Pick one so we can tailor your recommendation flow.
           </p>
 
-          <div className="mt-7 grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="mt-5 grid grid-cols-1 gap-3 sm:mt-7 sm:gap-4 md:grid-cols-3">
             {cards.map((card) => (
               <SelectionCard
                 key={card.id}
