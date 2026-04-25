@@ -172,7 +172,176 @@ const RecommendationCard = ({
       transition={{ duration: 0.32, delay: index * 0.06 }}
       className="group overflow-hidden rounded-3xl border border-slate-200/70 bg-white/85 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-700/60 dark:bg-slate-900/65"
     >
-      <div className="grid grid-cols-1 sm:grid-cols-[168px_1fr]">
+      {/* Mobile: poster + header on top; rich body below spans full width.
+          Desktop (sm+): grid with full poster column on the left. */}
+      <div className="flex gap-3 p-3 sm:hidden">
+        <div className="relative aspect-[2/3] w-24 shrink-0 overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800">
+          {rec.poster_url ? (
+            <Image
+              src={rec.poster_url}
+              alt={rec.title}
+              fill
+              sizes="96px"
+              className="object-cover"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-slate-400">
+              {rec.type === "movie" ? (
+                <Film size={20} />
+              ) : (
+                <BookOpen size={20} />
+              )}
+            </div>
+          )}
+          <div
+            className={cn(
+              "absolute left-1 top-1 rounded-full px-1.5 py-0.5 text-[9px] font-bold shadow-sm backdrop-blur-sm",
+              MATCH_TONE_CLASSES[matchTone],
+            )}
+          >
+            {matchScore}%
+          </div>
+        </div>
+
+        <div className="flex min-w-0 flex-1 flex-col">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                {rec.type === "movie" ? (
+                  <Film size={9} />
+                ) : (
+                  <BookOpen size={9} />
+                )}
+                {rec.type}
+              </span>
+              <h2 className="mt-1 text-base font-black leading-tight tracking-tight">
+                {rec.title}
+              </h2>
+              <p className="mt-0.5 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
+                {rec.author
+                  ? `By ${rec.author}`
+                  : rec.director
+                    ? `Directed by ${rec.director}`
+                    : ""}
+                {rec.year ? ` · ${rec.year}` : ""}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => onToggleFavorite(rec.id)}
+              aria-label={
+                rec.is_favorited
+                  ? `Remove ${rec.title} from favorites`
+                  : `Add ${rec.title} to favorites`
+              }
+              className={cn(
+                "shrink-0 rounded-full p-1.5 transition-all active:scale-[0.95]",
+                rec.is_favorited
+                  ? "bg-rose-500 text-white shadow-md"
+                  : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400",
+              )}
+            >
+              <Heart
+                size={13}
+                fill={rec.is_favorited ? "currentColor" : "none"}
+              />
+            </button>
+          </div>
+          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+            {typeof rec.rating === "number" && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                <Star size={10} className="fill-current" />
+                {rec.rating}
+              </span>
+            )}
+            {rec.genres?.slice(0, 2).map((g) => (
+              <span
+                key={g}
+                className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+              >
+                {g}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile-only body (below the header strip) */}
+      <div className="space-y-3 px-3 pb-3 sm:hidden">
+        {explanation && (
+          <div className="relative overflow-hidden rounded-xl border border-indigo-200/60 bg-gradient-to-br from-indigo-50/80 via-white to-violet-50/60 p-3 dark:border-indigo-500/30 dark:from-indigo-500/10 dark:via-slate-900/40 dark:to-violet-500/10">
+            <span
+              aria-hidden="true"
+              className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-indigo-400 to-violet-500"
+            />
+            <div className="flex items-center gap-1.5 pl-2">
+              <Sparkles
+                size={12}
+                className="text-indigo-600 dark:text-indigo-400"
+              />
+              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-indigo-700 dark:text-indigo-300">
+                Why this pick
+              </p>
+            </div>
+            <p className="mt-1.5 pl-2 text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+              {explanation}
+            </p>
+          </div>
+        )}
+
+        <div className="flex items-center justify-between gap-2">
+          <LogToLibraryButton
+            medium={rec.type}
+            title={rec.title}
+            creator={rec.author ?? rec.director ?? null}
+            year={rec.year ?? null}
+            poster_url={rec.poster_url ?? null}
+            source_recommendation_id={rec.id}
+            initialLogged={alreadyLogged}
+            variant="compact"
+          />
+        </div>
+
+        {showDescription && (
+          <div className="border-t border-slate-100 pt-3 dark:border-slate-800">
+            <p className="mb-1 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">
+              About
+            </p>
+            <p
+              className="overflow-hidden text-sm leading-relaxed text-slate-600 dark:text-slate-400"
+              style={
+                expanded
+                  ? undefined
+                  : {
+                      display: "-webkit-box",
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: "vertical",
+                    }
+              }
+            >
+              {description}
+            </p>
+            {description.length > 180 && (
+              <button
+                type="button"
+                onClick={() => setExpanded((prev) => !prev)}
+                className="mt-1.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400"
+              >
+                {expanded ? "Show less" : "Show more"}
+                <ChevronDown
+                  size={10}
+                  className={cn(
+                    "transition-transform duration-200",
+                    expanded && "rotate-180",
+                  )}
+                />
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="hidden sm:grid sm:grid-cols-[168px_1fr]">
         {/* Poster */}
         <div className="relative aspect-[2/3] overflow-hidden bg-slate-200 dark:bg-slate-800">
           {rec.poster_url ? (
@@ -180,7 +349,7 @@ const RecommendationCard = ({
               src={rec.poster_url}
               alt={rec.title}
               fill
-              sizes="(max-width: 640px) 100vw, 168px"
+              sizes="168px"
               className="object-cover transition-transform duration-500 group-hover:scale-105"
             />
           ) : (
@@ -222,7 +391,6 @@ const RecommendationCard = ({
                 {rec.year ? ` · ${rec.year}` : ""}
               </p>
             </div>
-            {/* Action group — favorite + log together */}
             <div className="flex shrink-0 items-center gap-2">
               <LogToLibraryButton
                 medium={rec.type}
@@ -256,7 +424,6 @@ const RecommendationCard = ({
             </div>
           </div>
 
-          {/* Metadata row — rating + genres only, log button is now up top */}
           {(typeof rec.rating === "number" || rec.genres?.length) && (
             <div className="mt-3 flex flex-wrap items-center gap-2">
               {typeof rec.rating === "number" && (
@@ -276,8 +443,6 @@ const RecommendationCard = ({
             </div>
           )}
 
-          {/* "Why this pick" — promoted: gradient accent border, larger leading,
-              sparkles glyph to flag it as the AI's voice. */}
           {explanation && (
             <div className="relative mt-4 overflow-hidden rounded-2xl border border-indigo-200/60 bg-gradient-to-br from-indigo-50/80 via-white to-violet-50/60 p-4 dark:border-indigo-500/30 dark:from-indigo-500/10 dark:via-slate-900/40 dark:to-violet-500/10">
               <span
@@ -778,22 +943,21 @@ const ResultsPage = () => {
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
       {topBar}
 
-      <main className="px-4 pb-20 pt-32 md:pt-36 sm:px-6">
+      <main className="px-4 pb-20 pt-28 sm:px-6 md:pt-36">
         <div className="mx-auto max-w-6xl">
-          {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35 }}
-            className="mb-8"
+            className="mb-6 sm:mb-8"
           >
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-indigo-500 sm:text-xs dark:text-indigo-400">
               Your picks
             </p>
-            <h1 className="mt-2 text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl">
+            <h1 className="mt-1.5 text-2xl font-black tracking-tighter sm:mt-2 sm:text-3xl md:text-4xl lg:text-5xl">
               Hand-picked for you
             </h1>
-            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+            <p className="mt-1.5 text-sm text-slate-500 sm:mt-2 dark:text-slate-400">
               {recommendations.length} personalized{" "}
               {recommendations.length === 1 ? "pick" : "picks"} from the AI,
               with the reasoning behind each. Log one to your library to nudge

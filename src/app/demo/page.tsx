@@ -7,6 +7,7 @@ import { motion } from "motion/react";
 const VALIDATION_FLASH_MS = 650;
 const VALIDATION_MESSAGE_MS = 3200;
 import { IconArrowRight, IconCheck } from "@tabler/icons-react";
+import { BookOpen, Film, Sparkles } from "lucide-react";
 
 import {
   useQuizStore,
@@ -26,8 +27,10 @@ import { PillButton } from "@/components/ui/pill-button";
 import { cn } from "@/lib/utils";
 
 interface DemoContentCardProps {
+  eyebrow: string;
   title: string;
   description: string;
+  icon: React.ReactNode;
   mediaSrc: string;
   secondaryMediaSrc?: string;
   isSelected: boolean;
@@ -35,33 +38,80 @@ interface DemoContentCardProps {
 }
 
 const DemoContentCard = ({
+  eyebrow,
   title,
   description,
+  icon,
   mediaSrc,
   secondaryMediaSrc,
   isSelected,
   onClick,
 }: DemoContentCardProps) => {
   return (
-    <PillButton
+    <button
+      type="button"
       onClick={onClick}
-      active={isSelected}
+      aria-pressed={isSelected}
       className={cn(
-        "relative w-full overflow-hidden rounded-3xl border p-0 text-left shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-1",
+        "group relative w-full overflow-hidden rounded-3xl border bg-white/85 text-left shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:bg-slate-900/65 dark:focus-visible:ring-offset-slate-950",
         isSelected
-          ? "border-indigo-500 bg-white shadow-lg dark:border-indigo-400 dark:bg-slate-900/70"
-          : "border-slate-200/80 bg-white/80 hover:border-indigo-300 hover:shadow-md dark:border-slate-700/70 dark:bg-slate-900/65 dark:hover:border-indigo-500/60",
+          ? "border-transparent shadow-indigo-500/15"
+          : "border-slate-200/70 hover:border-slate-300 dark:border-slate-700/60 dark:hover:border-slate-600/80",
       )}
     >
-      {isSelected && (
-        <div className="absolute right-3 top-3 z-10 inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-500 text-white shadow-md">
-          <IconCheck className="h-4 w-4" />
-        </div>
-      )}
+      {/* Gradient accent ring when selected. */}
+      <span
+        aria-hidden="true"
+        className={cn(
+          "pointer-events-none absolute inset-0 rounded-3xl transition-opacity duration-300",
+          isSelected
+            ? "opacity-100 ring-2 ring-indigo-500/70 dark:ring-indigo-400/70"
+            : "opacity-0",
+        )}
+      />
+      <span
+        aria-hidden="true"
+        className={cn(
+          "pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-indigo-500/[0.06] via-transparent to-violet-500/[0.06] transition-opacity duration-300 dark:from-indigo-400/[0.08] dark:to-violet-400/[0.08]",
+          isSelected ? "opacity-100" : "opacity-0",
+        )}
+      />
 
-      <div className="relative aspect-[16/9] overflow-hidden bg-slate-200 dark:bg-slate-800">
-        {secondaryMediaSrc ? (
-          <div className="grid h-full w-full grid-cols-2 gap-1 p-1">
+      {/* Selected check chip */}
+      <div
+        className={cn(
+          "absolute right-3 top-3 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-lg shadow-indigo-500/30 transition-all duration-300",
+          isSelected ? "scale-100 opacity-100" : "scale-50 opacity-0",
+        )}
+      >
+        <IconCheck className="h-4 w-4" strokeWidth={3} />
+      </div>
+
+      {/* Mobile: horizontal layout (square thumb + content). md+: vertical. */}
+      <div className="flex md:block">
+        <div className="relative aspect-square w-28 shrink-0 overflow-hidden bg-slate-100 sm:w-32 md:aspect-[16/10] md:w-full dark:bg-slate-800/80">
+          {secondaryMediaSrc ? (
+            <div className="grid h-full w-full grid-cols-2 gap-1 p-1">
+              <video
+                src={mediaSrc}
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="auto"
+                className="h-full w-full rounded-xl object-cover md:rounded-2xl"
+              />
+              <video
+                src={secondaryMediaSrc}
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="auto"
+                className="h-full w-full rounded-xl object-cover md:rounded-2xl"
+              />
+            </div>
+          ) : (
             <video
               src={mediaSrc}
               autoPlay
@@ -69,62 +119,69 @@ const DemoContentCard = ({
               muted
               playsInline
               preload="auto"
-              className="h-full w-full rounded-lg object-cover"
+              className="h-full w-full object-contain p-2 transition-transform duration-500 group-hover:scale-105 md:p-3"
             />
-            <video
-              src={secondaryMediaSrc}
-              autoPlay
-              loop
-              muted
-              playsInline
-              preload="auto"
-              className="h-full w-full rounded-lg object-cover"
-            />
-          </div>
-        ) : (
-          <video
-            src={mediaSrc}
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="auto"
-            className="h-full w-full object-contain p-2"
-          />
-        )}
-      </div>
+          )}
+        </div>
 
-      <div className="p-4 sm:p-5">
-        <h3 className="text-xl font-black tracking-tight sm:text-2xl">
-          {title}
-        </h3>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-          {description}
-        </p>
+        <div className="relative flex-1 p-4 md:p-5">
+          <div className="flex items-center gap-2">
+            <span
+              className={cn(
+                "flex h-7 w-7 items-center justify-center rounded-full transition-colors duration-300",
+                isSelected
+                  ? "bg-indigo-500 text-white"
+                  : "bg-slate-100 text-slate-500 group-hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-slate-700",
+              )}
+            >
+              {icon}
+            </span>
+            <p
+              className={cn(
+                "text-[10px] font-black uppercase tracking-[0.18em] transition-colors duration-300",
+                isSelected
+                  ? "text-indigo-600 dark:text-indigo-400"
+                  : "text-slate-400 dark:text-slate-500",
+              )}
+            >
+              {eyebrow}
+            </p>
+          </div>
+          <h3 className="mt-2 text-lg font-black tracking-tight sm:text-xl md:text-2xl">
+            {title}
+          </h3>
+          <p className="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-300 md:mt-1.5">
+            {description}
+          </p>
+        </div>
       </div>
-    </PillButton>
+    </button>
   );
 };
 
 const DEMO_CONTENT_CARDS = [
   {
     option: "Movies",
+    eyebrow: "On screen",
     title: "Movie",
-    description:
-      "Find a movie recommendation that fits your current mood and pace.",
+    description: "A film tuned to your current mood and pace.",
+    icon: <Film size={14} />,
     mediaSrc: "/animations/Popcorn.webm",
   },
   {
     option: "Books",
+    eyebrow: "On the shelf",
     title: "Book",
-    description:
-      "Get a reading recommendation tailored to your style and interests.",
+    description: "A read tailored to your style and interests.",
+    icon: <BookOpen size={14} />,
     mediaSrc: "/animations/Books.webm",
   },
   {
     option: "Both",
-    title: "Both",
-    description: "Get one movie and one book recommendation in the same flow.",
+    eyebrow: "Both",
+    title: "One of each",
+    description: "A movie and a book picked together in one go.",
+    icon: <Sparkles size={14} />,
     mediaSrc: "/animations/Popcorn.webm",
     secondaryMediaSrc: "/animations/Books.webm",
   },
@@ -277,12 +334,14 @@ export default function DemoPage() {
               onChange={setAnswer}
               bodyOverride={
                 current.id === "contentType" ? (
-                  <div className="mt-7 grid grid-cols-1 gap-4 md:grid-cols-3">
+                  <div className="mt-5 grid grid-cols-1 gap-3 sm:mt-7 sm:gap-4 md:grid-cols-3">
                     {DEMO_CONTENT_CARDS.map((card) => (
                       <DemoContentCard
                         key={card.option}
+                        eyebrow={card.eyebrow}
                         title={card.title}
                         description={card.description}
+                        icon={card.icon}
                         mediaSrc={card.mediaSrc}
                         secondaryMediaSrc={
                           "secondaryMediaSrc" in card

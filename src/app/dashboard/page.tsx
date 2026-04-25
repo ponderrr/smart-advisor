@@ -295,7 +295,7 @@ const DashboardPage = () => {
               <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
                 Dashboard
               </p>
-              <h1 className="mt-2 text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl">
+              <h1 className="mt-2 break-words text-2xl font-black tracking-tighter sm:text-3xl md:text-4xl lg:text-5xl">
                 Welcome{user?.name ? `, ${user.name}` : ""}.
               </h1>
               <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
@@ -475,7 +475,7 @@ const DashboardPage = () => {
                     )}
 
                     {/* Stats — compact, with secondary descriptors */}
-                    <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
+                    <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
                       {[
                         {
                           label: "Total picks",
@@ -573,7 +573,7 @@ const DashboardPage = () => {
                     </div>
 
                     {/* Library snapshot + Smart suggestion */}
-                    <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                       {/* Library snapshot */}
                       <div className="rounded-3xl border border-slate-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
                         <div className="mb-3 flex items-center justify-between">
@@ -801,7 +801,7 @@ const DashboardPage = () => {
                         transition={{ duration: 0.18 }}
                       >
                         {loading ? (
-                          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
                             {[...Array(10)].map((_, i) => (
                               <div
                                 key={i}
@@ -841,7 +841,7 @@ const DashboardPage = () => {
                             )}
                           </div>
                         ) : (
-                          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
                             {filteredPicks.slice(0, 15).map((rec) => {
                               const inLibrary = loggedTitleKeys.has(
                                 `${rec.type}::${rec.title.toLowerCase()}`,

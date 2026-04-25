@@ -154,7 +154,7 @@ const HeroSection = () => {
     <section className="relative flex min-h-screen min-h-[100svh] w-full items-center justify-center overflow-hidden bg-slate-50 px-4 py-24 transition-colors duration-300 sm:px-6 sm:py-28 dark:bg-slate-950">
       <ParallaxHeroImages
         images={heroImages}
-        className="hidden md:block"
+        className="hidden lg:block"
       />
 
       <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center gap-6 text-center sm:gap-8">

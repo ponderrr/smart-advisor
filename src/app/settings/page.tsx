@@ -613,7 +613,7 @@ const SettingsPage = () => {
             <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
               Settings
             </p>
-            <h1 className="mt-2 text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl">
+            <h1 className="mt-2 text-2xl font-black tracking-tighter sm:text-3xl md:text-4xl lg:text-5xl">
               Account Settings
             </h1>
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
