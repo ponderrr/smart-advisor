@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { format } from "date-fns";
 import { authService } from "../services/auth-service";
 import { MFAFactor } from "../types/mfa";
@@ -14,19 +15,32 @@ import {
   Check,
   Download,
   X,
+  Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "motion/react";
 
 interface MfaManagementProps {
   mfaEnabled: boolean;
   onMfaStatusChange?: () => void;
+  onAddAuthenticator?: () => void;
 }
+
+// Legacy factors enrolled before we set friendly_name get Supabase's default
+// "<Issuer> TOTP <timestamp>" label, which is useless to the user. Fall back
+// to a generic label in that case; we can't recover the original device.
+const prettifyFactorName = (name: string | undefined): string => {
+  if (!name) return "Authenticator App";
+  if (/\sTOTP\s\d{10,}$/.test(name)) return "Authenticator App";
+  return name;
+};
 
 export const MfaManagement = ({
   mfaEnabled,
   onMfaStatusChange,
+  onAddAuthenticator,
 }: MfaManagementProps) => {
   const [factors, setFactors] = useState<MFAFactor[]>([]);
   const [loading, setLoading] = useState(false);
@@ -197,7 +211,7 @@ export const MfaManagement = ({
                 <ShieldCheck className="h-5 w-5 text-green-600 dark:text-green-400" />
                 <div>
                   <p className="font-medium text-slate-900 dark:text-slate-100">
-                    {factor.friendly_name || "Authenticator App"}
+                    {prettifyFactorName(factor.friendly_name)}
                   </p>
                   <p className="text-xs text-slate-600 dark:text-slate-400">
                     Added {format(new Date(factor.created_at), "PP")}
@@ -219,6 +233,16 @@ export const MfaManagement = ({
               </Button>
             </div>
           ))}
+
+          {onAddAuthenticator && (
+            <button
+              onClick={onAddAuthenticator}
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 bg-white/50 px-4 py-3 text-sm font-semibold text-slate-600 transition-colors hover:border-indigo-400 hover:bg-indigo-50/50 hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-900/30 dark:text-slate-300 dark:hover:border-indigo-500 dark:hover:bg-indigo-900/10 dark:hover:text-indigo-400"
+            >
+              <Plus className="h-4 w-4" />
+              Add another authenticator
+            </button>
+          )}
 
           {/* Backup Codes Section */}
           <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-900/50">
@@ -339,88 +363,118 @@ export const MfaManagement = ({
         </div>
       )}
 
-      {/* Verification modal for MFA disable */}
-      {verifyModalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-          onClick={() => {
-            setVerifyModalOpen(false);
-            setPendingUnenrollId(null);
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="relative mx-4 w-full max-w-sm rounded-2xl border border-slate-200/70 bg-white p-6 shadow-xl dark:border-slate-700/60 dark:bg-slate-900"
+      {typeof window !== "undefined" && createPortal(
+        <AnimatePresence>
+        {verifyModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+            onClick={() => {
+              setVerifyModalOpen(false);
+              setPendingUnenrollId(null);
+            }}
           >
-            <button
-              onClick={() => {
-                setVerifyModalOpen(false);
-                setPendingUnenrollId(null);
-              }}
-              className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+            <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-label="Confirm disabling two-factor authentication"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative mx-4 max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-slate-200/70 bg-white shadow-xl dark:border-slate-700/60 dark:bg-slate-900"
             >
-              <X size={18} />
-            </button>
-
-            <div className="mb-4">
-              <div className="mb-2 flex items-center gap-2">
-                <ShieldOff className="h-5 w-5 text-red-500" />
-                <h3 className="text-lg font-bold">Confirm MFA Disable</h3>
-              </div>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                Enter your authenticator code to confirm disabling 2FA.
-              </p>
-            </div>
-
-            <input
-              type="text"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              maxLength={6}
-              value={verifyCode}
-              onChange={(e) => {
-                setVerifyCode(e.target.value.replace(/\D/g, "").slice(0, 6));
-                setVerifyError("");
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleVerifyAndUnenroll();
-              }}
-              placeholder="000000"
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-2xl font-mono tracking-[0.3em] transition-colors focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-100"
-              autoFocus
-            />
-
-            {verifyError && (
-              <p className="mt-2 text-sm font-medium text-red-600 dark:text-red-400">
-                {verifyError}
-              </p>
-            )}
-
-            <div className="mt-4 flex gap-3">
-              <Button
-                variant="outline"
+              <button
                 onClick={() => {
                   setVerifyModalOpen(false);
                   setPendingUnenrollId(null);
                 }}
-                className="flex-1"
+                aria-label="Close"
+                className="absolute right-4 top-4 z-10 text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-200"
               >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleVerifyAndUnenroll}
-                disabled={verifyCode.length !== 6 || verifyLoading}
-                className="flex-1 bg-red-600 text-white hover:bg-red-500"
-              >
-                {verifyLoading ? (
-                  <Loader className="h-4 w-4 animate-spin" />
-                ) : (
-                  "Disable 2FA"
-                )}
-              </Button>
-            </div>
-          </div>
-        </div>
+                <X size={18} />
+              </button>
+
+              <div className="flex flex-col items-center p-6 text-center">
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="mb-6 rounded-2xl bg-gradient-to-br from-violet-100 to-indigo-100 p-4 dark:from-violet-900/30 dark:to-indigo-900/30"
+                >
+                  <ShieldOff className="h-10 w-10 text-violet-600 dark:text-violet-400" />
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="w-full max-w-md"
+                >
+                  <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                    Disable two-factor authentication
+                  </h2>
+                  <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                    Enter the 6-digit code from your authenticator app to turn
+                    off 2FA on this account.
+                  </p>
+
+                  <div className="mt-6 w-full">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      maxLength={6}
+                      value={verifyCode}
+                      onChange={(e) => {
+                        setVerifyCode(
+                          e.target.value.replace(/\D/g, "").slice(0, 6),
+                        );
+                        setVerifyError("");
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleVerifyAndUnenroll();
+                      }}
+                      placeholder="000000"
+                      className="w-full rounded-lg border-2 border-slate-200 bg-white px-4 py-4 text-center text-4xl font-bold tracking-[0.4em] text-slate-900 placeholder-slate-300 focus:border-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder-slate-600"
+                      autoFocus
+                    />
+                    {verifyError && (
+                      <p className="mt-2 text-sm font-medium text-red-500">
+                        {verifyError}
+                      </p>
+                    )}
+                  </div>
+
+                  <Button
+                    onClick={handleVerifyAndUnenroll}
+                    disabled={verifyCode.length !== 6 || verifyLoading}
+                    size="lg"
+                    className="mt-6 w-full bg-red-600 hover:bg-red-500"
+                  >
+                    {verifyLoading ? (
+                      <Loader className="h-4 w-4 animate-spin" />
+                    ) : (
+                      "Disable 2FA"
+                    )}
+                  </Button>
+
+                  <button
+                    onClick={() => {
+                      setVerifyModalOpen(false);
+                      setPendingUnenrollId(null);
+                    }}
+                    className="mt-3 text-sm font-medium text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                  >
+                    Cancel
+                  </button>
+                </motion.div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+        </AnimatePresence>,
+        document.body,
       )}
     </Card>
   );

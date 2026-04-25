@@ -1,9 +1,18 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useCallback } from "react";
 import { format } from "date-fns";
 import { authService } from "../services/auth-service";
-import { ShieldCheck, ArrowRight, Copy, Check, Download } from "lucide-react";
+import {
+  ShieldCheck,
+  ArrowRight,
+  ArrowLeft,
+  Copy,
+  Check,
+  Download,
+  KeyRound,
+  Smartphone,
+} from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -12,17 +21,20 @@ interface MfaSetupProps {
   onComplete: () => void;
   onSkip?: () => void;
   skipIntro?: boolean;
+  /** When adding an additional authenticator, skip the backup-code step so
+   *  we don't invalidate the user's already-saved codes. */
+  skipBackupCodes?: boolean;
 }
 
-type SetupStep = "intro" | "qr" | "verify" | "backup-codes";
+type SetupStep = "intro" | "method" | "qr" | "verify" | "backup-codes";
 
 export const MfaSetup = ({
   onComplete,
   onSkip,
   skipIntro = false,
+  skipBackupCodes = false,
 }: MfaSetupProps) => {
-  const [step, setStep] = useState<SetupStep>("intro");
-  const autoEnrolledRef = useRef(false);
+  const [step, setStep] = useState<SetupStep>(skipIntro ? "method" : "intro");
   const [qrCode, setQrCode] = useState<string>("");
   const [secret, setSecret] = useState<string>("");
   const [factorId, setFactorId] = useState<string>("");
@@ -53,13 +65,6 @@ export const MfaSetup = ({
     }
   }, []);
 
-  useEffect(() => {
-    if (skipIntro && !autoEnrolledRef.current) {
-      autoEnrolledRef.current = true;
-      handleEnroll();
-    }
-  }, [skipIntro, handleEnroll]);
-
   const handleVerify = async () => {
     if (code.length !== 6) {
       setError("Please enter a 6-digit code");
@@ -74,6 +79,13 @@ export const MfaSetup = ({
       setLoading(false);
       setError(verifyError);
       toast.error(verifyError);
+      return;
+    }
+
+    if (skipBackupCodes) {
+      setLoading(false);
+      toast.success("Authenticator added");
+      onComplete();
       return;
     }
 
@@ -136,8 +148,37 @@ export const MfaSetup = ({
     toast.success("Backup codes saved to your downloads");
   };
 
+  const backTarget: SetupStep | null =
+    step === "method"
+      ? skipIntro
+        ? null
+        : "intro"
+      : step === "qr"
+        ? "method"
+        : step === "verify"
+          ? "qr"
+          : null;
+
+  const handleBack = () => {
+    if (!backTarget) return;
+    setError(null);
+    setCode("");
+    setStep(backTarget);
+  };
+
   return (
-    <div className="flex flex-col items-center text-center p-6">
+    <div className="relative flex flex-col items-center text-center p-6">
+      {backTarget && (
+        <button
+          type="button"
+          onClick={handleBack}
+          aria-label="Go back"
+          className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+        >
+          <ArrowLeft size={18} />
+        </button>
+      )}
+
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -146,55 +187,7 @@ export const MfaSetup = ({
         <ShieldCheck className="h-10 w-10 text-violet-600 dark:text-violet-400" />
       </motion.div>
 
-      {step === "intro" && (
-        skipIntro ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="w-full max-w-md"
-          >
-            {error ? (
-              <>
-                <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                  Couldn&apos;t start setup
-                </h2>
-                <p className="mt-3 text-sm text-red-500">{error}</p>
-                <div className="mt-6 flex flex-col gap-2 sm:flex-row">
-                  <Button
-                    onClick={() => {
-                      setError(null);
-                      handleEnroll();
-                    }}
-                    disabled={loading}
-                    size="lg"
-                    className="flex-1"
-                  >
-                    {loading ? "Retrying..." : "Try again"}
-                  </Button>
-                  {onSkip && (
-                    <Button
-                      onClick={onSkip}
-                      variant="outline"
-                      size="lg"
-                      className="flex-1"
-                    >
-                      Close
-                    </Button>
-                  )}
-                </div>
-              </>
-            ) : (
-              <>
-                <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                  Setting up two-factor...
-                </h2>
-                <div className="mt-6 flex justify-center">
-                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
-                </div>
-              </>
-            )}
-          </motion.div>
-        ) : (
+      {step === "intro" && !skipIntro && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -209,12 +202,12 @@ export const MfaSetup = ({
             </p>
             <div className="mt-8 w-full space-y-3">
               <Button
-                onClick={handleEnroll}
+                onClick={() => setStep("method")}
                 disabled={loading}
                 size="lg"
                 className="w-full"
               >
-                {loading ? "Setting up..." : "Set up 2FA"}
+                Set up 2FA
               </Button>
               {onSkip && (
                 <button
@@ -226,7 +219,84 @@ export const MfaSetup = ({
               )}
             </div>
           </motion.div>
-        )
+      )}
+
+      {step === "method" && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-md"
+        >
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+            Choose your method
+          </h2>
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            How do you want to sign in going forward?
+          </p>
+
+          <div className="mt-6 space-y-3 text-left">
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              className="relative flex w-full cursor-not-allowed items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 opacity-70 dark:border-slate-700 dark:bg-slate-900/40"
+            >
+              <div className="shrink-0 rounded-lg bg-violet-100 p-2 dark:bg-violet-900/30">
+                <KeyRound className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <p className="font-semibold text-slate-900 dark:text-slate-100">
+                    Passkey
+                  </p>
+                  <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:bg-slate-700 dark:text-slate-300">
+                    Coming soon
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  Use Touch ID, Face ID, Windows Hello, or a hardware key.
+                </p>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleEnroll}
+              disabled={loading}
+              className="flex w-full items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 text-left transition-colors hover:border-violet-400 hover:bg-violet-50/50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900/40 dark:hover:border-violet-500 dark:hover:bg-violet-900/10"
+            >
+              <div className="shrink-0 rounded-lg bg-indigo-100 p-2 dark:bg-indigo-900/30">
+                <Smartphone className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold text-slate-900 dark:text-slate-100">
+                  Authenticator app
+                </p>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  Scan a QR code with Google Authenticator, Authy, or 1Password.
+                </p>
+              </div>
+              {loading ? (
+                <div className="h-5 w-5 animate-spin self-center rounded-full border-2 border-indigo-500 border-t-transparent" />
+              ) : (
+                <ArrowRight className="h-4 w-4 self-center text-slate-400" />
+              )}
+            </button>
+          </div>
+
+          {error && (
+            <p className="mt-3 text-sm font-medium text-red-500">{error}</p>
+          )}
+
+          {onSkip && (
+            <button
+              onClick={onSkip}
+              className="mt-6 w-full text-sm font-medium text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+            >
+              Cancel
+            </button>
+          )}
+        </motion.div>
       )}
 
       {step === "qr" && (
