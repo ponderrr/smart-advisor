@@ -456,7 +456,7 @@ const ResultsPage = () => {
 
   const handleCancelGeneration = () => {
     setShowConfirmDialog(false);
-    router.push("/history");
+    router.push("/dashboard");
   };
 
   useEffect(() => {
@@ -694,15 +694,15 @@ const ResultsPage = () => {
               Generate new recommendations?
             </h2>
             <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-              You already generated recommendations for these answers. Generate
-              new ones or view your history.
+              You already generated recommendations for these answers.
+              Generate a fresh set or head back to your dashboard.
             </p>
             <div className="mt-6 flex items-center justify-center gap-3">
               <PillButton
                 onClick={handleCancelGeneration}
                 className="border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
               >
-                Go to History
+                Go to Dashboard
               </PillButton>
               <PillButton
                 onClick={handleConfirmGeneration}

@@ -27,7 +27,7 @@ export const VerifyEmailScreen = ({
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === "smart_advisor_email_verified") {
-        router.replace("/content-selection");
+        router.replace("/dashboard");
       }
     };
     window.addEventListener("storage", handleStorageChange);
@@ -37,7 +37,7 @@ export const VerifyEmailScreen = ({
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          router.replace("/content-selection");
+          router.replace("/dashboard");
         }
       } catch {
         // Ignore errors

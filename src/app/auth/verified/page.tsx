@@ -8,7 +8,7 @@ import { PageLoader } from "@/components/ui/loader";
 const VerifiedContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams?.get("next") ?? "/content-selection";
+  const next = searchParams?.get("next") ?? "/dashboard";
 
   useEffect(() => {
     // Signal the original "verify your email" tab via localStorage

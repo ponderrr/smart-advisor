@@ -3,10 +3,8 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="public/svgs/smartadvisor/SmartAdvisor-DM.svg">
   <source media="(prefers-color-scheme: light)" srcset="public/svgs/smartadvisor/SmartAdvisor-LM.svg">
-  <img src="public/svgs/smartadvisor/SmartAdvisor.svg" width="160" height="160" alt="Smart Advisor" />
+  <img src="public/svgs/smartadvisor/SmartAdvisor-LM.svg" width="320" alt="Smart Advisor" />
 </picture>
-
-# Smart Advisor
 
 AI-powered movie & book recommendations tailored to who you actually are.
 
