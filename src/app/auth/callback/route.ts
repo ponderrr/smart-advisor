@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get("code");
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type");
-  const next = searchParams.get("next") ?? "/content-selection";
+  const next = searchParams.get("next") ?? "/dashboard";
   const callbackErrorCode =
     searchParams.get("error_code") || searchParams.get("error");
   const callbackErrorDescription =
@@ -104,7 +104,15 @@ export async function GET(request: NextRequest) {
       }
       // Email verified — user now has an active session from verifyOtp.
       // Redirect through client-side page to signal original tab and proceed.
-      const verifiedParams = new URLSearchParams({ next });
+      // Signup and magic-link verifications always land on /dashboard so a
+      // brand-new account sees the welcome state instead of being dumped
+      // into a fresh quiz; old email templates that bake `next=/content-
+      // selection` into the link can't override that intent.
+      const safeNext =
+        type === "signup" || type === "magiclink" || type === "email"
+          ? "/dashboard"
+          : next;
+      const verifiedParams = new URLSearchParams({ next: safeNext });
       return NextResponse.redirect(
         `${origin}/auth/verified?${verifiedParams.toString()}`,
       );
