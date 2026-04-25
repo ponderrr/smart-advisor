@@ -29,6 +29,14 @@ import {
   FilterOptions,
 } from "@/features/recommendations/services/database-service";
 import { Recommendation } from "@/features/recommendations/types/recommendation";
+import { libraryService } from "@/features/library/services/library-service";
+import {
+  RATING_LABELS,
+  STATUS_LABELS,
+  STATUS_TONE,
+  type LibraryItem,
+} from "@/features/library/types/library";
+import { LogToLibraryButton } from "@/features/library/components/log-to-library-button";
 import { PillButton } from "@/components/ui/pill-button";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { PageLoader } from "@/components/ui/loader";
@@ -78,9 +86,11 @@ const HistoryShimmerLoader = () => {
 
 const RecommendationModal = ({
   rec,
+  libraryEntry,
   onClose,
 }: {
   rec: Recommendation;
+  libraryEntry: LibraryItem | null;
   onClose: () => void;
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
@@ -192,13 +202,44 @@ const RecommendationModal = ({
           </p>
         )}
 
-        <button
-          type="button"
-          onClick={onClose}
-          className="mt-5 w-full rounded-2xl bg-slate-100 py-2.5 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-        >
-          Close
-        </button>
+        {libraryEntry && (
+          <div className="mt-4 flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2 dark:border-slate-700/60 dark:bg-slate-800/40">
+            <span className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+              In your library
+            </span>
+            <span
+              className={cn(
+                "rounded-full px-2.5 py-1 text-[11px] font-semibold",
+                STATUS_TONE[libraryEntry.status].chip,
+              )}
+            >
+              {STATUS_LABELS[libraryEntry.status]}
+            </span>
+            {libraryEntry.rating !== null && (
+              <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-300">
+                · {RATING_LABELS[libraryEntry.rating]}
+              </span>
+            )}
+          </div>
+        )}
+
+        <div className="mt-5 flex items-center gap-2">
+          <LogToLibraryButton
+            medium={rec.type}
+            title={rec.title}
+            creator={rec.author ?? rec.director ?? null}
+            year={rec.year ?? null}
+            poster_url={rec.poster_url ?? null}
+            source_recommendation_id={rec.id}
+          />
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 rounded-2xl bg-slate-100 py-2.5 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+          >
+            Close
+          </button>
+        </div>
       </div>
     </motion.div>
   </motion.div>
@@ -222,6 +263,36 @@ const AccountHistoryPage = () => {
   const filterSlideDir = -1;
   const [sortBy, setSortBy] = useState<SortMode>("newest");
   const [selectedRec, setSelectedRec] = useState<Recommendation | null>(null);
+  const [libraryItems, setLibraryItems] = useState<LibraryItem[]>([]);
+
+  // Index by source_recommendation_id and (medium, lower(title)) so the
+  // modal can show "In your library: …" without re-querying per click.
+  const libraryByRec = useMemo(() => {
+    const bySource = new Map<string, LibraryItem>();
+    const byTitle = new Map<string, LibraryItem>();
+    for (const item of libraryItems) {
+      if (item.source_recommendation_id) {
+        bySource.set(item.source_recommendation_id, item);
+      }
+      byTitle.set(`${item.medium}::${item.title.toLowerCase()}`, item);
+    }
+    return { bySource, byTitle };
+  }, [libraryItems]);
+
+  const matchLibrary = useCallback(
+    (rec: Recommendation): LibraryItem | null =>
+      libraryByRec.bySource.get(rec.id) ??
+      libraryByRec.byTitle.get(
+        `${rec.type}::${rec.title.toLowerCase()}`,
+      ) ??
+      null,
+    [libraryByRec],
+  );
+
+  useEffect(() => {
+    if (!ready) return;
+    void libraryService.list().then(({ data }) => setLibraryItems(data));
+  }, [ready]);
 
   // Virtual scroll setup — uses the window scroll so the global navbar's
   // scroll-blur logic still fires on this page.
@@ -310,7 +381,7 @@ const AccountHistoryPage = () => {
     if (error) {
       toast.error("Couldn't remove that recommendation — please try again");
     } else {
-      toast.success("Recommendation removed from your library");
+      toast.success("Recommendation removed from your history");
       setRecommendations((prev) =>
         prev.filter((rec) => rec.id !== recommendationId),
       );
@@ -325,7 +396,7 @@ const AccountHistoryPage = () => {
 
     const { error } = await databaseService.deleteAllRecommendations();
     if (error) {
-      toast.error("Couldn't clear your library — please try again");
+      toast.error("Couldn't clear your history — please try again");
     } else {
       toast.success("All recommendations cleared");
       setRecommendations([]);
@@ -361,10 +432,12 @@ const AccountHistoryPage = () => {
                 History
               </p>
               <h1 className="mt-2 text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl">
-                Your Recommendation Library
+                Your suggestion history
               </h1>
               <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                Browse everything you have saved and refine what you keep.
+                Everything the AI has picked for you. Mark a favorite to keep
+                it close, or log one to your library to teach the AI how you
+                felt.
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -584,6 +657,7 @@ const AccountHistoryPage = () => {
         {selectedRec && (
           <RecommendationModal
             rec={selectedRec}
+            libraryEntry={matchLibrary(selectedRec)}
             onClose={() => setSelectedRec(null)}
           />
         )}

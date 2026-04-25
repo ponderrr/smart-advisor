@@ -43,6 +43,7 @@ const DEMO_ITEMS = [
 
 const LOGGED_IN_ITEMS = [
   { name: "Dashboard", link: "/dashboard" },
+  { name: "Library", link: "/library" },
   { name: "History", link: "/history" },
   { name: "Settings", link: "/settings" },
 ];

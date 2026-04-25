@@ -28,6 +28,7 @@ import {
 import { SafeLocalStorage } from "@/utils/localStorage";
 import { useQuizStore } from "@/features/quiz/store/quiz-store";
 import { PillButton } from "@/components/ui/pill-button";
+import { LogToLibraryButton } from "@/features/library/components/log-to-library-button";
 import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
 import { cn } from "@/lib/utils";
@@ -254,6 +255,16 @@ const RecommendationCard = ({
                 {g}
               </span>
             ))}
+            <div className="ml-auto">
+              <LogToLibraryButton
+                medium={rec.type}
+                title={rec.title}
+                creator={rec.author ?? rec.director ?? null}
+                year={rec.year ?? null}
+                poster_url={rec.poster_url ?? null}
+                source_recommendation_id={rec.id}
+              />
+            </div>
           </div>
 
           {/* Explanation */}
