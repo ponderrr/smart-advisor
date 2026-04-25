@@ -161,7 +161,9 @@ export const PasskeyManagement = () => {
   return (
     <>
       <div className="mb-5">
-        <h2 className="text-xl font-bold tracking-tight">Passkeys</h2>
+        <h2 className="text-xl font-black tracking-tight sm:text-2xl">
+          Passkeys
+        </h2>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           Sign in with your fingerprint, face, or device PIN — no password
           needed.
