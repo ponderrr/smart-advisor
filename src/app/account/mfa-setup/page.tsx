@@ -2,15 +2,25 @@
 
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { MfaSetup } from "@/features/auth/components/mfa-setup";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
+import {
+  getMfaSetupCompleteTarget,
+  getMfaSetupSkipTarget,
+} from "@/lib/auth/post-verify";
 
-export default function MfaSetupPage() {
+function MfaSetupContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, session, loading } = useAuth();
   const [mounted, setMounted] = useState(false);
+
+  const completeTarget = getMfaSetupCompleteTarget(
+    searchParams?.get("from") ?? null,
+  );
+  const skipTarget = getMfaSetupSkipTarget();
 
   useEffect(() => {
     setMounted(true);
@@ -38,14 +48,22 @@ export default function MfaSetupPage() {
         <div className="w-full max-w-md">
           <MfaSetup
             onComplete={() => {
-              router.push("/account/security");
+              router.push(completeTarget);
             }}
             onSkip={() => {
-              router.push("/dashboard");
+              router.push(skipTarget);
             }}
           />
         </div>
       </main>
     </div>
+  );
+}
+
+export default function MfaSetupPage() {
+  return (
+    <Suspense fallback={<PageLoader text="Loading..." />}>
+      <MfaSetupContent />
+    </Suspense>
   );
 }
