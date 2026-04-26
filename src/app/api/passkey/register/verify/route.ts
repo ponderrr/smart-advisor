@@ -3,6 +3,8 @@ import {
   verifyRegistrationResponse,
   type RegistrationResponseJSON,
 } from "@simplewebauthn/server";
+import { getAal } from "@/lib/auth/aal";
+import { authRestListFactors } from "@/lib/auth/supabase-rest";
 import {
   bytesToBase64Url,
   clearChallengeCookie,
@@ -22,6 +24,38 @@ export async function POST(req: NextRequest) {
   const user = await getUserFromAuthHeader(req);
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const authHeader = req.headers.get("authorization");
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : "";
+
+  // Same bootstrap check as register/options. The verify step is gated even
+  // though options already gated, so a session that drops AAL between options
+  // and verify can't slip through. The cookie ties verify to the original user
+  // (cookie.userId === user.id below), but the AAL check confirms the live
+  // session state at verification time.
+  const admin = getAdminClient();
+  const { count: existingPasskeys } = await admin
+    .from("user_passkeys")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id);
+  const factorsResult = await authRestListFactors(token);
+  const hasVerifiedSupabaseFactor =
+    factorsResult.ok && factorsResult.data.some((f) => f.status === "verified");
+  const hasExistingFactor =
+    (existingPasskeys ?? 0) > 0 || hasVerifiedSupabaseFactor;
+
+  if (hasExistingFactor) {
+    const aal = await getAal(token);
+    if (aal !== "aal2") {
+      return NextResponse.json(
+        {
+          error: "Step-up required. Verify your second factor to continue.",
+          code: "AAL2_REQUIRED",
+        },
+        { status: 403 },
+      );
+    }
   }
 
   const cookie = readChallengeCookie(req);
@@ -80,7 +114,6 @@ export async function POST(req: NextRequest) {
 
   const { credential } = verification.registrationInfo;
 
-  const admin = getAdminClient();
   const { error } = await admin.from("user_passkeys").insert({
     user_id: user.id,
     credential_id: credential.id,
