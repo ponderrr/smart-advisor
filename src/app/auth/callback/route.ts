@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse, NextRequest } from "next/server";
+import { getPostVerifyTarget } from "@/lib/auth/post-verify";
 
 const friendlyCallbackMessage = (message?: string | null) => {
   const normalized = (message || "").toLowerCase();
@@ -104,14 +105,9 @@ export async function GET(request: NextRequest) {
       }
       // Email verified — user now has an active session from verifyOtp.
       // Redirect through client-side page to signal original tab and proceed.
-      // Signup and magic-link verifications always land on /dashboard so a
-      // brand-new account sees the welcome state instead of being dumped
-      // into a fresh quiz; old email templates that bake `next=/content-
-      // selection` into the link can't override that intent.
-      const safeNext =
-        type === "signup" || type === "magiclink" || type === "email"
-          ? "/dashboard"
-          : next;
+      // Routing decision lives in lib/auth/post-verify so it's testable
+      // without standing up the route handler.
+      const safeNext = getPostVerifyTarget(type, next);
       const verifiedParams = new URLSearchParams({ next: safeNext });
       return NextResponse.redirect(
         `${origin}/auth/verified?${verifiedParams.toString()}`,

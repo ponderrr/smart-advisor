@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { requireAal2 } from "@/lib/auth/aal";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 
 export async function POST(request: NextRequest) {
@@ -14,25 +14,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const authHeader = request.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAal2(request);
+    if (!auth.ok) return auth.response;
+    const { user } = auth;
 
-    const token = authHeader.slice(7);
-
-    // Verify the user's identity with their JWT
-    const userClient = createClient(supabaseUrl, supabaseAnonKey);
-    const {
-      data: { user },
-      error: userError,
-    } = await userClient.auth.getUser(token);
-
-    if (userError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Use admin client to ban/disable the user
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
     const { error: banError } = await adminClient.auth.admin.updateUserById(
@@ -48,7 +33,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Revoke all sessions in the sessions table
     await adminClient
       .from("sessions")
       .update({ revoked_at: new Date().toISOString() })
