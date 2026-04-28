@@ -345,11 +345,31 @@ class AuthService {
       if (!isValidEmail(normalizedEmail))
         return { error: "Please enter a valid email address." };
 
-      const { error: authError } = await supabase.auth.updateUser({
-        email: normalizedEmail,
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        return { error: "No active session. Please sign in again." };
+      }
+
+      const resp = await fetch("/api/account/email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ email: normalizedEmail }),
       });
-      if (authError)
-        return { error: toUserFriendlyError(authError.message) };
+      if (!resp.ok) {
+        const payload = (await resp.json().catch(() => ({}))) as {
+          error?: string;
+        };
+        return {
+          error: toUserFriendlyError(
+            payload.error ?? "Failed to update email.",
+          ),
+        };
+      }
 
       const {
         data: { user },
@@ -374,8 +394,32 @@ class AuthService {
     try {
       if (password.length < 8)
         return { error: "Password must be at least 8 characters." };
-      const { error } = await supabase.auth.updateUser({ password });
-      if (error) return { error: toUserFriendlyError(error.message) };
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        return { error: "No active session. Please sign in again." };
+      }
+
+      const resp = await fetch("/api/account/password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ password }),
+      });
+      if (!resp.ok) {
+        const payload = (await resp.json().catch(() => ({}))) as {
+          error?: string;
+        };
+        return {
+          error: toUserFriendlyError(
+            payload.error ?? "Failed to update password.",
+          ),
+        };
+      }
       return { error: null };
     } catch (err) {
       console.error("Unexpected error updating password:", err);

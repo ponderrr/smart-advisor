@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAdminClient, getUserFromAuthHeader } from "../_lib";
+import { requireAal2 } from "@/lib/auth/aal";
+import { getAdminClient } from "../_lib";
 
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const user = await getUserFromAuthHeader(req);
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await requireAal2(req);
+  if (!auth.ok) return auth.response;
+  const { user } = auth;
 
   const { id } = await params;
   if (!id) {
@@ -37,10 +37,9 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const user = await getUserFromAuthHeader(req);
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await requireAal2(req);
+  if (!auth.ok) return auth.response;
+  const { user } = auth;
 
   const { id } = await params;
   if (!id) {
