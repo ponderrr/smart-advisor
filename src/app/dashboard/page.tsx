@@ -6,20 +6,22 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useQueryState, parseAsStringLiteral } from "nuqs";
 
-const GenrePieChart = dynamic(() => import("@/components/genre-pie-chart"), {
+const GenreBarChart = dynamic(() => import("@/components/genre-bar-chart"), {
   ssr: false,
   loading: () => (
-    <div className="flex h-72 items-center justify-center text-sm text-slate-400">
+    <div className="flex h-40 items-center justify-center text-sm text-slate-400">
       Loading chart...
     </div>
   ),
 });
+const ActivitySparkline = dynamic(
+  () => import("@/components/activity-sparkline"),
+  { ssr: false },
+);
 import {
   ArrowRight,
   BookOpen,
   Film,
-  Settings,
-  Clock,
   Sparkles,
   TrendingUp,
   BarChart3,
@@ -28,6 +30,9 @@ import {
   Bookmark,
   ThumbsUp,
   ThumbsDown,
+  Flame,
+  Trophy,
+  Lock,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
@@ -51,6 +56,7 @@ import { LogToLibraryButton } from "@/features/library/components/log-to-library
 import { formatDistanceToNowStrict } from "date-fns";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { Dialog } from "@/components/ui/dialog";
+import { TrailerEmbed } from "@/components/trailer-embed";
 import { WhyThisPick } from "@/components/why-this-pick";
 import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
@@ -126,6 +132,15 @@ const RecommendationModal = ({
             {rec.description}
           </p>
         )}
+
+        <div className="mt-4">
+          <TrailerEmbed
+            type={rec.type}
+            title={rec.title}
+            year={rec.year ?? null}
+            author={rec.author ?? null}
+          />
+        </div>
 
         <button
           type="button"
@@ -229,19 +244,305 @@ const DashboardPage = () => {
     : false;
   const topGenre = genreChartData[0] ?? null;
 
-  const picksTabs = ["all", "movies", "books", "favorites"] as const;
+  const activity = useMemo(() => {
+    const days = 14;
+    const buckets = new Array(days).fill(0) as number[];
+    const now = new Date();
+    const startOfToday = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+    ).getTime();
+    const dayMs = 24 * 60 * 60 * 1000;
+    recommendations.forEach((rec) => {
+      const t = new Date(rec.created_at).getTime();
+      const dayIdx = Math.floor((startOfToday - t) / dayMs);
+      if (dayIdx >= 0 && dayIdx < days) {
+        buckets[days - 1 - dayIdx] += 1;
+      }
+    });
+    const sevenDay = buckets.slice(-7).reduce((a, b) => a + b, 0);
+    const prevSevenDay = buckets.slice(0, 7).reduce((a, b) => a + b, 0);
+    return { series: buckets, sevenDay, prevSevenDay };
+  }, [recommendations]);
+
+  const streak = useMemo(() => {
+    const dayKey = (t: number) => {
+      const d = new Date(t);
+      return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    };
+    const days = new Set<string>();
+    recommendations.forEach((r) =>
+      days.add(dayKey(new Date(r.created_at).getTime())),
+    );
+    libraryItems.forEach((i) =>
+      days.add(dayKey(new Date(i.logged_at).getTime())),
+    );
+    if (days.size === 0) return 0;
+    const oneDay = 86400000;
+    const now = new Date();
+    let cursor: Date | null;
+    if (days.has(dayKey(now.getTime()))) {
+      cursor = now;
+    } else if (days.has(dayKey(now.getTime() - oneDay))) {
+      cursor = new Date(now.getTime() - oneDay);
+    } else {
+      return 0;
+    }
+    let count = 0;
+    while (days.has(dayKey(cursor.getTime()))) {
+      count += 1;
+      cursor = new Date(cursor.getTime() - oneDay);
+    }
+    return count;
+  }, [recommendations, libraryItems]);
+
+  const ratedCount = useMemo(
+    () => libraryItems.filter((i) => i.rating !== null).length,
+    [libraryItems],
+  );
+
+  const achievements = useMemo(() => {
+    const uniqueGenres = new Set<string>();
+    recommendations.forEach((r) => {
+      (r.genres ?? []).forEach((g) => {
+        if (g) uniqueGenres.add(g.toLowerCase().trim());
+      });
+    });
+    const list = [
+      {
+        id: "first-pick",
+        label: "First Pick",
+        icon: Sparkles,
+        tone: "indigo" as const,
+        progress: stats.total,
+        target: 1,
+      },
+      {
+        id: "ten-picks",
+        label: "10 Picks",
+        icon: TrendingUp,
+        tone: "indigo" as const,
+        progress: stats.total,
+        target: 10,
+      },
+      {
+        id: "wide-taste",
+        label: "Wide Taste",
+        icon: BarChart3,
+        tone: "violet" as const,
+        progress: uniqueGenres.size,
+        target: 5,
+      },
+      {
+        id: "cinephile",
+        label: "Cinephile",
+        icon: Film,
+        tone: "amber" as const,
+        progress: stats.movies,
+        target: 10,
+      },
+      {
+        id: "bookworm",
+        label: "Bookworm",
+        icon: BookOpen,
+        tone: "amber" as const,
+        progress: stats.books,
+        target: 10,
+      },
+      {
+        id: "curator",
+        label: "Curator",
+        icon: Heart,
+        tone: "rose" as const,
+        progress: stats.favorites,
+        target: 5,
+      },
+      {
+        id: "reflective",
+        label: "Reflective",
+        icon: ThumbsUp,
+        tone: "emerald" as const,
+        progress: ratedCount,
+        target: 5,
+      },
+      {
+        id: "streaker",
+        label: "Week Streak",
+        icon: Flame,
+        tone: "orange" as const,
+        progress: streak,
+        target: 7,
+      },
+    ];
+    const earned = list.filter((a) => a.progress >= a.target).length;
+    return { list, earned };
+  }, [recommendations, stats, ratedCount, streak]);
+
+  const [greeting, setGreeting] = useState("Welcome back");
+  useEffect(() => {
+    const greetings = [
+      "Welcome back",
+      "Hey",
+      "Good to see you",
+      "Hi there",
+      "Howdy",
+      "Hello again",
+      "Glad you're back",
+      "Look who's back",
+      "The legend returns",
+      "Well, well, well",
+      "Greetings, mortal",
+      "Fancy seeing you",
+      "The plot thickens",
+      "Sequel time",
+      "Now showing",
+      "Roll credits",
+      "Drumroll please",
+      "Brace yourself",
+      "Ready, set, scroll",
+    ];
+    const dayIndex = Math.floor(Date.now() / 86400000) % greetings.length;
+    setGreeting(greetings[dayIndex]);
+  }, []);
+
+  const greetName = useMemo(() => {
+    const username = user?.username?.trim();
+    if (username) return username;
+    const name = user?.name?.trim();
+    if (!name) return "";
+    return name.split(/\s+/)[0];
+  }, [user?.username, user?.name]);
+
+  // Year-in-review surfaces only during Dec (wrap up the current year) and
+  // January (look back at the year that just ended). Computed in an effect so
+  // SSR can't disagree with the client's local time.
+  const [wrappedSeason, setWrappedSeason] = useState<{
+    show: boolean;
+    year: number;
+  }>({ show: false, year: new Date().getFullYear() });
+  useEffect(() => {
+    const now = new Date();
+    const month = now.getMonth(); // 0-indexed
+    if (month === 11) {
+      setWrappedSeason({ show: true, year: now.getFullYear() });
+    } else if (month === 0) {
+      setWrappedSeason({ show: true, year: now.getFullYear() - 1 });
+    } else {
+      setWrappedSeason({ show: false, year: now.getFullYear() });
+    }
+  }, []);
+
+  const headerHook = useMemo(() => {
+    if (loading) return "Your personalized recommendation hub.";
+    if (stats.total === 0) return "Take your first quiz to get started.";
+    if (activity.sevenDay === 0) return "Quiet week — ready for a new pick?";
+    const delta = activity.sevenDay - activity.prevSevenDay;
+    const noun = `pick${activity.sevenDay === 1 ? "" : "s"}`;
+    if (delta > 0)
+      return `${activity.sevenDay} new ${noun} this week · up ${delta} from last week.`;
+    if (delta < 0)
+      return `${activity.sevenDay} new ${noun} this week · down ${-delta} from last week.`;
+    return `${activity.sevenDay} new ${noun} this week.`;
+  }, [loading, stats.total, activity]);
+
+  const picksTabs = ["all", "favorites"] as const;
   type PicksFilter = (typeof picksTabs)[number];
   const [picksFilter, setPicksFilter] = useState<PicksFilter>("all");
 
-  const filteredPicks = useMemo(() => {
-    if (picksFilter === "movies")
-      return recommendations.filter((r) => r.type === "movie");
-    if (picksFilter === "books")
-      return recommendations.filter((r) => r.type === "book");
-    if (picksFilter === "favorites")
-      return recommendations.filter((r) => r.is_favorited);
-    return recommendations;
-  }, [recommendations, picksFilter]);
+  const movieRail = useMemo(
+    () => recommendations.filter((r) => r.type === "movie").slice(0, 15),
+    [recommendations],
+  );
+  const bookRail = useMemo(
+    () => recommendations.filter((r) => r.type === "book").slice(0, 15),
+    [recommendations],
+  );
+  const favoritesGrid = useMemo(
+    () => recommendations.filter((r) => r.is_favorited).slice(0, 15),
+    [recommendations],
+  );
+
+  const renderPickCard = (rec: Recommendation) => {
+    const inLibrary = loggedTitleKeys.has(
+      `${rec.type}::${rec.title.toLowerCase()}`,
+    );
+    return (
+      <article
+        key={rec.id}
+        role="button"
+        tabIndex={0}
+        onClick={() => setSelectedRec(rec)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setSelectedRec(rec);
+          }
+        }}
+        className="group relative cursor-pointer overflow-hidden rounded-2xl border border-slate-200/70 bg-white/80 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:border-slate-700/60 dark:bg-slate-900/65 dark:focus-visible:ring-offset-slate-950"
+      >
+        <div className="relative aspect-[2/3] overflow-hidden bg-slate-200 dark:bg-slate-800">
+          {rec.poster_url ? (
+            <Image
+              src={rec.poster_url}
+              alt={rec.title}
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-slate-400">
+              {rec.type === "movie" ? (
+                <Film size={24} />
+              ) : (
+                <BookOpen size={24} />
+              )}
+            </div>
+          )}
+
+          <div className="absolute right-2 top-2 flex flex-col gap-1.5">
+            {rec.is_favorited && (
+              <span
+                aria-label="Favorited"
+                className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-rose-500 text-white shadow-md shadow-rose-500/30"
+              >
+                <Heart size={11} fill="currentColor" />
+              </span>
+            )}
+            {inLibrary && (
+              <span
+                aria-label="In your library"
+                className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-white shadow-md shadow-emerald-500/30"
+              >
+                <BookCheck size={11} />
+              </span>
+            )}
+          </div>
+
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent p-3">
+            <p className="line-clamp-2 text-sm font-black tracking-tight leading-tight text-white">
+              {rec.title}
+            </p>
+            <div className="mt-1 flex items-center gap-1.5">
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white/95 backdrop-blur-sm">
+                {rec.type === "movie" ? (
+                  <Film size={9} />
+                ) : (
+                  <BookOpen size={9} />
+                )}
+                {rec.type}
+              </span>
+              {rec.year && (
+                <span className="text-[9px] font-bold text-white/70">
+                  {rec.year}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </article>
+    );
+  };
 
   /**
    * Pick a single contextual nudge based on user state. Order matters —
@@ -251,9 +552,9 @@ const DashboardPage = () => {
     if (loading) return null;
     if (recommendations.length === 0) {
       return {
-        title: "Take your first quiz",
+        title: "Take Your First Quiz",
         body: "Answer a few questions and the AI will hand you a tailored pick.",
-        cta: "Start quiz",
+        cta: "Start Quiz",
         href: "/content-selection",
       };
     }
@@ -296,10 +597,11 @@ const DashboardPage = () => {
                 Dashboard
               </p>
               <h1 className="mt-2 break-words text-2xl font-black tracking-tighter sm:text-3xl md:text-4xl lg:text-5xl">
-                Welcome{user?.name ? `, ${user.name}` : ""}.
+                {greeting}
+                {greetName ? `, ${greetName}` : ""}.
               </h1>
               <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                Your personalized recommendation hub.
+                {headerHook}
               </p>
             </div>
             <div className="shrink-0">
@@ -318,9 +620,53 @@ const DashboardPage = () => {
             </div>
           </div>
 
+          {/* Mobile pill nav */}
+          <div
+            className="-mx-1 mb-4 flex gap-2 overflow-x-auto px-1 pb-1 md:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            role="tablist"
+            aria-label="Dashboard views"
+          >
+            {(
+              [
+                {
+                  id: "overview" as const,
+                  label: "Overview",
+                  icon: TrendingUp,
+                },
+                { id: "picks" as const, label: "Picks", icon: Sparkles },
+                { id: "genres" as const, label: "Genres", icon: BarChart3 },
+              ] as {
+                id: (typeof dashTabs)[number];
+                label: string;
+                icon: typeof TrendingUp;
+              }[]
+            ).map((tab) => {
+              const active = activeTab === tab.id;
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-4 py-2 text-xs font-bold tracking-tight transition-all duration-200 active:scale-[0.98]",
+                    active
+                      ? "border-indigo-500 bg-indigo-500 text-white shadow-sm shadow-indigo-500/20"
+                      : "border-slate-200 bg-white/70 text-slate-600 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-300",
+                  )}
+                >
+                  <Icon size={13} />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+
           {/* Sidebar + content layout */}
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6">
-            <SidebarNavShell>
+            <SidebarNavShell className="hidden md:flex">
               <nav aria-label="Dashboard views" className="flex-1">
                 <SidebarNavGroup label="Views" />
                 {[
@@ -371,6 +717,88 @@ const DashboardPage = () => {
                     transition={{ duration: 0.2 }}
                     className="space-y-5"
                   >
+                    {/* Year in Review — only surfaces in Dec / Jan */}
+                    {!loading && wrappedSeason.show && stats.total > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => router.push("/wrapped")}
+                        className="group relative w-full overflow-hidden rounded-3xl border border-amber-200/60 bg-gradient-to-br from-amber-100 via-rose-50 to-violet-100 p-6 text-left shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl dark:border-amber-500/30 dark:from-amber-500/15 dark:via-rose-500/10 dark:to-violet-500/15 sm:p-8"
+                      >
+                        <span
+                          aria-hidden="true"
+                          className="absolute -right-12 -top-12 h-44 w-44 rounded-full bg-gradient-to-br from-amber-400/40 to-rose-400/40 blur-3xl"
+                        />
+                        <span
+                          aria-hidden="true"
+                          className="absolute -bottom-16 -left-10 h-44 w-44 rounded-full bg-gradient-to-br from-violet-400/30 to-indigo-400/30 blur-3xl"
+                        />
+                        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500 text-white shadow-sm shadow-amber-500/30">
+                                <Trophy size={15} />
+                              </span>
+                              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-amber-700 dark:text-amber-300">
+                                Year in Review
+                              </p>
+                            </div>
+                            <h2 className="mt-3 text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl">
+                              Your{" "}
+                              <span className="bg-gradient-to-r from-amber-500 via-rose-500 to-violet-500 bg-clip-text text-transparent">
+                                {wrappedSeason.year}
+                              </span>{" "}
+                              in Picks
+                            </h2>
+                            <p className="mt-2 max-w-md text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                              Top genres, longest streak, most-picked
+                              creator — wrapped up in a card.
+                            </p>
+                          </div>
+                          <span className="inline-flex shrink-0 items-center gap-1.5 self-start rounded-full bg-slate-900 px-5 py-3 text-sm font-black tracking-tight text-white shadow-md transition-transform duration-200 group-hover:translate-x-0.5 sm:self-auto dark:bg-white dark:text-slate-900">
+                            Open Wrapped
+                            <ArrowRight size={14} />
+                          </span>
+                        </div>
+                      </button>
+                    )}
+
+                    {/* Suggestion banner — promoted hero CTA */}
+                    {!loading && suggestion && (
+                      <button
+                        type="button"
+                        onClick={() => router.push(suggestion.href)}
+                        className="group relative w-full overflow-hidden rounded-3xl border border-indigo-200/60 bg-gradient-to-br from-indigo-50/80 via-white to-violet-50/60 p-5 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-indigo-500/30 dark:from-indigo-500/10 dark:via-slate-900/40 dark:to-violet-500/10 sm:p-6"
+                      >
+                        <span
+                          aria-hidden="true"
+                          className="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-indigo-400 to-violet-500"
+                        />
+                        <div className="relative flex flex-col gap-4 pl-3 sm:flex-row sm:items-center sm:justify-between">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <Sparkles
+                                size={14}
+                                className="text-indigo-600 dark:text-indigo-400"
+                              />
+                              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-indigo-700 dark:text-indigo-300">
+                                Suggested next
+                              </p>
+                            </div>
+                            <h2 className="mt-2 text-xl font-black tracking-tight sm:text-2xl">
+                              {suggestion.title}
+                            </h2>
+                            <p className="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                              {suggestion.body}
+                            </p>
+                          </div>
+                          <span className="inline-flex shrink-0 items-center gap-1.5 self-start rounded-full bg-slate-900 px-5 py-2.5 text-sm font-black tracking-tight text-white transition-transform duration-200 group-hover:translate-x-0.5 sm:self-auto dark:bg-white dark:text-slate-900">
+                            {suggestion.cta}
+                            <ArrowRight size={14} />
+                          </span>
+                        </div>
+                      </button>
+                    )}
+
                     {/* Last Pick Spotlight */}
                     {loading ? (
                       <div className="flex gap-4 rounded-3xl border border-slate-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
@@ -465,7 +893,7 @@ const DashboardPage = () => {
                       <div className="rounded-3xl border border-dashed border-slate-300/80 bg-gradient-to-br from-indigo-50/50 via-white to-violet-50/50 p-10 text-center dark:border-slate-700/70 dark:from-indigo-500/5 dark:via-slate-900/40 dark:to-violet-500/5">
                         <Sparkles className="mx-auto h-10 w-10 text-indigo-300 dark:text-indigo-500/60" />
                         <h2 className="mt-4 text-2xl font-black tracking-tight">
-                          No picks yet
+                          No Picks Yet
                         </h2>
                         <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
                           Take your first quiz and your latest pick will live
@@ -474,265 +902,330 @@ const DashboardPage = () => {
                       </div>
                     )}
 
-                    {/* Stats — compact, with secondary descriptors */}
-                    <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
-                      {[
-                        {
-                          label: "Total picks",
-                          value: stats.total,
-                          icon: TrendingUp,
-                          color:
-                            "bg-indigo-100 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300",
-                          hint:
-                            stats.total === 0
-                              ? "Take your first quiz"
-                              : `${stats.movies} movies · ${stats.books} books`,
-                          href: "/history",
-                        },
-                        {
-                          label: "In your library",
-                          value: libraryItems.length,
-                          icon: BookCheck,
-                          color:
-                            "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300",
-                          hint:
-                            libraryItems.length === 0
-                              ? "Log a reaction"
-                              : `${ratedItems.length} rated`,
-                          href: "/library",
-                        },
-                        {
-                          label: "Favorites",
-                          value: stats.favorites,
-                          icon: Heart,
-                          color:
-                            "bg-rose-100 text-rose-600 dark:bg-rose-500/15 dark:text-rose-300",
-                          hint:
-                            stats.total > 0
-                              ? `${Math.round((stats.favorites / stats.total) * 100)}% of picks`
-                              : "—",
-                          href: "/history?filter=favorites",
-                        },
-                        {
-                          label: "Top genre",
-                          value: topGenre?.genre ?? "—",
-                          icon: BarChart3,
-                          color:
-                            "bg-violet-100 text-violet-600 dark:bg-violet-500/15 dark:text-violet-300",
-                          hint: topGenre
-                            ? `${topGenre.total} pick${topGenre.total === 1 ? "" : "s"}`
-                            : "Take a quiz",
-                          href: "?tab=genres",
-                          /** Genre tile uses smaller font since it's a label, not a number. */
-                          smallValue: true,
-                        },
-                      ].map((stat) => (
-                        <button
-                          key={stat.label}
-                          onClick={() => {
-                            if (stat.href.startsWith("?")) {
-                              setActiveTab("genres");
-                            } else {
-                              router.push(stat.href);
-                            }
-                          }}
-                          className="group rounded-2xl border border-slate-200/70 bg-white/80 p-3 text-left shadow-sm backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md sm:p-4 dark:border-slate-700/60 dark:bg-slate-900/60 dark:hover:border-slate-600/80"
-                        >
-                          <div className="flex items-center justify-between">
-                            <span
-                              className={cn(
-                                "flex h-7 w-7 items-center justify-center rounded-full",
-                                stat.color,
+                    {/* Pulse — rhythm card with sparkline */}
+                    {!loading && stats.total > 0 && (
+                      <div className="rounded-3xl border border-slate-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-6">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">
+                                <TrendingUp size={13} />
+                              </span>
+                              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-indigo-600 dark:text-indigo-400">
+                                Pulse
+                              </p>
+                            </div>
+                            <h3 className="mt-2 text-lg font-black tracking-tight sm:text-xl">
+                              {activity.sevenDay > 0
+                                ? `${activity.sevenDay} pick${activity.sevenDay === 1 ? "" : "s"} this week`
+                                : "Quiet Week"}
+                            </h3>
+                            <div className="mt-0.5 flex flex-wrap items-center gap-2">
+                              <p className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                                {(() => {
+                                  const d =
+                                    activity.sevenDay - activity.prevSevenDay;
+                                  if (d > 0) return `↑ ${d} from last week`;
+                                  if (d < 0) return `↓ ${-d} from last week`;
+                                  return "Last 14 days";
+                                })()}
+                              </p>
+                              {streak >= 2 && (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-orange-600 dark:bg-orange-500/15 dark:text-orange-300">
+                                  <Flame size={10} />
+                                  {streak}-day streak
+                                </span>
                               )}
-                            >
-                              <stat.icon size={13} />
-                            </span>
-                            <ArrowRight
-                              size={12}
-                              className="text-slate-300 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-slate-500 dark:text-slate-600 dark:group-hover:text-slate-400"
+                            </div>
+                          </div>
+                          <div className="hidden h-14 w-48 shrink-0 sm:block">
+                            <ActivitySparkline
+                              data={activity.series}
+                              className="h-full w-full"
                             />
                           </div>
-                          <p className="mt-3 text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
-                            {stat.label}
-                          </p>
-                          <p
-                            className={cn(
-                              "mt-1 font-black tracking-tight",
-                              stat.smallValue
-                                ? "truncate text-base sm:text-lg"
-                                : "text-2xl",
-                            )}
-                          >
-                            {loading ? "–" : stat.value}
-                          </p>
-                          <p className="mt-0.5 truncate text-[11px] text-slate-500 dark:text-slate-400">
-                            {stat.hint}
-                          </p>
-                        </button>
-                      ))}
-                    </div>
+                        </div>
+                        <div className="mt-3 h-12 w-full sm:hidden">
+                          <ActivitySparkline
+                            data={activity.series}
+                            className="h-full w-full"
+                          />
+                        </div>
+                        <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                          {[
+                            {
+                              label: "Picks",
+                              value: stats.total,
+                              icon: TrendingUp,
+                              hint: `${stats.movies}m · ${stats.books}b`,
+                              color: "text-indigo-600 dark:text-indigo-400",
+                              bg: "bg-indigo-100 dark:bg-indigo-500/15",
+                              href: "/history",
+                              smallValue: false,
+                            },
+                            {
+                              label: "Library",
+                              value: libraryItems.length,
+                              icon: BookCheck,
+                              hint:
+                                ratedItems.length > 0
+                                  ? `${ratedItems.length} rated`
+                                  : "—",
+                              color: "text-emerald-600 dark:text-emerald-400",
+                              bg: "bg-emerald-100 dark:bg-emerald-500/15",
+                              href: "/library",
+                              smallValue: false,
+                            },
+                            {
+                              label: "Favorites",
+                              value: stats.favorites,
+                              icon: Heart,
+                              hint:
+                                stats.total > 0
+                                  ? `${Math.round((stats.favorites / stats.total) * 100)}%`
+                                  : "—",
+                              color: "text-rose-600 dark:text-rose-400",
+                              bg: "bg-rose-100 dark:bg-rose-500/15",
+                              href: "/history?filter=favorites",
+                              smallValue: false,
+                            },
+                            {
+                              label: "Top Genre",
+                              value: topGenre?.genre ?? "—",
+                              icon: BarChart3,
+                              hint: topGenre
+                                ? `${topGenre.total} pick${topGenre.total === 1 ? "" : "s"}`
+                                : "—",
+                              color: "text-violet-600 dark:text-violet-400",
+                              bg: "bg-violet-100 dark:bg-violet-500/15",
+                              href: "?tab=genres",
+                              smallValue: true,
+                            },
+                          ].map((s) => (
+                            <button
+                              key={s.label}
+                              type="button"
+                              onClick={() =>
+                                s.href.startsWith("?")
+                                  ? setActiveTab("genres")
+                                  : router.push(s.href)
+                              }
+                              className="group flex items-center gap-2.5 rounded-xl border border-slate-100 bg-white/60 px-3 py-2 text-left transition-colors hover:border-slate-200 dark:border-slate-800 dark:bg-slate-900/40 dark:hover:border-slate-700"
+                            >
+                              <span
+                                className={cn(
+                                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-full",
+                                  s.bg,
+                                  s.color,
+                                )}
+                              >
+                                <s.icon size={13} />
+                              </span>
+                              <div className="min-w-0 flex-1">
+                                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+                                  {s.label}
+                                </p>
+                                <p
+                                  className={cn(
+                                    "font-black tracking-tight",
+                                    s.smallValue
+                                      ? "truncate text-sm"
+                                      : "text-base",
+                                  )}
+                                  title={String(s.value)}
+                                >
+                                  {s.value}
+                                </p>
+                                <p className="truncate text-[10px] text-slate-500 dark:text-slate-400">
+                                  {s.hint}
+                                </p>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
-                    {/* Library snapshot + Smart suggestion */}
-                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                      {/* Library snapshot */}
-                      <div className="rounded-3xl border border-slate-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
-                        <div className="mb-3 flex items-center justify-between">
+                    {/* Milestones — client-computed achievements */}
+                    {!loading && stats.total > 0 && (
+                      <div className="rounded-3xl border border-slate-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-6">
+                        <div className="mb-4 flex items-center justify-between gap-3">
                           <div className="flex items-center gap-2">
-                            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300">
-                              <BookCheck size={13} />
+                            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-300">
+                              <Trophy size={13} />
                             </span>
                             <div>
-                              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-400">
-                                Taste signal
+                              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-600 dark:text-amber-400">
+                                Milestones
                               </p>
                               <h3 className="text-sm font-black tracking-tight">
-                                Your library
+                                {achievements.earned} of{" "}
+                                {achievements.list.length} earned
                               </h3>
                             </div>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => router.push("/library")}
-                            className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 bg-white/80 px-3 py-1.5 text-xs font-bold tracking-tight text-slate-700 transition-colors hover:border-slate-300 hover:bg-white dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200 dark:hover:bg-slate-800/70"
-                          >
-                            View all
-                            <ArrowRight size={12} />
-                          </button>
                         </div>
-                        {libraryItems.length === 0 ? (
-                          <p className="text-sm text-slate-500 dark:text-slate-400">
-                            Nothing logged yet. Hit{" "}
-                            <span className="font-semibold text-slate-700 dark:text-slate-200">
-                              I watched / read this
-                            </span>{" "}
-                            on a result and it&apos;ll show up here as a taste
-                            signal for future quizzes.
-                          </p>
-                        ) : (
-                          <ul className="space-y-2">
-                            {libraryItems.slice(0, 3).map((item) => {
-                              const RatingIcon =
-                                item.rating === 1
-                                  ? ThumbsDown
-                                  : item.rating === 3
-                                    ? ThumbsUp
-                                    : Bookmark;
-                              return (
-                                <li
-                                  key={item.id}
-                                  className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white/60 px-3 py-2 dark:border-slate-800 dark:bg-slate-900/40"
+                        <ul className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                          {achievements.list.map((a) => {
+                            const earned = a.progress >= a.target;
+                            const pct = Math.min(
+                              100,
+                              Math.round((a.progress / a.target) * 100),
+                            );
+                            const Icon = a.icon;
+                            const earnedTone: Record<typeof a.tone, string> = {
+                              indigo:
+                                "bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300",
+                              violet:
+                                "bg-violet-100 text-violet-600 dark:bg-violet-500/20 dark:text-violet-300",
+                              amber:
+                                "bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-300",
+                              rose:
+                                "bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-300",
+                              emerald:
+                                "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-300",
+                              orange:
+                                "bg-orange-100 text-orange-600 dark:bg-orange-500/20 dark:text-orange-300",
+                            };
+                            return (
+                              <li
+                                key={a.id}
+                                className={cn(
+                                  "flex items-center gap-2.5 rounded-xl border px-3 py-2.5 transition-all",
+                                  earned
+                                    ? "border-amber-300/60 bg-gradient-to-br from-amber-50/80 to-white shadow-sm dark:border-amber-500/40 dark:from-amber-500/10 dark:to-slate-900/40"
+                                    : "border-slate-100 bg-white/60 dark:border-slate-800 dark:bg-slate-900/40",
+                                )}
+                              >
+                                <span
+                                  className={cn(
+                                    "relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
+                                    earned
+                                      ? earnedTone[a.tone]
+                                      : "bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-600",
+                                  )}
                                 >
-                                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
-                                    {item.medium === "movie" ? (
-                                      <Film size={14} />
-                                    ) : (
-                                      <BookOpen size={14} />
+                                  <Icon size={15} />
+                                  {!earned && (
+                                    <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-300">
+                                      <Lock size={8} />
+                                    </span>
+                                  )}
+                                </span>
+                                <div className="min-w-0 flex-1">
+                                  <p
+                                    className={cn(
+                                      "truncate text-xs font-black tracking-tight",
+                                      !earned &&
+                                        "text-slate-500 dark:text-slate-400",
                                     )}
-                                  </span>
-                                  <div className="min-w-0 flex-1">
-                                    <p className="truncate text-sm font-bold tracking-tight">
-                                      {item.title}
-                                    </p>
-                                    <div className="mt-0.5 flex items-center gap-1.5">
-                                      <span
-                                        className={cn(
-                                          "rounded-full px-1.5 py-0.5 text-[10px] font-bold",
-                                          STATUS_TONE[item.status].chip,
-                                        )}
-                                      >
-                                        {STATUS_LABELS[item.status]}
-                                      </span>
-                                      {item.rating !== null && (
-                                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-500 dark:text-slate-400">
-                                          <RatingIcon size={10} />
-                                          {RATING_LABELS[item.rating]}
-                                        </span>
-                                      )}
+                                  >
+                                    {a.label}
+                                  </p>
+                                  <p className="mt-0.5 truncate text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                                    {earned
+                                      ? "Unlocked"
+                                      : `${a.progress}/${a.target}`}
+                                  </p>
+                                  {!earned && (
+                                    <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                                      <div
+                                        className="h-full rounded-full bg-slate-400 transition-all duration-500 dark:bg-slate-500"
+                                        style={{ width: `${pct}%` }}
+                                      />
                                     </div>
-                                  </div>
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        )}
+                                  )}
+                                </div>
+                              </li>
+                            );
+                          })}
+                        </ul>
                       </div>
+                    )}
 
-                      {/* Smart suggestion / quick links */}
-                      {suggestion ? (
+                    {/* Library snapshot — full width */}
+                    <div className="rounded-3xl border border-slate-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
+                      <div className="mb-3 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300">
+                            <BookCheck size={13} />
+                          </span>
+                          <div>
+                            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-400">
+                              Taste Signal
+                            </p>
+                            <h3 className="text-sm font-black tracking-tight">
+                              Your Library
+                            </h3>
+                          </div>
+                        </div>
                         <button
                           type="button"
-                          onClick={() => router.push(suggestion.href)}
-                          className="group relative overflow-hidden rounded-3xl border border-indigo-200/60 bg-gradient-to-br from-indigo-50/80 via-white to-violet-50/60 p-5 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-indigo-500/30 dark:from-indigo-500/10 dark:via-slate-900/40 dark:to-violet-500/10"
+                          onClick={() => router.push("/library")}
+                          className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 bg-white/80 px-3 py-1.5 text-xs font-bold tracking-tight text-slate-700 transition-colors hover:border-slate-300 hover:bg-white dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200 dark:hover:bg-slate-800/70"
                         >
-                          <span
-                            aria-hidden="true"
-                            className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-indigo-400 to-violet-500"
-                          />
-                          <div className="relative flex items-center gap-2 pl-2">
-                            <Sparkles
-                              size={14}
-                              className="text-indigo-600 dark:text-indigo-400"
-                            />
-                            <p className="text-[11px] font-black uppercase tracking-[0.16em] text-indigo-700 dark:text-indigo-300">
-                              Suggested next
-                            </p>
-                          </div>
-                          <h3 className="mt-2 pl-2 text-lg font-black tracking-tight sm:text-xl">
-                            {suggestion.title}
-                          </h3>
-                          <p className="mt-1 pl-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                            {suggestion.body}
-                          </p>
-                          <p className="mt-3 inline-flex items-center gap-1 pl-2 text-sm font-bold text-indigo-600 transition-transform duration-200 group-hover:translate-x-0.5 dark:text-indigo-400">
-                            {suggestion.cta}
-                            <ArrowRight size={14} />
-                          </p>
+                          View all
+                          <ArrowRight size={12} />
                         </button>
+                      </div>
+                      {libraryItems.length === 0 ? (
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                          Nothing logged yet. Hit{" "}
+                          <span className="font-semibold text-slate-700 dark:text-slate-200">
+                            I watched / read this
+                          </span>{" "}
+                          on a result and it&apos;ll show up here as a taste
+                          signal for future quizzes.
+                        </p>
                       ) : (
-                        <div className="rounded-3xl border border-slate-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
-                          <p className="mb-3 text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
-                            Shortcuts
-                          </p>
-                          <div className="grid grid-cols-2 gap-2">
-                            {[
-                              {
-                                label: "History",
-                                icon: Clock,
-                                href: "/history",
-                              },
-                              {
-                                label: "Library",
-                                icon: BookCheck,
-                                href: "/library",
-                              },
-                              {
-                                label: "Settings",
-                                icon: Settings,
-                                href: "/settings",
-                              },
-                              {
-                                label: "Take quiz",
-                                icon: Sparkles,
-                                href: "/content-selection",
-                              },
-                            ].map((s) => (
-                              <button
-                                key={s.label}
-                                type="button"
-                                onClick={() => router.push(s.href)}
-                                className="group inline-flex items-center gap-2 rounded-xl border border-slate-200/70 bg-white/60 px-3 py-2.5 text-left text-sm font-bold tracking-tight transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm dark:border-slate-700/60 dark:bg-slate-900/40 dark:hover:border-slate-600"
+                        <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                          {libraryItems.slice(0, 4).map((item) => {
+                            const RatingIcon =
+                              item.rating === 1
+                                ? ThumbsDown
+                                : item.rating === 3
+                                  ? ThumbsUp
+                                  : Bookmark;
+                            return (
+                              <li
+                                key={item.id}
+                                className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white/60 px-3 py-2 dark:border-slate-800 dark:bg-slate-900/40"
                               >
-                                <s.icon
-                                  size={14}
-                                  className="text-slate-500 dark:text-slate-400"
-                                />
-                                {s.label}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
+                                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                                  {item.medium === "movie" ? (
+                                    <Film size={14} />
+                                  ) : (
+                                    <BookOpen size={14} />
+                                  )}
+                                </span>
+                                <div className="min-w-0 flex-1">
+                                  <p className="truncate text-sm font-bold tracking-tight">
+                                    {item.title}
+                                  </p>
+                                  <div className="mt-0.5 flex items-center gap-1.5">
+                                    <span
+                                      className={cn(
+                                        "rounded-full px-1.5 py-0.5 text-[10px] font-bold",
+                                        STATUS_TONE[item.status].chip,
+                                      )}
+                                    >
+                                      {STATUS_LABELS[item.status]}
+                                    </span>
+                                    {item.rating !== null && (
+                                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+                                        <RatingIcon size={10} />
+                                        {RATING_LABELS[item.rating]}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </li>
+                            );
+                          })}
+                        </ul>
                       )}
                     </div>
+
                   </motion.div>
                 )}
 
@@ -755,8 +1248,6 @@ const DashboardPage = () => {
                         {(
                           [
                             { id: "all", label: "All" },
-                            { id: "movies", label: "Movies" },
-                            { id: "books", label: "Books" },
                             { id: "favorites", label: "Favorites" },
                           ] as { id: PicksFilter; label: string }[]
                         ).map((opt) => {
@@ -802,132 +1293,120 @@ const DashboardPage = () => {
                         transition={{ duration: 0.18 }}
                       >
                         {loading ? (
-                          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
-                            {[...Array(10)].map((_, i) => (
+                          <div className="space-y-6">
+                            {[0, 1].map((rail) => (
                               <div
-                                key={i}
-                                className="overflow-hidden rounded-2xl border border-slate-200/70 bg-white/60 dark:border-slate-700/60 dark:bg-slate-900/40"
+                                key={rail}
+                                className="rounded-3xl border border-slate-200/70 bg-white/80 py-5 pl-6 pr-0 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65"
                               >
-                                <div className="aspect-[2/3] animate-pulse bg-slate-200 dark:bg-slate-800" />
+                                <div className="mb-3 h-3 w-20 animate-pulse rounded-full bg-slate-200 dark:bg-slate-800" />
+                                <div className="flex gap-3 overflow-hidden pr-6">
+                                  {[...Array(6)].map((_, i) => (
+                                    <div
+                                      key={i}
+                                      className="aspect-[2/3] w-36 shrink-0 animate-pulse rounded-2xl bg-slate-200 dark:bg-slate-800 sm:w-40"
+                                    />
+                                  ))}
+                                </div>
                               </div>
                             ))}
                           </div>
-                        ) : filteredPicks.length === 0 ? (
+                        ) : recommendations.length === 0 ? (
                           <div className="rounded-3xl border border-dashed border-slate-300/80 bg-gradient-to-br from-indigo-50/50 via-white to-violet-50/50 p-12 text-center dark:border-slate-700/70 dark:from-indigo-500/5 dark:via-slate-900/40 dark:to-violet-500/5">
                             <Sparkles
                               className="mx-auto h-10 w-10 text-indigo-300 dark:text-indigo-500/60"
                               aria-hidden="true"
                             />
                             <h3 className="mt-4 text-2xl font-black tracking-tight">
-                              {recommendations.length === 0
-                                ? "No picks yet"
-                                : "Nothing matches that filter"}
+                              No Picks Yet
                             </h3>
                             <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
-                              {recommendations.length === 0
-                                ? "Take a quiz and your picks will collect here."
-                                : "Try a different filter or take a new quiz."}
+                              Take a quiz and your picks will collect here.
                             </p>
-                            {recommendations.length === 0 && (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  router.push("/content-selection")
-                                }
-                                className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-black tracking-tight text-white transition-colors hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
-                              >
-                                <Sparkles size={14} />
-                                Start quiz
-                              </button>
-                            )}
+                            <button
+                              type="button"
+                              onClick={() => router.push("/content-selection")}
+                              className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-black tracking-tight text-white transition-colors hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+                            >
+                              <Sparkles size={14} />
+                              Start Quiz
+                            </button>
                           </div>
+                        ) : picksFilter === "favorites" ? (
+                          favoritesGrid.length === 0 ? (
+                            <div className="rounded-3xl border border-dashed border-slate-300/80 bg-gradient-to-br from-rose-50/50 via-white to-pink-50/50 p-12 text-center dark:border-slate-700/70 dark:from-rose-500/5 dark:via-slate-900/40 dark:to-pink-500/5">
+                              <Heart
+                                className="mx-auto h-10 w-10 text-rose-300 dark:text-rose-500/60"
+                                aria-hidden="true"
+                              />
+                              <h3 className="mt-4 text-2xl font-black tracking-tight">
+                                No favorites yet
+                              </h3>
+                              <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
+                                Tap the heart on any pick to save it here.
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
+                              {favoritesGrid.map(renderPickCard)}
+                            </div>
+                          )
                         ) : (
-                          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
-                            {filteredPicks.slice(0, 15).map((rec) => {
-                              const inLibrary = loggedTitleKeys.has(
-                                `${rec.type}::${rec.title.toLowerCase()}`,
-                              );
-                              return (
-                                <article
-                                  key={rec.id}
-                                  role="button"
-                                  tabIndex={0}
-                                  onClick={() => setSelectedRec(rec)}
-                                  onKeyDown={(e) => {
-                                    if (e.key === "Enter" || e.key === " ") {
-                                      e.preventDefault();
-                                      setSelectedRec(rec);
-                                    }
-                                  }}
-                                  className="group relative cursor-pointer overflow-hidden rounded-2xl border border-slate-200/70 bg-white/80 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:border-slate-700/60 dark:bg-slate-900/65 dark:focus-visible:ring-offset-slate-950"
-                                >
-                                  <div className="relative aspect-[2/3] overflow-hidden bg-slate-200 dark:bg-slate-800">
-                                    {rec.poster_url ? (
-                                      <Image
-                                        src={rec.poster_url}
-                                        alt={rec.title}
-                                        fill
-                                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-                                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                                      />
-                                    ) : (
-                                      <div className="flex h-full w-full items-center justify-center text-slate-400">
-                                        {rec.type === "movie" ? (
-                                          <Film size={24} />
-                                        ) : (
-                                          <BookOpen size={24} />
-                                        )}
-                                      </div>
-                                    )}
-
-                                    {/* Status badges, top-right */}
-                                    <div className="absolute right-2 top-2 flex flex-col gap-1.5">
-                                      {rec.is_favorited && (
-                                        <span
-                                          aria-label="Favorited"
-                                          className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-rose-500 text-white shadow-md shadow-rose-500/30"
-                                        >
-                                          <Heart
-                                            size={11}
-                                            fill="currentColor"
-                                          />
-                                        </span>
-                                      )}
-                                      {inLibrary && (
-                                        <span
-                                          aria-label="In your library"
-                                          className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-white shadow-md shadow-emerald-500/30"
-                                        >
-                                          <BookCheck size={11} />
-                                        </span>
-                                      )}
-                                    </div>
-
-                                    {/* Title overlay */}
-                                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent p-3">
-                                      <p className="line-clamp-2 text-sm font-black tracking-tight leading-tight text-white">
-                                        {rec.title}
-                                      </p>
-                                      <div className="mt-1 flex items-center gap-1.5">
-                                        <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white/95 backdrop-blur-sm">
-                                          {rec.type === "movie" ? (
-                                            <Film size={9} />
-                                          ) : (
-                                            <BookOpen size={9} />
-                                          )}
-                                          {rec.type}
-                                        </span>
-                                        {rec.year && (
-                                          <span className="text-[9px] font-bold text-white/70">
-                                            {rec.year}
-                                          </span>
-                                        )}
-                                      </div>
-                                    </div>
+                          <div className="space-y-6">
+                            {movieRail.length > 0 && (
+                              <section className="rounded-3xl border border-slate-200/70 bg-white/80 py-5 pl-6 pr-0 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
+                                <div className="mb-3 flex items-center justify-between gap-2 pr-6">
+                                  <div className="flex items-center gap-2">
+                                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">
+                                      <Film size={13} />
+                                    </span>
+                                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-indigo-600 dark:text-indigo-400">
+                                      Movies
+                                    </p>
+                                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500">
+                                      {movieRail.length}
+                                    </span>
                                   </div>
-                                </article>
-                              );
-                            })}
+                                </div>
+                                <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 pr-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                                  {movieRail.map((rec) => (
+                                    <div
+                                      key={rec.id}
+                                      className="w-36 shrink-0 snap-start sm:w-40"
+                                    >
+                                      {renderPickCard(rec)}
+                                    </div>
+                                  ))}
+                                </div>
+                              </section>
+                            )}
+                            {bookRail.length > 0 && (
+                              <section className="rounded-3xl border border-slate-200/70 bg-white/80 py-5 pl-6 pr-0 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
+                                <div className="mb-3 flex items-center justify-between gap-2 pr-6">
+                                  <div className="flex items-center gap-2">
+                                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-300">
+                                      <BookOpen size={13} />
+                                    </span>
+                                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-600 dark:text-amber-400">
+                                      Books
+                                    </p>
+                                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500">
+                                      {bookRail.length}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 pr-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                                  {bookRail.map((rec) => (
+                                    <div
+                                      key={rec.id}
+                                      className="w-36 shrink-0 snap-start sm:w-40"
+                                    >
+                                      {renderPickCard(rec)}
+                                    </div>
+                                  ))}
+                                </div>
+                              </section>
+                            )}
                           </div>
                         )}
                       </motion.div>
@@ -944,20 +1423,45 @@ const DashboardPage = () => {
                     transition={{ duration: 0.2 }}
                     className="space-y-4"
                   >
-                    {/* Top genres leaderboard */}
                     <div className="rounded-3xl border border-slate-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
-                      <div className="mb-4 flex items-center gap-2">
-                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-violet-100 text-violet-600 dark:bg-violet-500/15 dark:text-violet-300">
-                          <BarChart3 size={13} />
-                        </span>
-                        <div>
-                          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-violet-600 dark:text-violet-400">
-                            Genre breakdown
-                          </p>
-                          <h2 className="text-lg font-black tracking-tight sm:text-xl">
-                            Where your taste leans
-                          </h2>
+                      <div className="mb-4 flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-violet-100 text-violet-600 dark:bg-violet-500/15 dark:text-violet-300">
+                            <BarChart3 size={13} />
+                          </span>
+                          <div>
+                            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-violet-600 dark:text-violet-400">
+                              Genre breakdown
+                            </p>
+                            <h2 className="text-lg font-black tracking-tight sm:text-xl">
+                              Where Your Taste Leans
+                            </h2>
+                          </div>
                         </div>
+                        {topGenre && stats.total > 0 && (
+                          <div className="hidden shrink-0 text-right sm:block">
+                            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">
+                              Top
+                            </p>
+                            <p className="text-sm font-black tracking-tight">
+                              {topGenre.genre}{" "}
+                              <span className="text-slate-400 dark:text-slate-500">
+                                ·{" "}
+                                {Math.round(
+                                  (topGenre.total / stats.total) * 100,
+                                )}
+                                %
+                              </span>
+                            </p>
+                            <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                              {topGenre.movie > topGenre.book
+                                ? "mostly movies"
+                                : topGenre.book > topGenre.movie
+                                  ? "mostly books"
+                                  : "even split"}
+                            </p>
+                          </div>
+                        )}
                       </div>
                       {loading ? (
                         <div className="space-y-2">
@@ -973,77 +1477,9 @@ const DashboardPage = () => {
                           Take a quiz to see your genres.
                         </div>
                       ) : (
-                        <ul className="space-y-2">
-                          {genreChartData.map((g, i) => {
-                            const pct = stats.total
-                              ? Math.round((g.total / stats.total) * 100)
-                              : 0;
-                            return (
-                              <li
-                                key={g.genre}
-                                className="rounded-xl border border-slate-100 bg-white/60 p-3 dark:border-slate-800 dark:bg-slate-900/40"
-                              >
-                                <div className="flex items-center justify-between gap-3">
-                                  <div className="flex min-w-0 items-center gap-2">
-                                    <span
-                                      className={cn(
-                                        "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-black",
-                                        i === 0
-                                          ? "bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-sm shadow-indigo-500/20"
-                                          : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400",
-                                      )}
-                                    >
-                                      {i + 1}
-                                    </span>
-                                    <span className="truncate text-sm font-bold tracking-tight">
-                                      {g.genre}
-                                    </span>
-                                  </div>
-                                  <div className="flex shrink-0 items-center gap-2 text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                                    {g.movie > 0 && (
-                                      <span className="inline-flex items-center gap-1">
-                                        <Film size={10} />
-                                        {g.movie}
-                                      </span>
-                                    )}
-                                    {g.book > 0 && (
-                                      <span className="inline-flex items-center gap-1">
-                                        <BookOpen size={10} />
-                                        {g.book}
-                                      </span>
-                                    )}
-                                    <span className="ml-1 text-slate-400 dark:text-slate-500">
-                                      {pct}%
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-                                  <div
-                                    className={cn(
-                                      "h-full rounded-full transition-all duration-500",
-                                      i === 0
-                                        ? "bg-gradient-to-r from-indigo-500 to-violet-500"
-                                        : "bg-slate-300 dark:bg-slate-600",
-                                    )}
-                                    style={{ width: `${pct}%` }}
-                                  />
-                                </div>
-                              </li>
-                            );
-                          })}
-                        </ul>
+                        <GenreBarChart data={genreChartData} />
                       )}
                     </div>
-
-                    {/* Pie chart visualization */}
-                    {!loading && genreChartData.length > 0 && (
-                      <div className="rounded-3xl border border-slate-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
-                        <p className="mb-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
-                          Distribution
-                        </p>
-                        <GenrePieChart data={genreChartData} />
-                      </div>
-                    )}
                   </motion.div>
                 )}
               </AnimatePresence>

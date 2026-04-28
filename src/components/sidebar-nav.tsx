@@ -95,9 +95,20 @@ export function SidebarUser({ name, email, avatarUrl }: SidebarUserProps) {
  * Wrapper aside that gives the sidebar its card styling. Sticky on md+ so
  * it stays in view as you scroll the section content.
  */
-export function SidebarNavShell({ children }: { children: ReactNode }) {
+export function SidebarNavShell({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return (
-    <aside className="flex w-full flex-col rounded-3xl border border-slate-200/70 bg-white/85 p-4 shadow-sm backdrop-blur-md md:sticky md:top-32 md:w-64 md:shrink-0 dark:border-slate-700/60 dark:bg-slate-900/65">
+    <aside
+      className={cn(
+        "flex w-full flex-col rounded-3xl border border-slate-200/70 bg-white/85 p-4 shadow-sm backdrop-blur-md md:sticky md:top-32 md:w-64 md:shrink-0 dark:border-slate-700/60 dark:bg-slate-900/65",
+        className,
+      )}
+    >
       {children}
     </aside>
   );

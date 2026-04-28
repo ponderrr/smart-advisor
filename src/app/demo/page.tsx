@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 
 const VALIDATION_FLASH_MS = 650;
 const VALIDATION_MESSAGE_MS = 3200;
@@ -22,6 +22,7 @@ import {
   buildDemoQuiz,
   type DemoQuestion,
 } from "@/features/quiz/utils/demo-questions";
+import { useLeaveGuard } from "@/features/quiz/hooks/use-leave-guard";
 import { QuizStepShell } from "@/features/quiz/components/quiz-step-shell";
 import { PillButton } from "@/components/ui/pill-button";
 import { cn } from "@/lib/utils";
@@ -200,6 +201,9 @@ export default function DemoPage() {
   const [questions] = useState<DemoQuestion[]>(() => buildDemoQuiz());
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, QuestionValue>>({});
+
+  // Once the user has answered anything, prompt before leaving the demo.
+  useLeaveGuard(Object.keys(answers).length > 0);
   const [validationMessage, setValidationMessage] = useState<string | null>(
     null,
   );
@@ -279,10 +283,14 @@ export default function DemoPage() {
 
   const handleBack = () => {
     if (step === 0) {
-      const confirmed = window.confirm(
-        "Are you sure you want to go back to the home page?",
-      );
-      if (!confirmed) return;
+      if (
+        Object.keys(answers).length > 0 &&
+        !window.confirm(
+          "Leave the demo? Your answers so far won't be saved.",
+        )
+      ) {
+        return;
+      }
       router.push("/");
       return;
     }
@@ -318,11 +326,13 @@ export default function DemoPage() {
           transition={{ layout: { duration: 0.32, ease: [0.22, 1, 0.36, 1] } }}
           className="rounded-3xl border border-slate-200/70 bg-white/85 p-6 shadow-sm backdrop-blur-md sm:p-8 dark:border-slate-700/60 dark:bg-slate-900/65"
         >
+          <AnimatePresence mode="wait">
           <motion.div
             key={current.id}
-            initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            transition={{ duration: 0.28, ease: "easeOut" }}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.18 }}
           >
             <QuestionCard
               title={current.title}
@@ -357,6 +367,7 @@ export default function DemoPage() {
               }
             />
           </motion.div>
+          </AnimatePresence>
 
           <div className="mt-8 flex items-center justify-end">
             <motion.div

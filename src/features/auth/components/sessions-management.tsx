@@ -22,9 +22,11 @@ import { formatLastActivity } from "../utils/device";
  */
 const getBrowserIcon = (browserName?: string) => {
   const name = (browserName ?? "").toLowerCase();
-  if (name.includes("chrome") && !name.includes("chromium")) return IconBrandChrome;
+  if (name.includes("chrome") && !name.includes("chromium"))
+    return IconBrandChrome;
   if (name.includes("firefox")) return IconBrandFirefox;
-  if (name.includes("safari") && !name.includes("chrome")) return IconBrandSafari;
+  if (name.includes("safari") && !name.includes("chrome"))
+    return IconBrandSafari;
   if (name.includes("edge") || name.includes("edg")) return IconBrandEdge;
   if (name.includes("opera") || name.includes("opr")) return IconBrandOpera;
   return Globe;
@@ -122,7 +124,9 @@ export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
     return (
       <>
         <div className="mb-5">
-          <h2 className="text-xl font-black tracking-tight sm:text-2xl">Active sessions</h2>
+          <h2 className="text-xl font-black tracking-tight sm:text-2xl">
+            Active Sessions
+          </h2>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Manage devices currently signed in to your account.
           </p>
@@ -140,11 +144,11 @@ export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
     <>
       <div className="mb-5">
         <h2 className="text-xl font-black tracking-tight sm:text-2xl">
-          Active sessions
+          Active Sessions
         </h2>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Manage devices currently signed in to your account. Sign out to
-          revoke access.
+          Manage devices currently signed in to your account. Sign out to revoke
+          access.
         </p>
       </div>
 

@@ -40,11 +40,15 @@ import { LogToLibraryButton } from "@/features/library/components/log-to-library
 import { PillButton } from "@/components/ui/pill-button";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { Dialog } from "@/components/ui/dialog";
+import { TrailerEmbed } from "@/components/trailer-embed";
 import { WhyThisPick } from "@/components/why-this-pick";
 import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
+import { ViewToggle, type ViewMode } from "@/components/view-toggle";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+
+const VIEW_MODES = ["grid", "list"] as const;
 
 type HistoryFilter = "all" | "movies" | "books" | "favorites";
 type SortMode = "newest" | "oldest" | "favorites_first";
@@ -61,30 +65,6 @@ const sortOptions: { value: SortMode; label: string }[] = [
   { value: "oldest", label: "Oldest" },
   { value: "favorites_first", label: "Favorites First" },
 ];
-
-const HistoryShimmerLoader = () => {
-  return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-      {[...Array(10)].map((_, i) => (
-        <div
-          key={i}
-          className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 p-3 shadow-sm backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/65"
-        >
-          <div className="shimmer-container aspect-[2/3] rounded-2xl" />
-          <div className="mt-3 space-y-2">
-            <div className="shimmer-container h-4 w-4/5 rounded-full" />
-            <div className="shimmer-container h-3 w-3/5 rounded-full" />
-            <div className="shimmer-container h-8 rounded-xl" />
-            <div className="flex gap-2">
-              <div className="shimmer-container h-7 w-1/2 rounded-full" />
-              <div className="shimmer-container h-7 w-1/2 rounded-full" />
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-};
 
 const RecommendationModal = ({
   rec,
@@ -154,6 +134,15 @@ const RecommendationModal = ({
           </p>
         )}
 
+        <div className="mt-4">
+          <TrailerEmbed
+            type={rec.type}
+            title={rec.title}
+            year={rec.year ?? null}
+            author={rec.author ?? null}
+          />
+        </div>
+
         {libraryEntry && (
           <div className="mt-4 flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2 dark:border-slate-700/60 dark:bg-slate-800/40">
             <span className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
@@ -213,6 +202,10 @@ const AccountHistoryPage = () => {
   // the left and moves to center — so the motion feels consistent regardless
   // of which filter the user came from.
   const filterSlideDir = -1;
+  const [view, setView] = useQueryState(
+    "view",
+    parseAsStringLiteral(VIEW_MODES).withDefault("grid"),
+  );
   const [sortBy, setSortBy] = useState<SortMode>("newest");
   const [selectedRec, setSelectedRec] = useState<Recommendation | null>(null);
   const [libraryItems, setLibraryItems] = useState<LibraryItem[]>([]);
@@ -249,21 +242,22 @@ const AccountHistoryPage = () => {
   // Virtual scroll setup — uses the window scroll so the global navbar's
   // scroll-blur logic still fires on this page.
   const listRef = useRef<HTMLDivElement>(null);
-  const [colCount, setColCount] = useState(2);
+  const [gridColCount, setGridColCount] = useState(2);
 
   useEffect(() => {
     const update = () => {
       const w = window.innerWidth;
-      if (w >= 1280) setColCount(5);
-      else if (w >= 1024) setColCount(4);
-      else if (w >= 768) setColCount(3);
-      else setColCount(2);
+      if (w >= 1280) setGridColCount(5);
+      else if (w >= 1024) setGridColCount(4);
+      else if (w >= 768) setGridColCount(3);
+      else setGridColCount(2);
     };
     update();
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
   }, []);
 
+  const colCount = view === "list" ? 1 : gridColCount;
   const rowCount = Math.ceil(recommendations.length / colCount);
 
   const rowVirtualizer = useWindowVirtualizer({
@@ -271,10 +265,14 @@ const AccountHistoryPage = () => {
     // Reasonable seed value — measureElement on each row replaces this with
     // the actual rendered height as soon as the row is on screen, so the
     // initial estimate only needs to be in the ballpark.
-    estimateSize: () => 440,
+    estimateSize: () => (view === "list" ? 156 : 440),
     overscan: 3,
     scrollMargin: listRef.current?.offsetTop ?? 0,
   });
+
+  useEffect(() => {
+    rowVirtualizer.measure();
+  }, [view, rowVirtualizer]);
 
   useEffect(() => {
     const loadRecommendations = async () => {
@@ -385,7 +383,7 @@ const AccountHistoryPage = () => {
                 History
               </p>
               <h1 className="mt-2 text-2xl font-black tracking-tighter sm:text-3xl md:text-4xl lg:text-5xl">
-                Your suggestion history
+                Your Suggestion History
               </h1>
               <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
                 Everything the AI has picked for you. Mark a favorite to keep
@@ -467,25 +465,34 @@ const AccountHistoryPage = () => {
               ))}
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-slate-600 dark:text-slate-400">Sort:</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as SortMode)}
-                aria-label="Sort recommendations"
-                className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
-              >
-                {sortOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-slate-600 dark:text-slate-400">
+                  Sort:
+                </span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as SortMode)}
+                  aria-label="Sort recommendations"
+                  className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
+                >
+                  {sortOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <ViewToggle
+                value={view as ViewMode}
+                onChange={(v) => setView(v)}
+              />
             </div>
           </div>
 
           {/* Card Grid */}
           <AnimatePresence mode="wait">
+          {!loading && (
           <motion.div
             key={filter}
             initial={{ opacity: 0, x: filterSlideDir * 30 }}
@@ -493,12 +500,10 @@ const AccountHistoryPage = () => {
             exit={{ opacity: 0, x: filterSlideDir * -30 }}
             transition={{ duration: 0.2 }}
           >
-          {loading ? (
-            <HistoryShimmerLoader />
-          ) : recommendations.length === 0 ? (
+          {recommendations.length === 0 ? (
             <div className="rounded-3xl border border-slate-200/80 bg-white/80 p-10 text-center shadow-sm backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/65">
               <h2 className="text-2xl font-black tracking-tight">
-                No recommendations found
+                No Recommendations Found
               </h2>
               <p className="mx-auto mt-2 max-w-xl text-sm text-slate-600 dark:text-slate-400">
                 Try a different filter or generate a fresh recommendation set.
@@ -526,73 +531,195 @@ const AccountHistoryPage = () => {
                         gridTemplateColumns: `repeat(${colCount}, 1fr)`,
                       }}
                     >
-                      {rowItems.map((rec) => (
-                        <article
-                          key={rec.id}
-                          className="group overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-slate-700/70 dark:bg-slate-900/65"
-                        >
-                          <div
-                            role="button"
-                            tabIndex={0}
-                            aria-label={`Open details for ${rec.title}`}
-                            className="relative aspect-[2/3] cursor-pointer overflow-hidden bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:bg-slate-800 dark:focus-visible:ring-offset-slate-950"
-                            onClick={() => setSelectedRec(rec)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter" || e.key === " ") {
-                                e.preventDefault();
-                                setSelectedRec(rec);
-                              }
-                            }}
+                      {rowItems.map((rec) =>
+                        view === "list" ? (
+                          <article
+                            key={rec.id}
+                            className="group flex gap-4 rounded-3xl border border-slate-200/80 bg-white/80 p-4 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-slate-700/70 dark:bg-slate-900/65"
                           >
-                            {rec.poster_url ? (
-                              <Image
-                                src={rec.poster_url}
-                                alt={rec.title}
-                                fill
-                                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-                                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                              />
-                            ) : (
-                              <div className="flex h-full w-full items-center justify-center text-slate-500 dark:text-slate-400">
-                                {rec.type === "movie" ? <Film size={28} /> : <BookOpen size={28} />}
+                            <div
+                              role="button"
+                              tabIndex={0}
+                              aria-label={`Open details for ${rec.title}`}
+                              onClick={() => setSelectedRec(rec)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                  e.preventDefault();
+                                  setSelectedRec(rec);
+                                }
+                              }}
+                              className="relative h-32 w-24 shrink-0 cursor-pointer overflow-hidden rounded-2xl bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:bg-slate-800 dark:focus-visible:ring-offset-slate-950"
+                            >
+                              {rec.poster_url ? (
+                                <Image
+                                  src={rec.poster_url}
+                                  alt={rec.title}
+                                  fill
+                                  sizes="96px"
+                                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                />
+                              ) : (
+                                <div className="flex h-full w-full items-center justify-center text-slate-500 dark:text-slate-400">
+                                  {rec.type === "movie" ? (
+                                    <Film size={24} />
+                                  ) : (
+                                    <BookOpen size={24} />
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0 flex-1">
+                                  <h3
+                                    onClick={() => setSelectedRec(rec)}
+                                    className="cursor-pointer truncate text-base font-black tracking-tight hover:text-indigo-600 dark:hover:text-indigo-400"
+                                  >
+                                    {rec.title}
+                                  </h3>
+                                  <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
+                                    {rec.type === "movie" ? "Movie" : "Book"}
+                                    {rec.year ? ` · ${rec.year}` : ""}
+                                    {" · "}
+                                    {formatDistanceToNow(
+                                      new Date(rec.created_at),
+                                      { addSuffix: true },
+                                    )}
+                                  </p>
+                                </div>
+                                <div className="flex shrink-0 items-center gap-1">
+                                  <PillButton
+                                    onClick={() => handleToggleFavorite(rec.id)}
+                                    aria-label={
+                                      rec.is_favorited
+                                        ? "Remove from favorites"
+                                        : "Add to favorites"
+                                    }
+                                    className={cn(
+                                      "inline-flex h-7 w-7 items-center justify-center rounded-full p-0",
+                                      rec.is_favorited
+                                        ? "bg-rose-500 text-white"
+                                        : "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
+                                    )}
+                                  >
+                                    <Heart
+                                      size={13}
+                                      fill={
+                                        rec.is_favorited ? "currentColor" : "none"
+                                      }
+                                    />
+                                  </PillButton>
+                                  <PillButton
+                                    onClick={() =>
+                                      handleDeleteRecommendation(rec.id)
+                                    }
+                                    variant="destructive"
+                                    aria-label="Delete"
+                                    className="inline-flex h-7 w-7 items-center justify-center rounded-full p-0"
+                                  >
+                                    <Trash2 size={13} />
+                                  </PillButton>
+                                </div>
                               </div>
-                            )}
-                            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-4">
-                              <p className="line-clamp-2 text-base font-black tracking-tight text-white">{rec.title}</p>
-                              <div className="mt-2 flex items-center justify-end">
-                                <span className="text-xs text-white/80">
-                                  {formatDistanceToNow(new Date(rec.created_at), { addSuffix: true })}
-                                </span>
+                              {(rec.explanation || rec.description) && (
+                                <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                                  {rec.explanation ||
+                                    rec.description ||
+                                    ""}
+                                </p>
+                              )}
+                            </div>
+                          </article>
+                        ) : (
+                          <article
+                            key={rec.id}
+                            className="group overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-slate-700/70 dark:bg-slate-900/65"
+                          >
+                            <div
+                              role="button"
+                              tabIndex={0}
+                              aria-label={`Open details for ${rec.title}`}
+                              className="relative aspect-[2/3] cursor-pointer overflow-hidden bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:bg-slate-800 dark:focus-visible:ring-offset-slate-950"
+                              onClick={() => setSelectedRec(rec)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                  e.preventDefault();
+                                  setSelectedRec(rec);
+                                }
+                              }}
+                            >
+                              {rec.poster_url ? (
+                                <Image
+                                  src={rec.poster_url}
+                                  alt={rec.title}
+                                  fill
+                                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                />
+                              ) : (
+                                <div className="flex h-full w-full items-center justify-center text-slate-500 dark:text-slate-400">
+                                  {rec.type === "movie" ? (
+                                    <Film size={28} />
+                                  ) : (
+                                    <BookOpen size={28} />
+                                  )}
+                                </div>
+                              )}
+                              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-4">
+                                <p className="line-clamp-2 text-base font-black tracking-tight text-white">
+                                  {rec.title}
+                                </p>
+                                <div className="mt-2 flex items-center justify-end">
+                                  <span className="text-xs text-white/80">
+                                    {formatDistanceToNow(
+                                      new Date(rec.created_at),
+                                      { addSuffix: true },
+                                    )}
+                                  </span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="px-3 py-2.5">
-                            <p className="line-clamp-2 text-[11px] leading-snug text-slate-600 dark:text-slate-300">
-                              {rec.explanation || rec.description || `A tailored ${rec.type} recommendation based on your recent quiz choices.`}
-                            </p>
-                            <div className="mt-2.5 flex items-center justify-between">
-                              <PillButton
-                                onClick={() => handleToggleFavorite(rec.id)}
-                                aria-label={rec.is_favorited ? "Remove from favorites" : "Add to favorites"}
-                                className={cn(
-                                  "inline-flex h-7 w-7 items-center justify-center rounded-full p-0",
-                                  rec.is_favorited ? "bg-rose-500 text-white" : "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
-                                )}
-                              >
-                                <Heart size={13} fill={rec.is_favorited ? "currentColor" : "none"} />
-                              </PillButton>
-                              <PillButton
-                                onClick={() => handleDeleteRecommendation(rec.id)}
-                                variant="destructive"
-                                aria-label="Delete"
-                                className="inline-flex h-7 w-7 items-center justify-center rounded-full p-0"
-                              >
-                                <Trash2 size={13} />
-                              </PillButton>
+                            <div className="px-3 py-2.5">
+                              <p className="line-clamp-2 text-[11px] leading-snug text-slate-600 dark:text-slate-300">
+                                {rec.explanation ||
+                                  rec.description ||
+                                  `A tailored ${rec.type} recommendation based on your recent quiz choices.`}
+                              </p>
+                              <div className="mt-2.5 flex items-center justify-between">
+                                <PillButton
+                                  onClick={() => handleToggleFavorite(rec.id)}
+                                  aria-label={
+                                    rec.is_favorited
+                                      ? "Remove from favorites"
+                                      : "Add to favorites"
+                                  }
+                                  className={cn(
+                                    "inline-flex h-7 w-7 items-center justify-center rounded-full p-0",
+                                    rec.is_favorited
+                                      ? "bg-rose-500 text-white"
+                                      : "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
+                                  )}
+                                >
+                                  <Heart
+                                    size={13}
+                                    fill={
+                                      rec.is_favorited ? "currentColor" : "none"
+                                    }
+                                  />
+                                </PillButton>
+                                <PillButton
+                                  onClick={() => handleDeleteRecommendation(rec.id)}
+                                  variant="destructive"
+                                  aria-label="Delete"
+                                  className="inline-flex h-7 w-7 items-center justify-center rounded-full p-0"
+                                >
+                                  <Trash2 size={13} />
+                                </PillButton>
+                              </div>
                             </div>
-                          </div>
-                        </article>
-                      ))}
+                          </article>
+                        ),
+                      )}
                     </div>
                   );
                 })}
@@ -600,6 +727,7 @@ const AccountHistoryPage = () => {
             </div>
           )}
           </motion.div>
+          )}
           </AnimatePresence>
             </div>
           </div>

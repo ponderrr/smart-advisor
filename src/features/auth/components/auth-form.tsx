@@ -100,6 +100,14 @@ export const AuthForm = ({
 }: AuthFormProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  // Honor `?next=/some/path` after sign-in so deep-link auth (e.g. from
+  // /group-quiz "Sign in to host") returns to the originating page instead
+  // of dropping people on /dashboard. Only allow same-origin relative paths.
+  const postAuthDestination = (() => {
+    const raw = searchParams?.get("next") ?? null;
+    if (raw && raw.startsWith("/") && !raw.startsWith("//")) return raw;
+    return "/dashboard";
+  })();
   const [mode, setMode] = useState<AuthMode>(
     initialMfaRequired ? "mfa-challenge" : "signin",
   );
@@ -503,7 +511,7 @@ export const AuthForm = ({
       // Tell the parent to suppress the AAL elevation check that would
       // otherwise race our redirect and flash the MFA challenge screen.
       onPasskeySignedIn?.();
-      router.replace("/dashboard");
+      router.replace(postAuthDestination);
     } finally {
       setPasskeySigningIn(false);
     }
@@ -555,7 +563,7 @@ export const AuthForm = ({
           onMfaChallengeResolved?.();
           // Brief confirmation before the redirect so the verify success
           // doesn't feel like a silent flash.
-          setTimeout(() => router.replace("/dashboard"), 2800);
+          setTimeout(() => router.replace(postAuthDestination), 2800);
         }
       } else {
         const trimmed = mfaCode.trim();
@@ -570,7 +578,7 @@ export const AuthForm = ({
         } else {
           setMfaSuccess(true);
           onMfaChallengeResolved?.();
-          setTimeout(() => router.replace("/dashboard"), 2800);
+          setTimeout(() => router.replace(postAuthDestination), 2800);
         }
       }
     } finally {

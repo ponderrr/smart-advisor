@@ -10,7 +10,10 @@ import {
   IconAdjustmentsHorizontal,
   IconMessageCircleQuestion,
   IconSparkles,
+  IconUsers,
+  IconArrowRight,
 } from "@tabler/icons-react";
+import Link from "next/link";
 import { LinkPreview } from "@/components/ui/link-preview";
 import FeaturesSectionDemo from "@/components/features-section-demo-3";
 import { AppNavbar } from "@/components/app-navbar";
@@ -163,6 +166,56 @@ const Index = () => {
 
       {/* Features Section */}
       <FeaturesSectionDemo />
+
+      {/* Group Quiz CTA */}
+      <section
+        id="group-quiz-cta"
+        className="scroll-mt-32 px-4 py-16 sm:px-6 sm:py-20 md:py-24"
+      >
+        <div className="mx-auto max-w-6xl">
+          <Link
+            href="/group-quiz"
+            className="group relative block overflow-hidden rounded-3xl border border-indigo-200/60 bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-6 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-indigo-500/30 dark:from-indigo-500/10 dark:via-slate-900/40 dark:to-violet-500/10 sm:p-8 md:p-10"
+          >
+            <span
+              aria-hidden="true"
+              className="absolute -right-12 -top-12 h-44 w-44 rounded-full bg-gradient-to-br from-indigo-400/30 to-violet-500/30 blur-3xl"
+            />
+            <span
+              aria-hidden="true"
+              className="absolute -bottom-16 -left-10 h-44 w-44 rounded-full bg-gradient-to-br from-rose-400/20 to-amber-400/20 blur-3xl"
+            />
+            <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-500 text-white shadow-sm shadow-indigo-500/30">
+                    <IconUsers size={16} />
+                  </span>
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-indigo-700 dark:text-indigo-300">
+                    Group Quiz
+                  </p>
+                </div>
+                <h2 className="mt-3 text-3xl font-black tracking-tighter text-slate-900 sm:text-4xl md:text-5xl dark:text-slate-100">
+                  Find a Pick{" "}
+                  <span className="bg-gradient-to-r from-indigo-500 via-violet-500 to-rose-500 bg-clip-text text-transparent">
+                    Together
+                  </span>
+                </h2>
+                <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-600 dark:text-slate-300 sm:text-base">
+                  Host a quiz, share a six-character code, and let the group
+                  answer. The AI synthesizes everyone's taste into one pick
+                  that works for the room. Joining is free — no account
+                  needed.
+                </p>
+              </div>
+              <span className="inline-flex shrink-0 items-center gap-2 self-start rounded-full bg-slate-900 px-6 py-3 text-sm font-black tracking-tight text-white shadow-md transition-transform duration-200 group-hover:translate-x-0.5 sm:self-auto sm:text-base dark:bg-white dark:text-slate-900">
+                Try It
+                <IconArrowRight size={16} />
+              </span>
+            </div>
+          </Link>
+        </div>
+      </section>
 
       {/* Powered By */}
       <section

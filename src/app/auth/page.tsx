@@ -71,11 +71,19 @@ const AuthPageContent = () => {
       !oauthMfaRequired &&
       !mfaPending
     ) {
+      // After auth, honor a ?next=/some/path return URL if it points within
+      // the app (relative path) — otherwise fall back to dashboard.
+      const rawNext = searchParams?.get("next") ?? null;
+      const nextPath =
+        rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//")
+          ? rawNext
+          : "/dashboard";
+
       // Passkey just signed in — skip the AAL elevation that would
       // otherwise flash the MFA challenge before our redirect lands.
       if (skipNextAalCheckRef.current) {
         skipNextAalCheckRef.current = false;
-        router.push("/dashboard");
+        router.push(nextPath);
         return;
       }
 
@@ -87,11 +95,11 @@ const AuthPageContent = () => {
           if (data.nextLevel === "aal2" && data.currentLevel === "aal1") {
             setMfaChallengeActive(true);
           } else {
-            router.push("/dashboard");
+            router.push(nextPath);
           }
         });
       } else {
-        router.push("/dashboard");
+        router.push(nextPath);
       }
     }
   }, [
@@ -103,6 +111,7 @@ const AuthPageContent = () => {
     mfaPending,
     router,
     getAALLevel,
+    searchParams,
   ]);
 
   const handleClearError = () => {

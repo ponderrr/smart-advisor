@@ -43,36 +43,17 @@ import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { Dialog } from "@/components/ui/dialog";
 import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
+import { ViewToggle, type ViewMode } from "@/components/view-toggle";
 import { cn } from "@/lib/utils";
 
 const MEDIUM_TABS = ["all", "movie", "book"] as const;
+const VIEW_MODES = ["grid", "list"] as const;
 type MediumFilter = (typeof MEDIUM_TABS)[number];
 type StatusFilter = "all" | LibraryStatus;
 
 const STATUS_VALUES: LibraryStatus[] = ["finished", "in_progress", "wishlist"];
 const RATING_VALUES: LibraryRating[] = [1, 2, 3];
 
-const LibraryShimmerLoader = () => (
-  <div className="space-y-3">
-    {[...Array(4)].map((_, i) => (
-      <div
-        key={i}
-        className="flex gap-4 rounded-3xl border border-slate-200/80 bg-white/80 p-4 shadow-sm backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/65"
-      >
-        <div className="shimmer-container h-32 w-24 shrink-0 rounded-2xl" />
-        <div className="flex-1 space-y-2 py-2">
-          <div className="shimmer-container h-4 w-2/3 rounded-full" />
-          <div className="shimmer-container h-3 w-1/3 rounded-full" />
-          <div className="flex gap-2 pt-1">
-            <div className="shimmer-container h-6 w-20 rounded-full" />
-            <div className="shimmer-container h-6 w-24 rounded-full" />
-          </div>
-          <div className="shimmer-container h-3 w-3/4 rounded-full" />
-        </div>
-      </div>
-    ))}
-  </div>
-);
 
 const ratingChip = (rating: LibraryRating | null) => {
   if (rating === null) return null;
@@ -118,6 +99,10 @@ export default function LibraryPage() {
     parseAsStringLiteral(MEDIUM_TABS).withDefault("all"),
   );
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [view, setView] = useQueryState(
+    "view",
+    parseAsStringLiteral(VIEW_MODES).withDefault("list"),
+  );
   const [editTarget, setEditTarget] = useState<LibraryItem | null>(null);
 
   const load = async () => {
@@ -179,7 +164,7 @@ export default function LibraryPage() {
                 Library
               </p>
               <h1 className="mt-2 text-2xl font-black tracking-tighter sm:text-3xl md:text-4xl lg:text-5xl">
-                What you&apos;ve watched and read
+                What You&apos;ve Watched and Read
               </h1>
               <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
                 Reactions you save here become a taste signal the AI uses on
@@ -267,32 +252,39 @@ export default function LibraryPage() {
                   ))}
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    Status
-                  </span>
-                  {(
-                    [
-                      { id: "all", label: "All" },
-                      ...STATUS_VALUES.map((s) => ({
-                        id: s as StatusFilter,
-                        label: STATUS_LABELS[s],
-                      })),
-                    ] as { id: StatusFilter; label: string }[]
-                  ).map((opt) => (
-                    <PillButton
-                      key={opt.id}
-                      active={statusFilter === opt.id}
-                      onClick={() => setStatusFilter(opt.id)}
-                      className="px-3 py-1.5 text-xs font-semibold"
-                    >
-                      {opt.label}
-                    </PillButton>
-                  ))}
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      Status
+                    </span>
+                    {(
+                      [
+                        { id: "all", label: "All" },
+                        ...STATUS_VALUES.map((s) => ({
+                          id: s as StatusFilter,
+                          label: STATUS_LABELS[s],
+                        })),
+                      ] as { id: StatusFilter; label: string }[]
+                    ).map((opt) => (
+                      <PillButton
+                        key={opt.id}
+                        active={statusFilter === opt.id}
+                        onClick={() => setStatusFilter(opt.id)}
+                        className="px-3 py-1.5 text-xs font-semibold"
+                      >
+                        {opt.label}
+                      </PillButton>
+                    ))}
+                  </div>
+                  <ViewToggle
+                    value={view as ViewMode}
+                    onChange={(v) => setView(v)}
+                  />
                 </div>
               </div>
 
               <AnimatePresence mode="wait">
+                {!loading && (
                 <motion.div
                   key={`${mediumFilter}-${statusFilter}`}
                   initial={{ opacity: 0, x: -30 }}
@@ -300,21 +292,95 @@ export default function LibraryPage() {
                   exit={{ opacity: 0, x: 30 }}
                   transition={{ duration: 0.2 }}
                 >
-                  {loading ? (
-                    <LibraryShimmerLoader />
-                  ) : filtered.length === 0 ? (
+                  {filtered.length === 0 ? (
                     <div className="rounded-3xl border border-slate-200/80 bg-white/80 p-10 text-center shadow-sm backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/65">
                       <BookCheck className="mx-auto h-10 w-10 text-slate-300 dark:text-slate-600" />
                       <h2 className="mt-4 text-2xl font-black tracking-tight">
                         {items.length === 0
-                          ? "Nothing in your library yet"
-                          : "No matches for those filters"}
+                          ? "Nothing in Your Library Yet"
+                          : "No Matches for Those Filters"}
                       </h2>
                       <p className="mx-auto mt-2 max-w-xl text-sm text-slate-600 dark:text-slate-400">
                         {items.length === 0
                           ? 'After your next quiz, hit "I watched / read this" on a result and it will show up here.'
                           : "Try changing or clearing the filters above."}
                       </p>
+                    </div>
+                  ) : view === "grid" ? (
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
+                      {filtered.map((item) => (
+                        <article
+                          key={item.id}
+                          className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white/80 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-700/70 dark:bg-slate-900/65"
+                        >
+                          <div className="relative aspect-[2/3] overflow-hidden bg-slate-200 dark:bg-slate-800">
+                            {item.poster_url ? (
+                              <Image
+                                src={item.poster_url}
+                                alt={item.title}
+                                fill
+                                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center text-slate-400 dark:text-slate-500">
+                                {item.medium === "movie" ? (
+                                  <Film size={28} />
+                                ) : (
+                                  <BookOpen size={28} />
+                                )}
+                              </div>
+                            )}
+                            <div className="absolute right-2 top-2 flex flex-col gap-1.5">
+                              <PillButton
+                                onClick={() => setEditTarget(item)}
+                                aria-label={`Edit ${item.title}`}
+                                className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/90 p-0 text-slate-700 shadow-sm dark:bg-slate-900/80 dark:text-slate-200"
+                              >
+                                <Pencil size={13} />
+                              </PillButton>
+                              <PillButton
+                                onClick={() => void handleRemove(item)}
+                                variant="destructive"
+                                aria-label={`Remove ${item.title}`}
+                                className="inline-flex h-7 w-7 items-center justify-center rounded-full p-0 shadow-sm"
+                              >
+                                <Trash2 size={13} />
+                              </PillButton>
+                            </div>
+                            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent p-3">
+                              <p className="line-clamp-2 text-sm font-black leading-tight tracking-tight text-white">
+                                {item.title}
+                              </p>
+                              <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                                <span
+                                  className={cn(
+                                    "rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider",
+                                    STATUS_TONE[item.status].chip,
+                                  )}
+                                >
+                                  {STATUS_LABELS[item.status]}
+                                </span>
+                                {item.rating !== null &&
+                                  (() => {
+                                    const Icon =
+                                      item.rating === 1
+                                        ? ThumbsDown
+                                        : item.rating === 3
+                                          ? ThumbsUp
+                                          : Bookmark;
+                                    return (
+                                      <span className="inline-flex items-center gap-0.5 rounded-full bg-white/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white/95 backdrop-blur-sm">
+                                        <Icon size={9} />
+                                        {RATING_LABELS[item.rating]}
+                                      </span>
+                                    );
+                                  })()}
+                              </div>
+                            </div>
+                          </div>
+                        </article>
+                      ))}
                     </div>
                   ) : (
                     <div className="space-y-3">
@@ -396,6 +462,7 @@ export default function LibraryPage() {
                     </div>
                   )}
                 </motion.div>
+                )}
               </AnimatePresence>
             </div>
           </div>
