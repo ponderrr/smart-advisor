@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
+import { useLeaveGuard } from "@/features/quiz/hooks/use-leave-guard";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import { generateQuestionsWithRetry } from "@/features/recommendations/services/ai-service";
 import { Question } from "@/features/quiz/types/question";
@@ -96,6 +97,9 @@ const QuestionnairePage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Warn before leaving once the quiz is loaded and not yet submitted.
+  useLeaveGuard(!isLoading && !isSubmitting && questions.length > 0);
   // Guard so React StrictMode + changing useAuth references can't double-fire
   // the AI question request and replace the user's first question mid-quiz.
   const hasLoadedRef = useRef(false);
@@ -185,6 +189,13 @@ const QuestionnairePage = () => {
   const handlePrevious = () => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex((prev) => prev - 1);
+      return;
+    }
+    if (
+      !window.confirm(
+        "Leave the quiz? Your answers so far won't be saved.",
+      )
+    ) {
       return;
     }
     router.push("/question-count");
@@ -326,24 +337,27 @@ const QuestionnairePage = () => {
         transition={{ layout: { duration: 0.32, ease: [0.22, 1, 0.36, 1] } }}
         className="rounded-2xl border border-slate-200/70 bg-white/85 p-4 shadow-sm backdrop-blur-md sm:rounded-3xl sm:p-8 dark:border-slate-700/60 dark:bg-slate-900/65"
       >
-        {currentQuestion && (
-          <motion.section
-            key={currentQuestion.id}
-            initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            transition={{ duration: 0.28, ease: "easeOut" }}
-          >
-            <QuestionCard
-              title={currentQuestion.text}
-              subtitle={getSubtitle()}
-              type={currentQuestion.type ?? "single_select"}
-              options={currentOptions}
-              placeholder={currentQuestion.placeholder}
-              value={answers[currentQuestion.id]}
-              onChange={handleAnswer}
-            />
-          </motion.section>
-        )}
+        <AnimatePresence mode="wait">
+          {currentQuestion && (
+            <motion.section
+              key={currentQuestion.id}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.18 }}
+            >
+              <QuestionCard
+                title={currentQuestion.text}
+                subtitle={getSubtitle()}
+                type={currentQuestion.type ?? "single_select"}
+                options={currentOptions}
+                placeholder={currentQuestion.placeholder}
+                value={answers[currentQuestion.id]}
+                onChange={handleAnswer}
+              />
+            </motion.section>
+          )}
+        </AnimatePresence>
 
         <div className="mt-6 flex items-center justify-end sm:mt-8">
           <PillButton

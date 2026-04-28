@@ -65,7 +65,9 @@ export async function proxy(request: NextRequest) {
     pathname === "/demo" ||
     pathname.startsWith("/demo/") ||
     pathname.startsWith("/auth/") ||
-    pathname === "/auth";
+    pathname === "/auth" ||
+    pathname === "/group-quiz" ||
+    pathname.startsWith("/group-quiz/");
 
   // Redirect unauthenticated users to sign-in
   if (!user && !isPublic) {
