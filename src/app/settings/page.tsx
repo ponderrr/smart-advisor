@@ -614,7 +614,7 @@ const SettingsPage = () => {
               Settings
             </p>
             <h1 className="mt-2 text-2xl font-black tracking-tighter sm:text-3xl md:text-4xl lg:text-5xl">
-              Account settings
+              Account Settings
             </h1>
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
               Manage your profile, security, and preferences.
@@ -702,7 +702,7 @@ const SettingsPage = () => {
                     {/* Profile picture */}
                     <SectionCard>
                       <SectionHeader
-                        title="Profile picture"
+                        title="Profile Picture"
                         description="Upload an image to show across the app. JPG, PNG, GIF, or WEBP up to 5 MB."
                       />
                       <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
@@ -758,7 +758,7 @@ const SettingsPage = () => {
 
                     <SectionCard>
                       <SectionHeader
-                        title="Profile details"
+                        title="Profile Details"
                         description="Update your public account details."
                       />
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -883,7 +883,7 @@ const SettingsPage = () => {
                             rules={newPasswordRules}
                             visible={newPasswordFocused}
                             anchorRef={newPasswordAnchorRef}
-                            title="Password requirements"
+                            title="Password Requirements"
                           />
                         </div>
                         <div>
@@ -907,7 +907,7 @@ const SettingsPage = () => {
                             rules={confirmPasswordRules}
                             visible={confirmPasswordFocused}
                             anchorRef={confirmPasswordAnchorRef}
-                            title="Confirm password"
+                            title="Confirm Password"
                           />
                         </div>
                       </div>
@@ -931,7 +931,7 @@ const SettingsPage = () => {
                       {!showMfaPanel ? (
                         <>
                           <SectionHeader
-                            title="Two-factor authentication"
+                            title="Two-Factor Authentication"
                             description="An extra step at sign-in to keep your account secure."
                           />
 
@@ -1011,7 +1011,7 @@ const SettingsPage = () => {
                     {/* Backup Email */}
                     <SectionCard>
                       <SectionHeader
-                        title="Backup email"
+                        title="Backup Email"
                         description="A recovery address used when your authenticator is unavailable."
                       />
 
@@ -1038,7 +1038,7 @@ const SettingsPage = () => {
 
                       <SettingsInput
                         label={
-                          currentBackupEmail ? "Change to" : "Backup email"
+                          currentBackupEmail ? "Change to" : "Backup Email"
                         }
                         placeholder={
                           currentBackupEmail
@@ -1086,7 +1086,7 @@ const SettingsPage = () => {
                   >
                     <SectionCard>
                       <SectionHeader
-                        title="Content preferences"
+                        title="Content Preferences"
                         description="Set your default recommendation behavior."
                       />
 
@@ -1336,7 +1336,7 @@ const SettingsPage = () => {
                     <SectionCard className="!border-red-200/70 dark:!border-red-900/40">
                       <div className="mb-4">
                         <h2 className="text-xl font-black tracking-tight text-red-700 sm:text-2xl dark:text-red-400">
-                          Danger zone
+                          Danger Zone
                         </h2>
                         <p className="mt-1 text-sm text-red-600/80 dark:text-red-300/70">
                           These actions are irreversible. Proceed carefully.

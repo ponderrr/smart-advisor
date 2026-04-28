@@ -21,6 +21,7 @@ const securityHeaders = [
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.anthropic.com https://va.vercel-scripts.com https://vitals.vercel-insights.com",
+      "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://books.google.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -35,6 +36,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "image.tmdb.org" },
       { protocol: "https", hostname: "covers.openlibrary.org" },
       { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "img.youtube.com" },
     ],
   },
   async headers() {

@@ -66,6 +66,7 @@ export const logoSets = [
 export const FAQ_CATEGORIES = [
   { id: "getting-started", label: "Getting started" },
   { id: "how-it-works", label: "How it works" },
+  { id: "group-quiz", label: "Group quiz" },
   { id: "library", label: "Library" },
   { id: "account", label: "Account & privacy" },
 ] as const;
@@ -118,6 +119,48 @@ export const faqItems: {
     question: "What if my recommendations feel off?",
     answer:
       "You can retake the quiz anytime with different answers, or adjust the number of questions and your mood and pacing choices. The fastest way to improve future picks is to log reactions to your library — marking a past pick as 'Not for me' teaches the AI to steer away from similar titles, and a thumbs-up nudges it toward more like that.",
+  },
+  {
+    category: "how-it-works",
+    question: "Where can I see a trailer or preview?",
+    answer:
+      "Open any recommendation card from your dashboard or history. A trailer plays inline for movies (lazy-loaded so it only fires when you click), and a 'View on Open Library' link appears for books so you can dig into editions, covers, and reviews. Movies use TMDB's official trailer when published.",
+  },
+  {
+    category: "how-it-works",
+    question: "What is Year in Review and when does it appear?",
+    answer:
+      "Year in Review is a Spotify-Wrapped-style summary of your picks: top genre, longest streak, peak month, most-picked director or author, format mix, and your standout titles. It surfaces as a prominent banner on your dashboard during December (current year) and January (last year). Outside that window the page still works at /wrapped, just not advertised.",
+  },
+  {
+    category: "group-quiz",
+    question: "What is Group Quiz?",
+    answer:
+      "Group Quiz lets multiple people take the same quiz together — at the same table, on a couch, or remote. The host creates a session, shares a six-character code, and everyone answers the same set of questions on their own device. The AI then synthesizes everyone's answers into one recommendation that fits the room.",
+  },
+  {
+    category: "group-quiz",
+    question: "Do I need an account to join a Group Quiz?",
+    answer:
+      "No. Joining is free and requires no account — just enter the host's code and a display name. Hosting does require an account so we can save the group's pick to your library and tie streaks/milestones back to your profile.",
+  },
+  {
+    category: "group-quiz",
+    question: "How do I host a Group Quiz?",
+    answer:
+      "Signed-in users can open Group Quiz from the navbar; everyone else can hit the 'Find a Pick Together' card on the homepage. On the host card, set your display name, pick the content type (Both / Movies / Books), tap a number tile for how many questions you want (3 to 15), then Create Session. You'll land in a lobby with a six-character code and a Copy Link button — share either with the group. Once at least two players have joined, you'll see Start Quiz; pressing it generates fresh AI questions for the whole room. Everyone answers on their own device, and once all submissions are in you'll get a 'Reveal the Group's Pick' button to surface the AI's synthesized recommendation.",
+  },
+  {
+    category: "group-quiz",
+    question: "How does the AI find one pick that fits everyone?",
+    answer:
+      "When all participants submit their answers, the host taps 'Reveal the Group's Pick.' Every participant's answer to every question is sent to the recommendation model labeled with each player's name, and the AI picks something that respects the overlap rather than averaging it. It works best with 2 to 4 players; larger groups still work but the result tends to drift toward broader appeal.",
+  },
+  {
+    category: "group-quiz",
+    question: "How long does a Group Quiz session stay active?",
+    answer:
+      "A session is active for 24 hours from creation. After that the lobby and result expire and the code can no longer be joined. Hosts can also end a session early at any time from the lobby.",
   },
   {
     category: "library",

@@ -45,6 +45,7 @@ const LOGGED_IN_ITEMS = [
   { name: "Dashboard", link: "/dashboard" },
   { name: "Library", link: "/library" },
   { name: "History", link: "/history" },
+  { name: "Group Quiz", link: "/group-quiz" },
   { name: "Settings", link: "/settings" },
 ];
 
