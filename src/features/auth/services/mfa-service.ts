@@ -45,22 +45,41 @@ class MfaService {
       });
       const label = `${trimmed || "Authenticator"} · ${datePart}`;
 
-      const { data, error } = await supabase.auth.mfa.enroll({
-        factorType: "totp",
-        friendlyName: label,
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        return { error: "No active session. Please sign in again.", data: null };
+      }
+
+      const resp = await fetch("/api/account/mfa/totp/enroll", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ friendlyName: label }),
       });
 
-      if (error) {
-        console.error("MFA enroll error:", error.message, error);
+      const payload = (await resp.json().catch(() => ({}))) as {
+        error?: string;
+        code?: string;
+        id?: string;
+        type?: string;
+        totp?: { qr_code?: string; secret?: string; uri?: string };
+      };
+
+      if (!resp.ok) {
         return {
           error: toUserFriendlyError(
-            error.message,
+            payload.error ?? "Failed to start MFA enrollment.",
             "Failed to start MFA enrollment. Please try again.",
           ),
           data: null,
         };
       }
 
+      const data = payload as MFAEnrollData;
       return this.finalizeEnroll(data, user.id);
     } catch (err) {
       console.error("Error enrolling MFA:", err);
@@ -127,8 +146,30 @@ class MfaService {
 
   async unenroll(factorId: string) {
     try {
-      const { error } = await supabase.auth.mfa.unenroll({ factorId });
-      if (error) return { error: toUserFriendlyError(error.message) };
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        return { error: "No active session. Please sign in again." };
+      }
+
+      const resp = await fetch(
+        `/api/account/mfa/factor/${encodeURIComponent(factorId)}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        },
+      );
+      if (!resp.ok) {
+        const payload = (await resp.json().catch(() => ({}))) as {
+          error?: string;
+        };
+        return {
+          error: toUserFriendlyError(
+            payload.error ?? "Failed to unenroll MFA factor.",
+          ),
+        };
+      }
 
       const {
         data: { user },
@@ -175,24 +216,40 @@ class MfaService {
     }
 
     try {
-      const { data, error } = await supabase.rpc("rename_mfa_factor", {
-        p_factor_id: factorId,
-        p_new_name: trimmed,
-      });
-
-      if (error) {
-        // Postgres unique-constraint violation surfaces as 23505. Supabase
-        // rejects duplicate friendly_names per user, so translate that to
-        // a plain English message.
-        if ((error as { code?: string }).code === "23505") {
-          return { error: "You already have an authenticator with that name." };
-        }
-        return { error: toUserFriendlyError(error.message) };
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        return { error: "No active session. Please sign in again." };
       }
 
-      // RPC returns FOUND — false means nothing matched (wrong id or not yours).
-      if (data === false) {
-        return { error: "Authenticator not found." };
+      const resp = await fetch(
+        `/api/account/mfa/factor/${encodeURIComponent(factorId)}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ friendlyName: trimmed }),
+        },
+      );
+
+      if (!resp.ok) {
+        const payload = (await resp.json().catch(() => ({}))) as {
+          error?: string;
+        };
+        if (resp.status === 409) {
+          return { error: "You already have an authenticator with that name." };
+        }
+        if (resp.status === 404) {
+          return { error: "Authenticator not found." };
+        }
+        return {
+          error: toUserFriendlyError(
+            payload.error ?? "Failed to rename authenticator.",
+          ),
+        };
       }
 
       return { error: null };
