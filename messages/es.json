@@ -270,7 +270,84 @@
     "no": "No"
   },
   "Auth": {
-    "sessionExpired": "Tu sesión expiró. Inicia sesión de nuevo."
+    "sessionExpired": "Tu sesión expiró. Inicia sesión de nuevo.",
+    "eyebrow": {
+      "signin": "Iniciar sesión",
+      "signup": "Crear cuenta",
+      "forgot": "Restablecer contraseña"
+    },
+    "subtitle": {
+      "signin": "Inicia sesión para continuar tu camino de recomendaciones.",
+      "signup": "Configura tu cuenta para obtener recomendaciones personalizadas.",
+      "forgot": "Ingresa tu correo y te enviaremos un enlace seguro para restablecerla."
+    },
+    "headings": {
+      "signin": [
+        "Bienvenido de vuelta",
+        "Qué bueno verte de nuevo",
+        "¿Listo para tu próxima recomendación?"
+      ],
+      "signup": [
+        "Crea tu cuenta",
+        "Únete a Smart Advisor",
+        "Configuremos tu perfil"
+      ],
+      "forgot": [
+        "Restablece tu contraseña",
+        "Recupera el acceso",
+        "Vuelve a entrar en tu cuenta"
+      ],
+      "verifyEmail": ["Revisa tu bandeja", "Casi listo", "Un último paso"],
+      "mfaChallenge": [
+        "Verifica tu identidad",
+        "Un paso más",
+        "Verificación de seguridad"
+      ]
+    },
+    "labels": {
+      "emailOrUsername": "Correo o nombre de usuario",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "username": "Nombre de usuario",
+      "age": "Edad",
+      "confirmPassword": "Confirmar contraseña"
+    },
+    "placeholders": {
+      "emailOrUsername": "tu@ejemplo.com o nombre de usuario",
+      "email": "tu@ejemplo.com",
+      "password": "••••••••",
+      "username": "tunombre",
+      "age": "18"
+    },
+    "actions": {
+      "signin": "Iniciar sesión",
+      "signup": "Crear cuenta",
+      "forgot": "Enviar enlace de restablecimiento"
+    },
+    "rememberMe": "Mantenerme conectado durante 30 días",
+    "forgotPassword": "¿Olvidaste la contraseña?",
+    "passkeyDivider": "o",
+    "passkeySignIn": "Iniciar sesión con clave de acceso",
+    "passkeyWaiting": "Esperando la clave de acceso…",
+    "resendVerification": "Reenviar enlace de verificación",
+    "resendingVerification": "Reenviando…",
+    "resendSuccess": "Correo de verificación enviado. Revisa tu bandeja.",
+    "resetSuccess": "Si existe una cuenta con este correo, te enviamos un enlace para restablecer la contraseña.",
+    "cooldown": "Espera un momento antes de intentarlo de nuevo.",
+    "toggle": {
+      "signin": {
+        "prompt": "¿No tienes una cuenta?",
+        "cta": "Regístrate"
+      },
+      "signup": {
+        "prompt": "¿Ya tienes una cuenta?",
+        "cta": "Iniciar sesión"
+      },
+      "forgot": {
+        "prompt": "¿Recordaste tu contraseña?",
+        "cta": "Iniciar sesión"
+      }
+    }
   },
   "History": {
     "eyebrow": "Historial",

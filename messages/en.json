@@ -270,7 +270,84 @@
     "no": "No"
   },
   "Auth": {
-    "sessionExpired": "Your session has expired. Please sign in again."
+    "sessionExpired": "Your session has expired. Please sign in again.",
+    "eyebrow": {
+      "signin": "Sign in",
+      "signup": "Create account",
+      "forgot": "Reset password"
+    },
+    "subtitle": {
+      "signin": "Sign in to continue your recommendation journey.",
+      "signup": "Set up your account to get personalized picks.",
+      "forgot": "Enter your email and we will send a secure reset link."
+    },
+    "headings": {
+      "signin": [
+        "Welcome back",
+        "Great to see you again",
+        "Ready for your next pick?"
+      ],
+      "signup": [
+        "Create your account",
+        "Join Smart Advisor",
+        "Let's set up your profile"
+      ],
+      "forgot": [
+        "Reset your password",
+        "Recover access",
+        "Get back into your account"
+      ],
+      "verifyEmail": ["Check your inbox", "Almost there", "One last step"],
+      "mfaChallenge": [
+        "Verify your identity",
+        "One more step",
+        "Security check"
+      ]
+    },
+    "labels": {
+      "emailOrUsername": "Email or username",
+      "email": "Email",
+      "password": "Password",
+      "username": "Username",
+      "age": "Age",
+      "confirmPassword": "Confirm password"
+    },
+    "placeholders": {
+      "emailOrUsername": "you@example.com or username",
+      "email": "you@example.com",
+      "password": "••••••••",
+      "username": "yourname",
+      "age": "18"
+    },
+    "actions": {
+      "signin": "Sign In",
+      "signup": "Create Account",
+      "forgot": "Send reset link"
+    },
+    "rememberMe": "Keep me signed in for 30 days",
+    "forgotPassword": "Forgot Password?",
+    "passkeyDivider": "or",
+    "passkeySignIn": "Sign in with a passkey",
+    "passkeyWaiting": "Waiting for passkey…",
+    "resendVerification": "Resend verification link",
+    "resendingVerification": "Resending…",
+    "resendSuccess": "Verification email sent. Check your inbox.",
+    "resetSuccess": "If an account exists for this email, a password reset link has been sent.",
+    "cooldown": "Please wait a moment before trying again.",
+    "toggle": {
+      "signin": {
+        "prompt": "Don't have an account?",
+        "cta": "Sign up"
+      },
+      "signup": {
+        "prompt": "Already have an account?",
+        "cta": "Sign in"
+      },
+      "forgot": {
+        "prompt": "Remembered your password?",
+        "cta": "Sign in"
+      }
+    }
   },
   "History": {
     "eyebrow": "History",
