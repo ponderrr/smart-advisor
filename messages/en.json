@@ -738,6 +738,49 @@
       "saving": "Saving...",
       "save": "Save",
       "cancel": "Cancel"
+    },
+    "validation": {
+      "emailOrUsernameRequired": "Email or username is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Enter a valid email",
+      "passwordRequired": "Password is required",
+      "passwordRequirementsUnmet": "Password does not meet all requirements",
+      "usernameRequired": "Username is required",
+      "usernameTooShort": "Use at least 2 characters",
+      "usernameTooLong": "Use 24 characters or fewer",
+      "usernameInvalid": "Use letters, numbers, dots, dashes, or underscores",
+      "ageRequired": "Age is required",
+      "ageNotInteger": "Age must be a whole number",
+      "ageOutOfRange": "Enter an age between 13 and 120",
+      "confirmPasswordRequired": "Confirm your password",
+      "passwordsDoNotMatch": "Passwords do not match",
+      "fixHighlightedFields": "Please fix the highlighted fields.",
+      "correctHighlightedFields": "Please correct the highlighted fields",
+      "passkeyIdentifierRequired": "Enter your email or username to use a passkey.",
+      "enterSixDigitCode": "Please enter a 6-digit code",
+      "enterBackupCode": "Please enter a backup code",
+      "rules": {
+        "emailContainsAt": "Contains @",
+        "emailHasDomain": "Has a domain (example.com)",
+        "ageWholeNumber": "Whole number",
+        "ageInRange": "Between 13 and 120",
+        "usernameLength": "2–24 characters",
+        "usernameAllowedChars": "Letters, numbers, dots, dashes, or underscores",
+        "confirmPasswordMatches": "Matches your password"
+      },
+      "popoverTitles": {
+        "email": "Email requirements",
+        "password": "Password requirements",
+        "username": "Username requirements",
+        "age": "Age requirements",
+        "confirmPassword": "Confirm password"
+      },
+      "mfaError": {
+        "totpExpired": "That code expired. Wait for a new one in your authenticator and try again.",
+        "backupExpired": "That backup code is no longer valid.",
+        "totpMismatch": "That code didn't match. Double-check your authenticator and try again.",
+        "backupMismatch": "That backup code didn't match. Each code only works once."
+      }
     }
   },
   "Wrapped": {
@@ -1162,7 +1205,81 @@
       "Running it by our AI once more…",
       "Polishing each recommendation…",
       "Adding the finishing touches…"
-    ]
+    ],
+    "body": {
+      "matchSuffix": "{score}% match",
+      "matchPercent": "{score}%",
+      "whyThisPick": "Why this pick",
+      "about": "About",
+      "showMore": "Show more",
+      "showLess": "Show less",
+      "byAuthor": "By {author}",
+      "byDirector": "Directed by {director}",
+      "favoriteAdd": "Add {title} to favorites",
+      "favoriteRemove": "Remove {title} from favorites",
+      "movie": "Movie",
+      "book": "Book",
+      "eyebrow": "Your picks",
+      "headline": "Hand-picked for you",
+      "subhead": "{count, plural, one {# personalized pick from the AI, with the reasoning behind each. Log one to your library to nudge future picks.} other {# personalized picks from the AI, with the reasoning behind each. Log one to your library to nudge future picks.}}",
+      "sections": {
+        "movie": {
+          "eyebrow": "Movie",
+          "title": "On screen"
+        },
+        "book": {
+          "eyebrow": "Book",
+          "title": "On the shelf"
+        }
+      },
+      "actions": {
+        "retake": "Retake Quiz",
+        "viewHistory": "View History",
+        "share": "Share Results"
+      },
+      "shareMenu": {
+        "copy": "Copy to clipboard",
+        "shareX": "Share on X",
+        "shareEmail": "Share via email"
+      },
+      "shareToasts": {
+        "copySuccess": "Copied to clipboard!",
+        "copyFailed": "Couldn't copy — try again",
+        "favoriteFailed": "Couldn't update your favorite — please try again",
+        "favoriteAdded": "Added to favorites",
+        "favoriteRemoved": "Removed from favorites"
+      },
+      "shareText": {
+        "title": "My Smart Advisor Picks",
+        "movies": "Movies:",
+        "books": "Books:",
+        "directorPrefix": "dir. {director}",
+        "byAuthorShort": "by {author}",
+        "genres": "Genres: {list}",
+        "footer": "Get your own picks at smartadvisor.app"
+      },
+      "shareTwitter": "Just got my Smart Advisor picks: {titles}\n\nGet your own at smartadvisor.app",
+      "shareEmailSubject": "My Smart Advisor Picks",
+      "beforeUnload": "You have unsaved recommendations. Are you sure you want to leave?",
+      "generationStep": {
+        "analyzing": "Analyzing your answers...",
+        "generating": "Generating personalized recommendations...",
+        "enhancing": "Enhancing with movie and book data...",
+        "finalizing": "Finalizing your recommendations..."
+      },
+      "generationError": "Failed to generate personalized recommendations. Please try again.",
+      "confirmDialog": {
+        "title": "Generate new recommendations?",
+        "body": "You already generated recommendations for these answers. Generate a fresh set or head back to your dashboard.",
+        "cancel": "Go to Dashboard",
+        "confirm": "Generate New"
+      },
+      "errorState": {
+        "title": "Unable to generate recommendations",
+        "retry": "Try Again",
+        "back": "Retake Quiz"
+      }
+    }
   },
   "Dashboard": {
     "eyebrow": "Dashboard",
@@ -1185,6 +1302,221 @@
       "all": "All",
       "favorites": "Favorites"
     },
-    "recentAria": "Recent picks filter"
+    "recentAria": "Recent picks filter",
+    "body": {
+      "loadingChart": "Loading chart...",
+      "greetings": [
+        "Welcome back",
+        "Hey",
+        "Good to see you",
+        "Hi there",
+        "Howdy",
+        "Hello again",
+        "Glad you're back",
+        "Look who's back",
+        "The legend returns",
+        "Well, well, well",
+        "Greetings, mortal",
+        "Fancy seeing you",
+        "The plot thickens",
+        "Sequel time",
+        "Now showing",
+        "Roll credits",
+        "Drumroll please",
+        "Brace yourself",
+        "Ready, set, scroll"
+      ],
+      "headerHook": {
+        "loading": "Your personalized recommendation hub.",
+        "empty": "Take your first quiz to get started.",
+        "quietWeek": "Quiet week — ready for a new pick?",
+        "up": "{n, plural, one {# new pick this week · up {delta} from last week.} other {# new picks this week · up {delta} from last week.}}",
+        "down": "{n, plural, one {# new pick this week · down {delta} from last week.} other {# new picks this week · down {delta} from last week.}}",
+        "flat": "{n, plural, one {# new pick this week.} other {# new picks this week.}}"
+      },
+      "modal": {
+        "ariaLabel": "Details for {title}",
+        "byAuthor": "By {author}",
+        "byDirector": "Directed by {director}",
+        "close": "Close"
+      },
+      "favoriteAria": "Favorited",
+      "inLibraryAria": "In your library",
+      "wrapped": {
+        "eyebrow": "Year in Review",
+        "titleLead": "Your",
+        "titleTail": "in Picks",
+        "body": "Top genres, longest streak, most-picked creator — wrapped up in a card.",
+        "cta": "Open Wrapped"
+      },
+      "suggestion": {
+        "eyebrow": "Suggested next",
+        "firstQuiz": {
+          "title": "Take Your First Quiz",
+          "body": "Answer a few questions and the AI will hand you a tailored pick.",
+          "cta": "Start Quiz"
+        },
+        "logReaction": {
+          "title": "Log a reaction",
+          "body": "Tell the AI what landed and what didn't — your reactions become a taste signal on every future quiz.",
+          "cta": "Open results"
+        },
+        "anotherPick": {
+          "title": "Time for another pick?",
+          "body": "Your last quiz was {ago} ago. The AI now knows {count, plural, one {# of your reactions} other {# of your reactions}}.",
+          "cta": "Take another quiz"
+        }
+      },
+      "spotlight": {
+        "eyebrow": "Latest pick",
+        "openDetailsAria": "Open details for {title}",
+        "byAuthor": "By {author}",
+        "byDirector": "Directed by {director}",
+        "viewAll": "View all"
+      },
+      "noPicks": {
+        "title": "No Picks Yet",
+        "body": "Take your first quiz and your latest pick will live here so it's always one click away."
+      },
+      "pulse": {
+        "eyebrow": "Pulse",
+        "thisWeek": "{count, plural, one {# pick this week} other {# picks this week}}",
+        "quietWeek": "Quiet Week",
+        "up": "↑ {delta} from last week",
+        "down": "↓ {delta} from last week",
+        "lastFourteenDays": "Last 14 days",
+        "streakBadge": "{count}-day streak",
+        "stat": {
+          "picks": "Picks",
+          "library": "Library",
+          "favorites": "Favorites",
+          "topGenre": "Top Genre"
+        },
+        "picksHint": "{movies}m · {books}b",
+        "ratedHint": "{count} rated",
+        "favoritesPercent": "{percent}%",
+        "topGenrePicks": "{count, plural, one {# pick} other {# picks}}",
+        "noData": "—"
+      },
+      "milestones": {
+        "eyebrow": "Milestones",
+        "earnedSummary": "{earned} of {total} earned",
+        "unlocked": "Unlocked",
+        "progress": "{progress}/{target}",
+        "items": {
+          "firstPick": "First Pick",
+          "tenPicks": "10 Picks",
+          "wideTaste": "Wide Taste",
+          "cinephile": "Cinephile",
+          "bookworm": "Bookworm",
+          "curator": "Curator",
+          "reflective": "Reflective",
+          "weekStreak": "Week Streak"
+        }
+      },
+      "library": {
+        "eyebrow": "Taste Signal",
+        "title": "Your Library",
+        "viewAll": "View all",
+        "emptyLead": "Nothing logged yet. Hit",
+        "emptyAction": "I watched / read this",
+        "emptyTail": "on a result and it'll show up here as a taste signal for future quizzes."
+      },
+      "picks": {
+        "filterAria": "Recent picks filter",
+        "all": "All",
+        "favorites": "Favorites",
+        "seeAllInHistory": "See all in history",
+        "noPicksTitle": "No Picks Yet",
+        "noPicksBody": "Take a quiz and your picks will collect here.",
+        "startQuiz": "Start Quiz",
+        "noFavoritesTitle": "No favorites yet",
+        "noFavoritesBody": "Tap the heart on any pick to save it here.",
+        "movies": "Movies",
+        "books": "Books"
+      },
+      "genres": {
+        "eyebrow": "Genre breakdown",
+        "title": "Where Your Taste Leans",
+        "topLabel": "Top",
+        "topPercent": "{percent}%",
+        "mostlyMovies": "mostly movies",
+        "mostlyBooks": "mostly books",
+        "evenSplit": "even split",
+        "empty": "Take a quiz to see your genres."
+      }
+    }
+  },
+  "Demo": {
+    "quiz": {
+      "category": "Demo quiz",
+      "stepLabel": "Question {current} of {total}",
+      "back": {
+        "home": "Home",
+        "previous": "Previous"
+      },
+      "cards": {
+        "movie": {
+          "eyebrow": "On screen",
+          "title": "Movie",
+          "description": "A film tuned to your current mood and pace."
+        },
+        "book": {
+          "eyebrow": "On the shelf",
+          "title": "Book",
+          "description": "A read tailored to your style and interests."
+        },
+        "both": {
+          "eyebrow": "Both",
+          "title": "One of each",
+          "description": "A movie and a book picked together in one go."
+        }
+      },
+      "validation": {
+        "fillInBlank": "Please type an answer before continuing.",
+        "selectAll": "Please select at least one option before continuing.",
+        "singleSelect": "Please select an option before continuing."
+      },
+      "next": "Next",
+      "continue": "Continue",
+      "leaveConfirm": "Leave the demo? Your answers so far won't be saved."
+    },
+    "results": {
+      "loadingText": "Finding your perfect picks...",
+      "matchSuffix": " match",
+      "whyThisPick": "Why this pick",
+      "about": "About",
+      "showMore": "Show more",
+      "showLess": "Show less",
+      "viewDetails": "View details",
+      "errors": {
+        "limitTitle": "You hit the demo limit",
+        "genericTitle": "Something went wrong",
+        "limitFallback": "You have used your free demo runs for today. Sign up to keep going.",
+        "genericFallback": "We could not generate your demo recommendations. Please try again.",
+        "signUp": "Sign up to continue",
+        "tryAgain": "Try again"
+      },
+      "eyebrow": "Demo · Your picks",
+      "headline": "Hand-picked for you",
+      "subhead": "{count, plural, one {# personalized pick from your demo answers — sign up to save them and refine over time.} other {# personalized picks from your demo answers — sign up to save them and refine over time.}}",
+      "empty": "No results found. Try the demo again for a new set.",
+      "sections": {
+        "movie": {
+          "eyebrow": "Movie",
+          "title": "On screen"
+        },
+        "book": {
+          "eyebrow": "Book",
+          "title": "On the shelf"
+        }
+      },
+      "cta": {
+        "title": "Make this a habit",
+        "body": "Sign up to save your picks, build a taste profile from your reactions, and get AI-tailored recommendations every time.",
+        "signUp": "Sign up to continue",
+        "retake": "Retake demo"
+      }
+    }
   }
 }

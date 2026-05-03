@@ -738,6 +738,49 @@
       "saving": "Guardando...",
       "save": "Guardar",
       "cancel": "Cancelar"
+    },
+    "validation": {
+      "emailOrUsernameRequired": "El correo o nombre de usuario es obligatorio",
+      "emailRequired": "El correo es obligatorio",
+      "emailInvalid": "Ingresa un correo válido",
+      "passwordRequired": "La contraseña es obligatoria",
+      "passwordRequirementsUnmet": "La contraseña no cumple todos los requisitos",
+      "usernameRequired": "El nombre de usuario es obligatorio",
+      "usernameTooShort": "Usa al menos 2 caracteres",
+      "usernameTooLong": "Usa 24 caracteres o menos",
+      "usernameInvalid": "Usa letras, números, puntos, guiones o guiones bajos",
+      "ageRequired": "La edad es obligatoria",
+      "ageNotInteger": "La edad debe ser un número entero",
+      "ageOutOfRange": "Ingresa una edad entre 13 y 120",
+      "confirmPasswordRequired": "Confirma tu contraseña",
+      "passwordsDoNotMatch": "Las contraseñas no coinciden",
+      "fixHighlightedFields": "Por favor, corrige los campos resaltados.",
+      "correctHighlightedFields": "Por favor, corrige los campos resaltados",
+      "passkeyIdentifierRequired": "Ingresa tu correo o nombre de usuario para usar una clave de acceso.",
+      "enterSixDigitCode": "Ingresa un código de 6 dígitos",
+      "enterBackupCode": "Ingresa un código de respaldo",
+      "rules": {
+        "emailContainsAt": "Contiene @",
+        "emailHasDomain": "Tiene un dominio (ejemplo.com)",
+        "ageWholeNumber": "Número entero",
+        "ageInRange": "Entre 13 y 120",
+        "usernameLength": "2–24 caracteres",
+        "usernameAllowedChars": "Letras, números, puntos, guiones o guiones bajos",
+        "confirmPasswordMatches": "Coincide con tu contraseña"
+      },
+      "popoverTitles": {
+        "email": "Requisitos del correo",
+        "password": "Requisitos de la contraseña",
+        "username": "Requisitos del nombre de usuario",
+        "age": "Requisitos de la edad",
+        "confirmPassword": "Confirmar contraseña"
+      },
+      "mfaError": {
+        "totpExpired": "Ese código expiró. Espera uno nuevo en tu autenticador e inténtalo de nuevo.",
+        "backupExpired": "Ese código de respaldo ya no es válido.",
+        "totpMismatch": "Ese código no coincidió. Revisa tu autenticador e inténtalo de nuevo.",
+        "backupMismatch": "Ese código de respaldo no coincidió. Cada código solo funciona una vez."
+      }
     }
   },
   "Wrapped": {
@@ -1162,7 +1205,81 @@
       "Pasándolo por la IA una vez más…",
       "Puliendo cada recomendación…",
       "Dando los toques finales…"
-    ]
+    ],
+    "body": {
+      "matchSuffix": "{score}% de coincidencia",
+      "matchPercent": "{score}%",
+      "whyThisPick": "Por qué esta elección",
+      "about": "Sobre",
+      "showMore": "Ver más",
+      "showLess": "Ver menos",
+      "byAuthor": "Por {author}",
+      "byDirector": "Dirigida por {director}",
+      "favoriteAdd": "Añadir {title} a favoritos",
+      "favoriteRemove": "Quitar {title} de favoritos",
+      "movie": "Película",
+      "book": "Libro",
+      "eyebrow": "Tus elecciones",
+      "headline": "Elegidas a mano para ti",
+      "subhead": "{count, plural, one {# elección personalizada de la IA, con el razonamiento detrás de cada una. Registra una en tu biblioteca para afinar las próximas.} other {# elecciones personalizadas de la IA, con el razonamiento detrás de cada una. Registra una en tu biblioteca para afinar las próximas.}}",
+      "sections": {
+        "movie": {
+          "eyebrow": "Película",
+          "title": "En pantalla"
+        },
+        "book": {
+          "eyebrow": "Libro",
+          "title": "En el estante"
+        }
+      },
+      "actions": {
+        "retake": "Repetir cuestionario",
+        "viewHistory": "Ver historial",
+        "share": "Compartir resultados"
+      },
+      "shareMenu": {
+        "copy": "Copiar al portapapeles",
+        "shareX": "Compartir en X",
+        "shareEmail": "Compartir por correo"
+      },
+      "shareToasts": {
+        "copySuccess": "¡Copiado al portapapeles!",
+        "copyFailed": "No se pudo copiar — inténtalo de nuevo",
+        "favoriteFailed": "No pudimos actualizar tu favorito — inténtalo de nuevo",
+        "favoriteAdded": "Añadido a favoritos",
+        "favoriteRemoved": "Quitado de favoritos"
+      },
+      "shareText": {
+        "title": "Mis recomendaciones de Smart Advisor",
+        "movies": "Películas:",
+        "books": "Libros:",
+        "directorPrefix": "dir. {director}",
+        "byAuthorShort": "de {author}",
+        "genres": "Géneros: {list}",
+        "footer": "Obtén tus propias recomendaciones en smartadvisor.app"
+      },
+      "shareTwitter": "Acabo de recibir mis recomendaciones de Smart Advisor: {titles}\n\nObtén las tuyas en smartadvisor.app",
+      "shareEmailSubject": "Mis recomendaciones de Smart Advisor",
+      "beforeUnload": "Tienes recomendaciones sin guardar. ¿Seguro que quieres salir?",
+      "generationStep": {
+        "analyzing": "Analizando tus respuestas...",
+        "generating": "Generando recomendaciones personalizadas...",
+        "enhancing": "Enriqueciendo con datos de películas y libros...",
+        "finalizing": "Finalizando tus recomendaciones..."
+      },
+      "generationError": "No se pudieron generar las recomendaciones personalizadas. Inténtalo de nuevo.",
+      "confirmDialog": {
+        "title": "¿Generar nuevas recomendaciones?",
+        "body": "Ya generaste recomendaciones para estas respuestas. Genera un conjunto nuevo o vuelve a tu panel.",
+        "cancel": "Ir al panel",
+        "confirm": "Generar nuevas"
+      },
+      "errorState": {
+        "title": "No se pueden generar las recomendaciones",
+        "retry": "Reintentar",
+        "back": "Repetir cuestionario"
+      }
+    }
   },
   "Dashboard": {
     "eyebrow": "Panel",
@@ -1185,6 +1302,221 @@
       "all": "Todas",
       "favorites": "Favoritos"
     },
-    "recentAria": "Filtro de recomendaciones recientes"
+    "recentAria": "Filtro de recomendaciones recientes",
+    "body": {
+      "loadingChart": "Cargando gráfico...",
+      "greetings": [
+        "Bienvenido de vuelta",
+        "Hola",
+        "Qué bueno verte",
+        "Hola de nuevo",
+        "¿Qué tal?",
+        "Hola otra vez",
+        "Me alegra que vuelvas",
+        "Mira quién regresó",
+        "La leyenda regresa",
+        "Vaya, vaya, vaya",
+        "Saludos, mortal",
+        "Qué casualidad verte",
+        "La trama se complica",
+        "Hora de la secuela",
+        "En cartelera",
+        "A rodar los créditos",
+        "Redoble de tambores",
+        "Prepárate",
+        "Listos, ya, a explorar"
+      ],
+      "headerHook": {
+        "loading": "Tu central personalizada de recomendaciones.",
+        "empty": "Haz tu primer cuestionario para empezar.",
+        "quietWeek": "Semana tranquila, ¿lista para una nueva recomendación?",
+        "up": "{n, plural, one {# recomendación nueva esta semana · {delta} más que la semana pasada.} other {# recomendaciones nuevas esta semana · {delta} más que la semana pasada.}}",
+        "down": "{n, plural, one {# recomendación nueva esta semana · {delta} menos que la semana pasada.} other {# recomendaciones nuevas esta semana · {delta} menos que la semana pasada.}}",
+        "flat": "{n, plural, one {# recomendación nueva esta semana.} other {# recomendaciones nuevas esta semana.}}"
+      },
+      "modal": {
+        "ariaLabel": "Detalles de {title}",
+        "byAuthor": "Por {author}",
+        "byDirector": "Dirigida por {director}",
+        "close": "Cerrar"
+      },
+      "favoriteAria": "Favorita",
+      "inLibraryAria": "En tu biblioteca",
+      "wrapped": {
+        "eyebrow": "Año en revisión",
+        "titleLead": "Tu",
+        "titleTail": "en recomendaciones",
+        "body": "Géneros favoritos, racha más larga, creador más elegido — todo en una tarjeta.",
+        "cta": "Abrir Wrapped"
+      },
+      "suggestion": {
+        "eyebrow": "Lo siguiente sugerido",
+        "firstQuiz": {
+          "title": "Haz tu primer cuestionario",
+          "body": "Responde algunas preguntas y la IA te dará una recomendación a tu medida.",
+          "cta": "Iniciar cuestionario"
+        },
+        "logReaction": {
+          "title": "Registra una reacción",
+          "body": "Dile a la IA qué te gustó y qué no — tus reacciones se convierten en una señal de gusto en cada cuestionario futuro.",
+          "cta": "Abrir resultados"
+        },
+        "anotherPick": {
+          "title": "¿Hora de otra recomendación?",
+          "body": "Tu último cuestionario fue hace {ago}. La IA ya conoce {count, plural, one {# de tus reacciones} other {# de tus reacciones}}.",
+          "cta": "Hacer otro cuestionario"
+        }
+      },
+      "spotlight": {
+        "eyebrow": "Última recomendación",
+        "openDetailsAria": "Abrir detalles de {title}",
+        "byAuthor": "Por {author}",
+        "byDirector": "Dirigida por {director}",
+        "viewAll": "Ver todas"
+      },
+      "noPicks": {
+        "title": "Aún no hay recomendaciones",
+        "body": "Haz tu primer cuestionario y tu última recomendación vivirá aquí, siempre a un clic."
+      },
+      "pulse": {
+        "eyebrow": "Pulso",
+        "thisWeek": "{count, plural, one {# recomendación esta semana} other {# recomendaciones esta semana}}",
+        "quietWeek": "Semana tranquila",
+        "up": "↑ {delta} respecto a la semana pasada",
+        "down": "↓ {delta} respecto a la semana pasada",
+        "lastFourteenDays": "Últimos 14 días",
+        "streakBadge": "Racha de {count} días",
+        "stat": {
+          "picks": "Recomendaciones",
+          "library": "Biblioteca",
+          "favorites": "Favoritos",
+          "topGenre": "Género principal"
+        },
+        "picksHint": "{movies}p · {books}l",
+        "ratedHint": "{count} valoradas",
+        "favoritesPercent": "{percent}%",
+        "topGenrePicks": "{count, plural, one {# recomendación} other {# recomendaciones}}",
+        "noData": "—"
+      },
+      "milestones": {
+        "eyebrow": "Logros",
+        "earnedSummary": "{earned} de {total} obtenidos",
+        "unlocked": "Desbloqueado",
+        "progress": "{progress}/{target}",
+        "items": {
+          "firstPick": "Primera recomendación",
+          "tenPicks": "10 recomendaciones",
+          "wideTaste": "Gusto amplio",
+          "cinephile": "Cinéfilo",
+          "bookworm": "Ratón de biblioteca",
+          "curator": "Curador",
+          "reflective": "Reflexivo",
+          "weekStreak": "Racha semanal"
+        }
+      },
+      "library": {
+        "eyebrow": "Señal de gusto",
+        "title": "Tu biblioteca",
+        "viewAll": "Ver toda",
+        "emptyLead": "Aún no hay nada registrado. Pulsa",
+        "emptyAction": "Vi / leí esto",
+        "emptyTail": "en un resultado y aparecerá aquí como señal de gusto para futuros cuestionarios."
+      },
+      "picks": {
+        "filterAria": "Filtro de recomendaciones recientes",
+        "all": "Todas",
+        "favorites": "Favoritos",
+        "seeAllInHistory": "Ver todo en el historial",
+        "noPicksTitle": "Aún no hay recomendaciones",
+        "noPicksBody": "Haz un cuestionario y tus recomendaciones aparecerán aquí.",
+        "startQuiz": "Iniciar cuestionario",
+        "noFavoritesTitle": "Aún no hay favoritos",
+        "noFavoritesBody": "Pulsa el corazón en cualquier recomendación para guardarla aquí.",
+        "movies": "Películas",
+        "books": "Libros"
+      },
+      "genres": {
+        "eyebrow": "Desglose de géneros",
+        "title": "Hacia dónde se inclina tu gusto",
+        "topLabel": "Principal",
+        "topPercent": "{percent}%",
+        "mostlyMovies": "principalmente películas",
+        "mostlyBooks": "principalmente libros",
+        "evenSplit": "mitad y mitad",
+        "empty": "Haz un cuestionario para ver tus géneros."
+      }
+    }
+  },
+  "Demo": {
+    "quiz": {
+      "category": "Cuestionario de demostración",
+      "stepLabel": "Pregunta {current} de {total}",
+      "back": {
+        "home": "Inicio",
+        "previous": "Anterior"
+      },
+      "cards": {
+        "movie": {
+          "eyebrow": "En pantalla",
+          "title": "Película",
+          "description": "Una película ajustada a tu estado de ánimo y ritmo."
+        },
+        "book": {
+          "eyebrow": "En el estante",
+          "title": "Libro",
+          "description": "Una lectura adaptada a tu estilo e intereses."
+        },
+        "both": {
+          "eyebrow": "Ambos",
+          "title": "Uno de cada",
+          "description": "Una película y un libro elegidos juntos en una sola sesión."
+        }
+      },
+      "validation": {
+        "fillInBlank": "Escribe una respuesta antes de continuar.",
+        "selectAll": "Selecciona al menos una opción antes de continuar.",
+        "singleSelect": "Selecciona una opción antes de continuar."
+      },
+      "next": "Siguiente",
+      "continue": "Continuar",
+      "leaveConfirm": "¿Salir de la demostración? Tus respuestas no se guardarán."
+    },
+    "results": {
+      "loadingText": "Buscando tus mejores opciones...",
+      "matchSuffix": " de coincidencia",
+      "whyThisPick": "Por qué esta elección",
+      "about": "Sobre",
+      "showMore": "Ver más",
+      "showLess": "Ver menos",
+      "viewDetails": "Ver detalles",
+      "errors": {
+        "limitTitle": "Has alcanzado el límite de la demostración",
+        "genericTitle": "Algo salió mal",
+        "limitFallback": "Has usado tus pruebas gratuitas de la demostración de hoy. Regístrate para seguir.",
+        "genericFallback": "No pudimos generar tus recomendaciones de demostración. Inténtalo de nuevo.",
+        "signUp": "Regístrate para continuar",
+        "tryAgain": "Reintentar"
+      },
+      "eyebrow": "Demostración · Tus elecciones",
+      "headline": "Elegidas a mano para ti",
+      "subhead": "{count, plural, one {# elección personalizada a partir de tus respuestas de la demo — regístrate para guardarlas y afinarlas con el tiempo.} other {# elecciones personalizadas a partir de tus respuestas de la demo — regístrate para guardarlas y afinarlas con el tiempo.}}",
+      "empty": "No se encontraron resultados. Prueba la demostración de nuevo para obtener otras opciones.",
+      "sections": {
+        "movie": {
+          "eyebrow": "Película",
+          "title": "En pantalla"
+        },
+        "book": {
+          "eyebrow": "Libro",
+          "title": "En el estante"
+        }
+      },
+      "cta": {
+        "title": "Conviértelo en un hábito",
+        "body": "Regístrate para guardar tus elecciones, construir un perfil de gusto a partir de tus reacciones y obtener recomendaciones afinadas por IA cada vez.",
+        "signUp": "Regístrate para continuar",
+        "retake": "Repetir la demo"
+      }
+    }
   }
 }

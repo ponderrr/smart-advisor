@@ -6,13 +6,18 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useQueryState, parseAsStringLiteral } from "nuqs";
 
+const GenreBarChartLoading = () => {
+  const t = useTranslations("Dashboard.body");
+  return (
+    <div className="flex h-40 items-center justify-center text-sm text-slate-400">
+      {t("loadingChart")}
+    </div>
+  );
+};
+
 const GenreBarChart = dynamic(() => import("@/components/genre-bar-chart"), {
   ssr: false,
-  loading: () => (
-    <div className="flex h-40 items-center justify-center text-sm text-slate-400">
-      Loading chart...
-    </div>
-  ),
+  loading: () => <GenreBarChartLoading />,
 });
 const ActivitySparkline = dynamic(
   () => import("@/components/activity-sparkline"),
@@ -35,7 +40,7 @@ import {
   Lock,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useMessages } from "next-intl";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import {
@@ -71,11 +76,12 @@ const RecommendationModal = ({
   rec: Recommendation;
   onClose: () => void;
 }) => {
+  const t = useTranslations("Dashboard.body");
   return (
     <Dialog
       open={true}
       onClose={onClose}
-      ariaLabel={`Details for ${rec.title}`}
+      ariaLabel={t("modal.ariaLabel", { title: rec.title })}
       hideCloseButton
     >
       {rec.poster_url && (
@@ -104,9 +110,9 @@ const RecommendationModal = ({
         <h2 className="text-2xl font-black tracking-tight">{rec.title}</h2>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           {rec.author
-            ? `By ${rec.author}`
+            ? t("modal.byAuthor", { author: rec.author })
             : rec.director
-              ? `Directed by ${rec.director}`
+              ? t("modal.byDirector", { director: rec.director })
               : ""}
           {rec.year ? ` · ${rec.year}` : ""}
         </p>
@@ -148,7 +154,7 @@ const RecommendationModal = ({
           onClick={onClose}
           className="mt-5 w-full rounded-2xl bg-slate-100 py-2.5 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
         >
-          Close
+          {t("modal.close")}
         </button>
       </div>
     </Dialog>
@@ -160,7 +166,15 @@ const DashboardPage = () => {
   const { user } = useAuth();
   const { ready } = useRequireAuth();
   const t = useTranslations("Dashboard");
+  const tb = useTranslations("Dashboard.body");
   const tc = useTranslations("Common");
+  const messages = useMessages() as {
+    Dashboard?: { body?: { greetings?: string[] } };
+  };
+  const greetings = useMemo(
+    () => messages.Dashboard?.body?.greetings ?? [],
+    [messages],
+  );
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [libraryItems, setLibraryItems] = useState<LibraryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -315,7 +329,7 @@ const DashboardPage = () => {
     const list = [
       {
         id: "first-pick",
-        label: "First Pick",
+        label: tb("milestones.items.firstPick"),
         icon: Sparkles,
         tone: "indigo" as const,
         progress: stats.total,
@@ -323,7 +337,7 @@ const DashboardPage = () => {
       },
       {
         id: "ten-picks",
-        label: "10 Picks",
+        label: tb("milestones.items.tenPicks"),
         icon: TrendingUp,
         tone: "indigo" as const,
         progress: stats.total,
@@ -331,7 +345,7 @@ const DashboardPage = () => {
       },
       {
         id: "wide-taste",
-        label: "Wide Taste",
+        label: tb("milestones.items.wideTaste"),
         icon: BarChart3,
         tone: "violet" as const,
         progress: uniqueGenres.size,
@@ -339,7 +353,7 @@ const DashboardPage = () => {
       },
       {
         id: "cinephile",
-        label: "Cinephile",
+        label: tb("milestones.items.cinephile"),
         icon: Film,
         tone: "amber" as const,
         progress: stats.movies,
@@ -347,7 +361,7 @@ const DashboardPage = () => {
       },
       {
         id: "bookworm",
-        label: "Bookworm",
+        label: tb("milestones.items.bookworm"),
         icon: BookOpen,
         tone: "amber" as const,
         progress: stats.books,
@@ -355,7 +369,7 @@ const DashboardPage = () => {
       },
       {
         id: "curator",
-        label: "Curator",
+        label: tb("milestones.items.curator"),
         icon: Heart,
         tone: "rose" as const,
         progress: stats.favorites,
@@ -363,7 +377,7 @@ const DashboardPage = () => {
       },
       {
         id: "reflective",
-        label: "Reflective",
+        label: tb("milestones.items.reflective"),
         icon: ThumbsUp,
         tone: "emerald" as const,
         progress: ratedCount,
@@ -371,7 +385,7 @@ const DashboardPage = () => {
       },
       {
         id: "streaker",
-        label: "Week Streak",
+        label: tb("milestones.items.weekStreak"),
         icon: Flame,
         tone: "orange" as const,
         progress: streak,
@@ -380,34 +394,14 @@ const DashboardPage = () => {
     ];
     const earned = list.filter((a) => a.progress >= a.target).length;
     return { list, earned };
-  }, [recommendations, stats, ratedCount, streak]);
+  }, [recommendations, stats, ratedCount, streak, tb]);
 
-  const [greeting, setGreeting] = useState("Welcome back");
+  const [greeting, setGreeting] = useState("");
   useEffect(() => {
-    const greetings = [
-      "Welcome back",
-      "Hey",
-      "Good to see you",
-      "Hi there",
-      "Howdy",
-      "Hello again",
-      "Glad you're back",
-      "Look who's back",
-      "The legend returns",
-      "Well, well, well",
-      "Greetings, mortal",
-      "Fancy seeing you",
-      "The plot thickens",
-      "Sequel time",
-      "Now showing",
-      "Roll credits",
-      "Drumroll please",
-      "Brace yourself",
-      "Ready, set, scroll",
-    ];
+    if (greetings.length === 0) return;
     const dayIndex = Math.floor(Date.now() / 86400000) % greetings.length;
     setGreeting(greetings[dayIndex]);
-  }, []);
+  }, [greetings]);
 
   const greetName = useMemo(() => {
     const username = user?.username?.trim();
@@ -437,17 +431,16 @@ const DashboardPage = () => {
   }, []);
 
   const headerHook = useMemo(() => {
-    if (loading) return "Your personalized recommendation hub.";
-    if (stats.total === 0) return "Take your first quiz to get started.";
-    if (activity.sevenDay === 0) return "Quiet week — ready for a new pick?";
+    if (loading) return tb("headerHook.loading");
+    if (stats.total === 0) return tb("headerHook.empty");
+    if (activity.sevenDay === 0) return tb("headerHook.quietWeek");
     const delta = activity.sevenDay - activity.prevSevenDay;
-    const noun = `pick${activity.sevenDay === 1 ? "" : "s"}`;
     if (delta > 0)
-      return `${activity.sevenDay} new ${noun} this week · up ${delta} from last week.`;
+      return tb("headerHook.up", { n: activity.sevenDay, delta });
     if (delta < 0)
-      return `${activity.sevenDay} new ${noun} this week · down ${-delta} from last week.`;
-    return `${activity.sevenDay} new ${noun} this week.`;
-  }, [loading, stats.total, activity]);
+      return tb("headerHook.down", { n: activity.sevenDay, delta: -delta });
+    return tb("headerHook.flat", { n: activity.sevenDay });
+  }, [loading, stats.total, activity, tb]);
 
   const picksTabs = ["all", "favorites"] as const;
   type PicksFilter = (typeof picksTabs)[number];
@@ -506,7 +499,7 @@ const DashboardPage = () => {
           <div className="absolute right-2 top-2 flex flex-col gap-1.5">
             {rec.is_favorited && (
               <span
-                aria-label="Favorited"
+                aria-label={tb("favoriteAria")}
                 className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-rose-500 text-white shadow-md shadow-rose-500/30"
               >
                 <Heart size={11} fill="currentColor" />
@@ -514,7 +507,7 @@ const DashboardPage = () => {
             )}
             {inLibrary && (
               <span
-                aria-label="In your library"
+                aria-label={tb("inLibraryAria")}
                 className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-white shadow-md shadow-emerald-500/30"
               >
                 <BookCheck size={11} />
@@ -555,17 +548,17 @@ const DashboardPage = () => {
     if (loading) return null;
     if (recommendations.length === 0) {
       return {
-        title: "Take Your First Quiz",
-        body: "Answer a few questions and the AI will hand you a tailored pick.",
-        cta: "Start Quiz",
+        title: tb("suggestion.firstQuiz.title"),
+        body: tb("suggestion.firstQuiz.body"),
+        cta: tb("suggestion.firstQuiz.cta"),
         href: "/content-selection",
       };
     }
     if (libraryItems.length === 0) {
       return {
-        title: "Log a reaction",
-        body: 'Tell the AI what landed and what didn\'t — your reactions become a taste signal on every future quiz.',
-        cta: "Open results",
+        title: tb("suggestion.logReaction.title"),
+        body: tb("suggestion.logReaction.body"),
+        cta: tb("suggestion.logReaction.cta"),
         href: "/results",
       };
     }
@@ -575,15 +568,18 @@ const DashboardPage = () => {
         (1000 * 60 * 60 * 24);
       if (ageDays > 7) {
         return {
-          title: "Time for another pick?",
-          body: `Your last quiz was ${formatDistanceToNowStrict(new Date(lastPick.created_at))} ago. The AI now knows ${libraryItems.length} of your reactions.`,
-          cta: "Take another quiz",
+          title: tb("suggestion.anotherPick.title"),
+          body: tb("suggestion.anotherPick.body", {
+            ago: formatDistanceToNowStrict(new Date(lastPick.created_at)),
+            count: libraryItems.length,
+          }),
+          cta: tb("suggestion.anotherPick.cta"),
           href: "/content-selection",
         };
       }
     }
     return null;
-  }, [loading, recommendations.length, libraryItems.length, lastPick]);
+  }, [loading, recommendations.length, libraryItems.length, lastPick, tb]);
 
   if (!ready) return <PageLoader text={tc("loading")} />;
 
@@ -746,23 +742,22 @@ const DashboardPage = () => {
                                 <Trophy size={15} />
                               </span>
                               <p className="text-[11px] font-black uppercase tracking-[0.16em] text-amber-700 dark:text-amber-300">
-                                Year in Review
+                                {tb("wrapped.eyebrow")}
                               </p>
                             </div>
                             <h2 className="mt-3 text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl">
-                              Your{" "}
+                              {tb("wrapped.titleLead")}{" "}
                               <span className="bg-gradient-to-r from-amber-500 via-rose-500 to-violet-500 bg-clip-text text-transparent">
                                 {wrappedSeason.year}
                               </span>{" "}
-                              in Picks
+                              {tb("wrapped.titleTail")}
                             </h2>
                             <p className="mt-2 max-w-md text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                              Top genres, longest streak, most-picked
-                              creator — wrapped up in a card.
+                              {tb("wrapped.body")}
                             </p>
                           </div>
                           <span className="inline-flex shrink-0 items-center gap-1.5 self-start rounded-full bg-slate-900 px-5 py-3 text-sm font-black tracking-tight text-white shadow-md transition-transform duration-200 group-hover:translate-x-0.5 sm:self-auto dark:bg-white dark:text-slate-900">
-                            Open Wrapped
+                            {tb("wrapped.cta")}
                             <ArrowRight size={14} />
                           </span>
                         </div>
@@ -788,7 +783,7 @@ const DashboardPage = () => {
                                 className="text-indigo-600 dark:text-indigo-400"
                               />
                               <p className="text-[11px] font-black uppercase tracking-[0.16em] text-indigo-700 dark:text-indigo-300">
-                                Suggested next
+                                {tb("suggestion.eyebrow")}
                               </p>
                             </div>
                             <h2 className="mt-2 text-xl font-black tracking-tight sm:text-2xl">
@@ -822,7 +817,7 @@ const DashboardPage = () => {
                         <button
                           type="button"
                           onClick={() => setSelectedRec(lastPick)}
-                          aria-label={`Open details for ${lastPick.title}`}
+                          aria-label={tb("spotlight.openDetailsAria", { title: lastPick.title })}
                           className="relative h-32 w-24 shrink-0 overflow-hidden rounded-2xl bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:bg-slate-800 dark:focus-visible:ring-offset-slate-950"
                         >
                           {lastPick.poster_url ? (
@@ -845,7 +840,7 @@ const DashboardPage = () => {
                         </button>
                         <div className="min-w-0 flex-1">
                           <p className="text-[10px] font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
-                            Latest pick
+                            {tb("spotlight.eyebrow")}
                             <span className="mx-1.5 text-slate-300 dark:text-slate-600">
                               ·
                             </span>
@@ -861,9 +856,9 @@ const DashboardPage = () => {
                           </h2>
                           <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
                             {lastPick.author
-                              ? `By ${lastPick.author}`
+                              ? tb("spotlight.byAuthor", { author: lastPick.author })
                               : lastPick.director
-                                ? `Directed by ${lastPick.director}`
+                                ? tb("spotlight.byDirector", { director: lastPick.director })
                                 : ""}
                             {lastPick.year ? ` · ${lastPick.year}` : ""}
                           </p>
@@ -890,7 +885,7 @@ const DashboardPage = () => {
                               onClick={() => router.push("/history")}
                               className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 bg-white/80 px-3 py-1.5 text-xs font-bold tracking-tight text-slate-700 transition-colors hover:border-slate-300 hover:bg-white dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200 dark:hover:bg-slate-800/70"
                             >
-                              View all
+                              {tb("spotlight.viewAll")}
                               <ArrowRight size={12} />
                             </button>
                           </div>
@@ -900,11 +895,10 @@ const DashboardPage = () => {
                       <div className="rounded-3xl border border-dashed border-slate-300/80 bg-gradient-to-br from-indigo-50/50 via-white to-violet-50/50 p-10 text-center dark:border-slate-700/70 dark:from-indigo-500/5 dark:via-slate-900/40 dark:to-violet-500/5">
                         <Sparkles className="mx-auto h-10 w-10 text-indigo-300 dark:text-indigo-500/60" />
                         <h2 className="mt-4 text-2xl font-black tracking-tight">
-                          No Picks Yet
+                          {tb("noPicks.title")}
                         </h2>
                         <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
-                          Take your first quiz and your latest pick will live
-                          here so it&apos;s always one click away.
+                          {tb("noPicks.body")}
                         </p>
                       </div>
                     )}
@@ -919,28 +913,28 @@ const DashboardPage = () => {
                                 <TrendingUp size={13} />
                               </span>
                               <p className="text-[10px] font-black uppercase tracking-[0.16em] text-indigo-600 dark:text-indigo-400">
-                                Pulse
+                                {tb("pulse.eyebrow")}
                               </p>
                             </div>
                             <h3 className="mt-2 text-lg font-black tracking-tight sm:text-xl">
                               {activity.sevenDay > 0
-                                ? `${activity.sevenDay} pick${activity.sevenDay === 1 ? "" : "s"} this week`
-                                : "Quiet Week"}
+                                ? tb("pulse.thisWeek", { count: activity.sevenDay })
+                                : tb("pulse.quietWeek")}
                             </h3>
                             <div className="mt-0.5 flex flex-wrap items-center gap-2">
                               <p className="text-xs font-bold text-slate-500 dark:text-slate-400">
                                 {(() => {
                                   const d =
                                     activity.sevenDay - activity.prevSevenDay;
-                                  if (d > 0) return `↑ ${d} from last week`;
-                                  if (d < 0) return `↓ ${-d} from last week`;
-                                  return "Last 14 days";
+                                  if (d > 0) return tb("pulse.up", { delta: d });
+                                  if (d < 0) return tb("pulse.down", { delta: -d });
+                                  return tb("pulse.lastFourteenDays");
                                 })()}
                               </p>
                               {streak >= 2 && (
                                 <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-orange-600 dark:bg-orange-500/15 dark:text-orange-300">
                                   <Flame size={10} />
-                                  {streak}-day streak
+                                  {tb("pulse.streakBadge", { count: streak })}
                                 </span>
                               )}
                             </div>
@@ -961,48 +955,48 @@ const DashboardPage = () => {
                         <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
                           {[
                             {
-                              label: "Picks",
+                              label: tb("pulse.stat.picks"),
                               value: stats.total,
                               icon: TrendingUp,
-                              hint: `${stats.movies}m · ${stats.books}b`,
+                              hint: tb("pulse.picksHint", { movies: stats.movies, books: stats.books }),
                               color: "text-indigo-600 dark:text-indigo-400",
                               bg: "bg-indigo-100 dark:bg-indigo-500/15",
                               href: "/history",
                               smallValue: false,
                             },
                             {
-                              label: "Library",
+                              label: tb("pulse.stat.library"),
                               value: libraryItems.length,
                               icon: BookCheck,
                               hint:
                                 ratedItems.length > 0
-                                  ? `${ratedItems.length} rated`
-                                  : "—",
+                                  ? tb("pulse.ratedHint", { count: ratedItems.length })
+                                  : tb("pulse.noData"),
                               color: "text-emerald-600 dark:text-emerald-400",
                               bg: "bg-emerald-100 dark:bg-emerald-500/15",
                               href: "/library",
                               smallValue: false,
                             },
                             {
-                              label: "Favorites",
+                              label: tb("pulse.stat.favorites"),
                               value: stats.favorites,
                               icon: Heart,
                               hint:
                                 stats.total > 0
-                                  ? `${Math.round((stats.favorites / stats.total) * 100)}%`
-                                  : "—",
+                                  ? tb("pulse.favoritesPercent", { percent: Math.round((stats.favorites / stats.total) * 100) })
+                                  : tb("pulse.noData"),
                               color: "text-rose-600 dark:text-rose-400",
                               bg: "bg-rose-100 dark:bg-rose-500/15",
                               href: "/history?filter=favorites",
                               smallValue: false,
                             },
                             {
-                              label: "Top Genre",
-                              value: topGenre?.genre ?? "—",
+                              label: tb("pulse.stat.topGenre"),
+                              value: topGenre?.genre ?? tb("pulse.noData"),
                               icon: BarChart3,
                               hint: topGenre
-                                ? `${topGenre.total} pick${topGenre.total === 1 ? "" : "s"}`
-                                : "—",
+                                ? tb("pulse.topGenrePicks", { count: topGenre.total })
+                                : tb("pulse.noData"),
                               color: "text-violet-600 dark:text-violet-400",
                               bg: "bg-violet-100 dark:bg-violet-500/15",
                               href: "?tab=genres",
@@ -1063,11 +1057,13 @@ const DashboardPage = () => {
                             </span>
                             <div>
                               <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-600 dark:text-amber-400">
-                                Milestones
+                                {tb("milestones.eyebrow")}
                               </p>
                               <h3 className="text-sm font-black tracking-tight">
-                                {achievements.earned} of{" "}
-                                {achievements.list.length} earned
+                                {tb("milestones.earnedSummary", {
+                                  earned: achievements.earned,
+                                  total: achievements.list.length,
+                                })}
                               </h3>
                             </div>
                           </div>
@@ -1131,8 +1127,8 @@ const DashboardPage = () => {
                                   </p>
                                   <p className="mt-0.5 truncate text-[10px] font-bold text-slate-500 dark:text-slate-400">
                                     {earned
-                                      ? "Unlocked"
-                                      : `${a.progress}/${a.target}`}
+                                      ? tb("milestones.unlocked")
+                                      : tb("milestones.progress", { progress: a.progress, target: a.target })}
                                   </p>
                                   {!earned && (
                                     <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
@@ -1159,10 +1155,10 @@ const DashboardPage = () => {
                           </span>
                           <div>
                             <p className="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-400">
-                              Taste Signal
+                              {tb("library.eyebrow")}
                             </p>
                             <h3 className="text-sm font-black tracking-tight">
-                              Your Library
+                              {tb("library.title")}
                             </h3>
                           </div>
                         </div>
@@ -1171,18 +1167,17 @@ const DashboardPage = () => {
                           onClick={() => router.push("/library")}
                           className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 bg-white/80 px-3 py-1.5 text-xs font-bold tracking-tight text-slate-700 transition-colors hover:border-slate-300 hover:bg-white dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200 dark:hover:bg-slate-800/70"
                         >
-                          View all
+                          {tb("library.viewAll")}
                           <ArrowRight size={12} />
                         </button>
                       </div>
                       {libraryItems.length === 0 ? (
                         <p className="text-sm text-slate-500 dark:text-slate-400">
-                          Nothing logged yet. Hit{" "}
+                          {tb("library.emptyLead")}{" "}
                           <span className="font-semibold text-slate-700 dark:text-slate-200">
-                            I watched / read this
+                            {tb("library.emptyAction")}
                           </span>{" "}
-                          on a result and it&apos;ll show up here as a taste
-                          signal for future quizzes.
+                          {tb("library.emptyTail")}
                         </p>
                       ) : (
                         <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -1249,13 +1244,13 @@ const DashboardPage = () => {
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div
                         role="tablist"
-                        aria-label="Recent picks filter"
+                        aria-label={tb("picks.filterAria")}
                         className="flex flex-wrap gap-2"
                       >
                         {(
                           [
-                            { id: "all", label: "All" },
-                            { id: "favorites", label: "Favorites" },
+                            { id: "all", label: tb("picks.all") },
+                            { id: "favorites", label: tb("picks.favorites") },
                           ] as { id: PicksFilter; label: string }[]
                         ).map((opt) => {
                           const active = picksFilter === opt.id;
@@ -1283,7 +1278,7 @@ const DashboardPage = () => {
                         onClick={() => router.push("/history")}
                         className="group inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white/80 px-4 py-1.5 text-xs font-bold tracking-tight text-slate-700 shadow-sm backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-white hover:text-indigo-700 hover:shadow-md dark:border-slate-700/70 dark:bg-slate-900/65 dark:text-slate-200 dark:hover:border-indigo-500/60 dark:hover:bg-slate-800/70 dark:hover:text-indigo-300"
                       >
-                        See all in history
+                        {tb("picks.seeAllInHistory")}
                         <ArrowRight
                           size={12}
                           className="transition-transform duration-200 group-hover:translate-x-0.5"
@@ -1325,10 +1320,10 @@ const DashboardPage = () => {
                               aria-hidden="true"
                             />
                             <h3 className="mt-4 text-2xl font-black tracking-tight">
-                              No Picks Yet
+                              {tb("picks.noPicksTitle")}
                             </h3>
                             <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
-                              Take a quiz and your picks will collect here.
+                              {tb("picks.noPicksBody")}
                             </p>
                             <button
                               type="button"
@@ -1336,7 +1331,7 @@ const DashboardPage = () => {
                               className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-black tracking-tight text-white transition-colors hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
                             >
                               <Sparkles size={14} />
-                              Start Quiz
+                              {tb("picks.startQuiz")}
                             </button>
                           </div>
                         ) : picksFilter === "favorites" ? (
@@ -1347,10 +1342,10 @@ const DashboardPage = () => {
                                 aria-hidden="true"
                               />
                               <h3 className="mt-4 text-2xl font-black tracking-tight">
-                                No favorites yet
+                                {tb("picks.noFavoritesTitle")}
                               </h3>
                               <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
-                                Tap the heart on any pick to save it here.
+                                {tb("picks.noFavoritesBody")}
                               </p>
                             </div>
                           ) : (
@@ -1368,7 +1363,7 @@ const DashboardPage = () => {
                                       <Film size={13} />
                                     </span>
                                     <p className="text-[10px] font-black uppercase tracking-[0.16em] text-indigo-600 dark:text-indigo-400">
-                                      Movies
+                                      {tb("picks.movies")}
                                     </p>
                                     <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500">
                                       {movieRail.length}
@@ -1395,7 +1390,7 @@ const DashboardPage = () => {
                                       <BookOpen size={13} />
                                     </span>
                                     <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-600 dark:text-amber-400">
-                                      Books
+                                      {tb("picks.books")}
                                     </p>
                                     <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500">
                                       {bookRail.length}
@@ -1438,34 +1433,35 @@ const DashboardPage = () => {
                           </span>
                           <div>
                             <p className="text-[10px] font-black uppercase tracking-[0.16em] text-violet-600 dark:text-violet-400">
-                              Genre breakdown
+                              {tb("genres.eyebrow")}
                             </p>
                             <h2 className="text-lg font-black tracking-tight sm:text-xl">
-                              Where Your Taste Leans
+                              {tb("genres.title")}
                             </h2>
                           </div>
                         </div>
                         {topGenre && stats.total > 0 && (
                           <div className="hidden shrink-0 text-right sm:block">
                             <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">
-                              Top
+                              {tb("genres.topLabel")}
                             </p>
                             <p className="text-sm font-black tracking-tight">
                               {topGenre.genre}{" "}
                               <span className="text-slate-400 dark:text-slate-500">
                                 ·{" "}
-                                {Math.round(
-                                  (topGenre.total / stats.total) * 100,
-                                )}
-                                %
+                                {tb("genres.topPercent", {
+                                  percent: Math.round(
+                                    (topGenre.total / stats.total) * 100,
+                                  ),
+                                })}
                               </span>
                             </p>
                             <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
                               {topGenre.movie > topGenre.book
-                                ? "mostly movies"
+                                ? tb("genres.mostlyMovies")
                                 : topGenre.book > topGenre.movie
-                                  ? "mostly books"
-                                  : "even split"}
+                                  ? tb("genres.mostlyBooks")
+                                  : tb("genres.evenSplit")}
                             </p>
                           </div>
                         )}
@@ -1481,7 +1477,7 @@ const DashboardPage = () => {
                         </div>
                       ) : genreChartData.length === 0 ? (
                         <div className="flex h-40 items-center justify-center px-6 text-center text-base font-bold tracking-tight text-slate-500 dark:text-slate-400">
-                          Take a quiz to see your genres.
+                          {tb("genres.empty")}
                         </div>
                       ) : (
                         <GenreBarChart data={genreChartData} />
