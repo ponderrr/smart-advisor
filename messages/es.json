@@ -349,6 +349,72 @@
       }
     }
   },
+  "Wrapped": {
+    "eyebrow": "Año en revisión",
+    "subtitle": "Una mirada atrás a lo que descubriste este año.",
+    "fallbackName": "Tu",
+    "startQuiz": "Iniciar cuestionario",
+    "loading": "Cargando tu año…",
+    "empty": {
+      "title": "Sin recomendaciones en {year}",
+      "current": "Haz un cuestionario y empieza a llenar tu año.",
+      "past": "Elige otro año arriba, o inicia un nuevo cuestionario."
+    },
+    "hero": {
+      "eyebrow": "Titular",
+      "picks": "{count, plural, one {# recomendación} other {# recomendaciones}}",
+      "moviesPart": "{count, plural, one {# película} other {# películas}}",
+      "booksPart": "{count, plural, one {# libro} other {# libros}}",
+      "watchTime": "alrededor de {hours} horas de tiempo en pantalla",
+      "libraryLogged": "{count} registradas en tu biblioteca"
+    },
+    "tiles": {
+      "favorites": "Favoritos",
+      "favoritesHint": "{percent}% de las recomendaciones",
+      "longestStreak": "Racha más larga",
+      "streakDay": "día seguido",
+      "streakDays": "días seguidos",
+      "peakMonth": "Mes pico",
+      "topGenre": "Género principal",
+      "picksHint": "{count, plural, one {# recomendación} other {# recomendaciones}}",
+      "noData": "—"
+    },
+    "creator": {
+      "eyebrow": "Más recomendado",
+      "director": "Director",
+      "author": "Autor",
+      "noData": "Aún no hay suficientes datos."
+    },
+    "formatMix": {
+      "eyebrow": "Mezcla de formatos",
+      "movies": "Películas",
+      "books": "Libros"
+    },
+    "monthly": {
+      "eyebrow": "Recomendaciones por mes"
+    },
+    "genres": {
+      "eyebrow": "Resumen de géneros"
+    },
+    "standouts": {
+      "eyebrow": "Destacadas",
+      "fullHistory": "Historial completo"
+    },
+    "months": [
+      "Ene",
+      "Feb",
+      "Mar",
+      "Abr",
+      "May",
+      "Jun",
+      "Jul",
+      "Ago",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dic"
+    ]
+  },
   "GroupQuiz": {
     "lobby": {
       "eyebrow": "Cuestionario en grupo",
