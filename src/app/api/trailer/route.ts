@@ -32,13 +32,61 @@ interface TmdbVideo {
   name?: string;
 }
 
+interface TmdbProvider {
+  provider_id: number;
+  provider_name: string;
+  logo_path: string | null;
+}
+
+interface TmdbProvidersResponse {
+  results?: Record<
+    string,
+    {
+      link?: string;
+      flatrate?: TmdbProvider[];
+    }
+  >;
+}
+
 const cacheHeaders = {
   "Cache-Control": "public, max-age=3600, s-maxage=3600",
 } as const;
 
+const TMDB_LOGO_BASE = "https://image.tmdb.org/t/p/w92";
+
+// TMDB provider_id → deep-search URL on the actual streaming service.
+// Builds a search URL for the title since TMDB doesn't expose direct
+// title→service deep links (those are JustWatch-only and gated).
+const PROVIDER_SEARCH_URL: Record<number, (q: string) => string> = {
+  8: (q) => `https://www.netflix.com/search?q=${q}`, // Netflix
+  9: (q) => `https://www.amazon.com/s?k=${q}&i=instant-video`, // Amazon Prime Video
+  10: (q) => `https://www.amazon.com/s?k=${q}&i=instant-video`, // Amazon Video
+  119: (q) => `https://www.amazon.com/s?k=${q}&i=instant-video`, // Amazon Prime Video (alt id)
+  337: (q) => `https://www.disneyplus.com/search?q=${q}`, // Disney+
+  15: (q) => `https://www.hulu.com/search?q=${q}`, // Hulu
+  1899: (q) => `https://www.max.com/search?q=${q}`, // Max
+  384: (q) => `https://www.max.com/search?q=${q}`, // HBO Max (legacy id)
+  350: (q) => `https://tv.apple.com/search?term=${q}`, // Apple TV+
+  2: (q) => `https://tv.apple.com/search?term=${q}`, // Apple TV
+  531: (q) => `https://www.paramountplus.com/search/?query=${q}`, // Paramount+
+  386: (q) => `https://www.peacocktv.com/search?q=${q}`, // Peacock Premium
+  387: (q) => `https://www.peacocktv.com/search?q=${q}`, // Peacock Premium Plus
+  283: (q) => `https://www.crunchyroll.com/search?q=${q}`, // Crunchyroll
+  73: (q) => `https://tubitv.com/search/${q}`, // Tubi
+  300: (q) => `https://pluto.tv/en/search/${q}`, // Pluto TV
+  188: (q) => `https://www.youtube.com/results?search_query=${q}`, // YouTube Premium
+  192: (q) => `https://www.youtube.com/results?search_query=${q}`, // YouTube
+};
+
+const buildProviderLink = (providerId: number, title: string) => {
+  const builder = PROVIDER_SEARCH_URL[providerId];
+  return builder ? builder(encodeURIComponent(title)) : null;
+};
+
 async function lookupMovieTrailer(
   title: string,
   year: number | null,
+  region: string,
   apiKey: string,
 ) {
   const params = new URLSearchParams({
@@ -63,10 +111,17 @@ async function lookupMovieTrailer(
     ? `https://image.tmdb.org/t/p/w500${hit.poster_path}`
     : null;
 
-  const videosRes = await fetch(
-    `${API_URLS.TMDB_BASE}/movie/${hit.id}/videos?language=en-US&api_key=${apiKey}`,
-    { next: { revalidate: 3600 } },
-  );
+  const [videosRes, providersRes] = await Promise.all([
+    fetch(
+      `${API_URLS.TMDB_BASE}/movie/${hit.id}/videos?language=en-US&api_key=${apiKey}`,
+      { next: { revalidate: 3600 } },
+    ),
+    fetch(
+      `${API_URLS.TMDB_BASE}/movie/${hit.id}/watch/providers?api_key=${apiKey}`,
+      { next: { revalidate: 21600 } },
+    ),
+  ]);
+
   const videos = videosRes.ok
     ? ((await videosRes.json()) as { results?: TmdbVideo[] }).results ?? []
     : [];
@@ -84,6 +139,36 @@ async function lookupMovieTrailer(
     .filter((x) => x.s >= 0)
     .sort((a, b) => b.s - a.s)[0]?.v;
 
+  let watchProviders: {
+    region: string;
+    link: string | null;
+    flatrate: {
+      id: number;
+      name: string;
+      logo: string | null;
+      link: string | null;
+    }[];
+  } | null = null;
+  if (providersRes.ok) {
+    const json = (await providersRes.json()) as TmdbProvidersResponse;
+    const regional = json.results?.[region];
+    const flatrate = regional?.flatrate ?? [];
+    if (flatrate.length > 0) {
+      const tmdbLink = regional?.link ?? null;
+      const titleForSearch = hit.title ?? title;
+      watchProviders = {
+        region,
+        link: tmdbLink,
+        flatrate: flatrate.map((p) => ({
+          id: p.provider_id,
+          name: p.provider_name,
+          logo: p.logo_path ? `${TMDB_LOGO_BASE}${p.logo_path}` : null,
+          link: buildProviderLink(p.provider_id, titleForSearch) ?? tmdbLink,
+        })),
+      };
+    }
+  }
+
   return {
     provider: "youtube" as const,
     youtubeKey: best?.key ?? null,
@@ -91,6 +176,7 @@ async function lookupMovieTrailer(
     tmdbId: hit.id,
     posterUrl,
     overview: hit.overview ?? null,
+    watchProviders,
   };
 }
 
@@ -115,6 +201,8 @@ export async function GET(req: NextRequest) {
   const yearParam = searchParams.get("year");
   const type = searchParams.get("type");
   const author = searchParams.get("author")?.trim() || null;
+  const region =
+    searchParams.get("region")?.trim().toUpperCase().slice(0, 2) || "US";
 
   if (!title || (type !== "movie" && type !== "book")) {
     return NextResponse.json(
@@ -133,6 +221,7 @@ export async function GET(req: NextRequest) {
       const data = await lookupMovieTrailer(
         title,
         Number.isFinite(year) ? year : null,
+        region,
         apiKey,
       );
       return NextResponse.json({ data }, { headers: cacheHeaders });
