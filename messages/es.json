@@ -169,6 +169,63 @@
   "Auth": {
     "sessionExpired": "Tu sesión expiró. Inicia sesión de nuevo."
   },
+  "Library": {
+    "eyebrow": "Biblioteca",
+    "title": "Lo que has visto y leído",
+    "subtitle": "Las reacciones que guardas aquí se convierten en una señal de gusto que la IA usa en tu próximo cuestionario.",
+    "startQuiz": "Iniciar cuestionario",
+    "filtersAria": "Filtros de la biblioteca",
+    "typeGroup": "Tipo",
+    "type": {
+      "all": "Todo",
+      "movie": "Películas",
+      "book": "Libros"
+    },
+    "stats": {
+      "total": "Total",
+      "finished": "Terminado",
+      "movies": "Películas",
+      "books": "Libros"
+    },
+    "statusLabel": "Estado",
+    "filterAll": "Todos",
+    "status": {
+      "finished": "Terminado",
+      "in_progress": "En progreso",
+      "wishlist": "Lista de deseos"
+    },
+    "rating": {
+      "1": "No es para mí",
+      "2": "Estuvo bien",
+      "3": "Me encantó"
+    },
+    "byAuthor": "Por {creator}",
+    "byDirector": "Dirigida por {creator}",
+    "mediumMovie": "Película",
+    "mediumBook": "Libro",
+    "loggedOn": "Registrado el {date}",
+    "empty": {
+      "noItemsTitle": "Aún no hay nada en tu biblioteca",
+      "noItemsBody": "Después de tu próximo cuestionario, pulsa \"Lo vi / lo leí\" en un resultado y aparecerá aquí.",
+      "noMatchesTitle": "Sin coincidencias para esos filtros",
+      "noMatchesBody": "Prueba a cambiar o limpiar los filtros de arriba."
+    },
+    "removeConfirm": "¿Eliminar \"{title}\" de tu biblioteca?",
+    "removed": "Eliminado de la biblioteca",
+    "updated": "Entrada de la biblioteca actualizada",
+    "editAria": "Editar {title}",
+    "removeAria": "Eliminar {title}",
+    "editDialog": {
+      "ariaLabel": "Editar entrada de la biblioteca",
+      "title": "Editar entrada",
+      "statusHeader": "Estado",
+      "ratingHeader": "Valoración",
+      "reactionHeader": "Reacción",
+      "reactionPlaceholder": "Conclusión de una línea…",
+      "save": "Guardar cambios",
+      "cancel": "Cancelar"
+    }
+  },
   "Quiz": {
     "category": "Configuración del cuestionario",
     "stepOf": "Paso {current} de {total}",

@@ -20,12 +20,11 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import { libraryService } from "@/features/library/services/library-service";
 import {
-  RATING_LABELS,
-  STATUS_LABELS,
   STATUS_TONE,
   type LibraryItem,
   type LibraryRating,
@@ -55,43 +54,46 @@ const STATUS_VALUES: LibraryStatus[] = ["finished", "in_progress", "wishlist"];
 const RATING_VALUES: LibraryRating[] = [1, 2, 3];
 
 
-const ratingChip = (rating: LibraryRating | null) => {
-  if (rating === null) return null;
-  const Icon = rating === 1 ? ThumbsDown : rating === 3 ? ThumbsUp : Bookmark;
-  const tone =
-    rating === 3
-      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
-      : rating === 1
-        ? "bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300"
-        : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300";
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold",
-        tone,
-      )}
-    >
-      <Icon size={12} />
-      {RATING_LABELS[rating]}
-    </span>
-  );
-};
-
-const statusChip = (status: LibraryStatus) => (
-  <span
-    className={cn(
-      "rounded-full px-2.5 py-1 text-[11px] font-semibold",
-      STATUS_TONE[status].chip,
-    )}
-  >
-    {STATUS_LABELS[status]}
-  </span>
-);
-
 export default function LibraryPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { ready } = useRequireAuth();
+  const t = useTranslations("Library");
+  const tc = useTranslations("Common");
+
+  const ratingChip = (rating: LibraryRating | null) => {
+    if (rating === null) return null;
+    const Icon =
+      rating === 1 ? ThumbsDown : rating === 3 ? ThumbsUp : Bookmark;
+    const tone =
+      rating === 3
+        ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
+        : rating === 1
+          ? "bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300"
+          : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300";
+    return (
+      <span
+        className={cn(
+          "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold",
+          tone,
+        )}
+      >
+        <Icon size={12} />
+        {t(`rating.${rating}`)}
+      </span>
+    );
+  };
+
+  const statusChip = (status: LibraryStatus) => (
+    <span
+      className={cn(
+        "rounded-full px-2.5 py-1 text-[11px] font-semibold",
+        STATUS_TONE[status].chip,
+      )}
+    >
+      {t(`status.${status}`)}
+    </span>
+  );
   const [items, setItems] = useState<LibraryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [mediumFilter, setMediumFilter] = useQueryState(
@@ -129,14 +131,14 @@ export default function LibraryPage() {
   }, [items, mediumFilter, statusFilter]);
 
   const handleRemove = async (item: LibraryItem) => {
-    const ok = window.confirm(`Remove "${item.title}" from your library?`);
+    const ok = window.confirm(t("removeConfirm", { title: item.title }));
     if (!ok) return;
     const { error } = await libraryService.remove(item.id);
     if (error) {
       toast.error(error);
       return;
     }
-    toast.success("Removed from library");
+    toast.success(t("removed"));
     setItems((current) => current.filter((i) => i.id !== item.id));
   };
 
@@ -149,7 +151,7 @@ export default function LibraryPage() {
   }, [items]);
 
   if (!ready) {
-    return <PageLoader text="Loading..." />;
+    return <PageLoader text={tc("loading")} />;
   }
 
   return (
@@ -161,14 +163,13 @@ export default function LibraryPage() {
           <div className="mb-6 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
-                Library
+                {t("eyebrow")}
               </p>
               <h1 className="mt-2 text-2xl font-black tracking-tighter sm:text-3xl md:text-4xl lg:text-5xl">
-                What You&apos;ve Watched and Read
+                {t("title")}
               </h1>
               <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                Reactions you save here become a taste signal the AI uses on
-                your next quiz.
+                {t("subtitle")}
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -182,30 +183,30 @@ export default function LibraryPage() {
                 className="flex items-center gap-2 whitespace-nowrap bg-white px-6 py-3 text-sm font-black leading-none tracking-tight text-black dark:bg-black dark:text-white"
               >
                 <Sparkles size={16} />
-                Start Quiz
+                {t("startQuiz")}
               </HoverBorderGradient>
             </div>
           </div>
 
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6">
             <SidebarNavShell>
-              <nav aria-label="Library filters" className="flex-1">
-                <SidebarNavGroup label="Type" />
+              <nav aria-label={t("filtersAria")} className="flex-1">
+                <SidebarNavGroup label={t("typeGroup")} />
                 {(
                   [
                     {
                       id: "all" as const,
-                      label: "All",
+                      label: t("type.all"),
                       icon: <LayoutGrid size={16} />,
                     },
                     {
                       id: "movie" as const,
-                      label: "Movies",
+                      label: t("type.movie"),
                       icon: <Film size={16} />,
                     },
                     {
                       id: "book" as const,
-                      label: "Books",
+                      label: t("type.book"),
                       icon: <BookOpen size={16} />,
                     },
                   ] as { id: MediumFilter; label: string; icon: React.ReactNode }[]
@@ -233,10 +234,10 @@ export default function LibraryPage() {
               <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex flex-wrap gap-3">
                   {[
-                    { label: "Total", value: stats.total },
-                    { label: "Finished", value: stats.finished },
-                    { label: "Movies", value: stats.movies },
-                    { label: "Books", value: stats.books },
+                    { label: t("stats.total"), value: stats.total },
+                    { label: t("stats.finished"), value: stats.finished },
+                    { label: t("stats.movies"), value: stats.movies },
+                    { label: t("stats.books"), value: stats.books },
                   ].map((item) => (
                     <div
                       key={item.label}
@@ -255,14 +256,14 @@ export default function LibraryPage() {
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                      Status
+                      {t("statusLabel")}
                     </span>
                     {(
                       [
-                        { id: "all", label: "All" },
+                        { id: "all", label: t("filterAll") },
                         ...STATUS_VALUES.map((s) => ({
                           id: s as StatusFilter,
-                          label: STATUS_LABELS[s],
+                          label: t(`status.${s}`),
                         })),
                       ] as { id: StatusFilter; label: string }[]
                     ).map((opt) => (
@@ -297,13 +298,13 @@ export default function LibraryPage() {
                       <BookCheck className="mx-auto h-10 w-10 text-slate-300 dark:text-slate-600" />
                       <h2 className="mt-4 text-2xl font-black tracking-tight">
                         {items.length === 0
-                          ? "Nothing in Your Library Yet"
-                          : "No Matches for Those Filters"}
+                          ? t("empty.noItemsTitle")
+                          : t("empty.noMatchesTitle")}
                       </h2>
                       <p className="mx-auto mt-2 max-w-xl text-sm text-slate-600 dark:text-slate-400">
                         {items.length === 0
-                          ? 'After your next quiz, hit "I watched / read this" on a result and it will show up here.'
-                          : "Try changing or clearing the filters above."}
+                          ? t("empty.noItemsBody")
+                          : t("empty.noMatchesBody")}
                       </p>
                     </div>
                   ) : view === "grid" ? (
@@ -334,7 +335,7 @@ export default function LibraryPage() {
                             <div className="absolute right-2 top-2 flex flex-col gap-1.5">
                               <PillButton
                                 onClick={() => setEditTarget(item)}
-                                aria-label={`Edit ${item.title}`}
+                                aria-label={t("editAria", { title: item.title })}
                                 className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/90 p-0 text-slate-700 shadow-sm dark:bg-slate-900/80 dark:text-slate-200"
                               >
                                 <Pencil size={13} />
@@ -359,7 +360,7 @@ export default function LibraryPage() {
                                     STATUS_TONE[item.status].chip,
                                   )}
                                 >
-                                  {STATUS_LABELS[item.status]}
+                                  {t(`status.${item.status}`)}
                                 </span>
                                 {item.rating !== null &&
                                   (() => {
@@ -372,7 +373,7 @@ export default function LibraryPage() {
                                     return (
                                       <span className="inline-flex items-center gap-0.5 rounded-full bg-white/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white/95 backdrop-blur-sm">
                                         <Icon size={9} />
-                                        {RATING_LABELS[item.rating]}
+                                        {t(`rating.${item.rating}`)}
                                       </span>
                                     );
                                   })()}
@@ -417,17 +418,21 @@ export default function LibraryPage() {
                                 </h3>
                                 <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
                                   {item.creator
-                                    ? `${item.medium === "book" ? "By " : "Directed by "}${item.creator}`
+                                    ? item.medium === "book"
+                                      ? t("byAuthor", { creator: item.creator })
+                                      : t("byDirector", {
+                                          creator: item.creator,
+                                        })
                                     : item.medium === "movie"
-                                      ? "Movie"
-                                      : "Book"}
+                                      ? t("mediumMovie")
+                                      : t("mediumBook")}
                                   {item.year ? ` · ${item.year}` : ""}
                                 </p>
                               </div>
                               <div className="flex shrink-0 items-center gap-1">
                                 <PillButton
                                   onClick={() => setEditTarget(item)}
-                                  aria-label={`Edit ${item.title}`}
+                                  aria-label={t("editAria", { title: item.title })}
                                   className="inline-flex h-7 w-7 items-center justify-center rounded-full p-0"
                                 >
                                   <Pencil size={13} />
@@ -435,7 +440,7 @@ export default function LibraryPage() {
                                 <PillButton
                                   onClick={() => void handleRemove(item)}
                                   variant="destructive"
-                                  aria-label={`Remove ${item.title}`}
+                                  aria-label={t("removeAria", { title: item.title })}
                                   className="inline-flex h-7 w-7 items-center justify-center rounded-full p-0"
                                 >
                                   <Trash2 size={13} />
@@ -447,7 +452,9 @@ export default function LibraryPage() {
                               {statusChip(item.status)}
                               {ratingChip(item.rating)}
                               <span className="text-[11px] text-slate-400 dark:text-slate-500">
-                                Logged {format(new Date(item.logged_at), "PP")}
+                                {t("loggedOn", {
+                                  date: format(new Date(item.logged_at), "PP"),
+                                })}
                               </span>
                             </div>
 
@@ -489,6 +496,7 @@ interface EditDialogProps {
 }
 
 const EditDialog = ({ target, onClose, onSaved }: EditDialogProps) => {
+  const t = useTranslations("Library");
   const [status, setStatus] = useState<LibraryStatus>("finished");
   const [rating, setRating] = useState<LibraryRating | null>(null);
   const [reaction, setReaction] = useState("");
@@ -517,7 +525,7 @@ const EditDialog = ({ target, onClose, onSaved }: EditDialogProps) => {
       return;
     }
 
-    toast.success("Library entry updated");
+    toast.success(t("updated"));
     onSaved({
       ...target,
       status,
@@ -531,7 +539,7 @@ const EditDialog = ({ target, onClose, onSaved }: EditDialogProps) => {
     <Dialog
       open={!!target}
       onClose={onClose}
-      ariaLabel="Edit library entry"
+      ariaLabel={t("editDialog.ariaLabel")}
       size="sm"
       disableClose={saving}
     >
@@ -547,7 +555,7 @@ const EditDialog = ({ target, onClose, onSaved }: EditDialogProps) => {
 
               <div className="w-full max-w-md">
                 <h2 className="text-2xl font-black tracking-tight">
-                  Edit entry
+                  {t("editDialog.title")}
                 </h2>
                 <p
                   className="mt-2 truncate text-sm font-semibold text-slate-700 dark:text-slate-300"
@@ -558,7 +566,7 @@ const EditDialog = ({ target, onClose, onSaved }: EditDialogProps) => {
 
                 <div className="mt-6 text-left">
                   <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    Status
+                    {t("editDialog.statusHeader")}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {STATUS_VALUES.map((s) => (
@@ -573,7 +581,7 @@ const EditDialog = ({ target, onClose, onSaved }: EditDialogProps) => {
                             : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800/40 dark:text-slate-300",
                         )}
                       >
-                        {STATUS_LABELS[s]}
+                        {t(`status.${s}`)}
                       </button>
                     ))}
                   </div>
@@ -581,7 +589,7 @@ const EditDialog = ({ target, onClose, onSaved }: EditDialogProps) => {
 
                 <div className="mt-5 text-left">
                   <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    Rating
+                    {t("editDialog.ratingHeader")}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {RATING_VALUES.map((r) => {
@@ -605,7 +613,7 @@ const EditDialog = ({ target, onClose, onSaved }: EditDialogProps) => {
                           )}
                         >
                           <Icon size={14} />
-                          {RATING_LABELS[r]}
+                          {t(`rating.${r}`)}
                         </button>
                       );
                     })}
@@ -617,7 +625,7 @@ const EditDialog = ({ target, onClose, onSaved }: EditDialogProps) => {
                     htmlFor="library-edit-reaction"
                     className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400"
                   >
-                    Reaction
+                    {t("editDialog.reactionHeader")}
                   </label>
                   <textarea
                     id="library-edit-reaction"
@@ -625,7 +633,7 @@ const EditDialog = ({ target, onClose, onSaved }: EditDialogProps) => {
                     onChange={(e) => setReaction(e.target.value.slice(0, 280))}
                     rows={3}
                     maxLength={280}
-                    placeholder="One-line takeaway…"
+                    placeholder={t("editDialog.reactionPlaceholder")}
                     className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm transition-colors focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-100"
                   />
                   <p className="mt-1 text-right text-[10px] font-semibold text-slate-400">
@@ -642,7 +650,7 @@ const EditDialog = ({ target, onClose, onSaved }: EditDialogProps) => {
                   {saving ? (
                     <Loader className="h-4 w-4 animate-spin" />
                   ) : (
-                    "Save changes"
+                    t("editDialog.save")
                   )}
                 </Button>
 
@@ -651,7 +659,7 @@ const EditDialog = ({ target, onClose, onSaved }: EditDialogProps) => {
                   disabled={saving}
                   className="mt-3 text-sm font-medium text-slate-500 transition-colors hover:text-slate-700 disabled:opacity-60 dark:text-slate-400 dark:hover:text-slate-200"
                 >
-                  Cancel
+                  {t("editDialog.cancel")}
                 </button>
               </div>
         </div>
