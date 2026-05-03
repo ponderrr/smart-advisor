@@ -7,12 +7,19 @@ import { PasskeyManagement } from "@/features/auth/components/passkey-management
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
+import { useTranslations, useMessages } from "next-intl";
 import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
 
 export default function AccountSecurityPage() {
   const router = useRouter();
   const { user, session, loading } = useAuth();
+  const t = useTranslations("AccountSecurity");
+  const tc = useTranslations("Common");
+  const messages = useMessages() as {
+    AccountSecurity?: { tips?: string[] };
+  };
+  const tips = messages.AccountSecurity?.tips ?? [];
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -26,7 +33,7 @@ export default function AccountSecurityPage() {
   }, [mounted, loading, session, router]);
 
   if (!mounted || loading) {
-    return <PageLoader text="Loading..." />;
+    return <PageLoader text={tc("loading")} />;
   }
 
   if (!user || !session) {
@@ -48,19 +55,18 @@ export default function AccountSecurityPage() {
               size={14}
               className="transition-transform duration-200 group-hover:-translate-x-0.5"
             />
-            Back
+            {t("back")}
           </button>
 
           <div className="mb-8">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
-              Account · Security
+              {t("eyebrow")}
             </p>
             <h1 className="mt-2 text-2xl font-black tracking-tighter sm:text-3xl md:text-4xl lg:text-5xl">
-              Lock things down
+              {t("title")}
             </h1>
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-              Manage two-factor authentication, passkeys, and active sessions
-              across your devices.
+              {t("subtitle")}
             </p>
           </div>
 
@@ -93,25 +99,13 @@ export default function AccountSecurityPage() {
                   className="text-indigo-600 dark:text-indigo-400"
                 />
                 <p className="text-[11px] font-black uppercase tracking-[0.16em] text-indigo-700 dark:text-indigo-300">
-                  Security tips
+                  {t("tipsEyebrow")}
                 </p>
               </div>
               <ul className="mt-3 space-y-1.5 pl-2 text-sm leading-relaxed text-slate-700 dark:text-slate-200">
-                <li>
-                  Enable 2FA for an extra layer of protection against
-                  unauthorized access.
-                </li>
-                <li>
-                  Review active sessions regularly and sign out devices you
-                  don&apos;t recognize.
-                </li>
-                <li>
-                  Use a strong, unique password and update it regularly.
-                </li>
-                <li>
-                  Be cautious with login links and only sign in from trusted
-                  devices.
-                </li>
+                {tips.map((tip, i) => (
+                  <li key={i}>{tip}</li>
+                ))}
               </ul>
             </div>
           </div>
