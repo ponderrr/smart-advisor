@@ -12,6 +12,156 @@
     "groups": {
       "account": "Account",
       "app": "App"
+    },
+    "profile": {
+      "pictureTitle": "Profile Picture",
+      "pictureDescription": "Upload an image to show across the app. JPG, PNG, GIF, or WEBP up to 5 MB.",
+      "uploading": "Uploading…",
+      "changePicture": "Change picture",
+      "uploadPicture": "Upload picture",
+      "remove": "Remove",
+      "pictureUpdated": "Profile picture updated.",
+      "pictureRemoved": "Profile picture removed.",
+      "detailsTitle": "Profile Details",
+      "detailsDescription": "Update your public account details.",
+      "currentUsername": "Current username",
+      "newUsername": "New username",
+      "newUsernamePlaceholder": "Enter new username",
+      "age": "Age",
+      "agePlaceholder": "25",
+      "save": "Save changes",
+      "savedToast": "Profile updated."
+    },
+    "email": {
+      "title": "Email",
+      "description": "The address you use to sign in.",
+      "current": "Current",
+      "newEmail": "New email",
+      "newEmailPlaceholder": "new@example.com",
+      "update": "Update Email",
+      "differentRequired": "New email must be different.",
+      "checkInbox": "Check your inbox to confirm."
+    },
+    "password": {
+      "title": "Password",
+      "description": "Pick a new password.",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password",
+      "passwordPlaceholder": "••••••••",
+      "requirementsTitle": "Password Requirements",
+      "confirmRulesTitle": "Confirm Password",
+      "matches": "Matches your password",
+      "update": "Update Password",
+      "updatedToast": "Password updated."
+    },
+    "mfa": {
+      "title": "Two-Factor Authentication",
+      "description": "An extra step at sign-in to keep your account secure.",
+      "checking": "Checking…",
+      "on": "Two-factor is on",
+      "off": "Two-factor is off",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "manage": "Manage two-factor",
+      "enable": "Enable two-factor"
+    },
+    "backupEmail": {
+      "title": "Backup Email",
+      "description": "A recovery address used when your authenticator is unavailable.",
+      "labelChange": "Change to",
+      "labelDefault": "Backup Email",
+      "placeholderChange": "new-backup@example.com",
+      "placeholderDefault": "backup@example.com",
+      "save": "Save backup",
+      "update": "Update backup",
+      "savedToast": "Backup email saved.",
+      "removedToast": "Backup email removed.",
+      "remove": "Remove"
+    },
+    "content": {
+      "title": "Content Preferences",
+      "description": "Set your default recommendation behavior.",
+      "typeLabel": "Recommendation type",
+      "type": {
+        "movie": {
+          "eyebrow": "On screen",
+          "label": "Movies"
+        },
+        "book": {
+          "eyebrow": "On the shelf",
+          "label": "Books"
+        },
+        "both": {
+          "eyebrow": "One of each",
+          "label": "Both"
+        }
+      },
+      "toneLabel": "Content tone",
+      "ageLockedEyebrow": "Age-locked",
+      "ageLockedBody": "Recommendations are kept age-appropriate based on your age ({age}). Adults can choose between standard and family-friendly tones.",
+      "ageLockedBodyMissing": "Recommendations are kept age-appropriate based on your age. Adults can choose between standard and family-friendly tones.",
+      "tone": {
+        "standard": "Standard",
+        "family": "Family-friendly"
+      },
+      "toneHint": {
+        "standard": "Full personality. The AI may suggest dark, complex, or mature picks when they fit you.",
+        "family": "Picks stay light. No mature themes, dark content, or sexual content."
+      },
+      "questionCountLabel": "Questions per quiz",
+      "questionWord": "{count, plural, one {Question} other {Questions}}",
+      "depth": {
+        "quick": "Quick and focused",
+        "balanced": "Balanced depth",
+        "comprehensive": "Comprehensive detail"
+      },
+      "rangeAria": "Default questions per quiz",
+      "appliesNext": "Applies on next quiz",
+      "save": "Save Preferences",
+      "savedToast": "Content preferences saved."
+    },
+    "integrations": {
+      "title": "Integrations",
+      "description": "Connected providers and services.",
+      "emptyTitle": "No integrations available yet",
+      "emptyBody": "Third-party connections will show up here once they go live."
+    },
+    "danger": {
+      "title": "Danger Zone",
+      "description": "These actions are irreversible. Proceed carefully.",
+      "disable": "Disable Account",
+      "delete": "Delete Account",
+      "processing": "Processing…",
+      "disableConfirm": "Disable your account? You'll be signed out and unable to sign in until re-enabled by support.",
+      "disableFinalConfirm": "Final confirmation. Disable now?",
+      "deleteConfirm": "Permanently delete your account? This cannot be undone.",
+      "typeDeletePrompt": "Type \"DELETE\" to confirm:",
+      "deletionCanceled": "Deletion canceled."
+    },
+    "verifyAction": {
+      "save": "save your profile",
+      "email": "update your email",
+      "password": "change your password",
+      "content": "save content preferences",
+      "disable": "disable your account",
+      "delete": "permanently delete your account"
+    },
+    "verifyModal": {
+      "title": "Verify Identity",
+      "description": "Enter your 6-digit authenticator code to {action}.",
+      "placeholder": "000000",
+      "enterCode": "Enter a 6-digit code",
+      "noFactor": "No verified MFA factor found",
+      "cancel": "Cancel",
+      "verify": "Verify",
+      "closeAria": "Close verification dialog"
+    },
+    "verifyModalEnroll": {
+      "title": "Set Up 2FA First",
+      "description": "Two-factor authentication is required to {action}. Set it up now to continue."
+    },
+    "mfaSetupModal": {
+      "closeAria": "Close two-factor setup"
     }
   },
   "Language": {
@@ -268,6 +418,19 @@
     "retry": "Retry",
     "yes": "Yes",
     "no": "No"
+  },
+  "AccountSecurity": {
+    "back": "Back",
+    "eyebrow": "Account · Security",
+    "title": "Lock things down",
+    "subtitle": "Manage two-factor authentication, passkeys, and active sessions across your devices.",
+    "tipsEyebrow": "Security tips",
+    "tips": [
+      "Enable 2FA for an extra layer of protection against unauthorized access.",
+      "Review active sessions regularly and sign out devices you don't recognize.",
+      "Use a strong, unique password and update it regularly.",
+      "Be cautious with login links and only sign in from trusted devices."
+    ]
   },
   "Auth": {
     "sessionExpired": "Your session has expired. Please sign in again.",

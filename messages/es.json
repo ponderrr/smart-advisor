@@ -12,6 +12,156 @@
     "groups": {
       "account": "Cuenta",
       "app": "Aplicación"
+    },
+    "profile": {
+      "pictureTitle": "Foto de perfil",
+      "pictureDescription": "Sube una imagen para mostrar en toda la aplicación. JPG, PNG, GIF o WEBP de hasta 5 MB.",
+      "uploading": "Subiendo…",
+      "changePicture": "Cambiar foto",
+      "uploadPicture": "Subir foto",
+      "remove": "Quitar",
+      "pictureUpdated": "Foto de perfil actualizada.",
+      "pictureRemoved": "Foto de perfil eliminada.",
+      "detailsTitle": "Detalles del perfil",
+      "detailsDescription": "Actualiza los datos públicos de tu cuenta.",
+      "currentUsername": "Nombre de usuario actual",
+      "newUsername": "Nuevo nombre de usuario",
+      "newUsernamePlaceholder": "Ingresa un nuevo nombre de usuario",
+      "age": "Edad",
+      "agePlaceholder": "25",
+      "save": "Guardar cambios",
+      "savedToast": "Perfil actualizado."
+    },
+    "email": {
+      "title": "Correo electrónico",
+      "description": "La dirección que usas para iniciar sesión.",
+      "current": "Actual",
+      "newEmail": "Nuevo correo",
+      "newEmailPlaceholder": "nuevo@ejemplo.com",
+      "update": "Actualizar correo",
+      "differentRequired": "El nuevo correo debe ser diferente.",
+      "checkInbox": "Revisa tu bandeja para confirmar."
+    },
+    "password": {
+      "title": "Contraseña",
+      "description": "Elige una nueva contraseña.",
+      "newPassword": "Nueva contraseña",
+      "confirmPassword": "Confirmar contraseña",
+      "passwordPlaceholder": "••••••••",
+      "requirementsTitle": "Requisitos de la contraseña",
+      "confirmRulesTitle": "Confirmar contraseña",
+      "matches": "Coincide con tu contraseña",
+      "update": "Actualizar contraseña",
+      "updatedToast": "Contraseña actualizada."
+    },
+    "mfa": {
+      "title": "Autenticación de dos factores",
+      "description": "Un paso extra al iniciar sesión para mantener tu cuenta segura.",
+      "checking": "Verificando…",
+      "on": "El factor doble está activado",
+      "off": "El factor doble está desactivado",
+      "enabled": "Activado",
+      "disabled": "Desactivado",
+      "manage": "Gestionar 2FA",
+      "enable": "Activar 2FA"
+    },
+    "backupEmail": {
+      "title": "Correo de respaldo",
+      "description": "Una dirección de recuperación cuando tu autenticador no está disponible.",
+      "labelChange": "Cambiar a",
+      "labelDefault": "Correo de respaldo",
+      "placeholderChange": "nuevo-respaldo@ejemplo.com",
+      "placeholderDefault": "respaldo@ejemplo.com",
+      "save": "Guardar respaldo",
+      "update": "Actualizar respaldo",
+      "savedToast": "Correo de respaldo guardado.",
+      "removedToast": "Correo de respaldo eliminado.",
+      "remove": "Quitar"
+    },
+    "content": {
+      "title": "Preferencias de contenido",
+      "description": "Define el comportamiento por defecto de tus recomendaciones.",
+      "typeLabel": "Tipo de recomendación",
+      "type": {
+        "movie": {
+          "eyebrow": "En pantalla",
+          "label": "Películas"
+        },
+        "book": {
+          "eyebrow": "En el estante",
+          "label": "Libros"
+        },
+        "both": {
+          "eyebrow": "Uno de cada",
+          "label": "Ambos"
+        }
+      },
+      "toneLabel": "Tono del contenido",
+      "ageLockedEyebrow": "Bloqueado por edad",
+      "ageLockedBody": "Las recomendaciones se mantienen apropiadas para tu edad ({age}). Los adultos pueden elegir entre tono estándar y apto para toda la familia.",
+      "ageLockedBodyMissing": "Las recomendaciones se mantienen apropiadas para tu edad. Los adultos pueden elegir entre tono estándar y apto para toda la familia.",
+      "tone": {
+        "standard": "Estándar",
+        "family": "Apto para toda la familia"
+      },
+      "toneHint": {
+        "standard": "Personalidad completa. La IA puede sugerir recomendaciones oscuras, complejas o maduras cuando encajen contigo.",
+        "family": "Recomendaciones suaves. Sin temas maduros, contenido oscuro o sexual."
+      },
+      "questionCountLabel": "Preguntas por cuestionario",
+      "questionWord": "{count, plural, one {Pregunta} other {Preguntas}}",
+      "depth": {
+        "quick": "Rápido y enfocado",
+        "balanced": "Profundidad equilibrada",
+        "comprehensive": "Detalle completo"
+      },
+      "rangeAria": "Preguntas por defecto por cuestionario",
+      "appliesNext": "Se aplica en el próximo cuestionario",
+      "save": "Guardar preferencias",
+      "savedToast": "Preferencias de contenido guardadas."
+    },
+    "integrations": {
+      "title": "Integraciones",
+      "description": "Proveedores y servicios conectados.",
+      "emptyTitle": "Aún no hay integraciones disponibles",
+      "emptyBody": "Las conexiones con terceros aparecerán aquí cuando estén disponibles."
+    },
+    "danger": {
+      "title": "Zona de peligro",
+      "description": "Estas acciones son irreversibles. Procede con cuidado.",
+      "disable": "Desactivar cuenta",
+      "delete": "Eliminar cuenta",
+      "processing": "Procesando…",
+      "disableConfirm": "¿Desactivar tu cuenta? Cerrarás sesión y no podrás volver a entrar hasta que el soporte la reactive.",
+      "disableFinalConfirm": "Confirmación final. ¿Desactivar ahora?",
+      "deleteConfirm": "¿Eliminar permanentemente tu cuenta? Esto no se puede deshacer.",
+      "typeDeletePrompt": "Escribe \"DELETE\" para confirmar:",
+      "deletionCanceled": "Eliminación cancelada."
+    },
+    "verifyAction": {
+      "save": "guardar tu perfil",
+      "email": "actualizar tu correo",
+      "password": "cambiar tu contraseña",
+      "content": "guardar las preferencias de contenido",
+      "disable": "desactivar tu cuenta",
+      "delete": "eliminar permanentemente tu cuenta"
+    },
+    "verifyModal": {
+      "title": "Verificar identidad",
+      "description": "Ingresa tu código de 6 dígitos del autenticador para {action}.",
+      "placeholder": "000000",
+      "enterCode": "Ingresa un código de 6 dígitos",
+      "noFactor": "No se encontró ningún factor MFA verificado",
+      "cancel": "Cancelar",
+      "verify": "Verificar",
+      "closeAria": "Cerrar diálogo de verificación"
+    },
+    "verifyModalEnroll": {
+      "title": "Primero configura 2FA",
+      "description": "La autenticación de dos factores es necesaria para {action}. Configúrala ahora para continuar."
+    },
+    "mfaSetupModal": {
+      "closeAria": "Cerrar configuración de 2FA"
     }
   },
   "Language": {
@@ -268,6 +418,19 @@
     "retry": "Reintentar",
     "yes": "Sí",
     "no": "No"
+  },
+  "AccountSecurity": {
+    "back": "Atrás",
+    "eyebrow": "Cuenta · Seguridad",
+    "title": "Protege tu cuenta",
+    "subtitle": "Gestiona la autenticación de dos factores, claves de acceso y sesiones activas en tus dispositivos.",
+    "tipsEyebrow": "Consejos de seguridad",
+    "tips": [
+      "Activa 2FA para una capa extra de protección contra accesos no autorizados.",
+      "Revisa las sesiones activas con regularidad y cierra sesión en los dispositivos que no reconozcas.",
+      "Usa una contraseña fuerte y única, y actualízala con frecuencia.",
+      "Ten cuidado con los enlaces de inicio de sesión y entra solo desde dispositivos de confianza."
+    ]
   },
   "Auth": {
     "sessionExpired": "Tu sesión expiró. Inicia sesión de nuevo.",
