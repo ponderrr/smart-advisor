@@ -10,11 +10,13 @@ import {
   IconDeviceTv,
   IconStarFilled,
 } from "@tabler/icons-react";
+import { useTranslations, useMessages } from "next-intl";
 import { cn } from "@/lib/utils";
 
+type FeatureKey = "private" | "fast" | "trust" | "both";
+
 type Feature = {
-  title: string;
-  description: string;
+  key: FeatureKey;
   Skeleton: React.ComponentType;
   wide?: boolean;
 };
@@ -123,7 +125,10 @@ const WarpSpeedSkeleton = () => (
 );
 
 const TrustSkeleton = () => {
-  const reasons = [
+  const messages = useMessages() as {
+    Home?: { features?: { trustReasons?: string[] } };
+  };
+  const reasons = messages.Home?.features?.trustReasons ?? [
     "Matches your age rating",
     "Pace you said you prefer",
     "Tone you've picked before",
@@ -270,35 +275,14 @@ const AcrossBothSkeleton = () => {
 };
 
 const FEATURES: Feature[] = [
-  {
-    title: "Private Profile",
-    description:
-      "Your preferences stay tied to your account and are used only to improve your picks.",
-    Skeleton: PrivateProfileSkeleton,
-    wide: true,
-  },
-  {
-    title: "Warp Speed Results",
-    description:
-      "Quick results and smooth updates help you decide without waiting around.",
-    Skeleton: WarpSpeedSkeleton,
-  },
-  {
-    title: "Easy-To-Trust Picks",
-    description:
-      "Clear reasons make each suggestion easier to trust and choose, with open-source transparency.",
-    Skeleton: TrustSkeleton,
-  },
-  {
-    title: "Choose Across Both",
-    description:
-      "See book and movie results in one place so choosing feels faster and easier.",
-    Skeleton: AcrossBothSkeleton,
-    wide: true,
-  },
+  { key: "private", Skeleton: PrivateProfileSkeleton, wide: true },
+  { key: "fast", Skeleton: WarpSpeedSkeleton },
+  { key: "trust", Skeleton: TrustSkeleton },
+  { key: "both", Skeleton: AcrossBothSkeleton, wide: true },
 ];
 
 export default function FeaturesSectionDemo() {
+  const t = useTranslations("Home.features");
   return (
     <section
       id="why-smart-advisor"
@@ -307,14 +291,13 @@ export default function FeaturesSectionDemo() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-8 text-center sm:mb-10 md:mb-12">
           <p className="text-xs font-black uppercase tracking-[0.22em] text-indigo-500 dark:text-indigo-400">
-            Why Smart Advisor
+            {t("eyebrow")}
           </p>
           <h2 className="mx-auto mt-3 max-w-5xl text-3xl font-black tracking-tighter text-slate-900 dark:text-slate-100 sm:text-4xl md:text-5xl">
-            Built for picks you can trust
+            {t("title")}
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-sm text-slate-600 dark:text-slate-300 md:text-base">
-            Private by design, fast by default, and open source so you can see
-            how it works.
+            {t("subtitle")}
           </p>
         </div>
 
@@ -323,7 +306,7 @@ export default function FeaturesSectionDemo() {
             const Skeleton = feature.Skeleton;
             return (
               <motion.div
-                key={feature.title}
+                key={feature.key}
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.15 }}
@@ -361,10 +344,10 @@ export default function FeaturesSectionDemo() {
                   </p>
                   <div className="mt-2 h-px w-10 bg-gradient-to-r from-indigo-400 to-violet-400" />
                   <h3 className="mt-4 text-lg font-black tracking-tight text-slate-900 sm:text-xl dark:text-slate-100">
-                    {feature.title}
+                    {t(`items.${feature.key}.title`)}
                   </h3>
                   <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                    {feature.description}
+                    {t(`items.${feature.key}.description`)}
                   </p>
                 </div>
               </motion.div>

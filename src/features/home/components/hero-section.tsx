@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { motion } from "motion/react";
 import { IconChevronsDown } from "@tabler/icons-react";
+import { useTranslations, useMessages } from "next-intl";
 import { FlipWords } from "@/components/ui/flip-words";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { MarqueeHeroImages } from "@/components/ui/marquee-hero-images";
@@ -42,21 +43,26 @@ const pickFrame = (pool: string[], current: string[], size: number) => {
 const HeroSection = () => {
   const router = useRouter();
   const { user } = useAuth();
+  const t = useTranslations("Home.hero");
+  const messages = useMessages() as {
+    Home?: { hero?: { flipWords?: string[] } };
+  };
   const [heroImages, setHeroImages] = useState<string[]>([]);
   const [mediaPool, setMediaPool] = useState<string[]>([]);
   const recentRef = useRef<string[]>([]);
 
   const words = useMemo(
-    () => [
-      "Movie",
-      "Book",
-      "Story",
-      "Adventure",
-      "Classic",
-      "Masterpiece",
-      "Cult Favorite",
-    ],
-    [],
+    () =>
+      messages.Home?.hero?.flipWords ?? [
+        "Movie",
+        "Book",
+        "Story",
+        "Adventure",
+        "Classic",
+        "Masterpiece",
+        "Cult Favorite",
+      ],
+    [messages],
   );
 
   useEffect(() => {
@@ -166,8 +172,8 @@ const HeroSection = () => {
           transition={{ duration: 0.8 }}
           className="text-[1.75rem] font-black leading-[1.05] tracking-tighter text-slate-900 sm:text-5xl sm:tracking-tight md:text-6xl lg:text-7xl dark:text-slate-50"
         >
-          <span className="block">Discover Your Next Favorite</span>
-          <span className="block">Obsession Across Every</span>
+          <span className="block">{t("titleLine1")}</span>
+          <span className="block">{t("titleLine2")}</span>
           <span className="flex justify-center">
             <FlipWords
               words={words}
@@ -182,8 +188,7 @@ const HeroSection = () => {
           transition={{ delay: 0.4 }}
           className="max-w-md text-base text-slate-700 sm:max-w-xl sm:text-xl dark:text-slate-300"
         >
-          AI-powered recommendations for movies and books tailored to your
-          unique taste.
+          {t("subtitle")}
         </motion.p>
 
         <div className="mt-2 flex w-full flex-col items-center gap-3 sm:mt-6">
@@ -201,14 +206,14 @@ const HeroSection = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              {user ? "Go to Dashboard" : "Get Started"}
+              {user ? t("ctaPrimaryLoggedIn") : t("ctaPrimaryLoggedOut")}
             </motion.span>
           </HoverBorderGradient>
           <PillButton
             onClick={handleSecondaryCta}
             className="border-slate-300/80 bg-white/70 px-6 py-2.5 text-sm font-bold tracking-wide text-slate-700 sm:px-7 sm:py-3 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200"
           >
-            {user ? "View History" : "Try a Demo"}
+            {user ? t("ctaSecondaryLoggedIn") : t("ctaSecondaryLoggedOut")}
           </PillButton>
         </div>
       </div>
@@ -221,7 +226,7 @@ const HeroSection = () => {
       >
         <div className="flex flex-col items-center gap-2 text-slate-500 dark:text-slate-400">
           <span className="text-xs uppercase tracking-[0.2em]">
-            Scroll to Explore
+            {t("scrollHint")}
           </span>
           <motion.div
             animate={{ y: [0, 6, 0], opacity: [0.65, 1, 0.65] }}
