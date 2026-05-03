@@ -349,6 +349,72 @@
       }
     }
   },
+  "Wrapped": {
+    "eyebrow": "Year in Review",
+    "subtitle": "A look back at what you discovered this year.",
+    "fallbackName": "Your",
+    "startQuiz": "Start Quiz",
+    "loading": "Loading your year…",
+    "empty": {
+      "title": "No Picks in {year}",
+      "current": "Take a quiz and start filling out your year.",
+      "past": "Pick a different year above, or start a new quiz."
+    },
+    "hero": {
+      "eyebrow": "Headline",
+      "picks": "{count, plural, one {# Pick} other {# Picks}}",
+      "moviesPart": "{count, plural, one {# movie} other {# movies}}",
+      "booksPart": "{count, plural, one {# book} other {# books}}",
+      "watchTime": "about {hours} hours of screen time",
+      "libraryLogged": "{count} logged in your library"
+    },
+    "tiles": {
+      "favorites": "Favorites",
+      "favoritesHint": "{percent}% of picks",
+      "longestStreak": "Longest Streak",
+      "streakDay": "day in a row",
+      "streakDays": "days in a row",
+      "peakMonth": "Peak Month",
+      "topGenre": "Top Genre",
+      "picksHint": "{count, plural, one {# pick} other {# picks}}",
+      "noData": "—"
+    },
+    "creator": {
+      "eyebrow": "Most Picked",
+      "director": "Director",
+      "author": "Author",
+      "noData": "Not enough data yet."
+    },
+    "formatMix": {
+      "eyebrow": "Format Mix",
+      "movies": "Movies",
+      "books": "Books"
+    },
+    "monthly": {
+      "eyebrow": "Picks by Month"
+    },
+    "genres": {
+      "eyebrow": "Genre Roundup"
+    },
+    "standouts": {
+      "eyebrow": "Standouts",
+      "fullHistory": "Full history"
+    },
+    "months": [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ]
+  },
   "GroupQuiz": {
     "lobby": {
       "eyebrow": "Group Quiz",
