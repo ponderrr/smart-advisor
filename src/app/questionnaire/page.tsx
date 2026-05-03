@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { useTranslations, useMessages } from "next-intl";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useLeaveGuard } from "@/features/quiz/hooks/use-leave-guard";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
@@ -24,29 +25,23 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppNavbar } from "@/components/app-navbar";
 
 /* ---------- Loading Animation ---------- */
-const QUESTION_LOADING_MESSAGES = [
-  "Thinking up good questions...",
-  "Picking your angle...",
-  "Tailoring to your taste...",
-  "Calibrating for your vibe...",
-  "Finding the right starting point...",
-  "Drafting the quiz...",
-  "Stirring in a twist or two...",
-  "Sharpening the details...",
-  "Cutting the boring ones...",
-  "Double-checking the flow...",
-  "Almost ready for you...",
-] as const;
-
 const QuestionLoader = () => {
+  const messages = useMessages() as {
+    Quiz?: { questionnaire?: { loadingMessages?: string[] } };
+  };
+  const loadingMessages = useMemo(
+    () => messages.Quiz?.questionnaire?.loadingMessages ?? [],
+    [messages],
+  );
   const [messageIndex, setMessageIndex] = useState(0);
 
   useEffect(() => {
+    if (loadingMessages.length === 0) return;
     const id = setInterval(() => {
-      setMessageIndex((i) => (i + 1) % QUESTION_LOADING_MESSAGES.length);
+      setMessageIndex((i) => (i + 1) % loadingMessages.length);
     }, 3800);
     return () => clearInterval(id);
-  }, []);
+  }, [loadingMessages.length]);
 
   return (
     <div className="mx-auto flex min-h-[420px] w-full max-w-4xl flex-col items-center justify-center rounded-3xl border border-slate-200/70 bg-white/85 p-6 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
@@ -73,7 +68,7 @@ const QuestionLoader = () => {
             transition={{ duration: 0.35, ease: "easeOut" }}
             className="text-base font-semibold text-slate-700 dark:text-slate-200"
           >
-            {QUESTION_LOADING_MESSAGES[messageIndex]}
+            {loadingMessages[messageIndex] ?? ""}
           </motion.p>
         </AnimatePresence>
       </div>
@@ -85,6 +80,9 @@ const QuestionnairePage = () => {
   const router = useRouter();
   const { user } = useAuth();
   const { ready } = useRequireAuth();
+  const t = useTranslations("Quiz.questionnaire");
+  const tq = useTranslations("Quiz");
+  const tc = useTranslations("Common");
   const {
     contentType,
     questionCount,
@@ -117,7 +115,7 @@ const QuestionnairePage = () => {
         error: sessionError,
       } = await supabase.auth.getUser();
       if (sessionError || !sessionUser) {
-        setError("Your session expired. Please sign in again to continue.");
+        setError(t("errors.session"));
         hasLoadedRef.current = false;
         return;
       }
@@ -136,14 +134,14 @@ const QuestionnairePage = () => {
       hasLoadedRef.current = false;
       const errMsg = err instanceof Error ? err.message : "";
       if (errMsg.toLowerCase().includes("not authenticated")) {
-        setError("Your session expired. Please sign in again to continue.");
+        setError(t("errors.session"));
       } else {
-        setError("We could not generate your questions. Please try again.");
+        setError(t("errors.generic"));
       }
     } finally {
       setIsLoading(false);
     }
-  }, [contentType, questionCount, user]);
+  }, [contentType, questionCount, user, t]);
 
   useEffect(() => {
     if (!contentType || !user) {
@@ -191,11 +189,7 @@ const QuestionnairePage = () => {
       setCurrentQuestionIndex((prev) => prev - 1);
       return;
     }
-    if (
-      !window.confirm(
-        "Leave the quiz? Your answers so far won't be saved.",
-      )
-    ) {
+    if (!window.confirm(t("leaveConfirm"))) {
       return;
     }
     router.push("/question-count");
@@ -258,7 +252,7 @@ const QuestionnairePage = () => {
   const topBar = <AppNavbar />;
 
   if (!ready) {
-    return <PageLoader text="Loading..." />;
+    return <PageLoader text={tc("loading")} />;
   }
 
   if (isLoading) {
@@ -290,7 +284,7 @@ const QuestionnairePage = () => {
               />
             </div>
             <h2 className="text-2xl font-black tracking-tight">
-              Unable to load questions
+              {t("errors.title")}
             </h2>
             <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
               {error}
@@ -300,13 +294,13 @@ const QuestionnairePage = () => {
                 onClick={loadQuestions}
                 className="bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-black dark:text-white"
               >
-                Try Again
+                {t("errors.tryAgain")}
               </PillButton>
               <PillButton
                 onClick={() => router.push("/question-count")}
                 className="border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
               >
-                Back
+                {t("errors.back")}
               </PillButton>
             </div>
           </div>
@@ -318,19 +312,23 @@ const QuestionnairePage = () => {
   const getSubtitle = () => {
     if (!currentQuestion) return "";
     const qType = currentQuestion.type ?? "single_select";
-    if (qType === "fill_in_blank")
-      return "Share your thoughts in your own words.";
-    if (qType === "select_all") return "Choose as many as you like.";
-    return "Pick one so we can tune your recommendations.";
+    if (qType === "fill_in_blank") return t("subtitle.fillInBlank");
+    if (qType === "select_all") return t("subtitle.selectAll");
+    return t("subtitle.singleSelect");
   };
 
   return (
     <QuizStepShell
-      category="Live quiz"
-      stepLabel={`Question ${currentQuestionIndex + 1} of ${questions.length}`}
+      category={t("category")}
+      stepLabel={tq("stepOf", {
+        current: currentQuestionIndex + 1,
+        total: questions.length,
+      })}
       progress={progress}
       onBack={handlePrevious}
-      backLabel={currentQuestionIndex > 0 ? "Previous" : "Back"}
+      backLabel={
+        currentQuestionIndex > 0 ? t("previous") : t("back")
+      }
     >
       <motion.div
         layout
@@ -366,8 +364,8 @@ const QuestionnairePage = () => {
             className="inline-flex items-center justify-center gap-2 bg-white px-6 py-2.5 text-sm font-black tracking-tight text-black disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-900 dark:text-white"
           >
             {currentQuestionIndex === questions.length - 1
-              ? "Get Recommendations"
-              : "Next"}
+              ? t("submit")
+              : t("next")}
             <ArrowRight size={16} />
           </PillButton>
         </div>

@@ -23,5 +23,188 @@
     },
     "saving": "Saving…",
     "saved": "Language updated."
+  },
+  "Navbar": {
+    "items": {
+      "howItWorks": "How It Works",
+      "whySmartAdvisor": "Why Smart Advisor",
+      "poweredBy": "Powered By",
+      "ourTeam": "Our Team",
+      "faq": "FAQ",
+      "dashboard": "Dashboard",
+      "library": "Library",
+      "history": "History",
+      "groupQuiz": "Group Quiz",
+      "settings": "Settings"
+    },
+    "getStarted": "Get Started",
+    "signOut": "Sign Out",
+    "accountMenu": "Account menu",
+    "theme": {
+      "label": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System",
+      "systemHint": "Matches your device setting"
+    }
+  },
+  "Home": {
+    "howItWorks": {
+      "title": "How It Works",
+      "eyebrow": "How it works",
+      "subtitle": "Four simple steps from quiz to picks.",
+      "steps": {
+        "format": {
+          "title": "Pick your format",
+          "description": "Tell us if you're in the mood for a movie, a book, or both. We tailor the rest of the flow to whichever you choose."
+        },
+        "depth": {
+          "title": "Set your depth",
+          "description": "Choose how many questions you want to answer — a quick taste check or a deep dive, your call."
+        },
+        "quiz": {
+          "title": "Answer a personalized quiz",
+          "description": "Our AI generates fresh questions tuned to your age and content type. No two quizzes are the same."
+        },
+        "picks": {
+          "title": "Get your picks",
+          "description": "Real recommendations with a match score and a written reason for why each one fits you specifically."
+        }
+      }
+    }
+  },
+  "Common": {
+    "loading": "Loading…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "back": "Back",
+    "next": "Next",
+    "continue": "Continue",
+    "submit": "Submit",
+    "close": "Close",
+    "retry": "Retry",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "Quiz": {
+    "category": "Quiz setup",
+    "stepOf": "Step {current} of {total}",
+    "back": {
+      "dashboard": "Dashboard"
+    },
+    "contentSelection": {
+      "title": "What would you like a recommendation for?",
+      "subtitle": "Pick one so we can tailor your recommendation flow.",
+      "validation": "Please select an option before continuing.",
+      "continue": "Continue",
+      "continuing": "Continuing…",
+      "cards": {
+        "movie": {
+          "eyebrow": "On screen",
+          "title": "Movie",
+          "description": "A film tuned to your current mood and pace."
+        },
+        "book": {
+          "eyebrow": "On the shelf",
+          "title": "Book",
+          "description": "A read tailored to your style and interests."
+        },
+        "both": {
+          "eyebrow": "Both",
+          "title": "One of each",
+          "description": "A movie and a book picked together in one go."
+        }
+      }
+    },
+    "questionCount": {
+      "title": "How many questions should we ask?",
+      "subtitle": "Choose the depth for your {contentType} recommendation flow.",
+      "contentTypes": {
+        "movie": "movie",
+        "book": "book",
+        "both": "movie and book"
+      },
+      "questionsLabel": "{count, plural, one {Question} other {Questions}}",
+      "tone": {
+        "quick": "Quick and focused",
+        "balanced": "Balanced depth",
+        "comprehensive": "Comprehensive detail"
+      },
+      "ariaCount": "Number of questions",
+      "back": "Format",
+      "continue": "Continue",
+      "continuing": "Continuing…"
+    },
+    "questionnaire": {
+      "category": "Live quiz",
+      "questionOf": "Question {current} of {total}",
+      "previous": "Previous",
+      "back": "Back",
+      "next": "Next",
+      "submit": "Get Recommendations",
+      "subtitle": {
+        "fillInBlank": "Share your thoughts in your own words.",
+        "selectAll": "Choose as many as you like.",
+        "singleSelect": "Pick one so we can tune your recommendations."
+      },
+      "leaveConfirm": "Leave the quiz? Your answers so far won't be saved.",
+      "errors": {
+        "title": "Unable to load questions",
+        "session": "Your session expired. Please sign in again to continue.",
+        "generic": "We could not generate your questions. Please try again.",
+        "tryAgain": "Try Again",
+        "back": "Back"
+      },
+      "loadingMessages": [
+        "Thinking up good questions…",
+        "Picking your angle…",
+        "Tailoring to your taste…",
+        "Calibrating for your vibe…",
+        "Finding the right starting point…",
+        "Drafting the quiz…",
+        "Stirring in a twist or two…",
+        "Sharpening the details…",
+        "Cutting the boring ones…",
+        "Double-checking the flow…",
+        "Almost ready for you…"
+      ]
+    }
+  },
+  "Results": {
+    "loadingHeader": "Crafting your picks",
+    "errorTitle": "Something went wrong",
+    "errorRetry": "Try again",
+    "errorBack": "Back to setup",
+    "shareCopy": "Copy link",
+    "shareCopied": "Link copied!",
+    "shareTwitter": "Share on X",
+    "shareEmail": "Share by email",
+    "shareTitle": "Share your picks",
+    "anotherPick": "Get another pick",
+    "viewHistory": "View history",
+    "share": "Share",
+    "favorited": "Favorited",
+    "favorite": "Favorite",
+    "showMore": "Show more",
+    "showLess": "Show less"
+  },
+  "Dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Your activity at a glance.",
+    "tabs": {
+      "overview": "Overview",
+      "picks": "Picks",
+      "genres": "Genres"
+    },
+    "stats": {
+      "total": "Total picks",
+      "movies": "Movies",
+      "books": "Books",
+      "favorites": "Favorites"
+    },
+    "lastPick": "Last pick",
+    "newQuiz": "Start a new quiz",
+    "empty": "No recommendations yet. Take a quiz to get started.",
+    "startQuiz": "Take the quiz"
   }
 }

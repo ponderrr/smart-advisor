@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
+import { useTranslations } from "next-intl";
 
 const VALIDATION_FLASH_MS = 650;
 const VALIDATION_MESSAGE_MS = 3200;
@@ -160,6 +161,8 @@ const ContentSelectionPage = () => {
   const router = useRouter();
   const { ready } = useRequireAuth();
   const { setContentType } = useQuizStore();
+  const t = useTranslations("Quiz");
+  const tc = useTranslations("Common");
   const [selectedType, setSelectedType] = useState<ContentType>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showValidationFlash, setShowValidationFlash] = useState(false);
@@ -170,7 +173,7 @@ const ContentSelectionPage = () => {
   const handleContinue = () => {
     if (!selectedType) {
       setShowValidationFlash(true);
-      setValidationMessage("Please select an option before continuing.");
+      setValidationMessage(t("contentSelection.validation"));
       window.setTimeout(() => setShowValidationFlash(false), VALIDATION_FLASH_MS);
       window.setTimeout(() => setValidationMessage(null), VALIDATION_MESSAGE_MS);
       return;
@@ -188,26 +191,25 @@ const ContentSelectionPage = () => {
   const cards = [
     {
       id: "movie" as ContentType,
-      eyebrow: "On screen",
-      title: "Movie",
-      description:
-        "A film tuned to your current mood and pace.",
+      eyebrow: t("contentSelection.cards.movie.eyebrow"),
+      title: t("contentSelection.cards.movie.title"),
+      description: t("contentSelection.cards.movie.description"),
       icon: <Film size={14} />,
       mediaSrc: "/animations/Popcorn.webm",
     },
     {
       id: "book" as ContentType,
-      eyebrow: "On the shelf",
-      title: "Book",
-      description: "A read tailored to your style and interests.",
+      eyebrow: t("contentSelection.cards.book.eyebrow"),
+      title: t("contentSelection.cards.book.title"),
+      description: t("contentSelection.cards.book.description"),
       icon: <BookOpen size={14} />,
       mediaSrc: "/animations/Books.webm",
     },
     {
       id: "both" as ContentType,
-      eyebrow: "Both",
-      title: "One of each",
-      description: "A movie and a book picked together in one go.",
+      eyebrow: t("contentSelection.cards.both.eyebrow"),
+      title: t("contentSelection.cards.both.title"),
+      description: t("contentSelection.cards.both.description"),
       icon: <Sparkles size={14} />,
       mediaSrc: "/animations/Popcorn.webm",
       secondaryMediaSrc: "/animations/Books.webm",
@@ -223,16 +225,16 @@ const ContentSelectionPage = () => {
   }, []);
 
   if (!ready) {
-    return <PageLoader text="Loading..." />;
+    return <PageLoader text={tc("loading")} />;
   }
 
   return (
     <QuizStepShell
-      category="Quiz setup"
-      stepLabel="Step 1 of 4"
+      category={t("category")}
+      stepLabel={t("stepOf", { current: 1, total: 4 })}
       progress={25}
       onBack={handleBack}
-      backLabel="Dashboard"
+      backLabel={t("back.dashboard")}
     >
       <div className="rounded-3xl border border-slate-200/70 bg-white/85 p-4 shadow-sm backdrop-blur-md sm:p-6 md:p-8 dark:border-slate-700/60 dark:bg-slate-900/65">
         <motion.div
@@ -241,10 +243,10 @@ const ContentSelectionPage = () => {
           transition={{ duration: 0.22 }}
         >
           <h1 className="text-xl font-black tracking-tight sm:text-2xl md:text-3xl">
-            What would you like a recommendation for?
+            {t("contentSelection.title")}
           </h1>
           <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-400 sm:text-base">
-            Pick one so we can tailor your recommendation flow.
+            {t("contentSelection.subtitle")}
           </p>
 
           <div className="mt-5 grid grid-cols-1 gap-3 sm:mt-7 sm:gap-4 md:grid-cols-3">
@@ -281,7 +283,9 @@ const ContentSelectionPage = () => {
                 "inline-flex items-center justify-center gap-2 bg-white px-6 py-2.5 text-sm font-black tracking-tight text-black disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-900 dark:text-white",
               )}
             >
-              {isLoading ? "Continuing..." : "Continue"}
+              {isLoading
+                ? t("contentSelection.continuing")
+                : t("contentSelection.continue")}
               <ArrowRight size={16} />
             </PillButton>
           </motion.div>
