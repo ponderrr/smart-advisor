@@ -284,13 +284,14 @@ const SettingsPage = () => {
   const confirmPasswordAnchorRef = useRef<HTMLDivElement>(null);
   const watchedNewPassword = passwordForm.watch("newPassword");
   const watchedConfirmPassword = passwordForm.watch("confirmPassword");
+  const tPasswordRules = useTranslations("Auth.passwordRules");
   const newPasswordRules = useMemo(
     () =>
       PASSWORD_RULES.map((rule) => ({
-        label: rule.label,
+        label: tPasswordRules(rule.key),
         met: rule.test(watchedNewPassword || ""),
       })),
-    [watchedNewPassword],
+    [watchedNewPassword, tPasswordRules],
   );
   const confirmPasswordRules = useMemo(
     () => [

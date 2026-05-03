@@ -210,13 +210,14 @@ export const AuthForm = ({
     ],
     [trimmedUsername, tv],
   );
+  const tPasswordRules = useTranslations("Auth.passwordRules");
   const passwordRules = useMemo(
     () =>
       PASSWORD_RULES.map((rule) => ({
-        label: rule.label,
+        label: tPasswordRules(rule.key),
         met: rule.test(password),
       })),
-    [password],
+    [password, tPasswordRules],
   );
   const confirmPasswordRules = useMemo(
     () => [

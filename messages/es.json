@@ -563,6 +563,33 @@
       "showPassword": "Mostrar contraseña",
       "requirements": "Requisitos"
     },
+    "passwordRules": {
+      "minLength": "Al menos 8 caracteres",
+      "uppercase": "Una mayúscula (A–Z)",
+      "lowercase": "Una minúscula (a–z)",
+      "digit": "Un número (0–9)",
+      "special": "Un carácter especial (!@#$…)"
+    },
+    "resetPassword": {
+      "invalidTitle": "Enlace de restablecimiento no válido o caducado",
+      "invalidBody": "Abre el correo más reciente o solicita un nuevo enlace para continuar.",
+      "backToSignIn": "Volver al inicio de sesión",
+      "successTitle": "Contraseña actualizada",
+      "successBody": "Tu contraseña se ha cambiado correctamente. Redirigiéndote al inicio de sesión…",
+      "title": "Establecer nueva contraseña",
+      "subtitle": "Ingresa tu nueva contraseña segura.",
+      "newPassword": "Nueva contraseña",
+      "confirmPassword": "Confirmar nueva contraseña",
+      "passwordRequirementsTitle": "Requisitos de la contraseña",
+      "confirmRulesTitle": "Confirmar contraseña",
+      "matchesRule": "Coincide con tu contraseña",
+      "submit": "Actualizar contraseña",
+      "submitting": "Actualizando…",
+      "fixHighlighted": "Por favor corrige los campos resaltados."
+    },
+    "emailVerified": {
+      "message": "¡Correo verificado! Redirigiendo…"
+    },
     "mfaManagement": {
       "heading": "Autenticación de dos factores",
       "subtitle": "Un paso adicional al iniciar sesión para mantener tu cuenta segura.",
