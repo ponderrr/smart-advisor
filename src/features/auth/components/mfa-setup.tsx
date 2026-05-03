@@ -13,6 +13,7 @@ import {
   Smartphone,
 } from "lucide-react";
 import { motion } from "motion/react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -39,6 +40,7 @@ export const MfaSetup = ({
   skipIntro = false,
   skipBackupCodes = false,
 }: MfaSetupProps) => {
+  const t = useTranslations("Auth.mfaSetup");
   const [step, setStep] = useState<SetupStep>(skipIntro ? "method" : "intro");
   const [qrCode, setQrCode] = useState<string>("");
   const [secret, setSecret] = useState<string>("");
@@ -81,7 +83,7 @@ export const MfaSetup = ({
 
   const handleVerify = async () => {
     if (code.length !== 6) {
-      setError("Please enter a 6-digit code");
+      setError(t("verify.error"));
       return;
     }
 
@@ -98,7 +100,7 @@ export const MfaSetup = ({
 
     if (skipBackupCodes) {
       setLoading(false);
-      toast.success("Authenticator added");
+      toast.success(t("toasts.authenticatorAdded"));
       onComplete();
       return;
     }
@@ -110,16 +112,14 @@ export const MfaSetup = ({
 
     if (backupError || codes.length === 0) {
       // MFA is enabled but backup codes failed — still proceed but warn
-      toast.success("Two-factor authentication is now active!");
-      toast.warning(
-        "We couldn't generate backup codes right now. You can create them anytime from your Security settings.",
-      );
+      toast.success(t("toasts.enabled"));
+      toast.warning(t("toasts.backupWarning"));
       onComplete();
       return;
     }
 
     setBackupCodes(codes);
-    toast.success("Two-factor authentication is now active!");
+    toast.success(t("toasts.enabled"));
     setStep("backup-codes");
   };
 
@@ -128,7 +128,7 @@ export const MfaSetup = ({
       navigator.clipboard.writeText(secret);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-      toast.success("Secret code copied — paste it in your authenticator app");
+      toast.success(t("toasts.secretCopied"));
     }
   };
 
@@ -137,7 +137,7 @@ export const MfaSetup = ({
     navigator.clipboard.writeText(text);
     setBackupCodesCopied(true);
     setTimeout(() => setBackupCodesCopied(false), 2000);
-    toast.success("Backup codes copied to your clipboard");
+    toast.success(t("toasts.backupCopied"));
   };
 
   const handleDownloadBackupCodes = () => {
@@ -159,7 +159,7 @@ export const MfaSetup = ({
     a.download = "smart-advisor-backup-codes.txt";
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("Backup codes saved to your downloads");
+    toast.success(t("toasts.backupDownloaded"));
   };
 
   const backTarget: SetupStep | null =
@@ -188,7 +188,7 @@ export const MfaSetup = ({
         <button
           type="button"
           onClick={handleBack}
-          aria-label="Go back"
+          aria-label={t("goBack")}
           className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
         >
           <ArrowLeft size={18} />
@@ -210,11 +210,10 @@ export const MfaSetup = ({
             className="w-full max-w-md"
           >
             <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-              Secure your account
+              {t("intro.title")}
             </h2>
             <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
-              Add an extra layer of security with Two-Factor Authentication (2FA).
-              You'll need to enter a code from your phone during sign in.
+              {t("intro.body")}
             </p>
             <div className="mt-8 w-full space-y-3">
               <Button
@@ -223,14 +222,14 @@ export const MfaSetup = ({
                 size="lg"
                 className="w-full"
               >
-                Set up 2FA
+                {t("intro.cta")}
               </Button>
               {onSkip && (
                 <button
                   onClick={onSkip}
                   className="w-full text-sm font-medium text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                 >
-                  Skip for now
+                  {t("intro.skip")}
                 </button>
               )}
             </div>
@@ -244,10 +243,10 @@ export const MfaSetup = ({
           className="w-full max-w-md"
         >
           <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-            Choose your method
+            {t("method.title")}
           </h2>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            How do you want to sign in going forward?
+            {t("method.body")}
           </p>
 
           <div className="mt-6 space-y-3 text-left">
@@ -265,10 +264,10 @@ export const MfaSetup = ({
               </div>
               <div className="flex-1">
                 <p className="font-semibold text-slate-900 dark:text-slate-100">
-                  Authenticator app
+                  {t("method.appName")}
                 </p>
                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  Scan a QR code with Google Authenticator, Authy, or 1Password.
+                  {t("method.appBody")}
                 </p>
               </div>
               {loading ? (
@@ -288,7 +287,7 @@ export const MfaSetup = ({
               onClick={onSkip}
               className="mt-6 w-full text-sm font-medium text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
             >
-              Cancel
+              {t("method.cancel")}
             </button>
           )}
         </motion.div>
@@ -301,16 +300,15 @@ export const MfaSetup = ({
           className="w-full max-w-md"
         >
           <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-            Name this authenticator
+            {t("name.title")}
           </h2>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            Use the device that will hold the code — that way you can tell
-            authenticators apart later.
+            {t("name.body")}
           </p>
 
           <div className="mt-6 text-left">
             <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              Device name
+              {t("name.label")}
             </label>
             <input
               type="text"
@@ -319,12 +317,12 @@ export const MfaSetup = ({
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !loading) handleEnroll(deviceName);
               }}
-              placeholder="e.g., iPhone, Work phone"
+              placeholder={t("name.placeholder")}
               autoFocus
               className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm transition-colors focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-100"
             />
             <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-              Leave blank to use a generic label.
+              {t("name.hint")}
             </p>
           </div>
 
@@ -338,7 +336,7 @@ export const MfaSetup = ({
             size="lg"
             className="mt-6 w-full"
           >
-            {loading ? "Setting up..." : "Continue"}
+            {loading ? t("name.settingUp") : t("name.continue")}
           </Button>
         </motion.div>
       )}
@@ -350,24 +348,23 @@ export const MfaSetup = ({
           className="w-full max-w-md"
         >
           <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-            Scan QR Code
+            {t("qr.title")}
           </h2>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            Use Google Authenticator, Microsoft Authenticator, or Authy to scan
-            this code.
+            {t("qr.body")}
           </p>
 
           {qrCode && (
             <div className="my-6">
               <div className="flex justify-center rounded-xl border-4 border-white bg-white p-3 shadow-xl">
-                <img src={qrCode} alt="MFA QR Code" className="h-48 w-48" />
+                <img src={qrCode} alt={t("qr.imageAlt")} className="h-48 w-48" />
               </div>
             </div>
           )}
 
           <div className="rounded-lg bg-slate-50 p-4 dark:bg-slate-900/50">
             <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">
-              Can't scan? Enter this code manually:
+              {t("qr.manualHint")}
             </p>
             <div className="flex items-center justify-between gap-2">
               <code className="flex-1 break-all font-mono text-sm font-semibold text-slate-900 dark:text-slate-100">
@@ -391,7 +388,7 @@ export const MfaSetup = ({
             variant="outline"
             className="mt-6 w-full"
           >
-            I&apos;ve scanned it <ArrowRight className="ml-2 h-4 w-4" />
+            {t("qr.scanned")} <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </motion.div>
       )}
@@ -403,10 +400,10 @@ export const MfaSetup = ({
           className="w-full max-w-md"
         >
           <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-            Verify your code
+            {t("verify.title")}
           </h2>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            Enter the 6-digit code from your authenticator app.
+            {t("verify.body")}
           </p>
 
           <div className="mt-6 w-full">
@@ -417,7 +414,7 @@ export const MfaSetup = ({
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
               className="w-full rounded-lg border-2 border-slate-200 bg-white px-4 py-4 text-center text-4xl font-bold tracking-[0.4em] text-slate-900 placeholder-slate-300 focus:border-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder-slate-600"
-              placeholder="000000"
+              placeholder={t("verify.placeholder")}
             />
             {error && (
               <p className="mt-2 text-sm font-medium text-red-500">{error}</p>
@@ -430,7 +427,7 @@ export const MfaSetup = ({
             size="lg"
             className="mt-6 w-full"
           >
-            {loading ? "Verifying..." : "Verify & Enable 2FA"}
+            {loading ? t("verify.verifying") : t("verify.submit")}
           </Button>
 
           <button
@@ -441,7 +438,7 @@ export const MfaSetup = ({
             }}
             className="mt-3 text-sm font-medium text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
           >
-            Back to QR Code
+            {t("verify.back")}
           </button>
         </motion.div>
       )}
@@ -453,16 +450,15 @@ export const MfaSetup = ({
           className="w-full max-w-md"
         >
           <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-            Save your backup codes
+            {t("backupCodes.title")}
           </h2>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            If you lose access to your authenticator app, you can use one of
-            these codes to sign in. Each code can only be used once.
+            {t("backupCodes.body")}
           </p>
 
           <div className="mt-6 rounded-lg border-2 border-amber-200 bg-amber-50 p-4 dark:border-amber-800/50 dark:bg-amber-900/20">
             <p className="mb-3 text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
-              Store these in a safe place
+              {t("backupCodes.warning")}
             </p>
             <div className="grid grid-cols-2 gap-2">
               {backupCodes.map((backupCode, i) => (
@@ -488,7 +484,7 @@ export const MfaSetup = ({
               ) : (
                 <Copy className="mr-2 h-4 w-4" />
               )}
-              {backupCodesCopied ? "Copied" : "Copy"}
+              {backupCodesCopied ? t("backupCodes.copied") : t("backupCodes.copy")}
             </Button>
             <Button
               onClick={handleDownloadBackupCodes}
@@ -497,12 +493,12 @@ export const MfaSetup = ({
               className="flex-1"
             >
               <Download className="mr-2 h-4 w-4" />
-              Download
+              {t("backupCodes.download")}
             </Button>
           </div>
 
           <Button onClick={onComplete} size="lg" className="mt-6 w-full">
-            I've saved my codes
+            {t("backupCodes.done")}
           </Button>
         </motion.div>
       )}

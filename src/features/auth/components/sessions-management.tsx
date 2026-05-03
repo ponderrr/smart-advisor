@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { sessionManagementService } from "../services/session-management";
 import { authService } from "../services/auth-service";
 import { Loader, LogOut, Smartphone, Globe, LogOutIcon } from "lucide-react";
@@ -52,6 +53,7 @@ interface SessionsManagementProps {
 
 export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
   const router = useRouter();
+  const t = useTranslations("Auth.sessions");
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [revoking, setRevoking] = useState<string | null>(null);
@@ -77,8 +79,8 @@ export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
 
   const handleRevokeSession = async (session: Session) => {
     const promptMessage = session.is_current_device
-      ? "Sign out of this device? You'll be returned to the home page."
-      : `Sign out of ${session.device_name}? That session will lose access immediately.`;
+      ? t("signOutCurrentConfirm")
+      : t("signOutOtherConfirm", { device: session.device_name });
     if (!window.confirm(promptMessage)) {
       return;
     }
@@ -90,7 +92,7 @@ export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
     if (error) {
       toast.error(error);
     } else {
-      toast.success("You've been signed out of that device");
+      toast.success(t("signedOutToast"));
       setSessions((prev) => prev.filter((s) => s.id !== session.id));
 
       // If revoking current device, sign out and redirect
@@ -102,7 +104,7 @@ export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
   };
 
   const handleRevokeAll = async () => {
-    if (!window.confirm("Are you sure? You'll be signed out on all devices.")) {
+    if (!window.confirm(t("signOutAllConfirm"))) {
       return;
     }
 
@@ -115,7 +117,7 @@ export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
     if (error) {
       toast.error(error);
     } else {
-      toast.success("You've been signed out of all devices");
+      toast.success(t("signedOutAllToast"));
       router.push("/");
     }
   };
@@ -125,10 +127,10 @@ export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
       <>
         <div className="mb-5">
           <h2 className="text-xl font-black tracking-tight sm:text-2xl">
-            Active Sessions
+            {t("heading")}
           </h2>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Manage devices currently signed in to your account.
+            {t("subtitleLoading")}
           </p>
         </div>
         <div className="flex items-center justify-center rounded-xl border border-slate-200/70 bg-slate-50 py-8 dark:border-slate-700/60 dark:bg-slate-800/40">
@@ -144,11 +146,10 @@ export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
     <>
       <div className="mb-5">
         <h2 className="text-xl font-black tracking-tight sm:text-2xl">
-          Active Sessions
+          {t("heading")}
         </h2>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Manage devices currently signed in to your account. Sign out to revoke
-          access.
+          {t("subtitle")}
         </p>
       </div>
 
@@ -164,8 +165,8 @@ export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
           />
           <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
             {hasSessions
-              ? `${sessions.length} device${sessions.length === 1 ? "" : "s"} signed in`
-              : "No active sessions"}
+              ? t("signedInCount", { count: sessions.length })
+              : t("noActive")}
           </span>
         </div>
         {sessions.length > 1 && (
@@ -176,7 +177,7 @@ export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
             className="group inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-white px-3 py-1.5 text-xs font-bold tracking-tight text-red-600 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-red-300 hover:bg-red-50 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 dark:border-red-500/30 dark:bg-slate-900/60 dark:text-red-400 dark:hover:border-red-500/60 dark:hover:bg-red-500/10"
           >
             <LogOutIcon className="h-3.5 w-3.5 transition-transform duration-200 group-hover:-translate-x-0.5" />
-            {signingOutAll ? "Signing out…" : "Sign out all"}
+            {signingOutAll ? t("signingOutAll") : t("signOutAll")}
           </button>
         )}
       </div>
@@ -188,7 +189,7 @@ export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
             aria-hidden="true"
           />
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            No active sessions found
+            {t("noSessionsFound")}
           </p>
         </div>
       ) : (
@@ -218,7 +219,7 @@ export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
                       </p>
                       {session.is_current_device && (
                         <span className="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">
-                          Current
+                          {t("currentBadge")}
                         </span>
                       )}
                     </div>
@@ -228,11 +229,11 @@ export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
                     </p>
                     {session.ip_address && (
                       <p className="text-xs text-slate-400 dark:text-slate-500">
-                        IP {session.ip_address}
+                        {t("ipLabel", { ip: session.ip_address })}
                       </p>
                     )}
                     <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
-                      Last active {formatLastActivity(session.last_activity)}
+                      {t("lastActive", { time: formatLastActivity(session.last_activity) })}
                     </p>
                   </div>
                 </div>
@@ -240,8 +241,8 @@ export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
                   type="button"
                   onClick={() => handleRevokeSession(session)}
                   disabled={revoking === session.id || signingOutAll}
-                  aria-label={`Sign out of ${session.device_name}`}
-                  title={`Sign out of ${session.device_name}`}
+                  aria-label={t("signOutAria", { device: session.device_name })}
+                  title={t("signOutAria", { device: session.device_name })}
                   className="shrink-0 inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200/80 bg-white text-red-600 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-red-300 hover:bg-red-50 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 dark:border-slate-700/70 dark:bg-slate-900/60 dark:text-red-400 dark:hover:border-red-500/60 dark:hover:bg-red-500/10"
                 >
                   {revoking === session.id ? (
