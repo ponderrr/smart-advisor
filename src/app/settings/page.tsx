@@ -12,6 +12,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   CircleOff,
   Shield,
@@ -55,6 +56,7 @@ import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import { PillButton } from "@/components/ui/pill-button";
 import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -203,6 +205,7 @@ SettingsInput.displayName = "SettingsInput";
 
 const SettingsPage = () => {
   const router = useRouter();
+  const t = useTranslations("Settings");
   const {
     user,
     updateProfile,
@@ -421,10 +424,18 @@ const SettingsPage = () => {
     label: string;
     icon: React.ReactNode;
   }[] = [
-    { id: "profile", label: "Profile", icon: <UserRound size={15} /> },
-    { id: "security", label: "Security", icon: <Shield size={15} /> },
-    { id: "content", label: "Content", icon: <SlidersHorizontal size={15} /> },
-    { id: "integrations", label: "Integrations", icon: <Link2 size={15} /> },
+    { id: "profile", label: t("tabs.profile"), icon: <UserRound size={15} /> },
+    { id: "security", label: t("tabs.security"), icon: <Shield size={15} /> },
+    {
+      id: "content",
+      label: t("tabs.content"),
+      icon: <SlidersHorizontal size={15} />,
+    },
+    {
+      id: "integrations",
+      label: t("tabs.integrations"),
+      icon: <Link2 size={15} />,
+    },
   ];
 
   const handleSaveProfile = profileForm.handleSubmit(async (data) => {
@@ -611,13 +622,13 @@ const SettingsPage = () => {
           {/* Header */}
           <div className="mb-6">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
-              Settings
+              {t("eyebrow")}
             </p>
             <h1 className="mt-2 text-2xl font-black tracking-tighter sm:text-3xl md:text-4xl lg:text-5xl">
-              Account Settings
+              {t("title")}
             </h1>
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-              Manage your profile, security, and preferences.
+              {t("subtitle")}
             </p>
           </div>
 
@@ -625,7 +636,7 @@ const SettingsPage = () => {
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6">
             <SidebarNavShell>
               <nav aria-label="Account sections" className="flex-1">
-                <SidebarNavGroup label="Account" />
+                <SidebarNavGroup label={t("groups.account")} />
                 {sectionTabs
                   .filter(
                     (tab) => tab.id === "profile" || tab.id === "security",
@@ -640,7 +651,7 @@ const SettingsPage = () => {
                     />
                   ))}
 
-                <SidebarNavGroup label="App" />
+                <SidebarNavGroup label={t("groups.app")} />
                 {sectionTabs
                   .filter(
                     (tab) => tab.id === "content" || tab.id === "integrations",
@@ -1084,6 +1095,10 @@ const SettingsPage = () => {
                     transition={{ duration: 0.2 }}
                     className="space-y-4"
                   >
+                    <SectionCard>
+                      <LanguageSwitcher />
+                    </SectionCard>
+
                     <SectionCard>
                       <SectionHeader
                         title="Content Preferences"

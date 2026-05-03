@@ -1,0 +1,27 @@
+{
+  "Settings": {
+    "eyebrow": "Ajustes",
+    "title": "Ajustes de la cuenta",
+    "subtitle": "Gestiona tu perfil, seguridad y preferencias.",
+    "tabs": {
+      "profile": "Perfil",
+      "security": "Seguridad",
+      "content": "Contenido",
+      "integrations": "Integraciones"
+    },
+    "groups": {
+      "account": "Cuenta",
+      "app": "Aplicación"
+    }
+  },
+  "Language": {
+    "title": "Idioma",
+    "description": "Elige el idioma usado en toda la aplicación.",
+    "options": {
+      "en": "Inglés",
+      "es": "Español"
+    },
+    "saving": "Guardando…",
+    "saved": "Idioma actualizado."
+  }
+}
