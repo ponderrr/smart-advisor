@@ -86,6 +86,9 @@
     "yes": "Sí",
     "no": "No"
   },
+  "Auth": {
+    "sessionExpired": "Tu sesión expiró. Inicia sesión de nuevo."
+  },
   "Quiz": {
     "category": "Configuración del cuestionario",
     "stepOf": "Paso {current} de {total}",
@@ -171,29 +174,32 @@
     }
   },
   "Results": {
-    "loadingHeader": "Preparando tus recomendaciones",
-    "errorTitle": "Algo salió mal",
-    "errorRetry": "Reintentar",
-    "errorBack": "Volver a la configuración",
-    "shareCopy": "Copiar enlace",
-    "shareCopied": "¡Enlace copiado!",
-    "shareTwitter": "Compartir en X",
-    "shareEmail": "Compartir por correo",
-    "shareTitle": "Comparte tus recomendaciones",
-    "anotherPick": "Obtener otra recomendación",
-    "viewHistory": "Ver historial",
-    "share": "Compartir",
-    "favorited": "Favorito",
-    "favorite": "Marcar favorito",
-    "showMore": "Ver más",
-    "showLess": "Ver menos"
+    "loadingMessages": [
+      "Repasando tus respuestas…",
+      "Consultando el algoritmo…",
+      "Comparando buen gusto…",
+      "Revisando estanterías de películas…",
+      "Buscando en la biblioteca…",
+      "Cazando joyas ocultas…",
+      "Combinando estados de ánimo y géneros…",
+      "Desempolvando clásicos olvidados…",
+      "Revisando contra tu historial…",
+      "Sopesando la lista corta…",
+      "Reduciendo las opciones…",
+      "Pasándolo por la IA una vez más…",
+      "Puliendo cada recomendación…",
+      "Dando los toques finales…"
+    ]
   },
   "Dashboard": {
-    "title": "Panel",
-    "subtitle": "Tu actividad de un vistazo.",
+    "eyebrow": "Panel",
+    "startQuiz": "Iniciar cuestionario",
+    "viewsAria": "Vistas del panel",
+    "viewsGroup": "Vistas",
     "tabs": {
       "overview": "Resumen",
       "picks": "Recomendaciones",
+      "recentPicks": "Recomendaciones recientes",
       "genres": "Géneros"
     },
     "stats": {
@@ -202,9 +208,10 @@
       "books": "Libros",
       "favorites": "Favoritos"
     },
-    "lastPick": "Última recomendación",
-    "newQuiz": "Iniciar un nuevo cuestionario",
-    "empty": "Aún no tienes recomendaciones. Haz un cuestionario para empezar.",
-    "startQuiz": "Hacer el cuestionario"
+    "filters": {
+      "all": "Todas",
+      "favorites": "Favoritos"
+    },
+    "recentAria": "Filtro de recomendaciones recientes"
   }
 }
