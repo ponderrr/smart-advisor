@@ -510,6 +510,32 @@
         "prompt": "Remembered your password?",
         "cta": "Sign in"
       }
+    },
+    "mfaChallenge": {
+      "successTitle": "Verified",
+      "successBody": "Taking you to your dashboard…",
+      "totpTitle": "Enter verification code",
+      "totpBody": "Open your authenticator app and enter the 6-digit code.",
+      "backupTitle": "Enter backup code",
+      "backupBody": "Enter one of your pre-generated backup codes.",
+      "totpPlaceholder": "000000",
+      "backupPlaceholder": "XXXXX-XXXXX",
+      "verify": "Verify",
+      "verifying": "Verifying…",
+      "useBackup": "Can't access your authenticator? Use a backup code",
+      "useTotp": "Use authenticator app instead",
+      "backToSignIn": "Back to sign in"
+    },
+    "verifyEmail": {
+      "title": "Verify your email",
+      "bodyLead": "We sent a verification link to",
+      "bodyTail": ". Click the link to activate your account.",
+      "mfaHintLead": "Next up:",
+      "mfaHintBody": "After verifying your email, you'll be able to add two-factor authentication for extra security.",
+      "resend": "Resend verification email",
+      "resending": "Resending…",
+      "resendSuccess": "Verification email sent. Check your inbox.",
+      "backToSignIn": "Back to sign in"
     }
   },
   "Wrapped": {

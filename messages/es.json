@@ -510,6 +510,32 @@
         "prompt": "¿Recordaste tu contraseña?",
         "cta": "Iniciar sesión"
       }
+    },
+    "mfaChallenge": {
+      "successTitle": "Verificado",
+      "successBody": "Llevándote a tu panel…",
+      "totpTitle": "Ingresa el código de verificación",
+      "totpBody": "Abre tu app autenticadora e ingresa el código de 6 dígitos.",
+      "backupTitle": "Ingresa el código de respaldo",
+      "backupBody": "Ingresa uno de tus códigos de respaldo previamente generados.",
+      "totpPlaceholder": "000000",
+      "backupPlaceholder": "XXXXX-XXXXX",
+      "verify": "Verificar",
+      "verifying": "Verificando…",
+      "useBackup": "¿No puedes acceder a tu autenticador? Usa un código de respaldo",
+      "useTotp": "Usar la app autenticadora",
+      "backToSignIn": "Volver al inicio de sesión"
+    },
+    "verifyEmail": {
+      "title": "Verifica tu correo",
+      "bodyLead": "Enviamos un enlace de verificación a",
+      "bodyTail": ". Haz clic en el enlace para activar tu cuenta.",
+      "mfaHintLead": "Próximamente:",
+      "mfaHintBody": "Después de verificar tu correo, podrás añadir la autenticación de dos factores para mayor seguridad.",
+      "resend": "Reenviar correo de verificación",
+      "resending": "Reenviando…",
+      "resendSuccess": "Correo de verificación enviado. Revisa tu bandeja.",
+      "backToSignIn": "Volver al inicio de sesión"
     }
   },
   "Wrapped": {
