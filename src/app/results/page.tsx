@@ -35,6 +35,7 @@ import { LogToLibraryButton } from "@/features/library/components/log-to-library
 import { libraryService } from "@/features/library/services/library-service";
 import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
+import { TrailerEmbed } from "@/components/trailer-embed";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -339,6 +340,13 @@ const RecommendationCard = ({
             )}
           </div>
         )}
+
+        <TrailerEmbed
+          type={rec.type}
+          title={rec.title}
+          year={rec.year ?? null}
+          author={rec.author ?? null}
+        />
       </div>
 
       <div className="hidden sm:grid sm:grid-cols-[168px_1fr]">
@@ -504,6 +512,15 @@ const RecommendationCard = ({
               )}
             </div>
           )}
+
+          <div className="mt-4">
+            <TrailerEmbed
+              type={rec.type}
+              title={rec.title}
+              year={rec.year ?? null}
+              author={rec.author ?? null}
+            />
+          </div>
         </div>
       </div>
     </motion.article>
