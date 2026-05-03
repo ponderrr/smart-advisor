@@ -272,6 +272,67 @@
   "Auth": {
     "sessionExpired": "Tu sesión expiró. Inicia sesión de nuevo."
   },
+  "History": {
+    "eyebrow": "Historial",
+    "title": "Tu historial de sugerencias",
+    "subtitle": "Todo lo que la IA ha elegido para ti. Marca uno como favorito para tenerlo cerca, o regístralo en tu biblioteca para enseñarle a la IA cómo te sentiste.",
+    "clearAll": "Borrar todo",
+    "startQuiz": "Iniciar cuestionario",
+    "filtersAria": "Filtros del historial",
+    "filtersGroup": "Filtros",
+    "filters": {
+      "all": "Todo",
+      "movies": "Películas",
+      "books": "Libros",
+      "favorites": "Favoritos"
+    },
+    "stats": {
+      "total": "Total",
+      "favorites": "Favoritos",
+      "movies": "Películas",
+      "books": "Libros"
+    },
+    "sortLabel": "Ordenar:",
+    "sortAria": "Ordenar recomendaciones",
+    "sort": {
+      "newest": "Más nuevas",
+      "oldest": "Más antiguas",
+      "favorites_first": "Favoritos primero"
+    },
+    "empty": {
+      "title": "No se encontraron recomendaciones",
+      "body": "Prueba con un filtro diferente o genera un nuevo conjunto de recomendaciones."
+    },
+    "card": {
+      "movie": "Película",
+      "book": "Libro",
+      "fallbackExplanation": "Una recomendación de {type} adaptada a tus elecciones recientes del cuestionario.",
+      "openAria": "Abrir detalles de {title}",
+      "favoriteAdd": "Añadir a favoritos",
+      "favoriteRemove": "Quitar de favoritos",
+      "deleteAria": "Eliminar"
+    },
+    "toasts": {
+      "favoriteFailed": "No se pudo actualizar tu favorito; inténtalo de nuevo",
+      "favoriteAdded": "Añadido a favoritos",
+      "favoriteRemoved": "Quitado de favoritos",
+      "deleteFailed": "No se pudo eliminar esa recomendación; inténtalo de nuevo",
+      "deleted": "Recomendación eliminada de tu historial",
+      "clearFailed": "No se pudo borrar tu historial; inténtalo de nuevo",
+      "cleared": "Todas las recomendaciones eliminadas"
+    },
+    "confirm": {
+      "deleteOne": "¿Eliminar esta recomendación?",
+      "clearAll": "¿Seguro que quieres eliminar todas las recomendaciones? Esto no se puede deshacer."
+    },
+    "modal": {
+      "ariaLabel": "Detalles de {title}",
+      "byAuthor": "Por {author}",
+      "byDirector": "Dirigida por {director}",
+      "inLibrary": "En tu biblioteca",
+      "close": "Cerrar"
+    }
+  },
   "Library": {
     "eyebrow": "Biblioteca",
     "title": "Lo que has visto y leído",
