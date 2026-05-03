@@ -349,6 +349,144 @@
       }
     }
   },
+  "GroupQuiz": {
+    "lobby": {
+      "eyebrow": "Cuestionario en grupo",
+      "title": "Encuentra una recomendación juntos",
+      "subtitle": "Organiza un cuestionario y comparte el código. Todos responden, la IA encuentra una recomendación que encaja con el grupo.",
+      "intent": {
+        "eyebrow": "Bienvenido de vuelta",
+        "headline": "¿Continuar donde lo dejaste?",
+        "summary": "{count} preguntas · {types}",
+        "types": {
+          "both": "películas + libros",
+          "movie": "películas",
+          "book": "libros"
+        },
+        "continue": "Continuar",
+        "continuing": "Creando…",
+        "dismissAria": "Descartar"
+      },
+      "host": {
+        "eyebrow": "Anfitrión",
+        "title": "Iniciar nueva sesión",
+        "nameLabel": "Tu nombre",
+        "namePlaceholder": "Cómo te verán los demás",
+        "typeLabel": "Tipo de recomendación",
+        "questionsLabel": "Preguntas",
+        "questionsAria": "Número de preguntas",
+        "create": "Crear sesión",
+        "creating": "Creando…",
+        "signInTitle": "Inicia sesión para hospedar",
+        "signInBody": "Hospedar guarda la recomendación del grupo en tu biblioteca, registra rachas y desbloquea Año en Revisión.",
+        "signInCta": "Iniciar sesión o crear cuenta",
+        "signInHint": "¿Solo quieres jugar? Usa el código a la derecha."
+      },
+      "join": {
+        "eyebrow": "Unirse",
+        "title": "¿Tienes un código?",
+        "codeLabel": "Código de sesión",
+        "codePlaceholder": "ABC123",
+        "nameLabel": "Tu nombre",
+        "namePlaceholder": "Nombre para mostrar",
+        "join": "Unirse a la sesión",
+        "joining": "Uniéndose…",
+        "footer": "No necesitas cuenta para unirte: solo un nombre y un código."
+      },
+      "contentTypes": {
+        "both": "Ambos",
+        "movie": "Películas",
+        "book": "Libros"
+      },
+      "errors": {
+        "signInRequired": "Inicia sesión para hospedar un cuestionario en grupo.",
+        "createFailed": "No se pudo crear la sesión",
+        "joinFailed": "No se pudo unir a la sesión",
+        "codeLength": "Ingresa un código de 6 caracteres."
+      }
+    },
+    "session": {
+      "loading": "Cargando sesión…",
+      "notFoundTitle": "Sesión no encontrada",
+      "notFoundBody": "Ese código no corresponde a una sesión activa.",
+      "backToHome": "Volver al cuestionario en grupo",
+      "shareCode": "Comparte este código",
+      "copyLink": "Copiar enlace",
+      "linkCopied": "Enlace copiado",
+      "linkCopyFailed": "No se pudo copiar el enlace",
+      "joined": "{name} se unió",
+      "left": "{name} salió de la sala",
+      "playerCount": "{count, plural, one {# jugador} other {# jugadores}}",
+      "submittedCount": "{submitted}/{total} enviados",
+      "leave": "Salir",
+      "backToLobby": "Volver a la sala",
+      "end": "Terminar",
+      "leaveConfirm": "¿Salir de este cuestionario en grupo?",
+      "leaveQuizConfirm": "¿Salir del cuestionario en grupo? Tus respuestas no se enviarán.",
+      "endConfirm": "¿Terminar esta sesión para todos?",
+      "backToLobbyConfirmInProgress": "¿Enviar a todos de vuelta a la sala? Las respuestas en progreso se borrarán.",
+      "backToLobbyConfirmCompleted": "¿Enviar a todos de vuelta a la sala? Las respuestas y la recomendación actual se borrarán para empezar de nuevo.",
+      "host": {
+        "generatingQuestions": "Generando preguntas…",
+        "startQuiz": "Iniciar cuestionario · {count, plural, one {# pregunta} other {# preguntas}}",
+        "needTwoPlayers": "Necesitas al menos 2 jugadores para empezar.",
+        "startFailed": "No se pudo iniciar el cuestionario",
+        "restartFailed": "No se pudo reiniciar el cuestionario",
+        "synthesizeFailed": "No se pudo generar la recomendación"
+      },
+      "guest": {
+        "waitingHost": "Esperando al anfitrión",
+        "waitingBody": "Aguanta — empezarán en cualquier momento.",
+        "joinLobby": "Únete a la sala",
+        "joinPrompt": "Ingresa un nombre para unirte a este cuestionario en grupo.",
+        "joinPlaceholder": "Nombre para mostrar",
+        "join": "Unirse",
+        "joining": "Uniéndose…",
+        "joinFailed": "No se pudo unir a la sesión",
+        "inProgress": "El cuestionario ya está en curso.",
+        "completed": "Esta sesión ya terminó.",
+        "askHost": "Pide al anfitrión que vuelva a abrir la sala para unirte."
+      },
+      "submitted": {
+        "lockedInAll": "Todos enviaron",
+        "lockedIn": "Enviado",
+        "waitingOthers": "Esperando a que los demás terminen…",
+        "reveal": "Revelar la recomendación del grupo",
+        "revealing": "Buscando la recomendación…",
+        "guestWaiting": "El anfitrión está generando la recomendación…"
+      },
+      "quiz": {
+        "questionOf": "Pregunta {current} de {total}",
+        "back": "Atrás",
+        "next": "Siguiente",
+        "submit": "Confirmar",
+        "submitting": "Enviando…",
+        "submittedToast": "¡Confirmado!",
+        "answerAll": "Responde todas las preguntas primero."
+      },
+      "completed": {
+        "eyebrow": "La recomendación del grupo",
+        "subtitle": "Según lo que todos dijeron, aquí hay algo que debería encajar con la sala.",
+        "playAgain": "Jugar de nuevo",
+        "resetting": "Reiniciando…",
+        "newGroup": "Iniciar un nuevo grupo",
+        "done": "Listo",
+        "endSession": "Terminar sesión"
+      },
+      "cancelled": {
+        "body": "Esta sesión se terminó."
+      }
+    },
+    "result": {
+      "movie": "Película",
+      "book": "Libro",
+      "byAuthor": "Por {creator}",
+      "byDirector": "Dirigida por {creator}",
+      "viewOnOpenLibrary": "Ver en Open Library",
+      "watchTrailer": "Ver tráiler",
+      "playTrailerAria": "Reproducir tráiler de {title}"
+    }
+  },
   "History": {
     "eyebrow": "Historial",
     "title": "Tu historial de sugerencias",

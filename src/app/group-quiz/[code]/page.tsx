@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useLeaveGuard } from "@/features/quiz/hooks/use-leave-guard";
@@ -63,6 +64,7 @@ const GroupQuizLobbyPage = () => {
   const params = useParams<{ code: string }>();
   const code = (params?.code ?? "").toUpperCase();
   const { user } = useAuth();
+  const t = useTranslations("GroupQuiz.session");
 
   const [session, setSession] = useState<QuizSession | null>(null);
   const [participants, setParticipants] = useState<QuizParticipant[]>([]);
@@ -137,12 +139,12 @@ const GroupQuizLobbyPage = () => {
           if (payload.eventType === "DELETE") {
             const left = payload.old as { display_name?: string } | undefined;
             if (left?.display_name) {
-              toast.message(`${left.display_name} left the lobby`);
+              toast.message(t("left", { name: left.display_name }));
             }
           } else if (payload.eventType === "INSERT") {
             const joined = payload.new as { display_name?: string } | undefined;
             if (joined?.display_name) {
-              toast.success(`${joined.display_name} joined`);
+              toast.success(t("joined", { name: joined.display_name }));
             }
           }
           const { data } = await groupQuizService.listParticipants(sessionId);
@@ -182,7 +184,7 @@ const GroupQuizLobbyPage = () => {
       session?.status === "in_progress" &&
       !submitted &&
       !!session.questions?.length,
-    "Leave the group quiz? Your answers so far won't be submitted.",
+    t("leaveQuizConfirm"),
   );
   const allSubmitted =
     participants.length > 0 &&
@@ -193,16 +195,16 @@ const GroupQuizLobbyPage = () => {
     const url = `${window.location.origin}/group-quiz/${session.code}`;
     try {
       await navigator.clipboard.writeText(url);
-      toast.success("Link copied");
+      toast.success(t("linkCopied"));
     } catch {
-      toast.error("Couldn't copy link");
+      toast.error(t("linkCopyFailed"));
     }
   };
 
   const handleStart = async () => {
     if (!session || !user) return;
     if (participants.length < 2) {
-      toast.error("You need at least 2 players to start.");
+      toast.error(t("host.needTwoPlayers"));
       return;
     }
     setStarting(true);
@@ -214,7 +216,7 @@ const GroupQuizLobbyPage = () => {
       );
     setStarting(false);
     if (e || !newQuestions) {
-      toast.error(e ?? "Couldn't start the quiz");
+      toast.error(e ?? t("host.startFailed"));
       return;
     }
     setSession((prev) =>
@@ -226,7 +228,7 @@ const GroupQuizLobbyPage = () => {
 
   const handleCancel = async () => {
     if (!session) return;
-    const ok = window.confirm("End this session for everyone?");
+    const ok = window.confirm(t("endConfirm"));
     if (!ok) return;
     await groupQuizService.setStatus(session.id, "cancelled");
     router.push("/group-quiz");
@@ -234,7 +236,7 @@ const GroupQuizLobbyPage = () => {
 
   const handleLeave = async () => {
     if (!me) return;
-    if (!window.confirm("Leave this group quiz?")) return;
+    if (!window.confirm(t("leaveConfirm"))) return;
     await groupQuizService.leave(me.id);
     router.push("/group-quiz");
   };
@@ -246,7 +248,7 @@ const GroupQuizLobbyPage = () => {
     );
     if (unanswered !== -1) {
       setCurrentQ(unanswered);
-      toast.error("Answer every question first.");
+      toast.error(t("quiz.answerAll"));
       return;
     }
     setSubmitting(true);
@@ -268,7 +270,7 @@ const GroupQuizLobbyPage = () => {
     }
     await groupQuizService.markParticipantSubmitted(me.id);
     setSubmitting(false);
-    toast.success("Locked in!");
+    toast.success(t("quiz.submittedToast"));
   };
 
   const handleJoinHere = async () => {
@@ -285,7 +287,7 @@ const GroupQuizLobbyPage = () => {
     });
     setJoiningHere(false);
     if (e || !participant) {
-      toast.error(e ?? "Couldn't join session");
+      toast.error(e ?? t("guest.joinFailed"));
       return;
     }
     const { data: p } = await groupQuizService.listParticipants(session.id);
@@ -296,8 +298,8 @@ const GroupQuizLobbyPage = () => {
     if (!session) return;
     const message =
       session.status === "in_progress"
-        ? "Send everyone back to the lobby? In-progress answers will be cleared."
-        : "Send everyone back to the lobby? Answers and the current pick will be cleared so a fresh round can start.";
+        ? t("backToLobbyConfirmInProgress")
+        : t("backToLobbyConfirmCompleted");
     if (!window.confirm(message)) return;
     const { error: e } = await groupQuizService.returnToLobby(session);
     if (e) {
@@ -328,7 +330,7 @@ const GroupQuizLobbyPage = () => {
       );
     setStarting(false);
     if (e || !newQuestions) {
-      toast.error(e ?? "Couldn't restart the quiz");
+      toast.error(e ?? t("host.restartFailed"));
       return;
     }
     setSession((prev) =>
@@ -359,7 +361,7 @@ const GroupQuizLobbyPage = () => {
     );
     setSynthesizing(false);
     if (e || !result) {
-      toast.error(e ?? "Failed to generate recommendation");
+      toast.error(e ?? t("host.synthesizeFailed"));
       return;
     }
     // Flip the host's local state immediately so the result page appears
@@ -376,7 +378,7 @@ const GroupQuizLobbyPage = () => {
     );
   };
 
-  if (loading) return <PageLoader text="Loading session…" />;
+  if (loading) return <PageLoader text={t("loading")} />;
 
   if (error || !session) {
     return (
@@ -385,17 +387,17 @@ const GroupQuizLobbyPage = () => {
         <main className="px-4 pb-20 pt-28 sm:px-6 md:pt-36">
           <div className="mx-auto max-w-md rounded-3xl border border-slate-200/80 bg-white/80 p-10 text-center shadow-sm backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/65">
             <h2 className="text-2xl font-black tracking-tight">
-              Session Not Found
+              {t("notFoundTitle")}
             </h2>
             <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
-              {error ?? "That code doesn't match an active session."}
+              {error ?? t("notFoundBody")}
             </p>
             <button
               type="button"
               onClick={() => router.push("/group-quiz")}
               className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-black tracking-tight text-white transition-colors hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
             >
-              Back to Group Quiz
+              {t("backToHome")}
               <ArrowRight size={14} />
             </button>
           </div>
@@ -423,7 +425,7 @@ const GroupQuizLobbyPage = () => {
               <div className="relative overflow-hidden rounded-3xl border border-indigo-200/60 bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-6 shadow-sm dark:border-indigo-500/30 dark:from-indigo-500/15 dark:via-slate-900/60 dark:to-violet-500/15 sm:p-8">
                 <div className="flex flex-col items-center gap-4 text-center">
                   <p className="text-[11px] font-black uppercase tracking-[0.16em] text-indigo-700 dark:text-indigo-300">
-                    Share This Code
+                    {t("shareCode")}
                   </p>
                   <p className="select-all font-mono text-4xl font-black tracking-[0.5em] sm:text-5xl">
                     {session.code}
@@ -434,7 +436,7 @@ const GroupQuizLobbyPage = () => {
                     className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white/90 px-4 py-2 text-xs font-bold tracking-tight text-slate-700 shadow-sm hover:border-slate-300 hover:bg-white dark:border-slate-700 dark:bg-slate-900/65 dark:text-slate-200"
                   >
                     <Copy size={12} />
-                    Copy Link
+                    {t("copyLink")}
                   </button>
                 </div>
               </div>
@@ -448,16 +450,16 @@ const GroupQuizLobbyPage = () => {
                     <Users size={13} />
                   </span>
                   <h2 className="text-sm font-black tracking-tight">
-                    {participants.length}{" "}
-                    {participants.length === 1 ? "Player" : "Players"}
+                    {t("playerCount", { count: participants.length })}
                     {session.status === "in_progress" && (
                       <span className="ml-2 text-[11px] font-bold text-slate-500 dark:text-slate-400">
                         ·{" "}
-                        {
-                          participants.filter((p) => p.answers_submitted_at)
-                            .length
-                        }
-                        /{participants.length} submitted
+                        {t("submittedCount", {
+                          submitted: participants.filter(
+                            (p) => p.answers_submitted_at,
+                          ).length,
+                          total: participants.length,
+                        })}
                       </span>
                     )}
                   </h2>
@@ -470,7 +472,7 @@ const GroupQuizLobbyPage = () => {
                       className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold tracking-tight text-slate-600 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-300"
                     >
                       <LogOut size={12} />
-                      Leave
+                      {t("leave")}
                     </button>
                   )}
                   {isHost && session.status === "in_progress" && (
@@ -480,7 +482,7 @@ const GroupQuizLobbyPage = () => {
                       className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold tracking-tight text-slate-700 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200"
                     >
                       <ArrowLeft size={12} />
-                      Back to Lobby
+                      {t("backToLobby")}
                     </button>
                   )}
                   {isHost && session.status !== "completed" && (
@@ -489,7 +491,7 @@ const GroupQuizLobbyPage = () => {
                       onClick={handleCancel}
                       className="inline-flex items-center gap-1 rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-bold tracking-tight text-rose-700 hover:bg-rose-100 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300"
                     >
-                      End
+                      {t("end")}
                     </button>
                   )}
                 </div>
@@ -527,8 +529,8 @@ const GroupQuizLobbyPage = () => {
                     className="inline-flex items-center justify-center rounded-full bg-slate-900 px-8 py-3.5 text-base font-black tracking-tight text-white shadow-lg shadow-indigo-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-xl hover:shadow-indigo-500/40 active:translate-y-0 disabled:opacity-50 disabled:hover:translate-y-0 dark:bg-white dark:text-slate-900 dark:shadow-white/20 dark:hover:bg-slate-100 dark:hover:shadow-white/30"
                   >
                     {starting
-                      ? "Generating questions…"
-                      : `Start Quiz · ${session.question_count} ${session.question_count === 1 ? "question" : "questions"}`}
+                      ? t("host.generatingQuestions")
+                      : t("host.startQuiz", { count: session.question_count })}
                   </button>
                 </div>
               )}
@@ -539,27 +541,27 @@ const GroupQuizLobbyPage = () => {
                     <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-amber-500" />
                   </span>
                   <p className="text-sm font-black tracking-tight">
-                    Waiting for the Host
+                    {t("guest.waitingHost")}
                   </p>
                   <p className="-mt-0.5 max-w-xs text-xs text-slate-500 dark:text-slate-400">
-                    Hang tight — they'll kick things off any second.
+                    {t("guest.waitingBody")}
                   </p>
                 </div>
               )}
               {session.status === "lobby" && !me && (
                 <div className="mt-5 rounded-2xl border border-indigo-200/60 bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-5 dark:border-indigo-500/30 dark:from-indigo-500/10 dark:via-slate-900/40 dark:to-violet-500/10">
                   <p className="text-[11px] font-black uppercase tracking-[0.16em] text-indigo-700 dark:text-indigo-300">
-                    Join the Lobby
+                    {t("guest.joinLobby")}
                   </p>
                   <p className="mt-1 text-sm font-bold tracking-tight">
-                    Enter a name to join this group quiz.
+                    {t("guest.joinPrompt")}
                   </p>
                   <div className="mt-3 flex flex-col gap-2 sm:flex-row">
                     <input
                       type="text"
                       value={joinHereName}
                       onChange={(e) => setJoinHereName(e.target.value)}
-                      placeholder={user?.username || "Display name"}
+                      placeholder={user?.username || t("guest.joinPlaceholder")}
                       onKeyDown={(e) => {
                         if (e.key === "Enter") handleJoinHere();
                       }}
@@ -571,7 +573,7 @@ const GroupQuizLobbyPage = () => {
                       disabled={joiningHere}
                       className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-indigo-500 px-5 py-2.5 text-sm font-black tracking-tight text-white shadow-sm shadow-indigo-500/30 transition-colors hover:bg-indigo-600 disabled:opacity-50"
                     >
-                      {joiningHere ? "Joining…" : "Join"}
+                      {joiningHere ? t("guest.joining") : t("guest.join")}
                       <ArrowRight size={14} />
                     </button>
                   </div>
@@ -583,11 +585,11 @@ const GroupQuizLobbyPage = () => {
                   <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50/60 p-5 text-center dark:border-slate-700/60 dark:bg-slate-900/40">
                     <p className="text-sm font-bold tracking-tight">
                       {session.status === "in_progress"
-                        ? "The quiz is already underway."
-                        : "This session is wrapped up."}
+                        ? t("guest.inProgress")
+                        : t("guest.completed")}
                     </p>
                     <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                      Ask the host to bring the lobby back so you can join.
+                      {t("guest.askHost")}
                     </p>
                   </div>
                 )}
@@ -603,11 +605,13 @@ const GroupQuizLobbyPage = () => {
                       className="mx-auto text-emerald-500"
                     />
                     <h3 className="mt-3 text-xl font-black tracking-tight">
-                      {allSubmitted ? "Everyone's Locked In" : "Locked In"}
+                      {allSubmitted
+                        ? t("submitted.lockedInAll")
+                        : t("submitted.lockedIn")}
                     </h3>
                     {!allSubmitted && (
                       <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                        Waiting for everyone else to finish…
+                        {t("submitted.waitingOthers")}
                       </p>
                     )}
                     {isHost && allSubmitted && (
@@ -618,13 +622,13 @@ const GroupQuizLobbyPage = () => {
                         className="mt-5 inline-flex items-center justify-center rounded-full bg-slate-900 px-8 py-3.5 text-base font-black tracking-tight text-white shadow-lg shadow-indigo-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-xl hover:shadow-indigo-500/40 active:translate-y-0 disabled:opacity-50 disabled:hover:translate-y-0 dark:bg-white dark:text-slate-900 dark:shadow-white/20 dark:hover:bg-slate-100 dark:hover:shadow-white/30"
                       >
                         {synthesizing
-                          ? "Finding the pick…"
-                          : "Reveal the Group's Pick"}
+                          ? t("submitted.revealing")
+                          : t("submitted.reveal")}
                       </button>
                     )}
                     {!isHost && allSubmitted && (
                       <p className="mt-4 text-xs text-slate-500 dark:text-slate-400">
-                        Host is generating the pick…
+                        {t("submitted.guestWaiting")}
                       </p>
                     )}
                   </div>
@@ -633,7 +637,10 @@ const GroupQuizLobbyPage = () => {
                     <div className="mb-4 flex items-center justify-between gap-3">
                       <div>
                         <p className="text-[10px] font-black uppercase tracking-[0.16em] text-indigo-600 dark:text-indigo-400">
-                          Question {currentQ + 1} of {questions.length}
+                          {t("quiz.questionOf", {
+                            current: currentQ + 1,
+                            total: questions.length,
+                          })}
                         </p>
                       </div>
                       <div className="h-1 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
@@ -677,7 +684,7 @@ const GroupQuizLobbyPage = () => {
                         className="inline-flex items-center gap-1.5 px-5 py-2.5 text-sm"
                       >
                         <ArrowLeft size={14} />
-                        Back
+                        {t("quiz.back")}
                       </PillButton>
                       {currentQ === questions.length - 1 ? (
                         <button
@@ -689,7 +696,7 @@ const GroupQuizLobbyPage = () => {
                           }
                           className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-black tracking-tight text-white transition-colors hover:bg-slate-800 disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
                         >
-                          {submitting ? "Submitting…" : "Lock It In"}
+                          {submitting ? t("quiz.submitting") : t("quiz.submit")}
                           <ArrowRight size={14} />
                         </button>
                       ) : (
@@ -699,7 +706,7 @@ const GroupQuizLobbyPage = () => {
                           disabled={!hasAnswer(localAnswers[currentQuestion.id])}
                           className="inline-flex items-center gap-2 rounded-full bg-indigo-500 px-5 py-2.5 text-sm font-black tracking-tight text-white transition-colors hover:bg-indigo-600 disabled:opacity-50"
                         >
-                          Next
+                          {t("quiz.next")}
                           <ArrowRight size={14} />
                         </button>
                       )}
@@ -717,7 +724,7 @@ const GroupQuizLobbyPage = () => {
                   aria-hidden="true"
                 />
                 <p className="mt-3 text-sm font-bold tracking-tight">
-                  Generating questions…
+                  {t("host.generatingQuestions")}
                 </p>
               </div>
             )}
@@ -732,12 +739,11 @@ const GroupQuizLobbyPage = () => {
                       className="text-amber-600 dark:text-amber-400"
                     />
                     <p className="text-[11px] font-black uppercase tracking-[0.16em] text-amber-700 dark:text-amber-300">
-                      The Group's Pick
+                      {t("completed.eyebrow")}
                     </p>
                   </div>
                   <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-                    Based on what everyone said, here's something that should
-                    land for the room.
+                    {t("completed.subtitle")}
                   </p>
                 </div>
                 {session.result.movie && (
@@ -771,7 +777,9 @@ const GroupQuizLobbyPage = () => {
                           className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-black tracking-tight text-white transition-colors hover:bg-slate-800 disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
                         >
                           <RotateCcw size={14} />
-                          {starting ? "Resetting…" : "Play Again"}
+                          {starting
+                            ? t("completed.resetting")
+                            : t("completed.playAgain")}
                         </button>
                         <button
                           type="button"
@@ -779,14 +787,14 @@ const GroupQuizLobbyPage = () => {
                           className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold tracking-tight text-slate-700 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200"
                         >
                           <ArrowLeft size={12} />
-                          Back to Lobby
+                          {t("backToLobby")}
                         </button>
                         <button
                           type="button"
                           onClick={() => router.push("/group-quiz")}
                           className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold tracking-tight text-slate-700 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200"
                         >
-                          Start a New Group
+                          {t("completed.newGroup")}
                           <ArrowRight size={12} />
                         </button>
                       </>
@@ -796,7 +804,7 @@ const GroupQuizLobbyPage = () => {
                         onClick={() => router.push("/group-quiz")}
                         className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-black tracking-tight text-white transition-colors hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
                       >
-                        Done
+                        {t("completed.done")}
                         <ArrowRight size={14} />
                       </button>
                     )}
@@ -807,7 +815,7 @@ const GroupQuizLobbyPage = () => {
                       onClick={handleCancel}
                       className="inline-flex items-center justify-center gap-1.5 self-start rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-bold tracking-tight text-rose-700 hover:bg-rose-100 sm:self-auto dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300"
                     >
-                      End Session
+                      {t("completed.endSession")}
                     </button>
                   )}
                 </div>
@@ -817,14 +825,14 @@ const GroupQuizLobbyPage = () => {
             {session.status === "cancelled" && (
               <div className="rounded-3xl border border-slate-200/70 bg-white/80 p-8 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
                 <p className="text-sm font-bold tracking-tight">
-                  This session was ended.
+                  {t("cancelled.body")}
                 </p>
                 <button
                   type="button"
                   onClick={() => router.push("/group-quiz")}
                   className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-black tracking-tight text-white transition-colors hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
                 >
-                  Back to Group Quiz
+                  {t("backToHome")}
                   <ArrowRight size={14} />
                 </button>
               </div>
@@ -870,6 +878,7 @@ const ResultCard = ({
   genres,
   explanation,
 }: ResultCardProps) => {
+  const t = useTranslations("GroupQuiz.result");
   const [media, setMedia] = useState<TrailerData>(null);
   const [showPlayer, setShowPlayer] = useState(false);
 
@@ -918,7 +927,7 @@ const ResultCard = ({
               {type === "movie" ? <Film size={13} /> : <BookOpen size={13} />}
             </span>
             <p className="text-[10px] font-black uppercase tracking-[0.16em] text-indigo-600 dark:text-indigo-400">
-              {type === "movie" ? "Movie" : "Book"}
+              {type === "movie" ? t("movie") : t("book")}
             </p>
           </div>
           <h3 className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">
@@ -926,7 +935,9 @@ const ResultCard = ({
           </h3>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             {creator
-              ? `${type === "movie" ? "Directed by" : "By"} ${creator}`
+              ? type === "movie"
+                ? t("byDirector", { creator })
+                : t("byAuthor", { creator })
               : ""}
             {year ? ` · ${year}` : ""}
           </p>
@@ -959,7 +970,7 @@ const ResultCard = ({
               rel="noopener noreferrer"
               className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white/80 px-3.5 py-1.5 text-xs font-bold tracking-tight text-slate-700 hover:border-slate-300 hover:text-indigo-700 dark:border-slate-700/70 dark:bg-slate-900/65 dark:text-slate-200 dark:hover:text-indigo-300"
             >
-              View on Open Library
+              {t("viewOnOpenLibrary")}
             </a>
           )}
         </div>
@@ -970,7 +981,7 @@ const ResultCard = ({
             <button
               type="button"
               onClick={() => setShowPlayer(true)}
-              aria-label={`Play trailer for ${title}`}
+              aria-label={t("playTrailerAria", { title })}
               className="group relative block aspect-video w-full overflow-hidden rounded-2xl bg-slate-900"
             >
                 <img
@@ -991,7 +1002,7 @@ const ResultCard = ({
               <span className="absolute bottom-3 left-3 right-3 truncate text-left text-xs font-bold text-white/90">
                 {media?.provider === "youtube" && media.name
                   ? media.name
-                  : "Watch trailer"}
+                  : t("watchTrailer")}
               </span>
             </button>
           ) : (

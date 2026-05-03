@@ -349,6 +349,144 @@
       }
     }
   },
+  "GroupQuiz": {
+    "lobby": {
+      "eyebrow": "Group Quiz",
+      "title": "Find a Pick Together",
+      "subtitle": "Host a quiz and share the code. Everyone answers, the AI finds one pick that fits the group.",
+      "intent": {
+        "eyebrow": "Welcome Back",
+        "headline": "Pick up where you left off?",
+        "summary": "{count} questions · {types}",
+        "types": {
+          "both": "movies + books",
+          "movie": "movies",
+          "book": "books"
+        },
+        "continue": "Continue",
+        "continuing": "Creating…",
+        "dismissAria": "Dismiss"
+      },
+      "host": {
+        "eyebrow": "Host",
+        "title": "Start a New Session",
+        "nameLabel": "Your Name",
+        "namePlaceholder": "How others see you",
+        "typeLabel": "Pick Type",
+        "questionsLabel": "Questions",
+        "questionsAria": "Number of questions",
+        "create": "Create Session",
+        "creating": "Creating…",
+        "signInTitle": "Sign In to Host",
+        "signInBody": "Hosting saves the group's pick to your library, tracks streaks, and unlocks Year in Review.",
+        "signInCta": "Sign In or Create Account",
+        "signInHint": "Just want to play? Use the code on the right."
+      },
+      "join": {
+        "eyebrow": "Join",
+        "title": "Have a Code?",
+        "codeLabel": "Session Code",
+        "codePlaceholder": "ABC123",
+        "nameLabel": "Your Name",
+        "namePlaceholder": "Display name",
+        "join": "Join Session",
+        "joining": "Joining…",
+        "footer": "No account needed to join — just a name and a code."
+      },
+      "contentTypes": {
+        "both": "Both",
+        "movie": "Movies",
+        "book": "Books"
+      },
+      "errors": {
+        "signInRequired": "Sign in to host a group quiz.",
+        "createFailed": "Failed to create session",
+        "joinFailed": "Couldn't join session",
+        "codeLength": "Enter a 6-character code."
+      }
+    },
+    "session": {
+      "loading": "Loading session…",
+      "notFoundTitle": "Session Not Found",
+      "notFoundBody": "That code doesn't match an active session.",
+      "backToHome": "Back to Group Quiz",
+      "shareCode": "Share This Code",
+      "copyLink": "Copy Link",
+      "linkCopied": "Link copied",
+      "linkCopyFailed": "Couldn't copy link",
+      "joined": "{name} joined",
+      "left": "{name} left the lobby",
+      "playerCount": "{count, plural, one {# Player} other {# Players}}",
+      "submittedCount": "{submitted}/{total} submitted",
+      "leave": "Leave",
+      "backToLobby": "Back to Lobby",
+      "end": "End",
+      "leaveConfirm": "Leave this group quiz?",
+      "leaveQuizConfirm": "Leave the group quiz? Your answers so far won't be submitted.",
+      "endConfirm": "End this session for everyone?",
+      "backToLobbyConfirmInProgress": "Send everyone back to the lobby? In-progress answers will be cleared.",
+      "backToLobbyConfirmCompleted": "Send everyone back to the lobby? Answers and the current pick will be cleared so a fresh round can start.",
+      "host": {
+        "generatingQuestions": "Generating questions…",
+        "startQuiz": "Start Quiz · {count, plural, one {# question} other {# questions}}",
+        "needTwoPlayers": "You need at least 2 players to start.",
+        "startFailed": "Couldn't start the quiz",
+        "restartFailed": "Couldn't restart the quiz",
+        "synthesizeFailed": "Failed to generate recommendation"
+      },
+      "guest": {
+        "waitingHost": "Waiting for the Host",
+        "waitingBody": "Hang tight — they'll kick things off any second.",
+        "joinLobby": "Join the Lobby",
+        "joinPrompt": "Enter a name to join this group quiz.",
+        "joinPlaceholder": "Display name",
+        "join": "Join",
+        "joining": "Joining…",
+        "joinFailed": "Couldn't join session",
+        "inProgress": "The quiz is already underway.",
+        "completed": "This session is wrapped up.",
+        "askHost": "Ask the host to bring the lobby back so you can join."
+      },
+      "submitted": {
+        "lockedInAll": "Everyone's Locked In",
+        "lockedIn": "Locked In",
+        "waitingOthers": "Waiting for everyone else to finish…",
+        "reveal": "Reveal the Group's Pick",
+        "revealing": "Finding the pick…",
+        "guestWaiting": "Host is generating the pick…"
+      },
+      "quiz": {
+        "questionOf": "Question {current} of {total}",
+        "back": "Back",
+        "next": "Next",
+        "submit": "Lock It In",
+        "submitting": "Submitting…",
+        "submittedToast": "Locked in!",
+        "answerAll": "Answer every question first."
+      },
+      "completed": {
+        "eyebrow": "The Group's Pick",
+        "subtitle": "Based on what everyone said, here's something that should land for the room.",
+        "playAgain": "Play Again",
+        "resetting": "Resetting…",
+        "newGroup": "Start a New Group",
+        "done": "Done",
+        "endSession": "End Session"
+      },
+      "cancelled": {
+        "body": "This session was ended."
+      }
+    },
+    "result": {
+      "movie": "Movie",
+      "book": "Book",
+      "byAuthor": "By {creator}",
+      "byDirector": "Directed by {creator}",
+      "viewOnOpenLibrary": "View on Open Library",
+      "watchTrailer": "Watch trailer",
+      "playTrailerAria": "Play trailer for {title}"
+    }
+  },
   "History": {
     "eyebrow": "History",
     "title": "Your Suggestion History",
