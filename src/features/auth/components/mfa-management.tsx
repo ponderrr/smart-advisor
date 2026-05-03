@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import { toast } from "sonner";
 import { motion } from "motion/react";
+import { useTranslations } from "next-intl";
 import { Dialog } from "@/components/ui/dialog";
 
 interface MfaManagementProps {
@@ -28,20 +29,22 @@ interface MfaManagementProps {
   onAddAuthenticator?: () => void;
 }
 
-// Legacy factors enrolled before we set friendly_name get Supabase's default
-// "<Issuer> TOTP <timestamp>" label, which is useless to the user. Fall back
-// to a generic label in that case; we can't recover the original device.
-const prettifyFactorName = (name: string | undefined): string => {
-  if (!name) return "Authenticator App";
-  if (/\sTOTP\s\d{10,}$/.test(name)) return "Authenticator App";
-  return name;
-};
-
 export const MfaManagement = ({
   mfaEnabled,
   onMfaStatusChange,
   onAddAuthenticator,
 }: MfaManagementProps) => {
+  const t = useTranslations("Auth.mfaManagement");
+
+  // Legacy factors enrolled before we set friendly_name get Supabase's default
+  // "<Issuer> TOTP <timestamp>" label, which is useless to the user. Fall back
+  // to a generic label in that case; we can't recover the original device.
+  const prettifyFactorName = (name: string | undefined): string => {
+    if (!name) return t("fallbackFactorName");
+    if (/\sTOTP\s\d{10,}$/.test(name)) return t("fallbackFactorName");
+    return name;
+  };
+
   const [factors, setFactors] = useState<MFAFactor[]>([]);
   const [loading, setLoading] = useState(false);
   const [unenrollingId, setUnenrollingId] = useState<string | null>(null);
@@ -88,9 +91,7 @@ export const MfaManagement = ({
     setLoading(false);
 
     if (error) {
-      toast.error(
-        "Couldn't load your security settings — please refresh the page",
-      );
+      toast.error(t("loadError"));
       return;
     }
 
@@ -113,7 +114,7 @@ export const MfaManagement = ({
 
   const handleVerifyAndUnenroll = async () => {
     if (verifyCode.length !== 6) {
-      setVerifyError("Enter a 6-digit code");
+      setVerifyError(t("verifyDialogError"));
       return;
     }
     setVerifyLoading(true);
@@ -141,7 +142,7 @@ export const MfaManagement = ({
     if (error) {
       toast.error(error);
     } else {
-      toast.success("Two-factor authentication has been turned off");
+      toast.success(t("disabledToast"));
       await loadFactors();
       onMfaStatusChange?.();
     }
@@ -159,7 +160,7 @@ export const MfaManagement = ({
 
     setNewBackupCodes(codes);
     setBackupCodeCount(codes.length);
-    toast.success("Fresh backup codes are ready — save them somewhere safe");
+    toast.success(t("regeneratedToast"));
   };
 
   const handleCopyBackupCodes = () => {
@@ -167,7 +168,7 @@ export const MfaManagement = ({
     navigator.clipboard.writeText(text);
     setBackupCodesCopied(true);
     setTimeout(() => setBackupCodesCopied(false), 2000);
-    toast.success("Backup codes copied to your clipboard");
+    toast.success(t("copiedToast"));
   };
 
   const handleDownloadBackupCodes = () => {
@@ -199,10 +200,10 @@ export const MfaManagement = ({
     <>
       <div className="mb-5">
         <h2 className="text-xl font-black tracking-tight sm:text-2xl">
-          Two-factor authentication
+          {t("heading")}
         </h2>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          An extra step at sign-in to keep your account secure.
+          {t("subtitle")}
         </p>
       </div>
 
@@ -218,8 +219,8 @@ export const MfaManagement = ({
           />
           <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
             {mfaEnabled
-              ? `${factors.length} authenticator${factors.length === 1 ? "" : "s"} active`
-              : "Not yet enabled"}
+              ? t("activeCount", { count: factors.length })
+              : t("notEnabled")}
           </span>
         </div>
         <span
@@ -229,7 +230,7 @@ export const MfaManagement = ({
               : "shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:bg-slate-800 dark:text-slate-400"
           }
         >
-          {mfaEnabled ? "Enabled" : "Inactive"}
+          {mfaEnabled ? t("statusEnabled") : t("statusInactive")}
         </span>
       </div>
 
@@ -247,7 +248,7 @@ export const MfaManagement = ({
                     {prettifyFactorName(factor.friendly_name)}
                   </p>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Added {format(new Date(factor.created_at), "PP")}
+                    {t("addedOn", { date: format(new Date(factor.created_at), "PP") })}
                   </p>
                 </div>
               </div>
@@ -256,7 +257,7 @@ export const MfaManagement = ({
                   variant="ghost"
                   size="sm"
                   onClick={() => setRenameTarget(factor)}
-                  aria-label={`Rename ${prettifyFactorName(factor.friendly_name)}`}
+                  aria-label={t("renameAria", { name: prettifyFactorName(factor.friendly_name) })}
                   className="text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
                 >
                   <Pencil className="h-4 w-4" />
@@ -285,12 +286,12 @@ export const MfaManagement = ({
                 <KeyRound className="h-5 w-5 shrink-0 text-slate-600 dark:text-slate-400" />
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                    Backup codes
+                    {t("backupCodesHeading")}
                   </p>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
                     {backupCodeCount !== null
-                      ? `${backupCodeCount} unused code${backupCodeCount === 1 ? "" : "s"} remaining`
-                      : "Loading…"}
+                      ? t("backupCodesRemaining", { count: backupCodeCount })
+                      : t("loadingBackupCodes")}
                   </p>
                 </div>
               </div>
@@ -307,8 +308,8 @@ export const MfaManagement = ({
                 }}
                 aria-label={
                   showRegeneratePanel
-                    ? "Hide backup codes panel"
-                    : "Show backup codes panel"
+                    ? t("togglePanelHide")
+                    : t("togglePanelShow")
                 }
                 className="text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
               >
@@ -321,7 +322,7 @@ export const MfaManagement = ({
                 {newBackupCodes.length === 0 ? (
                   <div>
                     <p className="mb-3 text-xs text-slate-600 dark:text-slate-400">
-                      Regenerating will invalidate all existing backup codes.
+                      {t("regenerateWarning")}
                     </p>
                     <Button
                       onClick={handleRegenerateBackupCodes}
@@ -334,13 +335,13 @@ export const MfaManagement = ({
                       ) : (
                         <RefreshCw className="mr-2 h-3 w-3" />
                       )}
-                      {regenerating ? "Generating…" : "Generate new codes"}
+                      {regenerating ? t("generating") : t("generateButton")}
                     </Button>
                   </div>
                 ) : (
                   <div>
                     <p className="mb-3 text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
-                      Save these codes — they won&apos;t be shown again
+                      {t("saveCodesWarning")}
                     </p>
                     <div className="grid grid-cols-2 gap-2">
                       {newBackupCodes.map((code, i) => (
@@ -364,7 +365,7 @@ export const MfaManagement = ({
                         ) : (
                           <Copy className="mr-1 h-3 w-3" />
                         )}
-                        {backupCodesCopied ? "Copied" : "Copy"}
+                        {backupCodesCopied ? t("copied") : t("copy")}
                       </Button>
                       <Button
                         onClick={handleDownloadBackupCodes}
@@ -373,7 +374,7 @@ export const MfaManagement = ({
                         className="flex-1"
                       >
                         <Download className="mr-1 h-3 w-3" />
-                        Download
+                        {t("download")}
                       </Button>
                     </div>
                   </div>
@@ -382,11 +383,9 @@ export const MfaManagement = ({
             )}
           </div>
 
-          {lowBackupCodes && (
+          {lowBackupCodes && backupCodeCount !== null && (
             <p className="rounded-xl border border-amber-200/70 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
-              You have {backupCodeCount} backup code
-              {backupCodeCount !== 1 ? "s" : ""} remaining. Consider
-              regenerating new codes.
+              {t("lowBackupCodes", { count: backupCodeCount })}
             </p>
           )}
         </div>
@@ -394,8 +393,7 @@ export const MfaManagement = ({
 
       {!mfaEnabled && (
         <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
-          Enable 2FA to add an extra layer of security at sign-in. You&apos;ll
-          verify with your authenticator app.
+          {t("enableHint")}
         </p>
       )}
 
@@ -405,14 +403,14 @@ export const MfaManagement = ({
             onClick={onAddAuthenticator}
             className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
           >
-            Add authenticator
+            {t("addAuthenticator")}
           </StatefulButton>
         ) : !mfaEnabled ? (
           <StatefulButton
             disabled
             className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
           >
-            {loading ? "Loading…" : "Enable 2FA"}
+            {loading ? t("loading") : t("enable2fa")}
           </StatefulButton>
         ) : null}
       </div>
@@ -420,15 +418,15 @@ export const MfaManagement = ({
       <RenameDialog
         open={renameTarget !== null}
         onClose={() => setRenameTarget(null)}
-        title="Rename authenticator"
-        description="Pick a name that makes the device easy to spot in your list."
-        fieldLabel="Authenticator name"
+        title={t("renameDialogTitle")}
+        description={t("renameDialogDescription")}
+        fieldLabel={t("renameDialogFieldLabel")}
         initialName={prettifyFactorName(renameTarget?.friendly_name)}
-        successMessage="Authenticator renamed"
+        successMessage={t("renameDialogSuccess")}
         maxLength={64}
-        placeholder="e.g., iPhone, Work phone"
+        placeholder={t("renameDialogPlaceholder")}
         onSave={async (name) => {
-          if (!renameTarget) return { error: "No authenticator selected" };
+          if (!renameTarget) return { error: t("renameDialogNoTarget") };
           const result = await authService.renameMFAFactor(
             renameTarget.id,
             name,
@@ -444,7 +442,7 @@ export const MfaManagement = ({
           setVerifyModalOpen(false);
           setPendingUnenrollId(null);
         }}
-        ariaLabel="Confirm disabling two-factor authentication"
+        ariaLabel={t("verifyDialogAria")}
         size="sm"
         disableClose={verifyLoading}
       >
@@ -459,11 +457,10 @@ export const MfaManagement = ({
 
           <div className="w-full max-w-md">
             <h2 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100">
-              Disable two-factor authentication
+              {t("verifyDialogTitle")}
             </h2>
             <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-              Enter the 6-digit code from your authenticator app to turn off
-              2FA on this account.
+              {t("verifyDialogBody")}
             </p>
 
             <div className="mt-6 w-full">
@@ -482,7 +479,7 @@ export const MfaManagement = ({
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleVerifyAndUnenroll();
                 }}
-                placeholder="000000"
+                placeholder={t("verifyDialogPlaceholder")}
                 className="w-full rounded-lg border-2 border-slate-200 bg-white px-4 py-4 text-center text-4xl font-bold tracking-[0.4em] text-slate-900 placeholder-slate-300 focus:border-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder-slate-600"
                 autoFocus
               />
@@ -502,7 +499,7 @@ export const MfaManagement = ({
               {verifyLoading ? (
                 <Loader className="h-4 w-4 animate-spin" />
               ) : (
-                "Disable 2FA"
+                t("verifyDialogConfirm")
               )}
             </Button>
 
@@ -514,7 +511,7 @@ export const MfaManagement = ({
               disabled={verifyLoading}
               className="mt-3 text-sm font-medium text-slate-500 transition-colors hover:text-slate-700 disabled:opacity-60 dark:text-slate-400 dark:hover:text-slate-200"
             >
-              Cancel
+              {t("verifyDialogCancel")}
             </button>
           </div>
         </div>
