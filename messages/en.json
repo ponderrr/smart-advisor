@@ -169,6 +169,63 @@
   "Auth": {
     "sessionExpired": "Your session has expired. Please sign in again."
   },
+  "Library": {
+    "eyebrow": "Library",
+    "title": "What You've Watched and Read",
+    "subtitle": "Reactions you save here become a taste signal the AI uses on your next quiz.",
+    "startQuiz": "Start Quiz",
+    "filtersAria": "Library filters",
+    "typeGroup": "Type",
+    "type": {
+      "all": "All",
+      "movie": "Movies",
+      "book": "Books"
+    },
+    "stats": {
+      "total": "Total",
+      "finished": "Finished",
+      "movies": "Movies",
+      "books": "Books"
+    },
+    "statusLabel": "Status",
+    "filterAll": "All",
+    "status": {
+      "finished": "Finished",
+      "in_progress": "In progress",
+      "wishlist": "Wishlist"
+    },
+    "rating": {
+      "1": "Not for me",
+      "2": "It was fine",
+      "3": "Loved it"
+    },
+    "byAuthor": "By {creator}",
+    "byDirector": "Directed by {creator}",
+    "mediumMovie": "Movie",
+    "mediumBook": "Book",
+    "loggedOn": "Logged {date}",
+    "empty": {
+      "noItemsTitle": "Nothing in Your Library Yet",
+      "noItemsBody": "After your next quiz, hit \"I watched / read this\" on a result and it will show up here.",
+      "noMatchesTitle": "No Matches for Those Filters",
+      "noMatchesBody": "Try changing or clearing the filters above."
+    },
+    "removeConfirm": "Remove \"{title}\" from your library?",
+    "removed": "Removed from library",
+    "updated": "Library entry updated",
+    "editAria": "Edit {title}",
+    "removeAria": "Remove {title}",
+    "editDialog": {
+      "ariaLabel": "Edit library entry",
+      "title": "Edit entry",
+      "statusHeader": "Status",
+      "ratingHeader": "Rating",
+      "reactionHeader": "Reaction",
+      "reactionPlaceholder": "One-line takeaway…",
+      "save": "Save changes",
+      "cancel": "Cancel"
+    }
+  },
   "Quiz": {
     "category": "Quiz setup",
     "stepOf": "Step {current} of {total}",
