@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthHoverButton } from "./auth-shared";
 
@@ -20,6 +21,7 @@ export const VerifyEmailScreen = ({
   showMfaHint?: boolean;
 }) => {
   const router = useRouter();
+  const t = useTranslations("Auth.verifyEmail");
   const [resendMessage, setResendMessage] = useState<string | null>(null);
   const [resendError, setResendError] = useState<string | null>(null);
 
@@ -65,7 +67,7 @@ export const VerifyEmailScreen = ({
     if (result.error) {
       setResendError(result.error);
     } else {
-      setResendMessage("Verification email sent. Check your inbox.");
+      setResendMessage(t("resendSuccess"));
     }
   };
 
@@ -88,14 +90,14 @@ export const VerifyEmailScreen = ({
       </div>
       <div>
         <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-          Verify your email
+          {t("title")}
         </h2>
         <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
-          We sent a verification link to{" "}
+          {t("bodyLead")}{" "}
           <span className="font-semibold text-slate-800 dark:text-slate-200">
             {email}
           </span>
-          . Click the link to activate your account.
+          {t("bodyTail")}
         </p>
       </div>
 
@@ -104,10 +106,9 @@ export const VerifyEmailScreen = ({
           <ShieldCheck className="h-5 w-5 shrink-0 text-violet-500 dark:text-violet-400" />
           <p className="text-xs text-slate-600 dark:text-slate-400">
             <span className="font-semibold text-slate-800 dark:text-slate-200">
-              Next up:
+              {t("mfaHintLead")}
             </span>{" "}
-            After verifying your email, you'll be able to add two-factor
-            authentication for extra security.
+            {t("mfaHintBody")}
           </p>
         </div>
       )}
@@ -126,14 +127,14 @@ export const VerifyEmailScreen = ({
           disabled={isResending}
           className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 transition-all hover:border-violet-400 hover:bg-violet-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
         >
-          {isResending ? "Resending..." : "Resend verification email"}
+          {isResending ? t("resending") : t("resend")}
         </AuthHoverButton>
         <button
           type="button"
           onClick={onBackToSignIn}
           className="text-sm font-semibold text-violet-600 transition-colors hover:text-violet-500 dark:text-violet-400 dark:hover:text-violet-300"
         >
-          Back to sign in
+          {t("backToSignIn")}
         </button>
       </div>
     </div>
