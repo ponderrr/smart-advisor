@@ -272,6 +272,67 @@
   "Auth": {
     "sessionExpired": "Your session has expired. Please sign in again."
   },
+  "History": {
+    "eyebrow": "History",
+    "title": "Your Suggestion History",
+    "subtitle": "Everything the AI has picked for you. Mark a favorite to keep it close, or log one to your library to teach the AI how you felt.",
+    "clearAll": "Clear All",
+    "startQuiz": "Start Quiz",
+    "filtersAria": "History filters",
+    "filtersGroup": "Filters",
+    "filters": {
+      "all": "All",
+      "movies": "Movies",
+      "books": "Books",
+      "favorites": "Favorites"
+    },
+    "stats": {
+      "total": "Total",
+      "favorites": "Favorites",
+      "movies": "Movies",
+      "books": "Books"
+    },
+    "sortLabel": "Sort:",
+    "sortAria": "Sort recommendations",
+    "sort": {
+      "newest": "Newest",
+      "oldest": "Oldest",
+      "favorites_first": "Favorites First"
+    },
+    "empty": {
+      "title": "No Recommendations Found",
+      "body": "Try a different filter or generate a fresh recommendation set."
+    },
+    "card": {
+      "movie": "Movie",
+      "book": "Book",
+      "fallbackExplanation": "A tailored {type} recommendation based on your recent quiz choices.",
+      "openAria": "Open details for {title}",
+      "favoriteAdd": "Add to favorites",
+      "favoriteRemove": "Remove from favorites",
+      "deleteAria": "Delete"
+    },
+    "toasts": {
+      "favoriteFailed": "Couldn't update your favorite — please try again",
+      "favoriteAdded": "Added to favorites",
+      "favoriteRemoved": "Removed from favorites",
+      "deleteFailed": "Couldn't remove that recommendation — please try again",
+      "deleted": "Recommendation removed from your history",
+      "clearFailed": "Couldn't clear your history — please try again",
+      "cleared": "All recommendations cleared"
+    },
+    "confirm": {
+      "deleteOne": "Delete this recommendation?",
+      "clearAll": "Are you sure you want to delete all recommendations? This cannot be undone."
+    },
+    "modal": {
+      "ariaLabel": "Details for {title}",
+      "byAuthor": "By {author}",
+      "byDirector": "Directed by {director}",
+      "inLibrary": "In your library",
+      "close": "Close"
+    }
+  },
   "Library": {
     "eyebrow": "Library",
     "title": "What You've Watched and Read",

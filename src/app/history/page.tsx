@@ -16,6 +16,7 @@ import {
   Star,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import {
@@ -31,8 +32,6 @@ import {
 import { Recommendation } from "@/features/recommendations/types/recommendation";
 import { libraryService } from "@/features/library/services/library-service";
 import {
-  RATING_LABELS,
-  STATUS_LABELS,
   STATUS_TONE,
   type LibraryItem,
 } from "@/features/library/types/library";
@@ -53,18 +52,7 @@ const VIEW_MODES = ["grid", "list"] as const;
 type HistoryFilter = "all" | "movies" | "books" | "favorites";
 type SortMode = "newest" | "oldest" | "favorites_first";
 
-const filterOptions: { value: HistoryFilter; label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "movies", label: "Movies" },
-  { value: "books", label: "Books" },
-  { value: "favorites", label: "Favorites" },
-];
-
-const sortOptions: { value: SortMode; label: string }[] = [
-  { value: "newest", label: "Newest" },
-  { value: "oldest", label: "Oldest" },
-  { value: "favorites_first", label: "Favorites First" },
-];
+const SORT_VALUES: SortMode[] = ["newest", "oldest", "favorites_first"];
 
 const RecommendationModal = ({
   rec,
@@ -75,11 +63,13 @@ const RecommendationModal = ({
   libraryEntry: LibraryItem | null;
   onClose: () => void;
 }) => {
+  const t = useTranslations("History.modal");
+  const tLib = useTranslations("Library");
   return (
     <Dialog
       open={true}
       onClose={onClose}
-      ariaLabel={`Details for ${rec.title}`}
+      ariaLabel={t("ariaLabel", { title: rec.title })}
       hideCloseButton
     >
       {rec.poster_url && (
@@ -104,9 +94,9 @@ const RecommendationModal = ({
         <h2 className="text-2xl font-black tracking-tight">{rec.title}</h2>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           {rec.author
-            ? `By ${rec.author}`
+            ? t("byAuthor", { author: rec.author })
             : rec.director
-              ? `Directed by ${rec.director}`
+              ? t("byDirector", { director: rec.director })
               : ""}
           {rec.year ? ` · ${rec.year}` : ""}
         </p>
@@ -146,7 +136,7 @@ const RecommendationModal = ({
         {libraryEntry && (
           <div className="mt-4 flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2 dark:border-slate-700/60 dark:bg-slate-800/40">
             <span className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
-              In your library
+              {t("inLibrary")}
             </span>
             <span
               className={cn(
@@ -154,11 +144,11 @@ const RecommendationModal = ({
                 STATUS_TONE[libraryEntry.status].chip,
               )}
             >
-              {STATUS_LABELS[libraryEntry.status]}
+              {tLib(`status.${libraryEntry.status}`)}
             </span>
             {libraryEntry.rating !== null && (
               <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-300">
-                · {RATING_LABELS[libraryEntry.rating]}
+                · {tLib(`rating.${libraryEntry.rating}`)}
               </span>
             )}
           </div>
@@ -179,7 +169,7 @@ const RecommendationModal = ({
             onClick={onClose}
             className="flex-1 rounded-2xl bg-slate-100 py-2.5 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
           >
-            Close
+            {t("close")}
           </button>
         </div>
       </div>
@@ -191,6 +181,8 @@ const AccountHistoryPage = () => {
   const router = useRouter();
   const { user } = useAuth();
   const { ready } = useRequireAuth();
+  const t = useTranslations("History");
+  const tc = useTranslations("Common");
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(true);
   const historyTabs = ["all", "movies", "books", "favorites"] as const;
@@ -307,11 +299,13 @@ const AccountHistoryPage = () => {
   const handleToggleFavorite = async (recommendationId: string) => {
     const { error } = await databaseService.toggleFavorite(recommendationId);
     if (error) {
-      toast.error("Couldn't update your favorite — please try again");
+      toast.error(t("toasts.favoriteFailed"));
     } else {
       const rec = recommendations.find((r) => r.id === recommendationId);
       toast.success(
-        rec?.is_favorited ? "Removed from favorites" : "Added to favorites",
+        rec?.is_favorited
+          ? t("toasts.favoriteRemoved")
+          : t("toasts.favoriteAdded"),
       );
       setRecommendations((prev) =>
         prev.map((r) =>
@@ -324,15 +318,15 @@ const AccountHistoryPage = () => {
   };
 
   const handleDeleteRecommendation = async (recommendationId: string) => {
-    const shouldDelete = window.confirm("Delete this recommendation?");
+    const shouldDelete = window.confirm(t("confirm.deleteOne"));
     if (!shouldDelete) return;
 
     const { error } =
       await databaseService.deleteRecommendation(recommendationId);
     if (error) {
-      toast.error("Couldn't remove that recommendation — please try again");
+      toast.error(t("toasts.deleteFailed"));
     } else {
-      toast.success("Recommendation removed from your history");
+      toast.success(t("toasts.deleted"));
       setRecommendations((prev) =>
         prev.filter((rec) => rec.id !== recommendationId),
       );
@@ -340,16 +334,14 @@ const AccountHistoryPage = () => {
   };
 
   const handleClearAll = async () => {
-    const shouldClear = window.confirm(
-      "Are you sure you want to delete all recommendations? This cannot be undone.",
-    );
+    const shouldClear = window.confirm(t("confirm.clearAll"));
     if (!shouldClear) return;
 
     const { error } = await databaseService.deleteAllRecommendations();
     if (error) {
-      toast.error("Couldn't clear your history — please try again");
+      toast.error(t("toasts.clearFailed"));
     } else {
-      toast.success("All recommendations cleared");
+      toast.success(t("toasts.cleared"));
       setRecommendations([]);
     }
   };
@@ -367,7 +359,7 @@ const AccountHistoryPage = () => {
   }, [recommendations]);
 
   if (!ready) {
-    return <PageLoader text="Loading..." />;
+    return <PageLoader text={tc("loading")} />;
   }
 
   return (
@@ -380,15 +372,13 @@ const AccountHistoryPage = () => {
           <div className="mb-6 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
-                History
+                {t("eyebrow")}
               </p>
               <h1 className="mt-2 text-2xl font-black tracking-tighter sm:text-3xl md:text-4xl lg:text-5xl">
-                Your Suggestion History
+                {t("title")}
               </h1>
               <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                Everything the AI has picked for you. Mark a favorite to keep
-                it close, or log one to your library to teach the AI how you
-                felt.
+                {t("subtitle")}
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -399,7 +389,7 @@ const AccountHistoryPage = () => {
                   className="inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold"
                 >
                   <Trash2 size={14} />
-                  Clear All
+                  {t("clearAll")}
                 </PillButton>
               )}
               <HoverBorderGradient
@@ -412,7 +402,7 @@ const AccountHistoryPage = () => {
                 className="flex items-center gap-2 whitespace-nowrap bg-white px-6 py-3 text-sm font-black leading-none tracking-tight text-black dark:bg-black dark:text-white"
               >
                 <Sparkles size={16} />
-                Start Quiz
+                {t("startQuiz")}
               </HoverBorderGradient>
             </div>
           </div>
@@ -420,13 +410,13 @@ const AccountHistoryPage = () => {
           {/* Sidebar + content layout */}
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6">
             <SidebarNavShell>
-              <nav aria-label="History filters" className="flex-1">
-                <SidebarNavGroup label="Filters" />
+              <nav aria-label={t("filtersAria")} className="flex-1">
+                <SidebarNavGroup label={t("filtersGroup")} />
                 {[
-                  { id: "all" as const, label: "All", icon: <LayoutGrid size={16} /> },
-                  { id: "movies" as const, label: "Movies", icon: <Film size={16} /> },
-                  { id: "books" as const, label: "Books", icon: <BookOpen size={16} /> },
-                  { id: "favorites" as const, label: "Favorites", icon: <Star size={16} /> },
+                  { id: "all" as const, label: t("filters.all"), icon: <LayoutGrid size={16} /> },
+                  { id: "movies" as const, label: t("filters.movies"), icon: <Film size={16} /> },
+                  { id: "books" as const, label: t("filters.books"), icon: <BookOpen size={16} /> },
+                  { id: "favorites" as const, label: t("filters.favorites"), icon: <Star size={16} /> },
                 ].map((tab) => (
                   <SidebarNavItem
                     key={tab.id}
@@ -453,10 +443,10 @@ const AccountHistoryPage = () => {
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex gap-3">
               {[
-                { label: "Total", value: stats.total },
-                { label: "Favorites", value: stats.favorites },
-                { label: "Movies", value: stats.movies },
-                { label: "Books", value: stats.books },
+                { label: t("stats.total"), value: stats.total },
+                { label: t("stats.favorites"), value: stats.favorites },
+                { label: t("stats.movies"), value: stats.movies },
+                { label: t("stats.books"), value: stats.books },
               ].map((item) => (
                 <div key={item.label} className="rounded-xl border border-slate-200/70 bg-white/80 px-3 py-2 shadow-sm backdrop-blur-sm dark:border-slate-700/60 dark:bg-slate-900/60">
                   <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">{item.label}</p>
@@ -468,17 +458,17 @@ const AccountHistoryPage = () => {
             <div className="flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-2">
                 <span className="text-sm text-slate-600 dark:text-slate-400">
-                  Sort:
+                  {t("sortLabel")}
                 </span>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as SortMode)}
-                  aria-label="Sort recommendations"
+                  aria-label={t("sortAria")}
                   className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
                 >
-                  {sortOptions.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
+                  {SORT_VALUES.map((value) => (
+                    <option key={value} value={value}>
+                      {t(`sort.${value}`)}
                     </option>
                   ))}
                 </select>
@@ -503,10 +493,10 @@ const AccountHistoryPage = () => {
           {recommendations.length === 0 ? (
             <div className="rounded-3xl border border-slate-200/80 bg-white/80 p-10 text-center shadow-sm backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/65">
               <h2 className="text-2xl font-black tracking-tight">
-                No Recommendations Found
+                {t("empty.title")}
               </h2>
               <p className="mx-auto mt-2 max-w-xl text-sm text-slate-600 dark:text-slate-400">
-                Try a different filter or generate a fresh recommendation set.
+                {t("empty.body")}
               </p>
             </div>
           ) : (
@@ -540,7 +530,7 @@ const AccountHistoryPage = () => {
                             <div
                               role="button"
                               tabIndex={0}
-                              aria-label={`Open details for ${rec.title}`}
+                              aria-label={t("card.openAria", { title: rec.title })}
                               onClick={() => setSelectedRec(rec)}
                               onKeyDown={(e) => {
                                 if (e.key === "Enter" || e.key === " ") {
@@ -578,7 +568,7 @@ const AccountHistoryPage = () => {
                                     {rec.title}
                                   </h3>
                                   <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
-                                    {rec.type === "movie" ? "Movie" : "Book"}
+                                    {rec.type === "movie" ? t("card.movie") : t("card.book")}
                                     {rec.year ? ` · ${rec.year}` : ""}
                                     {" · "}
                                     {formatDistanceToNow(
@@ -592,8 +582,8 @@ const AccountHistoryPage = () => {
                                     onClick={() => handleToggleFavorite(rec.id)}
                                     aria-label={
                                       rec.is_favorited
-                                        ? "Remove from favorites"
-                                        : "Add to favorites"
+                                        ? t("card.favoriteRemove")
+                                        : t("card.favoriteAdd")
                                     }
                                     className={cn(
                                       "inline-flex h-7 w-7 items-center justify-center rounded-full p-0",
@@ -614,7 +604,7 @@ const AccountHistoryPage = () => {
                                       handleDeleteRecommendation(rec.id)
                                     }
                                     variant="destructive"
-                                    aria-label="Delete"
+                                    aria-label={t("card.deleteAria")}
                                     className="inline-flex h-7 w-7 items-center justify-center rounded-full p-0"
                                   >
                                     <Trash2 size={13} />
@@ -638,7 +628,7 @@ const AccountHistoryPage = () => {
                             <div
                               role="button"
                               tabIndex={0}
-                              aria-label={`Open details for ${rec.title}`}
+                              aria-label={t("card.openAria", { title: rec.title })}
                               className="relative aspect-[2/3] cursor-pointer overflow-hidden bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:bg-slate-800 dark:focus-visible:ring-offset-slate-950"
                               onClick={() => setSelectedRec(rec)}
                               onKeyDown={(e) => {
@@ -683,15 +673,20 @@ const AccountHistoryPage = () => {
                               <p className="line-clamp-2 text-[11px] leading-snug text-slate-600 dark:text-slate-300">
                                 {rec.explanation ||
                                   rec.description ||
-                                  `A tailored ${rec.type} recommendation based on your recent quiz choices.`}
+                                  t("card.fallbackExplanation", {
+                                    type:
+                                      rec.type === "movie"
+                                        ? t("card.movie").toLowerCase()
+                                        : t("card.book").toLowerCase(),
+                                  })}
                               </p>
                               <div className="mt-2.5 flex items-center justify-between">
                                 <PillButton
                                   onClick={() => handleToggleFavorite(rec.id)}
                                   aria-label={
                                     rec.is_favorited
-                                      ? "Remove from favorites"
-                                      : "Add to favorites"
+                                      ? t("card.favoriteRemove")
+                                      : t("card.favoriteAdd")
                                   }
                                   className={cn(
                                     "inline-flex h-7 w-7 items-center justify-center rounded-full p-0",
@@ -710,7 +705,7 @@ const AccountHistoryPage = () => {
                                 <PillButton
                                   onClick={() => handleDeleteRecommendation(rec.id)}
                                   variant="destructive"
-                                  aria-label="Delete"
+                                  aria-label={t("card.deleteAria")}
                                   className="inline-flex h-7 w-7 items-center justify-center rounded-full p-0"
                                 >
                                   <Trash2 size={13} />
