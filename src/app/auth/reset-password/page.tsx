@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { authService } from "@/features/auth/services/auth-service";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthLayout } from "@/features/auth/components";
@@ -20,6 +21,8 @@ const REDIRECT_DELAY = 3000;
 
 export default function ResetPasswordPage() {
   const router = useRouter();
+  const t = useTranslations("Auth.resetPassword");
+  const tPasswordRules = useTranslations("Auth.passwordRules");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -38,19 +41,19 @@ export default function ResetPasswordPage() {
   const passwordRules = useMemo(
     () =>
       PASSWORD_RULES.map((rule) => ({
-        label: rule.label,
+        label: tPasswordRules(rule.key),
         met: rule.test(password),
       })),
-    [password],
+    [password, tPasswordRules],
   );
   const confirmRules = useMemo(
     () => [
       {
-        label: "Matches your password",
+        label: t("matchesRule"),
         met: confirmPassword.length > 0 && confirmPassword === password,
       },
     ],
-    [confirmPassword, password],
+    [confirmPassword, password, t],
   );
 
   const passwordAllMet = passwordRules.every((r) => r.met);
@@ -71,7 +74,7 @@ export default function ResetPasswordPage() {
   const validate = () => {
     const next: Record<string, string> = {};
     if (!isValidPassword(password) || password !== confirmPassword || !confirmPassword) {
-      next.general = "Please fix the highlighted fields.";
+      next.general = t("fixHighlighted");
     }
     setErrors(next);
     return Object.keys(next).length === 0;
@@ -113,17 +116,17 @@ export default function ResetPasswordPage() {
       <AuthLayout onLogoClick={() => router.push("/")}>
         <div className="mx-auto w-full max-w-md rounded-2xl border border-slate-200/70 bg-white/85 p-6 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
           <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100">
-            Reset link invalid or expired
+            {t("invalidTitle")}
           </h1>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            Open the most recent reset email or request a new link to continue.
+            {t("invalidBody")}
           </p>
           <AuthHoverButton
             type="button"
             onClick={() => router.push("/auth")}
             className="mt-6"
           >
-            Back to sign in
+            {t("backToSignIn")}
           </AuthHoverButton>
         </div>
       </AuthLayout>
@@ -136,11 +139,10 @@ export default function ResetPasswordPage() {
         {success ? (
           <div className="text-center">
             <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100">
-              Password Updated
+              {t("successTitle")}
             </h1>
             <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-              Your password has been changed successfully. Redirecting you to
-              sign in...
+              {t("successBody")}
             </p>
             <div className="mt-4 flex justify-center">
               <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
@@ -150,17 +152,17 @@ export default function ResetPasswordPage() {
           <form onSubmit={handleReset} className="space-y-4">
             <div>
               <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100">
-                Set New Password
+                {t("title")}
               </h1>
               <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-400">
-                Enter your new secure password below.
+                {t("subtitle")}
               </p>
             </div>
 
             <div>
               <div ref={passwordAnchorRef}>
                 <FormField
-                  label="New Password"
+                  label={t("newPassword")}
                   htmlFor="new-password"
                   invalid={submitAttempted && !passwordAllMet}
                 >
@@ -183,7 +185,7 @@ export default function ResetPasswordPage() {
                   passwordFocused || (submitAttempted && !passwordAllMet)
                 }
                 anchorRef={passwordAnchorRef}
-                title="Password requirements"
+                title={t("passwordRequirementsTitle")}
               />
             </div>
 
@@ -205,7 +207,7 @@ export default function ResetPasswordPage() {
             <div>
               <div ref={confirmAnchorRef}>
                 <FormField
-                  label="Confirm New Password"
+                  label={t("confirmPassword")}
                   htmlFor="confirm-password"
                   invalid={submitAttempted && !confirmAllMet}
                 >
@@ -228,7 +230,7 @@ export default function ResetPasswordPage() {
                   confirmFocused || (submitAttempted && !confirmAllMet)
                 }
                 anchorRef={confirmAnchorRef}
-                title="Confirm password"
+                title={t("confirmRulesTitle")}
               />
             </div>
 
@@ -237,7 +239,7 @@ export default function ResetPasswordPage() {
             )}
 
             <AuthHoverButton type="submit" disabled={loading}>
-              {loading ? "Updating..." : "Update Password"}
+              {loading ? t("submitting") : t("submit")}
             </AuthHoverButton>
           </form>
         )}

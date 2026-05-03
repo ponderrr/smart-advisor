@@ -563,6 +563,33 @@
       "showPassword": "Show password",
       "requirements": "Requirements"
     },
+    "passwordRules": {
+      "minLength": "At least 8 characters",
+      "uppercase": "One uppercase letter (A–Z)",
+      "lowercase": "One lowercase letter (a–z)",
+      "digit": "One number (0–9)",
+      "special": "One special character (!@#$…)"
+    },
+    "resetPassword": {
+      "invalidTitle": "Reset link invalid or expired",
+      "invalidBody": "Open the most recent reset email or request a new link to continue.",
+      "backToSignIn": "Back to sign in",
+      "successTitle": "Password Updated",
+      "successBody": "Your password has been changed successfully. Redirecting you to sign in…",
+      "title": "Set New Password",
+      "subtitle": "Enter your new secure password below.",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "passwordRequirementsTitle": "Password requirements",
+      "confirmRulesTitle": "Confirm password",
+      "matchesRule": "Matches your password",
+      "submit": "Update Password",
+      "submitting": "Updating…",
+      "fixHighlighted": "Please fix the highlighted fields."
+    },
+    "emailVerified": {
+      "message": "Email verified! Redirecting…"
+    },
     "mfaManagement": {
       "heading": "Two-factor authentication",
       "subtitle": "An extra step at sign-in to keep your account secure.",
