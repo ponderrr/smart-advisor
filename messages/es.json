@@ -49,10 +49,29 @@
     }
   },
   "Home": {
+    "hero": {
+      "titleLine1": "Descubre tu próxima",
+      "titleLine2": "obsesión favorita en cada",
+      "subtitle": "Recomendaciones de películas y libros con IA adaptadas a tu gusto único.",
+      "ctaPrimaryLoggedOut": "Comenzar",
+      "ctaPrimaryLoggedIn": "Ir al panel",
+      "ctaSecondaryLoggedOut": "Probar la demo",
+      "ctaSecondaryLoggedIn": "Ver historial",
+      "scrollHint": "Desplázate para explorar",
+      "flipWords": [
+        "Película",
+        "Libro",
+        "Historia",
+        "Aventura",
+        "Clásico",
+        "Obra maestra",
+        "Favorito de culto"
+      ]
+    },
     "howItWorks": {
-      "title": "Cómo funciona",
       "eyebrow": "Cómo funciona",
-      "subtitle": "Cuatro pasos simples del cuestionario a las recomendaciones.",
+      "title": "De la indecisión a una gran recomendación en cuatro pasos",
+      "subtitle": "Una forma más rápida de elegir algo que valga tu tiempo.",
       "steps": {
         "format": {
           "title": "Elige tu formato",
@@ -71,6 +90,67 @@
           "description": "Recomendaciones reales con una puntuación de afinidad y una explicación escrita de por qué cada una encaja contigo."
         }
       }
+    },
+    "features": {
+      "eyebrow": "Por qué Smart Advisor",
+      "title": "Hecho para recomendaciones en las que puedes confiar",
+      "subtitle": "Privado por diseño, rápido por defecto y de código abierto para que veas cómo funciona.",
+      "items": {
+        "private": {
+          "title": "Perfil privado",
+          "description": "Tus preferencias quedan vinculadas a tu cuenta y solo se usan para mejorar tus recomendaciones."
+        },
+        "fast": {
+          "title": "Resultados a velocidad luz",
+          "description": "Resultados rápidos y actualizaciones fluidas te ayudan a decidir sin esperar."
+        },
+        "trust": {
+          "title": "Recomendaciones confiables",
+          "description": "Razones claras hacen que cada sugerencia sea fácil de confiar y elegir, con transparencia de código abierto."
+        },
+        "both": {
+          "title": "Elige entre ambos",
+          "description": "Ve resultados de libros y películas en un solo lugar para que elegir sea más rápido y fácil."
+        }
+      },
+      "trustReasons": [
+        "Coincide con tu clasificación por edad",
+        "Ritmo que dijiste preferir",
+        "Tono que has elegido antes"
+      ]
+    },
+    "groupQuizCta": {
+      "eyebrow": "Cuestionario en grupo",
+      "titleLead": "Encuentra una recomendación",
+      "titleHighlight": "juntos",
+      "description": "Organiza un cuestionario, comparte un código de seis caracteres y deja que el grupo responda. La IA combina los gustos de todos en una recomendación que funciona para la sala. Unirse es gratis: no se necesita cuenta.",
+      "cta": "Probar"
+    },
+    "poweredBy": {
+      "eyebrow": "Tecnología",
+      "title": "Construido sobre infraestructura confiable",
+      "subtitle": "Servicios confiables que ayudan a Smart Advisor a ser rápido, fiable y útil."
+    },
+    "team": {
+      "eyebrow": "El equipo",
+      "title": "Conoce al equipo",
+      "subtitle": "Las personas detrás de Smart Advisor."
+    },
+    "faq": {
+      "eyebrow": "Preguntas frecuentes",
+      "title": "Preguntas, respondidas",
+      "subtitleLead": "¿Preguntas antes de empezar? Escríbenos a",
+      "subtitleMid": "o reporta errores en",
+      "subtitleTail": ". Smart Advisor es de código abierto, así que puedes revisarlo y contribuir cuando quieras.",
+      "categoriesAria": "Categorías de preguntas frecuentes",
+      "filterAll": "Todas"
+    },
+    "footer": {
+      "navAria": "Navegación del pie de página",
+      "rights": "© {year} Smart Advisor. Todos los derechos reservados.",
+      "builtWith": "Hecho con",
+      "builtSuffix": "como proyecto de código abierto.",
+      "githubLabel": "GitHub"
     }
   },
   "Common": {

@@ -49,10 +49,29 @@
     }
   },
   "Home": {
+    "hero": {
+      "titleLine1": "Discover Your Next Favorite",
+      "titleLine2": "Obsession Across Every",
+      "subtitle": "AI-powered recommendations for movies and books tailored to your unique taste.",
+      "ctaPrimaryLoggedOut": "Get Started",
+      "ctaPrimaryLoggedIn": "Go to Dashboard",
+      "ctaSecondaryLoggedOut": "Try a Demo",
+      "ctaSecondaryLoggedIn": "View History",
+      "scrollHint": "Scroll to Explore",
+      "flipWords": [
+        "Movie",
+        "Book",
+        "Story",
+        "Adventure",
+        "Classic",
+        "Masterpiece",
+        "Cult Favorite"
+      ]
+    },
     "howItWorks": {
-      "title": "How It Works",
-      "eyebrow": "How it works",
-      "subtitle": "Four simple steps from quiz to picks.",
+      "eyebrow": "How It Works",
+      "title": "From indecision to a great pick in four steps",
+      "subtitle": "A faster way to land on a watch or read worth your time.",
       "steps": {
         "format": {
           "title": "Pick your format",
@@ -71,6 +90,67 @@
           "description": "Real recommendations with a match score and a written reason for why each one fits you specifically."
         }
       }
+    },
+    "features": {
+      "eyebrow": "Why Smart Advisor",
+      "title": "Built for picks you can trust",
+      "subtitle": "Private by design, fast by default, and open source so you can see how it works.",
+      "items": {
+        "private": {
+          "title": "Private Profile",
+          "description": "Your preferences stay tied to your account and are used only to improve your picks."
+        },
+        "fast": {
+          "title": "Warp Speed Results",
+          "description": "Quick results and smooth updates help you decide without waiting around."
+        },
+        "trust": {
+          "title": "Easy-To-Trust Picks",
+          "description": "Clear reasons make each suggestion easier to trust and choose, with open-source transparency."
+        },
+        "both": {
+          "title": "Choose Across Both",
+          "description": "See book and movie results in one place so choosing feels faster and easier."
+        }
+      },
+      "trustReasons": [
+        "Matches your age rating",
+        "Pace you said you prefer",
+        "Tone you've picked before"
+      ]
+    },
+    "groupQuizCta": {
+      "eyebrow": "Group Quiz",
+      "titleLead": "Find a Pick",
+      "titleHighlight": "Together",
+      "description": "Host a quiz, share a six-character code, and let the group answer. The AI synthesizes everyone's taste into one pick that works for the room. Joining is free — no account needed.",
+      "cta": "Try It"
+    },
+    "poweredBy": {
+      "eyebrow": "Powered By",
+      "title": "Built on trusted infrastructure",
+      "subtitle": "Trusted services that help Smart Advisor stay fast, dependable, and helpful."
+    },
+    "team": {
+      "eyebrow": "The People",
+      "title": "Meet the Team",
+      "subtitle": "The folks behind Smart Advisor."
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "title": "Questions, answered",
+      "subtitleLead": "Questions before you get started? Reach out at",
+      "subtitleMid": "or report bugs on",
+      "subtitleTail": ". Smart Advisor is open source, so you can review and contribute anytime.",
+      "categoriesAria": "FAQ categories",
+      "filterAll": "All"
+    },
+    "footer": {
+      "navAria": "Footer navigation",
+      "rights": "© {year} Smart Advisor. All rights reserved.",
+      "builtWith": "Built with",
+      "builtSuffix": "as an open-source project.",
+      "githubLabel": "GitHub"
     }
   },
   "Common": {
