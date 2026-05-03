@@ -536,6 +536,11 @@
       "resending": "Reenviando…",
       "resendSuccess": "Correo de verificación enviado. Revisa tu bandeja.",
       "backToSignIn": "Volver al inicio de sesión"
+    },
+    "shared": {
+      "hidePassword": "Ocultar contraseña",
+      "showPassword": "Mostrar contraseña",
+      "requirements": "Requisitos"
     }
   },
   "Wrapped": {
