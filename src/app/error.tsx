@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { AlertTriangle, RefreshCw, Home } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function GlobalError({
   error,
@@ -10,6 +11,7 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations("System.error");
   useEffect(() => {
     console.error("[App Error]", error);
   }, [error]);
@@ -33,18 +35,16 @@ export default function GlobalError({
         </div>
 
         <h1 className="text-3xl font-black tracking-tighter sm:text-4xl">
-          {isNetworkError ? "Can't reach our servers" : "Something broke"}
+          {isNetworkError ? t("networkTitle") : t("genericTitle")}
         </h1>
 
         <p className="mt-3 text-sm text-slate-600 dark:text-slate-400 sm:text-base">
-          {isNetworkError
-            ? "Check your connection and try again — we'll pick up right where you left off."
-            : "An unexpected error stopped this page from loading. A refresh usually does it."}
+          {isNetworkError ? t("networkBody") : t("genericBody")}
         </p>
 
         {error.digest && (
           <p className="mt-3 font-mono text-[11px] uppercase tracking-wider text-slate-400 dark:text-slate-600">
-            Ref · {error.digest}
+            {t("ref")} · {error.digest}
           </p>
         )}
 
@@ -54,14 +54,14 @@ export default function GlobalError({
             className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-slate-200 px-6 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100"
           >
             <Home size={16} />
-            Go home
+            {t("goHome")}
           </a>
           <button
             onClick={reset}
             className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-indigo-600 px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500"
           >
             <RefreshCw size={16} />
-            Try again
+            {t("tryAgain")}
           </button>
         </div>
       </div>
