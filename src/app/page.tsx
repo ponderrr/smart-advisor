@@ -286,13 +286,13 @@ const Index = () => {
                     {member.name}
                   </h3>
                   <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-indigo-600 dark:text-indigo-400">
-                    {member.designation}
+                    {t(`team.members.${member.key}.designation`)}
                   </p>
                 </div>
 
                 {/* Quote */}
                 <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:mt-4 dark:text-slate-400">
-                  &ldquo;{member.quote}&rdquo;
+                  &ldquo;{t(`team.members.${member.key}.quote`)}&rdquo;
                 </p>
               </motion.article>
             ))}
@@ -342,7 +342,10 @@ const Index = () => {
             {(
               [
                 { id: "all" as const, label: t("faq.filterAll") },
-                ...FAQ_CATEGORIES.map((c) => ({ id: c.id, label: c.label })),
+                ...FAQ_CATEGORIES.map((c) => ({
+                  id: c.id,
+                  label: t(`faq.categories.${c.id}`),
+                })),
               ] as { id: FaqFilter; label: string }[]
             ).map((opt) => {
               const active = faqFilter === opt.id;
@@ -379,13 +382,13 @@ const Index = () => {
               className="space-y-3"
             >
               {filteredFaq.map((item) => {
-                const isOpen = openFaq === item.question;
-                const categoryLabel =
-                  FAQ_CATEGORIES.find((c) => c.id === item.category)?.label ??
-                  "";
+                const isOpen = openFaq === item.key;
+                const categoryLabel = t(`faq.categories.${item.category}`);
+                const question = t(`faq.items.${item.key}.question`);
+                const answer = t(`faq.items.${item.key}.answer`);
                 return (
                   <div
-                    key={item.question}
+                    key={item.key}
                     className={cn(
                       "group relative overflow-hidden rounded-2xl border bg-white/80 shadow-sm backdrop-blur-md transition-all duration-300 dark:bg-slate-900/65",
                       isOpen
@@ -403,7 +406,7 @@ const Index = () => {
                     <button
                       type="button"
                       onClick={() =>
-                        setOpenFaq(isOpen ? null : item.question)
+                        setOpenFaq(isOpen ? null : item.key)
                       }
                       aria-expanded={isOpen}
                       className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left transition-colors sm:px-6 sm:py-5"
@@ -415,7 +418,7 @@ const Index = () => {
                           </span>
                         )}
                         <span className="block text-sm font-bold tracking-tight text-slate-900 dark:text-slate-100 md:text-base">
-                          {item.question}
+                          {question}
                         </span>
                       </span>
                       <span
@@ -447,7 +450,7 @@ const Index = () => {
                           className="overflow-hidden"
                         >
                           <p className="px-5 pb-5 pt-0 text-sm leading-relaxed text-slate-600 sm:px-6 sm:pb-6 sm:text-[15px] dark:text-slate-300">
-                            {item.answer}
+                            {answer}
                           </p>
                         </motion.div>
                       )}
