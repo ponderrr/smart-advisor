@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { motion } from "motion/react";
+import { useTranslations } from "next-intl";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import { useQuizStore } from "@/features/quiz/store/quiz-store";
 import { PillButton } from "@/components/ui/pill-button";
@@ -19,6 +20,8 @@ const QuestionCountPage = () => {
   const { ready } = useRequireAuth();
   const { contentType, setQuestionCount: setStoreQuestionCount } =
     useQuizStore();
+  const t = useTranslations("Quiz");
+  const tc = useTranslations("Common");
   const [questionCount, setQuestionCount] = useState(5);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -50,19 +53,17 @@ const QuestionCountPage = () => {
     }
   };
 
-  const getContentTypeDisplay = (type: ContentType) => {
-    if (type === "both") return "movie and book";
-    return type;
-  };
+  const getContentTypeDisplay = (type: ContentType) =>
+    t(`questionCount.contentTypes.${type}`);
 
   if (!ready || !contentType) {
-    return <PageLoader text="Loading..." />;
+    return <PageLoader text={tc("loading")} />;
   }
 
   return (
     <QuizStepShell
-      category="Quiz setup"
-      stepLabel="Step 2 of 4"
+      category={t("category")}
+      stepLabel={t("stepOf", { current: 2, total: 4 })}
       progress={50}
       onBack={() => router.push("/content-selection")}
     >
@@ -73,12 +74,12 @@ const QuestionCountPage = () => {
           transition={{ duration: 0.22 }}
         >
           <h1 className="text-2xl font-black tracking-tight sm:text-3xl">
-            How many questions should we ask?
+            {t("questionCount.title")}
           </h1>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 sm:text-base">
-            Choose the depth for your{" "}
-            {getContentTypeDisplay(contentType as ContentType)}{" "}
-            recommendation flow.
+            {t("questionCount.subtitle", {
+              contentType: getContentTypeDisplay(contentType as ContentType),
+            })}
           </p>
         </motion.div>
 
@@ -94,7 +95,7 @@ const QuestionCountPage = () => {
               {questionCount}
             </motion.div>
             <p className="mt-1 text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-              {questionCount === 1 ? "Question" : "Questions"}
+              {t("questionCount.questionsLabel", { count: questionCount })}
             </p>
           </div>
 
@@ -104,7 +105,7 @@ const QuestionCountPage = () => {
             max={15}
             value={questionCount}
             onChange={(e) => setQuestionCount(parseInt(e.target.value, 10))}
-            aria-label="Number of questions"
+            aria-label={t("questionCount.ariaCount")}
             className="w-full cursor-pointer accent-indigo-500"
           />
           <div className="mt-1 flex justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
@@ -120,10 +121,10 @@ const QuestionCountPage = () => {
             className="mt-4 text-center text-base font-bold tracking-tight text-slate-700 dark:text-slate-200 sm:text-lg"
           >
             {questionCount <= 5
-              ? "Quick and focused"
+              ? t("questionCount.tone.quick")
               : questionCount <= 10
-                ? "Balanced depth"
-                : "Comprehensive detail"}
+                ? t("questionCount.tone.balanced")
+                : t("questionCount.tone.comprehensive")}
           </motion.p>
         </div>
 
@@ -135,7 +136,9 @@ const QuestionCountPage = () => {
               "inline-flex items-center justify-center gap-2 bg-white px-7 py-3 text-sm font-black tracking-tight text-black disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-900 dark:text-white",
             )}
           >
-            {isLoading ? "Continuing..." : "Continue"}
+            {isLoading
+              ? t("questionCount.continuing")
+              : t("questionCount.continue")}
             <ArrowRight size={16} />
           </PillButton>
         </div>

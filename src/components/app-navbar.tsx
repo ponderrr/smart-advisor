@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { LogOut, MonitorSmartphone, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { motion } from "motion/react";
+import { useTranslations } from "next-intl";
 
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -28,26 +29,26 @@ import {
   MobileNavMenu,
 } from "@/components/ui/resizable-navbar";
 
-const LOGGED_OUT_ITEMS = [
-  { name: "How It Works", link: "/#how-it-works" },
-  { name: "Why Smart Advisor", link: "/#why-smart-advisor" },
-  { name: "Powered By", link: "/#powered-by" },
-  { name: "Our Team", link: "/#meet-the-team" },
-  { name: "FAQ", link: "/#faq" },
-];
+const LOGGED_OUT_KEYS = [
+  { key: "howItWorks", link: "/#how-it-works" },
+  { key: "whySmartAdvisor", link: "/#why-smart-advisor" },
+  { key: "poweredBy", link: "/#powered-by" },
+  { key: "ourTeam", link: "/#meet-the-team" },
+  { key: "faq", link: "/#faq" },
+] as const;
 
-const DEMO_ITEMS = [
-  { name: "How It Works", link: "/#how-it-works" },
-  { name: "FAQ", link: "/#faq" },
-];
+const DEMO_KEYS = [
+  { key: "howItWorks", link: "/#how-it-works" },
+  { key: "faq", link: "/#faq" },
+] as const;
 
-const LOGGED_IN_ITEMS = [
-  { name: "Dashboard", link: "/dashboard" },
-  { name: "Library", link: "/library" },
-  { name: "History", link: "/history" },
-  { name: "Group Quiz", link: "/group-quiz" },
-  { name: "Settings", link: "/settings" },
-];
+const LOGGED_IN_KEYS = [
+  { key: "dashboard", link: "/dashboard" },
+  { key: "library", link: "/library" },
+  { key: "history", link: "/history" },
+  { key: "groupQuiz", link: "/group-quiz" },
+  { key: "settings", link: "/settings" },
+] as const;
 
 /**
  * AppNavbar — the single source of truth for the global navigation bar.
@@ -60,17 +61,22 @@ export function AppNavbar() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, signOut } = useAuth();
+  const t = useTranslations("Navbar");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // The demo flow is for prospective users — even if a logged-in user lands
   // here, we show a trimmed marketing-style navbar so the demo stays focused.
   const isDemoContext = pathname?.startsWith("/demo") ?? false;
   const useMarketingVariant = !user || isDemoContext;
-  const navItems = isDemoContext
-    ? DEMO_ITEMS
+  const navKeys = isDemoContext
+    ? DEMO_KEYS
     : useMarketingVariant
-      ? LOGGED_OUT_ITEMS
-      : LOGGED_IN_ITEMS;
+      ? LOGGED_OUT_KEYS
+      : LOGGED_IN_KEYS;
+  const navItems = navKeys.map((entry) => ({
+    name: t(`items.${entry.key}`),
+    link: entry.link,
+  }));
 
   const handlePrimary = () => {
     if (useMarketingVariant) {
@@ -82,9 +88,9 @@ export function AppNavbar() {
 
   const primaryLabel = useMarketingVariant
     ? user
-      ? "Dashboard"
-      : "Get Started"
-    : "Dashboard";
+      ? t("items.dashboard")
+      : t("getStarted")
+    : t("items.dashboard");
 
   const handleSignOut = async () => {
     await signOut();
@@ -181,7 +187,7 @@ export function AppNavbar() {
               }}
               className="text-left text-xl font-black tracking-tight text-rose-600 dark:text-rose-400"
             >
-              Sign Out
+              {t("signOut")}
             </button>
           )}
         </MobileNavMenu>
@@ -198,6 +204,7 @@ export function AppNavbar() {
 function UserAvatarMenu() {
   const router = useRouter();
   const { user, signOut } = useAuth();
+  const t = useTranslations("Navbar");
 
   if (!user) return null;
 
@@ -214,7 +221,7 @@ function UserAvatarMenu() {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          aria-label="Account menu"
+          aria-label={t("accountMenu")}
           className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200/80 shadow-sm ring-offset-2 transition-transform duration-200 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-slate-700/70 dark:ring-offset-slate-950"
         >
           {user.avatar_url ? (
@@ -266,7 +273,7 @@ function UserAvatarMenu() {
           className="cursor-pointer gap-2.5 rounded-xl px-2.5 py-2 text-sm font-semibold text-rose-600 focus:bg-rose-50 focus:text-rose-700 dark:text-rose-400 dark:focus:bg-rose-500/10 dark:focus:text-rose-300"
         >
           <LogOut size={16} />
-          Sign Out
+          {t("signOut")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -281,6 +288,7 @@ function UserAvatarMenu() {
 function ThemeSwitcherRow() {
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
+  const t = useTranslations("Navbar.theme");
 
   useEffect(() => {
     setMounted(true);
@@ -292,7 +300,7 @@ function ThemeSwitcherRow() {
   const options = [
     {
       value: "light",
-      label: "Light",
+      label: t("light"),
       Icon: Sun,
       activeBg: "bg-orange-50",
       activeIcon: "text-orange-600",
@@ -300,7 +308,7 @@ function ThemeSwitcherRow() {
     },
     {
       value: "dark",
-      label: "Dark",
+      label: t("dark"),
       Icon: Moon,
       activeBg: "bg-indigo-950",
       activeIcon: "text-indigo-400",
@@ -308,9 +316,9 @@ function ThemeSwitcherRow() {
     },
     {
       value: "system",
-      label: "System",
+      label: t("system"),
       Icon: MonitorSmartphone,
-      hint: "Matches your device setting",
+      hint: t("systemHint"),
       activeBg: "bg-blue-50 dark:bg-blue-950/40",
       activeIcon: "text-blue-500",
       activeText: "text-blue-900 dark:text-blue-100",
@@ -324,7 +332,7 @@ function ThemeSwitcherRow() {
   return (
     <div className="px-2 py-2">
       <p className="px-1 pb-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">
-        Theme
+        {t("label")}
       </p>
       <div className="relative flex rounded-full bg-slate-100 p-1 dark:bg-slate-800/60">
         {options.map((option) => {

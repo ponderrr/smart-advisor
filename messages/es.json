@@ -23,5 +23,188 @@
     },
     "saving": "Guardando…",
     "saved": "Idioma actualizado."
+  },
+  "Navbar": {
+    "items": {
+      "howItWorks": "Cómo funciona",
+      "whySmartAdvisor": "Por qué Smart Advisor",
+      "poweredBy": "Tecnología",
+      "ourTeam": "Nuestro equipo",
+      "faq": "Preguntas frecuentes",
+      "dashboard": "Panel",
+      "library": "Biblioteca",
+      "history": "Historial",
+      "groupQuiz": "Cuestionario en grupo",
+      "settings": "Ajustes"
+    },
+    "getStarted": "Comenzar",
+    "signOut": "Cerrar sesión",
+    "accountMenu": "Menú de cuenta",
+    "theme": {
+      "label": "Tema",
+      "light": "Claro",
+      "dark": "Oscuro",
+      "system": "Sistema",
+      "systemHint": "Coincide con la configuración de tu dispositivo"
+    }
+  },
+  "Home": {
+    "howItWorks": {
+      "title": "Cómo funciona",
+      "eyebrow": "Cómo funciona",
+      "subtitle": "Cuatro pasos simples del cuestionario a las recomendaciones.",
+      "steps": {
+        "format": {
+          "title": "Elige tu formato",
+          "description": "Cuéntanos si estás de humor para una película, un libro o ambos. Adaptamos el resto del flujo a lo que elijas."
+        },
+        "depth": {
+          "title": "Define la profundidad",
+          "description": "Elige cuántas preguntas quieres responder: una prueba rápida o un análisis profundo, tú decides."
+        },
+        "quiz": {
+          "title": "Responde un cuestionario personalizado",
+          "description": "Nuestra IA genera preguntas frescas según tu edad y tipo de contenido. No hay dos cuestionarios iguales."
+        },
+        "picks": {
+          "title": "Recibe tus recomendaciones",
+          "description": "Recomendaciones reales con una puntuación de afinidad y una explicación escrita de por qué cada una encaja contigo."
+        }
+      }
+    }
+  },
+  "Common": {
+    "loading": "Cargando…",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "continue": "Continuar",
+    "submit": "Enviar",
+    "close": "Cerrar",
+    "retry": "Reintentar",
+    "yes": "Sí",
+    "no": "No"
+  },
+  "Quiz": {
+    "category": "Configuración del cuestionario",
+    "stepOf": "Paso {current} de {total}",
+    "back": {
+      "dashboard": "Panel"
+    },
+    "contentSelection": {
+      "title": "¿Para qué quieres una recomendación?",
+      "subtitle": "Elige una opción para adaptar tu flujo de recomendaciones.",
+      "validation": "Selecciona una opción antes de continuar.",
+      "continue": "Continuar",
+      "continuing": "Continuando…",
+      "cards": {
+        "movie": {
+          "eyebrow": "En pantalla",
+          "title": "Película",
+          "description": "Una película ajustada a tu estado de ánimo y ritmo."
+        },
+        "book": {
+          "eyebrow": "En el estante",
+          "title": "Libro",
+          "description": "Una lectura adaptada a tu estilo e intereses."
+        },
+        "both": {
+          "eyebrow": "Ambos",
+          "title": "Uno de cada",
+          "description": "Una película y un libro elegidos juntos en una sola sesión."
+        }
+      }
+    },
+    "questionCount": {
+      "title": "¿Cuántas preguntas debemos hacer?",
+      "subtitle": "Elige la profundidad para tu flujo de recomendación de {contentType}.",
+      "contentTypes": {
+        "movie": "película",
+        "book": "libro",
+        "both": "película y libro"
+      },
+      "questionsLabel": "{count, plural, one {Pregunta} other {Preguntas}}",
+      "tone": {
+        "quick": "Rápido y enfocado",
+        "balanced": "Profundidad equilibrada",
+        "comprehensive": "Detalle completo"
+      },
+      "ariaCount": "Número de preguntas",
+      "back": "Formato",
+      "continue": "Continuar",
+      "continuing": "Continuando…"
+    },
+    "questionnaire": {
+      "category": "Cuestionario en curso",
+      "questionOf": "Pregunta {current} de {total}",
+      "previous": "Anterior",
+      "back": "Atrás",
+      "next": "Siguiente",
+      "submit": "Obtener recomendaciones",
+      "subtitle": {
+        "fillInBlank": "Comparte tus ideas con tus propias palabras.",
+        "selectAll": "Elige todas las que quieras.",
+        "singleSelect": "Elige una para afinar tus recomendaciones."
+      },
+      "leaveConfirm": "¿Salir del cuestionario? Tus respuestas no se guardarán.",
+      "errors": {
+        "title": "No se pudieron cargar las preguntas",
+        "session": "Tu sesión expiró. Inicia sesión de nuevo para continuar.",
+        "generic": "No pudimos generar tus preguntas. Inténtalo de nuevo.",
+        "tryAgain": "Reintentar",
+        "back": "Atrás"
+      },
+      "loadingMessages": [
+        "Pensando buenas preguntas…",
+        "Eligiendo tu enfoque…",
+        "Adaptándose a tu gusto…",
+        "Calibrando para tu vibra…",
+        "Encontrando el punto de partida adecuado…",
+        "Redactando el cuestionario…",
+        "Añadiendo un giro o dos…",
+        "Afinando los detalles…",
+        "Quitando las aburridas…",
+        "Revisando el flujo…",
+        "Casi listo para ti…"
+      ]
+    }
+  },
+  "Results": {
+    "loadingHeader": "Preparando tus recomendaciones",
+    "errorTitle": "Algo salió mal",
+    "errorRetry": "Reintentar",
+    "errorBack": "Volver a la configuración",
+    "shareCopy": "Copiar enlace",
+    "shareCopied": "¡Enlace copiado!",
+    "shareTwitter": "Compartir en X",
+    "shareEmail": "Compartir por correo",
+    "shareTitle": "Comparte tus recomendaciones",
+    "anotherPick": "Obtener otra recomendación",
+    "viewHistory": "Ver historial",
+    "share": "Compartir",
+    "favorited": "Favorito",
+    "favorite": "Marcar favorito",
+    "showMore": "Ver más",
+    "showLess": "Ver menos"
+  },
+  "Dashboard": {
+    "title": "Panel",
+    "subtitle": "Tu actividad de un vistazo.",
+    "tabs": {
+      "overview": "Resumen",
+      "picks": "Recomendaciones",
+      "genres": "Géneros"
+    },
+    "stats": {
+      "total": "Recomendaciones totales",
+      "movies": "Películas",
+      "books": "Libros",
+      "favorites": "Favoritos"
+    },
+    "lastPick": "Última recomendación",
+    "newQuiz": "Iniciar un nuevo cuestionario",
+    "empty": "Aún no tienes recomendaciones. Haz un cuestionario para empezar.",
+    "startQuiz": "Hacer el cuestionario"
   }
 }
