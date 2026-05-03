@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { BrandWordmark } from "@/components/brand-wordmark";
 
 export const metadata: Metadata = {
@@ -8,7 +9,8 @@ export const metadata: Metadata = {
   robots: "noindex, nofollow",
 };
 
-export default function MaintenancePage() {
+export default async function MaintenancePage() {
+  const t = await getTranslations("System.maintenance");
   return (
     <div className="relative min-h-[100svh] overflow-hidden bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <div
@@ -32,11 +34,10 @@ export default function MaintenancePage() {
           </div>
 
           <h1 className="mb-5 whitespace-nowrap text-[clamp(1.5rem,7.5vw,4.5rem)] font-bold leading-tight tracking-tight">
-            Our AI is at the movies.
+            {t("title")}
           </h1>
           <p className="mx-auto max-w-[640px] text-base leading-relaxed text-slate-600 sm:text-lg dark:text-slate-400">
-            Smart Advisor stepped out to binge a few classics and skim a novel
-            or two. We&apos;ll be back shortly with fresher taste.
+            {t("body")}
           </p>
         </div>
       </main>

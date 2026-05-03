@@ -419,6 +419,27 @@
     "yes": "Sí",
     "no": "No"
   },
+  "System": {
+    "error": {
+      "networkTitle": "No podemos conectar con nuestros servidores",
+      "networkBody": "Revisa tu conexión e inténtalo de nuevo: continuaremos justo donde lo dejaste.",
+      "genericTitle": "Algo se rompió",
+      "genericBody": "Un error inesperado impidió cargar esta página. Una actualización suele resolverlo.",
+      "ref": "Ref",
+      "goHome": "Ir al inicio",
+      "tryAgain": "Reintentar"
+    },
+    "notFound": {
+      "title": "Esta escena no llegó al corte final.",
+      "body": "La página que buscas se perdió entre tomas. Puede que sea un error en la URL o que se quedara en la sala de edición. En cualquier caso, te llevamos de vuelta.",
+      "goBack": "Volver",
+      "goHome": "Ir al inicio"
+    },
+    "maintenance": {
+      "title": "Nuestra IA fue al cine.",
+      "body": "Smart Advisor salió a ver clásicos y a hojear una novela. Volveremos pronto con un gusto más fresco."
+    }
+  },
   "AccountSecurity": {
     "back": "Atrás",
     "eyebrow": "Cuenta · Seguridad",

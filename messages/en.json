@@ -419,6 +419,27 @@
     "yes": "Yes",
     "no": "No"
   },
+  "System": {
+    "error": {
+      "networkTitle": "Can't reach our servers",
+      "networkBody": "Check your connection and try again — we'll pick up right where you left off.",
+      "genericTitle": "Something broke",
+      "genericBody": "An unexpected error stopped this page from loading. A refresh usually does it.",
+      "ref": "Ref",
+      "goHome": "Go home",
+      "tryAgain": "Try again"
+    },
+    "notFound": {
+      "title": "This scene didn't make the cut.",
+      "body": "The page you're looking for wandered off between takes. Maybe a typo in the URL, maybe it got left on the cutting room floor. Either way, let's get you back.",
+      "goBack": "Go Back",
+      "goHome": "Go Home"
+    },
+    "maintenance": {
+      "title": "Our AI is at the movies.",
+      "body": "Smart Advisor stepped out to binge a few classics and skim a novel or two. We'll be back shortly with fresher taste."
+    }
+  },
   "AccountSecurity": {
     "back": "Back",
     "eyebrow": "Account · Security",
