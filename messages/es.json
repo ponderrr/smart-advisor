@@ -134,7 +134,17 @@
     "team": {
       "eyebrow": "El equipo",
       "title": "Conoce al equipo",
-      "subtitle": "Las personas detrás de Smart Advisor."
+      "subtitle": "Las personas detrás de Smart Advisor.",
+      "members": {
+        "andrew": {
+          "designation": "Creador",
+          "quote": "Construí Smart Advisor para que las recomendaciones se sientan personales, rápidas y genuinamente útiles."
+        },
+        "vlad": {
+          "designation": "Diseñador web",
+          "quote": "Enfocado en crear una interfaz limpia que mantenga la experiencia fluida en escritorio."
+        }
+      }
     },
     "faq": {
       "eyebrow": "Preguntas frecuentes",
@@ -143,7 +153,100 @@
       "subtitleMid": "o reporta errores en",
       "subtitleTail": ". Smart Advisor es de código abierto, así que puedes revisarlo y contribuir cuando quieras.",
       "categoriesAria": "Categorías de preguntas frecuentes",
-      "filterAll": "Todas"
+      "filterAll": "Todas",
+      "categories": {
+        "getting-started": "Primeros pasos",
+        "how-it-works": "Cómo funciona",
+        "group-quiz": "Cuestionario en grupo",
+        "library": "Biblioteca",
+        "account": "Cuenta y privacidad"
+      },
+      "items": {
+        "create-account": {
+          "question": "¿Cómo creo una cuenta?",
+          "answer": "Haz clic en Registrarse en la página de inicio de sesión, ingresa tu nombre, correo y una contraseña (mínimo 8 caracteres). Recibirás un correo de verificación: haz clic en el enlace para activar tu cuenta antes de iniciar sesión."
+        },
+        "verify-email": {
+          "question": "¿Por qué necesito verificar mi correo?",
+          "answer": "La verificación del correo confirma tu identidad y protege tu cuenta. No podrás iniciar sesión hasta que hagas clic en el enlace de verificación enviado a tu bandeja. Revisa la carpeta de spam si no lo ves."
+        },
+        "personalize": {
+          "question": "¿Cómo personaliza Smart Advisor las recomendaciones?",
+          "answer": "Smart Advisor usa tus respuestas del cuestionario para entender tu estado de ánimo, preferencias de ritmo e intereses de género. Luego combina esto con datos en tiempo real de TMDB y Open Library para generar recomendaciones con una explicación clara detrás de cada elección."
+        },
+        "quiz-flow": {
+          "question": "¿Cómo funciona el cuestionario?",
+          "answer": "Eliges un tipo de contenido (película, libro o ambos), seleccionas cuántas preguntas quieres (de 3 a 15) y respondes cada una. Tus respuestas se envían a nuestra IA que genera recomendaciones personalizadas adaptadas a tus respuestas."
+        },
+        "results-generated": {
+          "question": "¿Cómo se generan los resultados?",
+          "answer": "Tus respuestas las procesa un modelo de IA que selecciona títulos que coinciden con tus preferencias. Cada recomendación se enriquece con carteles reales, valoraciones y descripciones de TMDB (películas) y Open Library (libros)."
+        },
+        "movies-and-books": {
+          "question": "¿Puedo usar Smart Advisor para películas y libros?",
+          "answer": "Sí. Selecciona 'Ambos' durante la elección de contenido para recibir una recomendación de película y otra de libro en la misma sesión. Todo tu historial de recomendaciones se guarda para futuras consultas."
+        },
+        "off-results": {
+          "question": "¿Y si mis recomendaciones no me convencen?",
+          "answer": "Puedes rehacer el cuestionario en cualquier momento con respuestas distintas, o ajustar el número de preguntas y tus elecciones de estado de ánimo y ritmo. La forma más rápida de mejorar futuras elecciones es registrar reacciones en tu biblioteca: marcar una recomendación pasada como 'No es para mí' enseña a la IA a evitar títulos similares, y un pulgar arriba la inclina hacia más como ese."
+        },
+        "trailer-preview": {
+          "question": "¿Dónde puedo ver un tráiler o vista previa?",
+          "answer": "Abre cualquier tarjeta de recomendación desde tu panel o historial. Para películas se reproduce un tráiler en línea (carga diferida, solo se activa al hacer clic), y para libros aparece un enlace 'Ver en Open Library' para que explores ediciones, portadas y reseñas. Las películas usan el tráiler oficial de TMDB cuando está publicado."
+        },
+        "year-in-review": {
+          "question": "¿Qué es Año en Revisión y cuándo aparece?",
+          "answer": "Año en Revisión es un resumen estilo Spotify Wrapped de tus recomendaciones: género principal, racha más larga, mes pico, director o autor más recomendado, mezcla de formatos y tus títulos destacados. Aparece como un banner prominente en tu panel durante diciembre (año actual) y enero (año pasado). Fuera de esa ventana la página sigue funcionando en /wrapped, solo que no se promociona."
+        },
+        "group-what": {
+          "question": "¿Qué es el cuestionario en grupo?",
+          "answer": "El cuestionario en grupo permite que varias personas hagan el mismo cuestionario juntas: en la misma mesa, en el sofá o de forma remota. El anfitrión crea una sesión, comparte un código de seis caracteres y todos responden el mismo conjunto de preguntas en su propio dispositivo. Luego la IA combina las respuestas de todos en una recomendación que se ajusta al grupo."
+        },
+        "group-account": {
+          "question": "¿Necesito una cuenta para unirme a un cuestionario en grupo?",
+          "answer": "No. Unirse es gratis y no requiere cuenta: solo ingresa el código del anfitrión y un nombre para mostrar. Hospedar sí requiere cuenta para que podamos guardar la elección del grupo en tu biblioteca y vincular rachas/logros a tu perfil."
+        },
+        "group-host": {
+          "question": "¿Cómo hospedo un cuestionario en grupo?",
+          "answer": "Los usuarios con sesión iniciada pueden abrir Cuestionario en grupo desde la barra de navegación; el resto puede usar la tarjeta 'Encuentra una recomendación juntos' en la página principal. En la tarjeta del anfitrión, define tu nombre, elige el tipo de contenido (Ambos / Películas / Libros), toca un número para cuántas preguntas quieres (3 a 15) y luego Crear sesión. Aterrizarás en una sala con un código de seis caracteres y un botón Copiar enlace: comparte cualquiera con el grupo. Cuando al menos dos jugadores se unan, verás Iniciar cuestionario; al pulsarlo se generan preguntas frescas con IA para toda la sala. Cada quien responde en su dispositivo, y cuando todas las respuestas estén enviadas verás un botón 'Revelar la elección del grupo' para mostrar la recomendación sintetizada por la IA."
+        },
+        "group-synthesis": {
+          "question": "¿Cómo encuentra la IA una recomendación que sirva para todos?",
+          "answer": "Cuando todos los participantes envían sus respuestas, el anfitrión toca 'Revelar la elección del grupo'. Cada respuesta de cada participante se envía al modelo etiquetada con el nombre del jugador, y la IA elige algo que respeta los puntos en común en lugar de promediar. Funciona mejor con 2 a 4 jugadores; los grupos más grandes también funcionan pero el resultado tiende hacia un atractivo más amplio."
+        },
+        "group-expiry": {
+          "question": "¿Cuánto tiempo permanece activa una sesión de cuestionario en grupo?",
+          "answer": "Una sesión está activa durante 24 horas desde su creación. Después, la sala y el resultado caducan y ya no se puede unir con el código. Los anfitriones también pueden terminar una sesión antes en cualquier momento desde la sala."
+        },
+        "library-vs-history": {
+          "question": "¿Qué es la biblioteca y en qué se diferencia del historial?",
+          "answer": "El historial es cada recomendación que la IA ha generado para ti. Tu biblioteca es un registro aparte de lo que realmente has visto o leído, con un estado (Terminado, En progreso, Lista de deseos), una valoración con pulgar y una reacción opcional de una línea. Puedes registrar un título desde cualquier tarjeta de resultados o desde el modal del historial."
+        },
+        "library-improves": {
+          "question": "¿Cómo mejora la biblioteca mis recomendaciones?",
+          "answer": "Tus entradas valoradas más recientes se envían a la IA junto con tus respuestas del cuestionario como señal de gusto. Un pulgar arriba le dice 'más como esto'; un pulgar abajo le dice que se aleje. Las reacciones que escribes se leen literalmente, así que un comentario como 'demasiado lento' tiene peso real en la próxima recomendación."
+        },
+        "mfa": {
+          "question": "¿Qué es la autenticación de dos factores (MFA)?",
+          "answer": "MFA añade una capa extra de seguridad al requerir un código de una app autenticadora (como Google Authenticator o Authy) cuando inicias sesión. Puedes activarlo desde Ajustes de cuenta en la pestaña Seguridad."
+        },
+        "sessions": {
+          "question": "¿Cómo gestiono mis dispositivos y sesiones?",
+          "answer": "Ve a Ajustes de cuenta, abre la pestaña Seguridad y desplázate hasta Sesiones activas. Puedes ver todos los dispositivos donde tienes sesión iniciada, revocar el acceso a dispositivos individuales o cerrar la sesión en todos los dispositivos a la vez."
+        },
+        "delete-account": {
+          "question": "¿Puedo eliminar o desactivar mi cuenta?",
+          "answer": "Sí. En Ajustes de cuenta, dentro de la pestaña Integraciones, encontrarás una sección Zona de peligro. Puedes desactivar tu cuenta (que el soporte puede reactivar) o eliminarla permanentemente junto con todos los datos asociados."
+        },
+        "data-handling": {
+          "question": "¿Cómo se manejan mis datos personales?",
+          "answer": "Tus datos se almacenan de forma segura en Supabase con políticas de seguridad a nivel de fila. Solo usamos tus preferencias y respuestas del cuestionario para generar recomendaciones. No compartimos tus datos con terceros."
+        },
+        "open-source": {
+          "question": "¿Es Smart Advisor de código abierto?",
+          "answer": "Sí. Smart Advisor es totalmente de código abierto. Puedes revisar el código, reportar problemas y seguir el progreso del desarrollo en GitHub."
+        }
+      }
     },
     "footer": {
       "navAria": "Navegación del pie de página",
