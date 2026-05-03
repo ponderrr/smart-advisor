@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
+import { useTranslations } from "next-intl";
 
 const VALIDATION_FLASH_MS = 650;
 const VALIDATION_MESSAGE_MS = 3200;
@@ -163,25 +164,19 @@ const DemoContentCard = ({
 const DEMO_CONTENT_CARDS = [
   {
     option: "Movies",
-    eyebrow: "On screen",
-    title: "Movie",
-    description: "A film tuned to your current mood and pace.",
+    cardKey: "movie",
     icon: <Film size={14} />,
     mediaSrc: "/animations/Popcorn.webm",
   },
   {
     option: "Books",
-    eyebrow: "On the shelf",
-    title: "Book",
-    description: "A read tailored to your style and interests.",
+    cardKey: "book",
     icon: <BookOpen size={14} />,
     mediaSrc: "/animations/Books.webm",
   },
   {
     option: "Both",
-    eyebrow: "Both",
-    title: "One of each",
-    description: "A movie and a book picked together in one go.",
+    cardKey: "both",
     icon: <Sparkles size={14} />,
     mediaSrc: "/animations/Popcorn.webm",
     secondaryMediaSrc: "/animations/Books.webm",
@@ -196,6 +191,7 @@ const mapContentType = (value: string): ContentType => {
 
 export default function DemoPage() {
   const router = useRouter();
+  const t = useTranslations("Demo.quiz");
   const { setContentType, setQuestionCount, setFilters } = useQuizStore();
 
   const [questions] = useState<DemoQuestion[]>(() => buildDemoQuiz());
@@ -242,10 +238,10 @@ export default function DemoPage() {
       setShowValidationFlash(true);
       setValidationMessage(
         current.type === "fill_in_blank"
-          ? "Please type an answer before continuing."
+          ? t("validation.fillInBlank")
           : current.type === "select_all"
-            ? "Please select at least one option before continuing."
-            : "Please select an option before continuing.",
+            ? t("validation.selectAll")
+            : t("validation.singleSelect"),
       );
       window.setTimeout(() => setShowValidationFlash(false), VALIDATION_FLASH_MS);
       window.setTimeout(() => setValidationMessage(null), VALIDATION_MESSAGE_MS);
@@ -285,9 +281,7 @@ export default function DemoPage() {
     if (step === 0) {
       if (
         Object.keys(answers).length > 0 &&
-        !window.confirm(
-          "Leave the demo? Your answers so far won't be saved.",
-        )
+        !window.confirm(t("leaveConfirm"))
       ) {
         return;
       }
@@ -315,11 +309,14 @@ export default function DemoPage() {
         crossOrigin="anonymous"
       />
       <QuizStepShell
-        category="Demo quiz"
-        stepLabel={`Question ${step + 1} of ${questions.length}`}
+        category={t("category")}
+        stepLabel={t("stepLabel", {
+          current: step + 1,
+          total: questions.length,
+        })}
         progress={progress}
         onBack={handleBack}
-        backLabel={step === 0 ? "Home" : "Previous"}
+        backLabel={step === 0 ? t("back.home") : t("back.previous")}
       >
         <motion.div
           layout
@@ -348,9 +345,9 @@ export default function DemoPage() {
                     {DEMO_CONTENT_CARDS.map((card) => (
                       <DemoContentCard
                         key={card.option}
-                        eyebrow={card.eyebrow}
-                        title={card.title}
-                        description={card.description}
+                        eyebrow={t(`cards.${card.cardKey}.eyebrow`)}
+                        title={t(`cards.${card.cardKey}.title`)}
+                        description={t(`cards.${card.cardKey}.description`)}
                         icon={card.icon}
                         mediaSrc={card.mediaSrc}
                         secondaryMediaSrc={
@@ -384,7 +381,7 @@ export default function DemoPage() {
                   "inline-flex items-center justify-center gap-2 bg-white px-6 py-2.5 text-sm font-black tracking-tight text-black dark:bg-slate-900 dark:text-white",
                 )}
               >
-                {step === questions.length - 1 ? "Continue" : "Next"}
+                {step === questions.length - 1 ? t("continue") : t("next")}
                 <IconArrowRight className="h-4 w-4" />
               </PillButton>
             </motion.div>

@@ -100,6 +100,7 @@ export const AuthForm = ({
   const router = useRouter();
   const searchParams = useSearchParams();
   const t = useTranslations("Auth");
+  const tv = useTranslations("Auth.validation");
   const messages = useMessages() as {
     Auth?: { headings?: Record<string, string[]> };
   };
@@ -168,21 +169,21 @@ export const AuthForm = ({
   const trimmedEmail = email.trim();
   const emailRules = useMemo(
     () => [
-      { label: "Contains @", met: trimmedEmail.includes("@") },
+      { label: tv("rules.emailContainsAt"), met: trimmedEmail.includes("@") },
       {
-        label: "Has a domain (example.com)",
+        label: tv("rules.emailHasDomain"),
         met: /^\S+@\S+\.\S+$/.test(trimmedEmail),
       },
     ],
-    [trimmedEmail],
+    [trimmedEmail, tv],
   );
 
   const parsedAge = Number(age);
   const ageRules = useMemo(
     () => [
-      { label: "Whole number", met: age.length > 0 && /^\d+$/.test(age) },
+      { label: tv("rules.ageWholeNumber"), met: age.length > 0 && /^\d+$/.test(age) },
       {
-        label: "Between 13 and 120",
+        label: tv("rules.ageInRange"),
         met:
           age.length > 0 &&
           Number.isFinite(parsedAge) &&
@@ -190,24 +191,24 @@ export const AuthForm = ({
           parsedAge <= 120,
       },
     ],
-    [age, parsedAge],
+    [age, parsedAge, tv],
   );
 
   const trimmedUsername = username.trim();
   const usernameRules = useMemo(
     () => [
       {
-        label: "2–24 characters",
+        label: tv("rules.usernameLength"),
         met: trimmedUsername.length >= 2 && trimmedUsername.length <= 24,
       },
       {
-        label: "Letters, numbers, dots, dashes, or underscores",
+        label: tv("rules.usernameAllowedChars"),
         met:
           trimmedUsername.length > 0 &&
           /^[a-zA-Z0-9._-]+$/.test(trimmedUsername),
       },
     ],
-    [trimmedUsername],
+    [trimmedUsername, tv],
   );
   const passwordRules = useMemo(
     () =>
@@ -220,11 +221,11 @@ export const AuthForm = ({
   const confirmPasswordRules = useMemo(
     () => [
       {
-        label: "Matches your password",
+        label: tv("rules.confirmPasswordMatches"),
         met: confirmPassword.length > 0 && confirmPassword === password,
       },
     ],
-    [confirmPassword, password],
+    [confirmPassword, password, tv],
   );
 
   const emailAllMet = emailRules.every((r) => r.met);
@@ -367,51 +368,50 @@ export const AuthForm = ({
     const nextErrors: Record<string, string> = {};
     if (!email) {
       nextErrors.email =
-        mode === "signin" ? "Email or username is required" : "Email is required";
+        mode === "signin" ? tv("emailOrUsernameRequired") : tv("emailRequired");
     } else if (mode !== "signin" && !/\S+@\S+\.\S+/.test(email)) {
       // Sign-in accepts username too — only enforce email format for signup/forgot.
-      nextErrors.email = "Enter a valid email";
+      nextErrors.email = tv("emailInvalid");
     }
 
     if (mode === "signin" || mode === "signup") {
       if (!password) {
-        nextErrors.password = "Password is required";
+        nextErrors.password = tv("passwordRequired");
       } else if (mode === "signup" && !isValidPassword(password)) {
-        nextErrors.password = "Password does not meet all requirements";
+        nextErrors.password = tv("passwordRequirementsUnmet");
       }
     }
 
     if (mode === "signup") {
       const trimmedUsername = username.trim();
       if (!trimmedUsername) {
-        nextErrors.username = "Username is required";
+        nextErrors.username = tv("usernameRequired");
       } else if (trimmedUsername.length < 2) {
-        nextErrors.username = "Use at least 2 characters";
+        nextErrors.username = tv("usernameTooShort");
       } else if (trimmedUsername.length > 24) {
-        nextErrors.username = "Use 24 characters or fewer";
+        nextErrors.username = tv("usernameTooLong");
       } else if (!/^[a-zA-Z0-9._-]+$/.test(trimmedUsername)) {
-        nextErrors.username =
-          "Use letters, numbers, dots, dashes, or underscores";
+        nextErrors.username = tv("usernameInvalid");
       }
 
       const parsedAge = Number(age);
       if (!age.trim()) {
-        nextErrors.age = "Age is required";
+        nextErrors.age = tv("ageRequired");
       } else if (!Number.isFinite(parsedAge) || !Number.isInteger(parsedAge)) {
-        nextErrors.age = "Age must be a whole number";
+        nextErrors.age = tv("ageNotInteger");
       } else if (parsedAge < 13 || parsedAge > 120) {
-        nextErrors.age = "Enter an age between 13 and 120";
+        nextErrors.age = tv("ageOutOfRange");
       }
 
       if (!confirmPassword) {
-        nextErrors.confirmPassword = "Confirm your password";
+        nextErrors.confirmPassword = tv("confirmPasswordRequired");
       } else if (confirmPassword !== password) {
-        nextErrors.confirmPassword = "Passwords do not match";
+        nextErrors.confirmPassword = tv("passwordsDoNotMatch");
       }
     }
 
     if (Object.keys(nextErrors).length > 0) {
-      nextErrors.general = "Please fix the highlighted fields.";
+      nextErrors.general = tv("fixHighlightedFields");
     }
 
     setErrors(nextErrors);
@@ -424,7 +424,7 @@ export const AuthForm = ({
 
     if (!validate()) {
       setSubmitAttempted(true);
-      return { error: "Please correct the highlighted fields" };
+      return { error: tv("correctHighlightedFields") };
     }
     setSubmitAttempted(false);
 
@@ -499,8 +499,8 @@ export const AuthForm = ({
     const identifier = email.trim();
     if (!identifier) {
       setErrors({
-        email: "Email or username is required",
-        general: "Enter your email or username to use a passkey.",
+        email: tv("emailOrUsernameRequired"),
+        general: tv("passkeyIdentifierRequired"),
       });
       setSubmitAttempted(true);
       return;
@@ -531,8 +531,8 @@ export const AuthForm = ({
     const normalized = raw.toLowerCase();
     if (normalized.includes("expired")) {
       return mode === "totp"
-        ? "That code expired. Wait for a new one in your authenticator and try again."
-        : "That backup code is no longer valid.";
+        ? tv("mfaError.totpExpired")
+        : tv("mfaError.backupExpired");
     }
     if (
       normalized.includes("invalid") ||
@@ -543,8 +543,8 @@ export const AuthForm = ({
       normalized.includes("wrong")
     ) {
       return mode === "totp"
-        ? "That code didn't match. Double-check your authenticator and try again."
-        : "That backup code didn't match. Each code only works once.";
+        ? tv("mfaError.totpMismatch")
+        : tv("mfaError.backupMismatch");
     }
     return raw;
   };
@@ -556,7 +556,7 @@ export const AuthForm = ({
     try {
       if (mfaInputMode === "totp") {
         if (mfaCode.length !== 6) {
-          setErrors({ general: "Please enter a 6-digit code" });
+          setErrors({ general: tv("enterSixDigitCode") });
           return;
         }
         const result = await onVerifyMFA(mfaFactorId, mfaCode);
@@ -573,7 +573,7 @@ export const AuthForm = ({
       } else {
         const trimmed = mfaCode.trim();
         if (!trimmed) {
-          setErrors({ general: "Please enter a backup code" });
+          setErrors({ general: tv("enterBackupCode") });
           return;
         }
         const result = await onVerifyBackupCode(trimmed);
@@ -739,7 +739,7 @@ export const AuthForm = ({
                     (emailFocused || (submitAttempted && !emailAllMet))
                   }
                   anchorRef={emailAnchorRef}
-                  title="Email requirements"
+                  title={tv("popoverTitles.email")}
                 />
               </div>
 
@@ -787,7 +787,7 @@ export const AuthForm = ({
                           (submitAttempted && !passwordAllMet))
                       }
                       anchorRef={passwordAnchorRef}
-                      title="Password requirements"
+                      title={tv("popoverTitles.password")}
                     />
                   </motion.div>
                 )}
@@ -829,7 +829,7 @@ export const AuthForm = ({
                           (submitAttempted && !usernameAllMet)
                         }
                         anchorRef={usernameAnchorRef}
-                        title="Username requirements"
+                        title={tv("popoverTitles.username")}
                       />
                     </div>
 
@@ -862,7 +862,7 @@ export const AuthForm = ({
                           ageFocused || (submitAttempted && !ageAllMet)
                         }
                         anchorRef={ageAnchorRef}
-                        title="Age requirements"
+                        title={tv("popoverTitles.age")}
                       />
                     </div>
 
@@ -896,7 +896,7 @@ export const AuthForm = ({
                           (submitAttempted && !confirmAllMet)
                         }
                         anchorRef={confirmPasswordAnchorRef}
-                        title="Confirm password"
+                        title={tv("popoverTitles.confirmPassword")}
                       />
                     </div>
                   </motion.div>

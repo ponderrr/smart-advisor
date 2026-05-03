@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion } from "motion/react";
+import { useTranslations } from "next-intl";
 import {
   ArrowRight,
   Film,
@@ -43,14 +44,18 @@ type DemoAnswerPayload = {
 };
 
 /* ---------- Loading Animation ---------- */
-const DemoLoadingState = () => (
-  <div className="mx-auto flex min-h-[420px] w-full max-w-4xl flex-col items-center justify-center rounded-3xl border border-slate-200/70 bg-white/85 p-6 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
-    <LoaderFive text="Finding your perfect picks..." />
-  </div>
-);
+const DemoLoadingState = () => {
+  const t = useTranslations("Demo.results");
+  return (
+    <div className="mx-auto flex min-h-[420px] w-full max-w-4xl flex-col items-center justify-center rounded-3xl border border-slate-200/70 bg-white/85 p-6 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
+      <LoaderFive text={t("loadingText")} />
+    </div>
+  );
+};
 
 /* ---------- Demo Result Card ---------- */
 const DemoResultCard = ({ item, index }: { item: DemoItem; index: number }) => {
+  const t = useTranslations("Demo.results");
   const [expanded, setExpanded] = useState(false);
   const [isClamped, setIsClamped] = useState(false);
   const descRef = useRef<HTMLParagraphElement>(null);
@@ -95,7 +100,7 @@ const DemoResultCard = ({ item, index }: { item: DemoItem; index: number }) => {
               MATCH_TONE_CLASSES[matchTone],
             )}
           >
-            {matchScore}%<span className="hidden sm:inline"> match</span>
+            {matchScore}%<span className="hidden sm:inline">{t("matchSuffix")}</span>
           </div>
         </div>
 
@@ -120,7 +125,7 @@ const DemoResultCard = ({ item, index }: { item: DemoItem; index: number }) => {
                   className="text-indigo-600 dark:text-indigo-400"
                 />
                 <p className="text-[11px] font-black uppercase tracking-[0.16em] text-indigo-700 dark:text-indigo-300">
-                  Why this pick
+                  {t("whyThisPick")}
                 </p>
               </div>
               <p className="mt-2 pl-2 text-[15px] leading-relaxed text-slate-700 dark:text-slate-200">
@@ -132,7 +137,7 @@ const DemoResultCard = ({ item, index }: { item: DemoItem; index: number }) => {
           {showDescription && (
             <div className="mt-4 border-t border-slate-100 pt-4 dark:border-slate-800">
               <p className="mb-1.5 text-[11px] font-black uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">
-                About
+                {t("about")}
               </p>
               <p
                 ref={descRef}
@@ -153,11 +158,11 @@ const DemoResultCard = ({ item, index }: { item: DemoItem; index: number }) => {
                 <button
                   type="button"
                   onClick={() => setExpanded((prev) => !prev)}
-                  aria-label={expanded ? "Show less" : "Show more"}
+                  aria-label={expanded ? t("showLess") : t("showMore")}
                   aria-expanded={expanded}
                   className="mt-2 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-indigo-600 transition-colors hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10"
                 >
-                  {expanded ? "Show less" : "Show more"}
+                  {expanded ? t("showLess") : t("showMore")}
                   <ChevronDown
                     size={12}
                     className={cn(
@@ -176,7 +181,7 @@ const DemoResultCard = ({ item, index }: { item: DemoItem; index: number }) => {
             rel="noreferrer"
             className="mt-auto inline-flex items-center gap-1 pt-4 text-sm font-bold text-indigo-600 transition-colors hover:text-indigo-500 dark:text-indigo-400"
           >
-            View details
+            {t("viewDetails")}
             <ArrowRight size={14} />
           </a>
         </div>
@@ -188,6 +193,7 @@ const DemoResultCard = ({ item, index }: { item: DemoItem; index: number }) => {
 /* ---------- Demo Results Page ---------- */
 export default function DemoResultsPage() {
   const router = useRouter();
+  const t = useTranslations("Demo.results");
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<DemoItem[]>([]);
   const [contentType, setContentType] = useState<"book" | "movie" | "both">(
@@ -240,8 +246,7 @@ export default function DemoResultsPage() {
             setError({
               kind: "limit",
               message:
-                data?.message ??
-                "You have used your free demo runs for today. Sign up to keep going.",
+                data?.message ?? t("errors.limitFallback"),
             });
             setItems([]);
           }
@@ -252,7 +257,7 @@ export default function DemoResultsPage() {
           if (active) {
             setError({
               kind: "generic",
-              message: "We could not generate your demo recommendations. Please try again.",
+              message: t("errors.genericFallback"),
             });
             setItems([]);
           }
@@ -269,7 +274,7 @@ export default function DemoResultsPage() {
         if (active) {
           setError({
             kind: "generic",
-            message: "We could not generate your demo recommendations. Please try again.",
+            message: t("errors.genericFallback"),
           });
           setItems([]);
         }
@@ -287,7 +292,7 @@ export default function DemoResultsPage() {
     return () => {
       active = false;
     };
-  }, [router]);
+  }, [router, t]);
 
   const movieItems = items.filter((i) => i.type === "movie");
   const bookItems = items.filter((i) => i.type === "book");
@@ -316,8 +321,8 @@ export default function DemoResultsPage() {
             >
               <h2 className="text-2xl font-black tracking-tight sm:text-3xl">
                 {error.kind === "limit"
-                  ? "You hit the demo limit"
-                  : "Something went wrong"}
+                  ? t("errors.limitTitle")
+                  : t("errors.genericTitle")}
               </h2>
               <p className="mx-auto mt-3 max-w-md text-sm text-slate-600 dark:text-slate-300">
                 {error.message}
@@ -328,7 +333,7 @@ export default function DemoResultsPage() {
                     onClick={() => router.push("/auth")}
                     className="inline-flex w-full items-center justify-center gap-2 bg-white px-6 py-3 text-sm font-black text-black sm:w-auto dark:bg-slate-900 dark:text-white"
                   >
-                    Sign up to continue
+                    {t("errors.signUp")}
                     <ArrowRight size={16} />
                   </PillButton>
                 ) : (
@@ -337,7 +342,7 @@ export default function DemoResultsPage() {
                     className="inline-flex w-full items-center justify-center gap-2 bg-white px-6 py-3 text-sm font-black text-black sm:w-auto dark:bg-slate-900 dark:text-white"
                   >
                     <RotateCcw size={16} />
-                    Try again
+                    {t("errors.tryAgain")}
                   </PillButton>
                 )}
               </div>
@@ -352,15 +357,13 @@ export default function DemoResultsPage() {
                 className="mb-8"
               >
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
-                  Demo · Your picks
+                  {t("eyebrow")}
                 </p>
                 <h1 className="mt-2 text-2xl font-black tracking-tighter sm:text-3xl md:text-4xl lg:text-5xl">
-                  Hand-picked for you
+                  {t("headline")}
                 </h1>
                 <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                  {items.length} personalized{" "}
-                  {items.length === 1 ? "pick" : "picks"} from your demo
-                  answers — sign up to save them and refine over time.
+                  {t("subhead", { count: items.length })}
                 </p>
               </motion.div>
 
@@ -368,7 +371,7 @@ export default function DemoResultsPage() {
               {items.length === 0 ? (
                 <div className="rounded-3xl border border-slate-200/70 bg-white/85 p-8 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
                   <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                    No results found. Try the demo again for a new set.
+                    {t("empty")}
                   </p>
                 </div>
               ) : contentType === "both" ? (
@@ -382,8 +385,8 @@ export default function DemoResultsPage() {
                     >
                       <SectionHeader
                         icon={<Film size={14} />}
-                        eyebrow="Movie"
-                        title="On screen"
+                        eyebrow={t("sections.movie.eyebrow")}
+                        title={t("sections.movie.title")}
                         count={movieItems.length}
                         accent="violet"
                       />
@@ -404,8 +407,8 @@ export default function DemoResultsPage() {
                     >
                       <SectionHeader
                         icon={<BookOpen size={14} />}
-                        eyebrow="Book"
-                        title="On the shelf"
+                        eyebrow={t("sections.book.eyebrow")}
+                        title={t("sections.book.title")}
                         count={bookItems.length}
                         accent="emerald"
                       />
@@ -445,11 +448,10 @@ export default function DemoResultsPage() {
                     <Sparkles size={22} />
                   </span>
                   <h3 className="mt-4 text-2xl font-black tracking-tight sm:text-3xl">
-                    Make this a habit
+                    {t("cta.title")}
                   </h3>
                   <p className="mx-auto mt-2 max-w-lg text-sm text-slate-600 dark:text-slate-300">
-                    Sign up to save your picks, build a taste profile from your
-                    reactions, and get AI-tailored recommendations every time.
+                    {t("cta.body")}
                   </p>
                   <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
                     <HoverBorderGradient
@@ -461,7 +463,7 @@ export default function DemoResultsPage() {
                       containerClassName="rounded-full w-full sm:w-auto"
                       className="flex w-full items-center justify-center gap-2 whitespace-nowrap bg-white px-6 py-3 text-sm font-black leading-none tracking-tight text-black sm:w-auto dark:bg-black dark:text-white"
                     >
-                      Sign up to continue
+                      {t("cta.signUp")}
                       <ArrowRight size={16} />
                     </HoverBorderGradient>
                     <PillButton
@@ -469,7 +471,7 @@ export default function DemoResultsPage() {
                       className="inline-flex w-full items-center justify-center gap-2 border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 sm:w-auto dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
                     >
                       <RotateCcw size={16} />
-                      Retake demo
+                      {t("cta.retake")}
                     </PillButton>
                   </div>
                 </div>
