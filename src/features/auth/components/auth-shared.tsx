@@ -8,6 +8,7 @@ import {
   IconEye,
   IconEyeOff,
 } from "@tabler/icons-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
@@ -60,6 +61,7 @@ export const PasswordInput = ({
   id,
   ...props
 }: PasswordInputProps) => {
+  const t = useTranslations("Auth.shared");
   const radius = 100;
   const [visible, setVisible] = useState(false);
   const mouseX = useMotionValue(0);
@@ -92,7 +94,7 @@ export const PasswordInput = ({
       <button
         type="button"
         onClick={onTogglePassword}
-        aria-label={showPassword ? "Hide password" : "Show password"}
+        aria-label={showPassword ? t("hidePassword") : t("showPassword")}
         aria-pressed={showPassword}
         className="absolute inset-y-0 right-1 inline-flex items-center justify-center px-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
       >
@@ -126,8 +128,10 @@ export const FieldRequirements = ({
   rules,
   visible,
   anchorRef,
-  title = "Requirements",
+  title,
 }: FieldRequirementsProps) => {
+  const t = useTranslations("Auth.shared");
+  const resolvedTitle = title ?? t("requirements");
   const [mounted, setMounted] = useState(false);
   const [pos, setPos] = useState<{
     top: number;
@@ -164,7 +168,7 @@ export const FieldRequirements = ({
   const content = (
     <div className="rounded-lg border border-slate-200/80 bg-white/95 p-3 shadow-lg backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/95">
       <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-        {title}
+        {resolvedTitle}
       </p>
       <ul className="space-y-1">
         {rules.map((rule, i) => (

@@ -536,6 +536,11 @@
       "resending": "Resending…",
       "resendSuccess": "Verification email sent. Check your inbox.",
       "backToSignIn": "Back to sign in"
+    },
+    "shared": {
+      "hidePassword": "Hide password",
+      "showPassword": "Show password",
+      "requirements": "Requirements"
     }
   },
   "Wrapped": {
