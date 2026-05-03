@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { AuthForm, AuthLayout } from "@/features/auth/components";
 import { PageLoader } from "@/components/ui/loader";
@@ -9,6 +10,7 @@ import { PageLoader } from "@/components/ui/loader";
 const AuthPageContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const tAuth = useTranslations("Auth");
   const {
     signIn,
     signUp,
@@ -48,10 +50,10 @@ const AuthPageContent = () => {
   // Clear session expired flag when user starts interacting
   const effectiveAuthError = useMemo(() => {
     if (sessionExpiredParam && !authError) {
-      return "Your session has expired. Please sign in again.";
+      return tAuth("sessionExpired");
     }
     return authError;
-  }, [sessionExpiredParam, authError]);
+  }, [sessionExpiredParam, authError, tAuth]);
 
   useEffect(() => {
     if (oauthMfaRequired && session) {
@@ -147,8 +149,13 @@ const AuthPageContent = () => {
   );
 };
 
+const AuthPageFallback = () => {
+  const tc = useTranslations("Common");
+  return <PageLoader text={tc("loading")} />;
+};
+
 const AuthPage = () => (
-  <Suspense fallback={<PageLoader text="Loading..." />}>
+  <Suspense fallback={<AuthPageFallback />}>
     <AuthPageContent />
   </Suspense>
 );

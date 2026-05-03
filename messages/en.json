@@ -86,6 +86,9 @@
     "yes": "Yes",
     "no": "No"
   },
+  "Auth": {
+    "sessionExpired": "Your session has expired. Please sign in again."
+  },
   "Quiz": {
     "category": "Quiz setup",
     "stepOf": "Step {current} of {total}",
@@ -171,29 +174,32 @@
     }
   },
   "Results": {
-    "loadingHeader": "Crafting your picks",
-    "errorTitle": "Something went wrong",
-    "errorRetry": "Try again",
-    "errorBack": "Back to setup",
-    "shareCopy": "Copy link",
-    "shareCopied": "Link copied!",
-    "shareTwitter": "Share on X",
-    "shareEmail": "Share by email",
-    "shareTitle": "Share your picks",
-    "anotherPick": "Get another pick",
-    "viewHistory": "View history",
-    "share": "Share",
-    "favorited": "Favorited",
-    "favorite": "Favorite",
-    "showMore": "Show more",
-    "showLess": "Show less"
+    "loadingMessages": [
+      "Flipping through your answers…",
+      "Consulting the algorithm…",
+      "Cross-referencing great taste…",
+      "Digging through movie shelves…",
+      "Searching the library stacks…",
+      "Hunting for hidden gems…",
+      "Matching moods and genres…",
+      "Dusting off forgotten classics…",
+      "Checking against your history…",
+      "Weighing the shortlist…",
+      "Narrowing down the picks…",
+      "Running it by our AI once more…",
+      "Polishing each recommendation…",
+      "Adding the finishing touches…"
+    ]
   },
   "Dashboard": {
-    "title": "Dashboard",
-    "subtitle": "Your activity at a glance.",
+    "eyebrow": "Dashboard",
+    "startQuiz": "Start Quiz",
+    "viewsAria": "Dashboard views",
+    "viewsGroup": "Views",
     "tabs": {
       "overview": "Overview",
       "picks": "Picks",
+      "recentPicks": "Recent Picks",
       "genres": "Genres"
     },
     "stats": {
@@ -202,9 +208,10 @@
       "books": "Books",
       "favorites": "Favorites"
     },
-    "lastPick": "Last pick",
-    "newQuiz": "Start a new quiz",
-    "empty": "No recommendations yet. Take a quiz to get started.",
-    "startQuiz": "Take the quiz"
+    "filters": {
+      "all": "All",
+      "favorites": "Favorites"
+    },
+    "recentAria": "Recent picks filter"
   }
 }

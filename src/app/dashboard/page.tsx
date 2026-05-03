@@ -35,6 +35,7 @@ import {
   Lock,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import {
@@ -158,6 +159,8 @@ const DashboardPage = () => {
   const router = useRouter();
   const { user } = useAuth();
   const { ready } = useRequireAuth();
+  const t = useTranslations("Dashboard");
+  const tc = useTranslations("Common");
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [libraryItems, setLibraryItems] = useState<LibraryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -582,7 +585,7 @@ const DashboardPage = () => {
     return null;
   }, [loading, recommendations.length, libraryItems.length, lastPick]);
 
-  if (!ready) return <PageLoader text="Loading..." />;
+  if (!ready) return <PageLoader text={tc("loading")} />;
 
   return (
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
@@ -594,7 +597,7 @@ const DashboardPage = () => {
           <div className="mb-6 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
-                Dashboard
+                {t("eyebrow")}
               </p>
               <h1 className="mt-2 break-words text-2xl font-black tracking-tighter sm:text-3xl md:text-4xl lg:text-5xl">
                 {greeting}
@@ -615,7 +618,7 @@ const DashboardPage = () => {
                 className="flex items-center gap-2 whitespace-nowrap bg-white px-8 py-4 text-base font-black leading-none tracking-tight text-black dark:bg-black dark:text-white"
               >
                 <Sparkles size={16} />
-                Start Quiz
+                {t("startQuiz")}
               </HoverBorderGradient>
             </div>
           </div>
@@ -624,17 +627,21 @@ const DashboardPage = () => {
           <div
             className="-mx-1 mb-4 flex gap-2 overflow-x-auto px-1 pb-1 md:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             role="tablist"
-            aria-label="Dashboard views"
+            aria-label={t("viewsAria")}
           >
             {(
               [
                 {
                   id: "overview" as const,
-                  label: "Overview",
+                  label: t("tabs.overview"),
                   icon: TrendingUp,
                 },
-                { id: "picks" as const, label: "Picks", icon: Sparkles },
-                { id: "genres" as const, label: "Genres", icon: BarChart3 },
+                { id: "picks" as const, label: t("tabs.picks"), icon: Sparkles },
+                {
+                  id: "genres" as const,
+                  label: t("tabs.genres"),
+                  icon: BarChart3,
+                },
               ] as {
                 id: (typeof dashTabs)[number];
                 label: string;
@@ -667,22 +674,22 @@ const DashboardPage = () => {
           {/* Sidebar + content layout */}
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6">
             <SidebarNavShell className="hidden md:flex">
-              <nav aria-label="Dashboard views" className="flex-1">
-                <SidebarNavGroup label="Views" />
+              <nav aria-label={t("viewsAria")} className="flex-1">
+                <SidebarNavGroup label={t("viewsGroup")} />
                 {[
                   {
                     id: "overview" as const,
-                    label: "Overview",
+                    label: t("tabs.overview"),
                     icon: <TrendingUp size={16} />,
                   },
                   {
                     id: "picks" as const,
-                    label: "Recent Picks",
+                    label: t("tabs.recentPicks"),
                     icon: <Sparkles size={16} />,
                   },
                   {
                     id: "genres" as const,
-                    label: "Genres",
+                    label: t("tabs.genres"),
                     icon: <BarChart3 size={16} />,
                   },
                 ].map((tab) => (

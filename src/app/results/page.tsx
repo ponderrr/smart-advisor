@@ -1,7 +1,8 @@
 "use client";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useTranslations, useMessages } from "next-intl";
 import {
   RefreshCw,
   Heart,
@@ -79,32 +80,23 @@ const saveGeneratedSession = (sessionId: string) => {
 };
 
 /* ---------- Loading Animation ---------- */
-const LOADING_MESSAGES = [
-  "Flipping through your answers...",
-  "Consulting the algorithm...",
-  "Cross-referencing great taste...",
-  "Digging through movie shelves...",
-  "Searching the library stacks...",
-  "Hunting for hidden gems...",
-  "Matching moods and genres...",
-  "Dusting off forgotten classics...",
-  "Checking against your history...",
-  "Weighing the shortlist...",
-  "Narrowing down the picks...",
-  "Running it by our AI once more...",
-  "Polishing each recommendation...",
-  "Adding the finishing touches...",
-] as const;
-
 const ResultsLoadingState = ({ step: _step }: { step: string }) => {
+  const messages = useMessages() as {
+    Results?: { loadingMessages?: string[] };
+  };
+  const loadingMessages = useMemo(
+    () => messages.Results?.loadingMessages ?? [],
+    [messages],
+  );
   const [messageIndex, setMessageIndex] = useState(0);
 
   useEffect(() => {
+    if (loadingMessages.length === 0) return;
     const id = setInterval(() => {
-      setMessageIndex((i) => (i + 1) % LOADING_MESSAGES.length);
+      setMessageIndex((i) => (i + 1) % loadingMessages.length);
     }, 3800);
     return () => clearInterval(id);
-  }, []);
+  }, [loadingMessages.length]);
 
   return (
     <div className="mx-auto flex min-h-[480px] w-full max-w-4xl flex-col items-center justify-center rounded-3xl border border-slate-200/70 bg-white/85 p-6 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
@@ -131,7 +123,7 @@ const ResultsLoadingState = ({ step: _step }: { step: string }) => {
             transition={{ duration: 0.35, ease: "easeOut" }}
             className="text-base font-semibold text-slate-700 dark:text-slate-200"
           >
-            {LOADING_MESSAGES[messageIndex]}
+            {loadingMessages[messageIndex] ?? ""}
           </motion.p>
         </AnimatePresence>
       </div>
@@ -533,6 +525,7 @@ const ResultsPage = () => {
   const { user } = useAuth();
   const { ready } = useRequireAuth();
   const { contentType, answers, reset } = useQuizStore();
+  const tc = useTranslations("Common");
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loggedTitleKeys, setLoggedTitleKeys] = useState<Set<string>>(
     () => new Set(),
@@ -849,13 +842,13 @@ const ResultsPage = () => {
   };
 
   if (!ready) {
-    return <PageLoader text="Loading..." />;
+    return <PageLoader text={tc("loading")} />;
   }
 
   if (!contentType || !answers?.length || !user) {
     // Missing quiz state — redirect to start a new quiz
     router.replace("/content-selection");
-    return <PageLoader text="Loading..." />;
+    return <PageLoader text={tc("loading")} />;
   }
 
   const topBar = <AppNavbar />;
