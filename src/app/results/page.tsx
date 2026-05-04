@@ -100,10 +100,7 @@ const ResultsLoadingState = ({ step: _step }: { step: string }) => {
 
   return (
     <div className="mx-auto flex min-h-[480px] w-full max-w-4xl flex-col items-center justify-center rounded-3xl border border-slate-200/70 bg-white/85 p-6 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
-      <div
-        className="mb-6 flex items-center justify-center gap-2"
-        aria-hidden
-      >
+      <div className="mb-6 flex items-center justify-center gap-2" aria-hidden>
         <span className="h-3 w-3 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.3s]" />
         <span className="h-3 w-3 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.15s]" />
         <span className="h-3 w-3 animate-bounce rounded-full bg-indigo-500" />
@@ -739,7 +736,9 @@ const ResultsPage = () => {
       } else {
         const rec = recommendations.find((r) => r.id === recommendationId);
         toast.success(
-          rec?.is_favorited ? tb("shareToasts.favoriteRemoved") : tb("shareToasts.favoriteAdded"),
+          rec?.is_favorited
+            ? tb("shareToasts.favoriteRemoved")
+            : tb("shareToasts.favoriteAdded"),
         );
         const updatedRecs = recommendations.map((r) =>
           r.id === recommendationId
@@ -776,9 +775,18 @@ const ResultsPage = () => {
     if (mRecs.length > 0) {
       lines.push(tb("shareText.movies"));
       mRecs.forEach((r) => {
-        const detail = [r.director && tb("shareText.directorPrefix", { director: r.director }), r.year].filter(Boolean).join(", ");
+        const detail = [
+          r.director &&
+            tb("shareText.directorPrefix", { director: r.director }),
+          r.year,
+        ]
+          .filter(Boolean)
+          .join(", ");
         lines.push(`  ${r.title}${detail ? ` (${detail})` : ""}`);
-        if (r.genres?.length) lines.push(`  ${tb("shareText.genres", { list: r.genres.join(", ") })}`);
+        if (r.genres?.length)
+          lines.push(
+            `  ${tb("shareText.genres", { list: r.genres.join(", ") })}`,
+          );
       });
       lines.push("");
     }
@@ -786,9 +794,17 @@ const ResultsPage = () => {
     if (bRecs.length > 0) {
       lines.push(tb("shareText.books"));
       bRecs.forEach((r) => {
-        const detail = [r.author && tb("shareText.byAuthorShort", { author: r.author }), r.year].filter(Boolean).join(", ");
+        const detail = [
+          r.author && tb("shareText.byAuthorShort", { author: r.author }),
+          r.year,
+        ]
+          .filter(Boolean)
+          .join(", ");
         lines.push(`  ${r.title}${detail ? ` (${detail})` : ""}`);
-        if (r.genres?.length) lines.push(`  ${tb("shareText.genres", { list: r.genres.join(", ") })}`);
+        if (r.genres?.length)
+          lines.push(
+            `  ${tb("shareText.genres", { list: r.genres.join(", ") })}`,
+          );
       });
       lines.push("");
     }
@@ -841,8 +857,6 @@ const ResultsPage = () => {
   }
 
   if (!contentType || !answers?.length || !user) {
-    // Missing quiz state — redirect to start a new quiz
-    router.replace("/content-selection");
     return <PageLoader text={tc("loading")} />;
   }
 
@@ -1102,7 +1116,12 @@ const ResultsPage = () => {
                         onClick={handleShareTwitter}
                         className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
                       >
-                        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-current"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
+                        <svg
+                          viewBox="0 0 24 24"
+                          className="h-3.5 w-3.5 fill-current"
+                        >
+                          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                        </svg>
                         {tb("shareMenu.shareX")}
                       </button>
                       <button
