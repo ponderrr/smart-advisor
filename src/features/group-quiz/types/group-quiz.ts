@@ -36,6 +36,7 @@ export interface QuizSession {
   status: QuizSessionStatus;
   content_type: QuizContentType;
   question_count: number;
+  max_participants: number;
   recommendation_id: string | null;
   questions: Question[] | null;
   result: GroupQuizResult | null;
@@ -67,6 +68,7 @@ export interface QuizAnswer {
 export interface CreateSessionInput {
   content_type: QuizContentType;
   question_count: number;
+  max_participants: number;
   display_name: string;
 }
 

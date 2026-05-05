@@ -20,6 +20,7 @@ interface HostIntent {
   display_name: string;
   content_type: QuizContentType;
   question_count: number;
+  max_participants: number;
 }
 
 const GroupQuizLandingPage = () => {
@@ -30,6 +31,7 @@ const GroupQuizLandingPage = () => {
   const [hostName, setHostName] = useState("");
   const [hostContentType, setHostContentType] = useState<QuizContentType>("both");
   const [questionCount, setQuestionCount] = useState(5);
+  const [maxParticipants, setMaxParticipants] = useState(8);
   const [creating, setCreating] = useState(false);
   const [pendingIntent, setPendingIntent] = useState<HostIntent | null>(null);
 
@@ -48,6 +50,7 @@ const GroupQuizLandingPage = () => {
       setHostName(parsed.display_name ?? "");
       setHostContentType(parsed.content_type ?? "both");
       setQuestionCount(parsed.question_count ?? 5);
+      setMaxParticipants(parsed.max_participants ?? 8);
       setPendingIntent(parsed);
     } catch {
       window.localStorage.removeItem(HOST_INTENT_KEY);
@@ -67,6 +70,7 @@ const GroupQuizLandingPage = () => {
         display_name: hostName.trim(),
         content_type: hostContentType,
         question_count: questionCount,
+        max_participants: maxParticipants,
       };
       window.localStorage.setItem(HOST_INTENT_KEY, JSON.stringify(intent));
     }
@@ -83,6 +87,7 @@ const GroupQuizLandingPage = () => {
     const { session, error } = await groupQuizService.createSession({
       content_type: hostContentType,
       question_count: questionCount,
+      max_participants: maxParticipants,
       display_name: name,
     });
     setCreating(false);
@@ -145,6 +150,7 @@ const GroupQuizLandingPage = () => {
                   {t("intent.summary", {
                     count: pendingIntent.question_count,
                     types: t(`intent.types.${pendingIntent.content_type}`),
+                    max: pendingIntent.max_participants,
                   })}
                 </p>
               </div>
@@ -241,6 +247,38 @@ const GroupQuizLandingPage = () => {
                         role="radio"
                         aria-checked={active}
                         onClick={() => setQuestionCount(n)}
+                        className={cn(
+                          "rounded-xl border py-2 text-sm font-black tracking-tight transition-all duration-200 active:scale-[0.96]",
+                          active
+                            ? "border-indigo-500 bg-indigo-500 text-white shadow-sm shadow-indigo-500/20"
+                            : "border-slate-200 bg-white/70 text-slate-600 hover:border-slate-300 hover:bg-white dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/60",
+                        )}
+                      >
+                        {n}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+                  {t("host.maxPlayersLabel")}
+                </span>
+                <div
+                  role="radiogroup"
+                  aria-label={t("host.maxPlayersAria")}
+                  className="grid grid-cols-5 gap-1.5 sm:grid-cols-6"
+                >
+                  {Array.from({ length: 11 }, (_, i) => i + 2).map((n) => {
+                    const active = maxParticipants === n;
+                    return (
+                      <button
+                        key={n}
+                        type="button"
+                        role="radio"
+                        aria-checked={active}
+                        onClick={() => setMaxParticipants(n)}
                         className={cn(
                           "rounded-xl border py-2 text-sm font-black tracking-tight transition-all duration-200 active:scale-[0.96]",
                           active

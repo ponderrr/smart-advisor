@@ -176,6 +176,8 @@ const GroupQuizLobbyPage = () => {
 
   const isHost = me?.is_host === true;
   const submitted = me?.answers_submitted_at != null;
+  const lobbyFull =
+    !!session && participants.length >= session.max_participants;
 
   // Guard navigation during the answering phase. Once submitted, leaving is
   // fine — the answers are already on the server.
@@ -450,7 +452,12 @@ const GroupQuizLobbyPage = () => {
                     <Users size={13} />
                   </span>
                   <h2 className="text-sm font-black tracking-tight">
-                    {t("playerCount", { count: participants.length })}
+                    {session.status === "lobby"
+                      ? t("playerCountOf", {
+                          count: participants.length,
+                          max: session.max_participants,
+                        })
+                      : t("playerCount", { count: participants.length })}
                     {session.status === "in_progress" && (
                       <span className="ml-2 text-[11px] font-bold text-slate-500 dark:text-slate-400">
                         ·{" "}
@@ -548,7 +555,7 @@ const GroupQuizLobbyPage = () => {
                   </p>
                 </div>
               )}
-              {session.status === "lobby" && !me && (
+              {session.status === "lobby" && !me && !lobbyFull && (
                 <div className="mt-5 rounded-2xl border border-indigo-200/60 bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-5 dark:border-indigo-500/30 dark:from-indigo-500/10 dark:via-slate-900/40 dark:to-violet-500/10">
                   <p className="text-[11px] font-black uppercase tracking-[0.16em] text-indigo-700 dark:text-indigo-300">
                     {t("guest.joinLobby")}
@@ -577,6 +584,16 @@ const GroupQuizLobbyPage = () => {
                       <ArrowRight size={14} />
                     </button>
                   </div>
+                </div>
+              )}
+              {session.status === "lobby" && !me && lobbyFull && (
+                <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50/60 p-5 text-center dark:border-slate-700/60 dark:bg-slate-900/40">
+                  <p className="text-sm font-bold tracking-tight">
+                    {t("guest.lobbyFull")}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    {t("guest.lobbyFullBody")}
+                  </p>
                 </div>
               )}
               {!me &&
@@ -910,7 +927,7 @@ const ResultCard = ({
     <div className="overflow-hidden rounded-3xl border border-slate-200/70 bg-white/80 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
       <div className="flex flex-col gap-5 p-5 sm:flex-row sm:p-6">
         {posterUrl && (
-          <div className="relative aspect-[2/3] w-full shrink-0 overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800 sm:w-40">
+          <div className="relative aspect-[2/3] w-32 shrink-0 self-center overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800 sm:w-40 sm:self-auto">
             {/* Plain <img> — Google Books / TMDB sizes vary, no need to pay
                 for Image optimization on a single result. */}
             <img

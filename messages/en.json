@@ -884,7 +884,7 @@
       "intent": {
         "eyebrow": "Welcome Back",
         "headline": "Pick up where you left off?",
-        "summary": "{count} questions · {types}",
+        "summary": "{count} questions · {types} · up to {max} players",
         "types": {
           "both": "movies + books",
           "movie": "movies",
@@ -902,6 +902,8 @@
         "typeLabel": "Pick Type",
         "questionsLabel": "Questions",
         "questionsAria": "Number of questions",
+        "maxPlayersLabel": "Max Players",
+        "maxPlayersAria": "Maximum number of players in the lobby",
         "create": "Create Session",
         "creating": "Creating…",
         "signInTitle": "Sign In to Host",
@@ -944,6 +946,7 @@
       "joined": "{name} joined",
       "left": "{name} left the lobby",
       "playerCount": "{count, plural, one {# Player} other {# Players}}",
+      "playerCountOf": "{count}/{max, plural, one {# Player} other {# Players}}",
       "submittedCount": "{submitted}/{total} submitted",
       "leave": "Leave",
       "backToLobby": "Back to Lobby",
@@ -972,7 +975,9 @@
         "joinFailed": "Couldn't join session",
         "inProgress": "The quiz is already underway.",
         "completed": "This session is wrapped up.",
-        "askHost": "Ask the host to bring the lobby back so you can join."
+        "askHost": "Ask the host to bring the lobby back so you can join.",
+        "lobbyFull": "Lobby is Full",
+        "lobbyFullBody": "The host capped this lobby and it's already at the limit. Ask them to raise it or wait for someone to leave."
       },
       "submitted": {
         "lockedInAll": "Everyone's Locked In",

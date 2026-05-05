@@ -884,7 +884,7 @@
       "intent": {
         "eyebrow": "Bienvenido de vuelta",
         "headline": "¿Continuar donde lo dejaste?",
-        "summary": "{count} preguntas · {types}",
+        "summary": "{count} preguntas · {types} · hasta {max} jugadores",
         "types": {
           "both": "películas + libros",
           "movie": "películas",
@@ -902,6 +902,8 @@
         "typeLabel": "Tipo de recomendación",
         "questionsLabel": "Preguntas",
         "questionsAria": "Número de preguntas",
+        "maxPlayersLabel": "Jugadores máximos",
+        "maxPlayersAria": "Número máximo de jugadores en la sala",
         "create": "Crear sesión",
         "creating": "Creando…",
         "signInTitle": "Inicia sesión para hospedar",
@@ -944,6 +946,7 @@
       "joined": "{name} se unió",
       "left": "{name} salió de la sala",
       "playerCount": "{count, plural, one {# jugador} other {# jugadores}}",
+      "playerCountOf": "{count}/{max, plural, one {# jugador} other {# jugadores}}",
       "submittedCount": "{submitted}/{total} enviados",
       "leave": "Salir",
       "backToLobby": "Volver a la sala",
@@ -972,7 +975,9 @@
         "joinFailed": "No se pudo unir a la sesión",
         "inProgress": "El cuestionario ya está en curso.",
         "completed": "Esta sesión ya terminó.",
-        "askHost": "Pide al anfitrión que vuelva a abrir la sala para unirte."
+        "askHost": "Pide al anfitrión que vuelva a abrir la sala para unirte.",
+        "lobbyFull": "La sala está llena",
+        "lobbyFullBody": "El anfitrión limitó esta sala y ya está al tope. Pídele que aumente el límite o espera a que alguien salga."
       },
       "submitted": {
         "lockedInAll": "Todos enviaron",
