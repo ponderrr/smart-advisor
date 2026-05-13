@@ -1,7 +1,8 @@
 "use client";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useTranslations, useMessages } from "next-intl";
 import {
   RefreshCw,
   Heart,
@@ -32,9 +33,12 @@ import { PillButton } from "@/components/ui/pill-button";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { SectionHeader } from "@/components/section-header";
 import { LogToLibraryButton } from "@/features/library/components/log-to-library-button";
+import { WishlistButton } from "@/features/library/components/wishlist-button";
 import { libraryService } from "@/features/library/services/library-service";
+import type { LibraryStatus } from "@/features/library/types/library";
 import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
+import { TrailerEmbed } from "@/components/trailer-embed";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -78,39 +82,27 @@ const saveGeneratedSession = (sessionId: string) => {
 };
 
 /* ---------- Loading Animation ---------- */
-const LOADING_MESSAGES = [
-  "Flipping through your answers...",
-  "Consulting the algorithm...",
-  "Cross-referencing great taste...",
-  "Digging through movie shelves...",
-  "Searching the library stacks...",
-  "Hunting for hidden gems...",
-  "Matching moods and genres...",
-  "Dusting off forgotten classics...",
-  "Checking against your history...",
-  "Weighing the shortlist...",
-  "Narrowing down the picks...",
-  "Running it by our AI once more...",
-  "Polishing each recommendation...",
-  "Adding the finishing touches...",
-] as const;
-
 const ResultsLoadingState = ({ step: _step }: { step: string }) => {
+  const messages = useMessages() as {
+    Results?: { loadingMessages?: string[] };
+  };
+  const loadingMessages = useMemo(
+    () => messages.Results?.loadingMessages ?? [],
+    [messages],
+  );
   const [messageIndex, setMessageIndex] = useState(0);
 
   useEffect(() => {
+    if (loadingMessages.length === 0) return;
     const id = setInterval(() => {
-      setMessageIndex((i) => (i + 1) % LOADING_MESSAGES.length);
+      setMessageIndex((i) => (i + 1) % loadingMessages.length);
     }, 3800);
     return () => clearInterval(id);
-  }, []);
+  }, [loadingMessages.length]);
 
   return (
-    <div className="mx-auto flex min-h-[480px] w-full max-w-4xl flex-col items-center justify-center rounded-3xl border border-slate-200/70 bg-white/85 p-6 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
-      <div
-        className="mb-6 flex items-center justify-center gap-2"
-        aria-hidden
-      >
+    <div className="mx-auto flex min-h-[480px] w-full max-w-4xl flex-col items-center justify-center rounded-3xl border border-violet-300/60 bg-gradient-to-br from-violet-50/80 via-fuchsia-50/40 to-rose-50/60 p-6 text-center shadow-sm backdrop-blur-md sm:p-8 dark:border-violet-500/40 dark:from-violet-500/15 dark:via-fuchsia-500/10 dark:to-rose-500/15">
+      <div className="mb-6 flex items-center justify-center gap-2" aria-hidden>
         <span className="h-3 w-3 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.3s]" />
         <span className="h-3 w-3 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.15s]" />
         <span className="h-3 w-3 animate-bounce rounded-full bg-indigo-500" />
@@ -130,7 +122,7 @@ const ResultsLoadingState = ({ step: _step }: { step: string }) => {
             transition={{ duration: 0.35, ease: "easeOut" }}
             className="text-base font-semibold text-slate-700 dark:text-slate-200"
           >
-            {LOADING_MESSAGES[messageIndex]}
+            {loadingMessages[messageIndex] ?? ""}
           </motion.p>
         </AnimatePresence>
       </div>
@@ -143,13 +135,16 @@ const RecommendationCard = ({
   rec,
   index,
   alreadyLogged,
+  libraryStatus,
   onToggleFavorite,
 }: {
   rec: Recommendation;
   index: number;
   alreadyLogged: boolean;
+  libraryStatus: LibraryStatus | null;
   onToggleFavorite: (id: string) => void;
 }) => {
+  const tb = useTranslations("Results.body");
   const [expanded, setExpanded] = useState(false);
   const [isClamped, setIsClamped] = useState(false);
   const descRef = useRef<HTMLParagraphElement>(null);
@@ -170,7 +165,12 @@ const RecommendationCard = ({
       initial={{ opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.32, delay: index * 0.06 }}
-      className="group overflow-hidden rounded-3xl border border-slate-200/70 bg-white/85 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-700/60 dark:bg-slate-900/65"
+      className={cn(
+        "group overflow-hidden rounded-3xl border bg-gradient-to-br shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg",
+        rec.type === "movie"
+          ? "border-amber-200/60 from-amber-50/80 to-white dark:border-amber-500/30 dark:from-amber-500/10 dark:to-slate-900/40"
+          : "border-emerald-200/60 from-emerald-50/80 to-white dark:border-emerald-500/30 dark:from-emerald-500/10 dark:to-slate-900/40",
+      )}
     >
       {/* Mobile: poster + header on top; rich body below spans full width.
           Desktop (sm+): grid with full poster column on the left. */}
@@ -199,7 +199,7 @@ const RecommendationCard = ({
               MATCH_TONE_CLASSES[matchTone],
             )}
           >
-            {matchScore}%
+            {tb("matchPercent", { score: matchScore })}
           </div>
         </div>
 
@@ -219,9 +219,9 @@ const RecommendationCard = ({
               </h2>
               <p className="mt-0.5 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
                 {rec.author
-                  ? `By ${rec.author}`
+                  ? tb("byAuthor", { author: rec.author })
                   : rec.director
-                    ? `Directed by ${rec.director}`
+                    ? tb("byDirector", { director: rec.director })
                     : ""}
                 {rec.year ? ` · ${rec.year}` : ""}
               </p>
@@ -231,8 +231,8 @@ const RecommendationCard = ({
               onClick={() => onToggleFavorite(rec.id)}
               aria-label={
                 rec.is_favorited
-                  ? `Remove ${rec.title} from favorites`
-                  : `Add ${rec.title} to favorites`
+                  ? tb("favoriteRemove", { title: rec.title })
+                  : tb("favoriteAdd", { title: rec.title })
               }
               className={cn(
                 "shrink-0 rounded-full p-1.5 transition-all active:scale-[0.95]",
@@ -280,7 +280,7 @@ const RecommendationCard = ({
                 className="text-indigo-600 dark:text-indigo-400"
               />
               <p className="text-[10px] font-black uppercase tracking-[0.16em] text-indigo-700 dark:text-indigo-300">
-                Why this pick
+                {tb("whyThisPick")}
               </p>
             </div>
             <p className="mt-1.5 pl-2 text-sm leading-relaxed text-slate-700 dark:text-slate-200">
@@ -290,22 +290,34 @@ const RecommendationCard = ({
         )}
 
         <div className="flex items-center justify-between gap-2">
-          <LogToLibraryButton
-            medium={rec.type}
-            title={rec.title}
-            creator={rec.author ?? rec.director ?? null}
-            year={rec.year ?? null}
-            poster_url={rec.poster_url ?? null}
-            source_recommendation_id={rec.id}
-            initialLogged={alreadyLogged}
-            variant="compact"
-          />
+          <div className="flex items-center gap-2">
+            <LogToLibraryButton
+              medium={rec.type}
+              title={rec.title}
+              creator={rec.author ?? rec.director ?? null}
+              year={rec.year ?? null}
+              poster_url={rec.poster_url ?? null}
+              source_recommendation_id={rec.id}
+              initialLogged={alreadyLogged}
+              variant="compact"
+            />
+            <WishlistButton
+              medium={rec.type}
+              title={rec.title}
+              creator={rec.author ?? rec.director ?? null}
+              year={rec.year ?? null}
+              poster_url={rec.poster_url ?? null}
+              source_recommendation_id={rec.id}
+              initialStatus={libraryStatus}
+              variant="compact"
+            />
+          </div>
         </div>
 
         {showDescription && (
           <div className="border-t border-slate-100 pt-3 dark:border-slate-800">
             <p className="mb-1 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">
-              About
+              {tb("about")}
             </p>
             <p
               className="overflow-hidden text-sm leading-relaxed text-slate-600 dark:text-slate-400"
@@ -327,7 +339,7 @@ const RecommendationCard = ({
                 onClick={() => setExpanded((prev) => !prev)}
                 className="mt-1.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400"
               >
-                {expanded ? "Show less" : "Show more"}
+                {expanded ? tb("showLess") : tb("showMore")}
                 <ChevronDown
                   size={10}
                   className={cn(
@@ -339,6 +351,13 @@ const RecommendationCard = ({
             )}
           </div>
         )}
+
+        <TrailerEmbed
+          type={rec.type}
+          title={rec.title}
+          year={rec.year ?? null}
+          author={rec.author ?? null}
+        />
       </div>
 
       <div className="hidden sm:grid sm:grid-cols-[168px_1fr]">
@@ -371,7 +390,7 @@ const RecommendationCard = ({
               MATCH_TONE_CLASSES[matchTone],
             )}
           >
-            {matchScore}% match
+            {tb("matchSuffix", { score: matchScore })}
           </div>
         </div>
 
@@ -384,9 +403,9 @@ const RecommendationCard = ({
               </h2>
               <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                 {rec.author
-                  ? `By ${rec.author}`
+                  ? tb("byAuthor", { author: rec.author })
                   : rec.director
-                    ? `Directed by ${rec.director}`
+                    ? tb("byDirector", { director: rec.director })
                     : ""}
                 {rec.year ? ` · ${rec.year}` : ""}
               </p>
@@ -401,13 +420,22 @@ const RecommendationCard = ({
                 source_recommendation_id={rec.id}
                 initialLogged={alreadyLogged}
               />
+              <WishlistButton
+                medium={rec.type}
+                title={rec.title}
+                creator={rec.author ?? rec.director ?? null}
+                year={rec.year ?? null}
+                poster_url={rec.poster_url ?? null}
+                source_recommendation_id={rec.id}
+                initialStatus={libraryStatus}
+              />
               <button
                 type="button"
                 onClick={() => onToggleFavorite(rec.id)}
                 aria-label={
                   rec.is_favorited
-                    ? `Remove ${rec.title} from favorites`
-                    : `Add ${rec.title} to favorites`
+                    ? tb("favoriteRemove", { title: rec.title })
+                    : tb("favoriteAdd", { title: rec.title })
                 }
                 className={cn(
                   "rounded-full p-2 transition-all active:scale-[0.95]",
@@ -455,7 +483,7 @@ const RecommendationCard = ({
                   className="text-indigo-600 dark:text-indigo-400"
                 />
                 <p className="text-[11px] font-black uppercase tracking-[0.16em] text-indigo-700 dark:text-indigo-300">
-                  Why this pick
+                  {tb("whyThisPick")}
                 </p>
               </div>
               <p className="mt-2 pl-2 text-[15px] leading-relaxed text-slate-700 dark:text-slate-200">
@@ -467,7 +495,7 @@ const RecommendationCard = ({
           {showDescription && (
             <div className="mt-4 border-t border-slate-100 pt-4 dark:border-slate-800">
               <p className="mb-1.5 text-[11px] font-black uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">
-                About
+                {tb("about")}
               </p>
               <p
                 ref={descRef}
@@ -488,11 +516,11 @@ const RecommendationCard = ({
                 <button
                   type="button"
                   onClick={() => setExpanded((prev) => !prev)}
-                  aria-label={expanded ? "Show less" : "Show more"}
+                  aria-label={expanded ? tb("showLess") : tb("showMore")}
                   aria-expanded={expanded}
                   className="mt-2 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-indigo-600 transition-colors hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10"
                 >
-                  {expanded ? "Show less" : "Show more"}
+                  {expanded ? tb("showLess") : tb("showMore")}
                   <ChevronDown
                     size={12}
                     className={cn(
@@ -504,6 +532,15 @@ const RecommendationCard = ({
               )}
             </div>
           )}
+
+          <div className="mt-4">
+            <TrailerEmbed
+              type={rec.type}
+              title={rec.title}
+              year={rec.year ?? null}
+              author={rec.author ?? null}
+            />
+          </div>
         </div>
       </div>
     </motion.article>
@@ -516,15 +553,15 @@ const ResultsPage = () => {
   const { user } = useAuth();
   const { ready } = useRequireAuth();
   const { contentType, answers, reset } = useQuizStore();
+  const tc = useTranslations("Common");
+  const tb = useTranslations("Results.body");
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
-  const [loggedTitleKeys, setLoggedTitleKeys] = useState<Set<string>>(
-    () => new Set(),
-  );
+  const [loggedTitleMap, setLoggedTitleMap] = useState<
+    Map<string, LibraryStatus>
+  >(() => new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [generationStep, setGenerationStep] = useState<string>(
-    "Analyzing your answers...",
-  );
+  const [generationStep, setGenerationStep] = useState<string>("");
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const currentSessionRef = useRef<string | null>(null);
@@ -561,15 +598,15 @@ const ResultsPage = () => {
 
       if (abortController.signal.aborted) return;
 
-      setGenerationStep("Analyzing your answers...");
+      setGenerationStep(tb("generationStep.analyzing"));
       await new Promise((resolve) => setTimeout(resolve, 1000));
       if (abortController.signal.aborted) return;
 
-      setGenerationStep("Generating personalized recommendations...");
+      setGenerationStep(tb("generationStep.generating"));
       await new Promise((resolve) => setTimeout(resolve, 500));
       if (abortController.signal.aborted) return;
 
-      setGenerationStep("Enhancing with movie and book data...");
+      setGenerationStep(tb("generationStep.enhancing"));
 
       const questionnaireData = {
         answers,
@@ -585,7 +622,7 @@ const ResultsPage = () => {
 
       if (abortController.signal.aborted) return;
 
-      setGenerationStep("Finalizing your recommendations...");
+      setGenerationStep(tb("generationStep.finalizing"));
       await new Promise((resolve) => setTimeout(resolve, 500));
       if (abortController.signal.aborted) return;
 
@@ -596,9 +633,7 @@ const ResultsPage = () => {
     } catch (err) {
       if (abortController.signal.aborted) return;
       console.error("Error generating recommendations:", err);
-      setError(
-        "Failed to generate personalized recommendations. Please try again.",
-      );
+      setError(tb("generationError"));
     } finally {
       if (!abortController.signal.aborted) {
         setLoading(false);
@@ -607,7 +642,7 @@ const ResultsPage = () => {
         abortControllerRef.current = null;
       }
     }
-  }, [sessionId, user, answers, contentType]);
+  }, [sessionId, user, answers, contentType, tb]);
 
   const wasSessionGenerated = useCallback((id: string): boolean => {
     const generatedSessions = getGeneratedSessions();
@@ -669,31 +704,37 @@ const ResultsPage = () => {
   useEffect(() => {
     if (!ready) return;
     void libraryService.list().then(({ data }) => {
-      setLoggedTitleKeys(
-        new Set(data.map((i) => `${i.medium}::${i.title.toLowerCase()}`)),
+      setLoggedTitleMap(
+        new Map(
+          data.map((i) => [`${i.medium}::${i.title.toLowerCase()}`, i.status]),
+        ),
       );
     });
   }, [ready]);
 
+  const libraryStatusOf = useCallback(
+    (rec: Recommendation): LibraryStatus | null =>
+      loggedTitleMap.get(`${rec.type}::${rec.title.toLowerCase()}`) ?? null,
+    [loggedTitleMap],
+  );
+
   const isAlreadyLogged = useCallback(
-    (rec: Recommendation): boolean =>
-      loggedTitleKeys.has(`${rec.type}::${rec.title.toLowerCase()}`),
-    [loggedTitleKeys],
+    (rec: Recommendation): boolean => libraryStatusOf(rec) !== null,
+    [libraryStatusOf],
   );
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (recommendations.length > 0 && !error) {
         e.preventDefault();
-        e.returnValue =
-          "You have unsaved recommendations. Are you sure you want to leave?";
-        return "You have unsaved recommendations. Are you sure you want to leave?";
+        e.returnValue = tb("beforeUnload");
+        return tb("beforeUnload");
       }
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [recommendations.length, error]);
+  }, [recommendations.length, error, tb]);
 
   useEffect(() => {
     return () => {
@@ -728,11 +769,13 @@ const ResultsPage = () => {
       const { error: toggleError } =
         await databaseService.toggleFavorite(recommendationId);
       if (toggleError) {
-        toast.error("Couldn't update your favorite — please try again");
+        toast.error(tb("shareToasts.favoriteFailed"));
       } else {
         const rec = recommendations.find((r) => r.id === recommendationId);
         toast.success(
-          rec?.is_favorited ? "Removed from favorites" : "Added to favorites",
+          rec?.is_favorited
+            ? tb("shareToasts.favoriteRemoved")
+            : tb("shareToasts.favoriteAdded"),
         );
         const updatedRecs = recommendations.map((r) =>
           r.id === recommendationId
@@ -764,29 +807,46 @@ const ResultsPage = () => {
   const buildShareText = () => {
     const mRecs = recommendations.filter((r) => r.type === "movie");
     const bRecs = recommendations.filter((r) => r.type === "book");
-    const lines: string[] = ["My Smart Advisor Picks", ""];
+    const lines: string[] = [tb("shareText.title"), ""];
 
     if (mRecs.length > 0) {
-      lines.push("Movies:");
+      lines.push(tb("shareText.movies"));
       mRecs.forEach((r) => {
-        const detail = [r.director && `dir. ${r.director}`, r.year].filter(Boolean).join(", ");
+        const detail = [
+          r.director &&
+            tb("shareText.directorPrefix", { director: r.director }),
+          r.year,
+        ]
+          .filter(Boolean)
+          .join(", ");
         lines.push(`  ${r.title}${detail ? ` (${detail})` : ""}`);
-        if (r.genres?.length) lines.push(`  Genres: ${r.genres.join(", ")}`);
+        if (r.genres?.length)
+          lines.push(
+            `  ${tb("shareText.genres", { list: r.genres.join(", ") })}`,
+          );
       });
       lines.push("");
     }
 
     if (bRecs.length > 0) {
-      lines.push("Books:");
+      lines.push(tb("shareText.books"));
       bRecs.forEach((r) => {
-        const detail = [r.author && `by ${r.author}`, r.year].filter(Boolean).join(", ");
+        const detail = [
+          r.author && tb("shareText.byAuthorShort", { author: r.author }),
+          r.year,
+        ]
+          .filter(Boolean)
+          .join(", ");
         lines.push(`  ${r.title}${detail ? ` (${detail})` : ""}`);
-        if (r.genres?.length) lines.push(`  Genres: ${r.genres.join(", ")}`);
+        if (r.genres?.length)
+          lines.push(
+            `  ${tb("shareText.genres", { list: r.genres.join(", ") })}`,
+          );
       });
       lines.push("");
     }
 
-    lines.push("Get your own picks at smartadvisor.app");
+    lines.push(tb("shareText.footer"));
     return lines.join("\n");
   };
 
@@ -795,7 +855,7 @@ const ResultsPage = () => {
 
     if (navigator.share) {
       try {
-        await navigator.share({ title: "My Smart Advisor Picks", text });
+        await navigator.share({ title: tb("shareText.title"), text });
         return;
       } catch {
         // User cancelled — fall through to share menu
@@ -808,37 +868,33 @@ const ResultsPage = () => {
   const handleCopyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(buildShareText());
-      toast.success("Copied to clipboard!");
+      toast.success(tb("shareToasts.copySuccess"));
     } catch {
-      toast.error("Couldn't copy — try again");
+      toast.error(tb("shareToasts.copyFailed"));
     }
     setShowShareMenu(false);
   };
 
   const handleShareTwitter = () => {
     const titles = recommendations.map((r) => r.title).join(", ");
-    const text = encodeURIComponent(
-      `Just got my Smart Advisor picks: ${titles}\n\nGet your own at smartadvisor.app`,
-    );
+    const text = encodeURIComponent(tb("shareTwitter", { titles }));
     window.open(`https://x.com/intent/tweet?text=${text}`, "_blank");
     setShowShareMenu(false);
   };
 
   const handleShareEmail = () => {
-    const subject = encodeURIComponent("My Smart Advisor Picks");
+    const subject = encodeURIComponent(tb("shareEmailSubject"));
     const body = encodeURIComponent(buildShareText());
     window.open(`mailto:?subject=${subject}&body=${body}`, "_blank");
     setShowShareMenu(false);
   };
 
   if (!ready) {
-    return <PageLoader text="Loading..." />;
+    return <PageLoader text={tc("loading")} />;
   }
 
   if (!contentType || !answers?.length || !user) {
-    // Missing quiz state — redirect to start a new quiz
-    router.replace("/content-selection");
-    return <PageLoader text="Loading..." />;
+    return <PageLoader text={tc("loading")} />;
   }
 
   const topBar = <AppNavbar />;
@@ -848,7 +904,7 @@ const ResultsPage = () => {
       <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
         {topBar}
         <main className="px-4 pb-20 pt-32 md:pt-36 sm:px-6">
-          <div className="mx-auto max-w-xl rounded-3xl border border-slate-200/70 bg-white/85 p-8 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
+          <div className="mx-auto max-w-xl rounded-3xl border border-violet-300/60 bg-gradient-to-br from-violet-50/80 via-fuchsia-50/40 to-rose-50/60 p-8 text-center shadow-sm backdrop-blur-md dark:border-violet-500/40 dark:from-violet-500/15 dark:via-fuchsia-500/10 dark:to-rose-500/15">
             <div className="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-500/20">
               <RefreshCw
                 size={24}
@@ -856,24 +912,23 @@ const ResultsPage = () => {
               />
             </div>
             <h2 className="text-2xl font-black tracking-tight">
-              Generate new recommendations?
+              {tb("confirmDialog.title")}
             </h2>
             <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-              You already generated recommendations for these answers.
-              Generate a fresh set or head back to your dashboard.
+              {tb("confirmDialog.body")}
             </p>
             <div className="mt-6 flex items-center justify-center gap-3">
               <PillButton
                 onClick={handleCancelGeneration}
                 className="border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
               >
-                Go to Dashboard
+                {tb("confirmDialog.cancel")}
               </PillButton>
               <PillButton
                 onClick={handleConfirmGeneration}
                 className="bg-white px-5 py-2.5 text-sm font-black text-black dark:bg-slate-900 dark:text-white"
               >
-                Generate New
+                {tb("confirmDialog.confirm")}
               </PillButton>
             </div>
           </div>
@@ -898,7 +953,7 @@ const ResultsPage = () => {
       <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
         {topBar}
         <main className="px-4 pb-20 pt-32 md:pt-36 sm:px-6">
-          <div className="mx-auto max-w-xl rounded-3xl border border-slate-200/70 bg-white/85 p-8 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
+          <div className="mx-auto max-w-xl rounded-3xl border border-violet-300/60 bg-gradient-to-br from-violet-50/80 via-fuchsia-50/40 to-rose-50/60 p-8 text-center shadow-sm backdrop-blur-md dark:border-violet-500/40 dark:from-violet-500/15 dark:via-fuchsia-500/10 dark:to-rose-500/15">
             <div className="mx-auto mb-5 flex h-24 w-24 items-center justify-center overflow-hidden">
               <video
                 src="/animations/error-animation.webm"
@@ -911,7 +966,7 @@ const ResultsPage = () => {
               />
             </div>
             <h2 className="text-2xl font-black tracking-tight">
-              Unable to generate recommendations
+              {tb("errorState.title")}
             </h2>
             <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
               {error}
@@ -921,13 +976,13 @@ const ResultsPage = () => {
                 onClick={handleRetry}
                 className="bg-white px-5 py-2.5 text-sm font-black text-black dark:bg-slate-900 dark:text-white"
               >
-                Try Again
+                {tb("errorState.retry")}
               </PillButton>
               <PillButton
                 onClick={() => router.push("/content-selection")}
                 className="border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
               >
-                Retake Quiz
+                {tb("errorState.back")}
               </PillButton>
             </div>
           </div>
@@ -952,16 +1007,13 @@ const ResultsPage = () => {
             className="mb-6 sm:mb-8"
           >
             <p className="text-[10px] font-black uppercase tracking-[0.18em] text-indigo-500 sm:text-xs dark:text-indigo-400">
-              Your picks
+              {tb("eyebrow")}
             </p>
             <h1 className="mt-1.5 text-2xl font-black tracking-tighter sm:mt-2 sm:text-3xl md:text-4xl lg:text-5xl">
-              Hand-picked for you
+              {tb("headline")}
             </h1>
             <p className="mt-1.5 text-sm text-slate-500 sm:mt-2 dark:text-slate-400">
-              {recommendations.length} personalized{" "}
-              {recommendations.length === 1 ? "pick" : "picks"} from the AI,
-              with the reasoning behind each. Log one to your library to nudge
-              future picks.
+              {tb("subhead", { count: recommendations.length })}
             </p>
           </motion.div>
 
@@ -977,8 +1029,8 @@ const ResultsPage = () => {
                 >
                   <SectionHeader
                     icon={<Film size={14} />}
-                    eyebrow="Movie"
-                    title="On screen"
+                    eyebrow={tb("sections.movie.eyebrow")}
+                    title={tb("sections.movie.title")}
                     count={movieRecs.length}
                     accent="violet"
                   />
@@ -989,6 +1041,7 @@ const ResultsPage = () => {
                         rec={rec}
                         index={i}
                         alreadyLogged={isAlreadyLogged(rec)}
+                        libraryStatus={libraryStatusOf(rec)}
                         onToggleFavorite={handleToggleFavorite}
                       />
                     ))}
@@ -1005,8 +1058,8 @@ const ResultsPage = () => {
                 >
                   <SectionHeader
                     icon={<BookOpen size={14} />}
-                    eyebrow="Book"
-                    title="On the shelf"
+                    eyebrow={tb("sections.book.eyebrow")}
+                    title={tb("sections.book.title")}
                     count={bookRecs.length}
                     accent="emerald"
                   />
@@ -1017,6 +1070,7 @@ const ResultsPage = () => {
                         rec={rec}
                         index={i}
                         alreadyLogged={isAlreadyLogged(rec)}
+                        libraryStatus={libraryStatusOf(rec)}
                         onToggleFavorite={handleToggleFavorite}
                       />
                     ))}
@@ -1032,6 +1086,7 @@ const ResultsPage = () => {
                   rec={rec}
                   index={i}
                   alreadyLogged={isAlreadyLogged(rec)}
+                  libraryStatus={libraryStatusOf(rec)}
                   onToggleFavorite={handleToggleFavorite}
                 />
               ))}
@@ -1055,13 +1110,13 @@ const ResultsPage = () => {
               className="flex w-full items-center justify-center gap-2 whitespace-nowrap bg-white px-6 py-3 text-sm font-black leading-none tracking-tight text-black sm:w-auto dark:bg-black dark:text-white"
             >
               <RotateCcw size={16} />
-              Retake Quiz
+              {tb("actions.retake")}
             </HoverBorderGradient>
             <PillButton
               onClick={() => router.push("/history")}
               className="inline-flex w-full items-center justify-center gap-2 border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 sm:w-auto dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
             >
-              View History
+              {tb("actions.viewHistory")}
               <ArrowRight size={16} />
             </PillButton>
             <div className="relative w-full sm:w-auto">
@@ -1070,7 +1125,7 @@ const ResultsPage = () => {
                 className="inline-flex w-full items-center justify-center gap-2 border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 sm:w-auto dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
               >
                 <Share2 size={16} />
-                Share Results
+                {tb("actions.share")}
               </PillButton>
 
               <AnimatePresence>
@@ -1095,21 +1150,26 @@ const ResultsPage = () => {
                         className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
                       >
                         <Copy size={14} />
-                        Copy to clipboard
+                        {tb("shareMenu.copy")}
                       </button>
                       <button
                         onClick={handleShareTwitter}
                         className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
                       >
-                        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-current"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
-                        Share on X
+                        <svg
+                          viewBox="0 0 24 24"
+                          className="h-3.5 w-3.5 fill-current"
+                        >
+                          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                        </svg>
+                        {tb("shareMenu.shareX")}
                       </button>
                       <button
                         onClick={handleShareEmail}
                         className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
                       >
                         <Mail size={14} />
-                        Share via email
+                        {tb("shareMenu.shareEmail")}
                       </button>
                     </motion.div>
                   </>

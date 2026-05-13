@@ -12,6 +12,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   CircleOff,
   Shield,
@@ -28,9 +29,14 @@ import {
   Film,
   BookOpen,
   Sparkles,
+  Sun,
+  Moon,
+  Monitor,
 } from "lucide-react";
+import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import {
   SidebarNavItem,
@@ -53,8 +59,10 @@ import {
 } from "@/features/auth/utils/validation";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import { PillButton } from "@/components/ui/pill-button";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -201,8 +209,12 @@ SettingsInput.displayName = "SettingsInput";
 /*  Main settings page                                                */
 /* ------------------------------------------------------------------ */
 
+type ThemeChoice = "light" | "dark" | "system";
+
 const SettingsPage = () => {
   const router = useRouter();
+  const t = useTranslations("Settings");
+  const { theme, setTheme } = useTheme();
   const {
     user,
     updateProfile,
@@ -210,6 +222,7 @@ const SettingsPage = () => {
     updatePassword,
     uploadAvatar,
     removeAvatar,
+    refreshUser,
   } = useAuth();
   const { ready } = useRequireAuth();
 
@@ -226,14 +239,16 @@ const SettingsPage = () => {
   // of which tab the user came from.
   const sectionSlideDir = -1;
 
-  // Switching sections when scrolled would otherwise snap the window up,
-  // since the newly rendered section is often shorter than the previous one.
-  // Animate the scroll so the change feels continuous.
+  // Snap the page to the top on section change so the user lands at the
+  // start of the new content instead of in the middle of empty space.
+  // We use `behavior: "instant"` (not "smooth") on purpose — smooth scrolls
+  // trigger iOS Safari's URL bar to collapse/expand, which wobbles the
+  // fixed bottom nav and the navbar mid-transition.
   const changeSection = (id: SettingsSection) => {
     if (id === activeSection) return;
     setActiveSection(id);
     if (typeof window !== "undefined" && window.scrollY > 0) {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
     }
   };
 
@@ -261,11 +276,14 @@ const SettingsPage = () => {
     text: string;
     type: "success" | "error" | "info";
   } | null>(null);
-  const [contentFocus, setContentFocus] = useState("both");
+  const [contentFocus, setContentFocus] = useState<"movie" | "book" | "both">(
+    "both",
+  );
   const [contentTone, setContentTone] = useState<"standard" | "family">(
     "standard",
   );
   const [preferredQuestionCount, setPreferredQuestionCount] = useState(5);
+  const [savingContent, setSavingContent] = useState(false);
   const [accountActionLoading, setAccountActionLoading] = useState(false);
   const [showMfaPanel, setShowMfaPanel] = useState(false);
   const [mfaSetupModal, setMfaSetupModal] = useState<{
@@ -281,24 +299,25 @@ const SettingsPage = () => {
   const confirmPasswordAnchorRef = useRef<HTMLDivElement>(null);
   const watchedNewPassword = passwordForm.watch("newPassword");
   const watchedConfirmPassword = passwordForm.watch("confirmPassword");
+  const tPasswordRules = useTranslations("Auth.passwordRules");
   const newPasswordRules = useMemo(
     () =>
       PASSWORD_RULES.map((rule) => ({
-        label: rule.label,
+        label: tPasswordRules(rule.key),
         met: rule.test(watchedNewPassword || ""),
       })),
-    [watchedNewPassword],
+    [watchedNewPassword, tPasswordRules],
   );
   const confirmPasswordRules = useMemo(
     () => [
       {
-        label: "Matches your password",
+        label: t("password.matches"),
         met:
           !!watchedConfirmPassword &&
           watchedConfirmPassword === watchedNewPassword,
       },
     ],
-    [watchedConfirmPassword, watchedNewPassword],
+    [watchedConfirmPassword, watchedNewPassword, t],
   );
   const [currentBackupEmail, setCurrentBackupEmail] = useState<string | null>(
     null,
@@ -319,7 +338,7 @@ const SettingsPage = () => {
     if (result.error) {
       showMessage(result.error, "error");
     } else {
-      showMessage("Profile picture updated.", "success");
+      showMessage(t("profile.pictureUpdated"), "success");
     }
   };
 
@@ -330,7 +349,7 @@ const SettingsPage = () => {
     if (result.error) {
       showMessage(result.error, "error");
     } else {
-      showMessage("Profile picture removed.", "success");
+      showMessage(t("profile.pictureRemoved"), "success");
     }
   };
 
@@ -380,7 +399,7 @@ const SettingsPage = () => {
 
   const handleVerifySubmit = useCallback(async () => {
     if (verifyCode.length !== 6) {
-      setVerifyError("Enter a 6-digit code");
+      setVerifyError(t("verifyModal.enterCode"));
       return;
     }
     setVerifyLoading(true);
@@ -390,7 +409,7 @@ const SettingsPage = () => {
       (f: MFAFactor) => f.status === "verified",
     );
     if (!factor) {
-      setVerifyError("No verified MFA factor found");
+      setVerifyError(t("verifyModal.noFactor"));
       setVerifyLoading(false);
       return;
     }
@@ -401,7 +420,7 @@ const SettingsPage = () => {
     } else {
       closeVerifyModal(true);
     }
-  }, [verifyCode, closeVerifyModal]);
+  }, [verifyCode, closeVerifyModal, t]);
 
   // Auto-submit the verify modal once six digits are in (TOTP mode only —
   // the enroll mode inside this modal has its own input).
@@ -421,20 +440,28 @@ const SettingsPage = () => {
     label: string;
     icon: React.ReactNode;
   }[] = [
-    { id: "profile", label: "Profile", icon: <UserRound size={15} /> },
-    { id: "security", label: "Security", icon: <Shield size={15} /> },
-    { id: "content", label: "Content", icon: <SlidersHorizontal size={15} /> },
-    { id: "integrations", label: "Integrations", icon: <Link2 size={15} /> },
+    { id: "profile", label: t("tabs.profile"), icon: <UserRound size={15} /> },
+    { id: "security", label: t("tabs.security"), icon: <Shield size={15} /> },
+    {
+      id: "content",
+      label: t("tabs.content"),
+      icon: <SlidersHorizontal size={15} />,
+    },
+    {
+      id: "integrations",
+      label: t("tabs.integrations"),
+      icon: <Link2 size={15} />,
+    },
   ];
 
   const handleSaveProfile = profileForm.handleSubmit(async (data) => {
     setMessage(null);
-    const verified = await requestVerification("save your profile");
+    const verified = await requestVerification(t("verifyAction.save"));
     if (!verified) return;
     const parsedAge = typeof data.age === "number" ? data.age : 25;
     const result = await updateProfile(data.newName, parsedAge);
     showMessage(
-      result.error ?? "Profile updated.",
+      result.error ?? t("profile.savedToast"),
       result.error ? "error" : "success",
     );
   });
@@ -445,54 +472,76 @@ const SettingsPage = () => {
       user?.email &&
       data.newEmail.toLowerCase() === user.email.trim().toLowerCase()
     ) {
-      showMessage("New email must be different.", "error");
+      showMessage(t("email.differentRequired"), "error");
       return;
     }
-    const verified = await requestVerification("update your email");
+    const verified = await requestVerification(t("verifyAction.email"));
     if (!verified) return;
     const result = await updateEmail(data.newEmail);
     showMessage(
-      result.error ?? "Check your inbox to confirm.",
+      result.error ?? t("email.checkInbox"),
       result.error ? "error" : "success",
     );
   });
 
   const handleSavePassword = passwordForm.handleSubmit(async (data) => {
     setMessage(null);
-    const verified = await requestVerification("change your password");
+    const verified = await requestVerification(t("verifyAction.password"));
     if (!verified) return;
     const result = await updatePassword(data.newPassword);
     if (result.error) {
       showMessage(result.error, "error");
     } else {
-      showMessage("Password updated.", "success");
+      showMessage(t("password.updatedToast"), "success");
       passwordForm.reset();
     }
   });
 
   const handleSaveContentPreferences = async () => {
     if (typeof window === "undefined") return;
-    const verified = await requestVerification("save content preferences");
+    const verified = await requestVerification(t("verifyAction.content"));
     if (!verified) return;
-    window.localStorage.setItem(PREF_CONTENT_KEY, contentFocus);
-    window.localStorage.setItem(PREF_CONTENT_TONE_KEY, contentTone);
-    window.localStorage.setItem(
-      PREF_QUESTION_COUNT_KEY,
-      String(preferredQuestionCount),
-    );
-    showMessage("Content preferences saved.", "success");
+
+    setSavingContent(true);
+    try {
+      window.localStorage.setItem(PREF_CONTENT_KEY, contentFocus);
+      window.localStorage.setItem(PREF_CONTENT_TONE_KEY, contentTone);
+      window.localStorage.setItem(
+        PREF_QUESTION_COUNT_KEY,
+        String(preferredQuestionCount),
+      );
+
+      // Persist content_tone to profiles too so it survives a localStorage
+      // clear and stays consistent across devices. content_focus and the
+      // question-count slider live in localStorage only — they're per-device
+      // habits, not part of the canonical profile.
+      if (user) {
+        const { error } = await supabase
+          .from("profiles")
+          .update({
+            content_tone: contentTone,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", user.id);
+        if (error) {
+          console.error("[settings] save content_tone failed", error);
+          showMessage(t("content.saveError"), "error");
+          return;
+        }
+        await refreshUser?.();
+      }
+
+      showMessage(t("content.savedToast"), "success");
+    } finally {
+      setSavingContent(false);
+    }
   };
 
   const handleDisableAccount = async () => {
-    if (
-      !window.confirm(
-        "Disable your account? You'll be signed out and unable to sign in until re-enabled by support.",
-      )
-    )
-      return;
-    const verified = await requestVerification("disable your account");
+    if (!window.confirm(t("danger.disableConfirm"))) return;
+    const verified = await requestVerification(t("verifyAction.disable"));
     if (!verified) return;
-    if (!window.confirm("Final confirmation. Disable now?")) return;
+    if (!window.confirm(t("danger.disableFinalConfirm"))) return;
     setAccountActionLoading(true);
     setMessage(null);
     const result = await authService.disableAccount();
@@ -505,17 +554,12 @@ const SettingsPage = () => {
   };
 
   const handleDeleteAccount = async () => {
-    if (
-      !window.confirm("Permanently delete your account? This cannot be undone.")
-    )
-      return;
-    const verified = await requestVerification(
-      "permanently delete your account",
-    );
+    if (!window.confirm(t("danger.deleteConfirm"))) return;
+    const verified = await requestVerification(t("verifyAction.delete"));
     if (!verified) return;
-    const typed = window.prompt('Type "DELETE" to confirm:');
+    const typed = window.prompt(t("danger.typeDeletePrompt"));
     if (typed !== "DELETE") {
-      showMessage("Deletion canceled.", "info");
+      showMessage(t("danger.deletionCanceled"), "info");
       return;
     }
     setAccountActionLoading(true);
@@ -536,11 +580,21 @@ const SettingsPage = () => {
     const sq = Number(
       window.localStorage.getItem(PREF_QUESTION_COUNT_KEY) || "5",
     );
-    if (sc && ["movie", "book", "both"].includes(sc)) setContentFocus(sc);
+    if (sc === "movie" || sc === "book" || sc === "both")
+      setContentFocus(sc);
     if (st === "standard" || st === "family") setContentTone(st);
     if (Number.isFinite(sq) && sq >= 3 && sq <= 15)
       setPreferredQuestionCount(sq);
   }, []);
+
+  // Profile is the source of truth for content_tone (set in onboarding,
+  // synced via useAuth). Override the localStorage value once the user
+  // loads — otherwise a cross-device user would see stale local prefs.
+  useEffect(() => {
+    if (user?.content_tone === "standard" || user?.content_tone === "family") {
+      setContentTone(user.content_tone);
+    }
+  }, [user?.content_tone]);
 
   useEffect(() => {
     if (!message) return;
@@ -575,18 +629,29 @@ const SettingsPage = () => {
   }, []);
 
   const handleSaveBackupEmail = backupEmailForm.handleSubmit(async (data) => {
+    // Backup email is an account-recovery surface — anyone with a stolen
+    // session could otherwise quietly point recovery at their own address.
+    // Gate behind MFA the same way the other sensitive saves do.
+    const verified = await requestVerification(
+      t("verifyAction.setBackupEmail"),
+    );
+    if (!verified) return;
     const { error } = await authService.setBackupEmail(data.backupEmail);
     if (error) {
       showMessage(error, "error");
     } else {
       setCurrentBackupEmail(data.backupEmail);
       backupEmailForm.reset();
-      showMessage("Backup email saved.", "success");
+      showMessage(t("backupEmail.savedToast"), "success");
     }
   });
 
   const [removingBackupEmail, setRemovingBackupEmail] = useState(false);
   const handleRemoveBackupEmail = async () => {
+    const verified = await requestVerification(
+      t("verifyAction.removeBackupEmail"),
+    );
+    if (!verified) return;
     setRemovingBackupEmail(true);
     const { error } = await authService.removeBackupEmail();
     setRemovingBackupEmail(false);
@@ -594,7 +659,7 @@ const SettingsPage = () => {
       showMessage(error, "error");
     } else {
       setCurrentBackupEmail(null);
-      showMessage("Backup email removed.", "success");
+      showMessage(t("backupEmail.removedToast"), "success");
     }
   };
 
@@ -611,21 +676,38 @@ const SettingsPage = () => {
           {/* Header */}
           <div className="mb-6">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
-              Settings
+              {t("eyebrow")}
             </p>
             <h1 className="mt-2 text-2xl font-black tracking-tighter sm:text-3xl md:text-4xl lg:text-5xl">
-              Account Settings
+              {t("title")}
             </h1>
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-              Manage your profile, security, and preferences.
+              {t("subtitle")}
             </p>
+          </div>
+
+          {/* Mobile pill nav — desktop keeps the grouped sidebar below. */}
+          <div className="mb-4 md:hidden">
+            <SegmentedControl<SettingsSection>
+              layoutId="settings-mobile-tabs"
+              value={activeSection}
+              onChange={changeSection}
+              size="sm"
+              ariaLabel="Account sections"
+              options={sectionTabs.map((tab) => ({
+                value: tab.id,
+                label: tab.label,
+                icon: tab.icon,
+                pillClassName: "bg-indigo-500",
+              }))}
+            />
           </div>
 
           {/* Sidebar + content layout */}
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6">
-            <SidebarNavShell>
+            <SidebarNavShell className="hidden md:flex">
               <nav aria-label="Account sections" className="flex-1">
-                <SidebarNavGroup label="Account" />
+                <SidebarNavGroup label={t("groups.account")} />
                 {sectionTabs
                   .filter(
                     (tab) => tab.id === "profile" || tab.id === "security",
@@ -640,7 +722,7 @@ const SettingsPage = () => {
                     />
                   ))}
 
-                <SidebarNavGroup label="App" />
+                <SidebarNavGroup label={t("groups.app")} />
                 {sectionTabs
                   .filter(
                     (tab) => tab.id === "content" || tab.id === "integrations",
@@ -688,9 +770,15 @@ const SettingsPage = () => {
                 )}
               </AnimatePresence>
 
-              {/* Section Content */}
-              <AnimatePresence mode="wait">
-                {activeSection === "profile" && (
+              {/* Section Content — wrapped in a min-height container so the
+                  page doesn't shrink when switching from a tall section
+                  (security has email + password + MFA + passkeys + backup
+                  + sessions stacked) to a short one. Without this, the
+                  browser auto-scrolls to keep the viewport valid, which
+                  reads as "the page jumped up". */}
+              <div className="min-h-[70vh]">
+                <AnimatePresence mode="popLayout">
+                  {activeSection === "profile" && (
                   <motion.div
                     key="profile"
                     initial={{ opacity: 0, x: sectionSlideDir * 30 }}
@@ -702,8 +790,8 @@ const SettingsPage = () => {
                     {/* Profile picture */}
                     <SectionCard>
                       <SectionHeader
-                        title="Profile Picture"
-                        description="Upload an image to show across the app. JPG, PNG, GIF, or WEBP up to 5 MB."
+                        title={t("profile.pictureTitle")}
+                        description={t("profile.pictureDescription")}
                       />
                       <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
                         {user?.avatar_url ? (
@@ -729,10 +817,10 @@ const SettingsPage = () => {
                               className="h-10 rounded-full border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-800/70"
                             >
                               {avatarUploading
-                                ? "Uploading…"
+                                ? t("profile.uploading")
                                 : user?.avatar_url
-                                  ? "Change picture"
-                                  : "Upload picture"}
+                                  ? t("profile.changePicture")
+                                  : t("profile.uploadPicture")}
                             </button>
                             {user?.avatar_url && (
                               <button
@@ -741,7 +829,7 @@ const SettingsPage = () => {
                                 disabled={avatarUploading}
                                 className="h-10 rounded-full px-4 text-sm font-semibold text-rose-600 transition-colors hover:bg-rose-50 disabled:opacity-60 dark:text-rose-400 dark:hover:bg-rose-500/10"
                               >
-                                Remove
+                                {t("profile.remove")}
                               </button>
                             )}
                           </div>
@@ -758,27 +846,27 @@ const SettingsPage = () => {
 
                     <SectionCard>
                       <SectionHeader
-                        title="Profile Details"
-                        description="Update your public account details."
+                        title={t("profile.detailsTitle")}
+                        description={t("profile.detailsDescription")}
                       />
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <SettingsInput
-                          label="Current username"
+                          label={t("profile.currentUsername")}
                           defaultValue={user?.name || ""}
                           readOnly
                           disabled
                           icon={<CircleOff size={14} />}
                         />
                         <SettingsInput
-                          label="New username"
-                          placeholder="Enter new username"
+                          label={t("profile.newUsername")}
+                          placeholder={t("profile.newUsernamePlaceholder")}
                           error={profileForm.formState.errors.newName?.message}
                           {...profileForm.register("newName")}
                         />
                         <SettingsInput
-                          label="Age"
+                          label={t("profile.age")}
                           type="number"
-                          placeholder="25"
+                          placeholder={t("profile.agePlaceholder")}
                           min={13}
                           max={120}
                           error={profileForm.formState.errors.age?.message}
@@ -795,9 +883,51 @@ const SettingsPage = () => {
                           }
                           className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
                         >
-                          Save changes
+                          {t("profile.save")}
                         </StatefulButton>
                       </div>
+                    </SectionCard>
+
+                    {/* UI preferences — language + theme. They sit here in
+                        Profile (not Content) since they control how the app
+                        looks for you, not what gets recommended. */}
+                    <SectionCard>
+                      <LanguageSwitcher />
+                    </SectionCard>
+
+                    <SectionCard>
+                      <p className="mb-1 text-base font-bold tracking-tight">
+                        {t("theme.title")}
+                      </p>
+                      <p className="mb-3 text-sm text-slate-500 dark:text-slate-400">
+                        {t("theme.description")}
+                      </p>
+                      <SegmentedControl<ThemeChoice>
+                        layoutId="settings-theme"
+                        value={(theme as ThemeChoice) ?? "system"}
+                        onChange={setTheme}
+                        ariaLabel={t("theme.title")}
+                        options={[
+                          {
+                            value: "light",
+                            label: t("theme.light"),
+                            icon: <Sun size={14} />,
+                            pillClassName: "bg-amber-500",
+                          },
+                          {
+                            value: "dark",
+                            label: t("theme.dark"),
+                            icon: <Moon size={14} />,
+                            pillClassName: "bg-indigo-600",
+                          },
+                          {
+                            value: "system",
+                            label: t("theme.system"),
+                            icon: <Monitor size={14} />,
+                            pillClassName: "bg-slate-700 dark:bg-slate-600",
+                          },
+                        ]}
+                      />
                     </SectionCard>
                   </motion.div>
                 )}
@@ -814,8 +944,8 @@ const SettingsPage = () => {
                     {/* Email */}
                     <SectionCard>
                       <SectionHeader
-                        title="Email"
-                        description="The address you use to sign in."
+                        title={t("email.title")}
+                        description={t("email.description")}
                       />
 
                       <div className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-slate-200/70 bg-slate-50 px-4 py-3 dark:border-slate-700/60 dark:bg-slate-800/40">
@@ -829,13 +959,13 @@ const SettingsPage = () => {
                           </span>
                         </div>
                         <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-                          Current
+                          {t("email.current")}
                         </span>
                       </div>
 
                       <SettingsInput
-                        label="New email"
-                        placeholder="new@example.com"
+                        label={t("email.newEmail")}
+                        placeholder={t("email.newEmailPlaceholder")}
                         error={emailForm.formState.errors.newEmail?.message}
                         {...emailForm.register("newEmail")}
                       />
@@ -850,7 +980,7 @@ const SettingsPage = () => {
                           }
                           className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
                         >
-                          Update Email
+                          {t("email.update")}
                         </StatefulButton>
                       </div>
                     </SectionCard>
@@ -858,16 +988,16 @@ const SettingsPage = () => {
                     {/* Password */}
                     <SectionCard>
                       <SectionHeader
-                        title="Password"
-                        description="Pick a new password."
+                        title={t("password.title")}
+                        description={t("password.description")}
                       />
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
                           <div ref={newPasswordAnchorRef}>
                             <SettingsInput
-                              label="New password"
+                              label={t("password.newPassword")}
                               type="password"
-                              placeholder="••••••••"
+                              placeholder={t("password.passwordPlaceholder")}
                               icon={<Lock size={14} />}
                               error={
                                 passwordForm.formState.errors.newPassword
@@ -883,15 +1013,15 @@ const SettingsPage = () => {
                             rules={newPasswordRules}
                             visible={newPasswordFocused}
                             anchorRef={newPasswordAnchorRef}
-                            title="Password Requirements"
+                            title={t("password.requirementsTitle")}
                           />
                         </div>
                         <div>
                           <div ref={confirmPasswordAnchorRef}>
                             <SettingsInput
-                              label="Confirm password"
+                              label={t("password.confirmPassword")}
                               type="password"
-                              placeholder="••••••••"
+                              placeholder={t("password.passwordPlaceholder")}
                               icon={<Lock size={14} />}
                               error={
                                 passwordForm.formState.errors.confirmPassword
@@ -907,7 +1037,7 @@ const SettingsPage = () => {
                             rules={confirmPasswordRules}
                             visible={confirmPasswordFocused}
                             anchorRef={confirmPasswordAnchorRef}
-                            title="Confirm Password"
+                            title={t("password.confirmRulesTitle")}
                           />
                         </div>
                       </div>
@@ -921,7 +1051,7 @@ const SettingsPage = () => {
                           }
                           className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
                         >
-                          Update Password
+                          {t("password.update")}
                         </StatefulButton>
                       </div>
                     </SectionCard>
@@ -931,8 +1061,8 @@ const SettingsPage = () => {
                       {!showMfaPanel ? (
                         <>
                           <SectionHeader
-                            title="Two-Factor Authentication"
-                            description="An extra step at sign-in to keep your account secure."
+                            title={t("mfa.title")}
+                            description={t("mfa.description")}
                           />
 
                           <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/70 bg-slate-50 px-4 py-3 dark:border-slate-700/60 dark:bg-slate-800/40">
@@ -949,9 +1079,9 @@ const SettingsPage = () => {
                               <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
                                 {mfaChecked
                                   ? mfaEnabled
-                                    ? "Two-factor is on"
-                                    : "Two-factor is off"
-                                  : "Checking…"}
+                                    ? t("mfa.on")
+                                    : t("mfa.off")
+                                  : t("mfa.checking")}
                               </span>
                             </div>
                             {mfaChecked && (
@@ -963,7 +1093,7 @@ const SettingsPage = () => {
                                     : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400",
                                 )}
                               >
-                                {mfaEnabled ? "Enabled" : "Disabled"}
+                                {mfaEnabled ? t("mfa.enabled") : t("mfa.disabled")}
                               </span>
                             )}
                           </div>
@@ -980,11 +1110,23 @@ const SettingsPage = () => {
                                   });
                                 }
                               }}
+                              // Same controlled-state fix as the Add
+                              // Authenticator and Add Passkey buttons —
+                              // without this, the synchronous handler
+                              // returns undefined and StatefulButton's
+                              // auto-detect flashes a green check before
+                              // the modal/panel even mounts.
+                              state={
+                                mfaSetupModal.open &&
+                                !mfaSetupModal.isAdditional
+                                  ? "loading"
+                                  : "idle"
+                              }
                               className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
                             >
                               {mfaEnabled
-                                ? "Manage two-factor"
-                                : "Enable two-factor"}
+                                ? t("mfa.manage")
+                                : t("mfa.enable")}
                             </StatefulButton>
                           </div>
                         </>
@@ -993,11 +1135,23 @@ const SettingsPage = () => {
                           key={mfaPanelKey}
                           mfaEnabled={mfaEnabled}
                           onMfaStatusChange={() => setShowMfaPanel(false)}
-                          onAddAuthenticator={() =>
+                          onAddAuthenticator={async () => {
+                            // Adding a factor requires AAL2 — the user has
+                            // to re-verify their existing TOTP first.
+                            // Without this, the API rejects the enroll call
+                            // with AAL2_REQUIRED and the setup modal shows
+                            // "Failed to start MFA enrollment".
+                            const verified = await requestVerification(
+                              t("verifyAction.addAuthenticator"),
+                            );
+                            if (!verified) return;
                             setMfaSetupModal({
                               open: true,
                               isAdditional: true,
-                            })
+                            });
+                          }}
+                          addingAuthenticator={
+                            mfaSetupModal.open && mfaSetupModal.isAdditional
                           }
                         />
                       )}
@@ -1011,8 +1165,8 @@ const SettingsPage = () => {
                     {/* Backup Email */}
                     <SectionCard>
                       <SectionHeader
-                        title="Backup Email"
-                        description="A recovery address used when your authenticator is unavailable."
+                        title={t("backupEmail.title")}
+                        description={t("backupEmail.description")}
                       />
 
                       {currentBackupEmail && (
@@ -1031,19 +1185,21 @@ const SettingsPage = () => {
                             disabled={removingBackupEmail}
                             className="shrink-0 text-xs font-semibold text-rose-600 transition-colors hover:text-rose-500 disabled:opacity-50 dark:text-rose-400"
                           >
-                            Remove
+                            {t("backupEmail.remove")}
                           </button>
                         </div>
                       )}
 
                       <SettingsInput
                         label={
-                          currentBackupEmail ? "Change to" : "Backup Email"
+                          currentBackupEmail
+                            ? t("backupEmail.labelChange")
+                            : t("backupEmail.labelDefault")
                         }
                         placeholder={
                           currentBackupEmail
-                            ? "new-backup@example.com"
-                            : "backup@example.com"
+                            ? t("backupEmail.placeholderChange")
+                            : t("backupEmail.placeholderDefault")
                         }
                         error={
                           backupEmailForm.formState.errors.backupEmail?.message
@@ -1061,7 +1217,9 @@ const SettingsPage = () => {
                           }
                           className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
                         >
-                          {currentBackupEmail ? "Update backup" : "Save backup"}
+                          {currentBackupEmail
+                            ? t("backupEmail.update")
+                            : t("backupEmail.save")}
                         </StatefulButton>
                       </div>
                     </SectionCard>
@@ -1069,7 +1227,10 @@ const SettingsPage = () => {
                     {/* Sessions */}
                     {user?.id && (
                       <SectionCard>
-                        <SessionsManagement userId={user.id} />
+                        <SessionsManagement
+                          userId={user.id}
+                          requestVerification={requestVerification}
+                        />
                       </SectionCard>
                     )}
                   </motion.div>
@@ -1086,103 +1247,46 @@ const SettingsPage = () => {
                   >
                     <SectionCard>
                       <SectionHeader
-                        title="Content Preferences"
-                        description="Set your default recommendation behavior."
+                        title={t("content.title")}
+                        description={t("content.description")}
                       />
 
                       <div className="space-y-6">
                         <div>
                           <p className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
-                            Recommendation type
+                            {t("content.typeLabel")}
                           </p>
-                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                            {(
-                              [
-                                {
-                                  id: "movie",
-                                  label: "Movies",
-                                  eyebrow: "On screen",
-                                  icon: <Film size={14} />,
-                                },
-                                {
-                                  id: "book",
-                                  label: "Books",
-                                  eyebrow: "On the shelf",
-                                  icon: <BookOpen size={14} />,
-                                },
-                                {
-                                  id: "both",
-                                  label: "Both",
-                                  eyebrow: "One of each",
-                                  icon: <Sparkles size={14} />,
-                                },
-                              ] as const
-                            ).map((opt) => {
-                              const active = contentFocus === opt.id;
-                              return (
-                                <button
-                                  key={opt.id}
-                                  type="button"
-                                  onClick={() => setContentFocus(opt.id)}
-                                  aria-pressed={active}
-                                  className={cn(
-                                    "group relative overflow-hidden rounded-2xl border bg-white/85 p-4 text-left shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:bg-slate-900/65 dark:focus-visible:ring-offset-slate-950",
-                                    active
-                                      ? "border-transparent shadow-indigo-500/15 ring-2 ring-indigo-500/70 dark:ring-indigo-400/70"
-                                      : "border-slate-200/70 hover:border-slate-300 dark:border-slate-700/60 dark:hover:border-slate-600/80",
-                                  )}
-                                >
-                                  <span
-                                    aria-hidden="true"
-                                    className={cn(
-                                      "pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-500/[0.06] via-transparent to-violet-500/[0.06] transition-opacity duration-300 dark:from-indigo-400/[0.08] dark:to-violet-400/[0.08]",
-                                      active ? "opacity-100" : "opacity-0",
-                                    )}
-                                  />
-                                  <div
-                                    className={cn(
-                                      "absolute right-3 top-3 inline-flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-md shadow-indigo-500/30 transition-all duration-300",
-                                      active
-                                        ? "scale-100 opacity-100"
-                                        : "scale-50 opacity-0",
-                                    )}
-                                  >
-                                    <Check size={12} strokeWidth={3} />
-                                  </div>
-                                  <div className="relative flex items-center gap-2">
-                                    <span
-                                      className={cn(
-                                        "flex h-7 w-7 items-center justify-center rounded-full transition-colors duration-300",
-                                        active
-                                          ? "bg-indigo-500 text-white"
-                                          : "bg-slate-100 text-slate-500 group-hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-slate-700",
-                                      )}
-                                    >
-                                      {opt.icon}
-                                    </span>
-                                    <p
-                                      className={cn(
-                                        "text-[10px] font-black uppercase tracking-[0.18em] transition-colors duration-300",
-                                        active
-                                          ? "text-indigo-600 dark:text-indigo-400"
-                                          : "text-slate-400 dark:text-slate-500",
-                                      )}
-                                    >
-                                      {opt.eyebrow}
-                                    </p>
-                                  </div>
-                                  <p className="relative mt-1.5 text-base font-black tracking-tight">
-                                    {opt.label}
-                                  </p>
-                                </button>
-                              );
-                            })}
-                          </div>
+                          <SegmentedControl<"movie" | "book" | "both">
+                            layoutId="settings-content-focus"
+                            value={contentFocus}
+                            onChange={setContentFocus}
+                            ariaLabel={t("content.typeLabel")}
+                            options={[
+                              {
+                                value: "movie",
+                                label: t("content.type.movie.label"),
+                                icon: <Film size={14} />,
+                                pillClassName: "bg-indigo-500",
+                              },
+                              {
+                                value: "book",
+                                label: t("content.type.book.label"),
+                                icon: <BookOpen size={14} />,
+                                pillClassName: "bg-indigo-500",
+                              },
+                              {
+                                value: "both",
+                                label: t("content.type.both.label"),
+                                icon: <Sparkles size={14} />,
+                                pillClassName: "bg-indigo-500",
+                              },
+                            ]}
+                          />
                         </div>
 
                         <div>
                           <p className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
-                            Content tone
+                            {t("content.toneLabel")}
                           </p>
                           {(user?.age ?? 0) < 18 ? (
                             <div className="relative overflow-hidden rounded-2xl border border-indigo-200/60 bg-gradient-to-br from-indigo-50/80 via-white to-violet-50/60 p-4 dark:border-indigo-500/30 dark:from-indigo-500/10 dark:via-slate-900/40 dark:to-violet-500/10">
@@ -1196,47 +1300,49 @@ const SettingsPage = () => {
                                   className="text-indigo-600 dark:text-indigo-400"
                                 />
                                 <p className="text-[11px] font-black uppercase tracking-[0.16em] text-indigo-700 dark:text-indigo-300">
-                                  Age-locked
+                                  {t("content.ageLockedEyebrow")}
                                 </p>
                               </div>
                               <p className="mt-2 pl-2 text-sm leading-relaxed text-slate-700 dark:text-slate-200">
-                                Recommendations are kept age-appropriate based
-                                on your age ({user?.age ?? "—"}). Adults can
-                                choose between standard and family-friendly
-                                tones.
+                                {user?.age != null
+                                  ? t("content.ageLockedBody", {
+                                      age: user.age,
+                                    })
+                                  : t("content.ageLockedBodyMissing")}
                               </p>
                             </div>
                           ) : (
-                            <div className="flex flex-wrap gap-2">
-                              {(
-                                [
-                                  { id: "standard", label: "Standard" },
-                                  { id: "family", label: "Family-friendly" },
-                                ] as const
-                              ).map((opt) => (
-                                <PillButton
-                                  key={opt.id}
-                                  onClick={() => setContentTone(opt.id)}
-                                  active={contentTone === opt.id}
-                                  className="px-4 py-2 text-sm font-semibold"
-                                >
-                                  {opt.label}
-                                </PillButton>
-                              ))}
-                            </div>
+                            <SegmentedControl<"standard" | "family">
+                              layoutId="settings-content-tone"
+                              value={contentTone}
+                              onChange={setContentTone}
+                              ariaLabel={t("content.toneLabel")}
+                              options={[
+                                {
+                                  value: "standard",
+                                  label: t("content.tone.standard"),
+                                  pillClassName: "bg-indigo-500",
+                                },
+                                {
+                                  value: "family",
+                                  label: t("content.tone.family"),
+                                  pillClassName: "bg-emerald-500",
+                                },
+                              ]}
+                            />
                           )}
                           {(user?.age ?? 0) >= 18 && (
                             <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                               {contentTone === "family"
-                                ? "Picks stay light. No mature themes, dark content, or sexual content."
-                                : "Full personality. The AI may suggest dark, complex, or mature picks when they fit you."}
+                                ? t("content.toneHint.family")
+                                : t("content.toneHint.standard")}
                             </p>
                           )}
                         </div>
 
                         <div>
                           <p className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
-                            Questions per quiz
+                            {t("content.questionCountLabel")}
                           </p>
                           <div className="rounded-2xl border border-slate-200/80 bg-gradient-to-br from-indigo-50/60 via-white to-violet-50/60 p-5 dark:border-slate-700/70 dark:from-indigo-500/5 dark:via-slate-900/40 dark:to-violet-500/5">
                             <div className="mb-4 flex items-end justify-between gap-4">
@@ -1254,17 +1360,25 @@ const SettingsPage = () => {
                                   {preferredQuestionCount}
                                 </motion.p>
                                 <p className="mt-1 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-                                  {preferredQuestionCount === 1
-                                    ? "Question"
-                                    : "Questions"}
+                                  {t("content.questionWord", {
+                                    count: preferredQuestionCount,
+                                  })}
                                 </p>
                               </div>
                               <p className="text-sm font-bold tracking-tight text-slate-700 dark:text-slate-200">
-                                {preferredQuestionCount <= 5
-                                  ? "Quick and focused"
-                                  : preferredQuestionCount <= 10
-                                    ? "Balanced depth"
-                                    : "Comprehensive detail"}
+                                {t(
+                                  `content.depth.${
+                                    preferredQuestionCount <= 4
+                                      ? "quick"
+                                      : preferredQuestionCount <= 7
+                                        ? "focused"
+                                        : preferredQuestionCount <= 10
+                                          ? "balanced"
+                                          : preferredQuestionCount <= 13
+                                            ? "thorough"
+                                            : "comprehensive"
+                                  }`,
+                                )}
                               </p>
                             </div>
                             <input
@@ -1277,7 +1391,7 @@ const SettingsPage = () => {
                                   Number(e.target.value),
                                 )
                               }
-                              aria-label="Default questions per quiz"
+                              aria-label={t("content.rangeAria")}
                               className="w-full cursor-pointer accent-indigo-500"
                             />
                             <div className="mt-1 flex justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
@@ -1290,13 +1404,14 @@ const SettingsPage = () => {
 
                       <div className="mt-5 flex flex-wrap items-center justify-end gap-3">
                         <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
-                          Applies on next quiz
+                          {t("content.appliesNext")}
                         </span>
                         <StatefulButton
                           onClick={handleSaveContentPreferences}
+                          state={savingContent ? "loading" : "idle"}
                           className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
                         >
-                          Save Preferences
+                          {t("content.save")}
                         </StatefulButton>
                       </div>
                     </SectionCard>
@@ -1314,8 +1429,8 @@ const SettingsPage = () => {
                   >
                     <SectionCard>
                       <SectionHeader
-                        title="Integrations"
-                        description="Connected providers and services."
+                        title={t("integrations.title")}
+                        description={t("integrations.description")}
                       />
                       <div className="rounded-2xl border border-dashed border-slate-300/80 bg-gradient-to-br from-slate-50/80 via-white to-slate-50/40 p-10 text-center dark:border-slate-700/70 dark:from-slate-900/40 dark:via-slate-900/20 dark:to-slate-900/40">
                         <Link2
@@ -1323,11 +1438,10 @@ const SettingsPage = () => {
                           aria-hidden="true"
                         />
                         <p className="mt-4 text-xl font-black tracking-tight text-slate-700 dark:text-slate-200">
-                          No integrations available yet
+                          {t("integrations.emptyTitle")}
                         </p>
                         <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
-                          Third-party connections will show up here once they
-                          go live.
+                          {t("integrations.emptyBody")}
                         </p>
                       </div>
                     </SectionCard>
@@ -1336,10 +1450,10 @@ const SettingsPage = () => {
                     <SectionCard className="!border-red-200/70 dark:!border-red-900/40">
                       <div className="mb-4">
                         <h2 className="text-xl font-black tracking-tight text-red-700 sm:text-2xl dark:text-red-400">
-                          Danger Zone
+                          {t("danger.title")}
                         </h2>
                         <p className="mt-1 text-sm text-red-600/80 dark:text-red-300/70">
-                          These actions are irreversible. Proceed carefully.
+                          {t("danger.description")}
                         </p>
                       </div>
                       <div className="flex flex-wrap gap-3">
@@ -1351,8 +1465,8 @@ const SettingsPage = () => {
                         >
                           <UserMinus size={14} />
                           {accountActionLoading
-                            ? "Processing…"
-                            : "Disable Account"}
+                            ? t("danger.processing")
+                            : t("danger.disable")}
                         </PillButton>
                         <PillButton
                           onClick={handleDeleteAccount}
@@ -1362,14 +1476,15 @@ const SettingsPage = () => {
                         >
                           <Trash2 size={14} />
                           {accountActionLoading
-                            ? "Processing…"
-                            : "Delete Account"}
+                            ? t("danger.processing")
+                            : t("danger.delete")}
                         </PillButton>
                       </div>
                     </SectionCard>
                   </motion.div>
                 )}
-              </AnimatePresence>
+                </AnimatePresence>
+              </div>
             </div>
           </div>
         </div>
@@ -1397,7 +1512,7 @@ const SettingsPage = () => {
             >
               <button
                 onClick={() => closeVerifyModal(false)}
-                aria-label="Close verification dialog"
+                aria-label={t("verifyModal.closeAria")}
                 className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
               >
                 <X size={18} />
@@ -1413,14 +1528,14 @@ const SettingsPage = () => {
                           className="text-violet-600 dark:text-violet-400"
                         />
                       </div>
-                      <h3 className="text-lg font-bold">Verify Identity</h3>
+                      <h3 className="text-lg font-bold">
+                        {t("verifyModal.title")}
+                      </h3>
                     </div>
                     <p className="text-sm text-slate-500 dark:text-slate-400">
-                      Enter your 6-digit authenticator code to{" "}
-                      <span className="font-medium text-slate-700 dark:text-slate-200">
-                        {verifyModal.actionLabel}
-                      </span>
-                      .
+                      {t("verifyModal.description", {
+                        action: verifyModal.actionLabel,
+                      })}
                     </p>
                   </div>
 
@@ -1438,7 +1553,7 @@ const SettingsPage = () => {
                     onKeyDown={(e) => {
                       if (e.key === "Enter") handleVerifySubmit();
                     }}
-                    placeholder="000000"
+                    placeholder={t("verifyModal.placeholder")}
                     className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-2xl font-mono tracking-[0.3em] transition-colors focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-100"
                     autoFocus
                   />
@@ -1454,7 +1569,7 @@ const SettingsPage = () => {
                       onClick={() => closeVerifyModal(false)}
                       className="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                     >
-                      Cancel
+                      {t("verifyModal.cancel")}
                     </button>
                     <StatefulButton
                       onClick={handleVerifySubmit}
@@ -1462,7 +1577,7 @@ const SettingsPage = () => {
                       disabled={verifyCode.length !== 6}
                       className="flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold"
                     >
-                      Verify
+                      {t("verifyModal.verify")}
                     </StatefulButton>
                   </div>
                 </>
@@ -1476,14 +1591,14 @@ const SettingsPage = () => {
                           className="text-violet-600 dark:text-violet-400"
                         />
                       </div>
-                      <h3 className="text-lg font-bold">Set Up 2FA First</h3>
+                      <h3 className="text-lg font-bold">
+                        {t("verifyModalEnroll.title")}
+                      </h3>
                     </div>
                     <p className="text-sm text-slate-500 dark:text-slate-400">
-                      Two-factor authentication is required to{" "}
-                      <span className="font-medium text-slate-700 dark:text-slate-200">
-                        {verifyModal.actionLabel}
-                      </span>
-                      . Set it up now to continue.
+                      {t("verifyModalEnroll.description", {
+                        action: verifyModal.actionLabel,
+                      })}
                     </p>
                   </div>
 
@@ -1527,7 +1642,7 @@ const SettingsPage = () => {
                 onClick={() =>
                   setMfaSetupModal((prev) => ({ ...prev, open: false }))
                 }
-                aria-label="Close two-factor setup"
+                aria-label={t("mfaSetupModal.closeAria")}
                 className="absolute right-4 top-4 z-10 text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-200"
               >
                 <X size={18} />

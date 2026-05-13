@@ -15,6 +15,10 @@ type SidebarNavItemProps = {
   label: string;
   active: boolean;
   onClick: () => void;
+  /** Override the icon tint. When set, replaces the default indigo-on-
+   *  active / slate-on-idle treatment with a single fixed color the icon
+   *  keeps in both states. Use for accent items (e.g. Milestones gold). */
+  iconClassName?: string;
 };
 
 export function SidebarNavItem({
@@ -22,6 +26,7 @@ export function SidebarNavItem({
   label,
   active,
   onClick,
+  iconClassName,
 }: SidebarNavItemProps) {
   return (
     <button
@@ -39,7 +44,7 @@ export function SidebarNavItem({
         className={cn(
           "flex h-5 w-5 shrink-0 items-center justify-center transition-colors",
           active
-            ? "text-indigo-600 dark:text-indigo-400"
+            ? (iconClassName ?? "text-indigo-600 dark:text-indigo-400")
             : "text-slate-400 group-hover:text-slate-600 dark:text-slate-500 dark:group-hover:text-slate-300",
         )}
       >

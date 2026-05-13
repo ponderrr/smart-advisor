@@ -80,6 +80,7 @@ class GroupQuizService {
           status: "lobby",
           content_type: input.content_type,
           question_count: input.question_count,
+          max_participants: input.max_participants,
         })
         .select("*")
         .single()) as { data: QuizSession | null; error: { code?: string; message: string } | null };
@@ -173,6 +174,28 @@ class GroupQuizService {
 
     const { data: authData } = await supabase.auth.getUser();
     const userId = authData.user?.id ?? null;
+
+    // Re-use existing signed-in participant (e.g., a refresh) before any
+    // capacity check — otherwise rejoining a full lobby they're already in
+    // would falsely look "full".
+    if (userId) {
+      const { data: existing } = (await participantsTable()
+        .select("*")
+        .eq("session_id", session.id)
+        .eq("user_id", userId)
+        .maybeSingle()) as { data: QuizParticipant | null };
+      if (existing) {
+        return { session, participant: existing, error: null };
+      }
+    }
+
+    // New joiner — enforce the host's lobby cap.
+    const { count } = (await participantsTable()
+      .select("id", { count: "exact", head: true })
+      .eq("session_id", session.id)) as { count: number | null };
+    if (count != null && count >= session.max_participants) {
+      return { session, participant: null, error: "This lobby is full." };
+    }
 
     const { data: participant, error } = (await participantsTable()
       .insert({

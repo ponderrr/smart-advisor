@@ -4,6 +4,7 @@ import { useAuth } from "@/features/auth/hooks/use-auth";
 import { MfaSetup } from "@/features/auth/components/mfa-setup";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
 import {
@@ -15,12 +16,12 @@ function MfaSetupContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, session, loading } = useAuth();
+  const tc = useTranslations("Common");
   const [mounted, setMounted] = useState(false);
 
-  const completeTarget = getMfaSetupCompleteTarget(
-    searchParams?.get("from") ?? null,
-  );
-  const skipTarget = getMfaSetupSkipTarget();
+  const fromParam = searchParams?.get("from") ?? null;
+  const completeTarget = getMfaSetupCompleteTarget(fromParam);
+  const skipTarget = getMfaSetupSkipTarget(fromParam);
 
   useEffect(() => {
     setMounted(true);
@@ -33,7 +34,7 @@ function MfaSetupContent() {
   }, [mounted, loading, session, router]);
 
   if (!mounted || loading) {
-    return <PageLoader text="Loading..." />;
+    return <PageLoader text={tc("loading")} />;
   }
 
   if (!user || !session) {
@@ -60,9 +61,14 @@ function MfaSetupContent() {
   );
 }
 
+function MfaSetupFallback() {
+  const tc = useTranslations("Common");
+  return <PageLoader text={tc("loading")} />;
+}
+
 export default function MfaSetupPage() {
   return (
-    <Suspense fallback={<PageLoader text="Loading..." />}>
+    <Suspense fallback={<MfaSetupFallback />}>
       <MfaSetupContent />
     </Suspense>
   );

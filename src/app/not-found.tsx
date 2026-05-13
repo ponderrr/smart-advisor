@@ -1,10 +1,12 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { Home, ArrowLeft } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { BrandWordmark } from "@/components/brand-wordmark";
 
 const NotFound = () => {
   const router = useRouter();
+  const t = useTranslations("System.notFound");
 
   const handleGoHome = () => {
     router.push("/");
@@ -37,13 +39,11 @@ const NotFound = () => {
           </h1>
 
           <h2 className="mb-5 text-3xl font-bold leading-tight tracking-tight sm:text-4xl md:text-5xl">
-            This scene didn&apos;t make the cut.
+            {t("title")}
           </h2>
 
           <p className="mx-auto max-w-[600px] text-base leading-relaxed text-slate-600 sm:text-lg dark:text-slate-400">
-            The page you&apos;re looking for wandered off between takes. Maybe
-            a typo in the URL, maybe it got left on the cutting room floor.
-            Either way, let&apos;s get you back.
+            {t("body")}
           </p>
 
           <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
@@ -52,14 +52,14 @@ const NotFound = () => {
               className="flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-6 py-3 text-slate-900 transition-colors duration-200 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
             >
               <ArrowLeft size={20} />
-              Go Back
+              {t("goBack")}
             </button>
             <button
               onClick={handleGoHome}
               className="flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-6 py-3 text-white transition-colors duration-200 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-400"
             >
               <Home size={20} />
-              Go Home
+              {t("goHome")}
             </button>
           </div>
         </div>

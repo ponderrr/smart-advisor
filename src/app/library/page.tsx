@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { format } from "date-fns";
@@ -9,6 +9,7 @@ import {
   BookCheck,
   BookOpen,
   Bookmark,
+  ChevronDown,
   Film,
   LayoutGrid,
   Loader,
@@ -20,12 +21,12 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import { libraryService } from "@/features/library/services/library-service";
 import {
-  RATING_LABELS,
-  STATUS_LABELS,
+  STATUS_PILL_CLASSES,
   STATUS_TONE,
   type LibraryItem,
   type LibraryRating,
@@ -39,8 +40,15 @@ import {
 } from "@/components/sidebar-nav";
 import { Button } from "@/components/ui/button";
 import { PillButton } from "@/components/ui/pill-button";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { Dialog } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
 import { ViewToggle, type ViewMode } from "@/components/view-toggle";
@@ -51,59 +59,118 @@ const VIEW_MODES = ["grid", "list"] as const;
 type MediumFilter = (typeof MEDIUM_TABS)[number];
 type StatusFilter = "all" | LibraryStatus;
 
-const STATUS_VALUES: LibraryStatus[] = ["finished", "in_progress", "wishlist"];
-const RATING_VALUES: LibraryRating[] = [1, 2, 3];
+const STATUS_VALUES: LibraryStatus[] = [
+  "wishlist",
+  "in_progress",
+  "finished",
+  "dropped",
+];
+const STATUS_FILTER_VALUES = ["all", ...STATUS_VALUES] as const;
+const ALL_FILTER_PILL_CLASS = "bg-slate-700 dark:bg-slate-600";
 
-
-const ratingChip = (rating: LibraryRating | null) => {
-  if (rating === null) return null;
-  const Icon = rating === 1 ? ThumbsDown : rating === 3 ? ThumbsUp : Bookmark;
-  const tone =
-    rating === 3
-      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
-      : rating === 1
-        ? "bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300"
-        : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300";
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold",
-        tone,
-      )}
-    >
-      <Icon size={12} />
-      {RATING_LABELS[rating]}
-    </span>
-  );
-};
-
-const statusChip = (status: LibraryStatus) => (
-  <span
-    className={cn(
-      "rounded-full px-2.5 py-1 text-[11px] font-semibold",
-      STATUS_TONE[status].chip,
-    )}
-  >
-    {STATUS_LABELS[status]}
-  </span>
-);
 
 export default function LibraryPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { ready } = useRequireAuth();
+  const t = useTranslations("Library");
+  const tc = useTranslations("Common");
+
+  const ratingChip = (rating: LibraryRating | null) => {
+    if (rating === null) return null;
+    const Icon =
+      rating === 1 ? ThumbsDown : rating === 3 ? ThumbsUp : Bookmark;
+    const tone =
+      rating === 3
+        ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
+        : rating === 1
+          ? "bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300"
+          : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300";
+    return (
+      <span
+        className={cn(
+          "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold",
+          tone,
+        )}
+      >
+        <Icon size={12} />
+        {t(`rating.${rating}`)}
+      </span>
+    );
+  };
+
+  const StatusChipMenu = ({
+    item,
+    variant = "list",
+  }: {
+    item: LibraryItem;
+    variant?: "list" | "grid";
+  }) => {
+    const isGrid = variant === "grid";
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            type="button"
+            aria-label={t("statusChangeAria", { title: item.title })}
+            className={cn(
+              "inline-flex items-center gap-1 rounded-full font-bold uppercase tracking-wider transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40",
+              isGrid
+                ? "px-1.5 py-0.5 text-[9px]"
+                : "px-2.5 py-1 text-[11px]",
+              STATUS_TONE[item.status].chip,
+            )}
+          >
+            {t(`status.${item.status}`)}
+            <ChevronDown size={isGrid ? 9 : 11} />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="min-w-[140px]">
+          {STATUS_VALUES.map((s) => (
+            <DropdownMenuItem
+              key={s}
+              disabled={s === item.status}
+              onSelect={() => {
+                void handleStatusChange(item, s);
+              }}
+              className="cursor-pointer text-xs font-semibold"
+            >
+              {t(`status.${s}`)}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  };
   const [items, setItems] = useState<LibraryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [mediumFilter, setMediumFilter] = useQueryState(
     "type",
     parseAsStringLiteral(MEDIUM_TABS).withDefault("all"),
   );
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [statusFilter, setStatusFilter] = useQueryState(
+    "status",
+    parseAsStringLiteral(STATUS_FILTER_VALUES).withDefault("all"),
+  );
   const [view, setView] = useQueryState(
     "view",
     parseAsStringLiteral(VIEW_MODES).withDefault("list"),
   );
   const [editTarget, setEditTarget] = useState<LibraryItem | null>(null);
+
+  // Snap to top instantly when the filters change so the user doesn't get
+  // stuck mid-scroll in empty space after narrowing a long list. Mirrors
+  // the same pattern in settings + dashboard.
+  const filterInitialRenderRef = useRef(true);
+  useEffect(() => {
+    if (filterInitialRenderRef.current) {
+      filterInitialRenderRef.current = false;
+      return;
+    }
+    if (typeof window !== "undefined" && window.scrollY > 0) {
+      window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+    }
+  }, [mediumFilter, statusFilter]);
 
   const load = async () => {
     setLoading(true);
@@ -128,15 +195,47 @@ export default function LibraryPage() {
     });
   }, [items, mediumFilter, statusFilter]);
 
+  const handleStatusChange = async (
+    item: LibraryItem,
+    nextStatus: LibraryStatus,
+  ) => {
+    if (nextStatus === item.status) return;
+
+    const { error } = await libraryService.update(item.id, {
+      status: nextStatus,
+    });
+    if (error) {
+      toast.error(error);
+      return;
+    }
+
+    const updated: LibraryItem = {
+      ...item,
+      status: nextStatus,
+      finished_at:
+        nextStatus === "finished" ? new Date().toISOString() : null,
+    };
+    setItems((current) =>
+      current.map((entry) => (entry.id === item.id ? updated : entry)),
+    );
+    toast.success(t("updated"));
+
+    // Marking something finished without a rating is the moment to capture the
+    // signal — open the edit dialog so the user adds the thumb while it's fresh.
+    if (nextStatus === "finished" && updated.rating === null) {
+      setEditTarget(updated);
+    }
+  };
+
   const handleRemove = async (item: LibraryItem) => {
-    const ok = window.confirm(`Remove "${item.title}" from your library?`);
+    const ok = window.confirm(t("removeConfirm", { title: item.title }));
     if (!ok) return;
     const { error } = await libraryService.remove(item.id);
     if (error) {
       toast.error(error);
       return;
     }
-    toast.success("Removed from library");
+    toast.success(t("removed"));
     setItems((current) => current.filter((i) => i.id !== item.id));
   };
 
@@ -149,7 +248,7 @@ export default function LibraryPage() {
   }, [items]);
 
   if (!ready) {
-    return <PageLoader text="Loading..." />;
+    return <PageLoader text={tc("loading")} />;
   }
 
   return (
@@ -161,14 +260,13 @@ export default function LibraryPage() {
           <div className="mb-6 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
-                Library
+                {t("eyebrow")}
               </p>
               <h1 className="mt-2 text-2xl font-black tracking-tighter sm:text-3xl md:text-4xl lg:text-5xl">
-                What You&apos;ve Watched and Read
+                {t("title")}
               </h1>
               <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                Reactions you save here become a taste signal the AI uses on
-                your next quiz.
+                {t("subtitle")}
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -182,30 +280,62 @@ export default function LibraryPage() {
                 className="flex items-center gap-2 whitespace-nowrap bg-white px-6 py-3 text-sm font-black leading-none tracking-tight text-black dark:bg-black dark:text-white"
               >
                 <Sparkles size={16} />
-                Start Quiz
+                {t("startQuiz")}
               </HoverBorderGradient>
             </div>
           </div>
 
+          {/* Mobile pill nav — mirrors the dashboard pattern; the sidebar
+              below stays for md+ where vertical room is plentiful. */}
+          <div className="mb-4 md:hidden">
+            <SegmentedControl<MediumFilter>
+              layoutId="library-medium-tabs"
+              value={mediumFilter}
+              onChange={setMediumFilter}
+              size="sm"
+              ariaLabel={t("filtersAria")}
+              options={[
+                {
+                  value: "all",
+                  label: t("type.all"),
+                  icon: <LayoutGrid size={13} />,
+                  pillClassName: "bg-indigo-500",
+                },
+                {
+                  value: "movie",
+                  label: t("type.movie"),
+                  icon: <Film size={13} />,
+                  pillClassName: "bg-indigo-500",
+                },
+                {
+                  value: "book",
+                  label: t("type.book"),
+                  icon: <BookOpen size={13} />,
+                  pillClassName: "bg-indigo-500",
+                },
+              ]}
+            />
+          </div>
+
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6">
-            <SidebarNavShell>
-              <nav aria-label="Library filters" className="flex-1">
-                <SidebarNavGroup label="Type" />
+            <SidebarNavShell className="hidden md:flex">
+              <nav aria-label={t("filtersAria")} className="flex-1">
+                <SidebarNavGroup label={t("typeGroup")} />
                 {(
                   [
                     {
                       id: "all" as const,
-                      label: "All",
+                      label: t("type.all"),
                       icon: <LayoutGrid size={16} />,
                     },
                     {
                       id: "movie" as const,
-                      label: "Movies",
+                      label: t("type.movie"),
                       icon: <Film size={16} />,
                     },
                     {
                       id: "book" as const,
-                      label: "Books",
+                      label: t("type.book"),
                       icon: <BookOpen size={16} />,
                     },
                   ] as { id: MediumFilter; label: string; icon: React.ReactNode }[]
@@ -233,10 +363,10 @@ export default function LibraryPage() {
               <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex flex-wrap gap-3">
                   {[
-                    { label: "Total", value: stats.total },
-                    { label: "Finished", value: stats.finished },
-                    { label: "Movies", value: stats.movies },
-                    { label: "Books", value: stats.books },
+                    { label: t("stats.total"), value: stats.total },
+                    { label: t("stats.finished"), value: stats.finished },
+                    { label: t("stats.movies"), value: stats.movies },
+                    { label: t("stats.books"), value: stats.books },
                   ].map((item) => (
                     <div
                       key={item.label}
@@ -255,26 +385,27 @@ export default function LibraryPage() {
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                      Status
+                      {t("statusLabel")}
                     </span>
-                    {(
-                      [
-                        { id: "all", label: "All" },
+                    <SegmentedControl<StatusFilter>
+                      layoutId="library-status-filter"
+                      value={statusFilter}
+                      onChange={setStatusFilter}
+                      size="sm"
+                      ariaLabel={t("statusLabel")}
+                      options={[
+                        {
+                          value: "all",
+                          label: t("filterAll"),
+                          pillClassName: ALL_FILTER_PILL_CLASS,
+                        },
                         ...STATUS_VALUES.map((s) => ({
-                          id: s as StatusFilter,
-                          label: STATUS_LABELS[s],
+                          value: s,
+                          label: t(`status.${s}`),
+                          pillClassName: STATUS_PILL_CLASSES[s],
                         })),
-                      ] as { id: StatusFilter; label: string }[]
-                    ).map((opt) => (
-                      <PillButton
-                        key={opt.id}
-                        active={statusFilter === opt.id}
-                        onClick={() => setStatusFilter(opt.id)}
-                        className="px-3 py-1.5 text-xs font-semibold"
-                      >
-                        {opt.label}
-                      </PillButton>
-                    ))}
+                      ]}
+                    />
                   </div>
                   <ViewToggle
                     value={view as ViewMode}
@@ -283,7 +414,7 @@ export default function LibraryPage() {
                 </div>
               </div>
 
-              <AnimatePresence mode="wait">
+              <AnimatePresence mode="popLayout">
                 {!loading && (
                 <motion.div
                   key={`${mediumFilter}-${statusFilter}`}
@@ -297,13 +428,13 @@ export default function LibraryPage() {
                       <BookCheck className="mx-auto h-10 w-10 text-slate-300 dark:text-slate-600" />
                       <h2 className="mt-4 text-2xl font-black tracking-tight">
                         {items.length === 0
-                          ? "Nothing in Your Library Yet"
-                          : "No Matches for Those Filters"}
+                          ? t("empty.noItemsTitle")
+                          : t("empty.noMatchesTitle")}
                       </h2>
                       <p className="mx-auto mt-2 max-w-xl text-sm text-slate-600 dark:text-slate-400">
                         {items.length === 0
-                          ? 'After your next quiz, hit "I watched / read this" on a result and it will show up here.'
-                          : "Try changing or clearing the filters above."}
+                          ? t("empty.noItemsBody")
+                          : t("empty.noMatchesBody")}
                       </p>
                     </div>
                   ) : view === "grid" ? (
@@ -334,7 +465,7 @@ export default function LibraryPage() {
                             <div className="absolute right-2 top-2 flex flex-col gap-1.5">
                               <PillButton
                                 onClick={() => setEditTarget(item)}
-                                aria-label={`Edit ${item.title}`}
+                                aria-label={t("editAria", { title: item.title })}
                                 className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/90 p-0 text-slate-700 shadow-sm dark:bg-slate-900/80 dark:text-slate-200"
                               >
                                 <Pencil size={13} />
@@ -353,14 +484,7 @@ export default function LibraryPage() {
                                 {item.title}
                               </p>
                               <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                                <span
-                                  className={cn(
-                                    "rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider",
-                                    STATUS_TONE[item.status].chip,
-                                  )}
-                                >
-                                  {STATUS_LABELS[item.status]}
-                                </span>
+                                <StatusChipMenu item={item} variant="grid" />
                                 {item.rating !== null &&
                                   (() => {
                                     const Icon =
@@ -372,7 +496,7 @@ export default function LibraryPage() {
                                     return (
                                       <span className="inline-flex items-center gap-0.5 rounded-full bg-white/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white/95 backdrop-blur-sm">
                                         <Icon size={9} />
-                                        {RATING_LABELS[item.rating]}
+                                        {t(`rating.${item.rating}`)}
                                       </span>
                                     );
                                   })()}
@@ -417,17 +541,21 @@ export default function LibraryPage() {
                                 </h3>
                                 <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
                                   {item.creator
-                                    ? `${item.medium === "book" ? "By " : "Directed by "}${item.creator}`
+                                    ? item.medium === "book"
+                                      ? t("byAuthor", { creator: item.creator })
+                                      : t("byDirector", {
+                                          creator: item.creator,
+                                        })
                                     : item.medium === "movie"
-                                      ? "Movie"
-                                      : "Book"}
+                                      ? t("mediumMovie")
+                                      : t("mediumBook")}
                                   {item.year ? ` · ${item.year}` : ""}
                                 </p>
                               </div>
                               <div className="flex shrink-0 items-center gap-1">
                                 <PillButton
                                   onClick={() => setEditTarget(item)}
-                                  aria-label={`Edit ${item.title}`}
+                                  aria-label={t("editAria", { title: item.title })}
                                   className="inline-flex h-7 w-7 items-center justify-center rounded-full p-0"
                                 >
                                   <Pencil size={13} />
@@ -435,7 +563,7 @@ export default function LibraryPage() {
                                 <PillButton
                                   onClick={() => void handleRemove(item)}
                                   variant="destructive"
-                                  aria-label={`Remove ${item.title}`}
+                                  aria-label={t("removeAria", { title: item.title })}
                                   className="inline-flex h-7 w-7 items-center justify-center rounded-full p-0"
                                 >
                                   <Trash2 size={13} />
@@ -444,10 +572,12 @@ export default function LibraryPage() {
                             </div>
 
                             <div className="mt-2 flex flex-wrap items-center gap-2">
-                              {statusChip(item.status)}
+                              <StatusChipMenu item={item} />
                               {ratingChip(item.rating)}
                               <span className="text-[11px] text-slate-400 dark:text-slate-500">
-                                Logged {format(new Date(item.logged_at), "PP")}
+                                {t("loggedOn", {
+                                  date: format(new Date(item.logged_at), "PP"),
+                                })}
                               </span>
                             </div>
 
@@ -489,6 +619,7 @@ interface EditDialogProps {
 }
 
 const EditDialog = ({ target, onClose, onSaved }: EditDialogProps) => {
+  const t = useTranslations("Library");
   const [status, setStatus] = useState<LibraryStatus>("finished");
   const [rating, setRating] = useState<LibraryRating | null>(null);
   const [reaction, setReaction] = useState("");
@@ -517,7 +648,7 @@ const EditDialog = ({ target, onClose, onSaved }: EditDialogProps) => {
       return;
     }
 
-    toast.success("Library entry updated");
+    toast.success(t("updated"));
     onSaved({
       ...target,
       status,
@@ -531,7 +662,7 @@ const EditDialog = ({ target, onClose, onSaved }: EditDialogProps) => {
     <Dialog
       open={!!target}
       onClose={onClose}
-      ariaLabel="Edit library entry"
+      ariaLabel={t("editDialog.ariaLabel")}
       size="sm"
       disableClose={saving}
     >
@@ -547,7 +678,7 @@ const EditDialog = ({ target, onClose, onSaved }: EditDialogProps) => {
 
               <div className="w-full max-w-md">
                 <h2 className="text-2xl font-black tracking-tight">
-                  Edit entry
+                  {t("editDialog.title")}
                 </h2>
                 <p
                   className="mt-2 truncate text-sm font-semibold text-slate-700 dark:text-slate-300"
@@ -558,58 +689,54 @@ const EditDialog = ({ target, onClose, onSaved }: EditDialogProps) => {
 
                 <div className="mt-6 text-left">
                   <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    Status
+                    {t("editDialog.statusHeader")}
                   </p>
-                  <div className="flex flex-wrap gap-2">
-                    {STATUS_VALUES.map((s) => (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => setStatus(s)}
-                        className={cn(
-                          "rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
-                          status === s
-                            ? STATUS_TONE[s].active
-                            : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800/40 dark:text-slate-300",
-                        )}
-                      >
-                        {STATUS_LABELS[s]}
-                      </button>
-                    ))}
-                  </div>
+                  <SegmentedControl<LibraryStatus>
+                    layoutId="edit-dialog-status"
+                    value={status}
+                    onChange={setStatus}
+                    size="sm"
+                    ariaLabel={t("editDialog.statusHeader")}
+                    options={STATUS_VALUES.map((s) => ({
+                      value: s,
+                      label: t(`status.${s}`),
+                      pillClassName: STATUS_PILL_CLASSES[s],
+                    }))}
+                  />
                 </div>
 
                 <div className="mt-5 text-left">
                   <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    Rating
+                    {t("editDialog.ratingHeader")}
                   </p>
-                  <div className="flex flex-wrap gap-2">
-                    {RATING_VALUES.map((r) => {
-                      const active = rating === r;
-                      const Icon =
-                        r === 1 ? ThumbsDown : r === 2 ? Bookmark : ThumbsUp;
-                      return (
-                        <button
-                          key={r}
-                          type="button"
-                          onClick={() => setRating(active ? null : r)}
-                          className={cn(
-                            "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
-                            active
-                              ? r === 3
-                                ? "border-emerald-400 bg-emerald-50 text-emerald-700 dark:border-emerald-500 dark:bg-emerald-900/30 dark:text-emerald-300"
-                                : r === 1
-                                  ? "border-rose-400 bg-rose-50 text-rose-700 dark:border-rose-500 dark:bg-rose-900/30 dark:text-rose-300"
-                                  : "border-slate-400 bg-slate-100 text-slate-700 dark:border-slate-500 dark:bg-slate-800 dark:text-slate-200"
-                              : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800/40 dark:text-slate-400",
-                          )}
-                        >
-                          <Icon size={14} />
-                          {RATING_LABELS[r]}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <SegmentedControl<LibraryRating>
+                    layoutId="edit-dialog-rating"
+                    value={rating}
+                    onChange={setRating}
+                    onClear={() => setRating(null)}
+                    size="sm"
+                    ariaLabel={t("editDialog.ratingHeader")}
+                    options={[
+                      {
+                        value: 1,
+                        label: t("rating.1"),
+                        icon: <ThumbsDown size={14} />,
+                        pillClassName: "bg-rose-500",
+                      },
+                      {
+                        value: 2,
+                        label: t("rating.2"),
+                        icon: <Bookmark size={14} />,
+                        pillClassName: "bg-slate-500",
+                      },
+                      {
+                        value: 3,
+                        label: t("rating.3"),
+                        icon: <ThumbsUp size={14} />,
+                        pillClassName: "bg-emerald-500",
+                      },
+                    ]}
+                  />
                 </div>
 
                 <div className="mt-5 text-left">
@@ -617,7 +744,7 @@ const EditDialog = ({ target, onClose, onSaved }: EditDialogProps) => {
                     htmlFor="library-edit-reaction"
                     className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400"
                   >
-                    Reaction
+                    {t("editDialog.reactionHeader")}
                   </label>
                   <textarea
                     id="library-edit-reaction"
@@ -625,7 +752,7 @@ const EditDialog = ({ target, onClose, onSaved }: EditDialogProps) => {
                     onChange={(e) => setReaction(e.target.value.slice(0, 280))}
                     rows={3}
                     maxLength={280}
-                    placeholder="One-line takeaway…"
+                    placeholder={t("editDialog.reactionPlaceholder")}
                     className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm transition-colors focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-100"
                   />
                   <p className="mt-1 text-right text-[10px] font-semibold text-slate-400">
@@ -642,7 +769,7 @@ const EditDialog = ({ target, onClose, onSaved }: EditDialogProps) => {
                   {saving ? (
                     <Loader className="h-4 w-4 animate-spin" />
                   ) : (
-                    "Save changes"
+                    t("editDialog.save")
                   )}
                 </Button>
 
@@ -651,7 +778,7 @@ const EditDialog = ({ target, onClose, onSaved }: EditDialogProps) => {
                   disabled={saving}
                   className="mt-3 text-sm font-medium text-slate-500 transition-colors hover:text-slate-700 disabled:opacity-60 dark:text-slate-400 dark:hover:text-slate-200"
                 >
-                  Cancel
+                  {t("editDialog.cancel")}
                 </button>
               </div>
         </div>

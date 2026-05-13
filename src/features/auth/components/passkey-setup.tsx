@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Fingerprint } from "lucide-react";
 import { motion } from "motion/react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { passkeyService } from "../services/passkey-service";
@@ -13,6 +14,7 @@ interface PasskeySetupProps {
 }
 
 export const PasskeySetup = ({ onComplete, onSkip }: PasskeySetupProps) => {
+  const t = useTranslations("Auth.passkeySetup");
   const [deviceName, setDeviceName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +33,7 @@ export const PasskeySetup = ({ onComplete, onSkip }: PasskeySetupProps) => {
       return;
     }
 
-    toast.success("Passkey added");
+    toast.success(t("successToast"));
     onComplete();
   };
 
@@ -51,17 +53,15 @@ export const PasskeySetup = ({ onComplete, onSkip }: PasskeySetupProps) => {
         className="w-full max-w-md"
       >
         <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-          Add a passkey
+          {t("title")}
         </h2>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-          Pick a name you'll recognize later. After you continue, your device
-          will ask to confirm with Touch ID, Face ID, Windows Hello, or a
-          security key.
+          {t("body")}
         </p>
 
         <div className="mt-6 text-left">
           <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-            Passkey name
+            {t("label")}
           </label>
           <input
             type="text"
@@ -70,12 +70,12 @@ export const PasskeySetup = ({ onComplete, onSkip }: PasskeySetupProps) => {
             onKeyDown={(e) => {
               if (e.key === "Enter" && !loading) void handleRegister();
             }}
-            placeholder="e.g., MacBook, iPhone"
+            placeholder={t("placeholder")}
             autoFocus
             className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm transition-colors focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-100"
           />
           <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-            Leave blank and we'll use a date-stamped label.
+            {t("hint")}
           </p>
         </div>
 
@@ -89,7 +89,7 @@ export const PasskeySetup = ({ onComplete, onSkip }: PasskeySetupProps) => {
           size="lg"
           className="mt-6 w-full"
         >
-          {loading ? "Waiting for passkey..." : "Continue"}
+          {loading ? t("waiting") : t("continue")}
         </Button>
 
         {onSkip && (
@@ -98,7 +98,7 @@ export const PasskeySetup = ({ onComplete, onSkip }: PasskeySetupProps) => {
             disabled={loading}
             className="mt-3 text-sm font-medium text-slate-500 transition-colors hover:text-slate-700 disabled:opacity-60 dark:text-slate-400 dark:hover:text-slate-200"
           >
-            Cancel
+            {t("cancel")}
           </button>
         )}
       </motion.div>

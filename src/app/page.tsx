@@ -10,14 +10,12 @@ import {
   IconAdjustmentsHorizontal,
   IconMessageCircleQuestion,
   IconSparkles,
-  IconUsers,
-  IconArrowRight,
 } from "@tabler/icons-react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { LinkPreview } from "@/components/ui/link-preview";
 import FeaturesSectionDemo from "@/components/features-section-demo-3";
 import { AppNavbar } from "@/components/app-navbar";
-import { HeroSection } from "@/features/home/components";
+import { GroupQuizCta, HeroSection } from "@/features/home/components";
 import { cn } from "@/lib/utils";
 import {
   FAQ_CATEGORIES,
@@ -29,34 +27,16 @@ import {
 
 type FaqFilter = "all" | FaqCategory;
 
-const HOW_IT_WORKS_STEPS = [
-  {
-    Icon: IconLayoutGrid,
-    title: "Pick your format",
-    description:
-      "Tell us if you're in the mood for a movie, a book, or both. We tailor the rest of the flow to whichever you choose.",
-  },
-  {
-    Icon: IconAdjustmentsHorizontal,
-    title: "Set your depth",
-    description:
-      "Choose how many questions you want to answer — a quick taste check or a deep dive, your call.",
-  },
-  {
-    Icon: IconMessageCircleQuestion,
-    title: "Answer a personalized quiz",
-    description:
-      "Our AI generates fresh questions tuned to your age and content type. No two quizzes are the same.",
-  },
-  {
-    Icon: IconSparkles,
-    title: "Get your picks",
-    description:
-      "Real recommendations with a match score and a written reason for why each one fits you specifically.",
-  },
+const HOW_IT_WORKS_STEP_KEYS = [
+  { Icon: IconLayoutGrid, key: "format" },
+  { Icon: IconAdjustmentsHorizontal, key: "depth" },
+  { Icon: IconMessageCircleQuestion, key: "quiz" },
+  { Icon: IconSparkles, key: "picks" },
 ] as const;
 
-const HowItWorksSection = () => (
+const HowItWorksSection = () => {
+  const t = useTranslations("Home.howItWorks");
+  return (
   <section
     id="how-it-works"
     className="scroll-mt-32 bg-slate-50 px-4 py-16 sm:px-6 sm:py-20 md:py-24 dark:bg-slate-950"
@@ -64,13 +44,13 @@ const HowItWorksSection = () => (
     <div className="mx-auto max-w-6xl">
       <div className="text-center">
         <p className="text-xs font-black uppercase tracking-[0.22em] text-indigo-500 dark:text-indigo-400">
-          How It Works
+          {t("eyebrow")}
         </p>
         <h2 className="mt-3 text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl">
-          From indecision to a great pick in four steps
+          {t("title")}
         </h2>
         <p className="mx-auto mt-4 max-w-2xl text-sm text-slate-600 sm:text-base dark:text-slate-400">
-          A faster way to land on a watch or read worth your time.
+          {t("subtitle")}
         </p>
       </div>
 
@@ -83,11 +63,11 @@ const HowItWorksSection = () => (
         />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
-          {HOW_IT_WORKS_STEPS.map((step, index) => {
+          {HOW_IT_WORKS_STEP_KEYS.map((step, index) => {
             const Icon = step.Icon;
             return (
               <motion.div
-                key={step.title}
+                key={step.key}
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-80px" }}
@@ -114,12 +94,12 @@ const HowItWorksSection = () => (
 
                   {/* Title */}
                   <h3 className="mt-5 text-lg font-black tracking-tight text-slate-900 sm:mt-6 sm:text-xl dark:text-slate-100">
-                    {step.title}
+                    {t(`steps.${step.key}.title`)}
                   </h3>
 
                   {/* Description */}
                   <p className="mt-2 text-sm leading-relaxed text-slate-600 sm:mt-3 dark:text-slate-400">
-                    {step.description}
+                    {t(`steps.${step.key}.description`)}
                   </p>
                 </div>
               </motion.div>
@@ -129,9 +109,12 @@ const HowItWorksSection = () => (
       </div>
     </div>
   </section>
-);
+  );
+};
 
 const Index = () => {
+  const t = useTranslations("Home");
+  const tNav = useTranslations("Navbar");
   const [openFaq, setOpenFaq] = useState<string | null>(null);
   const [faqFilter, setFaqFilter] = useState<FaqFilter>("all");
 
@@ -168,54 +151,7 @@ const Index = () => {
       <FeaturesSectionDemo />
 
       {/* Group Quiz CTA */}
-      <section
-        id="group-quiz-cta"
-        className="scroll-mt-32 px-4 py-16 sm:px-6 sm:py-20 md:py-24"
-      >
-        <div className="mx-auto max-w-6xl">
-          <Link
-            href="/group-quiz"
-            className="group relative block overflow-hidden rounded-3xl border border-indigo-200/60 bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-6 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-indigo-500/30 dark:from-indigo-500/10 dark:via-slate-900/40 dark:to-violet-500/10 sm:p-8 md:p-10"
-          >
-            <span
-              aria-hidden="true"
-              className="absolute -right-12 -top-12 h-44 w-44 rounded-full bg-gradient-to-br from-indigo-400/30 to-violet-500/30 blur-3xl"
-            />
-            <span
-              aria-hidden="true"
-              className="absolute -bottom-16 -left-10 h-44 w-44 rounded-full bg-gradient-to-br from-rose-400/20 to-amber-400/20 blur-3xl"
-            />
-            <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-500 text-white shadow-sm shadow-indigo-500/30">
-                    <IconUsers size={16} />
-                  </span>
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-indigo-700 dark:text-indigo-300">
-                    Group Quiz
-                  </p>
-                </div>
-                <h2 className="mt-3 text-3xl font-black tracking-tighter text-slate-900 sm:text-4xl md:text-5xl dark:text-slate-100">
-                  Find a Pick{" "}
-                  <span className="bg-gradient-to-r from-indigo-500 via-violet-500 to-rose-500 bg-clip-text text-transparent">
-                    Together
-                  </span>
-                </h2>
-                <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-600 dark:text-slate-300 sm:text-base">
-                  Host a quiz, share a six-character code, and let the group
-                  answer. The AI synthesizes everyone's taste into one pick
-                  that works for the room. Joining is free — no account
-                  needed.
-                </p>
-              </div>
-              <span className="inline-flex shrink-0 items-center gap-2 self-start rounded-full bg-slate-900 px-6 py-3 text-sm font-black tracking-tight text-white shadow-md transition-transform duration-200 group-hover:translate-x-0.5 sm:self-auto sm:text-base dark:bg-white dark:text-slate-900">
-                Try It
-                <IconArrowRight size={16} />
-              </span>
-            </div>
-          </Link>
-        </div>
-      </section>
+      <GroupQuizCta />
 
       {/* Powered By */}
       <section
@@ -225,14 +161,13 @@ const Index = () => {
         <div className="mx-auto max-w-6xl">
           <div className="mb-8 text-center sm:mb-10 md:mb-14">
             <p className="text-xs font-black uppercase tracking-[0.22em] text-indigo-500 dark:text-indigo-400">
-              Powered By
+              {t("poweredBy.eyebrow")}
             </p>
             <h2 className="mt-3 text-3xl font-black tracking-tighter text-slate-900 sm:text-4xl md:text-5xl dark:text-slate-100">
-              Built on trusted infrastructure
+              {t("poweredBy.title")}
             </h2>
             <p className="mx-auto mt-4 max-w-3xl text-sm text-slate-600 sm:text-base md:whitespace-nowrap md:text-lg dark:text-slate-400">
-              Trusted services that help Smart Advisor stay fast, dependable,
-              and helpful.
+              {t("poweredBy.subtitle")}
             </p>
           </div>
           <RotatingLogoSets />
@@ -258,13 +193,13 @@ const Index = () => {
         <div className="relative mx-auto max-w-6xl">
           <div className="text-center">
             <p className="text-xs font-black uppercase tracking-[0.22em] text-indigo-500 dark:text-indigo-400">
-              The People
+              {t("team.eyebrow")}
             </p>
             <h2 className="mt-3 text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl">
-              Meet the Team
+              {t("team.title")}
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-sm text-slate-600 sm:text-base dark:text-slate-400">
-              The folks behind Smart Advisor.
+              {t("team.subtitle")}
             </p>
           </div>
 
@@ -304,13 +239,13 @@ const Index = () => {
                     {member.name}
                   </h3>
                   <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-indigo-600 dark:text-indigo-400">
-                    {member.designation}
+                    {t(`team.members.${member.key}.designation`)}
                   </p>
                 </div>
 
                 {/* Quote */}
                 <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:mt-4 dark:text-slate-400">
-                  &ldquo;{member.quote}&rdquo;
+                  &ldquo;{t(`team.members.${member.key}.quote`)}&rdquo;
                 </p>
               </motion.article>
             ))}
@@ -326,20 +261,20 @@ const Index = () => {
         <div className="mx-auto max-w-3xl">
           <div className="mb-8 text-center sm:mb-10">
             <p className="text-xs font-black uppercase tracking-[0.22em] text-indigo-500 dark:text-indigo-400">
-              FAQ
+              {t("faq.eyebrow")}
             </p>
             <h2 className="mt-3 text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl">
-              Questions, answered
+              {t("faq.title")}
             </h2>
             <p className="mx-auto mt-4 max-w-2xl break-words text-sm text-slate-600 dark:text-slate-400 md:text-base">
-              Questions before you get started? Reach out at{" "}
+              {t("faq.subtitleLead")}{" "}
               <a
                 href="mailto:support@smartadvisor.live"
                 className="break-all text-blue-600 underline underline-offset-2 dark:text-blue-400"
               >
                 support@smartadvisor.live
               </a>{" "}
-              or report bugs on{" "}
+              {t("faq.subtitleMid")}{" "}
               <a
                 href="https://github.com/ponderrr/smart-advisor/issues"
                 target="_blank"
@@ -348,20 +283,22 @@ const Index = () => {
               >
                 GitHub
               </a>
-              . Smart Advisor is open source, so you can review and contribute
-              anytime.
+              {t("faq.subtitleTail")}
             </p>
           </div>
 
           <div
             role="tablist"
-            aria-label="FAQ categories"
+            aria-label={t("faq.categoriesAria")}
             className="mb-8 flex flex-wrap justify-center gap-2"
           >
             {(
               [
-                { id: "all" as const, label: "All" },
-                ...FAQ_CATEGORIES.map((c) => ({ id: c.id, label: c.label })),
+                { id: "all" as const, label: t("faq.filterAll") },
+                ...FAQ_CATEGORIES.map((c) => ({
+                  id: c.id,
+                  label: t(`faq.categories.${c.id}`),
+                })),
               ] as { id: FaqFilter; label: string }[]
             ).map((opt) => {
               const active = faqFilter === opt.id;
@@ -398,13 +335,13 @@ const Index = () => {
               className="space-y-3"
             >
               {filteredFaq.map((item) => {
-                const isOpen = openFaq === item.question;
-                const categoryLabel =
-                  FAQ_CATEGORIES.find((c) => c.id === item.category)?.label ??
-                  "";
+                const isOpen = openFaq === item.key;
+                const categoryLabel = t(`faq.categories.${item.category}`);
+                const question = t(`faq.items.${item.key}.question`);
+                const answer = t(`faq.items.${item.key}.answer`);
                 return (
                   <div
-                    key={item.question}
+                    key={item.key}
                     className={cn(
                       "group relative overflow-hidden rounded-2xl border bg-white/80 shadow-sm backdrop-blur-md transition-all duration-300 dark:bg-slate-900/65",
                       isOpen
@@ -422,7 +359,7 @@ const Index = () => {
                     <button
                       type="button"
                       onClick={() =>
-                        setOpenFaq(isOpen ? null : item.question)
+                        setOpenFaq(isOpen ? null : item.key)
                       }
                       aria-expanded={isOpen}
                       className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left transition-colors sm:px-6 sm:py-5"
@@ -434,7 +371,7 @@ const Index = () => {
                           </span>
                         )}
                         <span className="block text-sm font-bold tracking-tight text-slate-900 dark:text-slate-100 md:text-base">
-                          {item.question}
+                          {question}
                         </span>
                       </span>
                       <span
@@ -466,7 +403,7 @@ const Index = () => {
                           className="overflow-hidden"
                         >
                           <p className="px-5 pb-5 pt-0 text-sm leading-relaxed text-slate-600 sm:px-6 sm:pb-6 sm:text-[15px] dark:text-slate-300">
-                            {item.answer}
+                            {answer}
                           </p>
                         </motion.div>
                       )}
@@ -482,22 +419,22 @@ const Index = () => {
       {/* Footer */}
       <footer className="px-4 py-10 sm:px-6 sm:py-14">
         <div className="mx-auto max-w-7xl">
-          <nav aria-label="Footer navigation">
+          <nav aria-label={t("footer.navAria")}>
             <ul className="flex flex-col items-center justify-center gap-3 text-sm font-medium text-slate-700 sm:gap-4 md:flex-row md:gap-8 dark:text-slate-300">
               {[
-                { label: "How It Works", href: "#how-it-works" },
-                { label: "Why Smart Advisor", href: "#why-smart-advisor" },
-                { label: "Powered By", href: "#powered-by" },
-                { label: "Our Team", href: "#meet-the-team" },
-                { label: "FAQ", href: "#faq" },
+                { key: "howItWorks", href: "#how-it-works" },
+                { key: "whySmartAdvisor", href: "#why-smart-advisor" },
+                { key: "poweredBy", href: "#powered-by" },
+                { key: "ourTeam", href: "#meet-the-team" },
+                { key: "faq", href: "#faq" },
               ].map((item) => (
-                <li key={item.label}>
+                <li key={item.key}>
                   <button
                     type="button"
                     onClick={() => smoothScrollToSection(item.href)}
                     className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400"
                   >
-                    {item.label}
+                    {tNav(`items.${item.key}`)}
                   </button>
                 </li>
               ))}
@@ -506,10 +443,10 @@ const Index = () => {
 
           <div className="mt-8 grid grid-cols-1 items-center gap-4 text-xs text-slate-500 sm:mt-10 sm:gap-5 md:grid-cols-3 dark:text-slate-400">
             <p className="text-center md:text-left">
-              © 2026 Smart Advisor. All rights reserved.
+              {t("footer.rights", { year: 2026 })}
             </p>
             <div className="text-center text-sm text-slate-700 md:whitespace-nowrap dark:text-slate-300">
-              Built with{" "}
+              {t("footer.builtWith")}{" "}
               <LinkPreview
                 url="https://react.dev"
                 className="font-semibold text-slate-900 dark:text-slate-100"
@@ -523,19 +460,19 @@ const Index = () => {
               >
                 Next.js
               </LinkPreview>
-              , and{" "}
+              ,{" "}
               <LinkPreview
                 url="https://www.typescriptlang.org"
                 className="font-semibold text-slate-900 dark:text-slate-100"
               >
                 TypeScript
               </LinkPreview>{" "}
-              as an open-source project.
+              {t("footer.builtSuffix")}
             </div>
             <div className="flex items-center justify-center gap-4 md:justify-end">
               <a
                 href="https://github.com/ponderrr/smart-advisor"
-                aria-label="GitHub"
+                aria-label={t("footer.githubLabel")}
                 target="_blank"
                 rel="noreferrer"
                 className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400"

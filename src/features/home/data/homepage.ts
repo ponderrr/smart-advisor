@@ -63,162 +63,54 @@ export const logoSets = [
   ],
 ];
 
-export const FAQ_CATEGORIES = [
-  { id: "getting-started", label: "Getting started" },
-  { id: "how-it-works", label: "How it works" },
-  { id: "group-quiz", label: "Group quiz" },
-  { id: "library", label: "Library" },
-  { id: "account", label: "Account & privacy" },
+export const FAQ_CATEGORY_IDS = [
+  "getting-started",
+  "how-it-works",
+  "group-quiz",
+  "library",
+  "account",
 ] as const;
 
-export type FaqCategory = (typeof FAQ_CATEGORIES)[number]["id"];
+export type FaqCategory = (typeof FAQ_CATEGORY_IDS)[number];
 
+// Translations for category labels live in messages/{en,es}.json under
+// Home.faq.categories.{id}. The page resolves them via useTranslations.
+export const FAQ_CATEGORIES: { id: FaqCategory }[] = FAQ_CATEGORY_IDS.map(
+  (id) => ({ id }),
+);
+
+// Each FAQ item points to a translation key under Home.faq.items.{key}.
+// Question + answer text live in the messages files.
 export const faqItems: {
   category: FaqCategory;
-  question: string;
-  answer: string;
+  key: string;
 }[] = [
-  {
-    category: "getting-started",
-    question: "How do I create an account?",
-    answer:
-      "Click Sign Up on the login page, enter your name, email, and a password (minimum 8 characters). You will receive a verification email — click the link to activate your account before signing in.",
-  },
-  {
-    category: "getting-started",
-    question: "Why do I need to verify my email?",
-    answer:
-      "Email verification confirms your identity and protects your account. You will not be able to sign in until you click the verification link sent to your inbox. Check your spam folder if you do not see it.",
-  },
-  {
-    category: "how-it-works",
-    question: "How does Smart Advisor personalize recommendations?",
-    answer:
-      "Smart Advisor uses your quiz answers to understand your mood, pacing preferences, and genre interests. It then combines this with real-time data from TMDB and Open Library to generate recommendations with clear reasoning behind every pick.",
-  },
-  {
-    category: "how-it-works",
-    question: "How does the quiz work?",
-    answer:
-      "You choose a content type (movie, book, or both), select how many questions you want (3 to 15), then answer each one. Your responses are sent to our AI which generates personalized recommendations tailored to your answers.",
-  },
-  {
-    category: "how-it-works",
-    question: "How are results generated?",
-    answer:
-      "Your answers are processed by an AI model that selects titles matching your preferences. Each recommendation is then enriched with real poster art, ratings, and descriptions from TMDB (movies) and Open Library (books).",
-  },
-  {
-    category: "how-it-works",
-    question: "Can I use Smart Advisor for both movies and books?",
-    answer:
-      "Yes. Select 'Both' during content selection to receive one movie and one book recommendation in the same session. Your entire recommendation history is saved for future reference.",
-  },
-  {
-    category: "how-it-works",
-    question: "What if my recommendations feel off?",
-    answer:
-      "You can retake the quiz anytime with different answers, or adjust the number of questions and your mood and pacing choices. The fastest way to improve future picks is to log reactions to your library — marking a past pick as 'Not for me' teaches the AI to steer away from similar titles, and a thumbs-up nudges it toward more like that.",
-  },
-  {
-    category: "how-it-works",
-    question: "Where can I see a trailer or preview?",
-    answer:
-      "Open any recommendation card from your dashboard or history. A trailer plays inline for movies (lazy-loaded so it only fires when you click), and a 'View on Open Library' link appears for books so you can dig into editions, covers, and reviews. Movies use TMDB's official trailer when published.",
-  },
-  {
-    category: "how-it-works",
-    question: "What is Year in Review and when does it appear?",
-    answer:
-      "Year in Review is a Spotify-Wrapped-style summary of your picks: top genre, longest streak, peak month, most-picked director or author, format mix, and your standout titles. It surfaces as a prominent banner on your dashboard during December (current year) and January (last year). Outside that window the page still works at /wrapped, just not advertised.",
-  },
-  {
-    category: "group-quiz",
-    question: "What is Group Quiz?",
-    answer:
-      "Group Quiz lets multiple people take the same quiz together — at the same table, on a couch, or remote. The host creates a session, shares a six-character code, and everyone answers the same set of questions on their own device. The AI then synthesizes everyone's answers into one recommendation that fits the room.",
-  },
-  {
-    category: "group-quiz",
-    question: "Do I need an account to join a Group Quiz?",
-    answer:
-      "No. Joining is free and requires no account — just enter the host's code and a display name. Hosting does require an account so we can save the group's pick to your library and tie streaks/milestones back to your profile.",
-  },
-  {
-    category: "group-quiz",
-    question: "How do I host a Group Quiz?",
-    answer:
-      "Signed-in users can open Group Quiz from the navbar; everyone else can hit the 'Find a Pick Together' card on the homepage. On the host card, set your display name, pick the content type (Both / Movies / Books), tap a number tile for how many questions you want (3 to 15), then Create Session. You'll land in a lobby with a six-character code and a Copy Link button — share either with the group. Once at least two players have joined, you'll see Start Quiz; pressing it generates fresh AI questions for the whole room. Everyone answers on their own device, and once all submissions are in you'll get a 'Reveal the Group's Pick' button to surface the AI's synthesized recommendation.",
-  },
-  {
-    category: "group-quiz",
-    question: "How does the AI find one pick that fits everyone?",
-    answer:
-      "When all participants submit their answers, the host taps 'Reveal the Group's Pick.' Every participant's answer to every question is sent to the recommendation model labeled with each player's name, and the AI picks something that respects the overlap rather than averaging it. It works best with 2 to 4 players; larger groups still work but the result tends to drift toward broader appeal.",
-  },
-  {
-    category: "group-quiz",
-    question: "How long does a Group Quiz session stay active?",
-    answer:
-      "A session is active for 24 hours from creation. After that the lobby and result expire and the code can no longer be joined. Hosts can also end a session early at any time from the lobby.",
-  },
-  {
-    category: "library",
-    question: "What is the library and how does it differ from history?",
-    answer:
-      "History is every recommendation the AI has generated for you. Your library is a separate log of what you have actually watched or read — with a status (Finished, In progress, Wishlist), a thumbs rating, and an optional one-line reaction. You can log a title from any results card or from the history modal.",
-  },
-  {
-    category: "library",
-    question: "How does the library improve my recommendations?",
-    answer:
-      "Your most recent rated entries are sent to the AI alongside your quiz answers as a taste signal. A thumbs-up tells it 'more like this'; a thumbs-down tells it to steer clear. Reactions you write are read verbatim, so a one-liner like 'too slow' carries real weight on the next pick.",
-  },
-  {
-    category: "account",
-    question: "What is two-factor authentication (MFA)?",
-    answer:
-      "MFA adds an extra layer of security by requiring a code from an authenticator app (like Google Authenticator or Authy) when you sign in. You can enable it from Account Settings under the Security tab.",
-  },
-  {
-    category: "account",
-    question: "How do I manage my devices and sessions?",
-    answer:
-      "Go to Account Settings, open the Security tab, and scroll to Active Sessions. You can see all devices where you are signed in, revoke access for individual devices, or sign out of all devices at once.",
-  },
-  {
-    category: "account",
-    question: "Can I delete or disable my account?",
-    answer:
-      "Yes. In Account Settings under the Integrations tab, you will find a Danger Zone section. You can disable your account (which can be re-enabled by support) or permanently delete it along with all associated data.",
-  },
-  {
-    category: "account",
-    question: "How is my personal data handled?",
-    answer:
-      "Your data is stored securely in Supabase with row-level security policies. We only use your preferences and quiz answers to generate recommendations. We do not share your data with third parties.",
-  },
-  {
-    category: "account",
-    question: "Is Smart Advisor open source?",
-    answer:
-      "Yes. Smart Advisor is fully open source. You can review the codebase, report issues, and follow development progress on GitHub.",
-  },
+  { category: "getting-started", key: "create-account" },
+  { category: "getting-started", key: "verify-email" },
+  { category: "how-it-works", key: "personalize" },
+  { category: "how-it-works", key: "quiz-flow" },
+  { category: "how-it-works", key: "results-generated" },
+  { category: "how-it-works", key: "movies-and-books" },
+  { category: "how-it-works", key: "off-results" },
+  { category: "how-it-works", key: "trailer-preview" },
+  { category: "how-it-works", key: "year-in-review" },
+  { category: "group-quiz", key: "group-what" },
+  { category: "group-quiz", key: "group-account" },
+  { category: "group-quiz", key: "group-host" },
+  { category: "group-quiz", key: "group-synthesis" },
+  { category: "group-quiz", key: "group-expiry" },
+  { category: "library", key: "library-vs-history" },
+  { category: "library", key: "library-improves" },
+  { category: "account", key: "mfa" },
+  { category: "account", key: "sessions" },
+  { category: "account", key: "delete-account" },
+  { category: "account", key: "data-handling" },
+  { category: "account", key: "open-source" },
 ];
 
+// Names + photos stay in code; designations + quotes are translated and
+// live under Home.team.members.{key} in the messages files.
 export const teamMembers = [
-  {
-    quote:
-      "Built Smart Advisor to make recommendations feel personal, fast, and genuinely useful.",
-    name: "Andrew Ponder",
-    designation: "Creator",
-    src: "/images/Andrew.jpg",
-  },
-  {
-    quote:
-      "Focused on creating a clean interface that keeps the experience smooth on desktop.",
-    name: "Vladimir Fiffie Jr",
-    designation: "Web Designer",
-    src: "/images/Vlad.jpg",
-  },
+  { key: "andrew", name: "Andrew Ponder", src: "/images/Andrew.jpg" },
+  { key: "vlad", name: "Vladimir Fiffie Jr", src: "/images/Vlad.jpg" },
 ];

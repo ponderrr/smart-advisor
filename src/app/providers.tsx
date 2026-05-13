@@ -6,6 +6,7 @@ import { ThemeProvider } from "next-themes";
 import { useState } from "react";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { SiteBanner } from "@/components/site-banner";
+import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -36,6 +37,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
             >
               {children}
             </div>
+            <MobileBottomNav />
             <Toaster />
           </AuthProvider>
         </QueryClientProvider>

@@ -17,6 +17,7 @@ import {
   Trophy,
 } from "lucide-react";
 import { motion } from "motion/react";
+import { useTranslations, useMessages } from "next-intl";
 
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
@@ -30,7 +31,7 @@ import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { PageLoader } from "@/components/ui/loader";
 import { cn } from "@/lib/utils";
 
-const MONTH_LABELS = [
+const FALLBACK_MONTHS = [
   "Jan",
   "Feb",
   "Mar",
@@ -49,6 +50,9 @@ const WrappedPage = () => {
   const router = useRouter();
   const { user } = useAuth();
   const { ready } = useRequireAuth();
+  const t = useTranslations("Wrapped");
+  const messages = useMessages() as { Wrapped?: { months?: string[] } };
+  const monthLabels = messages.Wrapped?.months ?? FALLBACK_MONTHS;
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [libraryItems, setLibraryItems] = useState<LibraryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -218,7 +222,7 @@ const WrappedPage = () => {
     };
   }, [yearRecs, yearLibrary, year, currentYear]);
 
-  if (!ready) return <PageLoader text="Loading..." />;
+  if (!ready) return <PageLoader text={t("loading")} />;
 
   const monthlyMax = Math.max(...stats.monthly, 1);
   const topGenreMax = stats.topGenres[0]?.[1] ?? 0;
@@ -233,16 +237,18 @@ const WrappedPage = () => {
           <div className="mb-6 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
-                Year in Review
+                {t("eyebrow")}
               </p>
               <h1 className="mt-2 break-words text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl">
-                {user?.username || user?.name?.split(/\s+/)[0] || "Your"}{" "}
+                {user?.username ||
+                  user?.name?.split(/\s+/)[0] ||
+                  t("fallbackName")}{" "}
                 <span className="bg-gradient-to-r from-indigo-500 via-violet-500 to-rose-500 bg-clip-text text-transparent">
                   {year}
                 </span>
               </h1>
               <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                A look back at what you discovered this year.
+                {t("subtitle")}
               </p>
             </div>
             <div className="shrink-0">
@@ -256,7 +262,7 @@ const WrappedPage = () => {
                 className="flex items-center gap-2 whitespace-nowrap bg-white px-6 py-3 text-sm font-black leading-none tracking-tight text-black dark:bg-black dark:text-white"
               >
                 <Sparkles size={16} />
-                Start Quiz
+                {t("startQuiz")}
               </HoverBorderGradient>
             </div>
           </div>
@@ -288,18 +294,18 @@ const WrappedPage = () => {
 
           {loading ? (
             <div className="rounded-3xl border border-slate-200/70 bg-white/80 p-10 text-center text-sm text-slate-500 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 dark:text-slate-400">
-              Loading your year…
+              {t("loading")}
             </div>
           ) : stats.total === 0 ? (
             <div className="rounded-3xl border border-dashed border-slate-300/80 bg-gradient-to-br from-indigo-50/50 via-white to-violet-50/50 p-12 text-center dark:border-slate-700/70 dark:from-indigo-500/5 dark:via-slate-900/40 dark:to-violet-500/5">
               <Sparkles className="mx-auto h-10 w-10 text-indigo-300 dark:text-indigo-500/60" />
               <h2 className="mt-4 text-2xl font-black tracking-tight">
-                No Picks in {year}
+                {t("empty.title", { year })}
               </h2>
               <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
                 {year === currentYear
-                  ? "Take a quiz and start filling out your year."
-                  : "Pick a different year above, or start a new quiz."}
+                  ? t("empty.current")
+                  : t("empty.past")}
               </p>
             </div>
           ) : (
@@ -322,20 +328,20 @@ const WrappedPage = () => {
                       className="text-indigo-600 dark:text-indigo-400"
                     />
                     <p className="text-[11px] font-black uppercase tracking-[0.16em] text-indigo-700 dark:text-indigo-300">
-                      Headline
+                      {t("hero.eyebrow")}
                     </p>
                   </div>
                   <p className="mt-3 text-4xl font-black tracking-tighter sm:text-5xl md:text-6xl">
-                    {stats.total} {stats.total === 1 ? "Pick" : "Picks"}
+                    {t("hero.picks", { count: stats.total })}
                   </p>
                   <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                    {stats.movies} {stats.movies === 1 ? "movie" : "movies"}
+                    {t("hero.moviesPart", { count: stats.movies })}
                     {" · "}
-                    {stats.books} {stats.books === 1 ? "book" : "books"}
+                    {t("hero.booksPart", { count: stats.books })}
                     {stats.watchHours > 0 &&
-                      ` · about ${stats.watchHours} hours of screen time`}
+                      ` · ${t("hero.watchTime", { hours: stats.watchHours })}`}
                     {stats.libraryLogged > 0 &&
-                      ` · ${stats.libraryLogged} logged in your library`}
+                      ` · ${t("hero.libraryLogged", { count: stats.libraryLogged })}`}
                     .
                   </p>
                 </div>
@@ -345,48 +351,54 @@ const WrappedPage = () => {
               <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                 <StatTile
                   icon={Heart}
-                  label="Favorites"
+                  label={t("tiles.favorites")}
                   value={stats.favorites}
                   hint={
                     stats.total > 0
-                      ? `${Math.round((stats.favorites / stats.total) * 100)}% of picks`
-                      : "—"
+                      ? t("tiles.favoritesHint", {
+                          percent: Math.round(
+                            (stats.favorites / stats.total) * 100,
+                          ),
+                        })
+                      : t("tiles.noData")
                   }
                   tone="rose"
                 />
                 <StatTile
                   icon={Flame}
-                  label="Longest Streak"
+                  label={t("tiles.longestStreak")}
                   value={stats.longest}
                   hint={
-                    stats.longest === 1 ? "day in a row" : "days in a row"
+                    stats.longest === 1
+                      ? t("tiles.streakDay")
+                      : t("tiles.streakDays")
                   }
                   tone="orange"
                 />
                 <StatTile
                   icon={Calendar}
-                  label="Peak Month"
+                  label={t("tiles.peakMonth")}
                   value={
                     stats.peakMonth.count > 0
-                      ? MONTH_LABELS[stats.peakMonth.idx]
-                      : "—"
+                      ? monthLabels[stats.peakMonth.idx]
+                      : t("tiles.noData")
                   }
                   hint={
                     stats.peakMonth.count > 0
-                      ? `${stats.peakMonth.count} ${stats.peakMonth.count === 1 ? "pick" : "picks"}`
-                      : "—"
+                      ? t("tiles.picksHint", { count: stats.peakMonth.count })
+                      : t("tiles.noData")
                   }
                   tone="violet"
                   smallValue
                 />
                 <StatTile
                   icon={BarChart3}
-                  label="Top Genre"
-                  value={stats.topGenres[0]?.[0] ?? "—"}
+                  label={t("tiles.topGenre")}
+                  value={stats.topGenres[0]?.[0] ?? t("tiles.noData")}
                   hint={
                     stats.topGenres[0]
-                      ? `${stats.topGenres[0][1]} ${stats.topGenres[0][1] === 1 ? "pick" : "picks"}`
-                      : "—"
+                      ? t("tiles.picksHint", { count: stats.topGenres[0][1] })
+                      : t("tiles.noData")
                   }
                   tone="indigo"
                   smallValue
@@ -401,7 +413,7 @@ const WrappedPage = () => {
                       <Trophy size={13} />
                     </span>
                     <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-600 dark:text-amber-400">
-                      Most Picked
+                      {t("creator.eyebrow")}
                     </p>
                   </div>
                   {stats.topCreator ? (
@@ -411,15 +423,17 @@ const WrappedPage = () => {
                       </h3>
                       <p className="mt-1 text-xs font-bold text-slate-500 dark:text-slate-400">
                         {stats.topCreator.type === "director"
-                          ? "Director"
-                          : "Author"}{" "}
-                        · {stats.topCreator.count}{" "}
-                        {stats.topCreator.count === 1 ? "pick" : "picks"}
+                          ? t("creator.director")
+                          : t("creator.author")}{" "}
+                        ·{" "}
+                        {t("tiles.picksHint", {
+                          count: stats.topCreator.count,
+                        })}
                       </p>
                     </>
                   ) : (
                     <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                      Not enough data yet.
+                      {t("creator.noData")}
                     </p>
                   )}
                 </div>
@@ -429,20 +443,20 @@ const WrappedPage = () => {
                       <TrendingUp size={13} />
                     </span>
                     <p className="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-400">
-                      Format Mix
+                      {t("formatMix.eyebrow")}
                     </p>
                   </div>
                   <div className="mt-3 space-y-2.5">
                     <SplitBar
                       icon={Film}
-                      label="Movies"
+                      label={t("formatMix.movies")}
                       value={stats.movies}
                       total={stats.total}
                       color="bg-indigo-500"
                     />
                     <SplitBar
                       icon={BookOpen}
-                      label="Books"
+                      label={t("formatMix.books")}
                       value={stats.books}
                       total={stats.total}
                       color="bg-amber-500"
@@ -458,7 +472,7 @@ const WrappedPage = () => {
                     <Calendar size={13} />
                   </span>
                   <p className="text-[10px] font-black uppercase tracking-[0.16em] text-indigo-600 dark:text-indigo-400">
-                    Picks by Month
+                    {t("monthly.eyebrow")}
                   </p>
                 </div>
                 <div className="flex h-32 items-end gap-1.5 sm:gap-2">
@@ -480,11 +494,11 @@ const WrappedPage = () => {
                             style={{
                               height: count > 0 ? `${Math.max(pct, 6)}%` : "6%",
                             }}
-                            title={`${MONTH_LABELS[idx]}: ${count}`}
+                            title={`${monthLabels[idx]}: ${count}`}
                           />
                         </div>
                         <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
-                          {MONTH_LABELS[idx][0]}
+                          {monthLabels[idx][0]}
                         </span>
                       </div>
                     );
@@ -500,7 +514,7 @@ const WrappedPage = () => {
                       <BarChart3 size={13} />
                     </span>
                     <p className="text-[10px] font-black uppercase tracking-[0.16em] text-violet-600 dark:text-violet-400">
-                      Genre Roundup
+                      {t("genres.eyebrow")}
                     </p>
                   </div>
                   <ul className="space-y-2">
@@ -529,7 +543,7 @@ const WrappedPage = () => {
                                 {name}
                               </span>
                               <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                                {count} {count === 1 ? "pick" : "picks"}
+                                {t("tiles.picksHint", { count })}
                               </span>
                             </div>
                             <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
@@ -560,7 +574,7 @@ const WrappedPage = () => {
                         <Star size={13} />
                       </span>
                       <p className="text-[10px] font-black uppercase tracking-[0.16em] text-rose-600 dark:text-rose-400">
-                        Standouts
+                        {t("standouts.eyebrow")}
                       </p>
                     </div>
                     <button
@@ -568,7 +582,7 @@ const WrappedPage = () => {
                       onClick={() => router.push("/history")}
                       className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 bg-white/80 px-3 py-1.5 text-xs font-bold tracking-tight text-slate-700 transition-colors hover:border-slate-300 hover:bg-white dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200 dark:hover:bg-slate-800/70"
                     >
-                      Full history
+                      {t("standouts.fullHistory")}
                       <ArrowRight size={12} />
                     </button>
                   </div>

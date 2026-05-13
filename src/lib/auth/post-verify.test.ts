@@ -26,8 +26,10 @@ describe("getPostVerifyTarget", () => {
 });
 
 describe("getMfaSetupCompleteTarget", () => {
-  it("routes signup-flow completion to /dashboard", () => {
-    expect(getMfaSetupCompleteTarget("signup")).toBe("/dashboard");
+  it("routes signup-flow completion to /onboarding", () => {
+    expect(getMfaSetupCompleteTarget("signup")).toBe(
+      "/onboarding?from=signup",
+    );
   });
 
   it("routes default-flow completion to /account/security", () => {
@@ -37,7 +39,13 @@ describe("getMfaSetupCompleteTarget", () => {
 });
 
 describe("getMfaSetupSkipTarget", () => {
-  it("always routes to /dashboard", () => {
+  it("routes signup-flow skip to /onboarding", () => {
+    expect(getMfaSetupSkipTarget("signup")).toBe("/onboarding?from=signup");
+  });
+
+  it("routes default-flow skip to /dashboard", () => {
     expect(getMfaSetupSkipTarget()).toBe("/dashboard");
+    expect(getMfaSetupSkipTarget(null)).toBe("/dashboard");
+    expect(getMfaSetupSkipTarget("settings")).toBe("/dashboard");
   });
 });

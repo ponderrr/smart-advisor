@@ -20,6 +20,9 @@ export type Database = {
           updated_at: string | null;
           mfa_enabled: boolean;
           last_login: string | null;
+          content_tone: "family" | "standard" | null;
+          locale: string | null;
+          setup_completed_at: string | null;
         };
         Insert: {
           age: number;
@@ -31,6 +34,9 @@ export type Database = {
           updated_at?: string | null;
           mfa_enabled?: boolean;
           last_login?: string | null;
+          content_tone?: "family" | "standard" | null;
+          locale?: string | null;
+          setup_completed_at?: string | null;
         };
         Update: {
           age?: number;
@@ -42,6 +48,9 @@ export type Database = {
           updated_at?: string | null;
           mfa_enabled?: boolean;
           last_login?: string | null;
+          content_tone?: "family" | "standard" | null;
+          locale?: string | null;
+          setup_completed_at?: string | null;
         };
         Relationships: [];
       };

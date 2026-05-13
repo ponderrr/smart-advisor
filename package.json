@@ -1,7 +1,7 @@
 {
   "name": "smart-advisor-app",
   "private": true,
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "AI-powered personalized movie and book recommendation engine built with React, TypeScript, and Supabase",
   "license": "MIT",
   "repository": {
@@ -31,6 +31,7 @@
     "@simplewebauthn/server": "^13.3.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.50.0",
+    "@swc/helpers": "0.5.21",
     "@tabler/icons-react": "^3.41.1",
     "@tanstack/react-query": "^5.56.2",
     "@tanstack/react-virtual": "^3.13.23",
@@ -44,6 +45,7 @@
     "lucide-react": "^0.462.0",
     "motion": "^12.38.0",
     "next": "^16.1.6",
+    "next-intl": "^4.11.0",
     "next-themes": "^0.3.0",
     "nuqs": "^2.8.9",
     "qss": "^3.0.0",

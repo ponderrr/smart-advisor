@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Pencil } from "lucide-react";
 import { motion } from "motion/react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
@@ -41,6 +42,7 @@ export const RenameDialog = ({
   maxLength = 60,
   placeholder,
 }: RenameDialogProps) => {
+  const t = useTranslations("Auth.renameDialog");
   const [draft, setDraft] = useState(initialName);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,7 +57,7 @@ export const RenameDialog = ({
   const handleSave = async () => {
     const trimmed = draft.trim();
     if (!trimmed) {
-      setError("Name cannot be empty");
+      setError(t("emptyError"));
       return;
     }
 
@@ -129,7 +131,7 @@ export const RenameDialog = ({
             size="lg"
             className="mt-6 w-full"
           >
-            {saving ? "Saving..." : "Save"}
+            {saving ? t("saving") : t("save")}
           </Button>
 
           <button
@@ -137,7 +139,7 @@ export const RenameDialog = ({
             disabled={saving}
             className="mt-3 text-sm font-medium text-slate-500 transition-colors hover:text-slate-700 disabled:opacity-60 dark:text-slate-400 dark:hover:text-slate-200"
           >
-            Cancel
+            {t("cancel")}
           </button>
         </div>
       </div>

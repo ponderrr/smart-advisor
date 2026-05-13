@@ -1,0 +1,1702 @@
+{
+  "Settings": {
+    "eyebrow": "Settings",
+    "title": "Account Settings",
+    "subtitle": "Manage your profile, security, and preferences.",
+    "tabs": {
+      "profile": "Profile",
+      "security": "Security",
+      "content": "Content",
+      "integrations": "Integrations"
+    },
+    "groups": {
+      "account": "Account",
+      "app": "App"
+    },
+    "profile": {
+      "pictureTitle": "Profile Picture",
+      "pictureDescription": "Upload an image to show across the app. JPG, PNG, GIF, or WEBP up to 5 MB.",
+      "uploading": "Uploading…",
+      "changePicture": "Change picture",
+      "uploadPicture": "Upload picture",
+      "remove": "Remove",
+      "pictureUpdated": "Profile picture updated.",
+      "pictureRemoved": "Profile picture removed.",
+      "detailsTitle": "Profile Details",
+      "detailsDescription": "Update your public account details.",
+      "currentUsername": "Current username",
+      "newUsername": "New username",
+      "newUsernamePlaceholder": "Enter new username",
+      "age": "Age",
+      "agePlaceholder": "25",
+      "save": "Save changes",
+      "savedToast": "Profile updated."
+    },
+    "email": {
+      "title": "Email",
+      "description": "The address you use to sign in.",
+      "current": "Current",
+      "newEmail": "New email",
+      "newEmailPlaceholder": "new@example.com",
+      "update": "Update Email",
+      "differentRequired": "New email must be different.",
+      "checkInbox": "Check your inbox to confirm."
+    },
+    "password": {
+      "title": "Password",
+      "description": "Pick a new password.",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password",
+      "passwordPlaceholder": "••••••••",
+      "requirementsTitle": "Password Requirements",
+      "confirmRulesTitle": "Confirm Password",
+      "matches": "Matches your password",
+      "update": "Update Password",
+      "updatedToast": "Password updated."
+    },
+    "mfa": {
+      "title": "Two-Factor Authentication",
+      "description": "An extra step at sign-in to keep your account secure.",
+      "checking": "Checking…",
+      "on": "Two-factor is on",
+      "off": "Two-factor is off",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "manage": "Manage two-factor",
+      "enable": "Enable two-factor"
+    },
+    "backupEmail": {
+      "title": "Backup Email",
+      "description": "A recovery address used when your authenticator is unavailable.",
+      "labelChange": "Change to",
+      "labelDefault": "Backup Email",
+      "placeholderChange": "new-backup@example.com",
+      "placeholderDefault": "backup@example.com",
+      "save": "Save backup",
+      "update": "Update backup",
+      "savedToast": "Backup email saved.",
+      "removedToast": "Backup email removed.",
+      "remove": "Remove"
+    },
+    "theme": {
+      "title": "Appearance",
+      "description": "Match your system or pin a fixed theme.",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "content": {
+      "title": "Content Preferences",
+      "description": "Set your default recommendation behavior.",
+      "typeLabel": "Recommendation type",
+      "type": {
+        "movie": {
+          "eyebrow": "On screen",
+          "label": "Movies"
+        },
+        "book": {
+          "eyebrow": "On the shelf",
+          "label": "Books"
+        },
+        "both": {
+          "eyebrow": "One of each",
+          "label": "Both"
+        }
+      },
+      "toneLabel": "Content tone",
+      "ageLockedEyebrow": "Age-locked",
+      "ageLockedBody": "Recommendations are kept age-appropriate based on your age ({age}). Adults can choose between standard and family-friendly tones.",
+      "ageLockedBodyMissing": "Recommendations are kept age-appropriate based on your age. Adults can choose between standard and family-friendly tones.",
+      "tone": {
+        "standard": "Standard",
+        "family": "Family-friendly"
+      },
+      "toneHint": {
+        "standard": "Full personality. The AI may suggest dark, complex, or mature picks when they fit you.",
+        "family": "Picks stay light. No mature themes, dark content, or sexual content."
+      },
+      "questionCountLabel": "Questions per quiz",
+      "questionWord": "{count, plural, one {Question} other {Questions}}",
+      "depth": {
+        "quick": "Quick and focused",
+        "focused": "Sharp and specific",
+        "balanced": "Balanced depth",
+        "thorough": "Thorough exploration",
+        "comprehensive": "Comprehensive detail"
+      },
+      "rangeAria": "Default questions per quiz",
+      "appliesNext": "Applies on next quiz",
+      "save": "Save Preferences",
+      "savedToast": "Content preferences saved.",
+      "saveError": "We couldn't save your preferences. Please try again."
+    },
+    "integrations": {
+      "title": "Integrations",
+      "description": "Connected providers and services.",
+      "emptyTitle": "No integrations available yet",
+      "emptyBody": "Third-party connections will show up here once they go live."
+    },
+    "danger": {
+      "title": "Danger Zone",
+      "description": "These actions are irreversible. Proceed carefully.",
+      "disable": "Disable Account",
+      "delete": "Delete Account",
+      "processing": "Processing…",
+      "disableConfirm": "Disable your account? You'll be signed out and unable to sign in until re-enabled by support.",
+      "disableFinalConfirm": "Final confirmation. Disable now?",
+      "deleteConfirm": "Permanently delete your account? This cannot be undone.",
+      "typeDeletePrompt": "Type \"DELETE\" to confirm:",
+      "deletionCanceled": "Deletion canceled."
+    },
+    "verifyAction": {
+      "save": "save your profile",
+      "email": "update your email",
+      "password": "change your password",
+      "content": "save content preferences",
+      "disable": "disable your account",
+      "delete": "permanently delete your account",
+      "addAuthenticator": "add another authenticator",
+      "setBackupEmail": "set your backup email",
+      "removeBackupEmail": "remove your backup email"
+    },
+    "verifyModal": {
+      "title": "Verify Identity",
+      "description": "Enter your 6-digit authenticator code to {action}.",
+      "placeholder": "000000",
+      "enterCode": "Enter a 6-digit code",
+      "noFactor": "No verified MFA factor found",
+      "cancel": "Cancel",
+      "verify": "Verify",
+      "closeAria": "Close verification dialog"
+    },
+    "verifyModalEnroll": {
+      "title": "Set Up 2FA First",
+      "description": "Two-factor authentication is required to {action}. Set it up now to continue."
+    },
+    "mfaSetupModal": {
+      "closeAria": "Close two-factor setup"
+    }
+  },
+  "Language": {
+    "title": "Language",
+    "description": "Choose the language used across the app.",
+    "options": {
+      "en": "English",
+      "es": "Spanish"
+    },
+    "saving": "Saving…",
+    "saved": "Language updated."
+  },
+  "Navbar": {
+    "items": {
+      "howItWorks": "How It Works",
+      "whySmartAdvisor": "Why Smart Advisor",
+      "poweredBy": "Powered By",
+      "ourTeam": "Our Team",
+      "faq": "FAQ",
+      "dashboard": "Dashboard",
+      "library": "Library",
+      "history": "History",
+      "groupQuiz": "Group Quiz",
+      "settings": "Settings"
+    },
+    "getStarted": "Get Started",
+    "signOut": "Sign Out",
+    "accountMenu": "Account menu",
+    "theme": {
+      "label": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System",
+      "systemHint": "Matches your device setting"
+    }
+  },
+  "Home": {
+    "hero": {
+      "titleLine1": "Discover Your Next Favorite",
+      "titleLine2": "Obsession Across Every",
+      "subtitle": "AI-powered recommendations for movies and books tailored to your unique taste.",
+      "ctaPrimaryLoggedOut": "Get Started",
+      "ctaPrimaryLoggedIn": "Go to Dashboard",
+      "ctaSecondaryLoggedOut": "Try a Demo",
+      "ctaSecondaryLoggedIn": "View History",
+      "scrollHint": "Scroll to Explore",
+      "flipWords": [
+        "Movie",
+        "Book",
+        "Story",
+        "Adventure",
+        "Classic",
+        "Masterpiece",
+        "Cult Favorite"
+      ]
+    },
+    "howItWorks": {
+      "eyebrow": "How It Works",
+      "title": "From indecision to a great pick in four steps",
+      "subtitle": "A faster way to land on a watch or read worth your time.",
+      "steps": {
+        "format": {
+          "title": "Pick your format",
+          "description": "Tell us if you're in the mood for a movie, a book, or both. We tailor the rest of the flow to whichever you choose."
+        },
+        "depth": {
+          "title": "Set your depth",
+          "description": "Choose how many questions you want to answer — a quick taste check or a deep dive, your call."
+        },
+        "quiz": {
+          "title": "Answer a personalized quiz",
+          "description": "Our AI generates fresh questions tuned to your age and content type. No two quizzes are the same."
+        },
+        "picks": {
+          "title": "Get your picks",
+          "description": "Real recommendations with a match score and a written reason for why each one fits you specifically."
+        }
+      }
+    },
+    "features": {
+      "eyebrow": "Why Smart Advisor",
+      "title": "Built for picks you can trust",
+      "subtitle": "Private by design, fast by default, and open source so you can see how it works.",
+      "items": {
+        "private": {
+          "title": "Private Profile",
+          "description": "Your preferences stay tied to your account and are used only to improve your picks."
+        },
+        "fast": {
+          "title": "Warp Speed Results",
+          "description": "Quick results and smooth updates help you decide without waiting around."
+        },
+        "trust": {
+          "title": "Easy-To-Trust Picks",
+          "description": "Clear reasons make each suggestion easier to trust and choose, with open-source transparency."
+        },
+        "both": {
+          "title": "Choose Across Both",
+          "description": "See book and movie results in one place so choosing feels faster and easier."
+        }
+      },
+      "trustReasons": [
+        "Matches your age rating",
+        "Pace you said you prefer",
+        "Tone you've picked before"
+      ]
+    },
+    "groupQuizCta": {
+      "newFeature": "New Feature",
+      "eyebrow": "Group Quiz",
+      "titleLead": "Find a Pick",
+      "titleHighlight": "Together",
+      "description": "Host a quiz, share a six-character code, and let the group answer. The AI synthesizes everyone's taste into one pick that works for the room. Joining is free — no account needed.",
+      "cta": "Try It"
+    },
+    "poweredBy": {
+      "eyebrow": "Powered By",
+      "title": "Built on trusted infrastructure",
+      "subtitle": "Trusted services that help Smart Advisor stay fast, dependable, and helpful."
+    },
+    "team": {
+      "eyebrow": "The People",
+      "title": "Meet the Team",
+      "subtitle": "The folks behind Smart Advisor.",
+      "members": {
+        "andrew": {
+          "designation": "Creator",
+          "quote": "Built Smart Advisor to make recommendations feel personal, fast, and genuinely useful."
+        },
+        "vlad": {
+          "designation": "Web Designer",
+          "quote": "Focused on creating a clean interface that keeps the experience smooth on desktop."
+        }
+      }
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "title": "Questions, answered",
+      "subtitleLead": "Questions before you get started? Reach out at",
+      "subtitleMid": "or report bugs on",
+      "subtitleTail": ". Smart Advisor is open source, so you can review and contribute anytime.",
+      "categoriesAria": "FAQ categories",
+      "filterAll": "All",
+      "categories": {
+        "getting-started": "Getting started",
+        "how-it-works": "How it works",
+        "group-quiz": "Group quiz",
+        "library": "Library",
+        "account": "Account & privacy"
+      },
+      "items": {
+        "create-account": {
+          "question": "How do I create an account?",
+          "answer": "Click Sign Up on the login page, enter your name, email, and a password (minimum 8 characters). You will receive a verification email — click the link to activate your account before signing in."
+        },
+        "verify-email": {
+          "question": "Why do I need to verify my email?",
+          "answer": "Email verification confirms your identity and protects your account. You will not be able to sign in until you click the verification link sent to your inbox. Check your spam folder if you do not see it."
+        },
+        "personalize": {
+          "question": "How does Smart Advisor personalize recommendations?",
+          "answer": "Smart Advisor uses your quiz answers to understand your mood, pacing preferences, and genre interests. It then combines this with real-time data from TMDB and Open Library to generate recommendations with clear reasoning behind every pick."
+        },
+        "quiz-flow": {
+          "question": "How does the quiz work?",
+          "answer": "You choose a content type (movie, book, or both), select how many questions you want (3 to 15), then answer each one. Your responses are sent to our AI which generates personalized recommendations tailored to your answers."
+        },
+        "results-generated": {
+          "question": "How are results generated?",
+          "answer": "Your answers are processed by an AI model that selects titles matching your preferences. Each recommendation is then enriched with real poster art, ratings, and descriptions from TMDB (movies) and Open Library (books)."
+        },
+        "movies-and-books": {
+          "question": "Can I use Smart Advisor for both movies and books?",
+          "answer": "Yes. Select 'Both' during content selection to receive one movie and one book recommendation in the same session. Your entire recommendation history is saved for future reference."
+        },
+        "off-results": {
+          "question": "What if my recommendations feel off?",
+          "answer": "You can retake the quiz anytime with different answers, or adjust the number of questions and your mood and pacing choices. The fastest way to improve future picks is to log reactions to your library — marking a past pick as 'Not for me' teaches the AI to steer away from similar titles, and a thumbs-up nudges it toward more like that."
+        },
+        "trailer-preview": {
+          "question": "Where can I see a trailer or preview?",
+          "answer": "Open any recommendation card from your dashboard or history. A trailer plays inline for movies (lazy-loaded so it only fires when you click), and a 'View on Open Library' link appears for books so you can dig into editions, covers, and reviews. Movies use TMDB's official trailer when published."
+        },
+        "year-in-review": {
+          "question": "What is Year in Review and when does it appear?",
+          "answer": "Year in Review is a Spotify-Wrapped-style summary of your picks: top genre, longest streak, peak month, most-picked director or author, format mix, and your standout titles. It surfaces as a prominent banner on your dashboard during December (current year) and January (last year). Outside that window the page still works at /wrapped, just not advertised."
+        },
+        "group-what": {
+          "question": "What is Group Quiz?",
+          "answer": "Group Quiz lets multiple people take the same quiz together — at the same table, on a couch, or remote. The host creates a session, shares a six-character code, and everyone answers the same set of questions on their own device. The AI then synthesizes everyone's answers into one recommendation that fits the room."
+        },
+        "group-account": {
+          "question": "Do I need an account to join a Group Quiz?",
+          "answer": "No. Joining is free and requires no account — just enter the host's code and a display name. Hosting does require an account so we can save the group's pick to your library and tie streaks/milestones back to your profile."
+        },
+        "group-host": {
+          "question": "How do I host a Group Quiz?",
+          "answer": "Signed-in users can open Group Quiz from the navbar; everyone else can hit the 'Find a Pick Together' card on the homepage. On the host card, set your display name, pick the content type (Both / Movies / Books), tap a number tile for how many questions you want (3 to 15), then Create Session. You'll land in a lobby with a six-character code and a Copy Link button — share either with the group. Once at least two players have joined, you'll see Start Quiz; pressing it generates fresh AI questions for the whole room. Everyone answers on their own device, and once all submissions are in you'll get a 'Reveal the Group's Pick' button to surface the AI's synthesized recommendation."
+        },
+        "group-synthesis": {
+          "question": "How does the AI find one pick that fits everyone?",
+          "answer": "When all participants submit their answers, the host taps 'Reveal the Group's Pick.' Every participant's answer to every question is sent to the recommendation model labeled with each player's name, and the AI picks something that respects the overlap rather than averaging it. It works best with 2 to 4 players; larger groups still work but the result tends to drift toward broader appeal."
+        },
+        "group-expiry": {
+          "question": "How long does a Group Quiz session stay active?",
+          "answer": "A session is active for 24 hours from creation. After that the lobby and result expire and the code can no longer be joined. Hosts can also end a session early at any time from the lobby."
+        },
+        "library-vs-history": {
+          "question": "What is the library and how does it differ from history?",
+          "answer": "History is every recommendation the AI has generated for you. Your library is a separate log of what you have actually watched or read — with a status (Finished, In progress, Wishlist), a thumbs rating, and an optional one-line reaction. You can log a title from any results card or from the history modal."
+        },
+        "library-improves": {
+          "question": "How does the library improve my recommendations?",
+          "answer": "Your most recent rated entries are sent to the AI alongside your quiz answers as a taste signal. A thumbs-up tells it 'more like this'; a thumbs-down tells it to steer clear. Reactions you write are read verbatim, so a one-liner like 'too slow' carries real weight on the next pick."
+        },
+        "mfa": {
+          "question": "What is two-factor authentication (MFA)?",
+          "answer": "MFA adds an extra layer of security by requiring a code from an authenticator app (like Google Authenticator or Authy) when you sign in. You can enable it from Account Settings under the Security tab."
+        },
+        "sessions": {
+          "question": "How do I manage my devices and sessions?",
+          "answer": "Go to Account Settings, open the Security tab, and scroll to Active Sessions. You can see all devices where you are signed in, revoke access for individual devices, or sign out of all devices at once."
+        },
+        "delete-account": {
+          "question": "Can I delete or disable my account?",
+          "answer": "Yes. In Account Settings under the Integrations tab, you will find a Danger Zone section. You can disable your account (which can be re-enabled by support) or permanently delete it along with all associated data."
+        },
+        "data-handling": {
+          "question": "How is my personal data handled?",
+          "answer": "Your data is stored securely in Supabase with row-level security policies. We only use your preferences and quiz answers to generate recommendations. We do not share your data with third parties."
+        },
+        "open-source": {
+          "question": "Is Smart Advisor open source?",
+          "answer": "Yes. Smart Advisor is fully open source. You can review the codebase, report issues, and follow development progress on GitHub."
+        }
+      }
+    },
+    "footer": {
+      "navAria": "Footer navigation",
+      "rights": "© {year} Smart Advisor. All rights reserved.",
+      "builtWith": "Built with",
+      "builtSuffix": "as an open-source project.",
+      "githubLabel": "GitHub"
+    }
+  },
+  "Common": {
+    "loading": "Loading…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "back": "Back",
+    "next": "Next",
+    "continue": "Continue",
+    "submit": "Submit",
+    "close": "Close",
+    "retry": "Retry",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "MobileNav": {
+    "ariaLabel": "Primary navigation",
+    "dashboard": "Dashboard",
+    "library": "Library",
+    "history": "History",
+    "profile": "Profile",
+    "quiz": "Quiz",
+    "quizMenu": {
+      "ariaLabel": "Pick a quiz to start",
+      "title": "Start a quiz",
+      "subtitle": "Pick the kind of session you want.",
+      "solo": "Solo Quiz",
+      "soloDesc": "A short personality quiz, just for you.",
+      "group": "Group Quiz",
+      "groupDesc": "Take it together with friends in a shared room.",
+      "close": "Cancel"
+    }
+  },
+  "System": {
+    "error": {
+      "networkTitle": "Can't reach our servers",
+      "networkBody": "Check your connection and try again — we'll pick up right where you left off.",
+      "genericTitle": "Something broke",
+      "genericBody": "An unexpected error stopped this page from loading. A refresh usually does it.",
+      "ref": "Ref",
+      "goHome": "Go home",
+      "tryAgain": "Try again"
+    },
+    "notFound": {
+      "title": "This scene didn't make the cut.",
+      "body": "The page you're looking for wandered off between takes. Maybe a typo in the URL, maybe it got left on the cutting room floor. Either way, let's get you back.",
+      "goBack": "Go Back",
+      "goHome": "Go Home"
+    },
+    "maintenance": {
+      "title": "Our AI is at the movies.",
+      "body": "Smart Advisor stepped out to binge a few classics and skim a novel or two. We'll be back shortly with fresher taste."
+    }
+  },
+  "AccountSecurity": {
+    "back": "Back",
+    "eyebrow": "Account · Security",
+    "title": "Lock things down",
+    "subtitle": "Manage two-factor authentication, passkeys, and active sessions across your devices.",
+    "tipsEyebrow": "Security tips",
+    "tips": [
+      "Enable 2FA for an extra layer of protection against unauthorized access.",
+      "Review active sessions regularly and sign out devices you don't recognize.",
+      "Use a strong, unique password and update it regularly.",
+      "Be cautious with login links and only sign in from trusted devices."
+    ]
+  },
+  "Auth": {
+    "sessionExpired": "Your session has expired. Please sign in again.",
+    "eyebrow": {
+      "signin": "Sign in",
+      "signup": "Create account",
+      "forgot": "Reset password"
+    },
+    "subtitle": {
+      "signin": "Sign in to continue your recommendation journey.",
+      "signup": "Set up your account to get personalized picks.",
+      "forgot": "Enter your email and we will send a secure reset link."
+    },
+    "headings": {
+      "signin": [
+        "Welcome back",
+        "Great to see you again",
+        "Ready for your next pick?"
+      ],
+      "signup": [
+        "Create your account",
+        "Join Smart Advisor",
+        "Let's set up your profile"
+      ],
+      "forgot": [
+        "Reset your password",
+        "Recover access",
+        "Get back into your account"
+      ],
+      "verifyEmail": ["Check your inbox", "Almost there", "One last step"],
+      "mfaChallenge": [
+        "Verify your identity",
+        "One more step",
+        "Security check"
+      ]
+    },
+    "labels": {
+      "emailOrUsername": "Email or username",
+      "email": "Email",
+      "password": "Password",
+      "username": "Username",
+      "age": "Age",
+      "confirmPassword": "Confirm password"
+    },
+    "placeholders": {
+      "emailOrUsername": "you@example.com or username",
+      "email": "you@example.com",
+      "password": "••••••••",
+      "username": "yourname",
+      "age": "18"
+    },
+    "actions": {
+      "signin": "Sign In",
+      "signup": "Create Account",
+      "forgot": "Send reset link"
+    },
+    "rememberMe": "Keep me signed in for 30 days",
+    "forgotPassword": "Forgot Password?",
+    "passkeyDivider": "or",
+    "passkeySignIn": "Sign in with a passkey",
+    "passkeyWaiting": "Waiting for passkey…",
+    "resendVerification": "Resend verification link",
+    "resendingVerification": "Resending…",
+    "resendSuccess": "Verification email sent. Check your inbox.",
+    "resetSuccess": "If an account exists for this email, a password reset link has been sent.",
+    "cooldown": "Please wait a moment before trying again.",
+    "toggle": {
+      "signin": {
+        "prompt": "Don't have an account?",
+        "cta": "Sign up"
+      },
+      "signup": {
+        "prompt": "Already have an account?",
+        "cta": "Sign in"
+      },
+      "forgot": {
+        "prompt": "Remembered your password?",
+        "cta": "Sign in"
+      }
+    },
+    "modeToggle": {
+      "ariaLabel": "Choose sign in or sign up",
+      "signin": "Sign in",
+      "signup": "Sign up"
+    },
+    "mfaChallenge": {
+      "successTitle": "Verified",
+      "successBody": "Taking you to your dashboard…",
+      "totpTitle": "Enter verification code",
+      "totpBody": "Open your authenticator app and enter the 6-digit code.",
+      "backupTitle": "Enter backup code",
+      "backupBody": "Enter one of your pre-generated backup codes.",
+      "totpPlaceholder": "000000",
+      "backupPlaceholder": "XXXXX-XXXXX",
+      "verify": "Verify",
+      "verifying": "Verifying…",
+      "useBackup": "Can't access your authenticator? Use a backup code",
+      "useTotp": "Use authenticator app instead",
+      "backToSignIn": "Back to sign in"
+    },
+    "verifyEmail": {
+      "title": "Verify your email",
+      "bodyLead": "We sent a verification link to",
+      "bodyTail": ". Click the link to activate your account.",
+      "mfaHintLead": "Next up:",
+      "mfaHintBody": "After verifying your email, you'll be able to add two-factor authentication for extra security.",
+      "resend": "Resend verification email",
+      "resending": "Resending…",
+      "resendSuccess": "Verification email sent. Check your inbox.",
+      "backToSignIn": "Back to sign in"
+    },
+    "shared": {
+      "hidePassword": "Hide password",
+      "showPassword": "Show password",
+      "requirements": "Requirements"
+    },
+    "passwordRules": {
+      "minLength": "At least 8 characters",
+      "uppercase": "One uppercase letter (A–Z)",
+      "lowercase": "One lowercase letter (a–z)",
+      "digit": "One number (0–9)",
+      "special": "One special character (!@#$…)"
+    },
+    "resetPassword": {
+      "invalidTitle": "Reset link invalid or expired",
+      "invalidBody": "Open the most recent reset email or request a new link to continue.",
+      "backToSignIn": "Back to sign in",
+      "successTitle": "Password Updated",
+      "successBody": "Your password has been changed successfully. Redirecting you to sign in…",
+      "title": "Set New Password",
+      "subtitle": "Enter your new secure password below.",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "passwordRequirementsTitle": "Password requirements",
+      "confirmRulesTitle": "Confirm password",
+      "matchesRule": "Matches your password",
+      "submit": "Update Password",
+      "submitting": "Updating…",
+      "fixHighlighted": "Please fix the highlighted fields."
+    },
+    "emailVerified": {
+      "message": "Email verified! Redirecting…"
+    },
+    "mfaManagement": {
+      "heading": "Two-factor authentication",
+      "subtitle": "An extra step at sign-in to keep your account secure.",
+      "fallbackFactorName": "Authenticator App",
+      "activeCount": "{count, plural, one {# authenticator active} other {# authenticators active}}",
+      "notEnabled": "Not yet enabled",
+      "statusEnabled": "Enabled",
+      "statusInactive": "Inactive",
+      "addedOn": "Added {date}",
+      "renameAria": "Rename {name}",
+      "loadError": "Couldn't load your security settings — please refresh the page",
+      "disabledToast": "Two-factor authentication has been turned off",
+      "regeneratedToast": "Fresh backup codes are ready — save them somewhere safe",
+      "copiedToast": "Backup codes copied to your clipboard",
+      "backupCodesHeading": "Backup codes",
+      "backupCodesRemaining": "{count, plural, one {# unused code remaining} other {# unused codes remaining}}",
+      "loadingBackupCodes": "Loading…",
+      "togglePanelShow": "Show backup codes panel",
+      "togglePanelHide": "Hide backup codes panel",
+      "regenerateWarning": "Regenerating will invalidate all existing backup codes.",
+      "generateButton": "Generate new codes",
+      "generating": "Generating…",
+      "saveCodesWarning": "Save these codes — they won't be shown again",
+      "copy": "Copy",
+      "copied": "Copied",
+      "download": "Download",
+      "lowBackupCodes": "{count, plural, one {You have # backup code remaining. Consider regenerating new codes.} other {You have # backup codes remaining. Consider regenerating new codes.}}",
+      "enableHint": "Enable 2FA to add an extra layer of security at sign-in. You'll verify with your authenticator app.",
+      "addAuthenticator": "Add authenticator",
+      "loading": "Loading…",
+      "enable2fa": "Enable 2FA",
+      "renameDialogTitle": "Rename authenticator",
+      "renameDialogDescription": "Pick a name that makes the device easy to spot in your list.",
+      "renameDialogFieldLabel": "Authenticator name",
+      "renameDialogSuccess": "Authenticator renamed",
+      "renameDialogPlaceholder": "e.g., iPhone, Work phone",
+      "renameDialogNoTarget": "No authenticator selected",
+      "verifyDialogAria": "Confirm disabling two-factor authentication",
+      "verifyDialogTitle": "Disable two-factor authentication",
+      "verifyDialogBody": "Enter the 6-digit code from your authenticator app to turn off 2FA on this account.",
+      "verifyDialogPlaceholder": "000000",
+      "verifyDialogError": "Enter a 6-digit code",
+      "verifyDialogConfirm": "Disable 2FA",
+      "verifyDialogCancel": "Cancel"
+    },
+    "passkeyManagement": {
+      "heading": "Passkeys",
+      "subtitle": "Sign in with your fingerprint, face, or device PIN — no password needed.",
+      "checking": "Checking…",
+      "activeCount": "{count, plural, one {# passkey active} other {# passkeys active}}",
+      "noPasskeys": "No passkeys yet",
+      "statusActive": "Active",
+      "statusInactive": "Inactive",
+      "unsupported": "Your current browser doesn't support passkeys. Try Chrome, Safari, Edge, or Firefox on a recent device.",
+      "fallbackPasskeyName": "Passkey",
+      "neverUsed": "Never used",
+      "lastUsed": "Last used {timeAgo} ago",
+      "lastUsedRecently": "Last used recently",
+      "addedOn": "Added {date}",
+      "renameAria": "Rename {name}",
+      "removeAria": "Remove {name}",
+      "removedToast": "Passkey removed",
+      "fallbackLabel": "this passkey",
+      "removeConfirm": "Remove {label}? You won't be able to sign in with it again.",
+      "addAnother": "Add another passkey",
+      "addFirst": "Add a passkey",
+      "verifyDialogAria": "Verify to remove passkey",
+      "verifyDialogTitle": "Confirm with your authenticator",
+      "verifyDialogBody": "This is your last passkey. Enter your 6-digit authenticator code to remove it.",
+      "verifyDialogPlaceholder": "000000",
+      "verifyDialogError": "Enter a 6-digit code",
+      "verifyDialogConfirm": "Verify & remove passkey",
+      "verifyDialogCancel": "Cancel",
+      "verifyNoFactor": "No verified authenticator found.",
+      "renameDialogTitle": "Rename passkey",
+      "renameDialogDescription": "Pick a name you'll recognize later, like \"MacBook\" or \"Phone\".",
+      "renameDialogFieldLabel": "Passkey name",
+      "renameDialogSuccess": "Passkey renamed",
+      "renameDialogPlaceholder": "e.g., MacBook, iPhone",
+      "renameDialogNoTarget": "No passkey selected",
+      "setupDialogAria": "Add a passkey"
+    },
+    "sessions": {
+      "heading": "Active Sessions",
+      "subtitleLoading": "Manage devices currently signed in to your account.",
+      "subtitle": "Manage devices currently signed in to your account. Sign out to revoke access.",
+      "signedInCount": "{count, plural, one {# device signed in} other {# devices signed in}}",
+      "noActive": "No active sessions",
+      "signOutAll": "Sign out all",
+      "signingOutAll": "Signing out…",
+      "signOutAllConfirm": "Are you sure? You'll be signed out on all devices.",
+      "signOutCurrentConfirm": "Sign out of this device? You'll be returned to the home page.",
+      "signOutOtherConfirm": "Sign out of {device}? That session will lose access immediately.",
+      "signedOutToast": "You've been signed out of that device",
+      "signedOutAllToast": "You've been signed out of all devices",
+      "noSessionsFound": "No active sessions found",
+      "currentBadge": "Current",
+      "ipLabel": "IP {ip}",
+      "lastActive": "Last active {time}",
+      "signOutAria": "Sign out of {device}",
+      "verifyAction": {
+        "signOut": "sign out of {device}",
+        "signOutAll": "sign out of all devices"
+      }
+    },
+    "mfaSetup": {
+      "goBack": "Go back",
+      "intro": {
+        "title": "Secure your account",
+        "body": "Add an extra layer of security with Two-Factor Authentication (2FA). You'll need to enter a code from your phone during sign in.",
+        "cta": "Set up 2FA",
+        "skip": "Skip for now"
+      },
+      "method": {
+        "title": "Choose your method",
+        "body": "How do you want to sign in going forward?",
+        "appName": "Authenticator app",
+        "appBody": "Scan a QR code with Google Authenticator, Authy, or 1Password.",
+        "cancel": "Cancel"
+      },
+      "name": {
+        "title": "Name this authenticator",
+        "body": "Use the device that will hold the code — that way you can tell authenticators apart later.",
+        "label": "Device name",
+        "placeholder": "e.g., iPhone, Work phone",
+        "hint": "Leave blank to use a generic label.",
+        "settingUp": "Setting up...",
+        "continue": "Continue"
+      },
+      "qr": {
+        "title": "Scan QR Code",
+        "body": "Use Google Authenticator, Microsoft Authenticator, or Authy to scan this code.",
+        "imageAlt": "MFA QR Code",
+        "manualHint": "Can't scan? Enter this code manually:",
+        "scanned": "I've scanned it"
+      },
+      "verify": {
+        "title": "Verify your code",
+        "body": "Enter the 6-digit code from your authenticator app.",
+        "placeholder": "000000",
+        "error": "Please enter a 6-digit code",
+        "verifying": "Verifying...",
+        "submit": "Verify & Enable 2FA",
+        "back": "Back to QR Code"
+      },
+      "backupCodes": {
+        "title": "Save your backup codes",
+        "body": "If you lose access to your authenticator app, you can use one of these codes to sign in. Each code can only be used once.",
+        "warning": "Store these in a safe place",
+        "copy": "Copy",
+        "copied": "Copied",
+        "download": "Download",
+        "done": "I've saved my codes"
+      },
+      "toasts": {
+        "authenticatorAdded": "Authenticator added",
+        "enabled": "Two-factor authentication is now active!",
+        "backupWarning": "We couldn't generate backup codes right now. You can create them anytime from your Security settings.",
+        "secretCopied": "Secret code copied — paste it in your authenticator app",
+        "backupCopied": "Backup codes copied to your clipboard",
+        "backupDownloaded": "Backup codes saved to your downloads"
+      }
+    },
+    "passkeySetup": {
+      "title": "Add a passkey",
+      "body": "Pick a name you'll recognize later. After you continue, your device will ask to confirm with Touch ID, Face ID, Windows Hello, or a security key.",
+      "label": "Passkey name",
+      "placeholder": "e.g., MacBook, iPhone",
+      "hint": "Leave blank and we'll use a date-stamped label.",
+      "waiting": "Waiting for passkey...",
+      "continue": "Continue",
+      "cancel": "Cancel",
+      "successToast": "Passkey added"
+    },
+    "renameDialog": {
+      "emptyError": "Name cannot be empty",
+      "saving": "Saving...",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "validation": {
+      "emailOrUsernameRequired": "Email or username is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Enter a valid email",
+      "passwordRequired": "Password is required",
+      "passwordRequirementsUnmet": "Password does not meet all requirements",
+      "usernameRequired": "Username is required",
+      "usernameTooShort": "Use at least 2 characters",
+      "usernameTooLong": "Use 24 characters or fewer",
+      "usernameInvalid": "Use letters, numbers, dots, dashes, or underscores",
+      "ageRequired": "Age is required",
+      "ageNotInteger": "Age must be a whole number",
+      "ageOutOfRange": "Enter an age between 13 and 120",
+      "confirmPasswordRequired": "Confirm your password",
+      "passwordsDoNotMatch": "Passwords do not match",
+      "fixHighlightedFields": "Please fix the highlighted fields.",
+      "correctHighlightedFields": "Please correct the highlighted fields",
+      "passkeyIdentifierRequired": "Enter your email or username to use a passkey.",
+      "enterSixDigitCode": "Please enter a 6-digit code",
+      "enterBackupCode": "Please enter a backup code",
+      "rules": {
+        "emailContainsAt": "Contains @",
+        "emailHasDomain": "Has a domain (example.com)",
+        "ageWholeNumber": "Whole number",
+        "ageInRange": "Between 13 and 120",
+        "usernameLength": "2–24 characters",
+        "usernameAllowedChars": "Letters, numbers, dots, dashes, or underscores",
+        "confirmPasswordMatches": "Matches your password"
+      },
+      "popoverTitles": {
+        "email": "Email requirements",
+        "password": "Password requirements",
+        "username": "Username requirements",
+        "age": "Age requirements",
+        "confirmPassword": "Confirm password"
+      },
+      "mfaError": {
+        "totpExpired": "That code expired. Wait for a new one in your authenticator and try again.",
+        "backupExpired": "That backup code is no longer valid.",
+        "totpMismatch": "That code didn't match. Double-check your authenticator and try again.",
+        "backupMismatch": "That backup code didn't match. Each code only works once."
+      }
+    }
+  },
+  "Wrapped": {
+    "eyebrow": "Year in Review",
+    "subtitle": "A look back at what you discovered this year.",
+    "fallbackName": "Your",
+    "startQuiz": "Start Quiz",
+    "loading": "Loading your year…",
+    "empty": {
+      "title": "No Picks in {year}",
+      "current": "Take a quiz and start filling out your year.",
+      "past": "Pick a different year above, or start a new quiz."
+    },
+    "hero": {
+      "eyebrow": "Headline",
+      "picks": "{count, plural, one {# Pick} other {# Picks}}",
+      "moviesPart": "{count, plural, one {# movie} other {# movies}}",
+      "booksPart": "{count, plural, one {# book} other {# books}}",
+      "watchTime": "about {hours} hours of screen time",
+      "libraryLogged": "{count} logged in your library"
+    },
+    "tiles": {
+      "favorites": "Favorites",
+      "favoritesHint": "{percent}% of picks",
+      "longestStreak": "Longest Streak",
+      "streakDay": "day in a row",
+      "streakDays": "days in a row",
+      "peakMonth": "Peak Month",
+      "topGenre": "Top Genre",
+      "picksHint": "{count, plural, one {# pick} other {# picks}}",
+      "noData": "—"
+    },
+    "creator": {
+      "eyebrow": "Most Picked",
+      "director": "Director",
+      "author": "Author",
+      "noData": "Not enough data yet."
+    },
+    "formatMix": {
+      "eyebrow": "Format Mix",
+      "movies": "Movies",
+      "books": "Books"
+    },
+    "monthly": {
+      "eyebrow": "Picks by Month"
+    },
+    "genres": {
+      "eyebrow": "Genre Roundup"
+    },
+    "standouts": {
+      "eyebrow": "Standouts",
+      "fullHistory": "Full history"
+    },
+    "months": [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ]
+  },
+  "GroupQuiz": {
+    "lobby": {
+      "eyebrow": "Group Quiz",
+      "title": "Find a Pick Together",
+      "subtitle": "Host a quiz and share the code. Everyone answers, the AI finds one pick that fits the group.",
+      "intent": {
+        "eyebrow": "Welcome Back",
+        "headline": "Pick up where you left off?",
+        "summary": "{count} questions · {types} · up to {max} players",
+        "types": {
+          "both": "movies + books",
+          "movie": "movies",
+          "book": "books"
+        },
+        "continue": "Continue",
+        "continuing": "Creating…",
+        "dismissAria": "Dismiss"
+      },
+      "host": {
+        "eyebrow": "Host",
+        "title": "Start a New Session",
+        "nameLabel": "Your Name",
+        "namePlaceholder": "How others see you",
+        "typeLabel": "Pick Type",
+        "questionsLabel": "Questions",
+        "questionsAria": "Number of questions",
+        "maxPlayersLabel": "Max Players",
+        "maxPlayersAria": "Maximum number of players in the lobby",
+        "create": "Create Session",
+        "creating": "Creating…",
+        "signInTitle": "Sign In to Host",
+        "signInBody": "Hosting saves the group's pick to your library, tracks streaks, and unlocks Year in Review.",
+        "signInCta": "Sign In or Create Account",
+        "signInHint": "Just want to play? Use the code on the right."
+      },
+      "join": {
+        "eyebrow": "Join",
+        "title": "Have a Code?",
+        "codeLabel": "Session Code",
+        "codePlaceholder": "ABC123",
+        "nameLabel": "Your Name",
+        "namePlaceholder": "Display name",
+        "join": "Join Session",
+        "joining": "Joining…",
+        "footer": "No account needed to join — just a name and a code."
+      },
+      "contentTypes": {
+        "both": "Both",
+        "movie": "Movies",
+        "book": "Books"
+      },
+      "errors": {
+        "signInRequired": "Sign in to host a group quiz.",
+        "createFailed": "Failed to create session",
+        "joinFailed": "Couldn't join session",
+        "codeLength": "Enter a 6-character code."
+      }
+    },
+    "session": {
+      "loading": "Loading session…",
+      "notFoundTitle": "Session Not Found",
+      "notFoundBody": "That code doesn't match an active session.",
+      "backToHome": "Back to Group Quiz",
+      "shareCode": "Share This Code",
+      "copyLink": "Copy Link",
+      "linkCopied": "Link copied",
+      "linkCopyFailed": "Couldn't copy link",
+      "joined": "{name} joined",
+      "left": "{name} left the lobby",
+      "playerCount": "{count, plural, one {# Player} other {# Players}}",
+      "playerCountOf": "{count}/{max, plural, one {# Player} other {# Players}}",
+      "submittedCount": "{submitted}/{total} submitted",
+      "leave": "Leave",
+      "backToLobby": "Back to Lobby",
+      "end": "End",
+      "leaveConfirm": "Leave this group quiz?",
+      "leaveQuizConfirm": "Leave the group quiz? Your answers so far won't be submitted.",
+      "endConfirm": "End this session for everyone?",
+      "backToLobbyConfirmInProgress": "Send everyone back to the lobby? In-progress answers will be cleared.",
+      "backToLobbyConfirmCompleted": "Send everyone back to the lobby? Answers and the current pick will be cleared so a fresh round can start.",
+      "host": {
+        "generatingQuestions": "Generating questions…",
+        "startQuiz": "Start Quiz · {count, plural, one {# question} other {# questions}}",
+        "needTwoPlayers": "You need at least 2 players to start.",
+        "startFailed": "Couldn't start the quiz",
+        "restartFailed": "Couldn't restart the quiz",
+        "synthesizeFailed": "Failed to generate recommendation"
+      },
+      "guest": {
+        "waitingHost": "Waiting for the Host",
+        "waitingBody": "Hang tight — they'll kick things off any second.",
+        "joinLobby": "Join the Lobby",
+        "joinPrompt": "Enter a name to join this group quiz.",
+        "joinPlaceholder": "Display name",
+        "join": "Join",
+        "joining": "Joining…",
+        "joinFailed": "Couldn't join session",
+        "inProgress": "The quiz is already underway.",
+        "completed": "This session is wrapped up.",
+        "askHost": "Ask the host to bring the lobby back so you can join.",
+        "lobbyFull": "Lobby is Full",
+        "lobbyFullBody": "The host capped this lobby and it's already at the limit. Ask them to raise it or wait for someone to leave."
+      },
+      "submitted": {
+        "lockedInAll": "Everyone's Locked In",
+        "lockedIn": "Locked In",
+        "waitingOthers": "Waiting for everyone else to finish…",
+        "reveal": "Reveal the Group's Pick",
+        "revealing": "Finding the pick…",
+        "guestWaiting": "Host is generating the pick…"
+      },
+      "quiz": {
+        "questionOf": "Question {current} of {total}",
+        "back": "Back",
+        "next": "Next",
+        "submit": "Lock It In",
+        "submitting": "Submitting…",
+        "submittedToast": "Locked in!",
+        "answerAll": "Answer every question first."
+      },
+      "completed": {
+        "eyebrow": "The Group's Pick",
+        "subtitle": "Based on what everyone said, here's something that should land for the room.",
+        "playAgain": "Play Again",
+        "resetting": "Resetting…",
+        "newGroup": "Start a New Group",
+        "done": "Done",
+        "endSession": "End Session"
+      },
+      "cancelled": {
+        "body": "This session was ended."
+      }
+    },
+    "result": {
+      "movie": "Movie",
+      "book": "Book",
+      "byAuthor": "By {creator}",
+      "byDirector": "Directed by {creator}",
+      "viewOnOpenLibrary": "View on Open Library",
+      "watchTrailer": "Watch trailer",
+      "playTrailerAria": "Play trailer for {title}"
+    }
+  },
+  "History": {
+    "eyebrow": "History",
+    "title": "Your Suggestion History",
+    "subtitle": "Everything the AI has picked for you. Mark a favorite to keep it close, or log one to your library to teach the AI how you felt.",
+    "clearAll": "Clear All",
+    "startQuiz": "Start Quiz",
+    "filtersAria": "History filters",
+    "filtersGroup": "Filters",
+    "filters": {
+      "all": "All",
+      "movies": "Movies",
+      "books": "Books",
+      "favorites": "Favorites"
+    },
+    "stats": {
+      "total": "Total",
+      "favorites": "Favorites",
+      "movies": "Movies",
+      "books": "Books"
+    },
+    "sortLabel": "Sort:",
+    "sortAria": "Sort recommendations",
+    "sort": {
+      "newest": "Newest",
+      "oldest": "Oldest",
+      "favorites_first": "Favorites First"
+    },
+    "empty": {
+      "title": "No Recommendations Found",
+      "body": "Try a different filter or generate a fresh recommendation set."
+    },
+    "card": {
+      "movie": "Movie",
+      "book": "Book",
+      "fallbackExplanation": "A tailored {type} recommendation based on your recent quiz choices.",
+      "openAria": "Open details for {title}",
+      "favoriteAdd": "Add to favorites",
+      "favoriteRemove": "Remove from favorites",
+      "deleteAria": "Delete"
+    },
+    "toasts": {
+      "favoriteFailed": "Couldn't update your favorite — please try again",
+      "favoriteAdded": "Added to favorites",
+      "favoriteRemoved": "Removed from favorites",
+      "deleteFailed": "Couldn't remove that recommendation — please try again",
+      "deleted": "Recommendation removed from your history",
+      "clearFailed": "Couldn't clear your history — please try again",
+      "cleared": "All recommendations cleared"
+    },
+    "confirm": {
+      "deleteOne": "Delete this recommendation?",
+      "clearAll": "Are you sure you want to delete all recommendations? This cannot be undone."
+    },
+    "modal": {
+      "ariaLabel": "Details for {title}",
+      "byAuthor": "By {author}",
+      "byDirector": "Directed by {director}",
+      "inLibrary": "In your library",
+      "close": "Close"
+    }
+  },
+  "Library": {
+    "eyebrow": "Library",
+    "title": "What You've Watched and Read",
+    "subtitle": "Reactions you save here become a taste signal the AI uses on your next quiz.",
+    "startQuiz": "Start Quiz",
+    "filtersAria": "Library filters",
+    "typeGroup": "Type",
+    "type": {
+      "all": "All",
+      "movie": "Movies",
+      "book": "Books"
+    },
+    "stats": {
+      "total": "Total",
+      "finished": "Finished",
+      "movies": "Movies",
+      "books": "Books"
+    },
+    "statusLabel": "Status",
+    "filterAll": "All",
+    "status": {
+      "finished": "Finished",
+      "in_progress": "In progress",
+      "wishlist": "Wishlist",
+      "dropped": "Gave up"
+    },
+    "rating": {
+      "1": "Not for me",
+      "2": "It was fine",
+      "3": "Loved it"
+    },
+    "byAuthor": "By {creator}",
+    "byDirector": "Directed by {creator}",
+    "mediumMovie": "Movie",
+    "mediumBook": "Book",
+    "loggedOn": "Logged {date}",
+    "empty": {
+      "noItemsTitle": "Nothing in Your Library Yet",
+      "noItemsBody": "After your next quiz, hit \"I watched / read this\" on a result and it will show up here.",
+      "noMatchesTitle": "No Matches for Those Filters",
+      "noMatchesBody": "Try changing or clearing the filters above."
+    },
+    "removeConfirm": "Remove \"{title}\" from your library?",
+    "removed": "Removed from library",
+    "updated": "Library entry updated",
+    "editAria": "Edit {title}",
+    "removeAria": "Remove {title}",
+    "statusChangeAria": "Change status of {title}",
+    "wishlistButton": {
+      "add": "Wishlist",
+      "onWishlist": "On wishlist",
+      "added": "Added to your wishlist",
+      "ariaAdd": "Add {title} to your wishlist",
+      "ariaOnWishlist": "{title} is on your wishlist"
+    },
+    "editDialog": {
+      "ariaLabel": "Edit library entry",
+      "title": "Edit entry",
+      "statusHeader": "Status",
+      "ratingHeader": "Rating",
+      "reactionHeader": "Reaction",
+      "reactionPlaceholder": "One-line takeaway…",
+      "save": "Save changes",
+      "cancel": "Cancel"
+    }
+  },
+  "Onboarding": {
+    "eyebrow": "Almost done",
+    "title": "Quick check",
+    "subtitle": "Make sure we've got this right before you jump in.",
+    "readonly": {
+      "email": "Email",
+      "age": "Age",
+      "editLater": "You can change these later in settings."
+    },
+    "fields": {
+      "displayName": {
+        "label": "Display name",
+        "placeholder": "How we should call you"
+      },
+      "language": {
+        "label": "Language",
+        "en": "English",
+        "es": "Español"
+      }
+    },
+    "submit": "Looks good",
+    "skip": "Skip for now",
+    "errors": {
+      "displayNameRequired": "Please enter a display name.",
+      "saveFailed": "We couldn't save your setup. Please try again."
+    },
+    "savedToast": "All set — welcome aboard."
+  },
+  "Quiz": {
+    "category": "Quiz setup",
+    "stepOf": "Step {current} of {total}",
+    "back": {
+      "dashboard": "Dashboard"
+    },
+    "contentSelection": {
+      "title": "What would you like a recommendation for?",
+      "subtitle": "Pick one so we can tailor your recommendation flow.",
+      "validation": "Please select an option before continuing.",
+      "continue": "Continue",
+      "continuing": "Continuing…",
+      "cards": {
+        "movie": {
+          "eyebrow": "On screen",
+          "title": "Movie",
+          "description": "A film tuned to your current mood and pace."
+        },
+        "book": {
+          "eyebrow": "On the shelf",
+          "title": "Book",
+          "description": "A read tailored to your style and interests."
+        },
+        "both": {
+          "eyebrow": "Both",
+          "title": "One of each",
+          "description": "A movie and a book picked together in one go."
+        }
+      }
+    },
+    "questionCount": {
+      "title": "How many questions should we ask?",
+      "subtitle": "Choose the depth for your {contentType} recommendation flow.",
+      "contentTypes": {
+        "movie": "movie",
+        "book": "book",
+        "both": "movie and book"
+      },
+      "questionsLabel": "{count, plural, one {Question} other {Questions}}",
+      "tone": {
+        "quick": "Quick and focused",
+        "focused": "Sharp and specific",
+        "balanced": "Balanced depth",
+        "thorough": "Thorough exploration",
+        "comprehensive": "Comprehensive detail"
+      },
+      "estimate": "{minutes, plural, one {# minute} other {# minutes}}",
+      "ariaCount": "Number of questions",
+      "back": "Format",
+      "continue": "Continue",
+      "continuing": "Continuing…"
+    },
+    "questionnaire": {
+      "category": "Live quiz",
+      "questionOf": "Question {current} of {total}",
+      "previous": "Previous",
+      "back": "Back",
+      "next": "Next",
+      "submit": "Get Recommendations",
+      "subtitle": {
+        "fillInBlank": "Share your thoughts in your own words.",
+        "selectAll": "Choose as many as you like.",
+        "singleSelect": "Pick one so we can tune your recommendations."
+      },
+      "leaveConfirm": "Leave the quiz? Your answers so far won't be saved.",
+      "errors": {
+        "title": "Unable to load questions",
+        "session": "Your session expired. Please sign in again to continue.",
+        "generic": "We could not generate your questions. Please try again.",
+        "tryAgain": "Try Again",
+        "back": "Back"
+      },
+      "loadingMessages": [
+        "Thinking up good questions…",
+        "Picking your angle…",
+        "Tailoring to your taste…",
+        "Calibrating for your vibe…",
+        "Finding the right starting point…",
+        "Drafting the quiz…",
+        "Stirring in a twist or two…",
+        "Sharpening the details…",
+        "Cutting the boring ones…",
+        "Double-checking the flow…",
+        "Almost ready for you…"
+      ]
+    }
+  },
+  "Results": {
+    "loadingMessages": [
+      "Flipping through your answers…",
+      "Consulting the algorithm…",
+      "Cross-referencing great taste…",
+      "Digging through movie shelves…",
+      "Searching the library stacks…",
+      "Hunting for hidden gems…",
+      "Matching moods and genres…",
+      "Dusting off forgotten classics…",
+      "Checking against your history…",
+      "Weighing the shortlist…",
+      "Narrowing down the picks…",
+      "Running it by our AI once more…",
+      "Polishing each recommendation…",
+      "Adding the finishing touches…"
+    ],
+    "body": {
+      "matchSuffix": "{score}% match",
+      "matchPercent": "{score}%",
+      "whyThisPick": "Why this pick",
+      "about": "About",
+      "showMore": "Show more",
+      "showLess": "Show less",
+      "byAuthor": "By {author}",
+      "byDirector": "Directed by {director}",
+      "favoriteAdd": "Add {title} to favorites",
+      "favoriteRemove": "Remove {title} from favorites",
+      "movie": "Movie",
+      "book": "Book",
+      "eyebrow": "Your picks",
+      "headline": "Hand-picked for you",
+      "subhead": "{count, plural, one {# personalized pick from the AI, with the reasoning behind each. Log one to your library to nudge future picks.} other {# personalized picks from the AI, with the reasoning behind each. Log one to your library to nudge future picks.}}",
+      "sections": {
+        "movie": {
+          "eyebrow": "Movie",
+          "title": "On screen"
+        },
+        "book": {
+          "eyebrow": "Book",
+          "title": "On the shelf"
+        }
+      },
+      "actions": {
+        "retake": "Retake Quiz",
+        "viewHistory": "View History",
+        "share": "Share Results"
+      },
+      "shareMenu": {
+        "copy": "Copy to clipboard",
+        "shareX": "Share on X",
+        "shareEmail": "Share via email"
+      },
+      "shareToasts": {
+        "copySuccess": "Copied to clipboard!",
+        "copyFailed": "Couldn't copy — try again",
+        "favoriteFailed": "Couldn't update your favorite — please try again",
+        "favoriteAdded": "Added to favorites",
+        "favoriteRemoved": "Removed from favorites"
+      },
+      "shareText": {
+        "title": "My Smart Advisor Picks",
+        "movies": "Movies:",
+        "books": "Books:",
+        "directorPrefix": "dir. {director}",
+        "byAuthorShort": "by {author}",
+        "genres": "Genres: {list}",
+        "footer": "Get your own picks at smartadvisor.app"
+      },
+      "shareTwitter": "Just got my Smart Advisor picks: {titles}\n\nGet your own at smartadvisor.app",
+      "shareEmailSubject": "My Smart Advisor Picks",
+      "beforeUnload": "You have unsaved recommendations. Are you sure you want to leave?",
+      "generationStep": {
+        "analyzing": "Analyzing your answers...",
+        "generating": "Generating personalized recommendations...",
+        "enhancing": "Enhancing with movie and book data...",
+        "finalizing": "Finalizing your recommendations..."
+      },
+      "generationError": "Failed to generate personalized recommendations. Please try again.",
+      "confirmDialog": {
+        "title": "Generate new recommendations?",
+        "body": "You already generated recommendations for these answers. Generate a fresh set or head back to your dashboard.",
+        "cancel": "Go to Dashboard",
+        "confirm": "Generate New"
+      },
+      "errorState": {
+        "title": "Unable to generate recommendations",
+        "retry": "Try Again",
+        "back": "Retake Quiz"
+      }
+    }
+  },
+  "Dashboard": {
+    "eyebrow": "Dashboard",
+    "startQuiz": "Start Quiz",
+    "viewsAria": "Dashboard views",
+    "viewsGroup": "Views",
+    "tabs": {
+      "overview": "Overview",
+      "picks": "Picks",
+      "recentPicks": "Recent Picks",
+      "genres": "Genres",
+      "milestones": "Milestones"
+    },
+    "stats": {
+      "total": "Total picks",
+      "movies": "Movies",
+      "books": "Books",
+      "favorites": "Favorites"
+    },
+    "filters": {
+      "all": "All",
+      "favorites": "Favorites"
+    },
+    "recentAria": "Recent picks filter",
+    "body": {
+      "loadingChart": "Loading chart...",
+      "greetings": [
+        "Welcome back",
+        "Hey",
+        "Good to see you",
+        "Hi there",
+        "Howdy",
+        "Hello again",
+        "Glad you're back",
+        "Look who's back",
+        "The legend returns",
+        "Well, well, well",
+        "Greetings, mortal",
+        "Fancy seeing you",
+        "The plot thickens",
+        "Sequel time",
+        "Now showing",
+        "Roll credits",
+        "Drumroll please",
+        "Brace yourself",
+        "Ready, set, scroll"
+      ],
+      "headerHook": {
+        "loading": "Your personalized recommendation hub.",
+        "empty": "Take your first quiz to get started.",
+        "quietWeek": "Quiet week — ready for a new pick?",
+        "up": "{n, plural, one {# new pick this week · up {delta} from last week.} other {# new picks this week · up {delta} from last week.}}",
+        "down": "{n, plural, one {# new pick this week · down {delta} from last week.} other {# new picks this week · down {delta} from last week.}}",
+        "flat": "{n, plural, one {# new pick this week.} other {# new picks this week.}}"
+      },
+      "modal": {
+        "ariaLabel": "Details for {title}",
+        "byAuthor": "By {author}",
+        "byDirector": "Directed by {director}",
+        "close": "Close"
+      },
+      "favoriteAria": "Favorited",
+      "inLibraryAria": "In your library",
+      "wrapped": {
+        "eyebrow": "Year in Review",
+        "titleLead": "Your",
+        "titleTail": "in Picks",
+        "body": "Top genres, longest streak, most-picked creator — wrapped up in a card.",
+        "cta": "Open Wrapped"
+      },
+      "suggestion": {
+        "eyebrow": "Suggested next",
+        "firstQuiz": {
+          "title": "Take Your First Quiz",
+          "body": "Answer a few questions and the AI will hand you a tailored pick.",
+          "cta": "Start Quiz"
+        },
+        "logReaction": {
+          "title": "Log a reaction",
+          "body": "Tell the AI what landed and what didn't — your reactions become a taste signal on every future quiz.",
+          "cta": "Open results"
+        },
+        "anotherPick": {
+          "title": "Time for another pick?",
+          "body": "Your last quiz was {ago} ago. The AI now knows {count, plural, one {# of your reactions} other {# of your reactions}}.",
+          "cta": "Take another quiz"
+        }
+      },
+      "spotlight": {
+        "eyebrow": "Latest pick",
+        "openDetailsAria": "Open details for {title}",
+        "byAuthor": "By {author}",
+        "byDirector": "Directed by {director}",
+        "viewAll": "View all"
+      },
+      "noPicks": {
+        "title": "No Picks Yet",
+        "body": "Take your first quiz and your latest pick will live here so it's always one click away."
+      },
+      "pulse": {
+        "eyebrow": "Pulse",
+        "thisWeek": "{count, plural, one {# pick this week} other {# picks this week}}",
+        "quietWeek": "Quiet Week",
+        "up": "↑ {delta} from last week",
+        "down": "↓ {delta} from last week",
+        "lastFourteenDays": "Last 14 days",
+        "streakBadge": "{count}-day streak",
+        "stat": {
+          "picks": "Picks",
+          "library": "Library",
+          "favorites": "Favorites",
+          "topGenre": "Top Genre"
+        },
+        "picksHint": "{movies}m · {books}b",
+        "ratedHint": "{count} rated",
+        "favoritesPercent": "{percent}%",
+        "topGenrePicks": "{count, plural, one {# pick} other {# picks}}",
+        "noData": "—"
+      },
+      "milestones": {
+        "eyebrow": "Milestones",
+        "earnedSummary": "{earned} of {total} earned",
+        "unlocked": "Unlocked",
+        "progress": "{progress}/{target}",
+        "unlockedToast": "Milestone unlocked: {label}",
+        "tierCompleteToast": "Tier complete: {tier}! 🏆",
+        "tapForDetails": "Tap a milestone to see how to unlock it",
+        "summaryCta": "Open Milestones",
+        "summaryHint": "See every milestone, grouped by tier.",
+        "tiers": {
+          "easy": "Easy",
+          "medium": "Medium",
+          "hard": "Hard",
+          "master": "Master"
+        },
+        "items": {
+          "firstPick": "First Pick",
+          "tenPicks": "10 Picks",
+          "twentyFivePicks": "25 Picks",
+          "halfCentury": "Half Century",
+          "centurion": "Centurion",
+          "wideTaste": "Wide Taste",
+          "genreExplorer": "Genre Explorer",
+          "genreMaster": "Genre Master",
+          "cinephile": "Cinephile",
+          "cinemaMaster": "Cinema Master",
+          "bookworm": "Bookworm",
+          "voracious": "Voracious Reader",
+          "curator": "Curator",
+          "maven": "Maven",
+          "reflective": "Reflective",
+          "critic": "Critic",
+          "librarian": "Librarian",
+          "completionist": "Completionist",
+          "weekStreak": "Week Streak",
+          "marathon": "Marathon",
+          "legend": "Legend",
+          "movieMogul": "Movie Mogul",
+          "libraryRoyal": "Library Royal",
+          "polymath": "Polymath",
+          "patron": "Patron",
+          "tastemaker": "Tastemaker",
+          "yearLong": "Year-Long"
+        },
+        "descriptions": {
+          "firstPick": "Get your first recommendation from the quiz.",
+          "tenPicks": "Get 10 recommendations across any mix of quizzes.",
+          "twentyFivePicks": "Stack up 25 recommendations.",
+          "halfCentury": "Reach 50 recommendations.",
+          "centurion": "100 recommendations is no joke.",
+          "wideTaste": "Get recommendations covering 5 different genres.",
+          "genreExplorer": "Branch out to 10 different genres.",
+          "genreMaster": "Cover 20 different genres.",
+          "cinephile": "Collect 10 movie recommendations.",
+          "cinemaMaster": "Collect 50 movie recommendations.",
+          "bookworm": "Collect 10 book recommendations.",
+          "voracious": "Collect 50 book recommendations.",
+          "curator": "Favorite 5 recommendations in your history.",
+          "maven": "Favorite 25 recommendations.",
+          "reflective": "Rate 5 items in your library.",
+          "critic": "Rate 25 items in your library.",
+          "librarian": "Log 20 items into your library.",
+          "completionist": "Mark 10 library items as finished.",
+          "weekStreak": "Use Smart Advisor 7 days in a row.",
+          "marathon": "Keep a 30-day Smart Advisor streak.",
+          "legend": "Reach 250 recommendations — a true legend.",
+          "movieMogul": "Collect 100 movie recommendations.",
+          "libraryRoyal": "Collect 100 book recommendations.",
+          "polymath": "Get recommendations across 30 different genres.",
+          "patron": "Favorite 50 recommendations.",
+          "tastemaker": "Rate 100 items in your library.",
+          "yearLong": "Keep a 365-day Smart Advisor streak. Yes, really."
+        }
+      },
+      "library": {
+        "eyebrow": "Taste Signal",
+        "title": "Your Library",
+        "viewAll": "View all",
+        "emptyLead": "Nothing logged yet. Hit",
+        "emptyAction": "I watched / read this",
+        "emptyTail": "on a result and it'll show up here as a taste signal for future quizzes."
+      },
+      "inProgress": {
+        "eyebrow": "Currently",
+        "title": "Pick Up Where You Left Off",
+        "markFinished": "Mark finished",
+        "markedFinishedToast": "Nice — open your library to rate \"{title}\".",
+        "viewAll": "View all"
+      },
+      "picks": {
+        "filterAria": "Recent picks filter",
+        "all": "All",
+        "favorites": "Favorites",
+        "seeAllInHistory": "See all in history",
+        "noPicksTitle": "No Picks Yet",
+        "noPicksBody": "Take a quiz and your picks will collect here.",
+        "startQuiz": "Start Quiz",
+        "noFavoritesTitle": "No favorites yet",
+        "noFavoritesBody": "Tap the heart on any pick to save it here.",
+        "movies": "Movies",
+        "books": "Books"
+      },
+      "genres": {
+        "eyebrow": "Genre breakdown",
+        "title": "Where Your Taste Leans",
+        "topLabel": "Top",
+        "topPercent": "{percent}%",
+        "mostlyMovies": "mostly movies",
+        "mostlyBooks": "mostly books",
+        "evenSplit": "even split",
+        "empty": "Take a quiz to see your genres."
+      }
+    }
+  },
+  "Demo": {
+    "quiz": {
+      "category": "Demo quiz",
+      "stepLabel": "Question {current} of {total}",
+      "back": {
+        "home": "Home",
+        "previous": "Previous"
+      },
+      "cards": {
+        "movie": {
+          "eyebrow": "On screen",
+          "title": "Movie",
+          "description": "A film tuned to your current mood and pace."
+        },
+        "book": {
+          "eyebrow": "On the shelf",
+          "title": "Book",
+          "description": "A read tailored to your style and interests."
+        },
+        "both": {
+          "eyebrow": "Both",
+          "title": "One of each",
+          "description": "A movie and a book picked together in one go."
+        }
+      },
+      "validation": {
+        "fillInBlank": "Please type an answer before continuing.",
+        "selectAll": "Please select at least one option before continuing.",
+        "singleSelect": "Please select an option before continuing."
+      },
+      "next": "Next",
+      "continue": "Continue",
+      "leaveConfirm": "Leave the demo? Your answers so far won't be saved."
+    },
+    "results": {
+      "loadingText": "Finding your perfect picks...",
+      "matchSuffix": " match",
+      "whyThisPick": "Why this pick",
+      "about": "About",
+      "showMore": "Show more",
+      "showLess": "Show less",
+      "viewDetails": "View details",
+      "errors": {
+        "limitTitle": "You hit the demo limit",
+        "genericTitle": "Something went wrong",
+        "limitFallback": "You have used your free demo runs for today. Sign up to keep going.",
+        "genericFallback": "We could not generate your demo recommendations. Please try again.",
+        "signUp": "Sign up to continue",
+        "tryAgain": "Try again"
+      },
+      "eyebrow": "Demo · Your picks",
+      "headline": "Hand-picked for you",
+      "subhead": "{count, plural, one {# personalized pick from your demo answers — sign up to save them and refine over time.} other {# personalized picks from your demo answers — sign up to save them and refine over time.}}",
+      "empty": "No results found. Try the demo again for a new set.",
+      "sections": {
+        "movie": {
+          "eyebrow": "Movie",
+          "title": "On screen"
+        },
+        "book": {
+          "eyebrow": "Book",
+          "title": "On the shelf"
+        }
+      },
+      "cta": {
+        "title": "Make this a habit",
+        "body": "Sign up to save your picks, build a taste profile from your reactions, and get AI-tailored recommendations every time.",
+        "signUp": "Sign up to continue",
+        "retake": "Retake demo"
+      }
+    }
+  }
+}

@@ -5,9 +5,11 @@ import { AnimatePresence, motion } from "motion/react";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { cn } from "@/lib/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations, useMessages } from "next-intl";
 import { MfaChallengeScreen } from "./mfa-challenge-screen";
 import { VerifyEmailScreen } from "./verify-email-screen";
 import {
@@ -28,25 +30,23 @@ export type AuthMode =
   | "verify-email"
   | "mfa-challenge";
 
-const MODE_HEADINGS = {
-  signin: [
-    "Welcome back",
-    "Great to see you again",
-    "Ready for your next pick?",
-  ],
-  signup: [
-    "Create your account",
-    "Join Smart Advisor",
-    "Let's set up your profile",
-  ],
-  forgot: [
-    "Reset your password",
-    "Recover access",
-    "Get back into your account",
-  ],
-  "verify-email": ["Check your inbox", "Almost there", "One last step"],
-  "mfa-challenge": ["Verify your identity", "One more step", "Security check"],
-} as const;
+// Heading text lives in messages/{en,es}.json under Auth.headings.{key}.
+// Mode → namespace key mapping (camelCase to satisfy JSON conventions).
+const MODE_HEADING_KEY: Record<AuthMode, string> = {
+  signin: "signin",
+  signup: "signup",
+  forgot: "forgot",
+  "verify-email": "verifyEmail",
+  "mfa-challenge": "mfaChallenge",
+};
+
+const MODE_HEADING_COUNTS: Record<AuthMode, number> = {
+  signin: 3,
+  signup: 3,
+  forgot: 3,
+  "verify-email": 3,
+  "mfa-challenge": 3,
+};
 
 interface AuthFormProps {
   loading: boolean;
@@ -100,6 +100,12 @@ export const AuthForm = ({
 }: AuthFormProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const t = useTranslations("Auth");
+  const tv = useTranslations("Auth.validation");
+  const messages = useMessages() as {
+    Auth?: { headings?: Record<string, string[]> };
+  };
+  const headingsByMode = messages.Auth?.headings ?? {};
   // Honor `?next=/some/path` after sign-in so deep-link auth (e.g. from
   // /group-quiz "Sign in to host") returns to the originating page instead
   // of dropping people on /dashboard. Only allow same-origin relative paths.
@@ -164,21 +170,21 @@ export const AuthForm = ({
   const trimmedEmail = email.trim();
   const emailRules = useMemo(
     () => [
-      { label: "Contains @", met: trimmedEmail.includes("@") },
+      { label: tv("rules.emailContainsAt"), met: trimmedEmail.includes("@") },
       {
-        label: "Has a domain (example.com)",
+        label: tv("rules.emailHasDomain"),
         met: /^\S+@\S+\.\S+$/.test(trimmedEmail),
       },
     ],
-    [trimmedEmail],
+    [trimmedEmail, tv],
   );
 
   const parsedAge = Number(age);
   const ageRules = useMemo(
     () => [
-      { label: "Whole number", met: age.length > 0 && /^\d+$/.test(age) },
+      { label: tv("rules.ageWholeNumber"), met: age.length > 0 && /^\d+$/.test(age) },
       {
-        label: "Between 13 and 120",
+        label: tv("rules.ageInRange"),
         met:
           age.length > 0 &&
           Number.isFinite(parsedAge) &&
@@ -186,41 +192,42 @@ export const AuthForm = ({
           parsedAge <= 120,
       },
     ],
-    [age, parsedAge],
+    [age, parsedAge, tv],
   );
 
   const trimmedUsername = username.trim();
   const usernameRules = useMemo(
     () => [
       {
-        label: "2–24 characters",
+        label: tv("rules.usernameLength"),
         met: trimmedUsername.length >= 2 && trimmedUsername.length <= 24,
       },
       {
-        label: "Letters, numbers, dots, dashes, or underscores",
+        label: tv("rules.usernameAllowedChars"),
         met:
           trimmedUsername.length > 0 &&
           /^[a-zA-Z0-9._-]+$/.test(trimmedUsername),
       },
     ],
-    [trimmedUsername],
+    [trimmedUsername, tv],
   );
+  const tPasswordRules = useTranslations("Auth.passwordRules");
   const passwordRules = useMemo(
     () =>
       PASSWORD_RULES.map((rule) => ({
-        label: rule.label,
+        label: tPasswordRules(rule.key),
         met: rule.test(password),
       })),
-    [password],
+    [password, tPasswordRules],
   );
   const confirmPasswordRules = useMemo(
     () => [
       {
-        label: "Matches your password",
+        label: tv("rules.confirmPasswordMatches"),
         met: confirmPassword.length > 0 && confirmPassword === password,
       },
     ],
-    [confirmPassword, password],
+    [confirmPassword, password, tv],
   );
 
   const emailAllMet = emailRules.every((r) => r.met);
@@ -253,14 +260,14 @@ export const AuthForm = ({
 
   useEffect(() => {
     setHeadingChoice({
-      signin: Math.floor(Math.random() * MODE_HEADINGS.signin.length),
-      signup: Math.floor(Math.random() * MODE_HEADINGS.signup.length),
-      forgot: Math.floor(Math.random() * MODE_HEADINGS.forgot.length),
+      signin: Math.floor(Math.random() * MODE_HEADING_COUNTS.signin),
+      signup: Math.floor(Math.random() * MODE_HEADING_COUNTS.signup),
+      forgot: Math.floor(Math.random() * MODE_HEADING_COUNTS.forgot),
       "verify-email": Math.floor(
-        Math.random() * MODE_HEADINGS["verify-email"].length,
+        Math.random() * MODE_HEADING_COUNTS["verify-email"],
       ),
       "mfa-challenge": Math.floor(
-        Math.random() * MODE_HEADINGS["mfa-challenge"].length,
+        Math.random() * MODE_HEADING_COUNTS["mfa-challenge"],
       ),
     });
   }, []);
@@ -304,15 +311,18 @@ export const AuthForm = ({
     return null;
   }, [searchParams, isExpiredVerificationLink, callbackErrorDescription]);
 
-  const headingPool = MODE_HEADINGS[mode];
-  const heading = headingPool[headingChoice[mode] % headingPool.length];
+  const headingPool = headingsByMode[MODE_HEADING_KEY[mode]] ?? [];
+  const heading =
+    headingPool.length > 0
+      ? headingPool[headingChoice[mode] % headingPool.length]
+      : "";
 
   const actionLabel =
     mode === "signin"
-      ? "Sign In"
+      ? t("actions.signin")
       : mode === "signup"
-        ? "Create Account"
-        : "Send reset link";
+        ? t("actions.signup")
+        : t("actions.forgot");
 
   const buttonDisabled = submitting || (mode === "signup" && signupCooldown);
 
@@ -350,7 +360,7 @@ export const AuthForm = ({
     setMfaInputMode("totp");
     setHeadingChoice((prev) => ({
       ...prev,
-      [nextMode]: Math.floor(Math.random() * MODE_HEADINGS[nextMode].length),
+      [nextMode]: Math.floor(Math.random() * MODE_HEADING_COUNTS[nextMode]),
     }));
     resetFeedback();
     clearCallbackParams();
@@ -360,51 +370,50 @@ export const AuthForm = ({
     const nextErrors: Record<string, string> = {};
     if (!email) {
       nextErrors.email =
-        mode === "signin" ? "Email or username is required" : "Email is required";
+        mode === "signin" ? tv("emailOrUsernameRequired") : tv("emailRequired");
     } else if (mode !== "signin" && !/\S+@\S+\.\S+/.test(email)) {
       // Sign-in accepts username too — only enforce email format for signup/forgot.
-      nextErrors.email = "Enter a valid email";
+      nextErrors.email = tv("emailInvalid");
     }
 
     if (mode === "signin" || mode === "signup") {
       if (!password) {
-        nextErrors.password = "Password is required";
+        nextErrors.password = tv("passwordRequired");
       } else if (mode === "signup" && !isValidPassword(password)) {
-        nextErrors.password = "Password does not meet all requirements";
+        nextErrors.password = tv("passwordRequirementsUnmet");
       }
     }
 
     if (mode === "signup") {
       const trimmedUsername = username.trim();
       if (!trimmedUsername) {
-        nextErrors.username = "Username is required";
+        nextErrors.username = tv("usernameRequired");
       } else if (trimmedUsername.length < 2) {
-        nextErrors.username = "Use at least 2 characters";
+        nextErrors.username = tv("usernameTooShort");
       } else if (trimmedUsername.length > 24) {
-        nextErrors.username = "Use 24 characters or fewer";
+        nextErrors.username = tv("usernameTooLong");
       } else if (!/^[a-zA-Z0-9._-]+$/.test(trimmedUsername)) {
-        nextErrors.username =
-          "Use letters, numbers, dots, dashes, or underscores";
+        nextErrors.username = tv("usernameInvalid");
       }
 
       const parsedAge = Number(age);
       if (!age.trim()) {
-        nextErrors.age = "Age is required";
+        nextErrors.age = tv("ageRequired");
       } else if (!Number.isFinite(parsedAge) || !Number.isInteger(parsedAge)) {
-        nextErrors.age = "Age must be a whole number";
+        nextErrors.age = tv("ageNotInteger");
       } else if (parsedAge < 13 || parsedAge > 120) {
-        nextErrors.age = "Enter an age between 13 and 120";
+        nextErrors.age = tv("ageOutOfRange");
       }
 
       if (!confirmPassword) {
-        nextErrors.confirmPassword = "Confirm your password";
+        nextErrors.confirmPassword = tv("confirmPasswordRequired");
       } else if (confirmPassword !== password) {
-        nextErrors.confirmPassword = "Passwords do not match";
+        nextErrors.confirmPassword = tv("passwordsDoNotMatch");
       }
     }
 
     if (Object.keys(nextErrors).length > 0) {
-      nextErrors.general = "Please fix the highlighted fields.";
+      nextErrors.general = tv("fixHighlightedFields");
     }
 
     setErrors(nextErrors);
@@ -417,7 +426,7 @@ export const AuthForm = ({
 
     if (!validate()) {
       setSubmitAttempted(true);
-      return { error: "Please correct the highlighted fields" };
+      return { error: tv("correctHighlightedFields") };
     }
     setSubmitAttempted(false);
 
@@ -430,9 +439,7 @@ export const AuthForm = ({
           setErrors({ general: result.error });
           return result;
         }
-        setSuccessMessage(
-          "If an account exists for this email, a password reset link has been sent.",
-        );
+        setSuccessMessage(t("resetSuccess"));
         return { error: null };
       }
 
@@ -494,8 +501,8 @@ export const AuthForm = ({
     const identifier = email.trim();
     if (!identifier) {
       setErrors({
-        email: "Email or username is required",
-        general: "Enter your email or username to use a passkey.",
+        email: tv("emailOrUsernameRequired"),
+        general: tv("passkeyIdentifierRequired"),
       });
       setSubmitAttempted(true);
       return;
@@ -526,8 +533,8 @@ export const AuthForm = ({
     const normalized = raw.toLowerCase();
     if (normalized.includes("expired")) {
       return mode === "totp"
-        ? "That code expired. Wait for a new one in your authenticator and try again."
-        : "That backup code is no longer valid.";
+        ? tv("mfaError.totpExpired")
+        : tv("mfaError.backupExpired");
     }
     if (
       normalized.includes("invalid") ||
@@ -538,8 +545,8 @@ export const AuthForm = ({
       normalized.includes("wrong")
     ) {
       return mode === "totp"
-        ? "That code didn't match. Double-check your authenticator and try again."
-        : "That backup code didn't match. Each code only works once.";
+        ? tv("mfaError.totpMismatch")
+        : tv("mfaError.backupMismatch");
     }
     return raw;
   };
@@ -551,7 +558,7 @@ export const AuthForm = ({
     try {
       if (mfaInputMode === "totp") {
         if (mfaCode.length !== 6) {
-          setErrors({ general: "Please enter a 6-digit code" });
+          setErrors({ general: tv("enterSixDigitCode") });
           return;
         }
         const result = await onVerifyMFA(mfaFactorId, mfaCode);
@@ -568,7 +575,7 @@ export const AuthForm = ({
       } else {
         const trimmed = mfaCode.trim();
         if (!trimmed) {
-          setErrors({ general: "Please enter a backup code" });
+          setErrors({ general: tv("enterBackupCode") });
           return;
         }
         const result = await onVerifyBackupCode(trimmed);
@@ -672,10 +679,10 @@ export const AuthForm = ({
             >
               <p className="text-[10px] font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
                 {mode === "signin"
-                  ? "Sign in"
+                  ? t("eyebrow.signin")
                   : mode === "signup"
-                    ? "Create account"
-                    : "Reset password"}
+                    ? t("eyebrow.signup")
+                    : t("eyebrow.forgot")}
               </p>
               <h1
                 className={cn(
@@ -687,12 +694,28 @@ export const AuthForm = ({
               </h1>
               <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
                 {mode === "signin"
-                  ? "Sign in to continue your recommendation journey."
+                  ? t("subtitle.signin")
                   : mode === "signup"
-                    ? "Set up your account to get personalized picks."
-                    : "Enter your email and we will send a secure reset link."}
+                    ? t("subtitle.signup")
+                    : t("subtitle.forgot")}
               </p>
             </motion.div>
+
+            {(mode === "signin" || mode === "signup") && (
+              <div className="mt-5">
+                <SegmentedControl<"signin" | "signup">
+                  layoutId="auth-mode-toggle"
+                  value={mode}
+                  onChange={(next) => toggleMode(next)}
+                  disabled={buttonDisabled}
+                  ariaLabel={t("modeToggle.ariaLabel")}
+                  options={[
+                    { value: "signin", label: t("modeToggle.signin") },
+                    { value: "signup", label: t("modeToggle.signup") },
+                  ]}
+                />
+              </div>
+            )}
 
             <form
               onSubmit={(event) => event.preventDefault()}
@@ -702,7 +725,11 @@ export const AuthForm = ({
               <div>
                 <div ref={emailAnchorRef}>
                   <FormField
-                    label={mode === "signin" ? "Email or username" : "Email"}
+                    label={
+                      mode === "signin"
+                        ? t("labels.emailOrUsername")
+                        : t("labels.email")
+                    }
                     htmlFor="auth-email"
                     invalid={submitAttempted && !emailMetForMode}
                   >
@@ -712,8 +739,8 @@ export const AuthForm = ({
                       autoComplete={mode === "signin" ? "username" : "email"}
                       placeholder={
                         mode === "signin"
-                          ? "you@example.com or username"
-                          : "you@example.com"
+                          ? t("placeholders.emailOrUsername")
+                          : t("placeholders.email")
                       }
                       value={email}
                       onChange={(event) => setEmail(event.target.value)}
@@ -730,7 +757,7 @@ export const AuthForm = ({
                     (emailFocused || (submitAttempted && !emailAllMet))
                   }
                   anchorRef={emailAnchorRef}
-                  title="Email requirements"
+                  title={tv("popoverTitles.email")}
                 />
               </div>
 
@@ -745,7 +772,7 @@ export const AuthForm = ({
                   >
                     <div ref={passwordAnchorRef}>
                       <FormField
-                        label="Password"
+                        label={t("labels.password")}
                         htmlFor="auth-password"
                         invalid={submitAttempted && !passwordMetForMode}
                       >
@@ -756,7 +783,7 @@ export const AuthForm = ({
                               ? "current-password"
                               : "new-password"
                           }
-                          placeholder="••••••••"
+                          placeholder={t("placeholders.password")}
                           value={password}
                           onChange={(
                             event: React.ChangeEvent<HTMLInputElement>,
@@ -778,7 +805,7 @@ export const AuthForm = ({
                           (submitAttempted && !passwordAllMet))
                       }
                       anchorRef={passwordAnchorRef}
-                      title="Password requirements"
+                      title={tv("popoverTitles.password")}
                     />
                   </motion.div>
                 )}
@@ -797,14 +824,14 @@ export const AuthForm = ({
                     <div>
                       <div ref={usernameAnchorRef}>
                         <FormField
-                          label="Username"
+                          label={t("labels.username")}
                           htmlFor="auth-username"
                           invalid={submitAttempted && !usernameAllMet}
                         >
                           <Input
                             id="auth-username"
                             type="text"
-                            placeholder="yourname"
+                            placeholder={t("placeholders.username")}
                             value={username}
                             maxLength={24}
                             onChange={(event) => setUsername(event.target.value)}
@@ -820,14 +847,14 @@ export const AuthForm = ({
                           (submitAttempted && !usernameAllMet)
                         }
                         anchorRef={usernameAnchorRef}
-                        title="Username requirements"
+                        title={tv("popoverTitles.username")}
                       />
                     </div>
 
                     <div>
                       <div ref={ageAnchorRef}>
                         <FormField
-                          label="Age"
+                          label={t("labels.age")}
                           htmlFor="auth-age"
                           invalid={submitAttempted && !ageAllMet}
                         >
@@ -836,7 +863,7 @@ export const AuthForm = ({
                             type="text"
                             inputMode="numeric"
                             pattern="[0-9]*"
-                            placeholder="18"
+                            placeholder={t("placeholders.age")}
                             maxLength={3}
                             value={age}
                             onChange={(event) =>
@@ -853,20 +880,20 @@ export const AuthForm = ({
                           ageFocused || (submitAttempted && !ageAllMet)
                         }
                         anchorRef={ageAnchorRef}
-                        title="Age requirements"
+                        title={tv("popoverTitles.age")}
                       />
                     </div>
 
                     <div>
                       <div ref={confirmPasswordAnchorRef}>
                         <FormField
-                          label="Confirm password"
+                          label={t("labels.confirmPassword")}
                           htmlFor="auth-confirm-password"
                           invalid={submitAttempted && !confirmAllMet}
                         >
                           <PasswordInput
                             id="auth-confirm-password"
-                            placeholder="••••••••"
+                            placeholder={t("placeholders.password")}
                             value={confirmPassword}
                             onChange={(
                               event: React.ChangeEvent<HTMLInputElement>,
@@ -887,7 +914,7 @@ export const AuthForm = ({
                           (submitAttempted && !confirmAllMet)
                         }
                         anchorRef={confirmPasswordAnchorRef}
-                        title="Confirm password"
+                        title={tv("popoverTitles.confirmPassword")}
                       />
                     </div>
                   </motion.div>
@@ -925,9 +952,7 @@ export const AuthForm = ({
                     if (result.error) {
                       setErrors({ general: result.error });
                     } else {
-                      setSuccessMessage(
-                        "Verification email sent. Check your inbox.",
-                      );
+                      setSuccessMessage(t("resendSuccess"));
                       // Drop the ?error=otp_expired params so the banner +
                       // resend button disappear once the new email is on
                       // the way.
@@ -937,14 +962,14 @@ export const AuthForm = ({
                   className="inline-flex items-center justify-center rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition-colors hover:border-violet-400 hover:bg-slate-100 hover:text-violet-700 disabled:opacity-60 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
                 >
                   {isResendingVerification
-                    ? "Resending..."
-                    : "Resend verification link"}
+                    ? t("resendingVerification")
+                    : t("resendVerification")}
                 </AuthHoverButton>
               )}
 
               {mode === "signup" && signupCooldown && !formError && (
                 <p className="text-center text-sm text-red-500">
-                  Please wait a moment before trying again.
+                  {t("cooldown")}
                 </p>
               )}
 
@@ -965,7 +990,7 @@ export const AuthForm = ({
                       className="h-px flex-1 bg-slate-200 dark:bg-slate-700"
                     />
                     <span className="px-3 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">
-                      or
+                      {t("passkeyDivider")}
                     </span>
                     <span
                       aria-hidden="true"
@@ -982,8 +1007,8 @@ export const AuthForm = ({
                       className="h-4 w-4 transition-transform duration-200 group-hover:scale-110"
                     />
                     {passkeySigningIn
-                      ? "Waiting for passkey..."
-                      : "Sign in with a passkey"}
+                      ? t("passkeyWaiting")
+                      : t("passkeySignIn")}
                   </button>
                 </div>
               )}
@@ -1012,7 +1037,7 @@ export const AuthForm = ({
                         htmlFor="remember-for-30-days"
                         className="cursor-pointer select-none text-xs font-medium text-slate-600 dark:text-slate-400"
                       >
-                        Keep me signed in for 30 days
+                        {t("rememberMe")}
                       </Label.Root>
                     </div>
 
@@ -1023,42 +1048,31 @@ export const AuthForm = ({
                         className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
                         disabled={buttonDisabled}
                       >
-                        Forgot Password?
+                        {t("forgotPassword")}
                       </button>
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
 
-              <div className="pt-2 text-center">
-                <span className="text-sm text-slate-500 dark:text-slate-400">
-                  {mode === "forgot"
-                    ? "Remembered your password?"
-                    : mode === "signup"
-                      ? "Already have an account?"
-                      : "Don't have an account?"}
-                </span>{" "}
-                <button
-                  type="button"
-                  onClick={() =>
-                    toggleMode(
-                      mode === "forgot"
-                        ? "signin"
-                        : mode === "signup"
-                          ? "signin"
-                          : "signup",
-                    )
-                  }
-                  className="text-sm font-black tracking-tight text-violet-600 underline-offset-2 transition-colors hover:text-violet-500 hover:underline disabled:opacity-60 dark:text-violet-400 dark:hover:text-violet-300"
-                  disabled={buttonDisabled}
-                >
-                  {mode === "forgot"
-                    ? "Sign in"
-                    : mode === "signup"
-                      ? "Sign in"
-                      : "Sign up"}
-                </button>
-              </div>
+              {/* Bottom text link is now only used by the forgot-password
+                  flow to send users back to sign-in. The signin/signup
+                  swap lives in the segmented control above the form. */}
+              {mode === "forgot" && (
+                <div className="pt-2 text-center">
+                  <span className="text-sm text-slate-500 dark:text-slate-400">
+                    {t("toggle.forgot.prompt")}
+                  </span>{" "}
+                  <button
+                    type="button"
+                    onClick={() => toggleMode("signin")}
+                    className="text-sm font-black tracking-tight text-violet-600 underline-offset-2 transition-colors hover:text-violet-500 hover:underline disabled:opacity-60 dark:text-violet-400 dark:hover:text-violet-300"
+                    disabled={buttonDisabled}
+                  >
+                    {t("toggle.forgot.cta")}
+                  </button>
+                </div>
+              )}
             </form>
           </motion.div>
         )}

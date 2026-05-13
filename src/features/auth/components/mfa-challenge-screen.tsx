@@ -2,6 +2,7 @@
 
 import { ShieldCheck, KeyRound, Check } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { useTranslations } from "next-intl";
 import { AuthHoverButton } from "./auth-shared";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +29,7 @@ export const MfaChallengeScreen = ({
   error: string | null;
   onBackToSignIn: () => void;
 }) => {
+  const t = useTranslations("Auth.mfaChallenge");
   const isTotp = mfaInputMode === "totp";
 
   if (success) {
@@ -46,10 +48,10 @@ export const MfaChallengeScreen = ({
         </div>
         <div>
           <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-            Verified
+            {t("successTitle")}
           </h2>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            Taking you to your dashboard…
+            {t("successBody")}
           </p>
         </div>
       </motion.div>
@@ -68,12 +70,10 @@ export const MfaChallengeScreen = ({
 
       <div>
         <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-          {isTotp ? "Enter verification code" : "Enter backup code"}
+          {isTotp ? t("totpTitle") : t("backupTitle")}
         </h2>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-          {isTotp
-            ? "Open your authenticator app and enter the 6-digit code."
-            : "Enter one of your pre-generated backup codes."}
+          {isTotp ? t("totpBody") : t("backupBody")}
         </p>
       </div>
 
@@ -91,7 +91,7 @@ export const MfaChallengeScreen = ({
                 ? "border-red-400 focus:border-red-500 focus:ring-red-500/15 dark:border-red-500/60"
                 : "border-slate-200 focus:border-violet-500 focus:ring-violet-500/10 dark:border-slate-700",
             )}
-            placeholder="000000"
+            placeholder={t("totpPlaceholder")}
             autoFocus
             onKeyDown={(e) => {
               if (e.key === "Enter" && mfaCode.length === 6) onVerify();
@@ -108,7 +108,7 @@ export const MfaChallengeScreen = ({
                 ? "border-red-400 focus:border-red-500 focus:ring-red-500/15 dark:border-red-500/60"
                 : "border-slate-200 focus:border-violet-500 focus:ring-violet-500/10 dark:border-slate-700",
             )}
-            placeholder="XXXXX-XXXXX"
+            placeholder={t("backupPlaceholder")}
             autoFocus
             onKeyDown={(e) => {
               if (e.key === "Enter" && mfaCode.trim()) onVerify();
@@ -142,7 +142,7 @@ export const MfaChallengeScreen = ({
           }
           className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-violet-600 text-sm font-semibold text-white transition-all hover:bg-violet-500 disabled:opacity-50"
         >
-          {verifying ? "Verifying..." : "Verify"}
+          {verifying ? t("verifying") : t("verify")}
         </AuthHoverButton>
 
         <button
@@ -150,9 +150,7 @@ export const MfaChallengeScreen = ({
           onClick={onToggleMfaInputMode}
           className="w-full text-sm font-medium text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
         >
-          {isTotp
-            ? "Can't access your authenticator? Use a backup code"
-            : "Use authenticator app instead"}
+          {isTotp ? t("useBackup") : t("useTotp")}
         </button>
 
         <button
@@ -160,7 +158,7 @@ export const MfaChallengeScreen = ({
           onClick={onBackToSignIn}
           className="text-sm font-semibold text-violet-600 transition-colors hover:text-violet-500 dark:text-violet-400 dark:hover:text-violet-300"
         >
-          Back to sign in
+          {t("backToSignIn")}
         </button>
       </div>
     </div>

@@ -14,11 +14,12 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { libraryService } from "../services/library-service";
 import {
   RATING_LABELS,
   STATUS_LABELS,
-  STATUS_TONE,
+  STATUS_PILL_CLASSES,
   type LibraryMedium,
   type LibraryRating,
   type LibraryStatus,
@@ -38,8 +39,12 @@ interface LogToLibraryButtonProps {
   variant?: "default" | "compact";
 }
 
-const RATING_VALUES: LibraryRating[] = [1, 2, 3];
-const STATUS_VALUES: LibraryStatus[] = ["finished", "in_progress", "wishlist"];
+const STATUS_VALUES: LibraryStatus[] = [
+  "wishlist",
+  "in_progress",
+  "finished",
+  "dropped",
+];
 
 export const LogToLibraryButton = ({
   medium,
@@ -162,23 +167,18 @@ export const LogToLibraryButton = ({
                         <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                           Status
                         </p>
-                        <div className="flex flex-wrap gap-2">
-                          {STATUS_VALUES.map((s) => (
-                            <button
-                              key={s}
-                              type="button"
-                              onClick={() => setStatus(s)}
-                              className={cn(
-                                "rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
-                                status === s
-                                  ? STATUS_TONE[s].active
-                                  : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800/40 dark:text-slate-300",
-                              )}
-                            >
-                              {STATUS_LABELS[s]}
-                            </button>
-                          ))}
-                        </div>
+                        <SegmentedControl<LibraryStatus>
+                          layoutId="log-dialog-status"
+                          value={status}
+                          onChange={setStatus}
+                          size="sm"
+                          ariaLabel="Status"
+                          options={STATUS_VALUES.map((s) => ({
+                            value: s,
+                            label: STATUS_LABELS[s],
+                            pillClassName: STATUS_PILL_CLASSES[s],
+                          }))}
+                        />
                       </div>
 
                       {/* Rating */}
@@ -186,39 +186,34 @@ export const LogToLibraryButton = ({
                         <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                           How was it?
                         </p>
-                        <div className="flex flex-wrap gap-2">
-                          {RATING_VALUES.map((r) => {
-                            const active = rating === r;
-                            const RatingIcon =
-                              r === 1
-                                ? ThumbsDown
-                                : r === 2
-                                  ? Bookmark
-                                  : ThumbsUp;
-                            return (
-                              <button
-                                key={r}
-                                type="button"
-                                onClick={() =>
-                                  setRating(active ? null : r)
-                                }
-                                className={cn(
-                                  "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
-                                  active
-                                    ? r === 3
-                                      ? "border-emerald-400 bg-emerald-50 text-emerald-700 dark:border-emerald-500 dark:bg-emerald-900/30 dark:text-emerald-300"
-                                      : r === 1
-                                        ? "border-rose-400 bg-rose-50 text-rose-700 dark:border-rose-500 dark:bg-rose-900/30 dark:text-rose-300"
-                                        : "border-slate-400 bg-slate-100 text-slate-700 dark:border-slate-500 dark:bg-slate-800 dark:text-slate-200"
-                                    : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800/40 dark:text-slate-400",
-                                )}
-                              >
-                                <RatingIcon size={14} />
-                                {RATING_LABELS[r]}
-                              </button>
-                            );
-                          })}
-                        </div>
+                        <SegmentedControl<LibraryRating>
+                          layoutId="log-dialog-rating"
+                          value={rating}
+                          onChange={setRating}
+                          onClear={() => setRating(null)}
+                          size="sm"
+                          ariaLabel="Rating"
+                          options={[
+                            {
+                              value: 1,
+                              label: RATING_LABELS[1],
+                              icon: <ThumbsDown size={14} />,
+                              pillClassName: "bg-rose-500",
+                            },
+                            {
+                              value: 2,
+                              label: RATING_LABELS[2],
+                              icon: <Bookmark size={14} />,
+                              pillClassName: "bg-slate-500",
+                            },
+                            {
+                              value: 3,
+                              label: RATING_LABELS[3],
+                              icon: <ThumbsUp size={14} />,
+                              pillClassName: "bg-emerald-500",
+                            },
+                          ]}
+                        />
                       </div>
 
                       {/* Reaction */}

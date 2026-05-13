@@ -1,5 +1,9 @@
 export type LibraryMedium = "movie" | "book";
-export type LibraryStatus = "finished" | "in_progress" | "wishlist";
+export type LibraryStatus =
+  | "finished"
+  | "in_progress"
+  | "wishlist"
+  | "dropped";
 /** 1 = thumbs-down, 2 = neutral, 3 = thumbs-up. */
 export type LibraryRating = 1 | 2 | 3;
 
@@ -48,6 +52,20 @@ export const STATUS_LABELS: Record<LibraryStatus, string> = {
   finished: "Finished",
   in_progress: "In progress",
   wishlist: "Wishlist",
+  dropped: "Gave up",
+};
+
+/**
+ * Saturated pill backgrounds for the SegmentedControl variants
+ * (status filter, log/edit dialogs). Mirrors STATUS_TONE conceptually
+ * but at a stronger contrast level since the pill always carries white
+ * text.
+ */
+export const STATUS_PILL_CLASSES: Record<LibraryStatus, string> = {
+  wishlist: "bg-violet-500",
+  in_progress: "bg-amber-500",
+  finished: "bg-emerald-500",
+  dropped: "bg-rose-500",
 };
 
 /**
@@ -73,5 +91,10 @@ export const STATUS_TONE: Record<
     active:
       "border-violet-400 bg-violet-50 text-violet-700 dark:border-violet-500 dark:bg-violet-900/30 dark:text-violet-300",
     chip: "bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300",
+  },
+  dropped: {
+    active:
+      "border-rose-400 bg-rose-50 text-rose-700 dark:border-rose-500 dark:bg-rose-900/30 dark:text-rose-300",
+    chip: "bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300",
   },
 };

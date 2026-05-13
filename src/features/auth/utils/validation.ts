@@ -56,21 +56,29 @@ export function isValidEmail(email: string): boolean {
 /**
  * Password strength rules. The single source of truth for both client-side
  * validation and the live requirements popover shown in the auth UI.
+ *
+ * `key` is the translation key under `Auth.passwordRules.{key}` — consumers
+ * resolve the user-facing label via useTranslations() so we keep one rule
+ * list across English and Spanish.
  */
+export type PasswordRuleKey =
+  | "minLength"
+  | "uppercase"
+  | "lowercase"
+  | "digit"
+  | "special";
+
 export interface PasswordRule {
-  label: string;
+  key: PasswordRuleKey;
   test: (password: string) => boolean;
 }
 
 export const PASSWORD_RULES: ReadonlyArray<PasswordRule> = [
-  { label: "At least 8 characters", test: (p) => p.length >= 8 },
-  { label: "One uppercase letter (A–Z)", test: (p) => /[A-Z]/.test(p) },
-  { label: "One lowercase letter (a–z)", test: (p) => /[a-z]/.test(p) },
-  { label: "One number (0–9)", test: (p) => /\d/.test(p) },
-  {
-    label: "One special character (!@#$…)",
-    test: (p) => /[^a-zA-Z0-9]/.test(p),
-  },
+  { key: "minLength", test: (p) => p.length >= 8 },
+  { key: "uppercase", test: (p) => /[A-Z]/.test(p) },
+  { key: "lowercase", test: (p) => /[a-z]/.test(p) },
+  { key: "digit", test: (p) => /\d/.test(p) },
+  { key: "special", test: (p) => /[^a-zA-Z0-9]/.test(p) },
 ];
 
 /**

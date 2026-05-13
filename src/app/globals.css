@@ -119,6 +119,20 @@ input[type="number"] {
     }
 }
 
+/* Reserve room for the mobile bottom nav when it's visible. The attribute
+   is toggled by <MobileBottomNav /> so pages that hide the nav (marketing,
+   auth, quiz flow) don't get the extra padding. Cleared on md+ since the
+   nav itself is `md:hidden`. */
+body[data-mobile-nav="visible"] {
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 768px) {
+    body[data-mobile-nav="visible"] {
+        padding-bottom: 0;
+    }
+}
+
 /* Text truncation utilities */
 .line-clamp-3 {
     overflow: hidden;
