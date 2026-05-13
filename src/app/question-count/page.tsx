@@ -67,7 +67,7 @@ const QuestionCountPage = () => {
       progress={50}
       onBack={() => router.push("/content-selection")}
     >
-      <div className="rounded-3xl border border-slate-200/70 bg-white/85 p-6 shadow-sm backdrop-blur-md sm:p-8 dark:border-slate-700/60 dark:bg-slate-900/65">
+      <div className="rounded-3xl border border-indigo-200/60 bg-gradient-to-br from-indigo-50/80 to-white p-6 shadow-sm backdrop-blur-md sm:p-8 dark:border-indigo-500/30 dark:from-indigo-500/10 dark:to-slate-900/40">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -90,7 +90,7 @@ const QuestionCountPage = () => {
               initial={{ scale: 0.9, opacity: 0.7 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
-              className="bg-gradient-to-br from-indigo-500 to-violet-500 bg-clip-text text-6xl font-black tracking-tighter text-transparent sm:text-7xl"
+              className="bg-gradient-to-br from-indigo-500 to-violet-500 bg-clip-text text-5xl font-black tracking-tighter text-transparent sm:text-6xl"
             >
               {questionCount}
             </motion.div>
@@ -113,19 +113,46 @@ const QuestionCountPage = () => {
             <span>15</span>
           </div>
 
-          <motion.p
-            key={`label-${questionCount}`}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2 }}
-            className="mt-4 text-center text-base font-bold tracking-tight text-slate-700 dark:text-slate-200 sm:text-lg"
-          >
-            {questionCount <= 5
-              ? t("questionCount.tone.quick")
-              : questionCount <= 10
-                ? t("questionCount.tone.balanced")
-                : t("questionCount.tone.comprehensive")}
-          </motion.p>
+          {(() => {
+            // Bucket the 3–15 range into 5 named tiers. We key the animation
+            // on the tier name (not the raw number) so the label only fades
+            // in when the slider crosses into a new bucket, not on every tick.
+            const tier =
+              questionCount <= 4
+                ? "quick"
+                : questionCount <= 7
+                  ? "focused"
+                  : questionCount <= 10
+                    ? "balanced"
+                    : questionCount <= 13
+                      ? "thorough"
+                      : "comprehensive";
+            // ~18s per question (read + answer) + ~30s for the AI to
+            // generate, rounded up to the nearest whole minute. Caps at 1
+            // so a 3-q quiz still reads "≈ 1 min" instead of disappearing.
+            const estimateMin = Math.max(
+              1,
+              Math.ceil((questionCount * 18 + 30) / 60),
+            );
+            return (
+              <>
+                <motion.p
+                  key={tier}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.22 }}
+                  className="mt-4 text-center text-base font-bold tracking-tight text-slate-700 dark:text-slate-200 sm:text-lg"
+                >
+                  {t(`questionCount.tone.${tier}`)}
+                </motion.p>
+                <div className="mt-4 flex justify-center">
+                  <span className="inline-flex items-center rounded-full border border-indigo-200/70 bg-white/80 px-5 py-2 text-base font-black tracking-tight text-indigo-700 shadow-sm dark:border-indigo-500/40 dark:bg-slate-900/60 dark:text-indigo-300 sm:text-lg">
+                    {t("questionCount.estimate", { minutes: estimateMin })}
+                  </span>
+                </div>
+              </>
+            );
+          })()}
         </div>
 
         <div className="mt-8 flex items-center justify-end">

@@ -82,6 +82,7 @@ interface AuthContextType {
   setBackupEmail: (email: string) => Promise<{ error: string | null }>;
   getBackupEmail: () => Promise<{ email: string | null; error: string | null }>;
   removeBackupEmail: () => Promise<{ error: string | null }>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -178,6 +179,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(null);
       } else {
         setUser(profileUser);
+        // Hot-cache the content tone so the AI service's existing
+        // localStorage read works across devices — the profile is the
+        // source of truth, this just keeps the read path zero-fetch.
+        if (
+          typeof window !== "undefined" &&
+          (profileUser?.content_tone === "family" ||
+            profileUser?.content_tone === "standard")
+        ) {
+          window.localStorage.setItem(
+            "smart_advisor_pref_content_tone",
+            profileUser.content_tone,
+          );
+        }
       }
     } catch (err) {
       if (signal?.aborted) return;
@@ -811,6 +825,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setBackupEmail,
     getBackupEmail,
     removeBackupEmail,
+    refreshUser: async () => {
+      if (!session?.user) return;
+      await fetchUserProfile(session.user);
+    },
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

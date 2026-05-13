@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { cn } from "@/lib/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -700,6 +701,22 @@ export const AuthForm = ({
               </p>
             </motion.div>
 
+            {(mode === "signin" || mode === "signup") && (
+              <div className="mt-5">
+                <SegmentedControl<"signin" | "signup">
+                  layoutId="auth-mode-toggle"
+                  value={mode}
+                  onChange={(next) => toggleMode(next)}
+                  disabled={buttonDisabled}
+                  ariaLabel={t("modeToggle.ariaLabel")}
+                  options={[
+                    { value: "signin", label: t("modeToggle.signin") },
+                    { value: "signup", label: t("modeToggle.signup") },
+                  ]}
+                />
+              </div>
+            )}
+
             <form
               onSubmit={(event) => event.preventDefault()}
               className="mt-6 space-y-4"
@@ -1038,35 +1055,24 @@ export const AuthForm = ({
                 )}
               </AnimatePresence>
 
-              <div className="pt-2 text-center">
-                <span className="text-sm text-slate-500 dark:text-slate-400">
-                  {mode === "forgot"
-                    ? t("toggle.forgot.prompt")
-                    : mode === "signup"
-                      ? t("toggle.signup.prompt")
-                      : t("toggle.signin.prompt")}
-                </span>{" "}
-                <button
-                  type="button"
-                  onClick={() =>
-                    toggleMode(
-                      mode === "forgot"
-                        ? "signin"
-                        : mode === "signup"
-                          ? "signin"
-                          : "signup",
-                    )
-                  }
-                  className="text-sm font-black tracking-tight text-violet-600 underline-offset-2 transition-colors hover:text-violet-500 hover:underline disabled:opacity-60 dark:text-violet-400 dark:hover:text-violet-300"
-                  disabled={buttonDisabled}
-                >
-                  {mode === "forgot"
-                    ? t("toggle.forgot.cta")
-                    : mode === "signup"
-                      ? t("toggle.signup.cta")
-                      : t("toggle.signin.cta")}
-                </button>
-              </div>
+              {/* Bottom text link is now only used by the forgot-password
+                  flow to send users back to sign-in. The signin/signup
+                  swap lives in the segmented control above the form. */}
+              {mode === "forgot" && (
+                <div className="pt-2 text-center">
+                  <span className="text-sm text-slate-500 dark:text-slate-400">
+                    {t("toggle.forgot.prompt")}
+                  </span>{" "}
+                  <button
+                    type="button"
+                    onClick={() => toggleMode("signin")}
+                    className="text-sm font-black tracking-tight text-violet-600 underline-offset-2 transition-colors hover:text-violet-500 hover:underline disabled:opacity-60 dark:text-violet-400 dark:hover:text-violet-300"
+                    disabled={buttonDisabled}
+                  >
+                    {t("toggle.forgot.cta")}
+                  </button>
+                </div>
+              )}
             </form>
           </motion.div>
         )}

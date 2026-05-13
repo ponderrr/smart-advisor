@@ -46,6 +46,9 @@ class LibraryService {
     if (!user) return { data: null, error: "You must be signed in." };
 
     const status = input.status ?? "finished";
+    // finished_at is the timestamp the user marked something finished — clear
+    // it whenever status isn't finished so a re-log as wishlist/dropped doesn't
+    // leave a stale completion date hanging around.
     const finished_at =
       status === "finished" ? new Date().toISOString() : null;
 
@@ -109,9 +112,11 @@ class LibraryService {
     const patch: Record<string, unknown> = {};
     if (input.status !== undefined) {
       patch.status = input.status;
-      if (input.status === "finished") {
-        patch.finished_at = new Date().toISOString();
-      }
+      // Set finished_at on transition to finished; clear it on any other
+      // status so an item moved back to in_progress/wishlist/dropped doesn't
+      // keep its old completion timestamp.
+      patch.finished_at =
+        input.status === "finished" ? new Date().toISOString() : null;
     }
     if (input.rating !== undefined) patch.rating = input.rating;
     if (input.reaction !== undefined) {

@@ -90,27 +90,12 @@ const HeroSection = () => {
           );
           const prioritized = unseen.length > 0 ? [...unseen, ...mixed] : mixed;
           const nextImages = uniqueUrls(prioritized).slice(0, 14);
-          await Promise.allSettled(
-            nextImages.map(
-              (src) =>
-                new Promise<void>((resolve) => {
-                  const img = new Image();
-                  img.src = src;
-                  img.onload = () => resolve();
-                  img.onerror = () => resolve();
-                }),
-            ),
-          );
-          if (active) {
-            recentRef.current = uniqueUrls([
-              ...recentRef.current,
-              ...nextImages,
-            ]).slice(-120);
-            setMediaPool((prev) =>
-              uniqueUrls([...prev, ...mixed]).slice(0, 60),
-            );
-            setHeroImages(nextImages);
-          }
+          recentRef.current = uniqueUrls([
+            ...recentRef.current,
+            ...nextImages,
+          ]).slice(-120);
+          setMediaPool((prev) => uniqueUrls([...prev, ...mixed]).slice(0, 60));
+          setHeroImages(nextImages);
         }
       } catch (error) {
         console.error("Hero media fetch failed:", error);
@@ -128,20 +113,9 @@ const HeroSection = () => {
 
   useEffect(() => {
     if (mediaPool.length < 2) return;
-    const timer = setInterval(async () => {
+    const timer = setInterval(() => {
       const nextImages = pickFrame(mediaPool, heroImages, 14);
       if (nextImages.length === 0) return;
-      await Promise.allSettled(
-        nextImages.map(
-          (src) =>
-            new Promise<void>((resolve) => {
-              const img = new Image();
-              img.src = src;
-              img.onload = () => resolve();
-              img.onerror = () => resolve();
-            }),
-        ),
-      );
       recentRef.current = uniqueUrls([
         ...recentRef.current,
         ...nextImages,

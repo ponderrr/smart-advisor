@@ -37,6 +37,7 @@ import {
 } from "@/features/library/types/library";
 import { LogToLibraryButton } from "@/features/library/components/log-to-library-button";
 import { PillButton } from "@/components/ui/pill-button";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { Dialog } from "@/components/ui/dialog";
 import { TrailerEmbed } from "@/components/trailer-embed";
@@ -184,6 +185,13 @@ const AccountHistoryPage = () => {
   const t = useTranslations("History");
   const tc = useTranslations("Common");
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  // Records which filter the current `recommendations` were loaded for.
+  // Lets the dedup memo skip rendering stale rows in the frame between a
+  // filter change and the server reload — otherwise switching to Favorites
+  // briefly dedupes the previous filter's rows and items visibly vanish.
+  const [loadedFilter, setLoadedFilter] = useState<HistoryFilter | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
   const historyTabs = ["all", "movies", "books", "favorites"] as const;
   const [filter, setFilter] = useQueryState(
@@ -194,6 +202,20 @@ const AccountHistoryPage = () => {
   // the left and moves to center — so the motion feels consistent regardless
   // of which filter the user came from.
   const filterSlideDir = -1;
+
+  // Snap to top instantly when the filter changes so the user lands at the
+  // start of the newly filtered list instead of mid-scroll in empty space.
+  // Mirrors settings + library + dashboard.
+  const filterInitialRenderRef = useRef(true);
+  useEffect(() => {
+    if (filterInitialRenderRef.current) {
+      filterInitialRenderRef.current = false;
+      return;
+    }
+    if (typeof window !== "undefined" && window.scrollY > 0) {
+      window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+    }
+  }, [filter]);
   const [view, setView] = useQueryState(
     "view",
     parseAsStringLiteral(VIEW_MODES).withDefault("grid"),
@@ -250,7 +272,27 @@ const AccountHistoryPage = () => {
   }, []);
 
   const colCount = view === "list" ? 1 : gridColCount;
-  const rowCount = Math.ceil(recommendations.length / colCount);
+
+  // Favorites mirror the source rec table, so if the engine recommended the
+  // same title across multiple quizzes you can end up with several rows for
+  // the same movie/book — all favorited together via toggleFavorite. Dedupe
+  // them for display so the Favorites tab doesn't show the same poster four
+  // times in a row.
+  const displayed = useMemo(() => {
+    // The current `recommendations` belong to a previous filter — wait for
+    // the reload to land instead of dedup-juddering the stale rows.
+    if (loadedFilter !== filter) return [];
+    if (filter !== "favorites") return recommendations;
+    const seen = new Set<string>();
+    return recommendations.filter((rec) => {
+      const key = `${rec.type}::${(rec.title ?? "").trim().toLowerCase()}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [filter, loadedFilter, recommendations]);
+
+  const rowCount = Math.ceil(displayed.length / colCount);
 
   const rowVirtualizer = useWindowVirtualizer({
     count: rowCount,
@@ -285,6 +327,7 @@ const AccountHistoryPage = () => {
         } else {
           setRecommendations(data);
         }
+        setLoadedFilter(filter);
       } catch (error) {
         console.error("Error loading recommendations:", error);
         setRecommendations([]);
@@ -297,24 +340,26 @@ const AccountHistoryPage = () => {
   }, [filter, sortBy]);
 
   const handleToggleFavorite = async (recommendationId: string) => {
-    const { error } = await databaseService.toggleFavorite(recommendationId);
+    const { error, affectedIds, nextValue } =
+      await databaseService.toggleFavorite(recommendationId);
     if (error) {
       toast.error(t("toasts.favoriteFailed"));
-    } else {
-      const rec = recommendations.find((r) => r.id === recommendationId);
-      toast.success(
-        rec?.is_favorited
-          ? t("toasts.favoriteRemoved")
-          : t("toasts.favoriteAdded"),
-      );
-      setRecommendations((prev) =>
-        prev.map((r) =>
-          r.id === recommendationId
-            ? { ...r, is_favorited: !r.is_favorited }
-            : r,
-        ),
-      );
+      return;
     }
+    toast.success(
+      nextValue
+        ? t("toasts.favoriteAdded")
+        : t("toasts.favoriteRemoved"),
+    );
+    // The server flipped every duplicate of this title — mirror that in
+    // local state so the heart updates on each matching row, not just the
+    // one the user tapped.
+    const affected = new Set(affectedIds);
+    setRecommendations((prev) =>
+      prev.map((r) =>
+        affected.has(r.id) ? { ...r, is_favorited: nextValue } : r,
+      ),
+    );
   };
 
   const handleDeleteRecommendation = async (recommendationId: string) => {
@@ -347,16 +392,16 @@ const AccountHistoryPage = () => {
   };
 
   const stats = useMemo(() => {
-    const favorites = recommendations.filter((rec) => rec.is_favorited).length;
-    const movies = recommendations.filter((rec) => rec.type === "movie").length;
-    const books = recommendations.filter((rec) => rec.type === "book").length;
+    const favorites = displayed.filter((rec) => rec.is_favorited).length;
+    const movies = displayed.filter((rec) => rec.type === "movie").length;
+    const books = displayed.filter((rec) => rec.type === "book").length;
     return {
-      total: recommendations.length,
+      total: displayed.length,
       favorites,
       movies,
       books,
     };
-  }, [recommendations]);
+  }, [displayed]);
 
   if (!ready) {
     return <PageLoader text={tc("loading")} />;
@@ -407,9 +452,46 @@ const AccountHistoryPage = () => {
             </div>
           </div>
 
+          {/* Mobile pill nav — sidebar below stays for md+. */}
+          <div className="mb-4 md:hidden">
+            <SegmentedControl<HistoryFilter>
+              layoutId="history-mobile-tabs"
+              value={filter}
+              onChange={setFilter}
+              size="sm"
+              ariaLabel={t("filtersAria")}
+              options={[
+                {
+                  value: "all",
+                  label: t("filters.all"),
+                  icon: <LayoutGrid size={13} />,
+                  pillClassName: "bg-indigo-500",
+                },
+                {
+                  value: "movies",
+                  label: t("filters.movies"),
+                  icon: <Film size={13} />,
+                  pillClassName: "bg-indigo-500",
+                },
+                {
+                  value: "books",
+                  label: t("filters.books"),
+                  icon: <BookOpen size={13} />,
+                  pillClassName: "bg-indigo-500",
+                },
+                {
+                  value: "favorites",
+                  label: t("filters.favorites"),
+                  icon: <Star size={13} />,
+                  pillClassName: "bg-rose-500",
+                },
+              ]}
+            />
+          </div>
+
           {/* Sidebar + content layout */}
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6">
-            <SidebarNavShell>
+            <SidebarNavShell className="hidden md:flex">
               <nav aria-label={t("filtersAria")} className="flex-1">
                 <SidebarNavGroup label={t("filtersGroup")} />
                 {[
@@ -481,7 +563,7 @@ const AccountHistoryPage = () => {
           </div>
 
           {/* Card Grid */}
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="popLayout">
           {!loading && (
           <motion.div
             key={filter}
@@ -490,7 +572,7 @@ const AccountHistoryPage = () => {
             exit={{ opacity: 0, x: filterSlideDir * -30 }}
             transition={{ duration: 0.2 }}
           >
-          {recommendations.length === 0 ? (
+          {displayed.length === 0 && loadedFilter === filter ? (
             <div className="rounded-3xl border border-slate-200/80 bg-white/80 p-10 text-center shadow-sm backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/65">
               <h2 className="text-2xl font-black tracking-tight">
                 {t("empty.title")}
@@ -507,7 +589,7 @@ const AccountHistoryPage = () => {
               >
                 {rowVirtualizer.getVirtualItems().map((virtualRow) => {
                   const startIdx = virtualRow.index * colCount;
-                  const rowItems = recommendations.slice(startIdx, startIdx + colCount);
+                  const rowItems = displayed.slice(startIdx, startIdx + colCount);
                   return (
                     <div
                       key={virtualRow.key}

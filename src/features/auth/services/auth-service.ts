@@ -455,6 +455,10 @@ class AuthService {
           last_login: profile.last_login,
           backup_email: profile.backup_email || undefined,
           avatar_url: profile.avatar_url || undefined,
+          content_tone:
+            (profile.content_tone as "family" | "standard" | null) ?? null,
+          locale: profile.locale ?? null,
+          setup_completed_at: profile.setup_completed_at ?? null,
         },
         error: null,
       };

@@ -10,6 +10,7 @@ import {
 import React, { useState } from "react";
 import { BrandWordmark } from "@/components/brand-wordmark";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 interface NavbarProps {
   children: React.ReactNode;
@@ -46,7 +47,14 @@ export const Navbar = ({ children, className }: NavbarProps) => {
   return (
     <motion.nav
       aria-label="Main navigation"
-      style={{ top: "var(--site-banner-height, 0px)" }}
+      style={{
+        top: "var(--site-banner-height, 0px)",
+        // Compositor-layer isolation so page-level paint events (segmented
+        // pills, AnimatePresence swaps) don't wobble the fixed navbar on
+        // iOS Safari.
+        transform: "translateZ(0)",
+        willChange: "transform",
+      }}
       className={cn("fixed inset-x-0 z-50 w-full py-4", className)}
       initial={false}
       animate={{ y: 0, opacity: 1 }}
@@ -95,6 +103,7 @@ export const NavItems = ({
   className,
   scrolled = false,
 }: NavItemsProps) => {
+  const pathname = usePathname();
   const handleAnchorClick = (
     event: React.MouseEvent<HTMLElement>,
     link: string,
@@ -106,11 +115,7 @@ export const NavItems = ({
     let hash: string | null = null;
     if (link.startsWith("#")) {
       hash = link;
-    } else if (
-      link.startsWith("/#") &&
-      typeof window !== "undefined" &&
-      window.location.pathname === "/"
-    ) {
+    } else if (link.startsWith("/#") && pathname === "/") {
       hash = link.slice(1);
     }
     if (!hash) return;
@@ -162,9 +167,7 @@ export const NavItems = ({
         // Cross-page anchor: let <Link> handle navigation normally.
         const isSamePageAnchor =
           item.link.startsWith("#") ||
-          (item.link.startsWith("/#") &&
-            typeof window !== "undefined" &&
-            window.location.pathname === "/");
+          (item.link.startsWith("/#") && pathname === "/");
 
         if (isSamePageAnchor) {
           return (
@@ -201,7 +204,6 @@ export const MobileNav = ({ children, className, scrolled = false }: MobileNavPr
     animate={{
       width: "calc(100% - 1rem)",
       borderRadius: scrolled ? 999 : 16,
-      y: scrolled ? 4 : 0,
     }}
     transition={{ duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
     className={cn(

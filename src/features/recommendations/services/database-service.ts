@@ -214,37 +214,66 @@ class DatabaseService {
   }
 
   /**
-   * Toggle favorite status of a recommendation
+   * Toggle favorite status of a recommendation. Flips every row in the
+   * current user's history that shares the same (type, title) — so when
+   * the engine has repeated the same pick across quizzes, favoriting one
+   * favorites them all and they stay in sync.
+   *
+   * Title matching is case-insensitive via ILIKE; the few %/_ wildcards
+   * a title could contain are escaped first.
    */
   async toggleFavorite(
     recommendationId: string,
-  ): Promise<{ error: string | null }> {
+  ): Promise<{
+    error: string | null;
+    /** All recommendation IDs that flipped, including the original. */
+    affectedIds: string[];
+    /** The new favorited state applied to all affected rows. */
+    nextValue: boolean;
+  }> {
     try {
       const { data: rec, error: fetchError } = await supabase
         .from("recommendations")
-        .select("is_favorited")
+        .select("id, type, title, is_favorited")
         .eq("id", recommendationId)
         .single();
 
       if (fetchError) {
         console.error("Error fetching recommendation:", fetchError);
-        return { error: fetchError.message };
+        return {
+          error: fetchError.message,
+          affectedIds: [],
+          nextValue: false,
+        };
       }
 
-      const { error } = await supabase
+      const nextValue = !rec.is_favorited;
+      const escapedTitle = String(rec.title).replace(/[\\%_]/g, "\\$&");
+
+      const { data: updated, error } = await supabase
         .from("recommendations")
-        .update({ is_favorited: !rec.is_favorited })
-        .eq("id", recommendationId);
+        .update({ is_favorited: nextValue })
+        .eq("type", rec.type)
+        .ilike("title", escapedTitle)
+        .select("id");
 
       if (error) {
         console.error("Error updating favorite status:", error);
-        return { error: error.message };
+        return { error: error.message, affectedIds: [], nextValue };
       }
 
-      return { error: null };
+      return {
+        error: null,
+        affectedIds: (updated ?? []).map((row) => row.id as string),
+        nextValue,
+      };
     } catch (err) {
       console.error("Unexpected error toggling favorite:", err);
-      return { error: "Failed to toggle favorite" };
+      return {
+        error: "Failed to toggle favorite",
+        affectedIds: [],
+        nextValue: false,
+      };
     }
   }
 

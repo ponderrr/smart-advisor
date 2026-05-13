@@ -78,6 +78,13 @@
       "removedToast": "Backup email removed.",
       "remove": "Remove"
     },
+    "theme": {
+      "title": "Appearance",
+      "description": "Match your system or pin a fixed theme.",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
     "content": {
       "title": "Content Preferences",
       "description": "Set your default recommendation behavior.",
@@ -112,13 +119,16 @@
       "questionWord": "{count, plural, one {Question} other {Questions}}",
       "depth": {
         "quick": "Quick and focused",
+        "focused": "Sharp and specific",
         "balanced": "Balanced depth",
+        "thorough": "Thorough exploration",
         "comprehensive": "Comprehensive detail"
       },
       "rangeAria": "Default questions per quiz",
       "appliesNext": "Applies on next quiz",
       "save": "Save Preferences",
-      "savedToast": "Content preferences saved."
+      "savedToast": "Content preferences saved.",
+      "saveError": "We couldn't save your preferences. Please try again."
     },
     "integrations": {
       "title": "Integrations",
@@ -144,7 +154,10 @@
       "password": "change your password",
       "content": "save content preferences",
       "disable": "disable your account",
-      "delete": "permanently delete your account"
+      "delete": "permanently delete your account",
+      "addAuthenticator": "add another authenticator",
+      "setBackupEmail": "set your backup email",
+      "removeBackupEmail": "remove your backup email"
     },
     "verifyModal": {
       "title": "Verify Identity",
@@ -270,6 +283,7 @@
       ]
     },
     "groupQuizCta": {
+      "newFeature": "New Feature",
       "eyebrow": "Group Quiz",
       "titleLead": "Find a Pick",
       "titleHighlight": "Together",
@@ -419,6 +433,24 @@
     "yes": "Yes",
     "no": "No"
   },
+  "MobileNav": {
+    "ariaLabel": "Primary navigation",
+    "dashboard": "Dashboard",
+    "library": "Library",
+    "history": "History",
+    "profile": "Profile",
+    "quiz": "Quiz",
+    "quizMenu": {
+      "ariaLabel": "Pick a quiz to start",
+      "title": "Start a quiz",
+      "subtitle": "Pick the kind of session you want.",
+      "solo": "Solo Quiz",
+      "soloDesc": "A short personality quiz, just for you.",
+      "group": "Group Quiz",
+      "groupDesc": "Take it together with friends in a shared room.",
+      "close": "Cancel"
+    }
+  },
   "System": {
     "error": {
       "networkTitle": "Can't reach our servers",
@@ -531,6 +563,11 @@
         "prompt": "Remembered your password?",
         "cta": "Sign in"
       }
+    },
+    "modeToggle": {
+      "ariaLabel": "Choose sign in or sign up",
+      "signin": "Sign in",
+      "signup": "Sign up"
     },
     "mfaChallenge": {
       "successTitle": "Verified",
@@ -689,7 +726,11 @@
       "currentBadge": "Current",
       "ipLabel": "IP {ip}",
       "lastActive": "Last active {time}",
-      "signOutAria": "Sign out of {device}"
+      "signOutAria": "Sign out of {device}",
+      "verifyAction": {
+        "signOut": "sign out of {device}",
+        "signOutAll": "sign out of all devices"
+      }
     },
     "mfaSetup": {
       "goBack": "Go back",
@@ -1103,7 +1144,8 @@
     "status": {
       "finished": "Finished",
       "in_progress": "In progress",
-      "wishlist": "Wishlist"
+      "wishlist": "Wishlist",
+      "dropped": "Gave up"
     },
     "rating": {
       "1": "Not for me",
@@ -1126,6 +1168,14 @@
     "updated": "Library entry updated",
     "editAria": "Edit {title}",
     "removeAria": "Remove {title}",
+    "statusChangeAria": "Change status of {title}",
+    "wishlistButton": {
+      "add": "Wishlist",
+      "onWishlist": "On wishlist",
+      "added": "Added to your wishlist",
+      "ariaAdd": "Add {title} to your wishlist",
+      "ariaOnWishlist": "{title} is on your wishlist"
+    },
     "editDialog": {
       "ariaLabel": "Edit library entry",
       "title": "Edit entry",
@@ -1136,6 +1186,34 @@
       "save": "Save changes",
       "cancel": "Cancel"
     }
+  },
+  "Onboarding": {
+    "eyebrow": "Almost done",
+    "title": "Quick check",
+    "subtitle": "Make sure we've got this right before you jump in.",
+    "readonly": {
+      "email": "Email",
+      "age": "Age",
+      "editLater": "You can change these later in settings."
+    },
+    "fields": {
+      "displayName": {
+        "label": "Display name",
+        "placeholder": "How we should call you"
+      },
+      "language": {
+        "label": "Language",
+        "en": "English",
+        "es": "Español"
+      }
+    },
+    "submit": "Looks good",
+    "skip": "Skip for now",
+    "errors": {
+      "displayNameRequired": "Please enter a display name.",
+      "saveFailed": "We couldn't save your setup. Please try again."
+    },
+    "savedToast": "All set — welcome aboard."
   },
   "Quiz": {
     "category": "Quiz setup",
@@ -1178,9 +1256,12 @@
       "questionsLabel": "{count, plural, one {Question} other {Questions}}",
       "tone": {
         "quick": "Quick and focused",
+        "focused": "Sharp and specific",
         "balanced": "Balanced depth",
+        "thorough": "Thorough exploration",
         "comprehensive": "Comprehensive detail"
       },
+      "estimate": "{minutes, plural, one {# minute} other {# minutes}}",
       "ariaCount": "Number of questions",
       "back": "Format",
       "continue": "Continue",
@@ -1322,7 +1403,8 @@
       "overview": "Overview",
       "picks": "Picks",
       "recentPicks": "Recent Picks",
-      "genres": "Genres"
+      "genres": "Genres",
+      "milestones": "Milestones"
     },
     "stats": {
       "total": "Total picks",
@@ -1435,15 +1517,74 @@
         "earnedSummary": "{earned} of {total} earned",
         "unlocked": "Unlocked",
         "progress": "{progress}/{target}",
+        "unlockedToast": "Milestone unlocked: {label}",
+        "tierCompleteToast": "Tier complete: {tier}! 🏆",
+        "tapForDetails": "Tap a milestone to see how to unlock it",
+        "summaryCta": "Open Milestones",
+        "summaryHint": "See every milestone, grouped by tier.",
+        "tiers": {
+          "easy": "Easy",
+          "medium": "Medium",
+          "hard": "Hard",
+          "master": "Master"
+        },
         "items": {
           "firstPick": "First Pick",
           "tenPicks": "10 Picks",
+          "twentyFivePicks": "25 Picks",
+          "halfCentury": "Half Century",
+          "centurion": "Centurion",
           "wideTaste": "Wide Taste",
+          "genreExplorer": "Genre Explorer",
+          "genreMaster": "Genre Master",
           "cinephile": "Cinephile",
+          "cinemaMaster": "Cinema Master",
           "bookworm": "Bookworm",
+          "voracious": "Voracious Reader",
           "curator": "Curator",
+          "maven": "Maven",
           "reflective": "Reflective",
-          "weekStreak": "Week Streak"
+          "critic": "Critic",
+          "librarian": "Librarian",
+          "completionist": "Completionist",
+          "weekStreak": "Week Streak",
+          "marathon": "Marathon",
+          "legend": "Legend",
+          "movieMogul": "Movie Mogul",
+          "libraryRoyal": "Library Royal",
+          "polymath": "Polymath",
+          "patron": "Patron",
+          "tastemaker": "Tastemaker",
+          "yearLong": "Year-Long"
+        },
+        "descriptions": {
+          "firstPick": "Get your first recommendation from the quiz.",
+          "tenPicks": "Get 10 recommendations across any mix of quizzes.",
+          "twentyFivePicks": "Stack up 25 recommendations.",
+          "halfCentury": "Reach 50 recommendations.",
+          "centurion": "100 recommendations is no joke.",
+          "wideTaste": "Get recommendations covering 5 different genres.",
+          "genreExplorer": "Branch out to 10 different genres.",
+          "genreMaster": "Cover 20 different genres.",
+          "cinephile": "Collect 10 movie recommendations.",
+          "cinemaMaster": "Collect 50 movie recommendations.",
+          "bookworm": "Collect 10 book recommendations.",
+          "voracious": "Collect 50 book recommendations.",
+          "curator": "Favorite 5 recommendations in your history.",
+          "maven": "Favorite 25 recommendations.",
+          "reflective": "Rate 5 items in your library.",
+          "critic": "Rate 25 items in your library.",
+          "librarian": "Log 20 items into your library.",
+          "completionist": "Mark 10 library items as finished.",
+          "weekStreak": "Use Smart Advisor 7 days in a row.",
+          "marathon": "Keep a 30-day Smart Advisor streak.",
+          "legend": "Reach 250 recommendations — a true legend.",
+          "movieMogul": "Collect 100 movie recommendations.",
+          "libraryRoyal": "Collect 100 book recommendations.",
+          "polymath": "Get recommendations across 30 different genres.",
+          "patron": "Favorite 50 recommendations.",
+          "tastemaker": "Rate 100 items in your library.",
+          "yearLong": "Keep a 365-day Smart Advisor streak. Yes, really."
         }
       },
       "library": {
@@ -1453,6 +1594,13 @@
         "emptyLead": "Nothing logged yet. Hit",
         "emptyAction": "I watched / read this",
         "emptyTail": "on a result and it'll show up here as a taste signal for future quizzes."
+      },
+      "inProgress": {
+        "eyebrow": "Currently",
+        "title": "Pick Up Where You Left Off",
+        "markFinished": "Mark finished",
+        "markedFinishedToast": "Nice — open your library to rate \"{title}\".",
+        "viewAll": "View all"
       },
       "picks": {
         "filterAria": "Recent picks filter",

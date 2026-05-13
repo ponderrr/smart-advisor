@@ -78,6 +78,13 @@
       "removedToast": "Correo de respaldo eliminado.",
       "remove": "Quitar"
     },
+    "theme": {
+      "title": "Apariencia",
+      "description": "Sigue al sistema o fija un tema concreto.",
+      "light": "Claro",
+      "dark": "Oscuro",
+      "system": "Sistema"
+    },
     "content": {
       "title": "Preferencias de contenido",
       "description": "Define el comportamiento por defecto de tus recomendaciones.",
@@ -112,13 +119,16 @@
       "questionWord": "{count, plural, one {Pregunta} other {Preguntas}}",
       "depth": {
         "quick": "Rápido y enfocado",
+        "focused": "Preciso y específico",
         "balanced": "Profundidad equilibrada",
+        "thorough": "Exploración a fondo",
         "comprehensive": "Detalle completo"
       },
       "rangeAria": "Preguntas por defecto por cuestionario",
       "appliesNext": "Se aplica en el próximo cuestionario",
       "save": "Guardar preferencias",
-      "savedToast": "Preferencias de contenido guardadas."
+      "savedToast": "Preferencias de contenido guardadas.",
+      "saveError": "No pudimos guardar tus preferencias. Inténtalo de nuevo."
     },
     "integrations": {
       "title": "Integraciones",
@@ -144,7 +154,10 @@
       "password": "cambiar tu contraseña",
       "content": "guardar las preferencias de contenido",
       "disable": "desactivar tu cuenta",
-      "delete": "eliminar permanentemente tu cuenta"
+      "delete": "eliminar permanentemente tu cuenta",
+      "addAuthenticator": "añadir otro autenticador",
+      "setBackupEmail": "configurar tu correo de respaldo",
+      "removeBackupEmail": "eliminar tu correo de respaldo"
     },
     "verifyModal": {
       "title": "Verificar identidad",
@@ -270,6 +283,7 @@
       ]
     },
     "groupQuizCta": {
+      "newFeature": "Nueva función",
       "eyebrow": "Cuestionario en grupo",
       "titleLead": "Encuentra una recomendación",
       "titleHighlight": "juntos",
@@ -419,6 +433,24 @@
     "yes": "Sí",
     "no": "No"
   },
+  "MobileNav": {
+    "ariaLabel": "Navegación principal",
+    "dashboard": "Panel",
+    "library": "Biblioteca",
+    "history": "Historial",
+    "profile": "Perfil",
+    "quiz": "Cuestionario",
+    "quizMenu": {
+      "ariaLabel": "Elige un cuestionario para empezar",
+      "title": "Empezar un cuestionario",
+      "subtitle": "Elige el tipo de sesión que quieres.",
+      "solo": "Cuestionario solo",
+      "soloDesc": "Un cuestionario de personalidad corto, solo para ti.",
+      "group": "Cuestionario en grupo",
+      "groupDesc": "Hazlo junto a tus amigos en una sala compartida.",
+      "close": "Cancelar"
+    }
+  },
   "System": {
     "error": {
       "networkTitle": "No podemos conectar con nuestros servidores",
@@ -531,6 +563,11 @@
         "prompt": "¿Recordaste tu contraseña?",
         "cta": "Iniciar sesión"
       }
+    },
+    "modeToggle": {
+      "ariaLabel": "Elige iniciar sesión o registrarte",
+      "signin": "Iniciar sesión",
+      "signup": "Registrarse"
     },
     "mfaChallenge": {
       "successTitle": "Verificado",
@@ -689,7 +726,11 @@
       "currentBadge": "Actual",
       "ipLabel": "IP {ip}",
       "lastActive": "Última actividad {time}",
-      "signOutAria": "Cerrar sesión en {device}"
+      "signOutAria": "Cerrar sesión en {device}",
+      "verifyAction": {
+        "signOut": "cerrar sesión en {device}",
+        "signOutAll": "cerrar sesión en todos los dispositivos"
+      }
     },
     "mfaSetup": {
       "goBack": "Volver",
@@ -1103,7 +1144,8 @@
     "status": {
       "finished": "Terminado",
       "in_progress": "En progreso",
-      "wishlist": "Lista de deseos"
+      "wishlist": "Lista de deseos",
+      "dropped": "Abandonado"
     },
     "rating": {
       "1": "No es para mí",
@@ -1126,6 +1168,14 @@
     "updated": "Entrada de la biblioteca actualizada",
     "editAria": "Editar {title}",
     "removeAria": "Eliminar {title}",
+    "statusChangeAria": "Cambiar estado de {title}",
+    "wishlistButton": {
+      "add": "Lista",
+      "onWishlist": "En tu lista",
+      "added": "Añadido a tu lista de deseos",
+      "ariaAdd": "Añadir {title} a tu lista de deseos",
+      "ariaOnWishlist": "{title} está en tu lista de deseos"
+    },
     "editDialog": {
       "ariaLabel": "Editar entrada de la biblioteca",
       "title": "Editar entrada",
@@ -1136,6 +1186,34 @@
       "save": "Guardar cambios",
       "cancel": "Cancelar"
     }
+  },
+  "Onboarding": {
+    "eyebrow": "Casi listo",
+    "title": "Comprobación rápida",
+    "subtitle": "Verifica que esto sea correcto antes de continuar.",
+    "readonly": {
+      "email": "Correo",
+      "age": "Edad",
+      "editLater": "Puedes cambiar esto luego en ajustes."
+    },
+    "fields": {
+      "displayName": {
+        "label": "Nombre para mostrar",
+        "placeholder": "Cómo deberíamos llamarte"
+      },
+      "language": {
+        "label": "Idioma",
+        "en": "English",
+        "es": "Español"
+      }
+    },
+    "submit": "Todo bien",
+    "skip": "Omitir por ahora",
+    "errors": {
+      "displayNameRequired": "Por favor, introduce un nombre para mostrar.",
+      "saveFailed": "No pudimos guardar tu configuración. Inténtalo de nuevo."
+    },
+    "savedToast": "Listo — bienvenido a bordo."
   },
   "Quiz": {
     "category": "Configuración del cuestionario",
@@ -1178,9 +1256,12 @@
       "questionsLabel": "{count, plural, one {Pregunta} other {Preguntas}}",
       "tone": {
         "quick": "Rápido y enfocado",
+        "focused": "Preciso y específico",
         "balanced": "Profundidad equilibrada",
+        "thorough": "Exploración a fondo",
         "comprehensive": "Detalle completo"
       },
+      "estimate": "{minutes, plural, one {# minuto} other {# minutos}}",
       "ariaCount": "Número de preguntas",
       "back": "Formato",
       "continue": "Continuar",
@@ -1322,7 +1403,8 @@
       "overview": "Resumen",
       "picks": "Recomendaciones",
       "recentPicks": "Recomendaciones recientes",
-      "genres": "Géneros"
+      "genres": "Géneros",
+      "milestones": "Logros"
     },
     "stats": {
       "total": "Recomendaciones totales",
@@ -1435,15 +1517,74 @@
         "earnedSummary": "{earned} de {total} obtenidos",
         "unlocked": "Desbloqueado",
         "progress": "{progress}/{target}",
+        "unlockedToast": "Logro desbloqueado: {label}",
+        "tierCompleteToast": "Nivel completo: {tier} 🏆",
+        "tapForDetails": "Toca un logro para ver cómo desbloquearlo",
+        "summaryCta": "Ver logros",
+        "summaryHint": "Mira todos los logros agrupados por nivel.",
+        "tiers": {
+          "easy": "Fácil",
+          "medium": "Medio",
+          "hard": "Difícil",
+          "master": "Maestro"
+        },
         "items": {
           "firstPick": "Primera recomendación",
           "tenPicks": "10 recomendaciones",
+          "twentyFivePicks": "25 recomendaciones",
+          "halfCentury": "Media centena",
+          "centurion": "Centurión",
           "wideTaste": "Gusto amplio",
+          "genreExplorer": "Explorador de géneros",
+          "genreMaster": "Maestro de géneros",
           "cinephile": "Cinéfilo",
+          "cinemaMaster": "Maestro del cine",
           "bookworm": "Ratón de biblioteca",
+          "voracious": "Lector voraz",
           "curator": "Curador",
+          "maven": "Conocedor",
           "reflective": "Reflexivo",
-          "weekStreak": "Racha semanal"
+          "critic": "Crítico",
+          "librarian": "Bibliotecario",
+          "completionist": "Completista",
+          "weekStreak": "Racha semanal",
+          "marathon": "Maratón",
+          "legend": "Leyenda",
+          "movieMogul": "Magnate del cine",
+          "libraryRoyal": "Realeza literaria",
+          "polymath": "Polímata",
+          "patron": "Mecenas",
+          "tastemaker": "Árbitro del gusto",
+          "yearLong": "Año entero"
+        },
+        "descriptions": {
+          "firstPick": "Obtén tu primera recomendación del cuestionario.",
+          "tenPicks": "Acumula 10 recomendaciones entre todos tus cuestionarios.",
+          "twentyFivePicks": "Acumula 25 recomendaciones.",
+          "halfCentury": "Llega a 50 recomendaciones.",
+          "centurion": "100 recomendaciones, sin broma.",
+          "wideTaste": "Obtén recomendaciones de 5 géneros distintos.",
+          "genreExplorer": "Explora 10 géneros distintos.",
+          "genreMaster": "Cubre 20 géneros distintos.",
+          "cinephile": "Acumula 10 recomendaciones de películas.",
+          "cinemaMaster": "Acumula 50 recomendaciones de películas.",
+          "bookworm": "Acumula 10 recomendaciones de libros.",
+          "voracious": "Acumula 50 recomendaciones de libros.",
+          "curator": "Marca como favoritas 5 recomendaciones en tu historial.",
+          "maven": "Marca como favoritas 25 recomendaciones.",
+          "reflective": "Valora 5 elementos en tu biblioteca.",
+          "critic": "Valora 25 elementos en tu biblioteca.",
+          "librarian": "Registra 20 elementos en tu biblioteca.",
+          "completionist": "Marca 10 elementos como terminados.",
+          "weekStreak": "Usa Smart Advisor 7 días seguidos.",
+          "marathon": "Mantén una racha de 30 días.",
+          "legend": "Alcanza 250 recomendaciones — una leyenda de verdad.",
+          "movieMogul": "Acumula 100 recomendaciones de películas.",
+          "libraryRoyal": "Acumula 100 recomendaciones de libros.",
+          "polymath": "Obtén recomendaciones de 30 géneros distintos.",
+          "patron": "Marca como favoritas 50 recomendaciones.",
+          "tastemaker": "Valora 100 elementos en tu biblioteca.",
+          "yearLong": "Mantén una racha de 365 días. En serio."
         }
       },
       "library": {
@@ -1453,6 +1594,13 @@
         "emptyLead": "Aún no hay nada registrado. Pulsa",
         "emptyAction": "Vi / leí esto",
         "emptyTail": "en un resultado y aparecerá aquí como señal de gusto para futuros cuestionarios."
+      },
+      "inProgress": {
+        "eyebrow": "Actualmente",
+        "title": "Continúa donde lo dejaste",
+        "markFinished": "Marcar como terminado",
+        "markedFinishedToast": "Genial — abre tu biblioteca para valorar \"{title}\".",
+        "viewAll": "Ver todo"
       },
       "picks": {
         "filterAria": "Filtro de recomendaciones recientes",

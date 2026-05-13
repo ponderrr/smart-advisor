@@ -333,7 +333,7 @@ const QuestionnairePage = () => {
       <motion.div
         layout
         transition={{ layout: { duration: 0.32, ease: [0.22, 1, 0.36, 1] } }}
-        className="rounded-2xl border border-slate-200/70 bg-white/85 p-4 shadow-sm backdrop-blur-md sm:rounded-3xl sm:p-8 dark:border-slate-700/60 dark:bg-slate-900/65"
+        className="rounded-2xl border border-indigo-200/60 bg-gradient-to-br from-indigo-50/80 to-white p-4 shadow-sm backdrop-blur-md sm:rounded-3xl sm:p-8 dark:border-indigo-500/30 dark:from-indigo-500/10 dark:to-slate-900/40"
       >
         <AnimatePresence mode="wait">
           {currentQuestion && (

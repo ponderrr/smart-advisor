@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Sparkles, Users, X } from "lucide-react";
+import { motion } from "motion/react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
@@ -10,7 +11,7 @@ import { useAuth } from "@/features/auth/hooks/use-auth";
 import { groupQuizService } from "@/features/group-quiz/services/group-quiz-service";
 import type { QuizContentType } from "@/features/group-quiz/types/group-quiz";
 import { AppNavbar } from "@/components/app-navbar";
-import { cn } from "@/lib/utils";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 
 const CONTENT_TYPE_IDS: QuizContentType[] = ["both", "movie", "book"];
 
@@ -27,6 +28,7 @@ const GroupQuizLandingPage = () => {
   const router = useRouter();
   const { user } = useAuth();
   const t = useTranslations("GroupQuiz.lobby");
+  const tQuestionCount = useTranslations("Quiz.questionCount");
 
   const [hostName, setHostName] = useState("");
   const [hostContentType, setHostContentType] = useState<QuizContentType>("both");
@@ -178,7 +180,7 @@ const GroupQuizLandingPage = () => {
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {/* Host */}
-            <section className="rounded-3xl border border-slate-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-6">
+            <section className="rounded-3xl border border-indigo-200/60 bg-gradient-to-br from-indigo-50/80 to-white p-5 shadow-sm backdrop-blur-md dark:border-indigo-500/30 dark:from-indigo-500/10 dark:to-slate-900/40 sm:p-6">
               <div className="mb-4 flex items-center gap-2">
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">
                   <Sparkles size={14} />
@@ -207,57 +209,93 @@ const GroupQuizLandingPage = () => {
               </label>
 
               <div className="mb-3">
-                <span className="mb-1 block text-[11px] font-black uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+                <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
                   {t("host.typeLabel")}
                 </span>
-                <div className="flex flex-wrap gap-2">
-                  {CONTENT_TYPE_IDS.map((id) => (
-                    <button
-                      key={id}
-                      type="button"
-                      onClick={() => setHostContentType(id)}
-                      className={cn(
-                        "rounded-full border px-3.5 py-1.5 text-xs font-bold tracking-tight transition-all duration-200 active:scale-[0.98]",
-                        hostContentType === id
-                          ? "border-indigo-500 bg-indigo-500 text-white shadow-sm shadow-indigo-500/20"
-                          : "border-slate-200 bg-white/70 text-slate-600 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-300",
-                      )}
-                    >
-                      {t(`contentTypes.${id}`)}
-                    </button>
-                  ))}
-                </div>
+                <SegmentedControl<QuizContentType>
+                  layoutId="group-quiz-content-type"
+                  value={hostContentType}
+                  onChange={setHostContentType}
+                  size="sm"
+                  ariaLabel={t("host.typeLabel")}
+                  options={CONTENT_TYPE_IDS.map((id) => ({
+                    value: id,
+                    label: t(`contentTypes.${id}`),
+                    pillClassName: "bg-indigo-500",
+                  }))}
+                />
               </div>
 
               <div className="mb-4">
                 <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
                   {t("host.questionsLabel")}
                 </span>
-                <div
-                  role="radiogroup"
-                  aria-label={t("host.questionsAria")}
-                  className="grid grid-cols-5 gap-1.5 sm:grid-cols-7"
-                >
-                  {Array.from({ length: 13 }, (_, i) => i + 3).map((n) => {
-                    const active = questionCount === n;
-                    return (
-                      <button
-                        key={n}
-                        type="button"
-                        role="radio"
-                        aria-checked={active}
-                        onClick={() => setQuestionCount(n)}
-                        className={cn(
-                          "rounded-xl border py-2 text-sm font-black tracking-tight transition-all duration-200 active:scale-[0.96]",
-                          active
-                            ? "border-indigo-500 bg-indigo-500 text-white shadow-sm shadow-indigo-500/20"
-                            : "border-slate-200 bg-white/70 text-slate-600 hover:border-slate-300 hover:bg-white dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/60",
-                        )}
-                      >
-                        {n}
-                      </button>
+                <div className="rounded-2xl border border-slate-200/80 bg-gradient-to-br from-indigo-50/60 via-white to-violet-50/60 px-4 py-5 dark:border-slate-700/70 dark:from-indigo-500/5 dark:via-slate-900/40 dark:to-violet-500/5">
+                  <div className="mb-4 text-center">
+                    <motion.div
+                      key={questionCount}
+                      initial={{ scale: 0.9, opacity: 0.7 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.18, ease: "easeOut" }}
+                      className="bg-gradient-to-br from-indigo-500 to-violet-500 bg-clip-text text-5xl font-black tracking-tighter text-transparent"
+                    >
+                      {questionCount}
+                    </motion.div>
+                  </div>
+                  <input
+                    type="range"
+                    min={3}
+                    max={15}
+                    value={questionCount}
+                    onChange={(e) =>
+                      setQuestionCount(parseInt(e.target.value, 10))
+                    }
+                    aria-label={t("host.questionsAria")}
+                    className="w-full cursor-pointer accent-indigo-500"
+                  />
+                  <div className="mt-1 flex justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                    <span>3</span>
+                    <span>15</span>
+                  </div>
+                  {(() => {
+                    // Same 5-tier mapping as /question-count. Keyed on the
+                    // tier name so the label only animates when the slider
+                    // crosses a tier boundary, not on every tick.
+                    const tier =
+                      questionCount <= 4
+                        ? "quick"
+                        : questionCount <= 7
+                          ? "focused"
+                          : questionCount <= 10
+                            ? "balanced"
+                            : questionCount <= 13
+                              ? "thorough"
+                              : "comprehensive";
+                    const estimateMin = Math.max(
+                      1,
+                      Math.ceil((questionCount * 18 + 30) / 60),
                     );
-                  })}
+                    return (
+                      <>
+                        <motion.p
+                          key={tier}
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.22 }}
+                          className="mt-3 text-center text-sm font-bold tracking-tight text-slate-700 dark:text-slate-200"
+                        >
+                          {tQuestionCount(`tone.${tier}`)}
+                        </motion.p>
+                        <div className="mt-3 flex justify-center">
+                          <span className="inline-flex items-center rounded-full border border-indigo-200/70 bg-white/80 px-5 py-2 text-base font-black tracking-tight text-indigo-700 shadow-sm dark:border-indigo-500/40 dark:bg-slate-900/60 dark:text-indigo-300 sm:text-lg">
+                            {tQuestionCount("estimate", {
+                              minutes: estimateMin,
+                            })}
+                          </span>
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
 
@@ -265,31 +303,33 @@ const GroupQuizLandingPage = () => {
                 <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
                   {t("host.maxPlayersLabel")}
                 </span>
-                <div
-                  role="radiogroup"
-                  aria-label={t("host.maxPlayersAria")}
-                  className="grid grid-cols-5 gap-1.5 sm:grid-cols-6"
-                >
-                  {Array.from({ length: 11 }, (_, i) => i + 2).map((n) => {
-                    const active = maxParticipants === n;
-                    return (
-                      <button
-                        key={n}
-                        type="button"
-                        role="radio"
-                        aria-checked={active}
-                        onClick={() => setMaxParticipants(n)}
-                        className={cn(
-                          "rounded-xl border py-2 text-sm font-black tracking-tight transition-all duration-200 active:scale-[0.96]",
-                          active
-                            ? "border-indigo-500 bg-indigo-500 text-white shadow-sm shadow-indigo-500/20"
-                            : "border-slate-200 bg-white/70 text-slate-600 hover:border-slate-300 hover:bg-white dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/60",
-                        )}
-                      >
-                        {n}
-                      </button>
-                    );
-                  })}
+                <div className="rounded-2xl border border-slate-200/80 bg-gradient-to-br from-rose-50/60 via-white to-amber-50/60 px-4 py-5 dark:border-slate-700/70 dark:from-rose-500/5 dark:via-slate-900/40 dark:to-amber-500/5">
+                  <div className="mb-4 text-center">
+                    <motion.div
+                      key={maxParticipants}
+                      initial={{ scale: 0.9, opacity: 0.7 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.18, ease: "easeOut" }}
+                      className="bg-gradient-to-br from-rose-500 to-amber-500 bg-clip-text text-5xl font-black tracking-tighter text-transparent"
+                    >
+                      {maxParticipants}
+                    </motion.div>
+                  </div>
+                  <input
+                    type="range"
+                    min={2}
+                    max={12}
+                    value={maxParticipants}
+                    onChange={(e) =>
+                      setMaxParticipants(parseInt(e.target.value, 10))
+                    }
+                    aria-label={t("host.maxPlayersAria")}
+                    className="w-full cursor-pointer accent-rose-500"
+                  />
+                  <div className="mt-1 flex justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                    <span>2</span>
+                    <span>12</span>
+                  </div>
                 </div>
               </div>
 
@@ -327,7 +367,7 @@ const GroupQuizLandingPage = () => {
             </section>
 
             {/* Join */}
-            <section className="rounded-3xl border border-slate-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-6">
+            <section className="rounded-3xl border border-emerald-200/60 bg-gradient-to-br from-emerald-50/80 to-white p-5 shadow-sm backdrop-blur-md dark:border-emerald-500/30 dark:from-emerald-500/10 dark:to-slate-900/40 sm:p-6">
               <div className="mb-4 flex items-center gap-2">
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300">
                   <Users size={14} />

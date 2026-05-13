@@ -19,10 +19,9 @@ function MfaSetupContent() {
   const tc = useTranslations("Common");
   const [mounted, setMounted] = useState(false);
 
-  const completeTarget = getMfaSetupCompleteTarget(
-    searchParams?.get("from") ?? null,
-  );
-  const skipTarget = getMfaSetupSkipTarget();
+  const fromParam = searchParams?.get("from") ?? null;
+  const completeTarget = getMfaSetupCompleteTarget(fromParam);
+  const skipTarget = getMfaSetupSkipTarget(fromParam);
 
   useEffect(() => {
     setMounted(true);

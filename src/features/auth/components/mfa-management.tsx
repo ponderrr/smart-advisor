@@ -27,12 +27,17 @@ interface MfaManagementProps {
   mfaEnabled: boolean;
   onMfaStatusChange?: () => void;
   onAddAuthenticator?: () => void;
+  /** True while the add-authenticator modal is open in the parent. Lets the
+   *  Add button read as "Please wait..." instead of flashing a green check
+   *  on the synchronous handler. */
+  addingAuthenticator?: boolean;
 }
 
 export const MfaManagement = ({
   mfaEnabled,
   onMfaStatusChange,
   onAddAuthenticator,
+  addingAuthenticator = false,
 }: MfaManagementProps) => {
   const t = useTranslations("Auth.mfaManagement");
 
@@ -401,6 +406,7 @@ export const MfaManagement = ({
         {mfaEnabled && onAddAuthenticator ? (
           <StatefulButton
             onClick={onAddAuthenticator}
+            state={addingAuthenticator ? "loading" : "idle"}
             className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
           >
             {t("addAuthenticator")}

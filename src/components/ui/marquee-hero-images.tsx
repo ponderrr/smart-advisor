@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +12,71 @@ interface MarqueeRowProps {
 
 const fadeMask =
   "linear-gradient(to right, transparent, black 6%, black 94%, transparent)";
+
+interface MarqueeTileProps {
+  src: string;
+  delay: number;
+}
+
+const MarqueeTile = memo(function MarqueeTile({
+  src,
+  delay,
+}: MarqueeTileProps) {
+  const [displaySrc, setDisplaySrc] = useState(src);
+  const [incomingSrc, setIncomingSrc] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    if (!src || src === displaySrc || src === incomingSrc) return;
+    const loader = new Image();
+    loader.src = src;
+    loader.onload = () => setIncomingSrc(src);
+    loader.onerror = () => setIncomingSrc(src);
+  }, [src, displaySrc, incomingSrc]);
+
+  return (
+    <motion.div
+      className="shrink-0 pr-3 sm:pr-4"
+      initial={mounted ? false : { opacity: 0, filter: "blur(6px)" }}
+      animate={{ opacity: 1, filter: "blur(0px)" }}
+      transition={{
+        duration: 0.55,
+        delay,
+        ease: [0.25, 0.1, 0.25, 1],
+      }}
+    >
+      <div className="relative aspect-[2/3] h-28 overflow-hidden rounded-lg opacity-70 ring-1 ring-black/10 sm:h-36 md:h-44 dark:opacity-55 dark:ring-white/10">
+        {!!displaySrc && (
+          <img
+            src={displaySrc}
+            alt=""
+            loading="eager"
+            decoding="async"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        )}
+        {incomingSrc && (
+          <motion.img
+            src={incomingSrc}
+            alt=""
+            loading="eager"
+            decoding="async"
+            initial={{ opacity: 0, filter: "blur(10px)" }}
+            animate={{ opacity: 1, filter: "blur(0px)" }}
+            transition={{ duration: 0.55, ease: "easeOut" }}
+            onAnimationComplete={() => {
+              setDisplaySrc(incomingSrc);
+              setIncomingSrc(null);
+            }}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        )}
+      </div>
+    </motion.div>
+  );
+});
 
 const MarqueeRow = ({
   images,
@@ -33,27 +98,11 @@ const MarqueeRow = ({
         transition={{ duration, ease: "linear", repeat: Infinity }}
       >
         {loop.map((src, i) => (
-          <motion.div
-            key={`${src}-${i}`}
-            className="shrink-0 pr-3 sm:pr-4"
-            initial={{ opacity: 0, filter: "blur(6px)" }}
-            animate={{ opacity: 1, filter: "blur(0px)" }}
-            transition={{
-              duration: 0.55,
-              delay: (i % images.length) * 0.06,
-              ease: [0.25, 0.1, 0.25, 1],
-            }}
-          >
-            <div className="relative aspect-[2/3] h-28 overflow-hidden rounded-lg opacity-70 ring-1 ring-black/10 sm:h-36 md:h-44 dark:opacity-55 dark:ring-white/10">
-              <img
-                src={src}
-                alt=""
-                loading="eager"
-                decoding="async"
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-            </div>
-          </motion.div>
+          <MarqueeTile
+            key={i}
+            src={src}
+            delay={(i % images.length) * 0.06}
+          />
         ))}
       </motion.div>
     </div>
@@ -69,19 +118,11 @@ export const MarqueeHeroImages = ({
   images,
   className,
 }: MarqueeHeroImagesProps) => {
-  const [snapshot, setSnapshot] = useState<string[]>([]);
+  if (images.length === 0) return null;
 
-  useEffect(() => {
-    if (snapshot.length === 0 && images.length > 0) {
-      setSnapshot(images);
-    }
-  }, [images, snapshot.length]);
-
-  if (snapshot.length === 0) return null;
-
-  const half = Math.max(3, Math.ceil(snapshot.length / 2));
-  const topRow = snapshot.slice(0, half);
-  const remainder = snapshot.slice(half);
+  const half = Math.max(3, Math.ceil(images.length / 2));
+  const topRow = images.slice(0, half);
+  const remainder = images.slice(half);
   const bottomRow =
     remainder.length >= 3 ? remainder : [...topRow].reverse();
 

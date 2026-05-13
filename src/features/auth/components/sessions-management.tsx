@@ -49,9 +49,16 @@ interface Session {
 
 interface SessionsManagementProps {
   userId: string;
+  /** When provided, revoking a session (single or all) is gated by an MFA
+   *  challenge — same pattern as the other sensitive settings actions. If
+   *  omitted, the only confirmation is the existing window.confirm prompt. */
+  requestVerification?: (actionLabel: string) => Promise<boolean>;
 }
 
-export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
+export const SessionsManagement = ({
+  userId,
+  requestVerification,
+}: SessionsManagementProps) => {
   const router = useRouter();
   const t = useTranslations("Auth.sessions");
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -85,6 +92,13 @@ export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
       return;
     }
 
+    if (requestVerification) {
+      const verified = await requestVerification(
+        t("verifyAction.signOut", { device: session.device_name }),
+      );
+      if (!verified) return;
+    }
+
     setRevoking(session.id);
     const { error } = await sessionManagementService.revokeSession(session.id);
     setRevoking(null);
@@ -106,6 +120,11 @@ export const SessionsManagement = ({ userId }: SessionsManagementProps) => {
   const handleRevokeAll = async () => {
     if (!window.confirm(t("signOutAllConfirm"))) {
       return;
+    }
+
+    if (requestVerification) {
+      const verified = await requestVerification(t("verifyAction.signOutAll"));
+      if (!verified) return;
     }
 
     setSigningOutAll(true);

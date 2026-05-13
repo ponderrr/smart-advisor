@@ -33,7 +33,9 @@ import { PillButton } from "@/components/ui/pill-button";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { SectionHeader } from "@/components/section-header";
 import { LogToLibraryButton } from "@/features/library/components/log-to-library-button";
+import { WishlistButton } from "@/features/library/components/wishlist-button";
 import { libraryService } from "@/features/library/services/library-service";
+import type { LibraryStatus } from "@/features/library/types/library";
 import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
 import { TrailerEmbed } from "@/components/trailer-embed";
@@ -99,7 +101,7 @@ const ResultsLoadingState = ({ step: _step }: { step: string }) => {
   }, [loadingMessages.length]);
 
   return (
-    <div className="mx-auto flex min-h-[480px] w-full max-w-4xl flex-col items-center justify-center rounded-3xl border border-slate-200/70 bg-white/85 p-6 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
+    <div className="mx-auto flex min-h-[480px] w-full max-w-4xl flex-col items-center justify-center rounded-3xl border border-violet-300/60 bg-gradient-to-br from-violet-50/80 via-fuchsia-50/40 to-rose-50/60 p-6 text-center shadow-sm backdrop-blur-md sm:p-8 dark:border-violet-500/40 dark:from-violet-500/15 dark:via-fuchsia-500/10 dark:to-rose-500/15">
       <div className="mb-6 flex items-center justify-center gap-2" aria-hidden>
         <span className="h-3 w-3 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.3s]" />
         <span className="h-3 w-3 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.15s]" />
@@ -133,11 +135,13 @@ const RecommendationCard = ({
   rec,
   index,
   alreadyLogged,
+  libraryStatus,
   onToggleFavorite,
 }: {
   rec: Recommendation;
   index: number;
   alreadyLogged: boolean;
+  libraryStatus: LibraryStatus | null;
   onToggleFavorite: (id: string) => void;
 }) => {
   const tb = useTranslations("Results.body");
@@ -161,7 +165,12 @@ const RecommendationCard = ({
       initial={{ opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.32, delay: index * 0.06 }}
-      className="group overflow-hidden rounded-3xl border border-slate-200/70 bg-white/85 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-700/60 dark:bg-slate-900/65"
+      className={cn(
+        "group overflow-hidden rounded-3xl border bg-gradient-to-br shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg",
+        rec.type === "movie"
+          ? "border-amber-200/60 from-amber-50/80 to-white dark:border-amber-500/30 dark:from-amber-500/10 dark:to-slate-900/40"
+          : "border-emerald-200/60 from-emerald-50/80 to-white dark:border-emerald-500/30 dark:from-emerald-500/10 dark:to-slate-900/40",
+      )}
     >
       {/* Mobile: poster + header on top; rich body below spans full width.
           Desktop (sm+): grid with full poster column on the left. */}
@@ -281,16 +290,28 @@ const RecommendationCard = ({
         )}
 
         <div className="flex items-center justify-between gap-2">
-          <LogToLibraryButton
-            medium={rec.type}
-            title={rec.title}
-            creator={rec.author ?? rec.director ?? null}
-            year={rec.year ?? null}
-            poster_url={rec.poster_url ?? null}
-            source_recommendation_id={rec.id}
-            initialLogged={alreadyLogged}
-            variant="compact"
-          />
+          <div className="flex items-center gap-2">
+            <LogToLibraryButton
+              medium={rec.type}
+              title={rec.title}
+              creator={rec.author ?? rec.director ?? null}
+              year={rec.year ?? null}
+              poster_url={rec.poster_url ?? null}
+              source_recommendation_id={rec.id}
+              initialLogged={alreadyLogged}
+              variant="compact"
+            />
+            <WishlistButton
+              medium={rec.type}
+              title={rec.title}
+              creator={rec.author ?? rec.director ?? null}
+              year={rec.year ?? null}
+              poster_url={rec.poster_url ?? null}
+              source_recommendation_id={rec.id}
+              initialStatus={libraryStatus}
+              variant="compact"
+            />
+          </div>
         </div>
 
         {showDescription && (
@@ -398,6 +419,15 @@ const RecommendationCard = ({
                 poster_url={rec.poster_url ?? null}
                 source_recommendation_id={rec.id}
                 initialLogged={alreadyLogged}
+              />
+              <WishlistButton
+                medium={rec.type}
+                title={rec.title}
+                creator={rec.author ?? rec.director ?? null}
+                year={rec.year ?? null}
+                poster_url={rec.poster_url ?? null}
+                source_recommendation_id={rec.id}
+                initialStatus={libraryStatus}
               />
               <button
                 type="button"
@@ -526,9 +556,9 @@ const ResultsPage = () => {
   const tc = useTranslations("Common");
   const tb = useTranslations("Results.body");
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
-  const [loggedTitleKeys, setLoggedTitleKeys] = useState<Set<string>>(
-    () => new Set(),
-  );
+  const [loggedTitleMap, setLoggedTitleMap] = useState<
+    Map<string, LibraryStatus>
+  >(() => new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [generationStep, setGenerationStep] = useState<string>("");
@@ -674,16 +704,23 @@ const ResultsPage = () => {
   useEffect(() => {
     if (!ready) return;
     void libraryService.list().then(({ data }) => {
-      setLoggedTitleKeys(
-        new Set(data.map((i) => `${i.medium}::${i.title.toLowerCase()}`)),
+      setLoggedTitleMap(
+        new Map(
+          data.map((i) => [`${i.medium}::${i.title.toLowerCase()}`, i.status]),
+        ),
       );
     });
   }, [ready]);
 
+  const libraryStatusOf = useCallback(
+    (rec: Recommendation): LibraryStatus | null =>
+      loggedTitleMap.get(`${rec.type}::${rec.title.toLowerCase()}`) ?? null,
+    [loggedTitleMap],
+  );
+
   const isAlreadyLogged = useCallback(
-    (rec: Recommendation): boolean =>
-      loggedTitleKeys.has(`${rec.type}::${rec.title.toLowerCase()}`),
-    [loggedTitleKeys],
+    (rec: Recommendation): boolean => libraryStatusOf(rec) !== null,
+    [libraryStatusOf],
   );
 
   useEffect(() => {
@@ -867,7 +904,7 @@ const ResultsPage = () => {
       <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
         {topBar}
         <main className="px-4 pb-20 pt-32 md:pt-36 sm:px-6">
-          <div className="mx-auto max-w-xl rounded-3xl border border-slate-200/70 bg-white/85 p-8 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
+          <div className="mx-auto max-w-xl rounded-3xl border border-violet-300/60 bg-gradient-to-br from-violet-50/80 via-fuchsia-50/40 to-rose-50/60 p-8 text-center shadow-sm backdrop-blur-md dark:border-violet-500/40 dark:from-violet-500/15 dark:via-fuchsia-500/10 dark:to-rose-500/15">
             <div className="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-500/20">
               <RefreshCw
                 size={24}
@@ -916,7 +953,7 @@ const ResultsPage = () => {
       <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
         {topBar}
         <main className="px-4 pb-20 pt-32 md:pt-36 sm:px-6">
-          <div className="mx-auto max-w-xl rounded-3xl border border-slate-200/70 bg-white/85 p-8 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
+          <div className="mx-auto max-w-xl rounded-3xl border border-violet-300/60 bg-gradient-to-br from-violet-50/80 via-fuchsia-50/40 to-rose-50/60 p-8 text-center shadow-sm backdrop-blur-md dark:border-violet-500/40 dark:from-violet-500/15 dark:via-fuchsia-500/10 dark:to-rose-500/15">
             <div className="mx-auto mb-5 flex h-24 w-24 items-center justify-center overflow-hidden">
               <video
                 src="/animations/error-animation.webm"
@@ -1004,6 +1041,7 @@ const ResultsPage = () => {
                         rec={rec}
                         index={i}
                         alreadyLogged={isAlreadyLogged(rec)}
+                        libraryStatus={libraryStatusOf(rec)}
                         onToggleFavorite={handleToggleFavorite}
                       />
                     ))}
@@ -1032,6 +1070,7 @@ const ResultsPage = () => {
                         rec={rec}
                         index={i}
                         alreadyLogged={isAlreadyLogged(rec)}
+                        libraryStatus={libraryStatusOf(rec)}
                         onToggleFavorite={handleToggleFavorite}
                       />
                     ))}
@@ -1047,6 +1086,7 @@ const ResultsPage = () => {
                   rec={rec}
                   index={i}
                   alreadyLogged={isAlreadyLogged(rec)}
+                  libraryStatus={libraryStatusOf(rec)}
                   onToggleFavorite={handleToggleFavorite}
                 />
               ))}

@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { motion } from "motion/react";
-import { useTranslations } from "next-intl";
+import { AnimatePresence, motion } from "motion/react";
+import { useMessages, useTranslations } from "next-intl";
 import {
   ArrowRight,
   Film,
@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { PillButton } from "@/components/ui/pill-button";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
-import { LoaderFive } from "@/components/ui/loader";
 import { SectionHeader } from "@/components/section-header";
 import {
   deriveMatchScore,
@@ -44,11 +43,53 @@ type DemoAnswerPayload = {
 };
 
 /* ---------- Loading Animation ---------- */
+// Mirrors the main quiz's ResultsLoadingState — bouncing dots + a rotating
+// message, wrapped in the master gradient. Keeps the demo and real flow
+// visually paired right up to the payoff.
 const DemoLoadingState = () => {
-  const t = useTranslations("Demo.results");
+  const messages = useMessages() as {
+    Results?: { loadingMessages?: string[] };
+  };
+  const loadingMessages = useMemo(
+    () => messages.Results?.loadingMessages ?? [],
+    [messages],
+  );
+  const [messageIndex, setMessageIndex] = useState(0);
+
+  useEffect(() => {
+    if (loadingMessages.length === 0) return;
+    const id = setInterval(() => {
+      setMessageIndex((i) => (i + 1) % loadingMessages.length);
+    }, 3800);
+    return () => clearInterval(id);
+  }, [loadingMessages.length]);
+
   return (
-    <div className="mx-auto flex min-h-[420px] w-full max-w-4xl flex-col items-center justify-center rounded-3xl border border-slate-200/70 bg-white/85 p-6 text-center shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65 sm:p-8">
-      <LoaderFive text={t("loadingText")} />
+    <div className="mx-auto flex min-h-[480px] w-full max-w-4xl flex-col items-center justify-center rounded-3xl border border-violet-300/60 bg-gradient-to-br from-violet-50/80 via-fuchsia-50/40 to-rose-50/60 p-6 text-center shadow-sm backdrop-blur-md sm:p-8 dark:border-violet-500/40 dark:from-violet-500/15 dark:via-fuchsia-500/10 dark:to-rose-500/15">
+      <div className="mb-6 flex items-center justify-center gap-2" aria-hidden>
+        <span className="h-3 w-3 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.3s]" />
+        <span className="h-3 w-3 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.15s]" />
+        <span className="h-3 w-3 animate-bounce rounded-full bg-indigo-500" />
+      </div>
+
+      <div
+        className="flex min-h-[1.75rem] items-center justify-center"
+        role="status"
+        aria-live="polite"
+      >
+        <AnimatePresence mode="wait">
+          <motion.p
+            key={messageIndex}
+            initial={{ opacity: 0, y: 6, filter: "blur(4px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            exit={{ opacity: 0, y: -6, filter: "blur(4px)" }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className="text-base font-semibold text-slate-700 dark:text-slate-200"
+          >
+            {loadingMessages[messageIndex] ?? ""}
+          </motion.p>
+        </AnimatePresence>
+      </div>
     </div>
   );
 };

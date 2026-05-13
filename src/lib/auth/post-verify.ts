@@ -20,18 +20,19 @@ export function getPostVerifyTarget(
 /**
  * Where /account/mfa-setup routes the user when they finish (or skip)
  * enrollment. When ?from=signup, this is the post-verify enrollment step
- * and both outcomes land in the app. Otherwise the page is being used to
- * add a factor mid-flow from /settings or /account/security, so completing
- * stays on the security surface.
+ * and the next stop is the onboarding screen (display name, content tone,
+ * language, age confirm). Otherwise the page is being used to add a factor
+ * mid-flow from /settings or /account/security, so completing stays on the
+ * security surface.
  */
 export function getMfaSetupCompleteTarget(from: string | null): string {
-  return from === "signup" ? "/dashboard" : "/account/security";
+  return from === "signup" ? "/onboarding?from=signup" : "/account/security";
 }
 
 /**
- * Where /account/mfa-setup routes when the user skips enrollment. Always
- * /dashboard — skipping should never trap the user on the enrollment page.
+ * Where /account/mfa-setup routes when the user skips enrollment. Onboarding
+ * still runs for signups; the skip applies to MFA, not the whole signup tail.
  */
-export function getMfaSetupSkipTarget(): string {
-  return "/dashboard";
+export function getMfaSetupSkipTarget(from: string | null = null): string {
+  return from === "signup" ? "/onboarding?from=signup" : "/dashboard";
 }

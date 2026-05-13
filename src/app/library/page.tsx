@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { format } from "date-fns";
@@ -9,6 +9,7 @@ import {
   BookCheck,
   BookOpen,
   Bookmark,
+  ChevronDown,
   Film,
   LayoutGrid,
   Loader,
@@ -25,6 +26,7 @@ import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import { libraryService } from "@/features/library/services/library-service";
 import {
+  STATUS_PILL_CLASSES,
   STATUS_TONE,
   type LibraryItem,
   type LibraryRating,
@@ -38,8 +40,15 @@ import {
 } from "@/components/sidebar-nav";
 import { Button } from "@/components/ui/button";
 import { PillButton } from "@/components/ui/pill-button";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { Dialog } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
 import { ViewToggle, type ViewMode } from "@/components/view-toggle";
@@ -50,8 +59,14 @@ const VIEW_MODES = ["grid", "list"] as const;
 type MediumFilter = (typeof MEDIUM_TABS)[number];
 type StatusFilter = "all" | LibraryStatus;
 
-const STATUS_VALUES: LibraryStatus[] = ["finished", "in_progress", "wishlist"];
-const RATING_VALUES: LibraryRating[] = [1, 2, 3];
+const STATUS_VALUES: LibraryStatus[] = [
+  "wishlist",
+  "in_progress",
+  "finished",
+  "dropped",
+];
+const STATUS_FILTER_VALUES = ["all", ...STATUS_VALUES] as const;
+const ALL_FILTER_PILL_CLASS = "bg-slate-700 dark:bg-slate-600";
 
 
 export default function LibraryPage() {
@@ -84,28 +99,78 @@ export default function LibraryPage() {
     );
   };
 
-  const statusChip = (status: LibraryStatus) => (
-    <span
-      className={cn(
-        "rounded-full px-2.5 py-1 text-[11px] font-semibold",
-        STATUS_TONE[status].chip,
-      )}
-    >
-      {t(`status.${status}`)}
-    </span>
-  );
+  const StatusChipMenu = ({
+    item,
+    variant = "list",
+  }: {
+    item: LibraryItem;
+    variant?: "list" | "grid";
+  }) => {
+    const isGrid = variant === "grid";
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            type="button"
+            aria-label={t("statusChangeAria", { title: item.title })}
+            className={cn(
+              "inline-flex items-center gap-1 rounded-full font-bold uppercase tracking-wider transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40",
+              isGrid
+                ? "px-1.5 py-0.5 text-[9px]"
+                : "px-2.5 py-1 text-[11px]",
+              STATUS_TONE[item.status].chip,
+            )}
+          >
+            {t(`status.${item.status}`)}
+            <ChevronDown size={isGrid ? 9 : 11} />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="min-w-[140px]">
+          {STATUS_VALUES.map((s) => (
+            <DropdownMenuItem
+              key={s}
+              disabled={s === item.status}
+              onSelect={() => {
+                void handleStatusChange(item, s);
+              }}
+              className="cursor-pointer text-xs font-semibold"
+            >
+              {t(`status.${s}`)}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  };
   const [items, setItems] = useState<LibraryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [mediumFilter, setMediumFilter] = useQueryState(
     "type",
     parseAsStringLiteral(MEDIUM_TABS).withDefault("all"),
   );
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [statusFilter, setStatusFilter] = useQueryState(
+    "status",
+    parseAsStringLiteral(STATUS_FILTER_VALUES).withDefault("all"),
+  );
   const [view, setView] = useQueryState(
     "view",
     parseAsStringLiteral(VIEW_MODES).withDefault("list"),
   );
   const [editTarget, setEditTarget] = useState<LibraryItem | null>(null);
+
+  // Snap to top instantly when the filters change so the user doesn't get
+  // stuck mid-scroll in empty space after narrowing a long list. Mirrors
+  // the same pattern in settings + dashboard.
+  const filterInitialRenderRef = useRef(true);
+  useEffect(() => {
+    if (filterInitialRenderRef.current) {
+      filterInitialRenderRef.current = false;
+      return;
+    }
+    if (typeof window !== "undefined" && window.scrollY > 0) {
+      window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+    }
+  }, [mediumFilter, statusFilter]);
 
   const load = async () => {
     setLoading(true);
@@ -129,6 +194,38 @@ export default function LibraryPage() {
       return true;
     });
   }, [items, mediumFilter, statusFilter]);
+
+  const handleStatusChange = async (
+    item: LibraryItem,
+    nextStatus: LibraryStatus,
+  ) => {
+    if (nextStatus === item.status) return;
+
+    const { error } = await libraryService.update(item.id, {
+      status: nextStatus,
+    });
+    if (error) {
+      toast.error(error);
+      return;
+    }
+
+    const updated: LibraryItem = {
+      ...item,
+      status: nextStatus,
+      finished_at:
+        nextStatus === "finished" ? new Date().toISOString() : null,
+    };
+    setItems((current) =>
+      current.map((entry) => (entry.id === item.id ? updated : entry)),
+    );
+    toast.success(t("updated"));
+
+    // Marking something finished without a rating is the moment to capture the
+    // signal — open the edit dialog so the user adds the thumb while it's fresh.
+    if (nextStatus === "finished" && updated.rating === null) {
+      setEditTarget(updated);
+    }
+  };
 
   const handleRemove = async (item: LibraryItem) => {
     const ok = window.confirm(t("removeConfirm", { title: item.title }));
@@ -188,8 +285,40 @@ export default function LibraryPage() {
             </div>
           </div>
 
+          {/* Mobile pill nav — mirrors the dashboard pattern; the sidebar
+              below stays for md+ where vertical room is plentiful. */}
+          <div className="mb-4 md:hidden">
+            <SegmentedControl<MediumFilter>
+              layoutId="library-medium-tabs"
+              value={mediumFilter}
+              onChange={setMediumFilter}
+              size="sm"
+              ariaLabel={t("filtersAria")}
+              options={[
+                {
+                  value: "all",
+                  label: t("type.all"),
+                  icon: <LayoutGrid size={13} />,
+                  pillClassName: "bg-indigo-500",
+                },
+                {
+                  value: "movie",
+                  label: t("type.movie"),
+                  icon: <Film size={13} />,
+                  pillClassName: "bg-indigo-500",
+                },
+                {
+                  value: "book",
+                  label: t("type.book"),
+                  icon: <BookOpen size={13} />,
+                  pillClassName: "bg-indigo-500",
+                },
+              ]}
+            />
+          </div>
+
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6">
-            <SidebarNavShell>
+            <SidebarNavShell className="hidden md:flex">
               <nav aria-label={t("filtersAria")} className="flex-1">
                 <SidebarNavGroup label={t("typeGroup")} />
                 {(
@@ -258,24 +387,25 @@ export default function LibraryPage() {
                     <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                       {t("statusLabel")}
                     </span>
-                    {(
-                      [
-                        { id: "all", label: t("filterAll") },
+                    <SegmentedControl<StatusFilter>
+                      layoutId="library-status-filter"
+                      value={statusFilter}
+                      onChange={setStatusFilter}
+                      size="sm"
+                      ariaLabel={t("statusLabel")}
+                      options={[
+                        {
+                          value: "all",
+                          label: t("filterAll"),
+                          pillClassName: ALL_FILTER_PILL_CLASS,
+                        },
                         ...STATUS_VALUES.map((s) => ({
-                          id: s as StatusFilter,
+                          value: s,
                           label: t(`status.${s}`),
+                          pillClassName: STATUS_PILL_CLASSES[s],
                         })),
-                      ] as { id: StatusFilter; label: string }[]
-                    ).map((opt) => (
-                      <PillButton
-                        key={opt.id}
-                        active={statusFilter === opt.id}
-                        onClick={() => setStatusFilter(opt.id)}
-                        className="px-3 py-1.5 text-xs font-semibold"
-                      >
-                        {opt.label}
-                      </PillButton>
-                    ))}
+                      ]}
+                    />
                   </div>
                   <ViewToggle
                     value={view as ViewMode}
@@ -284,7 +414,7 @@ export default function LibraryPage() {
                 </div>
               </div>
 
-              <AnimatePresence mode="wait">
+              <AnimatePresence mode="popLayout">
                 {!loading && (
                 <motion.div
                   key={`${mediumFilter}-${statusFilter}`}
@@ -354,14 +484,7 @@ export default function LibraryPage() {
                                 {item.title}
                               </p>
                               <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                                <span
-                                  className={cn(
-                                    "rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider",
-                                    STATUS_TONE[item.status].chip,
-                                  )}
-                                >
-                                  {t(`status.${item.status}`)}
-                                </span>
+                                <StatusChipMenu item={item} variant="grid" />
                                 {item.rating !== null &&
                                   (() => {
                                     const Icon =
@@ -449,7 +572,7 @@ export default function LibraryPage() {
                             </div>
 
                             <div className="mt-2 flex flex-wrap items-center gap-2">
-                              {statusChip(item.status)}
+                              <StatusChipMenu item={item} />
                               {ratingChip(item.rating)}
                               <span className="text-[11px] text-slate-400 dark:text-slate-500">
                                 {t("loggedOn", {
@@ -568,56 +691,52 @@ const EditDialog = ({ target, onClose, onSaved }: EditDialogProps) => {
                   <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     {t("editDialog.statusHeader")}
                   </p>
-                  <div className="flex flex-wrap gap-2">
-                    {STATUS_VALUES.map((s) => (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => setStatus(s)}
-                        className={cn(
-                          "rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
-                          status === s
-                            ? STATUS_TONE[s].active
-                            : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800/40 dark:text-slate-300",
-                        )}
-                      >
-                        {t(`status.${s}`)}
-                      </button>
-                    ))}
-                  </div>
+                  <SegmentedControl<LibraryStatus>
+                    layoutId="edit-dialog-status"
+                    value={status}
+                    onChange={setStatus}
+                    size="sm"
+                    ariaLabel={t("editDialog.statusHeader")}
+                    options={STATUS_VALUES.map((s) => ({
+                      value: s,
+                      label: t(`status.${s}`),
+                      pillClassName: STATUS_PILL_CLASSES[s],
+                    }))}
+                  />
                 </div>
 
                 <div className="mt-5 text-left">
                   <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     {t("editDialog.ratingHeader")}
                   </p>
-                  <div className="flex flex-wrap gap-2">
-                    {RATING_VALUES.map((r) => {
-                      const active = rating === r;
-                      const Icon =
-                        r === 1 ? ThumbsDown : r === 2 ? Bookmark : ThumbsUp;
-                      return (
-                        <button
-                          key={r}
-                          type="button"
-                          onClick={() => setRating(active ? null : r)}
-                          className={cn(
-                            "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
-                            active
-                              ? r === 3
-                                ? "border-emerald-400 bg-emerald-50 text-emerald-700 dark:border-emerald-500 dark:bg-emerald-900/30 dark:text-emerald-300"
-                                : r === 1
-                                  ? "border-rose-400 bg-rose-50 text-rose-700 dark:border-rose-500 dark:bg-rose-900/30 dark:text-rose-300"
-                                  : "border-slate-400 bg-slate-100 text-slate-700 dark:border-slate-500 dark:bg-slate-800 dark:text-slate-200"
-                              : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800/40 dark:text-slate-400",
-                          )}
-                        >
-                          <Icon size={14} />
-                          {t(`rating.${r}`)}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <SegmentedControl<LibraryRating>
+                    layoutId="edit-dialog-rating"
+                    value={rating}
+                    onChange={setRating}
+                    onClear={() => setRating(null)}
+                    size="sm"
+                    ariaLabel={t("editDialog.ratingHeader")}
+                    options={[
+                      {
+                        value: 1,
+                        label: t("rating.1"),
+                        icon: <ThumbsDown size={14} />,
+                        pillClassName: "bg-rose-500",
+                      },
+                      {
+                        value: 2,
+                        label: t("rating.2"),
+                        icon: <Bookmark size={14} />,
+                        pillClassName: "bg-slate-500",
+                      },
+                      {
+                        value: 3,
+                        label: t("rating.3"),
+                        icon: <ThumbsUp size={14} />,
+                        pillClassName: "bg-emerald-500",
+                      },
+                    ]}
+                  />
                 </div>
 
                 <div className="mt-5 text-left">

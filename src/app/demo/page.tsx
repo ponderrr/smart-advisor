@@ -35,6 +35,7 @@ interface DemoContentCardProps {
   icon: React.ReactNode;
   mediaSrc: string;
   secondaryMediaSrc?: string;
+  gradientClass: string;
   isSelected: boolean;
   onClick: () => void;
 }
@@ -46,6 +47,7 @@ const DemoContentCard = ({
   icon,
   mediaSrc,
   secondaryMediaSrc,
+  gradientClass,
   isSelected,
   onClick,
 }: DemoContentCardProps) => {
@@ -55,10 +57,11 @@ const DemoContentCard = ({
       onClick={onClick}
       aria-pressed={isSelected}
       className={cn(
-        "group relative w-full overflow-hidden rounded-3xl border bg-white/85 text-left shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:bg-slate-900/65 dark:focus-visible:ring-offset-slate-950",
+        "group relative w-full overflow-hidden rounded-3xl border bg-gradient-to-br text-left shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950",
+        gradientClass,
         isSelected
           ? "border-transparent shadow-indigo-500/15"
-          : "border-slate-200/70 hover:border-slate-300 dark:border-slate-700/60 dark:hover:border-slate-600/80",
+          : "hover:border-slate-300 dark:hover:border-slate-600/80",
       )}
     >
       {/* Gradient accent ring when selected. */}
@@ -167,12 +170,16 @@ const DEMO_CONTENT_CARDS = [
     cardKey: "movie",
     icon: <Film size={14} />,
     mediaSrc: "/animations/Popcorn.webm",
+    gradientClass:
+      "from-amber-50/80 to-white border-amber-200/60 dark:from-amber-500/10 dark:to-slate-900/40 dark:border-amber-500/30",
   },
   {
     option: "Books",
     cardKey: "book",
     icon: <BookOpen size={14} />,
     mediaSrc: "/animations/Books.webm",
+    gradientClass:
+      "from-emerald-50/80 to-white border-emerald-200/60 dark:from-emerald-500/10 dark:to-slate-900/40 dark:border-emerald-500/30",
   },
   {
     option: "Both",
@@ -180,6 +187,8 @@ const DEMO_CONTENT_CARDS = [
     icon: <Sparkles size={14} />,
     mediaSrc: "/animations/Popcorn.webm",
     secondaryMediaSrc: "/animations/Books.webm",
+    gradientClass:
+      "from-violet-50/80 via-fuchsia-50/40 to-rose-50/60 border-violet-300/60 dark:from-violet-500/15 dark:via-fuchsia-500/10 dark:to-rose-500/15 dark:border-violet-500/40",
   },
 ] as const;
 
@@ -321,7 +330,7 @@ export default function DemoPage() {
         <motion.div
           layout
           transition={{ layout: { duration: 0.32, ease: [0.22, 1, 0.36, 1] } }}
-          className="rounded-3xl border border-slate-200/70 bg-white/85 p-6 shadow-sm backdrop-blur-md sm:p-8 dark:border-slate-700/60 dark:bg-slate-900/65"
+          className="rounded-3xl border border-indigo-200/60 bg-gradient-to-br from-indigo-50/80 to-white p-6 shadow-sm backdrop-blur-md sm:p-8 dark:border-indigo-500/30 dark:from-indigo-500/10 dark:to-slate-900/40"
         >
           <AnimatePresence mode="wait">
           <motion.div
@@ -355,6 +364,7 @@ export default function DemoPage() {
                             ? card.secondaryMediaSrc
                             : undefined
                         }
+                        gradientClass={card.gradientClass}
                         isSelected={answers[current.id] === card.option}
                         onClick={() => setAnswer(card.option)}
                       />

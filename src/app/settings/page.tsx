@@ -29,9 +29,14 @@ import {
   Film,
   BookOpen,
   Sparkles,
+  Sun,
+  Moon,
+  Monitor,
 } from "lucide-react";
+import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import {
   SidebarNavItem,
@@ -54,6 +59,7 @@ import {
 } from "@/features/auth/utils/validation";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import { PillButton } from "@/components/ui/pill-button";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
 import { LanguageSwitcher } from "@/components/language-switcher";
@@ -203,9 +209,12 @@ SettingsInput.displayName = "SettingsInput";
 /*  Main settings page                                                */
 /* ------------------------------------------------------------------ */
 
+type ThemeChoice = "light" | "dark" | "system";
+
 const SettingsPage = () => {
   const router = useRouter();
   const t = useTranslations("Settings");
+  const { theme, setTheme } = useTheme();
   const {
     user,
     updateProfile,
@@ -213,6 +222,7 @@ const SettingsPage = () => {
     updatePassword,
     uploadAvatar,
     removeAvatar,
+    refreshUser,
   } = useAuth();
   const { ready } = useRequireAuth();
 
@@ -229,14 +239,16 @@ const SettingsPage = () => {
   // of which tab the user came from.
   const sectionSlideDir = -1;
 
-  // Switching sections when scrolled would otherwise snap the window up,
-  // since the newly rendered section is often shorter than the previous one.
-  // Animate the scroll so the change feels continuous.
+  // Snap the page to the top on section change so the user lands at the
+  // start of the new content instead of in the middle of empty space.
+  // We use `behavior: "instant"` (not "smooth") on purpose — smooth scrolls
+  // trigger iOS Safari's URL bar to collapse/expand, which wobbles the
+  // fixed bottom nav and the navbar mid-transition.
   const changeSection = (id: SettingsSection) => {
     if (id === activeSection) return;
     setActiveSection(id);
     if (typeof window !== "undefined" && window.scrollY > 0) {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
     }
   };
 
@@ -264,11 +276,14 @@ const SettingsPage = () => {
     text: string;
     type: "success" | "error" | "info";
   } | null>(null);
-  const [contentFocus, setContentFocus] = useState("both");
+  const [contentFocus, setContentFocus] = useState<"movie" | "book" | "both">(
+    "both",
+  );
   const [contentTone, setContentTone] = useState<"standard" | "family">(
     "standard",
   );
   const [preferredQuestionCount, setPreferredQuestionCount] = useState(5);
+  const [savingContent, setSavingContent] = useState(false);
   const [accountActionLoading, setAccountActionLoading] = useState(false);
   const [showMfaPanel, setShowMfaPanel] = useState(false);
   const [mfaSetupModal, setMfaSetupModal] = useState<{
@@ -486,13 +501,40 @@ const SettingsPage = () => {
     if (typeof window === "undefined") return;
     const verified = await requestVerification(t("verifyAction.content"));
     if (!verified) return;
-    window.localStorage.setItem(PREF_CONTENT_KEY, contentFocus);
-    window.localStorage.setItem(PREF_CONTENT_TONE_KEY, contentTone);
-    window.localStorage.setItem(
-      PREF_QUESTION_COUNT_KEY,
-      String(preferredQuestionCount),
-    );
-    showMessage(t("content.savedToast"), "success");
+
+    setSavingContent(true);
+    try {
+      window.localStorage.setItem(PREF_CONTENT_KEY, contentFocus);
+      window.localStorage.setItem(PREF_CONTENT_TONE_KEY, contentTone);
+      window.localStorage.setItem(
+        PREF_QUESTION_COUNT_KEY,
+        String(preferredQuestionCount),
+      );
+
+      // Persist content_tone to profiles too so it survives a localStorage
+      // clear and stays consistent across devices. content_focus and the
+      // question-count slider live in localStorage only — they're per-device
+      // habits, not part of the canonical profile.
+      if (user) {
+        const { error } = await supabase
+          .from("profiles")
+          .update({
+            content_tone: contentTone,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", user.id);
+        if (error) {
+          console.error("[settings] save content_tone failed", error);
+          showMessage(t("content.saveError"), "error");
+          return;
+        }
+        await refreshUser?.();
+      }
+
+      showMessage(t("content.savedToast"), "success");
+    } finally {
+      setSavingContent(false);
+    }
   };
 
   const handleDisableAccount = async () => {
@@ -538,11 +580,21 @@ const SettingsPage = () => {
     const sq = Number(
       window.localStorage.getItem(PREF_QUESTION_COUNT_KEY) || "5",
     );
-    if (sc && ["movie", "book", "both"].includes(sc)) setContentFocus(sc);
+    if (sc === "movie" || sc === "book" || sc === "both")
+      setContentFocus(sc);
     if (st === "standard" || st === "family") setContentTone(st);
     if (Number.isFinite(sq) && sq >= 3 && sq <= 15)
       setPreferredQuestionCount(sq);
   }, []);
+
+  // Profile is the source of truth for content_tone (set in onboarding,
+  // synced via useAuth). Override the localStorage value once the user
+  // loads — otherwise a cross-device user would see stale local prefs.
+  useEffect(() => {
+    if (user?.content_tone === "standard" || user?.content_tone === "family") {
+      setContentTone(user.content_tone);
+    }
+  }, [user?.content_tone]);
 
   useEffect(() => {
     if (!message) return;
@@ -577,6 +629,13 @@ const SettingsPage = () => {
   }, []);
 
   const handleSaveBackupEmail = backupEmailForm.handleSubmit(async (data) => {
+    // Backup email is an account-recovery surface — anyone with a stolen
+    // session could otherwise quietly point recovery at their own address.
+    // Gate behind MFA the same way the other sensitive saves do.
+    const verified = await requestVerification(
+      t("verifyAction.setBackupEmail"),
+    );
+    if (!verified) return;
     const { error } = await authService.setBackupEmail(data.backupEmail);
     if (error) {
       showMessage(error, "error");
@@ -589,6 +648,10 @@ const SettingsPage = () => {
 
   const [removingBackupEmail, setRemovingBackupEmail] = useState(false);
   const handleRemoveBackupEmail = async () => {
+    const verified = await requestVerification(
+      t("verifyAction.removeBackupEmail"),
+    );
+    if (!verified) return;
     setRemovingBackupEmail(true);
     const { error } = await authService.removeBackupEmail();
     setRemovingBackupEmail(false);
@@ -623,9 +686,26 @@ const SettingsPage = () => {
             </p>
           </div>
 
+          {/* Mobile pill nav — desktop keeps the grouped sidebar below. */}
+          <div className="mb-4 md:hidden">
+            <SegmentedControl<SettingsSection>
+              layoutId="settings-mobile-tabs"
+              value={activeSection}
+              onChange={changeSection}
+              size="sm"
+              ariaLabel="Account sections"
+              options={sectionTabs.map((tab) => ({
+                value: tab.id,
+                label: tab.label,
+                icon: tab.icon,
+                pillClassName: "bg-indigo-500",
+              }))}
+            />
+          </div>
+
           {/* Sidebar + content layout */}
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6">
-            <SidebarNavShell>
+            <SidebarNavShell className="hidden md:flex">
               <nav aria-label="Account sections" className="flex-1">
                 <SidebarNavGroup label={t("groups.account")} />
                 {sectionTabs
@@ -690,9 +770,15 @@ const SettingsPage = () => {
                 )}
               </AnimatePresence>
 
-              {/* Section Content */}
-              <AnimatePresence mode="wait">
-                {activeSection === "profile" && (
+              {/* Section Content — wrapped in a min-height container so the
+                  page doesn't shrink when switching from a tall section
+                  (security has email + password + MFA + passkeys + backup
+                  + sessions stacked) to a short one. Without this, the
+                  browser auto-scrolls to keep the viewport valid, which
+                  reads as "the page jumped up". */}
+              <div className="min-h-[70vh]">
+                <AnimatePresence mode="popLayout">
+                  {activeSection === "profile" && (
                   <motion.div
                     key="profile"
                     initial={{ opacity: 0, x: sectionSlideDir * 30 }}
@@ -800,6 +886,48 @@ const SettingsPage = () => {
                           {t("profile.save")}
                         </StatefulButton>
                       </div>
+                    </SectionCard>
+
+                    {/* UI preferences — language + theme. They sit here in
+                        Profile (not Content) since they control how the app
+                        looks for you, not what gets recommended. */}
+                    <SectionCard>
+                      <LanguageSwitcher />
+                    </SectionCard>
+
+                    <SectionCard>
+                      <p className="mb-1 text-base font-bold tracking-tight">
+                        {t("theme.title")}
+                      </p>
+                      <p className="mb-3 text-sm text-slate-500 dark:text-slate-400">
+                        {t("theme.description")}
+                      </p>
+                      <SegmentedControl<ThemeChoice>
+                        layoutId="settings-theme"
+                        value={(theme as ThemeChoice) ?? "system"}
+                        onChange={setTheme}
+                        ariaLabel={t("theme.title")}
+                        options={[
+                          {
+                            value: "light",
+                            label: t("theme.light"),
+                            icon: <Sun size={14} />,
+                            pillClassName: "bg-amber-500",
+                          },
+                          {
+                            value: "dark",
+                            label: t("theme.dark"),
+                            icon: <Moon size={14} />,
+                            pillClassName: "bg-indigo-600",
+                          },
+                          {
+                            value: "system",
+                            label: t("theme.system"),
+                            icon: <Monitor size={14} />,
+                            pillClassName: "bg-slate-700 dark:bg-slate-600",
+                          },
+                        ]}
+                      />
                     </SectionCard>
                   </motion.div>
                 )}
@@ -982,6 +1110,18 @@ const SettingsPage = () => {
                                   });
                                 }
                               }}
+                              // Same controlled-state fix as the Add
+                              // Authenticator and Add Passkey buttons —
+                              // without this, the synchronous handler
+                              // returns undefined and StatefulButton's
+                              // auto-detect flashes a green check before
+                              // the modal/panel even mounts.
+                              state={
+                                mfaSetupModal.open &&
+                                !mfaSetupModal.isAdditional
+                                  ? "loading"
+                                  : "idle"
+                              }
                               className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
                             >
                               {mfaEnabled
@@ -995,11 +1135,23 @@ const SettingsPage = () => {
                           key={mfaPanelKey}
                           mfaEnabled={mfaEnabled}
                           onMfaStatusChange={() => setShowMfaPanel(false)}
-                          onAddAuthenticator={() =>
+                          onAddAuthenticator={async () => {
+                            // Adding a factor requires AAL2 — the user has
+                            // to re-verify their existing TOTP first.
+                            // Without this, the API rejects the enroll call
+                            // with AAL2_REQUIRED and the setup modal shows
+                            // "Failed to start MFA enrollment".
+                            const verified = await requestVerification(
+                              t("verifyAction.addAuthenticator"),
+                            );
+                            if (!verified) return;
                             setMfaSetupModal({
                               open: true,
                               isAdditional: true,
-                            })
+                            });
+                          }}
+                          addingAuthenticator={
+                            mfaSetupModal.open && mfaSetupModal.isAdditional
                           }
                         />
                       )}
@@ -1075,7 +1227,10 @@ const SettingsPage = () => {
                     {/* Sessions */}
                     {user?.id && (
                       <SectionCard>
-                        <SessionsManagement userId={user.id} />
+                        <SessionsManagement
+                          userId={user.id}
+                          requestVerification={requestVerification}
+                        />
                       </SectionCard>
                     )}
                   </motion.div>
@@ -1091,10 +1246,6 @@ const SettingsPage = () => {
                     className="space-y-4"
                   >
                     <SectionCard>
-                      <LanguageSwitcher />
-                    </SectionCard>
-
-                    <SectionCard>
                       <SectionHeader
                         title={t("content.title")}
                         description={t("content.description")}
@@ -1105,89 +1256,32 @@ const SettingsPage = () => {
                           <p className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
                             {t("content.typeLabel")}
                           </p>
-                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                            {(
-                              [
-                                {
-                                  id: "movie",
-                                  label: t("content.type.movie.label"),
-                                  eyebrow: t("content.type.movie.eyebrow"),
-                                  icon: <Film size={14} />,
-                                },
-                                {
-                                  id: "book",
-                                  label: t("content.type.book.label"),
-                                  eyebrow: t("content.type.book.eyebrow"),
-                                  icon: <BookOpen size={14} />,
-                                },
-                                {
-                                  id: "both",
-                                  label: t("content.type.both.label"),
-                                  eyebrow: t("content.type.both.eyebrow"),
-                                  icon: <Sparkles size={14} />,
-                                },
-                              ] as const
-                            ).map((opt) => {
-                              const active = contentFocus === opt.id;
-                              return (
-                                <button
-                                  key={opt.id}
-                                  type="button"
-                                  onClick={() => setContentFocus(opt.id)}
-                                  aria-pressed={active}
-                                  className={cn(
-                                    "group relative overflow-hidden rounded-2xl border bg-white/85 p-4 text-left shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:bg-slate-900/65 dark:focus-visible:ring-offset-slate-950",
-                                    active
-                                      ? "border-transparent shadow-indigo-500/15 ring-2 ring-indigo-500/70 dark:ring-indigo-400/70"
-                                      : "border-slate-200/70 hover:border-slate-300 dark:border-slate-700/60 dark:hover:border-slate-600/80",
-                                  )}
-                                >
-                                  <span
-                                    aria-hidden="true"
-                                    className={cn(
-                                      "pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-500/[0.06] via-transparent to-violet-500/[0.06] transition-opacity duration-300 dark:from-indigo-400/[0.08] dark:to-violet-400/[0.08]",
-                                      active ? "opacity-100" : "opacity-0",
-                                    )}
-                                  />
-                                  <div
-                                    className={cn(
-                                      "absolute right-3 top-3 inline-flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-md shadow-indigo-500/30 transition-all duration-300",
-                                      active
-                                        ? "scale-100 opacity-100"
-                                        : "scale-50 opacity-0",
-                                    )}
-                                  >
-                                    <Check size={12} strokeWidth={3} />
-                                  </div>
-                                  <div className="relative flex items-center gap-2">
-                                    <span
-                                      className={cn(
-                                        "flex h-7 w-7 items-center justify-center rounded-full transition-colors duration-300",
-                                        active
-                                          ? "bg-indigo-500 text-white"
-                                          : "bg-slate-100 text-slate-500 group-hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-slate-700",
-                                      )}
-                                    >
-                                      {opt.icon}
-                                    </span>
-                                    <p
-                                      className={cn(
-                                        "text-[10px] font-black uppercase tracking-[0.18em] transition-colors duration-300",
-                                        active
-                                          ? "text-indigo-600 dark:text-indigo-400"
-                                          : "text-slate-400 dark:text-slate-500",
-                                      )}
-                                    >
-                                      {opt.eyebrow}
-                                    </p>
-                                  </div>
-                                  <p className="relative mt-1.5 text-base font-black tracking-tight">
-                                    {opt.label}
-                                  </p>
-                                </button>
-                              );
-                            })}
-                          </div>
+                          <SegmentedControl<"movie" | "book" | "both">
+                            layoutId="settings-content-focus"
+                            value={contentFocus}
+                            onChange={setContentFocus}
+                            ariaLabel={t("content.typeLabel")}
+                            options={[
+                              {
+                                value: "movie",
+                                label: t("content.type.movie.label"),
+                                icon: <Film size={14} />,
+                                pillClassName: "bg-indigo-500",
+                              },
+                              {
+                                value: "book",
+                                label: t("content.type.book.label"),
+                                icon: <BookOpen size={14} />,
+                                pillClassName: "bg-indigo-500",
+                              },
+                              {
+                                value: "both",
+                                label: t("content.type.both.label"),
+                                icon: <Sparkles size={14} />,
+                                pillClassName: "bg-indigo-500",
+                              },
+                            ]}
+                          />
                         </div>
 
                         <div>
@@ -1218,29 +1312,24 @@ const SettingsPage = () => {
                               </p>
                             </div>
                           ) : (
-                            <div className="flex flex-wrap gap-2">
-                              {(
-                                [
-                                  {
-                                    id: "standard",
-                                    label: t("content.tone.standard"),
-                                  },
-                                  {
-                                    id: "family",
-                                    label: t("content.tone.family"),
-                                  },
-                                ] as const
-                              ).map((opt) => (
-                                <PillButton
-                                  key={opt.id}
-                                  onClick={() => setContentTone(opt.id)}
-                                  active={contentTone === opt.id}
-                                  className="px-4 py-2 text-sm font-semibold"
-                                >
-                                  {opt.label}
-                                </PillButton>
-                              ))}
-                            </div>
+                            <SegmentedControl<"standard" | "family">
+                              layoutId="settings-content-tone"
+                              value={contentTone}
+                              onChange={setContentTone}
+                              ariaLabel={t("content.toneLabel")}
+                              options={[
+                                {
+                                  value: "standard",
+                                  label: t("content.tone.standard"),
+                                  pillClassName: "bg-indigo-500",
+                                },
+                                {
+                                  value: "family",
+                                  label: t("content.tone.family"),
+                                  pillClassName: "bg-emerald-500",
+                                },
+                              ]}
+                            />
                           )}
                           {(user?.age ?? 0) >= 18 && (
                             <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
@@ -1277,11 +1366,19 @@ const SettingsPage = () => {
                                 </p>
                               </div>
                               <p className="text-sm font-bold tracking-tight text-slate-700 dark:text-slate-200">
-                                {preferredQuestionCount <= 5
-                                  ? t("content.depth.quick")
-                                  : preferredQuestionCount <= 10
-                                    ? t("content.depth.balanced")
-                                    : t("content.depth.comprehensive")}
+                                {t(
+                                  `content.depth.${
+                                    preferredQuestionCount <= 4
+                                      ? "quick"
+                                      : preferredQuestionCount <= 7
+                                        ? "focused"
+                                        : preferredQuestionCount <= 10
+                                          ? "balanced"
+                                          : preferredQuestionCount <= 13
+                                            ? "thorough"
+                                            : "comprehensive"
+                                  }`,
+                                )}
                               </p>
                             </div>
                             <input
@@ -1311,6 +1408,7 @@ const SettingsPage = () => {
                         </span>
                         <StatefulButton
                           onClick={handleSaveContentPreferences}
+                          state={savingContent ? "loading" : "idle"}
                           className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
                         >
                           {t("content.save")}
@@ -1385,7 +1483,8 @@ const SettingsPage = () => {
                     </SectionCard>
                   </motion.div>
                 )}
-              </AnimatePresence>
+                </AnimatePresence>
+              </div>
             </div>
           </div>
         </div>
@@ -1434,12 +1533,8 @@ const SettingsPage = () => {
                       </h3>
                     </div>
                     <p className="text-sm text-slate-500 dark:text-slate-400">
-                      {t.rich("verifyModal.description", {
-                        action: () => (
-                          <span className="font-medium text-slate-700 dark:text-slate-200">
-                            {verifyModal.actionLabel}
-                          </span>
-                        ),
+                      {t("verifyModal.description", {
+                        action: verifyModal.actionLabel,
                       })}
                     </p>
                   </div>
@@ -1501,12 +1596,8 @@ const SettingsPage = () => {
                       </h3>
                     </div>
                     <p className="text-sm text-slate-500 dark:text-slate-400">
-                      {t.rich("verifyModalEnroll.description", {
-                        action: () => (
-                          <span className="font-medium text-slate-700 dark:text-slate-200">
-                            {verifyModal.actionLabel}
-                          </span>
-                        ),
+                      {t("verifyModalEnroll.description", {
+                        action: verifyModal.actionLabel,
                       })}
                     </p>
                   </div>

@@ -259,6 +259,12 @@ export const PasskeyManagement = () => {
       <div className="mt-5 flex justify-end">
         <StatefulButton
           onClick={() => setSetupOpen(true)}
+          // Controlled state — without this, StatefulButton's auto-detect
+          // sees the synchronous `setSetupOpen` return value (undefined) as
+          // a successful result and flashes the green check. Pin to the
+          // modal's open state so the button reads as "in progress" while
+          // the setup dialog is up, then idles after it closes.
+          state={setupOpen ? "loading" : "idle"}
           disabled={supported === false || loading}
           className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
         >

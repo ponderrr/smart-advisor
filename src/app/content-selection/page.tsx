@@ -236,7 +236,7 @@ const ContentSelectionPage = () => {
       onBack={handleBack}
       backLabel={t("back.dashboard")}
     >
-      <div className="rounded-3xl border border-slate-200/70 bg-white/85 p-4 shadow-sm backdrop-blur-md sm:p-6 md:p-8 dark:border-slate-700/60 dark:bg-slate-900/65">
+      <div className="rounded-3xl border border-indigo-200/60 bg-gradient-to-br from-indigo-50/80 to-white p-4 shadow-sm backdrop-blur-md sm:p-6 md:p-8 dark:border-indigo-500/30 dark:from-indigo-500/10 dark:to-slate-900/40">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
