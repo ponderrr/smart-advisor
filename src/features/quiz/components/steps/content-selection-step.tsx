@@ -1,21 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import { useTranslations } from "next-intl";
+import {
+  ArrowRight,
+  BookOpen,
+  Check,
+  Film,
+  Music,
+  Sparkles,
+} from "lucide-react";
+
+import { PillButton } from "@/components/ui/pill-button";
+import type { ContentType } from "@/features/quiz/store/quiz-store";
+import { cn } from "@/lib/utils";
 
 const VALIDATION_FLASH_MS = 650;
 const VALIDATION_MESSAGE_MS = 3200;
-import { Check, ArrowRight, Film, BookOpen, Music, Sparkles } from "lucide-react";
-import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
-import { useQuizStore } from "@/features/quiz/store/quiz-store";
-import { PillButton } from "@/components/ui/pill-button";
-import { PageLoader } from "@/components/ui/loader";
-import { QuizStepShell } from "@/features/quiz/components/quiz-step-shell";
-import { cn } from "@/lib/utils";
-
-type ContentType = "movie" | "book" | "music" | "mix" | null;
 const PREF_CONTENT_KEY = "smart_advisor_pref_content_focus";
 
 type CardAccent = "amber" | "emerald" | "rose" | "violet";
@@ -128,7 +130,6 @@ const SelectionCard: React.FC<SelectionCardProps> = ({
           : "border-slate-200/70 hover:border-slate-300 dark:border-slate-700/60 dark:hover:border-slate-600/80",
       )}
     >
-      {/* Gradient accent ring when selected — sits on top of the card border. */}
       <span
         aria-hidden="true"
         className={cn(
@@ -145,7 +146,6 @@ const SelectionCard: React.FC<SelectionCardProps> = ({
         )}
       />
 
-      {/* Selected check chip */}
       <div
         className={cn(
           "absolute right-3 top-3 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br text-white shadow-lg transition-all duration-300",
@@ -157,11 +157,9 @@ const SelectionCard: React.FC<SelectionCardProps> = ({
         <Check size={16} strokeWidth={3} />
       </div>
 
-      {/*
-        Mobile uses a horizontal layout (square thumbnail + content) so three
-        cards don't push the page far below the fold. Desktop (md+) keeps the
-        vertical layout with the wide 16:10 video preview.
-      */}
+      {/* Mobile uses a horizontal layout (square thumbnail + content) so three
+          cards don't push the page far below the fold. Desktop (md+) keeps the
+          vertical layout with the wide 16:10 video preview. */}
       <div className="flex md:block">
         <div className="relative aspect-square w-28 shrink-0 overflow-hidden bg-slate-100 sm:w-32 md:aspect-[16/10] md:w-full dark:bg-slate-800/80">
           {secondaryMediaSrc && mediaSrc ? (
@@ -243,36 +241,37 @@ const SelectionCard: React.FC<SelectionCardProps> = ({
   );
 };
 
-const ContentSelectionPage = () => {
-  const router = useRouter();
-  const { ready } = useRequireAuth();
-  const { setContentType } = useQuizStore();
+interface ContentSelectionStepProps {
+  selectedType: ContentType | null;
+  onSelect: (type: ContentType) => void;
+  onContinue: () => void;
+  isContinuing: boolean;
+}
+
+export const ContentSelectionStep = ({
+  selectedType,
+  onSelect,
+  onContinue,
+  isContinuing,
+}: ContentSelectionStepProps) => {
   const t = useTranslations("Quiz");
-  const tc = useTranslations("Common");
-  const [selectedType, setSelectedType] = useState<ContentType>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [showValidationFlash, setShowValidationFlash] = useState(false);
   const [validationMessage, setValidationMessage] = useState<string | null>(
     null,
   );
 
-  const handleContinue = () => {
-    if (!selectedType) {
-      setShowValidationFlash(true);
-      setValidationMessage(t("contentSelection.validation"));
-      window.setTimeout(() => setShowValidationFlash(false), VALIDATION_FLASH_MS);
-      window.setTimeout(() => setValidationMessage(null), VALIDATION_MESSAGE_MS);
-      return;
+  // Restore last picked focus on first mount so the cards remember the user's
+  // preference between sessions.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (selectedType) return;
+    const stored = window.localStorage.getItem(PREF_CONTENT_KEY);
+    if (stored && ["movie", "book", "music", "mix"].includes(stored)) {
+      onSelect(stored as ContentType);
     }
-
-    setIsLoading(true);
-    setContentType(selectedType);
-    router.push("/question-count");
-  };
-
-  const handleBack = () => {
-    router.push("/dashboard");
-  };
+    // We only want to hydrate once, on initial mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const cards: Array<{
     id: ContentType;
@@ -286,7 +285,7 @@ const ContentSelectionPage = () => {
     accent: CardAccent;
   }> = [
     {
-      id: "movie" as ContentType,
+      id: "movie",
       eyebrow: t("contentSelection.cards.movie.eyebrow"),
       title: t("contentSelection.cards.movie.title"),
       description: t("contentSelection.cards.movie.description"),
@@ -295,33 +294,33 @@ const ContentSelectionPage = () => {
       accent: "amber",
     },
     {
-      id: "book" as ContentType,
+      id: "book",
       eyebrow: t("contentSelection.cards.book.eyebrow"),
       title: t("contentSelection.cards.book.title"),
       description: t("contentSelection.cards.book.description"),
       icon: <BookOpen size={14} />,
-      // BookOpen and Music have visual mass weighted to the bottom of
-      // their SVG viewBox, so a flex-centered container makes them read
-      // ~6px lower than Film/Sparkles. Nudge upward to bring all four
-      // icons onto the same visual baseline.
+      // BookOpen and Music have visual mass weighted to the bottom of their
+      // SVG viewBox, so a flex-centered container makes them read lower than
+      // Film/Sparkles. Nudge upward to bring all four icons onto the same
+      // visual baseline.
       fallbackIcon: (
-        <BookOpen size={72} strokeWidth={1.5} className="-translate-y-1.5" />
+        <BookOpen size={72} strokeWidth={1.5} className="-translate-y-5" />
       ),
       accent: "emerald",
     },
     {
-      id: "music" as ContentType,
+      id: "music",
       eyebrow: t("contentSelection.cards.music.eyebrow"),
       title: t("contentSelection.cards.music.title"),
       description: t("contentSelection.cards.music.description"),
       icon: <Music size={14} />,
       fallbackIcon: (
-        <Music size={72} strokeWidth={1.5} className="-translate-y-1.5" />
+        <Music size={72} strokeWidth={1.5} className="-translate-y-5" />
       ),
       accent: "rose",
     },
     {
-      id: "mix" as ContentType,
+      id: "mix",
       eyebrow: t("contentSelection.cards.mix.eyebrow"),
       title: t("contentSelection.cards.mix.title"),
       description: t("contentSelection.cards.mix.description"),
@@ -331,109 +330,87 @@ const ContentSelectionPage = () => {
     },
   ];
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const storedContent = window.localStorage.getItem(PREF_CONTENT_KEY);
-    if (
-      storedContent &&
-      ["movie", "book", "music", "mix"].includes(storedContent)
-    ) {
-      setSelectedType(storedContent as ContentType);
+  const handleContinueClick = () => {
+    if (!selectedType) {
+      setShowValidationFlash(true);
+      setValidationMessage(t("contentSelection.validation"));
+      window.setTimeout(() => setShowValidationFlash(false), VALIDATION_FLASH_MS);
+      window.setTimeout(() => setValidationMessage(null), VALIDATION_MESSAGE_MS);
+      return;
     }
-  }, []);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(PREF_CONTENT_KEY, selectedType);
+    }
+    onContinue();
+  };
 
-  if (!ready) {
-    return <PageLoader text={tc("loading")} />;
-  }
-
-  // Pass the in-flight selection through to the shell so the progress bar
-  // and eyebrow tint shift the moment the user picks a card — no purple
-  // "neutral" flash between content-selection and question-count once a
-  // choice is made.
   return (
-    <QuizStepShell
-      category={t("category")}
-      stepLabel={t("stepOf", { current: 1, total: 4 })}
-      progress={25}
-      onBack={handleBack}
-      backLabel={t("back.dashboard")}
-      contentType={selectedType}
-    >
-      <div className="rounded-3xl border border-indigo-200/60 bg-gradient-to-br from-indigo-50/80 to-white p-4 shadow-sm backdrop-blur-md sm:p-6 md:p-8 dark:border-indigo-500/30 dark:from-indigo-500/10 dark:to-slate-900/40">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.22 }}
-        >
-          <h1 className="text-xl font-black tracking-tight sm:text-2xl md:text-3xl">
-            {t("contentSelection.title")}
-          </h1>
-          <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-400 sm:text-base">
-            {t("contentSelection.subtitle")}
-          </p>
+    <>
+      <h1 className="text-xl font-black tracking-tight sm:text-2xl md:text-3xl">
+        {t("contentSelection.title")}
+      </h1>
+      <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-400 sm:text-base">
+        {t("contentSelection.subtitle")}
+      </p>
 
-          <div className="mt-5 grid grid-cols-1 gap-3 sm:mt-7 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
-            {cards.map((card) => (
-              <SelectionCard
-                key={card.id}
-                id={card.id}
-                eyebrow={card.eyebrow}
-                title={card.title}
-                description={card.description}
-                icon={card.icon}
-                mediaSrc={card.mediaSrc}
-                secondaryMediaSrc={card.secondaryMediaSrc}
-                fallbackIcon={card.fallbackIcon}
-                accent={card.accent}
-                isSelected={selectedType === card.id}
-                onClick={setSelectedType}
-              />
-            ))}
-          </div>
-        </motion.div>
-
-        <div className="mt-8 flex items-center justify-end">
-          <motion.div
-            animate={
-              showValidationFlash
-                ? { scale: [1, 1.03, 0.99, 1], x: [0, -4, 4, 0] }
-                : { scale: 1, x: 0 }
-            }
-            transition={{ duration: 0.45 }}
-          >
-            <PillButton
-              onClick={handleContinue}
-              disabled={isLoading}
-              className={cn(
-                "inline-flex items-center justify-center gap-2 border-transparent bg-gradient-to-br px-6 py-2.5 text-sm font-black tracking-tight text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-md",
-                selectedType
-                  ? CARD_ACCENTS[
-                      selectedType === "movie"
-                        ? "amber"
-                        : selectedType === "book"
-                          ? "emerald"
-                          : selectedType === "music"
-                            ? "rose"
-                            : "violet"
-                    ].chipGradient
-                  : "from-slate-700 to-slate-900 dark:from-slate-300 dark:to-white dark:text-slate-900",
-              )}
-            >
-              {isLoading
-                ? t("contentSelection.continuing")
-                : t("contentSelection.continue")}
-              <ArrowRight size={16} />
-            </PillButton>
-          </motion.div>
-        </div>
-        {validationMessage ? (
-          <p className="mt-3 text-right text-xs font-semibold text-red-500 dark:text-red-400">
-            {validationMessage}
-          </p>
-        ) : null}
+      <div className="mt-5 grid grid-cols-1 gap-3 sm:mt-7 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
+        {cards.map((card) => (
+          <SelectionCard
+            key={card.id}
+            id={card.id}
+            eyebrow={card.eyebrow}
+            title={card.title}
+            description={card.description}
+            icon={card.icon}
+            mediaSrc={card.mediaSrc}
+            secondaryMediaSrc={card.secondaryMediaSrc}
+            fallbackIcon={card.fallbackIcon}
+            accent={card.accent}
+            isSelected={selectedType === card.id}
+            onClick={onSelect}
+          />
+        ))}
       </div>
-    </QuizStepShell>
+
+      <div className="mt-8 flex items-center justify-end">
+        <motion.div
+          animate={
+            showValidationFlash
+              ? { scale: [1, 1.03, 0.99, 1], x: [0, -4, 4, 0] }
+              : { scale: 1, x: 0 }
+          }
+          transition={{ duration: 0.45 }}
+        >
+          <PillButton
+            onClick={handleContinueClick}
+            disabled={isContinuing}
+            className={cn(
+              "inline-flex items-center justify-center gap-2 border-transparent bg-gradient-to-br px-6 py-2.5 text-sm font-black tracking-tight text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-md",
+              selectedType
+                ? CARD_ACCENTS[
+                    selectedType === "movie"
+                      ? "amber"
+                      : selectedType === "book"
+                        ? "emerald"
+                        : selectedType === "music"
+                          ? "rose"
+                          : "violet"
+                  ].chipGradient
+                : "from-slate-700 to-slate-900 dark:from-slate-300 dark:to-white dark:text-slate-900",
+            )}
+          >
+            {isContinuing
+              ? t("contentSelection.continuing")
+              : t("contentSelection.continue")}
+            <ArrowRight size={16} />
+          </PillButton>
+        </motion.div>
+      </div>
+      {validationMessage ? (
+        <p className="mt-3 text-right text-xs font-semibold text-red-500 dark:text-red-400">
+          {validationMessage}
+        </p>
+      ) : null}
+    </>
   );
 };
-
-export default ContentSelectionPage;

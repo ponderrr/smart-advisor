@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Quiz — Smart Advisor",
-  description: "Answer a short quiz so Smart Advisor can pick for you.",
+  description: "Pick a format, choose the depth, and answer a short quiz.",
   robots: { index: false, follow: false },
 };
 
-export default function QuestionnaireLayout({
+export default function QuizLayout({
   children,
 }: {
   children: React.ReactNode;

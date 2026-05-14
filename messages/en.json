@@ -1440,6 +1440,18 @@
       "music": "Album",
       "eyebrow": "Your picks",
       "headline": "Hand-picked for you",
+      "headlines": [
+        "Hand-picked for you",
+        "Tailored to your taste",
+        "Fresh off the press",
+        "Made to match your vibe",
+        "Built around your answers",
+        "Curated just for you",
+        "Your next favorite, maybe",
+        "Picked with intent",
+        "Personally yours",
+        "Selected with care"
+      ],
       "subhead": "{count, plural, one {# personalized pick from the AI, with the reasoning behind each. Log one to your library to nudge future picks.} other {# personalized picks from the AI, with the reasoning behind each. Log one to your library to nudge future picks.}}",
       "sections": {
         "movie": {
@@ -1733,7 +1745,8 @@
         "noFavoritesTitle": "No favorites yet",
         "noFavoritesBody": "Tap the heart on any pick to save it here.",
         "movies": "Movies",
-        "books": "Books"
+        "books": "Books",
+        "music": "Music"
       },
       "genres": {
         "eyebrow": "Genre breakdown",

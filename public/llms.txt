@@ -30,9 +30,7 @@ including dark content, moral complexity, and adult subject matter.
 
 - /               Landing page
 - /auth           Sign up / sign in
-- /select-content Choose movies, books, or both
-- /question-count Choose quiz length (5, 10, or 15 questions)
-- /questionnaire  Personality quiz
+- /quiz           Three-step quiz: pick a format, choose depth, answer questions
 - /results        AI-generated recommendation
 - /account        Saved recommendations and account history
 

@@ -1440,6 +1440,18 @@
       "music": "Álbum",
       "eyebrow": "Tus elecciones",
       "headline": "Elegidas a mano para ti",
+      "headlines": [
+        "Elegidas a mano para ti",
+        "Hechas a tu medida",
+        "Recién salidas del horno",
+        "A juego con tu estilo",
+        "Pensadas en tus respuestas",
+        "Curadas solo para ti",
+        "Tu próxima favorita, quizá",
+        "Seleccionadas con intención",
+        "Personalmente tuyas",
+        "Elegidas con cariño"
+      ],
       "subhead": "{count, plural, one {# elección personalizada de la IA, con el razonamiento detrás de cada una. Registra una en tu biblioteca para afinar las próximas.} other {# elecciones personalizadas de la IA, con el razonamiento detrás de cada una. Registra una en tu biblioteca para afinar las próximas.}}",
       "sections": {
         "movie": {
@@ -1733,7 +1745,8 @@
         "noFavoritesTitle": "Aún no hay favoritos",
         "noFavoritesBody": "Pulsa el corazón en cualquier recomendación para guardarla aquí.",
         "movies": "Películas",
-        "books": "Libros"
+        "books": "Libros",
+        "music": "Música"
       },
       "genres": {
         "eyebrow": "Desglose de géneros",

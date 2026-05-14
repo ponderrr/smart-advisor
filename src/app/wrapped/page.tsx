@@ -264,7 +264,7 @@ const WrappedPage = () => {
             </div>
             <div className="shrink-0">
               <HoverBorderGradient
-                onClick={() => router.push("/content-selection")}
+                onClick={() => router.push("/quiz")}
                 idleColor="17, 24, 39"
                 darkIdleColor="255, 255, 255"
                 highlightColor="99, 102, 241"

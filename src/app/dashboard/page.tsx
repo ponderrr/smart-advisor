@@ -984,6 +984,10 @@ const DashboardPage = () => {
     () => recommendations.filter((r) => r.type === "book").slice(0, 15),
     [recommendations],
   );
+  const musicRail = useMemo(
+    () => recommendations.filter((r) => r.type === "music").slice(0, 15),
+    [recommendations],
+  );
   const favoritesGrid = useMemo(
     () => recommendations.filter((r) => r.is_favorited).slice(0, 15),
     [recommendations],
@@ -1081,7 +1085,7 @@ const DashboardPage = () => {
         title: tb("suggestion.firstQuiz.title"),
         body: tb("suggestion.firstQuiz.body"),
         cta: tb("suggestion.firstQuiz.cta"),
-        href: "/content-selection",
+        href: "/quiz",
       };
     }
     if (libraryItems.length === 0) {
@@ -1104,7 +1108,7 @@ const DashboardPage = () => {
             count: libraryItems.length,
           }),
           cta: tb("suggestion.anotherPick.cta"),
-          href: "/content-selection",
+          href: "/quiz",
         };
       }
     }
@@ -1135,7 +1139,7 @@ const DashboardPage = () => {
             </div>
             <div className="shrink-0">
               <HoverBorderGradient
-                onClick={() => router.push("/content-selection")}
+                onClick={() => router.push("/quiz")}
                 idleColor="17, 24, 39"
                 darkIdleColor="255, 255, 255"
                 highlightColor="99, 102, 241"
@@ -1377,7 +1381,12 @@ const DashboardPage = () => {
                           )}
                         </button>
                         <div className="min-w-0 flex-1">
-                          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
+                          <p
+                            className={cn(
+                              "text-[10px] font-black uppercase tracking-[0.18em]",
+                              getRecTypeAccent(lastPick.type).tileText,
+                            )}
+                          >
                             {tb("spotlight.eyebrow")}
                             <span className="mx-1.5 text-slate-300 dark:text-slate-600">
                               ·
@@ -1825,10 +1834,10 @@ const DashboardPage = () => {
                     <AnimatePresence mode="popLayout">
                       <motion.div
                         key={picksFilter}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -8 }}
-                        transition={{ duration: 0.18 }}
+                        initial={{ opacity: 0, x: slideDir * 30 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: slideDir * -30 }}
+                        transition={{ duration: 0.2 }}
                       >
                         {loading ? (
                           <div className="space-y-6">
@@ -1863,7 +1872,7 @@ const DashboardPage = () => {
                             </p>
                             <button
                               type="button"
-                              onClick={() => router.push("/content-selection")}
+                              onClick={() => router.push("/quiz")}
                               className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-black tracking-tight text-white transition-colors hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
                             >
                               <Sparkles size={14} />
@@ -1895,10 +1904,10 @@ const DashboardPage = () => {
                               <section className="rounded-3xl border border-slate-200/70 bg-white/80 py-5 pl-6 pr-0 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
                                 <div className="mb-3 flex items-center justify-between gap-2 pr-6">
                                   <div className="flex items-center gap-2">
-                                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">
+                                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-300">
                                       <Film size={13} />
                                     </span>
-                                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-indigo-600 dark:text-indigo-400">
+                                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-600 dark:text-amber-400">
                                       {tb("picks.movies")}
                                     </p>
                                     <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500">
@@ -1922,10 +1931,10 @@ const DashboardPage = () => {
                               <section className="rounded-3xl border border-slate-200/70 bg-white/80 py-5 pl-6 pr-0 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
                                 <div className="mb-3 flex items-center justify-between gap-2 pr-6">
                                   <div className="flex items-center gap-2">
-                                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-300">
+                                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300">
                                       <BookOpen size={13} />
                                     </span>
-                                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-600 dark:text-amber-400">
+                                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-400">
                                       {tb("picks.books")}
                                     </p>
                                     <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500">
@@ -1935,6 +1944,33 @@ const DashboardPage = () => {
                                 </div>
                                 <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 pr-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                                   {bookRail.map((rec) => (
+                                    <div
+                                      key={rec.id}
+                                      className="w-36 shrink-0 snap-start sm:w-40"
+                                    >
+                                      {renderPickCard(rec)}
+                                    </div>
+                                  ))}
+                                </div>
+                              </section>
+                            )}
+                            {musicRail.length > 0 && (
+                              <section className="rounded-3xl border border-slate-200/70 bg-white/80 py-5 pl-6 pr-0 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/65">
+                                <div className="mb-3 flex items-center justify-between gap-2 pr-6">
+                                  <div className="flex items-center gap-2">
+                                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-rose-100 text-rose-600 dark:bg-rose-500/15 dark:text-rose-300">
+                                      <Music size={13} />
+                                    </span>
+                                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-rose-600 dark:text-rose-400">
+                                      {tb("picks.music")}
+                                    </p>
+                                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500">
+                                      {musicRail.length}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 pr-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                                  {musicRail.map((rec) => (
                                     <div
                                       key={rec.id}
                                       className="w-36 shrink-0 snap-start sm:w-40"

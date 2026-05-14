@@ -47,11 +47,10 @@ import { MusicPreview } from "@/components/music-preview";
 import { WhyThisPick } from "@/components/why-this-pick";
 import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
-import { ViewToggle, type ViewMode } from "@/components/view-toggle";
+import { ViewToggle } from "@/components/view-toggle";
+import { usePersistedViewMode } from "@/hooks/use-persisted-view-mode";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-
-const VIEW_MODES = ["grid", "list"] as const;
 
 type HistoryFilter = "all" | "movies" | "books" | "music" | "favorites";
 type SortMode = "newest" | "oldest" | "favorites_first";
@@ -243,10 +242,7 @@ const AccountHistoryPage = () => {
       window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
     }
   }, [filter]);
-  const [view, setView] = useQueryState(
-    "view",
-    parseAsStringLiteral(VIEW_MODES).withDefault("grid"),
-  );
+  const [view, setView] = usePersistedViewMode("grid");
   const [sortBy, setSortBy] = useState<SortMode>("newest");
   const [selectedRec, setSelectedRec] = useState<Recommendation | null>(null);
   const [libraryItems, setLibraryItems] = useState<LibraryItem[]>([]);
@@ -468,7 +464,7 @@ const AccountHistoryPage = () => {
                 </PillButton>
               )}
               <HoverBorderGradient
-                onClick={() => router.push("/content-selection")}
+                onClick={() => router.push("/quiz")}
                 idleColor="17, 24, 39"
                 darkIdleColor="255, 255, 255"
                 highlightColor="99, 102, 241"
@@ -584,7 +580,7 @@ const AccountHistoryPage = () => {
             <div className="min-w-0 flex-1 overflow-x-clip">
 
           {/* Stats + Sort */}
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mb-4 flex flex-col gap-3">
             <div className="flex flex-wrap gap-3">
               {(
                 [
@@ -642,7 +638,7 @@ const AccountHistoryPage = () => {
               })}
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <span className="text-sm text-slate-600 dark:text-slate-400">
                   {t("sortLabel")}
@@ -660,10 +656,7 @@ const AccountHistoryPage = () => {
                   ))}
                 </select>
               </div>
-              <ViewToggle
-                value={view as ViewMode}
-                onChange={(v) => setView(v)}
-              />
+              <ViewToggle value={view} onChange={setView} />
             </div>
           </div>
 

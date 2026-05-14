@@ -53,11 +53,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
-import { ViewToggle, type ViewMode } from "@/components/view-toggle";
+import { ViewToggle } from "@/components/view-toggle";
+import { usePersistedViewMode } from "@/hooks/use-persisted-view-mode";
 import { cn } from "@/lib/utils";
 
 const MEDIUM_TABS = ["all", "movie", "book", "music"] as const;
-const VIEW_MODES = ["grid", "list"] as const;
 type MediumFilter = (typeof MEDIUM_TABS)[number];
 type StatusFilter = "all" | LibraryStatus;
 
@@ -154,10 +154,7 @@ export default function LibraryPage() {
     "status",
     parseAsStringLiteral(STATUS_FILTER_VALUES).withDefault("all"),
   );
-  const [view, setView] = useQueryState(
-    "view",
-    parseAsStringLiteral(VIEW_MODES).withDefault("list"),
-  );
+  const [view, setView] = usePersistedViewMode("list");
   const [editTarget, setEditTarget] = useState<LibraryItem | null>(null);
 
   // Snap to top instantly when the filters change so the user doesn't get
@@ -274,7 +271,7 @@ export default function LibraryPage() {
             </div>
             <div className="flex items-center gap-3">
               <HoverBorderGradient
-                onClick={() => router.push("/content-selection")}
+                onClick={() => router.push("/quiz")}
                 idleColor="17, 24, 39"
                 darkIdleColor="255, 255, 255"
                 highlightColor="99, 102, 241"
@@ -383,7 +380,7 @@ export default function LibraryPage() {
             </SidebarNavShell>
 
             <div className="min-w-0 flex-1 overflow-x-clip">
-              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="mb-4 flex flex-col gap-3">
                 <div className="flex flex-wrap gap-3">
                   {(
                     [
@@ -441,7 +438,7 @@ export default function LibraryPage() {
                   })}
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex min-w-0 flex-wrap items-center gap-2">
                     <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                       {t("statusLabel")}
@@ -467,9 +464,9 @@ export default function LibraryPage() {
                     />
                   </div>
                   <ViewToggle
-                    value={view as ViewMode}
-                    onChange={(v) => setView(v)}
-                    className="ml-auto shrink-0"
+                    value={view}
+                    onChange={setView}
+                    className="shrink-0"
                   />
                 </div>
               </div>

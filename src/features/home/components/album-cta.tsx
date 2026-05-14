@@ -60,7 +60,7 @@ const AlbumCta = () => {
             </div>
 
             <Link
-              href="/content-selection"
+              href="/quiz"
               className="group/cta relative z-10 inline-flex shrink-0 items-center gap-2 self-start rounded-full bg-slate-900 px-6 py-3 text-sm font-black tracking-tight text-white shadow-md transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98] sm:self-auto sm:text-base dark:bg-white dark:text-slate-900"
             >
               {t("albumCta.cta")}
