@@ -13,9 +13,9 @@
 CREATE TABLE IF NOT EXISTS public.user_library (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL,
-  medium TEXT NOT NULL CHECK (medium IN ('movie', 'book')),
+  medium TEXT NOT NULL CHECK (medium IN ('movie', 'book', 'music')),
   title TEXT NOT NULL,
-  creator TEXT,            -- director (movie) or author (book)
+  creator TEXT,            -- director (movie), author (book), or artist (music)
   year INT,
   poster_url TEXT,
   status TEXT NOT NULL DEFAULT 'finished'

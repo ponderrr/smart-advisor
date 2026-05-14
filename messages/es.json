@@ -98,9 +98,17 @@
           "eyebrow": "En el estante",
           "label": "Libros"
         },
+        "music": {
+          "eyebrow": "En tus oídos",
+          "label": "Música"
+        },
         "both": {
           "eyebrow": "Uno de cada",
           "label": "Ambos"
+        },
+        "mix": {
+          "eyebrow": "Los tres",
+          "label": "Mezcla"
         }
       },
       "toneLabel": "Tono del contenido",
@@ -215,7 +223,7 @@
     "hero": {
       "titleLine1": "Descubre tu próxima",
       "titleLine2": "obsesión favorita en cada",
-      "subtitle": "Recomendaciones de películas y libros con IA adaptadas a tu gusto único.",
+      "subtitle": "Recomendaciones de películas, libros y álbumes con IA adaptadas a tu gusto único.",
       "ctaPrimaryLoggedOut": "Comenzar",
       "ctaPrimaryLoggedIn": "Ir al panel",
       "ctaSecondaryLoggedOut": "Probar la demo",
@@ -224,6 +232,7 @@
       "flipWords": [
         "Película",
         "Libro",
+        "Álbum",
         "Historia",
         "Aventura",
         "Clásico",
@@ -238,7 +247,7 @@
       "steps": {
         "format": {
           "title": "Elige tu formato",
-          "description": "Cuéntanos si estás de humor para una película, un libro o ambos. Adaptamos el resto del flujo a lo que elijas."
+          "description": "Cuéntanos si estás de humor para una película, un libro, un álbum o una mezcla. Adaptamos el resto del flujo a lo que elijas."
         },
         "depth": {
           "title": "Define la profundidad",
@@ -272,8 +281,8 @@
           "description": "Razones claras hacen que cada sugerencia sea fácil de confiar y elegir, con transparencia de código abierto."
         },
         "both": {
-          "title": "Elige entre ambos",
-          "description": "Ve resultados de libros y películas en un solo lugar para que elegir sea más rápido y fácil."
+          "title": "Elige entre formatos",
+          "description": "Ve resultados de libros, películas y álbumes en un solo lugar para que elegir sea más rápido y fácil."
         }
       },
       "trustReasons": [
@@ -281,6 +290,14 @@
         "Ritmo que dijiste preferir",
         "Tono que has elegido antes"
       ]
+    },
+    "albumCta": {
+      "newFeature": "Nuevo",
+      "eyebrow": "Recomendaciones de álbumes",
+      "titleLead": "Conéctate con tu próximo",
+      "titleHighlight": "álbum favorito",
+      "description": "El mismo cuestionario, un nuevo sentido. Cuéntanos sobre lo que escuchas — épocas, ambientes, instrumentos — y la IA elige un álbum con una vista previa de 30 segundos. Con tecnología de Deezer.",
+      "cta": "Elegir un álbum"
     },
     "groupQuizCta": {
       "newFeature": "Nueva función",
@@ -336,19 +353,19 @@
         },
         "personalize": {
           "question": "¿Cómo personaliza Smart Advisor las recomendaciones?",
-          "answer": "Smart Advisor usa tus respuestas del cuestionario para entender tu estado de ánimo, preferencias de ritmo e intereses de género. Luego combina esto con datos en tiempo real de TMDB y Open Library para generar recomendaciones con una explicación clara detrás de cada elección."
+          "answer": "Smart Advisor usa tus respuestas del cuestionario para entender tu estado de ánimo, preferencias de ritmo e intereses de género. Luego combina esto con datos en tiempo real de TMDB, Open Library y Deezer para generar recomendaciones con una explicación clara detrás de cada elección."
         },
         "quiz-flow": {
           "question": "¿Cómo funciona el cuestionario?",
-          "answer": "Eliges un tipo de contenido (película, libro o ambos), seleccionas cuántas preguntas quieres (de 3 a 15) y respondes cada una. Tus respuestas se envían a nuestra IA que genera recomendaciones personalizadas adaptadas a tus respuestas."
+          "answer": "Eliges un tipo de contenido (película, libro, álbum o una mezcla), seleccionas cuántas preguntas quieres (de 3 a 15) y respondes cada una. Tus respuestas se envían a nuestra IA que genera recomendaciones personalizadas adaptadas a tus respuestas."
         },
         "results-generated": {
           "question": "¿Cómo se generan los resultados?",
-          "answer": "Tus respuestas las procesa un modelo de IA que selecciona títulos que coinciden con tus preferencias. Cada recomendación se enriquece con carteles reales, valoraciones y descripciones de TMDB (películas) y Open Library (libros)."
+          "answer": "Tus respuestas las procesa un modelo de IA que selecciona títulos que coinciden con tus preferencias. Cada recomendación se enriquece con carteles reales, valoraciones y descripciones de TMDB (películas), Open Library (libros) y Deezer (álbumes, incluida una vista previa de 30 segundos)."
         },
         "movies-and-books": {
-          "question": "¿Puedo usar Smart Advisor para películas y libros?",
-          "answer": "Sí. Selecciona 'Ambos' durante la elección de contenido para recibir una recomendación de película y otra de libro en la misma sesión. Todo tu historial de recomendaciones se guarda para futuras consultas."
+          "question": "¿Puedo obtener películas, libros y música en una sola sesión?",
+          "answer": "Sí. Selecciona 'Mezcla' durante la elección de contenido para recibir una película, un libro y un álbum en la misma sesión. Todo tu historial de recomendaciones se guarda para futuras consultas."
         },
         "off-results": {
           "question": "¿Y si mis recomendaciones no me convencen?",
@@ -356,7 +373,7 @@
         },
         "trailer-preview": {
           "question": "¿Dónde puedo ver un tráiler o vista previa?",
-          "answer": "Abre cualquier tarjeta de recomendación desde tu panel o historial. Para películas se reproduce un tráiler en línea (carga diferida, solo se activa al hacer clic), y para libros aparece un enlace 'Ver en Open Library' para que explores ediciones, portadas y reseñas. Las películas usan el tráiler oficial de TMDB cuando está publicado."
+          "answer": "Abre cualquier tarjeta de recomendación desde tu panel o historial. Para películas se reproduce un tráiler en línea (carga diferida, solo se activa al hacer clic), para libros aparece un enlace 'Ver en Open Library' para que explores ediciones, portadas y reseñas, y para álbumes una vista previa de 30 segundos de la primera pista está a un toque. Las películas usan el tráiler oficial de TMDB cuando está publicado; las vistas previas vienen de Deezer."
         },
         "year-in-review": {
           "question": "¿Qué es Año en Revisión y cuándo aparece?",
@@ -372,7 +389,7 @@
         },
         "group-host": {
           "question": "¿Cómo hospedo un cuestionario en grupo?",
-          "answer": "Los usuarios con sesión iniciada pueden abrir Cuestionario en grupo desde la barra de navegación; el resto puede usar la tarjeta 'Encuentra una recomendación juntos' en la página principal. En la tarjeta del anfitrión, define tu nombre, elige el tipo de contenido (Ambos / Películas / Libros), toca un número para cuántas preguntas quieres (3 a 15) y luego Crear sesión. Aterrizarás en una sala con un código de seis caracteres y un botón Copiar enlace: comparte cualquiera con el grupo. Cuando al menos dos jugadores se unan, verás Iniciar cuestionario; al pulsarlo se generan preguntas frescas con IA para toda la sala. Cada quien responde en su dispositivo, y cuando todas las respuestas estén enviadas verás un botón 'Revelar la elección del grupo' para mostrar la recomendación sintetizada por la IA."
+          "answer": "Los usuarios con sesión iniciada pueden abrir Cuestionario en grupo desde la barra de navegación; el resto puede usar la tarjeta 'Encuentra una recomendación juntos' en la página principal. En la tarjeta del anfitrión, define tu nombre, elige el tipo de contenido (Mezcla / Películas / Libros / Música), toca un número para cuántas preguntas quieres (3 a 15) y luego Crear sesión. Aterrizarás en una sala con un código de seis caracteres y un botón Copiar enlace: comparte cualquiera con el grupo. Cuando al menos dos jugadores se unan, verás Iniciar cuestionario; al pulsarlo se generan preguntas frescas con IA para toda la sala. Cada quien responde en su dispositivo, y cuando todas las respuestas estén enviadas verás un botón 'Revelar la elección del grupo' para mostrar la recomendación sintetizada por la IA."
         },
         "group-synthesis": {
           "question": "¿Cómo encuentra la IA una recomendación que sirva para todos?",
@@ -867,6 +884,7 @@
       "picks": "{count, plural, one {# recomendación} other {# recomendaciones}}",
       "moviesPart": "{count, plural, one {# película} other {# películas}}",
       "booksPart": "{count, plural, one {# libro} other {# libros}}",
+      "musicPart": "{count, plural, one {# álbum} other {# álbumes}}",
       "watchTime": "alrededor de {hours} horas de tiempo en pantalla",
       "libraryLogged": "{count} registradas en tu biblioteca"
     },
@@ -885,12 +903,14 @@
       "eyebrow": "Más recomendado",
       "director": "Director",
       "author": "Autor",
+      "artist": "Artista",
       "noData": "Aún no hay suficientes datos."
     },
     "formatMix": {
       "eyebrow": "Mezcla de formatos",
       "movies": "Películas",
-      "books": "Libros"
+      "books": "Libros",
+      "music": "Música"
     },
     "monthly": {
       "eyebrow": "Recomendaciones por mes"
@@ -928,8 +948,10 @@
         "summary": "{count} preguntas · {types} · hasta {max} jugadores",
         "types": {
           "both": "películas + libros",
+          "mix": "películas + libros + música",
           "movie": "películas",
-          "book": "libros"
+          "book": "libros",
+          "music": "música"
         },
         "continue": "Continuar",
         "continuing": "Creando…",
@@ -965,8 +987,10 @@
       },
       "contentTypes": {
         "both": "Ambos",
+        "mix": "Mezcla",
         "movie": "Películas",
-        "book": "Libros"
+        "book": "Libros",
+        "music": "Música"
       },
       "errors": {
         "signInRequired": "Inicia sesión para hospedar un cuestionario en grupo.",
@@ -1053,8 +1077,10 @@
     "result": {
       "movie": "Película",
       "book": "Libro",
+      "music": "Álbum",
       "byAuthor": "Por {creator}",
       "byDirector": "Dirigida por {creator}",
+      "byArtist": "De {creator}",
       "viewOnOpenLibrary": "Ver en Open Library",
       "watchTrailer": "Ver tráiler",
       "playTrailerAria": "Reproducir tráiler de {title}"
@@ -1072,13 +1098,15 @@
       "all": "Todo",
       "movies": "Películas",
       "books": "Libros",
+      "music": "Música",
       "favorites": "Favoritos"
     },
     "stats": {
       "total": "Total",
       "favorites": "Favoritos",
       "movies": "Películas",
-      "books": "Libros"
+      "books": "Libros",
+      "music": "Música"
     },
     "sortLabel": "Ordenar:",
     "sortAria": "Ordenar recomendaciones",
@@ -1094,6 +1122,7 @@
     "card": {
       "movie": "Película",
       "book": "Libro",
+      "music": "Álbum",
       "fallbackExplanation": "Una recomendación de {type} adaptada a tus elecciones recientes del cuestionario.",
       "openAria": "Abrir detalles de {title}",
       "favoriteAdd": "Añadir a favoritos",
@@ -1117,6 +1146,7 @@
       "ariaLabel": "Detalles de {title}",
       "byAuthor": "Por {author}",
       "byDirector": "Dirigida por {director}",
+      "byArtist": "De {artist}",
       "inLibrary": "En tu biblioteca",
       "close": "Cerrar"
     }
@@ -1131,13 +1161,15 @@
     "type": {
       "all": "Todo",
       "movie": "Películas",
-      "book": "Libros"
+      "book": "Libros",
+      "music": "Música"
     },
     "stats": {
       "total": "Total",
       "finished": "Terminado",
       "movies": "Películas",
-      "books": "Libros"
+      "books": "Libros",
+      "music": "Música"
     },
     "statusLabel": "Estado",
     "filterAll": "Todos",
@@ -1154,8 +1186,10 @@
     },
     "byAuthor": "Por {creator}",
     "byDirector": "Dirigida por {creator}",
+    "byArtist": "De {creator}",
     "mediumMovie": "Película",
     "mediumBook": "Libro",
+    "mediumMusic": "Álbum",
     "loggedOn": "Registrado el {date}",
     "empty": {
       "noItemsTitle": "Aún no hay nada en tu biblioteca",
@@ -1238,6 +1272,16 @@
           "title": "Libro",
           "description": "Una lectura adaptada a tu estilo e intereses."
         },
+        "music": {
+          "eyebrow": "En tus oídos",
+          "title": "Álbum",
+          "description": "Un disco que coincide con el ambiente que llevas."
+        },
+        "mix": {
+          "eyebrow": "Los tres",
+          "title": "Mezcla",
+          "description": "Una película, un libro y un álbum elegidos juntos."
+        },
         "both": {
           "eyebrow": "Ambos",
           "title": "Uno de cada",
@@ -1251,6 +1295,8 @@
       "contentTypes": {
         "movie": "película",
         "book": "libro",
+        "music": "álbum",
+        "mix": "película, libro y álbum",
         "both": "película y libro"
       },
       "questionsLabel": "{count, plural, one {Pregunta} other {Preguntas}}",
@@ -1269,11 +1315,13 @@
     },
     "questionnaire": {
       "category": "Cuestionario en curso",
+      "loadingStep": "Preparando tu cuestionario",
       "questionOf": "Pregunta {current} de {total}",
       "previous": "Anterior",
       "back": "Atrás",
       "next": "Siguiente",
       "submit": "Obtener recomendaciones",
+      "submitting": "Generando…",
       "subtitle": {
         "fillInBlank": "Comparte tus ideas con tus propias palabras.",
         "selectAll": "Elige todas las que quieras.",
@@ -1287,38 +1335,94 @@
         "tryAgain": "Reintentar",
         "back": "Atrás"
       },
-      "loadingMessages": [
-        "Pensando buenas preguntas…",
-        "Eligiendo tu enfoque…",
-        "Adaptándose a tu gusto…",
-        "Calibrando para tu vibra…",
-        "Encontrando el punto de partida adecuado…",
-        "Redactando el cuestionario…",
-        "Añadiendo un giro o dos…",
-        "Afinando los detalles…",
-        "Quitando las aburridas…",
-        "Revisando el flujo…",
-        "Casi listo para ti…"
-      ]
+      "loadingMessages": {
+        "default": [
+          "Pensando buenas preguntas…",
+          "Eligiendo tu enfoque…",
+          "Adaptándose a tu gusto…",
+          "Calibrando para tu vibra…",
+          "Redactando el cuestionario…",
+          "Casi listo para ti…"
+        ],
+        "movie": [
+          "Investigando tu gusto en pantalla…",
+          "Preguntando qué te hace darle play…",
+          "Alineando las escenas indicadas…",
+          "Puliendo la marquesina…",
+          "Ajustando el lente…",
+          "Comenzando los créditos iniciales…"
+        ],
+        "book": [
+          "Hojeando tu estantería…",
+          "Escuchando tu voz lectora…",
+          "Preguntando por tus favoritos con esquinas dobladas…",
+          "Abriendo el lomo del libro…",
+          "Colocando el marcapáginas…",
+          "Yendo al primer capítulo…"
+        ],
+        "music": [
+          "Afinando tu gusto…",
+          "Escuchando qué te llega…",
+          "Buscando el ritmo justo…",
+          "Sintonizando el dial…",
+          "Alineando la aguja…",
+          "Presionando grabar…"
+        ],
+        "mix": [
+          "Leyendo entre formatos…",
+          "Mezclando pantalla, página y sonido…",
+          "Buscando tu hilo conductor…",
+          "Hilvanando tres gustos…",
+          "Afinando el trío…",
+          "Casi listo para ti…"
+        ]
+      }
     }
   },
   "Results": {
-    "loadingMessages": [
-      "Repasando tus respuestas…",
-      "Consultando el algoritmo…",
-      "Comparando buen gusto…",
-      "Revisando estanterías de películas…",
-      "Buscando en la biblioteca…",
-      "Cazando joyas ocultas…",
-      "Combinando estados de ánimo y géneros…",
-      "Desempolvando clásicos olvidados…",
-      "Revisando contra tu historial…",
-      "Sopesando la lista corta…",
-      "Reduciendo las opciones…",
-      "Pasándolo por la IA una vez más…",
-      "Puliendo cada recomendación…",
-      "Dando los toques finales…"
-    ],
+    "loadingMessages": {
+      "default": [
+        "Repasando tus respuestas…",
+        "Consultando el algoritmo…",
+        "Comparando buen gusto…",
+        "Cazando joyas ocultas…",
+        "Sopesando la lista corta…",
+        "Puliendo cada recomendación…",
+        "Dando los toques finales…"
+      ],
+      "movie": [
+        "Buceando en el cine…",
+        "Comparando tu gusto con el canon…",
+        "Sacando el rollo del proyector…",
+        "Leyendo los créditos…",
+        "Verificando lo que vale tus dos horas…",
+        "Cargando el tráiler…"
+      ],
+      "book": [
+        "Recorriendo los estantes…",
+        "Cruzando referencias con tu biblioteca…",
+        "Trazando tu mapa de lectura…",
+        "Desempolvando el lomo indicado…",
+        "Revisando la primera frase…",
+        "Colocando el marcapáginas…"
+      ],
+      "music": [
+        "Hurgando entre cajas de discos…",
+        "Secuenciando el álbum perfecto…",
+        "Escuchando más allá de los sencillos…",
+        "Sintonizando tu frecuencia…",
+        "Alineando los temas profundos…",
+        "Bajando la aguja…"
+      ],
+      "mix": [
+        "Hilando películas, libros y música…",
+        "Ajustando tres gustos a tus respuestas…",
+        "Mezclando tus tres elecciones…",
+        "Cruzando referencias entre formatos…",
+        "Alineando el trío…",
+        "Dando los toques finales…"
+      ]
+    },
     "body": {
       "matchSuffix": "{score}% de coincidencia",
       "matchPercent": "{score}%",
@@ -1328,10 +1432,12 @@
       "showLess": "Ver menos",
       "byAuthor": "Por {author}",
       "byDirector": "Dirigida por {director}",
+      "byArtist": "De {artist}",
       "favoriteAdd": "Añadir {title} a favoritos",
       "favoriteRemove": "Quitar {title} de favoritos",
       "movie": "Película",
       "book": "Libro",
+      "music": "Álbum",
       "eyebrow": "Tus elecciones",
       "headline": "Elegidas a mano para ti",
       "subhead": "{count, plural, one {# elección personalizada de la IA, con el razonamiento detrás de cada una. Registra una en tu biblioteca para afinar las próximas.} other {# elecciones personalizadas de la IA, con el razonamiento detrás de cada una. Registra una en tu biblioteca para afinar las próximas.}}",
@@ -1343,6 +1449,10 @@
         "book": {
           "eyebrow": "Libro",
           "title": "En el estante"
+        },
+        "music": {
+          "eyebrow": "Álbum",
+          "title": "En tus oídos"
         }
       },
       "actions": {
@@ -1366,8 +1476,10 @@
         "title": "Mis recomendaciones de Smart Advisor",
         "movies": "Películas:",
         "books": "Libros:",
+        "music": "Álbumes:",
         "directorPrefix": "dir. {director}",
         "byAuthorShort": "de {author}",
+        "byArtistShort": "de {artist}",
         "genres": "Géneros: {list}",
         "footer": "Obtén tus propias recomendaciones en smartadvisor.app"
       },
@@ -1377,7 +1489,7 @@
       "generationStep": {
         "analyzing": "Analizando tus respuestas...",
         "generating": "Generando recomendaciones personalizadas...",
-        "enhancing": "Enriqueciendo con datos de películas y libros...",
+        "enhancing": "Enriqueciendo con datos de películas, libros y álbumes...",
         "finalizing": "Finalizando tus recomendaciones..."
       },
       "generationError": "No se pudieron generar las recomendaciones personalizadas. Inténtalo de nuevo.",
@@ -1410,6 +1522,7 @@
       "total": "Recomendaciones totales",
       "movies": "Películas",
       "books": "Libros",
+      "music": "Música",
       "favorites": "Favoritos"
     },
     "filters": {
@@ -1452,6 +1565,7 @@
         "ariaLabel": "Detalles de {title}",
         "byAuthor": "Por {author}",
         "byDirector": "Dirigida por {director}",
+        "byArtist": "De {artist}",
         "close": "Cerrar"
       },
       "favoriteAria": "Favorita",
@@ -1506,7 +1620,7 @@
           "favorites": "Favoritos",
           "topGenre": "Género principal"
         },
-        "picksHint": "{movies}p · {books}l",
+        "picksHint": "{movies}p · {books}l · {music}á",
         "ratedHint": "{count} valoradas",
         "favoritesPercent": "{percent}%",
         "topGenrePicks": "{count, plural, one {# recomendación} other {# recomendaciones}}",
@@ -1541,6 +1655,9 @@
           "cinemaMaster": "Maestro del cine",
           "bookworm": "Ratón de biblioteca",
           "voracious": "Lector voraz",
+          "melomaniac": "Melómano",
+          "audiophile": "Audiófilo",
+          "musicMogul": "Magnate musical",
           "curator": "Curador",
           "maven": "Conocedor",
           "reflective": "Reflexivo",
@@ -1570,6 +1687,9 @@
           "cinemaMaster": "Acumula 50 recomendaciones de películas.",
           "bookworm": "Acumula 10 recomendaciones de libros.",
           "voracious": "Acumula 50 recomendaciones de libros.",
+          "melomaniac": "Acumula 10 recomendaciones de álbumes.",
+          "audiophile": "Acumula 50 recomendaciones de álbumes.",
+          "musicMogul": "Acumula 100 recomendaciones de álbumes.",
           "curator": "Marca como favoritas 5 recomendaciones en tu historial.",
           "maven": "Marca como favoritas 25 recomendaciones.",
           "reflective": "Valora 5 elementos en tu biblioteca.",
@@ -1622,8 +1742,16 @@
         "topPercent": "{percent}%",
         "mostlyMovies": "principalmente películas",
         "mostlyBooks": "principalmente libros",
+        "mostlyMusic": "principalmente música",
         "evenSplit": "mitad y mitad",
-        "empty": "Haz un cuestionario para ver tus géneros."
+        "empty": "Haz un cuestionario para ver tus géneros.",
+        "format": {
+          "movies": "Películas",
+          "books": "Libros",
+          "music": "Música",
+          "totalPicks": "{count, plural, one {# recomendación} other {# recomendaciones}}",
+          "empty": "Aún no hay recomendaciones."
+        }
       }
     }
   },

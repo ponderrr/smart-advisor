@@ -67,16 +67,25 @@ export interface BookRecommendation {
   explanation: string;
 }
 
+export interface MusicRecommendation {
+  title: string;
+  artist: string;
+  year: number;
+  genres: string[];
+  explanation: string;
+}
+
 export interface RecommendationData {
   movieRecommendation?: MovieRecommendation;
   bookRecommendation?: BookRecommendation;
+  musicRecommendation?: MusicRecommendation;
 }
 
 /**
  * Generates personalized recommendation questions using Supabase Edge Functions
  */
 export async function generateQuestions(
-  contentType: "movie" | "book" | "both",
+  contentType: "movie" | "book" | "music" | "both" | "mix",
   userAge: number,
   questionCount: number = 5,
   userName: string = "User",
@@ -171,7 +180,7 @@ export async function generateQuestions(
  */
 export async function generateRecommendations(
   answers: Answer[],
-  contentType: "movie" | "book" | "both",
+  contentType: "movie" | "book" | "music" | "both" | "mix",
   userAge: number,
   userName: string = "User",
 ): Promise<RecommendationData> {
@@ -216,6 +225,7 @@ export async function generateRecommendations(
       for (const rec of data.recommendations) {
         if (rec.type === "movie") result.movieRecommendation = rec;
         if (rec.type === "book") result.bookRecommendation = rec;
+        if (rec.type === "music") result.musicRecommendation = rec;
       }
       return result;
     }
@@ -232,7 +242,7 @@ export async function generateRecommendations(
  * Retry wrapper for question generation with exponential backoff
  */
 export async function generateQuestionsWithRetry(
-  contentType: "movie" | "book" | "both",
+  contentType: "movie" | "book" | "music" | "both" | "mix",
   userAge: number,
   questionCount: number = 5,
   userName: string = "User",
@@ -270,7 +280,7 @@ export async function generateQuestionsWithRetry(
  */
 export async function generateRecommendationsWithRetry(
   answers: Answer[],
-  contentType: "movie" | "book" | "both",
+  contentType: "movie" | "book" | "music" | "both" | "mix",
   userAge: number,
   userName: string = "User",
   maxRetries: number = 3,

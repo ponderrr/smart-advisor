@@ -7,13 +7,13 @@ const corsHeaders = {
 };
 
 const MINOR_SYSTEM_PROMPT = `You are Smart Advisor, a warm and enthusiastic entertainment companion.
-You give young people genuinely great movie and book recommendations based on who they are.
+You give young people genuinely great movie, book, and music recommendations based on who they are.
 Your recommendation write-ups are exciting, encouraging, and make them feel understood.
 You explain WHY something is perfect for them specifically — not generic summaries.
 Keep all recommendations age-appropriate (PG to PG-13 level content maximum).`;
 
 const ADULT_SYSTEM_PROMPT = `You are Smart Advisor, a sharp and opinionated entertainment critic.
-You give adults genuinely great movie and book recommendations — not safe, obvious picks.
+You give adults genuinely great movie, book, and music recommendations — not safe, obvious picks.
 You take their full personality profile seriously and match them with things that fit who they actually are.
 Your write-ups are direct, specific, and a little passionate. You explain exactly why this is right for them.
 You are not afraid to recommend challenging, dark, sexual, or morally complex content when it fits.
@@ -52,8 +52,15 @@ serve(async (req) => {
       ? MINOR_SYSTEM_PROMPT
       : ADULT_SYSTEM_PROMPT;
 
-    const wantsMovies = contentType === "movie" || contentType === "both";
-    const wantsBooks = contentType === "book" || contentType === "both";
+    const wantsMovies =
+      contentType === "movie" ||
+      contentType === "both" ||
+      contentType === "mix";
+    const wantsBooks =
+      contentType === "book" ||
+      contentType === "both" ||
+      contentType === "mix";
+    const wantsMusic = contentType === "music" || contentType === "mix";
 
     const recommendations = [];
 
@@ -85,6 +92,18 @@ serve(async (req) => {
       recommendations.push({ type: "book", ...bookRec });
     }
 
+    if (wantsMusic) {
+      const musicRec = await getRecommendation({
+        type: "music",
+        name,
+        age,
+        answers,
+        isAdult: allowMature,
+        systemPrompt,
+      });
+      recommendations.push({ type: "music", ...musicRec });
+    }
+
     return new Response(JSON.stringify({ recommendations }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
@@ -105,7 +124,7 @@ async function getRecommendation({
   isAdult,
   systemPrompt,
 }: {
-  type: "movie" | "book";
+  type: "movie" | "book" | "music";
   name: string;
   age: number;
   answers: unknown;
@@ -145,13 +164,13 @@ ${answersText}
 
 AGE: ${age} ${isAdult ? "(adult — mature themes are fair game when they fit)" : "(minor — keep it age-appropriate)"}
 
-Recommend ONE ${type} that fits these specific answers.
+Recommend ONE ${type === "music" ? "album (NOT a single song, NOT an artist — a specific studio album)" : type} that fits these specific answers.
 
 HARD RULES for the response:
 - The "explanation" MUST quote or reference at least one specific answer from the list above. Do not write generic blurbs.
 - The "explanation" MUST NOT contain phrases like "without clear profile data", "without more information", "based on limited info", "I'm going with a safe pick", or any similar disclaimer. The profile is complete.
 - Pick something specific and confident, not safe and obvious.
-- "description" is a synopsis of the work itself (no spoilers). It must be different from "explanation".
+- "description" is a synopsis of the work itself (no spoilers). It must be different from "explanation".${type === "music" ? "\n- For music: \"title\" is the EXACT album title and \"artist\" is the EXACT artist/band name. \"description\" should describe the album's sound, themes, and standout tracks." : ""}
 - "match_score" is YOUR honest 0-100 assessment of fit. Use this rubric strictly:
   • 95-100: rare. Only when the pick hits at least 3 of their specific answers and there's almost nothing in the work that fights what they said they want.
   • 85-94: strong. Hits multiple specific answers and feels clearly tailored to them.
@@ -166,9 +185,10 @@ Return ONLY a JSON object — no markdown fences, no commentary, no preamble. Ex
   "description": "2-3 sentence synopsis without spoilers",
   "explanation": "2-3 sentences referencing their actual answers and why this fits them",
   "genres": ["Genre 1", "Genre 2", "Genre 3"],
-  "year": 2019,
+  "year": ${type === "music" ? "2020" : "2019"},
   "director": ${type === "movie" ? '"Director name"' : "null"},
   "author": ${type === "book" ? '"Author name"' : "null"},
+  "artist": ${type === "music" ? '"Artist or band name"' : "null"},
   "rating": 8.4,
   "match_score": 87
 }`;

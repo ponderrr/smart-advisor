@@ -10,6 +10,7 @@ import {
   BookOpen,
   Film,
   Heart,
+  Music,
   Sparkles,
   Trash2,
   LayoutGrid,
@@ -35,12 +36,14 @@ import {
   STATUS_TONE,
   type LibraryItem,
 } from "@/features/library/types/library";
+import { getRecTypeAccent } from "@/features/recommendations/utils/type-accent";
 import { LogToLibraryButton } from "@/features/library/components/log-to-library-button";
 import { PillButton } from "@/components/ui/pill-button";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { Dialog } from "@/components/ui/dialog";
 import { TrailerEmbed } from "@/components/trailer-embed";
+import { MusicPreview } from "@/components/music-preview";
 import { WhyThisPick } from "@/components/why-this-pick";
 import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
@@ -50,7 +53,7 @@ import { toast } from "sonner";
 
 const VIEW_MODES = ["grid", "list"] as const;
 
-type HistoryFilter = "all" | "movies" | "books" | "favorites";
+type HistoryFilter = "all" | "movies" | "books" | "music" | "favorites";
 type SortMode = "newest" | "oldest" | "favorites_first";
 
 const SORT_VALUES: SortMode[] = ["newest", "oldest", "favorites_first"];
@@ -84,7 +87,13 @@ const RecommendationModal = ({
           />
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-5">
             <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm">
-              {rec.type === "movie" ? <Film size={10} /> : <BookOpen size={10} />}
+              {rec.type === "movie" ? (
+                <Film size={10} />
+              ) : rec.type === "music" ? (
+                <Music size={10} />
+              ) : (
+                <BookOpen size={10} />
+              )}
               {rec.type}
             </span>
           </div>
@@ -94,11 +103,13 @@ const RecommendationModal = ({
       <div className="p-5">
         <h2 className="text-2xl font-black tracking-tight">{rec.title}</h2>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          {rec.author
-            ? t("byAuthor", { author: rec.author })
-            : rec.director
-              ? t("byDirector", { director: rec.director })
-              : ""}
+          {rec.artist
+            ? t("byArtist", { artist: rec.artist })
+            : rec.author
+              ? t("byAuthor", { author: rec.author })
+              : rec.director
+                ? t("byDirector", { director: rec.director })
+                : ""}
           {rec.year ? ` · ${rec.year}` : ""}
         </p>
 
@@ -116,7 +127,11 @@ const RecommendationModal = ({
         )}
 
         {rec.explanation && (
-          <WhyThisPick text={rec.explanation} className="mt-4" />
+          <WhyThisPick
+            text={rec.explanation}
+            type={rec.type}
+            className="mt-4"
+          />
         )}
 
         {rec.description && (
@@ -125,14 +140,20 @@ const RecommendationModal = ({
           </p>
         )}
 
-        <div className="mt-4">
-          <TrailerEmbed
-            type={rec.type}
-            title={rec.title}
-            year={rec.year ?? null}
-            author={rec.author ?? null}
-          />
-        </div>
+        {rec.type === "music" && rec.preview_url ? (
+          <div className="mt-4">
+            <MusicPreview previewUrl={rec.preview_url} />
+          </div>
+        ) : rec.type !== "music" ? (
+          <div className="mt-4">
+            <TrailerEmbed
+              type={rec.type}
+              title={rec.title}
+              year={rec.year ?? null}
+              author={rec.author ?? null}
+            />
+          </div>
+        ) : null}
 
         {libraryEntry && (
           <div className="mt-4 flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2 dark:border-slate-700/60 dark:bg-slate-800/40">
@@ -159,7 +180,7 @@ const RecommendationModal = ({
           <LogToLibraryButton
             medium={rec.type}
             title={rec.title}
-            creator={rec.author ?? rec.director ?? null}
+            creator={rec.artist ?? rec.author ?? rec.director ?? null}
             year={rec.year ?? null}
             poster_url={rec.poster_url ?? null}
             source_recommendation_id={rec.id}
@@ -193,7 +214,13 @@ const AccountHistoryPage = () => {
     null,
   );
   const [loading, setLoading] = useState(true);
-  const historyTabs = ["all", "movies", "books", "favorites"] as const;
+  const historyTabs = [
+    "all",
+    "movies",
+    "books",
+    "music",
+    "favorites",
+  ] as const;
   const [filter, setFilter] = useQueryState(
     "filter",
     parseAsStringLiteral(historyTabs).withDefault("all"),
@@ -316,6 +343,7 @@ const AccountHistoryPage = () => {
         const filterConfig: FilterOptions = { sortBy };
         if (filter === "movies") filterConfig.contentType = "movie";
         if (filter === "books") filterConfig.contentType = "book";
+        if (filter === "music") filterConfig.contentType = "music";
         if (filter === "favorites") filterConfig.isFavorited = true;
 
         const { data, error } =
@@ -395,11 +423,13 @@ const AccountHistoryPage = () => {
     const favorites = displayed.filter((rec) => rec.is_favorited).length;
     const movies = displayed.filter((rec) => rec.type === "movie").length;
     const books = displayed.filter((rec) => rec.type === "book").length;
+    const music = displayed.filter((rec) => rec.type === "music").length;
     return {
       total: displayed.length,
       favorites,
       movies,
       books,
+      music,
     };
   }, [displayed]);
 
@@ -471,19 +501,25 @@ const AccountHistoryPage = () => {
                   value: "movies",
                   label: t("filters.movies"),
                   icon: <Film size={13} />,
-                  pillClassName: "bg-indigo-500",
+                  pillClassName: "bg-amber-500",
                 },
                 {
                   value: "books",
                   label: t("filters.books"),
                   icon: <BookOpen size={13} />,
-                  pillClassName: "bg-indigo-500",
+                  pillClassName: "bg-emerald-500",
+                },
+                {
+                  value: "music",
+                  label: t("filters.music"),
+                  icon: <Music size={13} />,
+                  pillClassName: "bg-rose-500",
                 },
                 {
                   value: "favorites",
                   label: t("filters.favorites"),
                   icon: <Star size={13} />,
-                  pillClassName: "bg-rose-500",
+                  pillClassName: "bg-pink-500",
                 },
               ]}
             />
@@ -495,16 +531,42 @@ const AccountHistoryPage = () => {
               <nav aria-label={t("filtersAria")} className="flex-1">
                 <SidebarNavGroup label={t("filtersGroup")} />
                 {[
-                  { id: "all" as const, label: t("filters.all"), icon: <LayoutGrid size={16} /> },
-                  { id: "movies" as const, label: t("filters.movies"), icon: <Film size={16} /> },
-                  { id: "books" as const, label: t("filters.books"), icon: <BookOpen size={16} /> },
-                  { id: "favorites" as const, label: t("filters.favorites"), icon: <Star size={16} /> },
+                  {
+                    id: "all" as const,
+                    label: t("filters.all"),
+                    icon: <LayoutGrid size={16} />,
+                  },
+                  {
+                    id: "movies" as const,
+                    label: t("filters.movies"),
+                    icon: <Film size={16} />,
+                    iconClassName: "text-amber-500 dark:text-amber-400",
+                  },
+                  {
+                    id: "books" as const,
+                    label: t("filters.books"),
+                    icon: <BookOpen size={16} />,
+                    iconClassName: "text-emerald-500 dark:text-emerald-400",
+                  },
+                  {
+                    id: "music" as const,
+                    label: t("filters.music"),
+                    icon: <Music size={16} />,
+                    iconClassName: "text-rose-500 dark:text-rose-400",
+                  },
+                  {
+                    id: "favorites" as const,
+                    label: t("filters.favorites"),
+                    icon: <Star size={16} />,
+                    iconClassName: "text-pink-500 dark:text-pink-400",
+                  },
                 ].map((tab) => (
                   <SidebarNavItem
                     key={tab.id}
                     icon={tab.icon}
                     label={tab.label}
                     active={filter === tab.id}
+                    iconClassName={tab.iconClassName}
                     onClick={() => setFilter(tab.id)}
                   />
                 ))}
@@ -519,22 +581,65 @@ const AccountHistoryPage = () => {
               </div>
             </SidebarNavShell>
 
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 overflow-x-clip">
 
           {/* Stats + Sort */}
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex gap-3">
-              {[
-                { label: t("stats.total"), value: stats.total },
-                { label: t("stats.favorites"), value: stats.favorites },
-                { label: t("stats.movies"), value: stats.movies },
-                { label: t("stats.books"), value: stats.books },
-              ].map((item) => (
-                <div key={item.label} className="rounded-xl border border-slate-200/70 bg-white/80 px-3 py-2 shadow-sm backdrop-blur-sm dark:border-slate-700/60 dark:bg-slate-900/60">
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">{item.label}</p>
-                  <p className="text-lg font-black tracking-tight">{item.value}</p>
-                </div>
-              ))}
+            <div className="flex flex-wrap gap-3">
+              {(
+                [
+                  { label: t("stats.total"), value: stats.total, accent: null },
+                  {
+                    label: t("stats.favorites"),
+                    value: stats.favorites,
+                    accent: null,
+                  },
+                  {
+                    label: t("stats.movies"),
+                    value: stats.movies,
+                    accent: "movie" as const,
+                  },
+                  {
+                    label: t("stats.books"),
+                    value: stats.books,
+                    accent: "book" as const,
+                  },
+                  {
+                    label: t("stats.music"),
+                    value: stats.music,
+                    accent: "music" as const,
+                  },
+                ]
+              ).map((item) => {
+                const tone = item.accent
+                  ? getRecTypeAccent(item.accent)
+                  : null;
+                return (
+                  <div
+                    key={item.label}
+                    className={cn(
+                      "rounded-xl border bg-white/80 px-3 py-2 shadow-sm backdrop-blur-sm dark:bg-slate-900/60",
+                      tone
+                        ? tone.tileBorder
+                        : "border-slate-200/70 dark:border-slate-700/60",
+                    )}
+                  >
+                    <p
+                      className={cn(
+                        "text-[10px] uppercase tracking-[0.14em]",
+                        tone
+                          ? tone.tileText
+                          : "text-slate-500 dark:text-slate-400",
+                      )}
+                    >
+                      {item.label}
+                    </p>
+                    <p className="text-lg font-black tracking-tight">
+                      {item.value}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
@@ -566,7 +671,7 @@ const AccountHistoryPage = () => {
           <AnimatePresence mode="popLayout">
           {!loading && (
           <motion.div
-            key={filter}
+            key={`${filter}-${view}`}
             initial={{ opacity: 0, x: filterSlideDir * 30 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: filterSlideDir * -30 }}
@@ -603,12 +708,20 @@ const AccountHistoryPage = () => {
                         gridTemplateColumns: `repeat(${colCount}, 1fr)`,
                       }}
                     >
-                      {rowItems.map((rec) =>
-                        view === "list" ? (
+                      {rowItems.map((rec) => {
+                        const accent = getRecTypeAccent(rec.type);
+                        return view === "list" ? (
                           <article
                             key={rec.id}
-                            className="group flex gap-4 rounded-3xl border border-slate-200/80 bg-white/80 p-4 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-slate-700/70 dark:bg-slate-900/65"
+                            className="group relative flex gap-4 overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 p-4 pl-5 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-slate-700/70 dark:bg-slate-900/65"
                           >
+                            <span
+                              aria-hidden
+                              className={cn(
+                                "absolute inset-y-0 left-0 w-1",
+                                accent.stripe,
+                              )}
+                            />
                             <div
                               role="button"
                               tabIndex={0}
@@ -634,6 +747,8 @@ const AccountHistoryPage = () => {
                                 <div className="flex h-full w-full items-center justify-center text-slate-500 dark:text-slate-400">
                                   {rec.type === "movie" ? (
                                     <Film size={24} />
+                                  ) : rec.type === "music" ? (
+                                    <Music size={24} />
                                   ) : (
                                     <BookOpen size={24} />
                                   )}
@@ -650,7 +765,11 @@ const AccountHistoryPage = () => {
                                     {rec.title}
                                   </h3>
                                   <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
-                                    {rec.type === "movie" ? t("card.movie") : t("card.book")}
+                                    {rec.type === "movie"
+                                      ? t("card.movie")
+                                      : rec.type === "music"
+                                        ? t("card.music")
+                                        : t("card.book")}
                                     {rec.year ? ` · ${rec.year}` : ""}
                                     {" · "}
                                     {formatDistanceToNow(
@@ -705,8 +824,15 @@ const AccountHistoryPage = () => {
                         ) : (
                           <article
                             key={rec.id}
-                            className="group overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-slate-700/70 dark:bg-slate-900/65"
+                            className="group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-slate-700/70 dark:bg-slate-900/65"
                           >
+                            <span
+                              aria-hidden
+                              className={cn(
+                                "absolute inset-y-0 left-0 z-10 w-1",
+                                accent.stripe,
+                              )}
+                            />
                             <div
                               role="button"
                               tabIndex={0}
@@ -732,6 +858,8 @@ const AccountHistoryPage = () => {
                                 <div className="flex h-full w-full items-center justify-center text-slate-500 dark:text-slate-400">
                                   {rec.type === "movie" ? (
                                     <Film size={28} />
+                                  ) : rec.type === "music" ? (
+                                    <Music size={28} />
                                   ) : (
                                     <BookOpen size={28} />
                                   )}
@@ -759,7 +887,9 @@ const AccountHistoryPage = () => {
                                     type:
                                       rec.type === "movie"
                                         ? t("card.movie").toLowerCase()
-                                        : t("card.book").toLowerCase(),
+                                        : rec.type === "music"
+                                          ? t("card.music").toLowerCase()
+                                          : t("card.book").toLowerCase(),
                                   })}
                               </p>
                               <div className="mt-2.5 flex items-center justify-between">
@@ -795,8 +925,8 @@ const AccountHistoryPage = () => {
                               </div>
                             </div>
                           </article>
-                        ),
-                      )}
+                        );
+                      })}
                     </div>
                   );
                 })}

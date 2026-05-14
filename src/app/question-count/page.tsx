@@ -10,9 +10,10 @@ import { useQuizStore } from "@/features/quiz/store/quiz-store";
 import { PillButton } from "@/components/ui/pill-button";
 import { PageLoader } from "@/components/ui/loader";
 import { QuizStepShell } from "@/features/quiz/components/quiz-step-shell";
+import { getAccentTone } from "@/features/quiz/utils/content-accent";
 import { cn } from "@/lib/utils";
 
-type ContentType = "movie" | "book" | "both";
+type ContentType = "movie" | "book" | "music" | "both" | "mix";
 const PREF_QUESTION_COUNT_KEY = "smart_advisor_pref_question_count";
 
 const QuestionCountPage = () => {
@@ -60,14 +61,23 @@ const QuestionCountPage = () => {
     return <PageLoader text={tc("loading")} />;
   }
 
+  const tone = getAccentTone(contentType);
   return (
     <QuizStepShell
       category={t("category")}
       stepLabel={t("stepOf", { current: 2, total: 4 })}
       progress={50}
+      initialProgress={25}
       onBack={() => router.push("/content-selection")}
+      contentType={contentType}
     >
-      <div className="rounded-3xl border border-indigo-200/60 bg-gradient-to-br from-indigo-50/80 to-white p-6 shadow-sm backdrop-blur-md sm:p-8 dark:border-indigo-500/30 dark:from-indigo-500/10 dark:to-slate-900/40">
+      <div
+        className={cn(
+          "rounded-3xl border bg-gradient-to-br p-6 shadow-sm backdrop-blur-md sm:p-8",
+          tone.surfaceBorder,
+          tone.surfaceGradient,
+        )}
+      >
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -83,14 +93,17 @@ const QuestionCountPage = () => {
           </p>
         </motion.div>
 
-        <div className="mt-6 rounded-2xl border border-slate-200/80 bg-gradient-to-br from-indigo-50/60 via-white to-violet-50/60 px-4 py-6 sm:px-6 sm:py-8 dark:border-slate-700/70 dark:from-indigo-500/5 dark:via-slate-900/40 dark:to-violet-500/5">
+        <div className="mt-6 rounded-2xl border border-slate-200/80 bg-white/70 px-4 py-6 backdrop-blur-sm sm:px-6 sm:py-8 dark:border-slate-700/70 dark:bg-slate-900/40">
           <div className="mb-5 text-center">
             <motion.div
               key={questionCount}
               initial={{ scale: 0.9, opacity: 0.7 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
-              className="bg-gradient-to-br from-indigo-500 to-violet-500 bg-clip-text text-5xl font-black tracking-tighter text-transparent sm:text-6xl"
+              className={cn(
+                "bg-gradient-to-br bg-clip-text text-5xl font-black tracking-tighter text-transparent sm:text-6xl",
+                tone.barGradient,
+              )}
             >
               {questionCount}
             </motion.div>
@@ -106,7 +119,16 @@ const QuestionCountPage = () => {
             value={questionCount}
             onChange={(e) => setQuestionCount(parseInt(e.target.value, 10))}
             aria-label={t("questionCount.ariaCount")}
-            className="w-full cursor-pointer accent-indigo-500"
+            className={cn(
+              "w-full cursor-pointer",
+              contentType === "movie"
+                ? "accent-amber-500"
+                : contentType === "book"
+                  ? "accent-emerald-500"
+                  : contentType === "music"
+                    ? "accent-rose-500"
+                    : "accent-violet-500",
+            )}
           />
           <div className="mt-1 flex justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
             <span>3</span>
@@ -146,7 +168,13 @@ const QuestionCountPage = () => {
                   {t(`questionCount.tone.${tier}`)}
                 </motion.p>
                 <div className="mt-4 flex justify-center">
-                  <span className="inline-flex items-center rounded-full border border-indigo-200/70 bg-white/80 px-5 py-2 text-base font-black tracking-tight text-indigo-700 shadow-sm dark:border-indigo-500/40 dark:bg-slate-900/60 dark:text-indigo-300 sm:text-lg">
+                  <span
+                    className={cn(
+                      "inline-flex items-center rounded-full border bg-white/80 px-5 py-2 text-base font-black tracking-tight shadow-sm dark:bg-slate-900/60 sm:text-lg",
+                      tone.surfaceBorder,
+                      tone.text,
+                    )}
+                  >
                     {t("questionCount.estimate", { minutes: estimateMin })}
                   </span>
                 </div>
@@ -160,7 +188,8 @@ const QuestionCountPage = () => {
             onClick={handleContinue}
             disabled={isLoading}
             className={cn(
-              "inline-flex items-center justify-center gap-2 bg-white px-7 py-3 text-sm font-black tracking-tight text-black disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-900 dark:text-white",
+              "inline-flex items-center justify-center gap-2 border-transparent bg-gradient-to-br px-7 py-3 text-sm font-black tracking-tight text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-md",
+              tone.barGradient,
             )}
           >
             {isLoading

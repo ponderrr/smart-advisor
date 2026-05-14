@@ -8,6 +8,7 @@ import {
   IconCheck,
   IconBookFilled,
   IconDeviceTv,
+  IconDisc,
   IconStarFilled,
 } from "@tabler/icons-react";
 import { useTranslations, useMessages } from "next-intl";
@@ -210,12 +211,15 @@ const TrustSkeleton = () => {
 };
 
 const AcrossBothSkeleton = () => {
-  const [mode, setMode] = useState<"book" | "movie">("book");
+  type Mode = "book" | "movie" | "music";
+  const order: Mode[] = ["book", "movie", "music"];
+  const [mode, setMode] = useState<Mode>("book");
   useEffect(() => {
     const id = setInterval(() => {
-      setMode((m) => (m === "book" ? "movie" : "book"));
+      setMode((m) => order[(order.indexOf(m) + 1) % order.length]);
     }, 2400);
     return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const variants = {
@@ -230,6 +234,12 @@ const AcrossBothSkeleton = () => {
       Icon: IconDeviceTv,
       gradient: "from-fuchsia-500 to-rose-500",
       meta: "1h 48m",
+    },
+    music: {
+      label: "Album",
+      Icon: IconDisc,
+      gradient: "from-rose-500 to-amber-500",
+      meta: "11 tracks",
     },
   } as const;
 

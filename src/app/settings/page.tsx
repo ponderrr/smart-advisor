@@ -28,6 +28,7 @@ import {
   Check,
   Film,
   BookOpen,
+  Music,
   Sparkles,
   Sun,
   Moon,
@@ -276,9 +277,9 @@ const SettingsPage = () => {
     text: string;
     type: "success" | "error" | "info";
   } | null>(null);
-  const [contentFocus, setContentFocus] = useState<"movie" | "book" | "both">(
-    "both",
-  );
+  const [contentFocus, setContentFocus] = useState<
+    "movie" | "book" | "music" | "both" | "mix"
+  >("mix");
   const [contentTone, setContentTone] = useState<"standard" | "family">(
     "standard",
   );
@@ -580,7 +581,13 @@ const SettingsPage = () => {
     const sq = Number(
       window.localStorage.getItem(PREF_QUESTION_COUNT_KEY) || "5",
     );
-    if (sc === "movie" || sc === "book" || sc === "both")
+    if (
+      sc === "movie" ||
+      sc === "book" ||
+      sc === "music" ||
+      sc === "both" ||
+      sc === "mix"
+    )
       setContentFocus(sc);
     if (st === "standard" || st === "family") setContentTone(st);
     if (Number.isFinite(sq) && sq >= 3 && sq <= 15)
@@ -686,7 +693,10 @@ const SettingsPage = () => {
             </p>
           </div>
 
-          {/* Mobile pill nav — desktop keeps the grouped sidebar below. */}
+          {/* Mobile pill nav — desktop keeps the grouped sidebar below.
+              Icons are omitted on mobile so "Integrations" (the longest
+              label) gets enough room inside its 1/4 segment share without
+              spilling past the pill on narrow phones. */}
           <div className="mb-4 md:hidden">
             <SegmentedControl<SettingsSection>
               layoutId="settings-mobile-tabs"
@@ -697,7 +707,6 @@ const SettingsPage = () => {
               options={sectionTabs.map((tab) => ({
                 value: tab.id,
                 label: tab.label,
-                icon: tab.icon,
                 pillClassName: "bg-indigo-500",
               }))}
             />
@@ -1256,7 +1265,9 @@ const SettingsPage = () => {
                           <p className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
                             {t("content.typeLabel")}
                           </p>
-                          <SegmentedControl<"movie" | "book" | "both">
+                          <SegmentedControl<
+                            "movie" | "book" | "music" | "both" | "mix"
+                          >
                             layoutId="settings-content-focus"
                             value={contentFocus}
                             onChange={setContentFocus}
@@ -1266,19 +1277,25 @@ const SettingsPage = () => {
                                 value: "movie",
                                 label: t("content.type.movie.label"),
                                 icon: <Film size={14} />,
-                                pillClassName: "bg-indigo-500",
+                                pillClassName: "bg-amber-500",
                               },
                               {
                                 value: "book",
                                 label: t("content.type.book.label"),
                                 icon: <BookOpen size={14} />,
-                                pillClassName: "bg-indigo-500",
+                                pillClassName: "bg-emerald-500",
                               },
                               {
-                                value: "both",
-                                label: t("content.type.both.label"),
+                                value: "music",
+                                label: t("content.type.music.label"),
+                                icon: <Music size={14} />,
+                                pillClassName: "bg-rose-500",
+                              },
+                              {
+                                value: "mix",
+                                label: t("content.type.mix.label"),
                                 icon: <Sparkles size={14} />,
-                                pillClassName: "bg-indigo-500",
+                                pillClassName: "bg-violet-500",
                               },
                             ]}
                           />

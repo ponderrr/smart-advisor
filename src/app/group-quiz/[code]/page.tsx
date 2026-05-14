@@ -11,6 +11,7 @@ import {
   Crown,
   Film,
   LogOut,
+  Music,
   PlayCircle,
   RotateCcw,
   Sparkles,
@@ -37,6 +38,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { PillButton } from "@/components/ui/pill-button";
 import { AppNavbar } from "@/components/app-navbar";
+import { MusicPreview } from "@/components/music-preview";
 import { PageLoader } from "@/components/ui/loader";
 import { cn } from "@/lib/utils";
 
@@ -783,6 +785,17 @@ const GroupQuizLobbyPage = () => {
                     explanation={session.result.book.explanation}
                   />
                 )}
+                {session.result.music && (
+                  <ResultCard
+                    type="music"
+                    title={session.result.music.title}
+                    creator={session.result.music.artist}
+                    year={session.result.music.year}
+                    genres={session.result.music.genres}
+                    explanation={session.result.music.explanation}
+                    previewUrl={session.result.music.preview_url}
+                  />
+                )}
                 <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex flex-wrap items-center gap-2">
                     {isHost ? (
@@ -879,12 +892,13 @@ type TrailerData =
   | null;
 
 interface ResultCardProps {
-  type: "movie" | "book";
+  type: "movie" | "book" | "music";
   title: string;
   creator?: string;
   year?: number;
   genres?: string[];
   explanation?: string;
+  previewUrl?: string;
 }
 
 const ResultCard = ({
@@ -894,12 +908,19 @@ const ResultCard = ({
   year,
   genres,
   explanation,
+  previewUrl,
 }: ResultCardProps) => {
   const t = useTranslations("GroupQuiz.result");
   const [media, setMedia] = useState<TrailerData>(null);
   const [showPlayer, setShowPlayer] = useState(false);
 
   useEffect(() => {
+    if (type === "music") {
+      // Music doesn't go through the trailer endpoint — we render an inline
+      // preview button instead, gated on a previewUrl prop from the parent.
+      setMedia(null);
+      return;
+    }
     let cancelled = false;
     const params = new URLSearchParams({ title, type });
     if (year) params.set("year", String(year));
@@ -941,10 +962,20 @@ const ResultCard = ({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">
-              {type === "movie" ? <Film size={13} /> : <BookOpen size={13} />}
+              {type === "movie" ? (
+                <Film size={13} />
+              ) : type === "music" ? (
+                <Music size={13} />
+              ) : (
+                <BookOpen size={13} />
+              )}
             </span>
             <p className="text-[10px] font-black uppercase tracking-[0.16em] text-indigo-600 dark:text-indigo-400">
-              {type === "movie" ? t("movie") : t("book")}
+              {type === "movie"
+                ? t("movie")
+                : type === "music"
+                  ? t("music")
+                  : t("book")}
             </p>
           </div>
           <h3 className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">
@@ -954,7 +985,9 @@ const ResultCard = ({
             {creator
               ? type === "movie"
                 ? t("byDirector", { creator })
-                : t("byAuthor", { creator })
+                : type === "music"
+                  ? t("byArtist", { creator })
+                  : t("byAuthor", { creator })
               : ""}
             {year ? ` · ${year}` : ""}
           </p>
@@ -989,6 +1022,11 @@ const ResultCard = ({
             >
               {t("viewOnOpenLibrary")}
             </a>
+          )}
+          {type === "music" && previewUrl && (
+            <div className="mt-3">
+              <MusicPreview previewUrl={previewUrl} />
+            </div>
           )}
         </div>
       </div>

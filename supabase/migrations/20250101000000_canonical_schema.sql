@@ -22,17 +22,19 @@ CREATE TABLE public.profiles (
 CREATE TABLE public.recommendations (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL,
-  type TEXT NOT NULL CHECK (type IN ('movie', 'book')),
-  content_type TEXT NOT NULL DEFAULT 'both' CHECK (content_type IN ('movie', 'book', 'both')),
+  type TEXT NOT NULL CHECK (type IN ('movie', 'book', 'music')),
+  content_type TEXT NOT NULL DEFAULT 'both' CHECK (content_type IN ('movie', 'book', 'music', 'both', 'mix')),
   title TEXT NOT NULL,
   description TEXT,
   explanation TEXT,
   poster_url TEXT,
+  preview_url TEXT,
   genre TEXT,
   rating DECIMAL(3,1) CHECK (rating IS NULL OR (rating >= 0 AND rating <= 10)),
   is_favorited BOOLEAN DEFAULT FALSE,
   director TEXT,
   author TEXT,
+  artist TEXT,
   year INTEGER CHECK (year IS NULL OR (year >= 1900 AND year <= 2100)),
   created_at TIMESTAMPTZ DEFAULT NOW()
 );

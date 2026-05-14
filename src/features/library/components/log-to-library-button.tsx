@@ -104,7 +104,8 @@ export const LogToLibraryButton = ({
     setOpen(false);
   };
 
-  const verb = medium === "movie" ? "watched" : "read";
+  const verb =
+    medium === "movie" ? "watched" : medium === "music" ? "listened to" : "read";
   const Icon = logged ? BookmarkCheck : Bookmark;
 
   return (

@@ -23,6 +23,12 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
+      // media-src allows the <audio> tag in MusicPreview to stream Deezer's
+      // 30s preview MP3s. Their preview CDN shards across hosts like
+      // cdns-preview-a.dzcdn.net, cdns-preview-d.dzcdn.net, etc. — covered
+      // by *.dzcdn.net. blob: is here so we can still play any locally-
+      // generated audio in dev.
+      "media-src 'self' blob: https://*.dzcdn.net",
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.anthropic.com https://va.vercel-scripts.com https://vitals.vercel-insights.com",
       "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://books.google.com",
       "frame-ancestors 'none'",
@@ -40,6 +46,10 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "covers.openlibrary.org" },
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "img.youtube.com" },
+      // Deezer cover art CDNs — albums return cover URLs from any of these
+      // host shards (cdns-images.dzcdn.net, e-cdns-images.dzcdn.net, etc.).
+      { protocol: "https", hostname: "*.dzcdn.net" },
+      { protocol: "https", hostname: "cdn-images.dzcdn.net" },
     ],
   },
   async headers() {

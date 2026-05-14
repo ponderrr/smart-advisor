@@ -10,6 +10,7 @@ import {
   Star,
   BookOpen,
   Film,
+  Music,
   ArrowRight,
   Share2,
   RotateCcw,
@@ -28,7 +29,11 @@ import {
   MATCH_TONE_CLASSES,
 } from "@/features/recommendations/utils/match-score";
 import { SafeLocalStorage } from "@/utils/localStorage";
-import { useQuizStore } from "@/features/quiz/store/quiz-store";
+import {
+  useQuizStore,
+  type ContentType,
+} from "@/features/quiz/store/quiz-store";
+import { getAccentTone } from "@/features/quiz/utils/content-accent";
 import { PillButton } from "@/components/ui/pill-button";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { SectionHeader } from "@/components/section-header";
@@ -39,6 +44,7 @@ import type { LibraryStatus } from "@/features/library/types/library";
 import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
 import { TrailerEmbed } from "@/components/trailer-embed";
+import { MusicPreview } from "@/components/music-preview";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -81,16 +87,148 @@ const saveGeneratedSession = (sessionId: string) => {
   SafeLocalStorage.setJSON(GENERATED_SESSIONS_KEY, sessionsToStore);
 };
 
-/* ---------- Loading Animation ---------- */
-const ResultsLoadingState = ({ step: _step }: { step: string }) => {
-  const messages = useMessages() as {
-    Results?: { loadingMessages?: string[] };
-  };
-  const loadingMessages = useMemo(
-    () => messages.Results?.loadingMessages ?? [],
-    [messages],
+/* ---------- Loading State ----------
+ * One skeleton card per upcoming recommendation — same count and same
+ * accent color the user is about to see for real. The mapping mirrors the
+ * engine's target split in `enhanced-recommendations-service.ts`:
+ *   movie       → 3 amber movie skeletons
+ *   book        → 3 emerald book skeletons
+ *   music       → 3 rose square album skeletons
+ *   mix         → 1 each (movie + book + album)
+ *   both (legacy) → 2 movies + 1 book
+ *
+ * Each skeleton mirrors the real RecommendationCard shape (poster column
+ * + title + meta chips + body lines) so the swap from loader to result is
+ * a content fill rather than a layout shift. The rotating status caption
+ * at the bottom uses the chosen contentType's bank. */
+type SkeletonFormat = "movie" | "book" | "music";
+
+const SKELETON_TONES: Record<
+  SkeletonFormat,
+  { border: string; surface: string; dot: string; square: boolean }
+> = {
+  movie: {
+    border: "border-amber-200/60 dark:border-amber-500/30",
+    surface:
+      "from-amber-50/80 via-white to-orange-50/60 dark:from-amber-500/10 dark:via-slate-900/40 dark:to-orange-500/10",
+    dot: "bg-amber-500",
+    square: false,
+  },
+  book: {
+    border: "border-emerald-200/60 dark:border-emerald-500/30",
+    surface:
+      "from-emerald-50/80 via-white to-teal-50/60 dark:from-emerald-500/10 dark:via-slate-900/40 dark:to-teal-500/10",
+    dot: "bg-emerald-500",
+    square: false,
+  },
+  music: {
+    border: "border-rose-200/60 dark:border-rose-500/30",
+    surface:
+      "from-rose-50/80 via-white to-pink-50/60 dark:from-rose-500/10 dark:via-slate-900/40 dark:to-pink-500/10",
+    dot: "bg-rose-500",
+    square: true,
+  },
+};
+
+function skeletonFormatsFor(
+  contentType: ContentType | null,
+): SkeletonFormat[] {
+  switch (contentType) {
+    case "movie":
+      return ["movie", "movie", "movie"];
+    case "book":
+      return ["book", "book", "book"];
+    case "music":
+      return ["music", "music", "music"];
+    case "mix":
+      return ["movie", "book", "music"];
+    case "both":
+      return ["movie", "movie", "book"];
+    default:
+      return ["movie", "book", "music"];
+  }
+}
+
+const SkeletonRecCard = ({ format, index }: { format: SkeletonFormat; index: number }) => {
+  const tone = SKELETON_TONES[format];
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.32, delay: index * 0.08 }}
+      className={cn(
+        "overflow-hidden rounded-3xl border bg-gradient-to-br shadow-sm backdrop-blur-md",
+        tone.border,
+        tone.surface,
+      )}
+    >
+      <div className="grid sm:grid-cols-[168px_1fr]">
+        {tone.square ? (
+          // Music skeleton mirrors the real music card: centered square
+          // cover-within-cover rather than a stretched 1:1 cell.
+          <div className="relative flex items-center justify-center p-5">
+            <div className="relative aspect-square w-full max-w-[136px] overflow-hidden rounded-2xl bg-slate-200/70 shadow-md dark:bg-slate-800/70">
+              <div
+                className="absolute inset-0 animate-pulse bg-gradient-to-br from-slate-200/40 via-white/30 to-slate-200/40 dark:from-slate-800/40 dark:via-slate-900/30 dark:to-slate-800/40"
+                style={{ animationDelay: `${index * 120}ms` }}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="relative aspect-[2/3] bg-slate-200/60 dark:bg-slate-800/60">
+            <div
+              className="absolute inset-0 animate-pulse bg-gradient-to-br from-slate-200/40 via-white/30 to-slate-200/40 dark:from-slate-800/40 dark:via-slate-900/30 dark:to-slate-800/40"
+              style={{ animationDelay: `${index * 120}ms` }}
+            />
+          </div>
+        )}
+        <div className="flex flex-col gap-4 p-5 sm:p-6">
+          <div className="space-y-3">
+            <div className="h-7 w-3/4 animate-pulse rounded-md bg-slate-200/80 dark:bg-slate-800/80 sm:h-8" />
+            <div className="h-4 w-1/2 animate-pulse rounded-md bg-slate-200/60 dark:bg-slate-800/60" />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className="h-6 w-20 animate-pulse rounded-full bg-slate-200/70 dark:bg-slate-800/70"
+                style={{ animationDelay: `${(index * 3 + i) * 80}ms` }}
+              />
+            ))}
+          </div>
+          <div className="space-y-2">
+            <div className="h-4 w-full animate-pulse rounded-md bg-slate-200/60 dark:bg-slate-800/60" />
+            <div className="h-4 w-[92%] animate-pulse rounded-md bg-slate-200/60 dark:bg-slate-800/60" />
+            <div className="h-4 w-[78%] animate-pulse rounded-md bg-slate-200/60 dark:bg-slate-800/60" />
+          </div>
+        </div>
+      </div>
+    </motion.div>
   );
+};
+
+const ResultsLoadingState = ({
+  step: _step,
+  contentType,
+}: {
+  step: string;
+  contentType: ContentType | null;
+}) => {
+  const messages = useMessages() as {
+    Results?: { loadingMessages?: Record<string, string[]> };
+  };
+  const loadingMessages = useMemo(() => {
+    const bank = messages.Results?.loadingMessages;
+    if (!bank) return [] as string[];
+    const key = contentType === "both" ? "mix" : (contentType ?? "default");
+    return bank[key] ?? bank.default ?? [];
+  }, [messages, contentType]);
   const [messageIndex, setMessageIndex] = useState(0);
+  const tone = getAccentTone(contentType);
+  const formats = useMemo(
+    () => skeletonFormatsFor(contentType),
+    [contentType],
+  );
 
   useEffect(() => {
     if (loadingMessages.length === 0) return;
@@ -101,26 +239,40 @@ const ResultsLoadingState = ({ step: _step }: { step: string }) => {
   }, [loadingMessages.length]);
 
   return (
-    <div className="mx-auto flex min-h-[480px] w-full max-w-4xl flex-col items-center justify-center rounded-3xl border border-violet-300/60 bg-gradient-to-br from-violet-50/80 via-fuchsia-50/40 to-rose-50/60 p-6 text-center shadow-sm backdrop-blur-md sm:p-8 dark:border-violet-500/40 dark:from-violet-500/15 dark:via-fuchsia-500/10 dark:to-rose-500/15">
-      <div className="mb-6 flex items-center justify-center gap-2" aria-hidden>
-        <span className="h-3 w-3 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.3s]" />
-        <span className="h-3 w-3 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.15s]" />
-        <span className="h-3 w-3 animate-bounce rounded-full bg-indigo-500" />
+    <div className="mx-auto w-full max-w-4xl space-y-5">
+      <div className="grid gap-5">
+        {formats.map((format, i) => (
+          <SkeletonRecCard
+            key={`${format}-${i}`}
+            format={format}
+            index={i}
+          />
+        ))}
       </div>
 
+      {/* Live status caption — accent dot + rotating per-type message —
+          mirrors the questionnaire skeleton so the visual language is
+          consistent across the flow. */}
       <div
-        className="flex min-h-[1.75rem] items-center justify-center"
+        className="flex items-center justify-center gap-2"
         role="status"
         aria-live="polite"
       >
+        <span
+          aria-hidden
+          className={cn("h-2 w-2 animate-pulse rounded-full", tone.dot)}
+        />
         <AnimatePresence mode="wait">
           <motion.p
             key={messageIndex}
-            initial={{ opacity: 0, y: 6, filter: "blur(4px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            exit={{ opacity: 0, y: -6, filter: "blur(4px)" }}
-            transition={{ duration: 0.35, ease: "easeOut" }}
-            className="text-base font-semibold text-slate-700 dark:text-slate-200"
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className={cn(
+              "text-xs font-bold tracking-tight sm:text-sm",
+              tone.text,
+            )}
           >
             {loadingMessages[messageIndex] ?? ""}
           </motion.p>
@@ -131,6 +283,41 @@ const ResultsLoadingState = ({ step: _step }: { step: string }) => {
 };
 
 /* ---------- Recommendation Card ---------- */
+type WhyTone = {
+  border: string;
+  surface: string;
+  bar: string;
+  icon: string;
+  eyebrow: string;
+};
+
+const WHY_TONES: Record<"movie" | "book" | "music", WhyTone> = {
+  movie: {
+    border: "border-amber-200/60 dark:border-amber-500/30",
+    surface:
+      "from-amber-50/80 via-white to-orange-50/60 dark:from-amber-500/10 dark:via-slate-900/40 dark:to-orange-500/10",
+    bar: "from-amber-400 to-orange-500",
+    icon: "text-amber-600 dark:text-amber-400",
+    eyebrow: "text-amber-700 dark:text-amber-300",
+  },
+  book: {
+    border: "border-emerald-200/60 dark:border-emerald-500/30",
+    surface:
+      "from-emerald-50/80 via-white to-teal-50/60 dark:from-emerald-500/10 dark:via-slate-900/40 dark:to-teal-500/10",
+    bar: "from-emerald-400 to-teal-500",
+    icon: "text-emerald-600 dark:text-emerald-400",
+    eyebrow: "text-emerald-700 dark:text-emerald-300",
+  },
+  music: {
+    border: "border-rose-200/60 dark:border-rose-500/30",
+    surface:
+      "from-rose-50/80 via-white to-pink-50/60 dark:from-rose-500/10 dark:via-slate-900/40 dark:to-pink-500/10",
+    bar: "from-rose-400 to-pink-500",
+    icon: "text-rose-600 dark:text-rose-400",
+    eyebrow: "text-rose-700 dark:text-rose-300",
+  },
+};
+
 const RecommendationCard = ({
   rec,
   index,
@@ -152,6 +339,7 @@ const RecommendationCard = ({
   const description = rec.description ?? "";
   const showDescription = description.length > 0 && description !== explanation;
   const { score: matchScore, tone: matchTone } = deriveMatchScore(rec);
+  const whyTone = WHY_TONES[rec.type] ?? WHY_TONES.book;
 
   useEffect(() => {
     if (expanded || !showDescription) return;
@@ -169,13 +357,20 @@ const RecommendationCard = ({
         "group overflow-hidden rounded-3xl border bg-gradient-to-br shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg",
         rec.type === "movie"
           ? "border-amber-200/60 from-amber-50/80 to-white dark:border-amber-500/30 dark:from-amber-500/10 dark:to-slate-900/40"
-          : "border-emerald-200/60 from-emerald-50/80 to-white dark:border-emerald-500/30 dark:from-emerald-500/10 dark:to-slate-900/40",
+          : rec.type === "music"
+            ? "border-rose-200/60 from-rose-50/80 to-white dark:border-rose-500/30 dark:from-rose-500/10 dark:to-slate-900/40"
+            : "border-emerald-200/60 from-emerald-50/80 to-white dark:border-emerald-500/30 dark:from-emerald-500/10 dark:to-slate-900/40",
       )}
     >
       {/* Mobile: poster + header on top; rich body below spans full width.
           Desktop (sm+): grid with full poster column on the left. */}
       <div className="flex gap-3 p-3 sm:hidden">
-        <div className="relative aspect-[2/3] w-24 shrink-0 overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800">
+        <div
+          className={cn(
+            "relative w-24 shrink-0 overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800",
+            rec.type === "music" ? "aspect-square" : "aspect-[2/3]",
+          )}
+        >
           {rec.poster_url ? (
             <Image
               src={rec.poster_url}
@@ -188,6 +383,8 @@ const RecommendationCard = ({
             <div className="flex h-full w-full items-center justify-center text-slate-400">
               {rec.type === "movie" ? (
                 <Film size={20} />
+              ) : rec.type === "music" ? (
+                <Music size={20} />
               ) : (
                 <BookOpen size={20} />
               )}
@@ -209,6 +406,8 @@ const RecommendationCard = ({
               <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                 {rec.type === "movie" ? (
                   <Film size={9} />
+                ) : rec.type === "music" ? (
+                  <Music size={9} />
                 ) : (
                   <BookOpen size={9} />
                 )}
@@ -218,11 +417,13 @@ const RecommendationCard = ({
                 {rec.title}
               </h2>
               <p className="mt-0.5 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
-                {rec.author
-                  ? tb("byAuthor", { author: rec.author })
-                  : rec.director
-                    ? tb("byDirector", { director: rec.director })
-                    : ""}
+                {rec.artist
+                  ? tb("byArtist", { artist: rec.artist })
+                  : rec.author
+                    ? tb("byAuthor", { author: rec.author })
+                    : rec.director
+                      ? tb("byDirector", { director: rec.director })
+                      : ""}
                 {rec.year ? ` · ${rec.year}` : ""}
               </p>
             </div>
@@ -269,17 +470,28 @@ const RecommendationCard = ({
       {/* Mobile-only body (below the header strip) */}
       <div className="space-y-3 px-3 pb-3 sm:hidden">
         {explanation && (
-          <div className="relative overflow-hidden rounded-xl border border-indigo-200/60 bg-gradient-to-br from-indigo-50/80 via-white to-violet-50/60 p-3 dark:border-indigo-500/30 dark:from-indigo-500/10 dark:via-slate-900/40 dark:to-violet-500/10">
+          <div
+            className={cn(
+              "relative overflow-hidden rounded-xl border bg-gradient-to-br p-3",
+              whyTone.border,
+              whyTone.surface,
+            )}
+          >
             <span
               aria-hidden="true"
-              className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-indigo-400 to-violet-500"
+              className={cn(
+                "absolute inset-y-0 left-0 w-1 bg-gradient-to-b",
+                whyTone.bar,
+              )}
             />
             <div className="flex items-center gap-1.5 pl-2">
-              <Sparkles
-                size={12}
-                className="text-indigo-600 dark:text-indigo-400"
-              />
-              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-indigo-700 dark:text-indigo-300">
+              <Sparkles size={12} className={whyTone.icon} />
+              <p
+                className={cn(
+                  "text-[10px] font-black uppercase tracking-[0.16em]",
+                  whyTone.eyebrow,
+                )}
+              >
                 {tb("whyThisPick")}
               </p>
             </div>
@@ -294,7 +506,7 @@ const RecommendationCard = ({
             <LogToLibraryButton
               medium={rec.type}
               title={rec.title}
-              creator={rec.author ?? rec.director ?? null}
+              creator={rec.artist ?? rec.author ?? rec.director ?? null}
               year={rec.year ?? null}
               poster_url={rec.poster_url ?? null}
               source_recommendation_id={rec.id}
@@ -304,7 +516,7 @@ const RecommendationCard = ({
             <WishlistButton
               medium={rec.type}
               title={rec.title}
-              creator={rec.author ?? rec.director ?? null}
+              creator={rec.artist ?? rec.author ?? rec.director ?? null}
               year={rec.year ?? null}
               poster_url={rec.poster_url ?? null}
               source_recommendation_id={rec.id}
@@ -313,6 +525,9 @@ const RecommendationCard = ({
             />
           </div>
         </div>
+        {rec.type === "music" && rec.preview_url && (
+          <MusicPreview previewUrl={rec.preview_url} />
+        )}
 
         {showDescription && (
           <div className="border-t border-slate-100 pt-3 dark:border-slate-800">
@@ -352,47 +567,94 @@ const RecommendationCard = ({
           </div>
         )}
 
-        <TrailerEmbed
-          type={rec.type}
-          title={rec.title}
-          year={rec.year ?? null}
-          author={rec.author ?? null}
-        />
+        {rec.type !== "music" && (
+          <TrailerEmbed
+            type={rec.type}
+            title={rec.title}
+            year={rec.year ?? null}
+            author={rec.author ?? null}
+          />
+        )}
       </div>
 
       <div className="hidden sm:grid sm:grid-cols-[168px_1fr]">
-        {/* Poster */}
-        <div className="relative aspect-[2/3] overflow-hidden bg-slate-200 dark:bg-slate-800">
-          {rec.poster_url ? (
-            <Image
-              src={rec.poster_url}
-              alt={rec.title}
-              fill
-              sizes="168px"
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-slate-400">
-              {rec.type === "movie" ? (
-                <Film size={32} />
-              ) : (
-                <BookOpen size={32} />
-              )}
-            </div>
-          )}
-          <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm">
-            {rec.type === "movie" ? <Film size={10} /> : <BookOpen size={10} />}
-            {rec.type}
-          </div>
+        {/* Poster — full-bleed for tall movie/book posters; for music
+            albums we wrap the square cover in a tinted column so it sits
+            as a centered, properly-aspected card-within-card rather than
+            getting vertically cropped by the grid row stretching to match
+            the content side. */}
+        {rec.type === "music" ? (
           <div
             className={cn(
-              "absolute right-3 top-3 rounded-full px-2.5 py-1 text-[10px] font-bold shadow-sm backdrop-blur-sm",
-              MATCH_TONE_CLASSES[matchTone],
+              "relative flex items-center justify-center p-5 bg-gradient-to-br",
+              whyTone.surface,
             )}
           >
-            {tb("matchSuffix", { score: matchScore })}
+            <div className="relative aspect-square w-full max-w-[136px] overflow-hidden rounded-2xl bg-slate-200 shadow-lg shadow-rose-500/10 dark:bg-slate-800">
+              {rec.poster_url ? (
+                <Image
+                  src={rec.poster_url}
+                  alt={rec.title}
+                  fill
+                  sizes="136px"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-slate-400">
+                  <Music size={32} />
+                </div>
+              )}
+            </div>
+            <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-rose-500 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">
+              <Music size={10} />
+              {rec.type}
+            </div>
+            <div
+              className={cn(
+                "absolute right-3 top-3 rounded-full px-2.5 py-1 text-[10px] font-bold shadow-sm backdrop-blur-sm",
+                MATCH_TONE_CLASSES[matchTone],
+              )}
+            >
+              {tb("matchSuffix", { score: matchScore })}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="relative aspect-[2/3] overflow-hidden bg-slate-200 dark:bg-slate-800">
+            {rec.poster_url ? (
+              <Image
+                src={rec.poster_url}
+                alt={rec.title}
+                fill
+                sizes="168px"
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-slate-400">
+                {rec.type === "movie" ? (
+                  <Film size={32} />
+                ) : (
+                  <BookOpen size={32} />
+                )}
+              </div>
+            )}
+            <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm">
+              {rec.type === "movie" ? (
+                <Film size={10} />
+              ) : (
+                <BookOpen size={10} />
+              )}
+              {rec.type}
+            </div>
+            <div
+              className={cn(
+                "absolute right-3 top-3 rounded-full px-2.5 py-1 text-[10px] font-bold shadow-sm backdrop-blur-sm",
+                MATCH_TONE_CLASSES[matchTone],
+              )}
+            >
+              {tb("matchSuffix", { score: matchScore })}
+            </div>
+          </div>
+        )}
 
         {/* Content */}
         <div className="flex flex-col p-5 sm:p-6">
@@ -402,11 +664,13 @@ const RecommendationCard = ({
                 {rec.title}
               </h2>
               <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                {rec.author
-                  ? tb("byAuthor", { author: rec.author })
-                  : rec.director
-                    ? tb("byDirector", { director: rec.director })
-                    : ""}
+                {rec.artist
+                  ? tb("byArtist", { artist: rec.artist })
+                  : rec.author
+                    ? tb("byAuthor", { author: rec.author })
+                    : rec.director
+                      ? tb("byDirector", { director: rec.director })
+                      : ""}
                 {rec.year ? ` · ${rec.year}` : ""}
               </p>
             </div>
@@ -414,7 +678,7 @@ const RecommendationCard = ({
               <LogToLibraryButton
                 medium={rec.type}
                 title={rec.title}
-                creator={rec.author ?? rec.director ?? null}
+                creator={rec.artist ?? rec.author ?? rec.director ?? null}
                 year={rec.year ?? null}
                 poster_url={rec.poster_url ?? null}
                 source_recommendation_id={rec.id}
@@ -423,7 +687,7 @@ const RecommendationCard = ({
               <WishlistButton
                 medium={rec.type}
                 title={rec.title}
-                creator={rec.author ?? rec.director ?? null}
+                creator={rec.artist ?? rec.author ?? rec.director ?? null}
                 year={rec.year ?? null}
                 poster_url={rec.poster_url ?? null}
                 source_recommendation_id={rec.id}
@@ -472,17 +736,28 @@ const RecommendationCard = ({
           )}
 
           {explanation && (
-            <div className="relative mt-4 overflow-hidden rounded-2xl border border-indigo-200/60 bg-gradient-to-br from-indigo-50/80 via-white to-violet-50/60 p-4 dark:border-indigo-500/30 dark:from-indigo-500/10 dark:via-slate-900/40 dark:to-violet-500/10">
+            <div
+              className={cn(
+                "relative mt-4 overflow-hidden rounded-2xl border bg-gradient-to-br p-4",
+                whyTone.border,
+                whyTone.surface,
+              )}
+            >
               <span
                 aria-hidden="true"
-                className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-indigo-400 to-violet-500"
+                className={cn(
+                  "absolute inset-y-0 left-0 w-1 bg-gradient-to-b",
+                  whyTone.bar,
+                )}
               />
               <div className="flex items-center gap-2 pl-2">
-                <Sparkles
-                  size={14}
-                  className="text-indigo-600 dark:text-indigo-400"
-                />
-                <p className="text-[11px] font-black uppercase tracking-[0.16em] text-indigo-700 dark:text-indigo-300">
+                <Sparkles size={14} className={whyTone.icon} />
+                <p
+                  className={cn(
+                    "text-[11px] font-black uppercase tracking-[0.16em]",
+                    whyTone.eyebrow,
+                  )}
+                >
                   {tb("whyThisPick")}
                 </p>
               </div>
@@ -533,14 +808,20 @@ const RecommendationCard = ({
             </div>
           )}
 
-          <div className="mt-4">
-            <TrailerEmbed
-              type={rec.type}
-              title={rec.title}
-              year={rec.year ?? null}
-              author={rec.author ?? null}
-            />
-          </div>
+          {rec.type === "music" && rec.preview_url ? (
+            <div className="mt-4">
+              <MusicPreview previewUrl={rec.preview_url} />
+            </div>
+          ) : rec.type !== "music" ? (
+            <div className="mt-4">
+              <TrailerEmbed
+                type={rec.type}
+                title={rec.title}
+                year={rec.year ?? null}
+                author={rec.author ?? null}
+              />
+            </div>
+          ) : null}
         </div>
       </div>
     </motion.article>
@@ -610,7 +891,7 @@ const ResultsPage = () => {
 
       const questionnaireData = {
         answers,
-        contentType: contentType ?? ("both" as const),
+        contentType: contentType ?? ("mix" as const),
         userAge: user.age,
         userName: user.name,
       };
@@ -807,6 +1088,7 @@ const ResultsPage = () => {
   const buildShareText = () => {
     const mRecs = recommendations.filter((r) => r.type === "movie");
     const bRecs = recommendations.filter((r) => r.type === "book");
+    const musicRecsLocal = recommendations.filter((r) => r.type === "music");
     const lines: string[] = [tb("shareText.title"), ""];
 
     if (mRecs.length > 0) {
@@ -833,6 +1115,24 @@ const ResultsPage = () => {
       bRecs.forEach((r) => {
         const detail = [
           r.author && tb("shareText.byAuthorShort", { author: r.author }),
+          r.year,
+        ]
+          .filter(Boolean)
+          .join(", ");
+        lines.push(`  ${r.title}${detail ? ` (${detail})` : ""}`);
+        if (r.genres?.length)
+          lines.push(
+            `  ${tb("shareText.genres", { list: r.genres.join(", ") })}`,
+          );
+      });
+      lines.push("");
+    }
+
+    if (musicRecsLocal.length > 0) {
+      lines.push(tb("shareText.music"));
+      musicRecsLocal.forEach((r) => {
+        const detail = [
+          r.artist && tb("shareText.byArtistShort", { artist: r.artist }),
           r.year,
         ]
           .filter(Boolean)
@@ -942,7 +1242,10 @@ const ResultsPage = () => {
       <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
         {topBar}
         <main className="px-4 pb-20 pt-32 md:pt-36 sm:px-6">
-          <ResultsLoadingState step={generationStep} />
+          <ResultsLoadingState
+            step={generationStep}
+            contentType={contentType}
+          />
         </main>
       </div>
     );
@@ -993,6 +1296,7 @@ const ResultsPage = () => {
 
   const movieRecs = recommendations.filter((r) => r.type === "movie");
   const bookRecs = recommendations.filter((r) => r.type === "book");
+  const musicRecs = recommendations.filter((r) => r.type === "music");
 
   return (
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
@@ -1018,7 +1322,7 @@ const ResultsPage = () => {
           </motion.div>
 
           {/* Category sections */}
-          {contentType === "both" ? (
+          {contentType === "both" || contentType === "mix" ? (
             <>
               {movieRecs.length > 0 && (
                 <motion.section
@@ -1065,6 +1369,35 @@ const ResultsPage = () => {
                   />
                   <div className="grid gap-5">
                     {bookRecs.map((rec, i) => (
+                      <RecommendationCard
+                        key={rec.id}
+                        rec={rec}
+                        index={i}
+                        alreadyLogged={isAlreadyLogged(rec)}
+                        libraryStatus={libraryStatusOf(rec)}
+                        onToggleFavorite={handleToggleFavorite}
+                      />
+                    ))}
+                  </div>
+                </motion.section>
+              )}
+
+              {musicRecs.length > 0 && (
+                <motion.section
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.15 }}
+                  className="mb-10"
+                >
+                  <SectionHeader
+                    icon={<Music size={14} />}
+                    eyebrow={tb("sections.music.eyebrow")}
+                    title={tb("sections.music.title")}
+                    count={musicRecs.length}
+                    accent="rose"
+                  />
+                  <div className="grid gap-5">
+                    {musicRecs.map((rec, i) => (
                       <RecommendationCard
                         key={rec.id}
                         rec={rec}

@@ -15,10 +15,13 @@ const GenreBarChartLoading = () => {
   );
 };
 
-const GenreBarChart = dynamic(() => import("@/components/genre-bar-chart"), {
-  ssr: false,
-  loading: () => <GenreBarChartLoading />,
-});
+const GenreFormatChart = dynamic(
+  () => import("@/components/genre-format-chart"),
+  {
+    ssr: false,
+    loading: () => <GenreBarChartLoading />,
+  },
+);
 const ActivitySparkline = dynamic(
   () => import("@/components/activity-sparkline"),
   { ssr: false },
@@ -28,6 +31,7 @@ import {
   BookOpen,
   CheckCircle2,
   Film,
+  Music,
   Sparkles,
   TrendingUp,
   BarChart3,
@@ -66,7 +70,9 @@ import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { Dialog } from "@/components/ui/dialog";
 import { TrailerEmbed } from "@/components/trailer-embed";
+import { MusicPreview } from "@/components/music-preview";
 import { WhyThisPick } from "@/components/why-this-pick";
+import { getRecTypeAccent } from "@/features/recommendations/utils/type-accent";
 import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
 import { cn } from "@/lib/utils";
@@ -100,6 +106,8 @@ const RecommendationModal = ({
             <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm">
               {rec.type === "movie" ? (
                 <Film size={10} />
+              ) : rec.type === "music" ? (
+                <Music size={10} />
               ) : (
                 <BookOpen size={10} />
               )}
@@ -112,11 +120,13 @@ const RecommendationModal = ({
       <div className="p-5">
         <h2 className="text-2xl font-black tracking-tight">{rec.title}</h2>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          {rec.author
-            ? t("modal.byAuthor", { author: rec.author })
-            : rec.director
-              ? t("modal.byDirector", { director: rec.director })
-              : ""}
+          {rec.artist
+            ? t("modal.byArtist", { artist: rec.artist })
+            : rec.author
+              ? t("modal.byAuthor", { author: rec.author })
+              : rec.director
+                ? t("modal.byDirector", { director: rec.director })
+                : ""}
           {rec.year ? ` · ${rec.year}` : ""}
         </p>
 
@@ -134,7 +144,11 @@ const RecommendationModal = ({
         )}
 
         {rec.explanation && (
-          <WhyThisPick text={rec.explanation} className="mt-4" />
+          <WhyThisPick
+            text={rec.explanation}
+            type={rec.type}
+            className="mt-4"
+          />
         )}
 
         {rec.description && (
@@ -143,14 +157,20 @@ const RecommendationModal = ({
           </p>
         )}
 
-        <div className="mt-4">
-          <TrailerEmbed
-            type={rec.type}
-            title={rec.title}
-            year={rec.year ?? null}
-            author={rec.author ?? null}
-          />
-        </div>
+        {rec.type === "music" && rec.preview_url ? (
+          <div className="mt-4">
+            <MusicPreview previewUrl={rec.preview_url} />
+          </div>
+        ) : rec.type !== "music" ? (
+          <div className="mt-4">
+            <TrailerEmbed
+              type={rec.type}
+              title={rec.title}
+              year={rec.year ?? null}
+              author={rec.author ?? null}
+            />
+          </div>
+        ) : null}
 
         <button
           type="button"
@@ -235,10 +255,8 @@ const DashboardPage = () => {
   }, []);
 
   const genreChartData = useMemo(() => {
-    const byGenre = new Map<
-      string,
-      { genre: string; movie: number; book: number; total: number }
-    >();
+    type Row = { genre: string; movie: number; book: number; music: number; total: number };
+    const byGenre = new Map<string, Row>();
     recommendations.forEach((rec) => {
       const genres =
         Array.isArray(rec.genres) && rec.genres.length > 0
@@ -254,10 +272,12 @@ const DashboardPage = () => {
           genre: label,
           movie: 0,
           book: 0,
+          music: 0,
           total: 0,
         };
         if (rec.type === "movie") cur.movie += 1;
         if (rec.type === "book") cur.book += 1;
+        if (rec.type === "music") cur.music += 1;
         cur.total += 1;
         byGenre.set(label, cur);
       });
@@ -265,11 +285,59 @@ const DashboardPage = () => {
     return [...byGenre.values()].sort((a, b) => b.total - a.total).slice(0, 6);
   }, [recommendations]);
 
+  /**
+   * Per-format breakdowns — each one is a small standalone chart instead of
+   * the previous stacked-bar mash-up. Five genres each, sorted by count, with
+   * "Other" pre-filtered so the top of the chart is the user's actual taste.
+   */
+  const genreByFormat = useMemo(() => {
+    type Format = "movie" | "book" | "music";
+    const buckets: Record<Format, Map<string, number>> = {
+      movie: new Map(),
+      book: new Map(),
+      music: new Map(),
+    };
+
+    recommendations.forEach((rec) => {
+      if (rec.type !== "movie" && rec.type !== "book" && rec.type !== "music")
+        return;
+      const genres =
+        Array.isArray(rec.genres) && rec.genres.length > 0
+          ? rec.genres
+              .flatMap((g) => g.split(/[,&/|]/g))
+              .map((g) => g.trim())
+              .filter(Boolean)
+          : [];
+      const seen = new Set<string>();
+      genres.forEach((genre) => {
+        const label =
+          genre.length > 14 ? `${genre.slice(0, 14).trim()}…` : genre;
+        if (seen.has(label.toLowerCase())) return;
+        seen.add(label.toLowerCase());
+        const bucket = buckets[rec.type as Format];
+        bucket.set(label, (bucket.get(label) ?? 0) + 1);
+      });
+    });
+
+    const topFive = (m: Map<string, number>) =>
+      [...m.entries()]
+        .map(([genre, count]) => ({ genre, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+
+    return {
+      movie: topFive(buckets.movie),
+      book: topFive(buckets.book),
+      music: topFive(buckets.music),
+    };
+  }, [recommendations]);
+
   const stats = useMemo(() => {
     const movies = recommendations.filter((r) => r.type === "movie").length;
     const books = recommendations.filter((r) => r.type === "book").length;
+    const music = recommendations.filter((r) => r.type === "music").length;
     const favorites = recommendations.filter((r) => r.is_favorited).length;
-    return { total: recommendations.length, movies, books, favorites };
+    return { total: recommendations.length, movies, books, music, favorites };
   }, [recommendations]);
 
   const lastPick = recommendations[0] ?? null;
@@ -432,6 +500,16 @@ const DashboardPage = () => {
         target: 10,
       },
       {
+        id: "melomaniac",
+        tier: "easy" as const,
+        label: tb("milestones.items.melomaniac"),
+        description: tb("milestones.descriptions.melomaniac"),
+        icon: Music,
+        tone: "rose" as const,
+        progress: stats.music,
+        target: 10,
+      },
+      {
         id: "curator",
         tier: "easy" as const,
         label: tb("milestones.items.curator"),
@@ -554,6 +632,16 @@ const DashboardPage = () => {
         target: 50,
       },
       {
+        id: "audiophile",
+        tier: "hard" as const,
+        label: tb("milestones.items.audiophile"),
+        description: tb("milestones.descriptions.audiophile"),
+        icon: Music,
+        tone: "rose" as const,
+        progress: stats.music,
+        target: 50,
+      },
+      {
         id: "genre-master",
         tier: "hard" as const,
         label: tb("milestones.items.genreMaster"),
@@ -612,6 +700,16 @@ const DashboardPage = () => {
         icon: BookOpen,
         tone: "amber" as const,
         progress: stats.books,
+        target: 100,
+      },
+      {
+        id: "music-mogul",
+        tier: "master" as const,
+        label: tb("milestones.items.musicMogul"),
+        description: tb("milestones.descriptions.musicMogul"),
+        icon: Music,
+        tone: "rose" as const,
+        progress: stats.music,
         target: 100,
       },
       {
@@ -1051,7 +1149,10 @@ const DashboardPage = () => {
             </div>
           </div>
 
-          {/* Mobile pill nav */}
+          {/* Mobile pill nav — icons omitted so the longest label
+              ("Milestones") gets enough horizontal room inside its 1/4
+              segment share on narrow phones. Pill colour still flags the
+              Milestones tab. */}
           <div className="mb-4 md:hidden">
             <SegmentedControl<(typeof dashTabs)[number]>
               layoutId="dashboard-mobile-tabs"
@@ -1063,25 +1164,21 @@ const DashboardPage = () => {
                 {
                   value: "overview",
                   label: t("tabs.overview"),
-                  icon: <TrendingUp size={13} />,
                   pillClassName: "bg-indigo-500",
                 },
                 {
                   value: "picks",
                   label: t("tabs.picks"),
-                  icon: <Sparkles size={13} />,
                   pillClassName: "bg-indigo-500",
                 },
                 {
                   value: "genres",
                   label: t("tabs.genres"),
-                  icon: <BarChart3 size={13} />,
                   pillClassName: "bg-indigo-500",
                 },
                 {
                   value: "milestones",
                   label: t("tabs.milestones"),
-                  icon: <Trophy size={13} />,
                   pillClassName: "bg-amber-500",
                 },
               ]}
@@ -1247,7 +1344,14 @@ const DashboardPage = () => {
                         </div>
                       </div>
                     ) : lastPick ? (
-                      <article className="group flex gap-4 rounded-3xl border border-slate-200/70 bg-white/85 p-5 shadow-sm backdrop-blur-md transition-all duration-300 hover:shadow-md dark:border-slate-700/60 dark:bg-slate-900/65">
+                      <article className="group relative flex gap-4 overflow-hidden rounded-3xl border border-slate-200/70 bg-white/85 p-5 pl-6 shadow-sm backdrop-blur-md transition-all duration-300 hover:shadow-md dark:border-slate-700/60 dark:bg-slate-900/65">
+                        <span
+                          aria-hidden
+                          className={cn(
+                            "absolute inset-y-0 left-0 w-1",
+                            getRecTypeAccent(lastPick.type).stripe,
+                          )}
+                        />
                         <button
                           type="button"
                           onClick={() => setSelectedRec(lastPick)}
@@ -1392,7 +1496,11 @@ const DashboardPage = () => {
                               label: tb("pulse.stat.picks"),
                               value: stats.total,
                               icon: TrendingUp,
-                              hint: tb("pulse.picksHint", { movies: stats.movies, books: stats.books }),
+                              hint: tb("pulse.picksHint", {
+                                movies: stats.movies,
+                                books: stats.books,
+                                music: stats.music,
+                              }),
                               color: "text-indigo-600 dark:text-indigo-400",
                               bg: "bg-indigo-100 dark:bg-indigo-500/15",
                               href: "/history",
@@ -2158,11 +2266,25 @@ const DashboardPage = () => {
                               </span>
                             </p>
                             <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
-                              {topGenre.movie > topGenre.book
-                                ? tb("genres.mostlyMovies")
-                                : topGenre.book > topGenre.movie
-                                  ? tb("genres.mostlyBooks")
-                                  : tb("genres.evenSplit")}
+                              {(() => {
+                                const counts: Array<[
+                                  "movie" | "book" | "music",
+                                  number,
+                                ]> = [
+                                  ["movie", topGenre.movie],
+                                  ["book", topGenre.book],
+                                  ["music", topGenre.music],
+                                ];
+                                counts.sort((a, b) => b[1] - a[1]);
+                                if (counts[0][1] === 0) return tb("genres.evenSplit");
+                                if (counts[0][1] === counts[1][1])
+                                  return tb("genres.evenSplit");
+                                if (counts[0][0] === "movie")
+                                  return tb("genres.mostlyMovies");
+                                if (counts[0][0] === "book")
+                                  return tb("genres.mostlyBooks");
+                                return tb("genres.mostlyMusic");
+                              })()}
                             </p>
                           </div>
                         )}
@@ -2181,7 +2303,76 @@ const DashboardPage = () => {
                           {tb("genres.empty")}
                         </div>
                       ) : (
-                        <GenreBarChart data={genreChartData} />
+                        <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+                          {(
+                            [
+                              {
+                                format: "movie" as const,
+                                data: genreByFormat.movie,
+                                count: stats.movies,
+                                accent:
+                                  "border-amber-200/60 dark:border-amber-500/30",
+                                label: tb("genres.format.movies"),
+                                badge:
+                                  "text-amber-600 dark:text-amber-400",
+                              },
+                              {
+                                format: "book" as const,
+                                data: genreByFormat.book,
+                                count: stats.books,
+                                accent:
+                                  "border-emerald-200/60 dark:border-emerald-500/30",
+                                label: tb("genres.format.books"),
+                                badge:
+                                  "text-emerald-600 dark:text-emerald-400",
+                              },
+                              {
+                                format: "music" as const,
+                                data: genreByFormat.music,
+                                count: stats.music,
+                                accent:
+                                  "border-rose-200/60 dark:border-rose-500/30",
+                                label: tb("genres.format.music"),
+                                badge:
+                                  "text-rose-600 dark:text-rose-400",
+                              },
+                            ]
+                          ).map((panel) => (
+                            <div
+                              key={panel.format}
+                              className={cn(
+                                "rounded-2xl border bg-white/60 p-4 dark:bg-slate-900/40",
+                                panel.accent,
+                              )}
+                            >
+                              <div className="mb-3 flex items-center justify-between">
+                                <p
+                                  className={cn(
+                                    "text-[10px] font-black uppercase tracking-[0.16em]",
+                                    panel.badge,
+                                  )}
+                                >
+                                  {panel.label}
+                                </p>
+                                <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500">
+                                  {tb("genres.format.totalPicks", {
+                                    count: panel.count,
+                                  })}
+                                </p>
+                              </div>
+                              {panel.data.length === 0 ? (
+                                <div className="flex h-32 items-center justify-center text-center text-xs font-semibold tracking-tight text-slate-400 dark:text-slate-500">
+                                  {tb("genres.format.empty")}
+                                </div>
+                              ) : (
+                                <GenreFormatChart
+                                  format={panel.format}
+                                  data={panel.data}
+                                />
+                              )}
+                            </div>
+                          ))}
+                        </div>
                       )}
                     </div>
                   </motion.div>

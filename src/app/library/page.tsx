@@ -13,6 +13,7 @@ import {
   Film,
   LayoutGrid,
   Loader,
+  Music,
   Pencil,
   Sparkles,
   ThumbsDown,
@@ -32,6 +33,7 @@ import {
   type LibraryRating,
   type LibraryStatus,
 } from "@/features/library/types/library";
+import { getRecTypeAccent } from "@/features/recommendations/utils/type-accent";
 import {
   SidebarNavGroup,
   SidebarNavItem,
@@ -54,7 +56,7 @@ import { AppNavbar } from "@/components/app-navbar";
 import { ViewToggle, type ViewMode } from "@/components/view-toggle";
 import { cn } from "@/lib/utils";
 
-const MEDIUM_TABS = ["all", "movie", "book"] as const;
+const MEDIUM_TABS = ["all", "movie", "book", "music"] as const;
 const VIEW_MODES = ["grid", "list"] as const;
 type MediumFilter = (typeof MEDIUM_TABS)[number];
 type StatusFilter = "all" | LibraryStatus;
@@ -244,7 +246,8 @@ export default function LibraryPage() {
     const finished = items.filter((i) => i.status === "finished").length;
     const movies = items.filter((i) => i.medium === "movie").length;
     const books = items.filter((i) => i.medium === "book").length;
-    return { total, finished, movies, books };
+    const music = items.filter((i) => i.medium === "music").length;
+    return { total, finished, movies, books, music };
   }, [items]);
 
   if (!ready) {
@@ -305,13 +308,19 @@ export default function LibraryPage() {
                   value: "movie",
                   label: t("type.movie"),
                   icon: <Film size={13} />,
-                  pillClassName: "bg-indigo-500",
+                  pillClassName: "bg-amber-500",
                 },
                 {
                   value: "book",
                   label: t("type.book"),
                   icon: <BookOpen size={13} />,
-                  pillClassName: "bg-indigo-500",
+                  pillClassName: "bg-emerald-500",
+                },
+                {
+                  value: "music",
+                  label: t("type.music"),
+                  icon: <Music size={13} />,
+                  pillClassName: "bg-rose-500",
                 },
               ]}
             />
@@ -332,19 +341,33 @@ export default function LibraryPage() {
                       id: "movie" as const,
                       label: t("type.movie"),
                       icon: <Film size={16} />,
+                      iconClassName: "text-amber-500 dark:text-amber-400",
                     },
                     {
                       id: "book" as const,
                       label: t("type.book"),
                       icon: <BookOpen size={16} />,
+                      iconClassName: "text-emerald-500 dark:text-emerald-400",
                     },
-                  ] as { id: MediumFilter; label: string; icon: React.ReactNode }[]
+                    {
+                      id: "music" as const,
+                      label: t("type.music"),
+                      icon: <Music size={16} />,
+                      iconClassName: "text-rose-500 dark:text-rose-400",
+                    },
+                  ] as {
+                    id: MediumFilter;
+                    label: string;
+                    icon: React.ReactNode;
+                    iconClassName?: string;
+                  }[]
                 ).map((tab) => (
                   <SidebarNavItem
                     key={tab.id}
                     icon={tab.icon}
                     label={tab.label}
                     active={mediumFilter === tab.id}
+                    iconClassName={tab.iconClassName}
                     onClick={() => setMediumFilter(tab.id)}
                   />
                 ))}
@@ -359,31 +382,67 @@ export default function LibraryPage() {
               </div>
             </SidebarNavShell>
 
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 overflow-x-clip">
               <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex flex-wrap gap-3">
-                  {[
-                    { label: t("stats.total"), value: stats.total },
-                    { label: t("stats.finished"), value: stats.finished },
-                    { label: t("stats.movies"), value: stats.movies },
-                    { label: t("stats.books"), value: stats.books },
-                  ].map((item) => (
+                  {(
+                    [
+                      { label: t("stats.total"), value: stats.total, accent: null },
+                      {
+                        label: t("stats.finished"),
+                        value: stats.finished,
+                        accent: null,
+                      },
+                      {
+                        label: t("stats.movies"),
+                        value: stats.movies,
+                        accent: "movie" as const,
+                      },
+                      {
+                        label: t("stats.books"),
+                        value: stats.books,
+                        accent: "book" as const,
+                      },
+                      {
+                        label: t("stats.music"),
+                        value: stats.music,
+                        accent: "music" as const,
+                      },
+                    ]
+                  ).map((item) => {
+                    const tone = item.accent
+                      ? getRecTypeAccent(item.accent)
+                      : null;
+                    return (
                     <div
                       key={item.label}
-                      className="rounded-xl border border-slate-200/70 bg-white/80 px-3 py-2 shadow-sm backdrop-blur-sm dark:border-slate-700/60 dark:bg-slate-900/60"
+                      className={cn(
+                        "rounded-xl border bg-white/80 px-3 py-2 shadow-sm backdrop-blur-sm dark:bg-slate-900/60",
+                        tone
+                          ? tone.tileBorder
+                          : "border-slate-200/70 dark:border-slate-700/60",
+                      )}
                     >
-                      <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+                      <p
+                        className={cn(
+                          "text-[10px] uppercase tracking-[0.14em]",
+                          tone
+                            ? tone.tileText
+                            : "text-slate-500 dark:text-slate-400",
+                        )}
+                      >
                         {item.label}
                       </p>
                       <p className="text-lg font-black tracking-tight">
                         {item.value}
                       </p>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex min-w-0 flex-wrap items-center gap-2">
                     <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                       {t("statusLabel")}
                     </span>
@@ -410,6 +469,7 @@ export default function LibraryPage() {
                   <ViewToggle
                     value={view as ViewMode}
                     onChange={(v) => setView(v)}
+                    className="ml-auto shrink-0"
                   />
                 </div>
               </div>
@@ -417,7 +477,7 @@ export default function LibraryPage() {
               <AnimatePresence mode="popLayout">
                 {!loading && (
                 <motion.div
-                  key={`${mediumFilter}-${statusFilter}`}
+                  key={`${mediumFilter}-${statusFilter}-${view}`}
                   initial={{ opacity: 0, x: -30 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 30 }}
@@ -439,11 +499,20 @@ export default function LibraryPage() {
                     </div>
                   ) : view === "grid" ? (
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
-                      {filtered.map((item) => (
+                      {filtered.map((item) => {
+                        const accent = getRecTypeAccent(item.medium);
+                        return (
                         <article
                           key={item.id}
                           className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white/80 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-700/70 dark:bg-slate-900/65"
                         >
+                          <span
+                            aria-hidden
+                            className={cn(
+                              "absolute inset-y-0 left-0 z-10 w-1",
+                              accent.stripe,
+                            )}
+                          />
                           <div className="relative aspect-[2/3] overflow-hidden bg-slate-200 dark:bg-slate-800">
                             {item.poster_url ? (
                               <Image
@@ -457,6 +526,8 @@ export default function LibraryPage() {
                               <div className="flex h-full w-full items-center justify-center text-slate-400 dark:text-slate-500">
                                 {item.medium === "movie" ? (
                                   <Film size={28} />
+                                ) : item.medium === "music" ? (
+                                  <Music size={28} />
                                 ) : (
                                   <BookOpen size={28} />
                                 )}
@@ -504,15 +575,25 @@ export default function LibraryPage() {
                             </div>
                           </div>
                         </article>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {filtered.map((item) => (
+                      {filtered.map((item) => {
+                        const accent = getRecTypeAccent(item.medium);
+                        return (
                         <article
                           key={item.id}
-                          className="group flex gap-4 rounded-3xl border border-slate-200/80 bg-white/80 p-4 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-700/70 dark:bg-slate-900/65"
+                          className="group relative flex gap-4 overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 p-4 pl-5 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-700/70 dark:bg-slate-900/65"
                         >
+                          <span
+                            aria-hidden
+                            className={cn(
+                              "absolute inset-y-0 left-0 w-1",
+                              accent.stripe,
+                            )}
+                          />
                           <div className="relative h-32 w-24 shrink-0 overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800">
                             {item.poster_url ? (
                               <Image
@@ -526,6 +607,8 @@ export default function LibraryPage() {
                               <div className="flex h-full w-full items-center justify-center text-slate-400 dark:text-slate-500">
                                 {item.medium === "movie" ? (
                                   <Film size={24} />
+                                ) : item.medium === "music" ? (
+                                  <Music size={24} />
                                 ) : (
                                   <BookOpen size={24} />
                                 )}
@@ -543,12 +626,18 @@ export default function LibraryPage() {
                                   {item.creator
                                     ? item.medium === "book"
                                       ? t("byAuthor", { creator: item.creator })
-                                      : t("byDirector", {
-                                          creator: item.creator,
-                                        })
+                                      : item.medium === "music"
+                                        ? t("byArtist", {
+                                            creator: item.creator,
+                                          })
+                                        : t("byDirector", {
+                                            creator: item.creator,
+                                          })
                                     : item.medium === "movie"
                                       ? t("mediumMovie")
-                                      : t("mediumBook")}
+                                      : item.medium === "music"
+                                        ? t("mediumMusic")
+                                        : t("mediumBook")}
                                   {item.year ? ` · ${item.year}` : ""}
                                 </p>
                               </div>
@@ -588,7 +677,8 @@ export default function LibraryPage() {
                             )}
                           </div>
                         </article>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </motion.div>

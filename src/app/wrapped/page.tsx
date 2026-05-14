@@ -7,6 +7,7 @@ import {
   ArrowRight,
   BarChart3,
   BookOpen,
+  Music,
   Calendar,
   Film,
   Flame,
@@ -119,6 +120,7 @@ const WrappedPage = () => {
   const stats = useMemo(() => {
     const movies = yearRecs.filter((r) => r.type === "movie").length;
     const books = yearRecs.filter((r) => r.type === "book").length;
+    const music = yearRecs.filter((r) => r.type === "music").length;
     const favorites = yearRecs.filter((r) => r.is_favorited).length;
 
     // Watch-time estimate (avg movie ~110 min)
@@ -138,15 +140,23 @@ const WrappedPage = () => {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 6);
 
-    // Top creator (combined director/author)
+    // Top creator (combined director/author/artist)
     const creatorCounts = new Map<
       string,
-      { name: string; type: "director" | "author"; count: number }
+      {
+        name: string;
+        type: "director" | "author" | "artist";
+        count: number;
+      }
     >();
     yearRecs.forEach((r) => {
-      const name = r.director || r.author;
+      const name = r.director || r.author || r.artist;
       if (!name) return;
-      const role: "director" | "author" = r.director ? "director" : "author";
+      const role: "director" | "author" | "artist" = r.director
+        ? "director"
+        : r.author
+          ? "author"
+          : "artist";
       const key = `${role}::${name.toLowerCase()}`;
       const cur = creatorCounts.get(key) ?? { name, type: role, count: 0 };
       cur.count += 1;
@@ -210,6 +220,7 @@ const WrappedPage = () => {
       total: yearRecs.length,
       movies,
       books,
+      music,
       favorites,
       watchHours,
       topGenres,
@@ -338,6 +349,8 @@ const WrappedPage = () => {
                     {t("hero.moviesPart", { count: stats.movies })}
                     {" · "}
                     {t("hero.booksPart", { count: stats.books })}
+                    {stats.music > 0 &&
+                      ` · ${t("hero.musicPart", { count: stats.music })}`}
                     {stats.watchHours > 0 &&
                       ` · ${t("hero.watchTime", { hours: stats.watchHours })}`}
                     {stats.libraryLogged > 0 &&
@@ -424,7 +437,9 @@ const WrappedPage = () => {
                       <p className="mt-1 text-xs font-bold text-slate-500 dark:text-slate-400">
                         {stats.topCreator.type === "director"
                           ? t("creator.director")
-                          : t("creator.author")}{" "}
+                          : stats.topCreator.type === "artist"
+                            ? t("creator.artist")
+                            : t("creator.author")}{" "}
                         ·{" "}
                         {t("tiles.picksHint", {
                           count: stats.topCreator.count,
@@ -460,6 +475,13 @@ const WrappedPage = () => {
                       value={stats.books}
                       total={stats.total}
                       color="bg-amber-500"
+                    />
+                    <SplitBar
+                      icon={Music}
+                      label={t("formatMix.music")}
+                      value={stats.music}
+                      total={stats.total}
+                      color="bg-rose-500"
                     />
                   </div>
                 </div>
@@ -598,6 +620,8 @@ const WrappedPage = () => {
                         <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
                           {rec.type === "movie" ? (
                             <Film size={13} />
+                          ) : rec.type === "music" ? (
+                            <Music size={13} />
                           ) : (
                             <BookOpen size={13} />
                           )}
@@ -608,7 +632,7 @@ const WrappedPage = () => {
                           </p>
                           <p className="truncate text-[11px] text-slate-500 dark:text-slate-400">
                             {rec.year ? `${rec.year} · ` : ""}
-                            {rec.director || rec.author || ""}
+                            {rec.director || rec.author || rec.artist || ""}
                           </p>
                         </div>
                         {rec.is_favorited && (

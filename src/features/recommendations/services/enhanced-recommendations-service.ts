@@ -1,13 +1,14 @@
 import { generateRecommendations } from "@/features/recommendations/services/ai-service";
 import { tmdbService } from "@/features/recommendations/services/tmdb-service";
 import { openLibraryService } from "@/features/recommendations/services/open-library-service";
+import { deezerService } from "@/features/recommendations/services/deezer-service";
 import { databaseService } from "@/features/recommendations/services/database-service";
 import { Recommendation } from "@/features/recommendations/types/recommendation";
 import { Answer } from "@/features/quiz/types/answer";
 
 interface QuestionnaireData {
   answers: Answer[];
-  contentType: "movie" | "book" | "both";
+  contentType: "movie" | "book" | "music" | "both" | "mix";
   userAge: number;
   userName: string;
 }
@@ -23,7 +24,7 @@ class EnhancedRecommendationsService {
   private toRecommendation(
     rec: Partial<Recommendation>,
     userId: string,
-    contentType: "movie" | "book" | "both",
+    contentType: "movie" | "book" | "music" | "both" | "mix",
   ): Recommendation {
     const idSeed = `${rec.type || "item"}-${rec.title || "pick"}-${rec.year || "na"}`;
     const safeId =
@@ -32,10 +33,11 @@ class EnhancedRecommendationsService {
     return {
       id: safeId,
       user_id: rec.user_id || userId,
-      type: (rec.type as "movie" | "book") || "movie",
+      type: (rec.type as "movie" | "book" | "music") || "movie",
       title: rec.title || "Recommended Pick",
       director: rec.director,
       author: rec.author,
+      artist: rec.artist,
       year: rec.year,
       rating: rec.rating,
       genres: Array.isArray(rec.genres)
@@ -48,6 +50,7 @@ class EnhancedRecommendationsService {
               .filter(Boolean)
           : [],
       poster_url: rec.poster_url,
+      preview_url: rec.preview_url,
       explanation: rec.explanation,
       is_favorited: Boolean(rec.is_favorited),
       content_type: rec.content_type || contentType,
@@ -94,8 +97,9 @@ class EnhancedRecommendationsService {
 
   /**
    * Target counts: always 3 total picks regardless of contentType.
-   * For "both" we split 2 movies + 1 book. Fires parallel calls with dedup
-   * buffer and falls back to sequential retries if any calls fail silently.
+   * "mix" splits 1 movie + 1 book + 1 music; "both" (legacy) stays 2 + 1.
+   * Fires parallel calls with dedup buffer and falls back to sequential
+   * retries if any calls fail silently.
    */
   async generateEnhancedRecommendations(
     questionnaireData: QuestionnaireData,
@@ -105,21 +109,36 @@ class EnhancedRecommendationsService {
 
     let movieTarget: number;
     let bookTarget: number;
+    let musicTarget: number;
     if (contentType === "movie") {
       movieTarget = 3;
       bookTarget = 0;
+      musicTarget = 0;
     } else if (contentType === "book") {
       movieTarget = 0;
       bookTarget = 3;
+      musicTarget = 0;
+    } else if (contentType === "music") {
+      movieTarget = 0;
+      bookTarget = 0;
+      musicTarget = 3;
+    } else if (contentType === "mix") {
+      movieTarget = 1;
+      bookTarget = 1;
+      musicTarget = 1;
     } else {
+      // legacy "both"
       movieTarget = 2;
       bookTarget = 1;
+      musicTarget = 0;
     }
 
     const movieRecs: Partial<Recommendation>[] = [];
     const bookRecs: Partial<Recommendation>[] = [];
+    const musicRecs: Partial<Recommendation>[] = [];
     const seenMovieTitles = new Set<string>();
     const seenBookTitles = new Set<string>();
+    const seenMusicTitles = new Set<string>();
 
     const ingest = (data: Awaited<ReturnType<typeof generateRecommendations>>) => {
       if (data.movieRecommendation && movieRecs.length < movieTarget) {
@@ -136,13 +155,22 @@ class EnhancedRecommendationsService {
           bookRecs.push({ ...data.bookRecommendation, type: "book" });
         }
       }
+      if (data.musicRecommendation && musicRecs.length < musicTarget) {
+        const title = data.musicRecommendation.title.toLowerCase().trim();
+        if (!seenMusicTitles.has(title)) {
+          seenMusicTitles.add(title);
+          musicRecs.push({ ...data.musicRecommendation, type: "music" });
+        }
+      }
     };
 
     const atTarget = () =>
-      movieRecs.length >= movieTarget && bookRecs.length >= bookTarget;
+      movieRecs.length >= movieTarget &&
+      bookRecs.length >= bookTarget &&
+      musicRecs.length >= musicTarget;
 
     // First pass: parallel calls sized to the target plus a small dedup buffer.
-    const parallelCalls = movieTarget + bookTarget + 2;
+    const parallelCalls = movieTarget + bookTarget + musicTarget + 2;
     const callResults = await Promise.allSettled(
       Array.from({ length: parallelCalls }, () =>
         generateRecommendations(answers, contentType, userAge, userName),
@@ -180,7 +208,7 @@ class EnhancedRecommendationsService {
       }
     }
 
-    const allRecs = [...movieRecs, ...bookRecs];
+    const allRecs = [...movieRecs, ...bookRecs, ...musicRecs];
 
     if (allRecs.length === 0) {
       throw new Error("No recommendations were generated");
@@ -234,6 +262,24 @@ class EnhancedRecommendationsService {
               }
             } catch {
               // Open Library enhancement is non-critical
+            }
+          }
+
+          if (rec.type === "music") {
+            try {
+              const albumData = rec.title
+                ? await deezerService.searchAlbum(rec.title, rec.artist)
+                : null;
+              if (albumData) {
+                enhancedRec = {
+                  ...enhancedRec,
+                  poster_url: albumData.cover || rec.poster_url,
+                  year: albumData.year || rec.year,
+                  preview_url: albumData.previewUrl || rec.preview_url,
+                };
+              }
+            } catch {
+              // Deezer enhancement is non-critical
             }
           }
 

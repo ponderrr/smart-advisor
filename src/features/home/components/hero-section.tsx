@@ -15,9 +15,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 type HeroMediaResponse = {
   books: string[];
   movies: string[];
+  music: string[];
   status: {
     books: "ok" | "error";
     movies: "ok" | "error";
+    music: "ok" | "error";
   };
 };
 
@@ -56,6 +58,7 @@ const HeroSection = () => {
       messages.Home?.hero?.flipWords ?? [
         "Movie",
         "Book",
+        "Album",
         "Story",
         "Adventure",
         "Classic",
@@ -81,7 +84,11 @@ const HeroSection = () => {
 
         const data: HeroMediaResponse = await response.json();
         const mixed = uniqueUrls(
-          shuffle([...(data.books || []), ...(data.movies || [])]),
+          shuffle([
+            ...(data.books || []),
+            ...(data.movies || []),
+            ...(data.music || []),
+          ]),
         );
 
         if (active && mixed.length > 0) {

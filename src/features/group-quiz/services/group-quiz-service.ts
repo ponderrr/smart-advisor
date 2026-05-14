@@ -441,6 +441,16 @@ class GroupQuizService {
           explanation: b.explanation,
         };
       }
+      if (data.musicRecommendation) {
+        const m = data.musicRecommendation;
+        result.music = {
+          title: m.title,
+          artist: m.artist,
+          year: m.year,
+          genres: m.genres,
+          explanation: m.explanation,
+        };
+      }
 
       // Persist the picks to the host's recommendations table so they show
       // up in History/Library and feed future taste signals. We swallow any
@@ -473,6 +483,21 @@ class GroupQuizService {
           year: result.book.year,
           genres: result.book.genres ?? [],
           explanation: result.book.explanation,
+          content_type: session.content_type,
+          is_favorited: false,
+          rating: 0,
+        } as Parameters<typeof databaseService.saveRecommendation>[0]);
+        savedRecommendationId = savedRecommendationId ?? saved.data?.id ?? null;
+      }
+      if (result.music) {
+        const saved = await databaseService.saveRecommendation({
+          user_id: "",
+          type: "music",
+          title: result.music.title,
+          artist: result.music.artist,
+          year: result.music.year,
+          genres: result.music.genres ?? [],
+          explanation: result.music.explanation,
           content_type: session.content_type,
           is_favorited: false,
           rating: 0,

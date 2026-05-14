@@ -13,7 +13,12 @@ import type { QuizContentType } from "@/features/group-quiz/types/group-quiz";
 import { AppNavbar } from "@/components/app-navbar";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 
-const CONTENT_TYPE_IDS: QuizContentType[] = ["both", "movie", "book"];
+const CONTENT_TYPE_IDS: QuizContentType[] = [
+  "mix",
+  "movie",
+  "book",
+  "music",
+];
 
 const HOST_INTENT_KEY = "smart-advisor.group-quiz.host-intent";
 
@@ -31,7 +36,7 @@ const GroupQuizLandingPage = () => {
   const tQuestionCount = useTranslations("Quiz.questionCount");
 
   const [hostName, setHostName] = useState("");
-  const [hostContentType, setHostContentType] = useState<QuizContentType>("both");
+  const [hostContentType, setHostContentType] = useState<QuizContentType>("mix");
   const [questionCount, setQuestionCount] = useState(5);
   const [maxParticipants, setMaxParticipants] = useState(8);
   const [creating, setCreating] = useState(false);
@@ -50,7 +55,7 @@ const GroupQuizLandingPage = () => {
     try {
       const parsed = JSON.parse(raw) as HostIntent;
       setHostName(parsed.display_name ?? "");
-      setHostContentType(parsed.content_type ?? "both");
+      setHostContentType(parsed.content_type ?? "mix");
       setQuestionCount(parsed.question_count ?? 5);
       setMaxParticipants(parsed.max_participants ?? 8);
       setPendingIntent(parsed);

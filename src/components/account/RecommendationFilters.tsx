@@ -25,6 +25,7 @@ const RecommendationFilters = ({
     { key: "all", label: "All" },
     { key: "movies", label: "Movies" },
     { key: "books", label: "Books" },
+    { key: "music", label: "Music" },
     { key: "favorites", label: "Favorites" },
     { key: "thisMonth", label: "This Month" },
   ];

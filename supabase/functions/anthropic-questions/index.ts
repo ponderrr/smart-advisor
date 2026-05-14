@@ -7,14 +7,14 @@ const corsHeaders = {
 };
 
 const MINOR_SYSTEM_PROMPT = `You are Smart Advisor, a warm and enthusiastic entertainment companion.
-You help young people discover movies and books they'll genuinely love.
+You help young people discover movies, books, and music they'll genuinely love.
 Your tone is friendly, encouraging, and upbeat — like a cool older sibling with great taste.
 You ask thoughtful questions to understand their personality and preferences.
 Keep questions age-appropriate. Focus on adventure, humor, emotions, friendships, identity, and imagination.
 Never mention adult themes, violence beyond PG-13, or mature content.`;
 
 const ADULT_SYSTEM_PROMPT = `You are Smart Advisor, a sharp and opinionated entertainment critic with eclectic taste.
-You help adults discover movies and books that actually match who they are — not safe, generic picks.
+You help adults discover movies, books, and music that actually match who they are — not safe, generic picks.
 Your tone is direct, a little irreverent, and genuinely curious. You treat users like adults with real taste.
 You ask probing questions to understand their personality, including preferences around mature themes.
 It is appropriate to ask about preferences for: morally complex narratives, dark or gritty content,
@@ -60,10 +60,49 @@ serve(async (req) => {
         ? "movies only"
         : contentType === "book"
           ? "books only"
-          : "both movies and books";
+          : contentType === "music"
+            ? "music albums only"
+            : contentType === "mix"
+              ? "a mix of movies, books, and music albums"
+              : "both movies and books";
+
+    const contentFocus =
+      contentType === "movie"
+        ? `EVERY question must be MOVIE-SPECIFIC. Ground them in cinema:
+- Favorite eras / directors / cinematography styles, runtime tolerance, theater vs streaming habits
+- Tonal preferences (slow-burn vs propulsive, intimate vs spectacle, indie vs blockbuster)
+- Genre comfort zones AND a stretch they're curious about
+- Reactions to specific film tropes (anti-heroes, ambiguous endings, non-linear time, found-footage, etc.)
+- A scene type that pulls them in (single-take dialogue, a tracking shot through a crowd, a needle drop, a silent stare)
+Do NOT ask anything that could equally apply to books or music. The word "movie", "film", "scene", "director", "screen", or "watch" should appear in the literal question text where natural.`
+        : contentType === "book"
+          ? `EVERY question must be BOOK-SPECIFIC. Ground them in reading:
+- Reading habits (chapter length tolerance, audiobook vs print, where/when they read)
+- Voice & POV preferences (first vs third person, present vs past, unreliable narrators)
+- Page-count comfort, series vs standalone, translated lit vs anglophone
+- Prose style (lyrical vs sparse, ornate vs propulsive, literary vs commercial)
+- Plot density vs character interiority, dialogue-heavy vs descriptive
+- A specific opening line vibe that hooks them
+Do NOT ask anything that could equally apply to movies or music. The word "book", "novel", "read", "chapter", "prose", "author", or "page" should appear in the literal question text where natural.`
+          : contentType === "music"
+            ? `EVERY question must be MUSIC-SPECIFIC and ALBUM-FOCUSED. Ground them in listening:
+- Decade / era preferences (60s soul, 90s indie, 2010s synthwave, etc.)
+- Listening contexts (driving alone at night, working out, dinner party, headphones-only deep listens)
+- Mood/vibe (melancholic, euphoric, propulsive, ambient, raw, polished)
+- Vocal vs instrumental, lyric-focused vs production-focused
+- Album experience preferences (cohesive 40-min statement vs sprawling 70-min epic, concept albums, double albums)
+- A specific sonic texture (lo-fi tape hiss, lush strings, gritty distortion, programmed drums, acoustic warmth)
+- Genre comfort zones AND a genre they want to explore
+- Artist discovery habits (deep cuts vs hits, B-sides, live recordings, debut vs late-career)
+- An instrument or sound that pulls them in
+Do NOT ask anything that could equally apply to movies or books. The word "album", "song", "track", "listen", "sound", "artist", "band", or "music" should appear in the literal question text where natural. Avoid generic "story" or "scene" framing — this is about LISTENING, not narrative.`
+            : `Questions should span movies, books, AND music albums — the user wants one of each. Mix the framing across questions: some about movies/films/screen time, some about books/reading/prose, some about albums/listening/sound. At least one question must explicitly invoke each of the three media.`;
 
     const userPrompt = `Generate exactly ${questionCount} personalized quiz questions for ${name}, age ${age}.
 The goal is to understand their personality and taste deeply enough to recommend ${contentContext} they'll love.
+
+CONTENT FOCUS (CRITICAL — read carefully):
+${contentFocus}
 
 ${
   !familyFriendly
@@ -90,25 +129,25 @@ CRITICAL RULES FOR OPTIONS:
 - Options must be specific to the question — generic "Yes / No / Maybe" answers are forbidden unless the question literally calls for them.
 - Each option must be 1-5 words. No long sentences.
 
-Return ONLY a JSON array. No markdown, no explanation, no preamble. Example format:
+Return ONLY a JSON array. No markdown, no explanation, no preamble. The format below is JUST illustrating shape — DO NOT reuse this generic story framing if the content focus above demands movie / book / music specificity:
 [
   {
     "id": "q1",
-    "text": "If you could live inside any fictional world for a week, where would you go and why?",
+    "text": "<question text matching the content focus above>",
     "type": "fill_in_blank",
-    "placeholder": "e.g. Middle-earth — to walk through the Shire"
+    "placeholder": "<short example answer>"
   },
   {
     "id": "q2",
-    "text": "What kind of story hooks you the fastest?",
+    "text": "<question text>",
     "type": "single_select",
-    "options": ["A surprising twist", "A character you can't look away from", "A vivid world", "A burning question"]
+    "options": ["Option A", "Option B", "Option C", "Option D"]
   },
   {
     "id": "q3",
-    "text": "Which themes pull you in? Pick any that resonate.",
+    "text": "<question text>",
     "type": "select_all",
-    "options": ["Found family", "Coming of age", "Mystery & intrigue", "Survival", "Forbidden love", "Redemption", "Power & politics"]
+    "options": ["Option 1", "Option 2", "Option 3", "Option 4", "Option 5", "Option 6"]
   }
 ]`;
 

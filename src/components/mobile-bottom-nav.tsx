@@ -31,8 +31,10 @@ const HIDDEN_PREFIXES = [
 ];
 
 // Exact-match version of the same idea — pages that shouldn't show the nav
-// but whose prefix could overlap something we DO want to show.
-const HIDDEN_EXACT = new Set(["/"]);
+// but whose prefix could overlap something we DO want to show. (Home/`/` is
+// allowed: signed-in visitors that land back on marketing still get a way
+// to jump straight to Dashboard / Library / etc. from the bottom nav.)
+const HIDDEN_EXACT = new Set<string>();
 
 const isInsideGroupQuizRoom = (pathname: string) =>
   pathname.startsWith("/group-quiz/") && pathname !== "/group-quiz/";
