@@ -1470,7 +1470,9 @@
       "actions": {
         "retake": "Repetir cuestionario",
         "viewHistory": "Ver historial",
-        "share": "Compartir resultados"
+        "share": "Compartir resultados",
+        "more": "Más",
+        "moreAriaLabel": "Más acciones"
       },
       "shareMenu": {
         "copy": "Copiar al portapapeles",

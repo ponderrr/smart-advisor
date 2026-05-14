@@ -1470,7 +1470,9 @@
       "actions": {
         "retake": "Retake Quiz",
         "viewHistory": "View History",
-        "share": "Share Results"
+        "share": "Share Results",
+        "more": "More",
+        "moreAriaLabel": "More actions"
       },
       "shareMenu": {
         "copy": "Copy to clipboard",
