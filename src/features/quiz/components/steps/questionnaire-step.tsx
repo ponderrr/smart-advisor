@@ -25,7 +25,10 @@ import type { ContentType } from "@/features/quiz/store/quiz-store";
 import type { Answer } from "@/features/quiz/types/answer";
 import type { Question } from "@/features/quiz/types/question";
 import { getAccentTone } from "@/features/quiz/utils/content-accent";
-import { generateQuestionsWithRetry } from "@/features/recommendations/services/ai-service";
+import {
+  generateQuestionsWithRetry,
+  isOverloadedError,
+} from "@/features/recommendations/services/ai-service";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -152,6 +155,7 @@ export const QuestionnaireStep = forwardRef<
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorIsOverloaded, setErrorIsOverloaded] = useState(false);
 
   useLeaveGuard(!isLoading && !isSubmitting && questions.length > 0);
 
@@ -165,6 +169,7 @@ export const QuestionnaireStep = forwardRef<
     try {
       setIsLoading(true);
       setError(null);
+      setErrorIsOverloaded(false);
 
       const {
         data: { user: sessionUser },
@@ -189,7 +194,10 @@ export const QuestionnaireStep = forwardRef<
       console.error("Failed to load questions:", err);
       hasLoadedRef.current = false;
       const msg = err instanceof Error ? err.message : "";
-      if (msg.toLowerCase().includes("not authenticated")) {
+      if (isOverloadedError(err)) {
+        setError(t("errors.overloaded"));
+        setErrorIsOverloaded(true);
+      } else if (msg.toLowerCase().includes("not authenticated")) {
         setError(t("errors.session"));
       } else {
         setError(t("errors.generic"));
@@ -329,7 +337,7 @@ export const QuestionnaireStep = forwardRef<
           />
         </div>
         <h2 className="text-2xl font-black tracking-tight">
-          {t("errors.title")}
+          {errorIsOverloaded ? t("errors.overloadedTitle") : t("errors.title")}
         </h2>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
           {error}
@@ -406,7 +414,7 @@ export const QuestionnaireStep = forwardRef<
                   layout: { duration: 0.32, ease: [0.22, 1, 0.36, 1] },
                 }}
                 className={cn(
-                  "inline-flex items-center justify-center gap-2 overflow-hidden rounded-full border border-transparent bg-gradient-to-br px-6 py-2.5 text-sm font-black tracking-tight text-white shadow-md transition-shadow duration-200 hover:shadow-lg active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60",
+                  "inline-flex items-center justify-center gap-2 overflow-hidden rounded-full border border-transparent bg-gradient-to-br px-6 py-2.5 text-sm font-black tracking-tight text-white shadow-md transition-shadow duration-200 hover:shadow-lg active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-md disabled:hover:shadow-md",
                   tone.barGradient,
                 )}
               >

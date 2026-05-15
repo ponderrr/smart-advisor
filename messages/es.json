@@ -874,6 +874,17 @@
     "fallbackName": "Tu",
     "startQuiz": "Iniciar cuestionario",
     "loading": "Cargando tu año…",
+    "share": {
+      "action": "Compartir",
+      "dialogTitle": "Comparte tu año en revisión",
+      "dialogSubtitle": "Cualquiera con este enlace o QR puede ver tus elecciones de {year}.",
+      "copyLink": "Copiar enlace",
+      "close": "Listo",
+      "signInRequired": "Vuelve a iniciar sesión para compartir tu año.",
+      "failed": "No se pudo generar el enlace para compartir",
+      "linkCopied": "Enlace copiado",
+      "copyFailed": "No se pudo copiar el enlace"
+    },
     "empty": {
       "title": "Sin recomendaciones en {year}",
       "current": "Haz un cuestionario y empieza a llenar tu año.",
@@ -922,6 +933,67 @@
       "eyebrow": "Destacadas",
       "fullHistory": "Historial completo"
     },
+    "story": {
+      "tapHint": "Toca para continuar",
+      "exit": "Salir",
+      "pickYear": "Año",
+      "intro": {
+        "eyebrow": "Año en revisión",
+        "kicker": "Tu {year}",
+        "subhead": "Dale play al año que pasó.",
+        "cta": "Ver tu año",
+        "keyHint": "Usa las flechas para navegar"
+      },
+      "total": {
+        "eyebrow": "En total",
+        "headline": "{count, plural, one {# recomendación} other {# recomendaciones}}",
+        "subhead": "{movies} en pantalla · {books} en la estantería · {music} en tus oídos."
+      },
+      "format": {
+        "eyebrow": "Tu mezcla",
+        "movies": "Películas",
+        "books": "Libros",
+        "music": "Álbumes",
+        "movieHeavy": "Estuviste en tu era cinéfila.",
+        "bookHeavy": "Te inclinaste por la lectura.",
+        "musicHeavy": "Los álbumes fueron lo tuyo.",
+        "balanced": "Un año equilibrado entre formatos."
+      },
+      "genres": {
+        "eyebrow": "Géneros favoritos",
+        "headline": "No te cansaste de {top}.",
+        "fallback": "Sin favorito claro este año."
+      },
+      "creator": {
+        "eyebrow": "Más elegido",
+        "headlineDirector": "{name} aparecía sin parar.",
+        "headlineAuthor": "{name} se quedó en bucle.",
+        "headlineArtist": "{name} dominó el año.",
+        "subhead": "{count, plural, one {# recomendación} other {# recomendaciones}}",
+        "fallback": "Sin un creador destacado este año."
+      },
+      "standout": {
+        "eyebrow": "Tu momento",
+        "peakMonth": "Mes cumbre",
+        "peakSubhead": "{count, plural, one {# recomendación} other {# recomendaciones}} en {month}",
+        "streak": "Racha más larga",
+        "streakSubhead": "{count, plural, one {# día seguido} other {# días seguidos}}",
+        "noStreak": "Aún sin racha"
+      },
+      "picks": {
+        "eyebrow": "Picos del año",
+        "headline": "Las que se quedaron contigo.",
+        "subhead": "Primero tus favoritas, luego el resto del top."
+      },
+      "outro": {
+        "eyebrow": "Ese fue tu año",
+        "headline": "{count, plural, one {# recomendación} other {# recomendaciones}} elegidas para ti.",
+        "subhead": "Comparte tus momentos o haz otro cuestionario para abrir el siguiente capítulo.",
+        "share": "Compartir mi año",
+        "restart": "Verlo de nuevo",
+        "newQuiz": "Hacer un cuestionario"
+      }
+    },
     "months": [
       "Ene",
       "Feb",
@@ -938,6 +1010,37 @@
     ]
   },
   "GroupQuiz": {
+    "category": "Cuestionario en grupo",
+    "stepOf": "Paso {current} de {total}",
+    "stepLabel": {
+      "path": "Anfitrión o unirse",
+      "host": "Configuración",
+      "join": "Unirse",
+      "lobby": "Sala",
+      "result": "Resultado"
+    },
+    "back": {
+      "dashboard": "Panel",
+      "step": "Atrás",
+      "leave": "Salir",
+      "lobby": "Sala"
+    },
+    "path": {
+      "title": "¿Anfitrión o unirse a una ronda?",
+      "subtitle": "Como anfitrión defines el formato y compartes un código. Para unirte solo necesitas un código de 6 caracteres.",
+      "cards": {
+        "host": {
+          "eyebrow": "Anfitrión",
+          "title": "Organizar una ronda",
+          "description": "Elige el formato, define cuántas preguntas, comparte el código y observa cómo llegan las elecciones."
+        },
+        "join": {
+          "eyebrow": "Unirse",
+          "title": "Unirse a una ronda",
+          "description": "¿Tienes un código de 6 caracteres? Súmate, no hace falta cuenta."
+        }
+      }
+    },
     "lobby": {
       "eyebrow": "Cuestionario en grupo",
       "title": "Encuentra una recomendación juntos",
@@ -1008,6 +1111,13 @@
       "copyLink": "Copiar enlace",
       "linkCopied": "Enlace copiado",
       "linkCopyFailed": "No se pudo copiar el enlace",
+      "qr": {
+        "show": "Mostrar QR",
+        "title": "Escanea para unirte",
+        "subtitle": "Apunta la cámara del teléfono al código QR para entrar directo a esta ronda.",
+        "codeHint": "O usa este código",
+        "close": "Listo"
+      },
       "joined": "{name} se unió",
       "left": "{name} salió de la sala",
       "playerCount": "{count, plural, one {# jugador} other {# jugadores}}",
@@ -1027,7 +1137,8 @@
         "needTwoPlayers": "Necesitas al menos 2 jugadores para empezar.",
         "startFailed": "No se pudo iniciar el cuestionario",
         "restartFailed": "No se pudo reiniciar el cuestionario",
-        "synthesizeFailed": "No se pudo generar la recomendación"
+        "synthesizeFailed": "No se pudo generar la recomendación",
+        "overloaded": "Nuestra IA está saturada. Espera un minuto y vuelve a intentarlo."
       },
       "guest": {
         "waitingHost": "Esperando al anfitrión",
@@ -1053,6 +1164,7 @@
         "guestWaiting": "El anfitrión está generando la recomendación…"
       },
       "quiz": {
+        "category": "Ronda en vivo",
         "questionOf": "Pregunta {current} de {total}",
         "back": "Atrás",
         "next": "Siguiente",
@@ -1060,6 +1172,17 @@
         "submitting": "Enviando…",
         "submittedToast": "¡Confirmado!",
         "answerAll": "Responde todas las preguntas primero."
+      },
+      "params": {
+        "contentMovie": "Películas",
+        "contentBook": "Libros",
+        "contentMusic": "Música",
+        "contentMix": "Mezcla",
+        "questions": "{count, plural, one {# pregunta} other {# preguntas}}",
+        "timeEstimate": "~{minutes, plural, one {# min} other {# min}}",
+        "maxPlayers": "{max, plural, one {# plaza} other {# plazas}}",
+        "emptySeat": "Plaza libre",
+        "submittedProgress": "{done} de {total} confirmados"
       },
       "completed": {
         "eyebrow": "La recomendación del grupo",
@@ -1081,6 +1204,7 @@
       "byAuthor": "Por {creator}",
       "byDirector": "Dirigida por {creator}",
       "byArtist": "De {creator}",
+      "whyThisPick": "Por qué esta elección",
       "viewOnOpenLibrary": "Ver en Open Library",
       "watchTrailer": "Ver tráiler",
       "playTrailerAria": "Reproducir tráiler de {title}"
@@ -1330,8 +1454,10 @@
       "leaveConfirm": "¿Salir del cuestionario? Tus respuestas no se guardarán.",
       "errors": {
         "title": "No se pudieron cargar las preguntas",
+        "overloadedTitle": "Nuestra IA está al límite",
         "session": "Tu sesión expiró. Inicia sesión de nuevo para continuar.",
         "generic": "No pudimos generar tus preguntas. Inténtalo de nuevo.",
+        "overloaded": "Nuestra IA está saturada en este momento. Espera un minuto y vuelve a intentarlo; ya reintentamos un par de veces por ti.",
         "tryAgain": "Reintentar",
         "back": "Atrás"
       },
@@ -1507,6 +1633,8 @@
         "finalizing": "Finalizando tus recomendaciones..."
       },
       "generationError": "No se pudieron generar las recomendaciones personalizadas. Inténtalo de nuevo.",
+      "overloadedTitle": "Nuestra IA está al límite",
+      "overloadedBody": "Nuestra IA está saturada en este momento. Espera un minuto y vuelve a intentarlo; ya reintentamos un par de veces por ti.",
       "confirmDialog": {
         "title": "¿Generar nuevas recomendaciones?",
         "body": "Ya generaste recomendaciones para estas respuestas. Genera un conjunto nuevo o vuelve a tu panel.",

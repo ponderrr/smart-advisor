@@ -53,7 +53,15 @@ export default async function RootLayout({
   const locale = await getLocale();
   const messages = await getMessages();
   return (
-    <html lang={locale} className={inter.variable} suppressHydrationWarning>
+    <html
+      lang={locale}
+      className={inter.variable}
+      suppressHydrationWarning
+      // Opt-in attribute Next 15+ wants when `scroll-behavior: smooth`
+      // is set globally (see globals.css). Without it, Next emits a
+      // warning about smooth-scroll during route transitions.
+      data-scroll-behavior="smooth"
+    >
       <body className="font-sans antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Providers>{children}</Providers>

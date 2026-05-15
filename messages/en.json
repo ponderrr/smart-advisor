@@ -874,6 +874,17 @@
     "fallbackName": "Your",
     "startQuiz": "Start Quiz",
     "loading": "Loading your year…",
+    "share": {
+      "action": "Share",
+      "dialogTitle": "Share Your Year in Review",
+      "dialogSubtitle": "Anyone with this link or QR can view your {year} picks.",
+      "copyLink": "Copy Link",
+      "close": "Done",
+      "signInRequired": "Sign in again to share your year.",
+      "failed": "Couldn't generate share link",
+      "linkCopied": "Link copied",
+      "copyFailed": "Couldn't copy link"
+    },
     "empty": {
       "title": "No Picks in {year}",
       "current": "Take a quiz and start filling out your year.",
@@ -922,6 +933,67 @@
       "eyebrow": "Standouts",
       "fullHistory": "Full history"
     },
+    "story": {
+      "tapHint": "Tap to continue",
+      "exit": "Exit",
+      "pickYear": "Year",
+      "intro": {
+        "eyebrow": "Year in Review",
+        "kicker": "Your {year}",
+        "subhead": "Press play on the year that was.",
+        "cta": "See your year",
+        "keyHint": "Arrow keys to navigate"
+      },
+      "total": {
+        "eyebrow": "All in",
+        "headline": "{count, plural, one {# pick} other {# picks}}",
+        "subhead": "{movies} on screen · {books} on the shelf · {music} in your ears."
+      },
+      "format": {
+        "eyebrow": "Your mix",
+        "movies": "Movies",
+        "books": "Books",
+        "music": "Albums",
+        "movieHeavy": "You were in your movie era.",
+        "bookHeavy": "You leaned into reading.",
+        "musicHeavy": "Albums were the move.",
+        "balanced": "A balanced year across formats."
+      },
+      "genres": {
+        "eyebrow": "Top genres",
+        "headline": "You couldn't get enough of {top}.",
+        "fallback": "No clear favorite this year."
+      },
+      "creator": {
+        "eyebrow": "Most picked",
+        "headlineDirector": "{name} kept showing up.",
+        "headlineAuthor": "{name} was on repeat.",
+        "headlineArtist": "{name} owned the year.",
+        "subhead": "{count, plural, one {# pick} other {# picks}}",
+        "fallback": "No standout creator this year."
+      },
+      "standout": {
+        "eyebrow": "Your moment",
+        "peakMonth": "Peak month",
+        "peakSubhead": "{count, plural, one {# pick} other {# picks}} in {month}",
+        "streak": "Longest streak",
+        "streakSubhead": "{count, plural, one {# day in a row} other {# days in a row}}",
+        "noStreak": "No streak yet"
+      },
+      "picks": {
+        "eyebrow": "Standout picks",
+        "headline": "The ones that stuck.",
+        "subhead": "Favorites first, then the rest of the highlights."
+      },
+      "outro": {
+        "eyebrow": "That was your year",
+        "headline": "{count, plural, one {# pick} other {# picks}} curated for you.",
+        "subhead": "Share your highlights or take another quiz to start the next chapter.",
+        "share": "Share my year",
+        "restart": "Watch again",
+        "newQuiz": "Take a new quiz"
+      }
+    },
     "months": [
       "Jan",
       "Feb",
@@ -938,6 +1010,37 @@
     ]
   },
   "GroupQuiz": {
+    "category": "Group quiz",
+    "stepOf": "Step {current} of {total}",
+    "stepLabel": {
+      "path": "Host or join",
+      "host": "Setup",
+      "join": "Join",
+      "lobby": "Lobby",
+      "result": "Result"
+    },
+    "back": {
+      "dashboard": "Dashboard",
+      "step": "Back",
+      "leave": "Leave",
+      "lobby": "Lobby"
+    },
+    "path": {
+      "title": "Host or join a round?",
+      "subtitle": "Hosting sets the format and shares a code. Joining drops you in someone else's round with a 6-character code.",
+      "cards": {
+        "host": {
+          "eyebrow": "Host",
+          "title": "Host a Round",
+          "description": "Pick the format, set how many questions, share the code, and watch the picks roll in."
+        },
+        "join": {
+          "eyebrow": "Join",
+          "title": "Join a Round",
+          "description": "Got a 6-character code from a friend? Hop in — no account needed."
+        }
+      }
+    },
     "lobby": {
       "eyebrow": "Group Quiz",
       "title": "Find a Pick Together",
@@ -1008,6 +1111,13 @@
       "copyLink": "Copy Link",
       "linkCopied": "Link copied",
       "linkCopyFailed": "Couldn't copy link",
+      "qr": {
+        "show": "Show QR",
+        "title": "Scan to join",
+        "subtitle": "Point your phone's camera at the QR code to drop straight into this round.",
+        "codeHint": "Or enter code",
+        "close": "Done"
+      },
       "joined": "{name} joined",
       "left": "{name} left the lobby",
       "playerCount": "{count, plural, one {# Player} other {# Players}}",
@@ -1027,7 +1137,8 @@
         "needTwoPlayers": "You need at least 2 players to start.",
         "startFailed": "Couldn't start the quiz",
         "restartFailed": "Couldn't restart the quiz",
-        "synthesizeFailed": "Failed to generate recommendation"
+        "synthesizeFailed": "Failed to generate recommendation",
+        "overloaded": "Our AI is swamped right now. Give it a minute and try again."
       },
       "guest": {
         "waitingHost": "Waiting for the Host",
@@ -1053,6 +1164,7 @@
         "guestWaiting": "Host is generating the pick…"
       },
       "quiz": {
+        "category": "Live round",
         "questionOf": "Question {current} of {total}",
         "back": "Back",
         "next": "Next",
@@ -1060,6 +1172,17 @@
         "submitting": "Submitting…",
         "submittedToast": "Locked in!",
         "answerAll": "Answer every question first."
+      },
+      "params": {
+        "contentMovie": "Movies",
+        "contentBook": "Books",
+        "contentMusic": "Music",
+        "contentMix": "Mix",
+        "questions": "{count, plural, one {# question} other {# questions}}",
+        "timeEstimate": "~{minutes, plural, one {# min} other {# min}}",
+        "maxPlayers": "{max, plural, one {# slot} other {# slots}}",
+        "emptySeat": "Open seat",
+        "submittedProgress": "{done} of {total} locked in"
       },
       "completed": {
         "eyebrow": "The Group's Pick",
@@ -1081,6 +1204,7 @@
       "byAuthor": "By {creator}",
       "byDirector": "Directed by {creator}",
       "byArtist": "By {creator}",
+      "whyThisPick": "Why this pick",
       "viewOnOpenLibrary": "View on Open Library",
       "watchTrailer": "Watch trailer",
       "playTrailerAria": "Play trailer for {title}"
@@ -1330,8 +1454,10 @@
       "leaveConfirm": "Leave the quiz? Your answers so far won't be saved.",
       "errors": {
         "title": "Unable to load questions",
+        "overloadedTitle": "Our AI is at capacity",
         "session": "Your session expired. Please sign in again to continue.",
         "generic": "We could not generate your questions. Please try again.",
+        "overloaded": "Our AI is getting hammered right now. Give it a minute and try again — we already retried a couple times for you.",
         "tryAgain": "Try Again",
         "back": "Back"
       },
@@ -1507,6 +1633,8 @@
         "finalizing": "Finalizing your recommendations..."
       },
       "generationError": "Failed to generate personalized recommendations. Please try again.",
+      "overloadedTitle": "Our AI is at capacity",
+      "overloadedBody": "Our AI is getting hammered right now. Give it a minute and try again — we already retried a couple times for you.",
       "confirmDialog": {
         "title": "Generate new recommendations?",
         "body": "You already generated recommendations for these answers. Generate a fresh set or head back to your dashboard.",

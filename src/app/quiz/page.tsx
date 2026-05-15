@@ -28,6 +28,7 @@ import { getAccentTone } from "@/features/quiz/utils/content-accent";
 import { ResultsLoadingState } from "@/features/recommendations/components/results-loading-state";
 import { ResultsView } from "@/features/recommendations/components/results-view";
 import { enhancedRecommendationsService } from "@/features/recommendations/services/enhanced-recommendations-service";
+import { isOverloadedError } from "@/features/recommendations/services/ai-service";
 import { cn } from "@/lib/utils";
 
 const STEPS = ["content", "count", "questions", "results"] as const;
@@ -87,6 +88,7 @@ const QuizPage = () => {
 
   const [flowMode, setFlowMode] = useState<FlowMode>("navigating");
   const [genError, setGenError] = useState<string | null>(null);
+  const [genErrorIsOverloaded, setGenErrorIsOverloaded] = useState(false);
   // Buffer the last submitted answers so the user can retry on gen failure
   // without re-walking the questions.
   const lastAnswersRef = useRef<Answer[] | null>(null);
@@ -169,8 +171,14 @@ const QuizPage = () => {
       } catch (err) {
         if (controller.signal.aborted) return;
         console.error("Quiz generation failed:", err);
+        const overloaded = isOverloadedError(err);
+        setGenErrorIsOverloaded(overloaded);
         setGenError(
-          err instanceof Error ? err.message : tResults("generationError"),
+          overloaded
+            ? tResults("overloadedBody")
+            : err instanceof Error
+              ? err.message
+              : tResults("generationError"),
         );
         setFlowMode("gen-error");
       }
@@ -185,6 +193,7 @@ const QuizPage = () => {
       setSlideDirection(1);
       setFlowMode("generating");
       setGenError(null);
+      setGenErrorIsOverloaded(false);
       void runGeneration(formattedAnswers);
     },
     [setStoreAnswers, runGeneration],
@@ -194,6 +203,7 @@ const QuizPage = () => {
     const answers = lastAnswersRef.current;
     if (!answers) return;
     setGenError(null);
+    setGenErrorIsOverloaded(false);
     setFlowMode("generating");
     void runGeneration(answers);
   };
@@ -278,7 +288,9 @@ const QuizPage = () => {
     category = tQuestionnaire("category");
     stepLabel =
       flowMode === "gen-error"
-        ? tResults("generationError")
+        ? genErrorIsOverloaded
+          ? tResults("overloadedTitle")
+          : tResults("generationError")
         : tResults("generationStep.generating");
     progress = 100;
     backLabel = tQuiz("back.dashboard");
@@ -385,7 +397,9 @@ const QuizPage = () => {
                   ) : flowMode === "gen-error" ? (
                     <div className="text-center">
                       <h2 className="text-2xl font-black tracking-tight">
-                        {tResults("generationError")}
+                        {genErrorIsOverloaded
+                          ? tResults("overloadedTitle")
+                          : tResults("generationError")}
                       </h2>
                       {genError ? (
                         <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
