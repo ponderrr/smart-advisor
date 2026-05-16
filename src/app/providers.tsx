@@ -7,7 +7,6 @@ import { useState } from "react";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { SiteBanner } from "@/components/site-banner";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
-import { InstallPrompt } from "@/components/install-prompt";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -39,7 +38,6 @@ export default function Providers({ children }: { children: React.ReactNode }) {
               {children}
             </div>
             <MobileBottomNav />
-            <InstallPrompt />
             <Toaster />
           </AuthProvider>
         </QueryClientProvider>

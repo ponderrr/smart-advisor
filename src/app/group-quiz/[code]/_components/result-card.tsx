@@ -273,12 +273,7 @@ export const ResultCard = ({
           )}
           {type === "music" && previewUrl && (
             <div className="mt-3">
-              <MusicPreview
-                previewUrl={previewUrl}
-                title={title}
-                artist={creator}
-                artworkUrl={posterUrl}
-              />
+              <MusicPreview previewUrl={previewUrl} />
             </div>
           )}
         </div>

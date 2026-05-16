@@ -8,7 +8,6 @@ import {
   Mail,
   MoreHorizontal,
   RotateCcw,
-  Share2,
 } from "lucide-react";
 import { motion } from "motion/react";
 import { useMessages, useTranslations } from "next-intl";
@@ -31,7 +30,6 @@ import { RecommendationCard } from "@/features/recommendations/components/recomm
 import { databaseService } from "@/features/recommendations/services/database-service";
 import type { Recommendation } from "@/features/recommendations/types/recommendation";
 import { cn } from "@/lib/utils";
-import { nativeShareOrCopy } from "@/lib/share";
 
 interface ResultsViewProps {
   /** Recommendations to render. */
@@ -72,13 +70,6 @@ export const ResultsView = ({
   const [loggedTitleMap, setLoggedTitleMap] = useState<
     Map<string, LibraryStatus>
   >(() => new Map());
-
-  // Only surface the native "Share…" entry where the OS share sheet
-  // exists. Resolved after mount to avoid an SSR/client markup mismatch.
-  const [canNativeShare, setCanNativeShare] = useState(false);
-  useEffect(() => {
-    setCanNativeShare(typeof navigator?.share === "function");
-  }, []);
 
   // Keep local recs in sync if the parent hands us a fresh batch.
   useEffect(() => {
@@ -223,15 +214,6 @@ export const ResultsView = ({
     }
   };
 
-  const handleNativeShare = async () => {
-    const status = await nativeShareOrCopy({
-      title: tb("shareText.title"),
-      text: buildShareText(),
-    });
-    if (status === "copied") toast.success(tb("shareToasts.copySuccess"));
-    else if (status === "failed") toast.error(tb("shareToasts.shareFailed"));
-  };
-
   const handleShareTwitter = () => {
     const titles = recommendations.map((r) => r.title).join(", ");
     const text = encodeURIComponent(tb("shareTwitter", { titles }));
@@ -321,15 +303,6 @@ export const ResultsView = ({
               {tb("actions.viewHistory")}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            {canNativeShare && (
-              <DropdownMenuItem
-                onSelect={() => void handleNativeShare()}
-                className="gap-2"
-              >
-                <Share2 size={14} />
-                {tb("shareMenu.share")}
-              </DropdownMenuItem>
-            )}
             <DropdownMenuItem
               onSelect={() => void handleCopyToClipboard()}
               className="gap-2"

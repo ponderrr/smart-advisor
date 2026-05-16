@@ -8,20 +8,7 @@ import { cn } from "@/lib/utils";
 interface MusicPreviewProps {
   previewUrl?: string | null;
   className?: string;
-  /** Track metadata — surfaced on the OS lock screen / media controls
-   *  via the Media Session API when the preview is playing. */
-  title?: string | null;
-  artist?: string | null;
-  artworkUrl?: string | null;
 }
-
-type MediaSessionAction =
-  | "play"
-  | "pause"
-  | "stop"
-  | "seekbackward"
-  | "seekforward"
-  | "seekto";
 
 const formatTime = (seconds: number) => {
   const safe = Number.isFinite(seconds) && seconds > 0 ? seconds : 0;
@@ -57,13 +44,7 @@ const Equalizer = () => (
   </span>
 );
 
-export const MusicPreview = ({
-  previewUrl,
-  className,
-  title,
-  artist,
-  artworkUrl,
-}: MusicPreviewProps) => {
+export const MusicPreview = ({ previewUrl, className }: MusicPreviewProps) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const scrubRef = useRef<HTMLDivElement | null>(null);
   const wasPlayingBeforeDragRef = useRef(false);
@@ -76,39 +57,15 @@ export const MusicPreview = ({
     const audio = audioRef.current;
     if (!audio) return;
 
-    const hasMediaSession =
-      typeof navigator !== "undefined" && "mediaSession" in navigator;
-    const syncPosition = () => {
-      if (!hasMediaSession) return;
-      const dur =
-        Number.isFinite(audio.duration) && audio.duration > 0
-          ? audio.duration
-          : 30;
-      try {
-        navigator.mediaSession.setPositionState({
-          duration: dur,
-          position: Math.min(audio.currentTime, dur),
-          playbackRate: audio.playbackRate || 1,
-        });
-      } catch {
-        // setPositionState throws if values are inconsistent — ignore.
-      }
-    };
-
     const onEnded = () => {
       setPlaying(false);
       setCurrentTime(0);
-      if (hasMediaSession) navigator.mediaSession.playbackState = "none";
     };
-    const onTimeUpdate = () => {
-      setCurrentTime(audio.currentTime);
-      syncPosition();
-    };
+    const onTimeUpdate = () => setCurrentTime(audio.currentTime);
     const onLoadedMetadata = () => {
       if (Number.isFinite(audio.duration) && audio.duration > 0) {
         setDuration(audio.duration);
       }
-      syncPosition();
     };
 
     audio.addEventListener("ended", onEnded);
@@ -121,112 +78,6 @@ export const MusicPreview = ({
       audio.pause();
     };
   }, []);
-
-  // Media Session — surfaces the track on the OS lock screen / media
-  // notification and wires hardware + lock-screen transport controls to
-  // this player. No-op on browsers without the API (e.g. older Safari).
-  useEffect(() => {
-    if (
-      typeof navigator === "undefined" ||
-      !("mediaSession" in navigator) ||
-      !previewUrl
-    ) {
-      return;
-    }
-    const ms = navigator.mediaSession;
-
-    if (title) {
-      ms.metadata = new MediaMetadata({
-        title,
-        artist: artist ?? undefined,
-        artwork: artworkUrl
-          ? [{ src: artworkUrl, sizes: "512x512", type: "image/jpeg" }]
-          : undefined,
-      });
-    }
-
-    const set = (
-      action: MediaSessionAction,
-      handler: MediaSessionActionHandler | null,
-    ) => {
-      try {
-        ms.setActionHandler(action, handler);
-      } catch {
-        // Some browsers throw on unsupported actions — safe to ignore.
-      }
-    };
-    const durationOf = (a: HTMLAudioElement) =>
-      Number.isFinite(a.duration) && a.duration > 0 ? a.duration : 30;
-
-    set("play", () => {
-      void audioRef.current
-        ?.play()
-        .then(() => setPlaying(true))
-        .catch(() => {});
-    });
-    set("pause", () => {
-      audioRef.current?.pause();
-      setPlaying(false);
-    });
-    set("stop", () => {
-      const a = audioRef.current;
-      if (a) {
-        a.pause();
-        a.currentTime = 0;
-      }
-      setPlaying(false);
-      setCurrentTime(0);
-    });
-    set("seekbackward", (d) => {
-      const a = audioRef.current;
-      if (!a) return;
-      a.currentTime = Math.max(0, a.currentTime - (d.seekOffset ?? 10));
-      setCurrentTime(a.currentTime);
-    });
-    set("seekforward", (d) => {
-      const a = audioRef.current;
-      if (!a) return;
-      a.currentTime = Math.min(
-        durationOf(a),
-        a.currentTime + (d.seekOffset ?? 10),
-      );
-      setCurrentTime(a.currentTime);
-    });
-    set("seekto", (d) => {
-      const a = audioRef.current;
-      if (!a || d.seekTime == null) return;
-      a.currentTime = d.seekTime;
-      setCurrentTime(a.currentTime);
-    });
-
-    return () => {
-      (
-        [
-          "play",
-          "pause",
-          "stop",
-          "seekbackward",
-          "seekforward",
-          "seekto",
-        ] as const
-      ).forEach((a) => {
-        try {
-          ms.setActionHandler(a, null);
-        } catch {
-          // ignore
-        }
-      });
-      ms.metadata = null;
-    };
-  }, [previewUrl, title, artist, artworkUrl]);
-
-  // Keep the OS playback indicator in sync with our play state.
-  useEffect(() => {
-    if (typeof navigator === "undefined" || !("mediaSession" in navigator)) {
-      return;
-    }
-    navigator.mediaSession.playbackState = playing ? "playing" : "paused";
-  }, [playing]);
 
   const togglePlay = () => {
     const audio = audioRef.current;

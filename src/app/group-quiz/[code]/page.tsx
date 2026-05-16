@@ -16,7 +16,6 @@ import {
   Music,
   QrCode,
   RotateCcw,
-  Share2,
   Sparkles,
   UserPlus,
   Users,
@@ -122,8 +121,7 @@ const GroupQuizLobbyPage = () => {
   // below gates on `session` being present before reading these.
   const tone = getAccentTone(session?.content_type ?? null);
 
-  const { canNativeShare, handleCopy, handleNativeShare } =
-    useGroupQuizShare(session);
+  const { handleCopy } = useGroupQuizShare(session);
 
   const {
     handleStart,
@@ -263,16 +261,6 @@ const GroupQuizLobbyPage = () => {
                     {session.code}
                   </p>
                   <div className="flex flex-wrap items-center justify-center gap-2">
-                    {canNativeShare && (
-                      <button
-                        type="button"
-                        onClick={() => void handleNativeShare()}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white/90 px-4 py-2 text-xs font-bold tracking-tight text-slate-700 shadow-sm hover:border-slate-300 hover:bg-white dark:border-slate-700 dark:bg-slate-900/65 dark:text-slate-200"
-                      >
-                        <Share2 size={12} />
-                        {t("shareLink")}
-                      </button>
-                    )}
                     <button
                       type="button"
                       onClick={handleCopy}
@@ -937,16 +925,6 @@ const GroupQuizLobbyPage = () => {
           </div>
 
           <div className="mt-6 flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-3">
-            {canNativeShare && (
-              <button
-                type="button"
-                onClick={() => void handleNativeShare()}
-                className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold tracking-tight text-slate-700 hover:border-slate-300 sm:w-auto dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200"
-              >
-                <Share2 size={12} />
-                {t("shareLink")}
-              </button>
-            )}
             <button
               type="button"
               onClick={handleCopy}
