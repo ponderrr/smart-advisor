@@ -141,7 +141,10 @@ const GroupQuizLandingPage = () => {
 
   const handleBack = () => {
     if (step === "path") {
-      router.push("/dashboard");
+      // Group quiz is reachable while signed out (join needs no account),
+      // so a guest's only "up" is the marketing home — /dashboard would
+      // just bounce them to /auth.
+      router.push(user ? "/dashboard" : "/");
       return;
     }
     goToStep("path", -1);
@@ -217,7 +220,9 @@ const GroupQuizLandingPage = () => {
   const progress = (stepIndex / TOTAL_STEPS) * 100;
   const backLabel =
     step === "path"
-      ? tShell("back.dashboard")
+      ? user
+        ? tShell("back.dashboard")
+        : tShell("back.home")
       : tShell("back.step");
 
   return (

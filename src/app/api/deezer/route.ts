@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { searchDeezerAlbum } from "@/lib/api-helpers";
+
 type AlbumProxyResponse = {
   cover: string;
   year: number;
@@ -7,24 +9,6 @@ type AlbumProxyResponse = {
   deezerUrl: string | null;
   previewUrl: string | null;
 };
-
-interface DeezerSearchAlbum {
-  id?: number;
-  title?: string;
-  cover_xl?: string;
-  cover_big?: string;
-  cover_medium?: string;
-  artist?: { name?: string };
-  link?: string;
-}
-
-interface DeezerAlbumDetail {
-  cover_xl?: string;
-  cover_big?: string;
-  release_date?: string;
-  link?: string;
-  tracks?: { data?: Array<{ preview?: string }> };
-}
 
 const DEFAULT_ALBUM: AlbumProxyResponse = {
   cover:
@@ -57,89 +41,17 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(cached.data);
     }
 
-    const query = artist ? `${title} ${artist}` : title;
-    const searchUrl = `https://api.deezer.com/search/album?q=${encodeURIComponent(query)}&limit=10`;
-
-    const searchController = new AbortController();
-    const searchTimeout = setTimeout(() => searchController.abort(), 8000);
-
-    const searchRes = await fetch(searchUrl, {
-      signal: searchController.signal,
-      cache: "no-store",
-    });
-    clearTimeout(searchTimeout);
-
-    if (!searchRes.ok) {
+    const album = await searchDeezerAlbum(title, artist || undefined);
+    if (!album) {
       return NextResponse.json(DEFAULT_ALBUM);
-    }
-
-    const searchData = await searchRes.json();
-    const albums: DeezerSearchAlbum[] = Array.isArray(searchData?.data)
-      ? searchData.data
-      : [];
-
-    if (albums.length === 0) {
-      return NextResponse.json(DEFAULT_ALBUM);
-    }
-
-    const searchTitle = title.toLowerCase();
-    const searchArtist = artist?.toLowerCase();
-    let best = albums[0];
-    for (const album of albums) {
-      const albumTitle = (album.title || "").toLowerCase();
-      const albumArtist = (album.artist?.name || "").toLowerCase();
-      const titleMatch =
-        albumTitle === searchTitle ||
-        albumTitle.includes(searchTitle) ||
-        searchTitle.includes(albumTitle);
-      const artistMatch = searchArtist
-        ? albumArtist === searchArtist ||
-          albumArtist.includes(searchArtist) ||
-          searchArtist.includes(albumArtist)
-        : true;
-      if (titleMatch && artistMatch) {
-        best = album;
-        break;
-      }
-    }
-
-    const cover =
-      best.cover_xl || best.cover_big || best.cover_medium || DEFAULT_ALBUM.cover;
-    const deezerUrl = best.link || null;
-
-    let year: number = DEFAULT_ALBUM.year;
-    let previewUrl: string | null = null;
-
-    if (best.id) {
-      try {
-        const detailController = new AbortController();
-        const detailTimeout = setTimeout(() => detailController.abort(), 5000);
-        const detailRes = await fetch(`https://api.deezer.com/album/${best.id}`, {
-          signal: detailController.signal,
-          cache: "no-store",
-        });
-        clearTimeout(detailTimeout);
-
-        if (detailRes.ok) {
-          const detail: DeezerAlbumDetail = await detailRes.json();
-          if (detail.release_date) {
-            const parsedYear = parseInt(detail.release_date.slice(0, 4), 10);
-            if (!Number.isNaN(parsedYear)) year = parsedYear;
-          }
-          const firstPreview = detail.tracks?.data?.find((t) => t.preview)?.preview;
-          if (firstPreview) previewUrl = firstPreview;
-        }
-      } catch {
-        // Detail fetch is non-critical
-      }
     }
 
     const payload: AlbumProxyResponse = {
-      cover,
-      year,
+      cover: album.cover,
+      year: album.year ?? DEFAULT_ALBUM.year,
       description: "",
-      deezerUrl,
-      previewUrl,
+      deezerUrl: album.deezerUrl,
+      previewUrl: album.previewUrl,
     };
 
     cache.set(cacheKey, { data: payload, expiry: Date.now() + CACHE_TTL });

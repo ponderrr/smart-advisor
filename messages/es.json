@@ -1041,6 +1041,7 @@
     },
     "back": {
       "dashboard": "Panel",
+      "home": "Inicio",
       "step": "Atrás",
       "leave": "Salir",
       "lobby": "Sala"
@@ -1927,6 +1928,7 @@
   "Demo": {
     "quiz": {
       "category": "Cuestionario de demostración",
+      "pickLabel": "Elige un formato",
       "stepLabel": "Pregunta {current} de {total}",
       "back": {
         "home": "Inicio",
@@ -1942,6 +1944,16 @@
           "eyebrow": "En el estante",
           "title": "Libro",
           "description": "Una lectura adaptada a tu estilo e intereses."
+        },
+        "music": {
+          "eyebrow": "En tus oídos",
+          "title": "Álbum",
+          "description": "Un disco que coincide con el ambiente que llevas."
+        },
+        "mix": {
+          "eyebrow": "Los tres",
+          "title": "Mezcla",
+          "description": "Una película, un libro y un álbum elegidos juntos."
         },
         "both": {
           "eyebrow": "Ambos",
@@ -1967,11 +1979,11 @@
       "showLess": "Ver menos",
       "viewDetails": "Ver detalles",
       "errors": {
-        "limitTitle": "Has alcanzado el límite de la demostración",
+        "limitTitle": "Esto es todo por hoy",
         "genericTitle": "Algo salió mal",
-        "limitFallback": "Has usado tus pruebas gratuitas de la demostración de hoy. Regístrate para seguir.",
+        "limitFallback": "Has usado tus {limit} pruebas gratuitas de hoy. Crea una cuenta gratis para recomendaciones ilimitadas — tu perfil de gustos mejora con cada cuestionario.",
         "genericFallback": "No pudimos generar tus recomendaciones de demostración. Inténtalo de nuevo.",
-        "signUp": "Regístrate para continuar",
+        "signUp": "Crea tu cuenta gratis",
         "tryAgain": "Reintentar"
       },
       "eyebrow": "Demostración · Tus elecciones",
@@ -1986,6 +1998,10 @@
         "book": {
           "eyebrow": "Libro",
           "title": "En el estante"
+        },
+        "music": {
+          "eyebrow": "Álbum",
+          "title": "En tus oídos"
         }
       },
       "cta": {

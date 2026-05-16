@@ -20,9 +20,9 @@ const VALIDATION_FLASH_MS = 650;
 const VALIDATION_MESSAGE_MS = 3200;
 const PREF_CONTENT_KEY = "smart_advisor_pref_content_focus";
 
-type CardAccent = "amber" | "emerald" | "rose" | "violet";
+export type CardAccent = "amber" | "emerald" | "rose" | "violet";
 
-const CARD_ACCENTS: Record<
+export const CARD_ACCENTS: Record<
   CardAccent,
   {
     ring: string;

@@ -11,10 +11,11 @@ export type DemoQuestion = {
 
 const FIRST_QUESTION: DemoQuestion = {
   id: "contentType",
-  title: "What are you looking for today?",
+  // Mirrors the real quiz's content-selection copy (Quiz.contentSelection).
+  title: "What would you like a recommendation for?",
   subtitle: "Pick one so we can tailor your recommendation flow.",
   type: "single_select",
-  options: ["Movies", "Books", "Both"],
+  options: ["Movies", "Books", "Music", "Mix"],
 };
 
 const LAST_QUESTION: DemoQuestion = {

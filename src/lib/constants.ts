@@ -40,6 +40,7 @@ export const API_URLS = {
   TMDB_BASE: "https://api.themoviedb.org/3",
   TMDB_IMAGE: "https://image.tmdb.org/t/p/w500",
   TMDB_WEB: "https://www.themoviedb.org",
+  DEEZER_API: "https://api.deezer.com",
   IPIFY: "https://api.ipify.org?format=json",
   SITE_URL: "https://smartadvisor.live",
 } as const;

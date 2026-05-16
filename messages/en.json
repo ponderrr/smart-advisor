@@ -1041,6 +1041,7 @@
     },
     "back": {
       "dashboard": "Dashboard",
+      "home": "Home",
       "step": "Back",
       "leave": "Leave",
       "lobby": "Lobby"
@@ -1927,6 +1928,7 @@
   "Demo": {
     "quiz": {
       "category": "Demo quiz",
+      "pickLabel": "Pick a format",
       "stepLabel": "Question {current} of {total}",
       "back": {
         "home": "Home",
@@ -1942,6 +1944,16 @@
           "eyebrow": "On the shelf",
           "title": "Book",
           "description": "A read tailored to your style and interests."
+        },
+        "music": {
+          "eyebrow": "In your ears",
+          "title": "Album",
+          "description": "A record matched to the mood you're in."
+        },
+        "mix": {
+          "eyebrow": "All three",
+          "title": "Mix it up",
+          "description": "A movie, a book, and an album picked together."
         },
         "both": {
           "eyebrow": "Both",
@@ -1967,11 +1979,11 @@
       "showLess": "Show less",
       "viewDetails": "View details",
       "errors": {
-        "limitTitle": "You hit the demo limit",
+        "limitTitle": "That's a wrap for today",
         "genericTitle": "Something went wrong",
-        "limitFallback": "You have used your free demo runs for today. Sign up to keep going.",
+        "limitFallback": "You've used all {limit} free demo runs for today. Create a free account for unlimited recommendations — your taste profile improves with every quiz.",
         "genericFallback": "We could not generate your demo recommendations. Please try again.",
-        "signUp": "Sign up to continue",
+        "signUp": "Create your free account",
         "tryAgain": "Try again"
       },
       "eyebrow": "Demo · Your picks",
@@ -1986,6 +1998,10 @@
         "book": {
           "eyebrow": "Book",
           "title": "On the shelf"
+        },
+        "music": {
+          "eyebrow": "Album",
+          "title": "In your ears"
         }
       },
       "cta": {
