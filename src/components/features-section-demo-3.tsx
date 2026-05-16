@@ -299,6 +299,30 @@ const FEATURES: Feature[] = [
   { key: "both", Skeleton: AcrossBothSkeleton, wide: true },
 ];
 
+// Per-card accent so the bento reads as color-coded rather than four
+// identical indigo tiles. Stays within the app's accent palette.
+const FEATURE_ACCENTS: Record<
+  FeatureKey,
+  { divider: string; hoverBorder: string }
+> = {
+  private: {
+    divider: "from-violet-400 to-indigo-400",
+    hoverBorder: "hover:border-violet-200 dark:hover:border-violet-500/40",
+  },
+  fast: {
+    divider: "from-amber-400 to-orange-400",
+    hoverBorder: "hover:border-amber-200 dark:hover:border-amber-500/40",
+  },
+  trust: {
+    divider: "from-emerald-400 to-teal-400",
+    hoverBorder: "hover:border-emerald-200 dark:hover:border-emerald-500/40",
+  },
+  both: {
+    divider: "from-rose-400 to-fuchsia-400",
+    hoverBorder: "hover:border-rose-200 dark:hover:border-rose-500/40",
+  },
+};
+
 export default function FeaturesSectionDemo() {
   const t = useTranslations("Home.features");
   return (
@@ -322,6 +346,7 @@ export default function FeaturesSectionDemo() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
           {FEATURES.map((feature, index) => {
             const Skeleton = feature.Skeleton;
+            const accent = FEATURE_ACCENTS[feature.key];
             return (
               <motion.div
                 key={feature.key}
@@ -335,7 +360,8 @@ export default function FeaturesSectionDemo() {
                 }}
                 style={{ opacity: 0, transform: "translateY(24px)" }}
                 className={cn(
-                  "group relative flex flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-md hover:border-indigo-200 hover:shadow-lg sm:p-6 dark:border-slate-700/70 dark:bg-slate-900/65 dark:hover:border-indigo-500/40",
+                  "group relative flex flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-md hover:shadow-lg sm:p-6 dark:border-slate-700/70 dark:bg-slate-900/65",
+                  accent.hoverBorder,
                   feature.wide
                     ? "lg:col-span-2 lg:flex-row lg:items-stretch lg:gap-6"
                     : "lg:col-span-1",
@@ -360,7 +386,12 @@ export default function FeaturesSectionDemo() {
                   <p className="font-mono text-xs font-bold tracking-[0.2em] text-slate-400 dark:text-slate-500">
                     {String(index + 1).padStart(2, "0")}
                   </p>
-                  <div className="mt-2 h-px w-10 bg-gradient-to-r from-indigo-400 to-violet-400" />
+                  <div
+                    className={cn(
+                      "mt-2 h-px w-10 bg-gradient-to-r",
+                      accent.divider,
+                    )}
+                  />
                   <h3 className="mt-4 text-lg font-black tracking-tight text-slate-900 sm:text-xl dark:text-slate-100">
                     {t(`items.${feature.key}.title`)}
                   </h3>
