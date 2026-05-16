@@ -64,6 +64,7 @@ import {
   PREF_CONTENT_TONE_KEY,
   PREF_QUESTION_COUNT_KEY,
 } from "./_hooks/use-content-preferences";
+import { useAvatarUpload } from "./_hooks/use-avatar-upload";
 import { isValidPassword } from "@/features/auth/utils/validation";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import { PillButton } from "@/components/ui/pill-button";
@@ -125,8 +126,6 @@ const SettingsPage = () => {
     updateProfile,
     updateEmail,
     updatePassword,
-    uploadAvatar,
-    removeAvatar,
     refreshUser,
   } = useAuth();
   const { ready } = useRequireAuth();
@@ -212,37 +211,6 @@ const SettingsPage = () => {
   const [currentBackupEmail, setCurrentBackupEmail] = useState<string | null>(
     null,
   );
-  const [avatarUploading, setAvatarUploading] = useState(false);
-  const avatarInputRef = useRef<HTMLInputElement>(null);
-
-  const handleAvatarFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = event.target.files?.[0];
-    // Reset so re-selecting the same file still fires onChange.
-    event.target.value = "";
-    if (!file) return;
-    setAvatarUploading(true);
-    const result = await uploadAvatar(file);
-    setAvatarUploading(false);
-    if (result.error) {
-      showMessage(result.error, "error");
-    } else {
-      showMessage(t("profile.pictureUpdated"), "success");
-    }
-  };
-
-  const handleRemoveAvatar = async () => {
-    setAvatarUploading(true);
-    const result = await removeAvatar();
-    setAvatarUploading(false);
-    if (result.error) {
-      showMessage(result.error, "error");
-    } else {
-      showMessage(t("profile.pictureRemoved"), "success");
-    }
-  };
-
   const showMessage = (
     text: string,
     type: "success" | "error" | "info" = "info",
@@ -252,6 +220,13 @@ const SettingsPage = () => {
     else if (type === "error") toast.error(text);
     else toast.info(text);
   };
+
+  const {
+    avatarUploading,
+    avatarInputRef,
+    handleAvatarFileChange,
+    handleRemoveAvatar,
+  } = useAvatarUpload(showMessage);
 
   // MFA verification modal state
   const [verifyModal, setVerifyModal] = useState<{
