@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryState, parseAsInteger } from "nuqs";
 import {
@@ -17,14 +17,12 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import { useMessages, useTranslations } from "next-intl";
 import { QRCodeSVG } from "qrcode.react";
-import { toast } from "sonner";
 
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 
 import { Dialog } from "@/components/ui/dialog";
 import { PageLoader } from "@/components/ui/loader";
-import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import {
   FALLBACK_MONTHS,
@@ -47,7 +45,7 @@ import {
 } from "./_components/story-cards";
 import { useWrappedData } from "./_hooks/use-wrapped-data";
 import { useStoryPlayback } from "./_hooks/use-story-playback";
-import { nativeShareOrCopy } from "@/lib/share";
+import { useWrappedShare } from "./_hooks/use-wrapped-share";
 
 const WrappedPage = () => {
   const router = useRouter();
@@ -71,20 +69,20 @@ const WrappedPage = () => {
     currentYear,
   });
 
-  // Share-token state (mints lazily on dialog open, cached per year).
-  const [showShare, setShowShare] = useState(false);
-  const [shareToken, setShareToken] = useState<string | null>(null);
-  const [shareTokenYear, setShareTokenYear] = useState<number | null>(null);
-  const [shareTokenLoading, setShareTokenLoading] = useState(false);
+  const {
+    showShare,
+    setShowShare,
+    shareToken,
+    shareTokenLoading,
+    canNativeShare,
+    shareUrl,
+    handleOpenShare,
+    handleCopyShareLink,
+    handleNativeShareLink,
+  } = useWrappedShare(year);
 
   // Year picker dropdown (rendered as a chip in the chrome).
   const [showYearPicker, setShowYearPicker] = useState(false);
-
-  // Native OS share sheet — resolved after mount to avoid SSR mismatch.
-  const [canNativeShare, setCanNativeShare] = useState(false);
-  useEffect(() => {
-    setCanNativeShare(typeof navigator?.share === "function");
-  }, []);
 
   const {
     stepIdx,
@@ -100,71 +98,6 @@ const WrappedPage = () => {
     year,
     paused: showShare || showYearPicker,
   });
-
-  const handleOpenShare = async () => {
-    setShowShare(true);
-    if (shareToken && shareTokenYear === year) return;
-    setShareTokenLoading(true);
-    try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const accessToken = session?.access_token;
-      if (!accessToken) {
-        toast.error(t("share.signInRequired"));
-        setShareTokenLoading(false);
-        return;
-      }
-      const res = await fetch("/api/wrapped/share-token", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({ year }),
-      });
-      if (!res.ok) {
-        const body = (await res.json().catch(() => ({}))) as { error?: string };
-        toast.error(body.error ?? t("share.failed"));
-        setShareTokenLoading(false);
-        return;
-      }
-      const { token } = (await res.json()) as { token: string };
-      setShareToken(token);
-      setShareTokenYear(year);
-    } catch (err) {
-      console.error("Failed to mint share token:", err);
-      toast.error(t("share.failed"));
-    } finally {
-      setShareTokenLoading(false);
-    }
-  };
-
-  const shareUrl =
-    shareToken && typeof window !== "undefined"
-      ? `${window.location.origin}/wrapped/share/${shareToken}`
-      : null;
-
-  const handleCopyShareLink = async () => {
-    if (!shareUrl) return;
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      toast.success(t("share.linkCopied"));
-    } catch {
-      toast.error(t("share.copyFailed"));
-    }
-  };
-
-  const handleNativeShareLink = async () => {
-    if (!shareUrl) return;
-    const status = await nativeShareOrCopy({
-      title: t("share.dialogTitle"),
-      text: t("share.dialogSubtitle", { year }),
-      url: shareUrl,
-    });
-    if (status === "copied") toast.success(t("share.linkCopied"));
-    else if (status === "failed") toast.error(t("share.shareFailed"));
-  };
 
   if (!ready || loading) return <PageLoader text={t("loading")} />;
 
