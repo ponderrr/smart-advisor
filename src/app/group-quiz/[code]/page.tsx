@@ -27,15 +27,10 @@ import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
 import { useAuth } from "@/features/auth/hooks/use-auth";
-import { groupQuizService } from "@/features/group-quiz/services/group-quiz-service";
 import type { QuizContentType } from "@/features/group-quiz/types/group-quiz";
-import {
-  QuestionCard,
-  type QuestionValue,
-} from "@/features/quiz/components/question-card";
+import { QuestionCard } from "@/features/quiz/components/question-card";
 import { QuizStepShell } from "@/features/quiz/components/quiz-step-shell";
 import { getAccentTone } from "@/features/quiz/utils/content-accent";
-import { isOverloadedError } from "@/features/recommendations/services/ai-service";
 import { Dialog } from "@/components/ui/dialog";
 import { PillButton } from "@/components/ui/pill-button";
 import { AppNavbar } from "@/components/app-navbar";
@@ -44,8 +39,8 @@ import { PageLoader } from "@/components/ui/loader";
 import { cn } from "@/lib/utils";
 import { useGroupQuizShare } from "./_hooks/use-group-quiz-share";
 import { useGroupQuizSession } from "./_hooks/use-group-quiz-session";
-
-type LocalAnswers = Record<string, QuestionValue>;
+import { useGroupQuizActions } from "./_hooks/use-group-quiz-actions";
+import { hasAnswer, type LocalAnswers } from "./_lib/answers";
 
 /** Gradient primary CTAs (Next / Submit / Join here). Pair with size +
  *  tone.barGradient. Disabled state freezes shadow + adds not-allowed. */
@@ -55,23 +50,6 @@ const PRIMARY_CTA =
 /** Hero CTAs with a translate-on-hover lift (Start Quiz / Reveal). */
 const HERO_CTA =
   "inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r font-black tracking-tight text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-lg disabled:hover:translate-y-0 disabled:hover:shadow-lg";
-
-const formatAnswerForStorage = (
-  type: "single_select" | "select_all" | "fill_in_blank",
-  value: QuestionValue | undefined,
-) => {
-  if (value === undefined || value === null) return "";
-  if (type === "select_all") {
-    return Array.isArray(value) ? value.join(", ") : "";
-  }
-  return typeof value === "string" ? value : "";
-};
-
-const hasAnswer = (value: QuestionValue | undefined) => {
-  if (value === undefined || value === null) return false;
-  if (Array.isArray(value)) return value.length > 0;
-  return value.trim().length > 0;
-};
 
 /** Icon shown on the content-type chip in the lobby params bar. Music
  *  always gets the album icon; mix/both fall back to the generic sparkle. */
@@ -146,192 +124,30 @@ const GroupQuizLobbyPage = () => {
   const { canNativeShare, handleCopy, handleNativeShare } =
     useGroupQuizShare(session);
 
-  const handleStart = async () => {
-    if (!session || !user) return;
-    if (participants.length < 2) {
-      toast.error(t("host.needTwoPlayers"));
-      return;
-    }
-    setStarting(true);
-    const { questions: newQuestions, error: e } =
-      await groupQuizService.generateAndStartQuiz(
-        session,
-        user.age,
-        user.username || user.name || "Host",
-      );
-    setStarting(false);
-    if (e || !newQuestions) {
-      toast.error(
-        isOverloadedError(e) ? t("host.overloaded") : (e ?? t("host.startFailed")),
-      );
-      return;
-    }
-    setSession((prev) =>
-      prev
-        ? { ...prev, status: "in_progress", questions: newQuestions }
-        : prev,
-    );
-  };
-
-  const handleCancel = async () => {
-    if (!session) return;
-    const ok = window.confirm(t("endConfirm"));
-    if (!ok) return;
-    await groupQuizService.setStatus(session.id, "cancelled");
-    router.push("/group-quiz");
-  };
-
-  const handleLeave = async () => {
-    if (!me) return;
-    if (!window.confirm(t("leaveConfirm"))) return;
-    await groupQuizService.leave(me.id);
-    router.push("/group-quiz");
-  };
-
-  const handleSubmitAnswers = async () => {
-    if (!session || !me || !session.questions) return;
-    const unanswered = session.questions.findIndex(
-      (q) => !hasAnswer(localAnswers[q.id]),
-    );
-    if (unanswered !== -1) {
-      setCurrentQ(unanswered);
-      toast.error(t("quiz.answerAll"));
-      return;
-    }
-    setSubmitting(true);
-    for (let i = 0; i < session.questions.length; i += 1) {
-      const q = session.questions[i];
-      const answerText = formatAnswerForStorage(q.type, localAnswers[q.id]);
-      const { error: e } = await groupQuizService.submitAnswer({
-        session_id: session.id,
-        participant_id: me.id,
-        question_index: i,
-        question: q.text,
-        answer: answerText,
-      });
-      if (e) {
-        toast.error(e);
-        setSubmitting(false);
-        return;
-      }
-    }
-    await groupQuizService.markParticipantSubmitted(me.id);
-    setSubmitting(false);
-    toast.success(t("quiz.submittedToast"));
-  };
-
-  const handleJoinHere = async () => {
-    if (!session) return;
-    const name =
-      joinHereName.trim() ||
-      user?.username ||
-      user?.name?.split(/\s+/)[0] ||
-      "Guest";
-    setJoiningHere(true);
-    const { participant, error: e } = await groupQuizService.joinSession({
-      code: session.code,
-      display_name: name,
-    });
-    setJoiningHere(false);
-    if (e || !participant) {
-      toast.error(e ?? t("guest.joinFailed"));
-      return;
-    }
-    const { data: p } = await groupQuizService.listParticipants(session.id);
-    setParticipants(p);
-  };
-
-  const handleBackToLobby = async () => {
-    if (!session) return;
-    const message =
-      session.status === "in_progress"
-        ? t("backToLobbyConfirmInProgress")
-        : t("backToLobbyConfirmCompleted");
-    if (!window.confirm(message)) return;
-    const { error: e } = await groupQuizService.returnToLobby(session);
-    if (e) {
-      toast.error(e);
-      return;
-    }
-    setSession((prev) =>
-      prev
-        ? {
-            ...prev,
-            status: "lobby",
-            questions: null,
-            result: null,
-            completed_at: null,
-          }
-        : prev,
-    );
-  };
-
-  const handleRestart = async () => {
-    if (!session || !user) return;
-    setStarting(true);
-    const { questions: newQuestions, error: e } =
-      await groupQuizService.restartSession(
-        session,
-        user.age,
-        user.username || user.name || "Host",
-      );
-    setStarting(false);
-    if (e || !newQuestions) {
-      toast.error(
-        isOverloadedError(e)
-          ? t("host.overloaded")
-          : (e ?? t("host.restartFailed")),
-      );
-      return;
-    }
-    setSession((prev) =>
-      prev
-        ? {
-            ...prev,
-            status: "in_progress",
-            questions: newQuestions,
-            result: null,
-            completed_at: null,
-          }
-        : prev,
-    );
-  };
-
-  const handleSynthesize = async () => {
-    if (!session || !user) return;
-    setSynthesizing(true);
-    const { data: answersData } = await groupQuizService.listAnswers(
-      session.id,
-    );
-    const { result, error: e } = await groupQuizService.synthesizeRecommendation(
-      session,
-      participants,
-      answersData,
-      user.age,
-      user.username || user.name || "Host",
-    );
-    setSynthesizing(false);
-    if (e || !result) {
-      toast.error(
-        isOverloadedError(e)
-          ? t("host.overloaded")
-          : (e ?? t("host.synthesizeFailed")),
-      );
-      return;
-    }
-    // Flip the host's local state immediately so the result page appears
-    // without waiting for realtime to round-trip.
-    setSession((prev) =>
-      prev
-        ? {
-            ...prev,
-            status: "completed",
-            result,
-            completed_at: new Date().toISOString(),
-          }
-        : prev,
-    );
-  };
+  const {
+    handleStart,
+    handleCancel,
+    handleLeave,
+    handleSubmitAnswers,
+    handleJoinHere,
+    handleBackToLobby,
+    handleRestart,
+    handleSynthesize,
+    handleBackToDashboard,
+  } = useGroupQuizActions({
+    session,
+    setSession,
+    participants,
+    setParticipants,
+    me,
+    localAnswers,
+    setCurrentQ,
+    setSubmitting,
+    setStarting,
+    setSynthesizing,
+    joinHereName,
+    setJoiningHere,
+  });
 
   if (loading) return <PageLoader text={t("loading")} />;
 
@@ -426,8 +242,6 @@ const GroupQuizLobbyPage = () => {
     shellStepLabel = tShell("stepLabel.result");
     shellProgress = 100;
   }
-
-  const handleBackToDashboard = () => router.push("/dashboard");
 
   return (
     <div className="min-h-screen w-full bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
