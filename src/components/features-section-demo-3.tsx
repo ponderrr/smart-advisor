@@ -226,19 +226,22 @@ const AcrossBothSkeleton = () => {
     book: {
       label: "Book",
       Icon: IconBookFilled,
-      gradient: "from-indigo-500 to-violet-500",
+      gradient: "from-emerald-500 to-teal-500",
+      labelColor: "text-emerald-600 dark:text-emerald-400",
       meta: "312 pages",
     },
     movie: {
       label: "Movie",
       Icon: IconDeviceTv,
-      gradient: "from-fuchsia-500 to-rose-500",
+      gradient: "from-amber-500 to-orange-500",
+      labelColor: "text-amber-600 dark:text-amber-400",
       meta: "1h 48m",
     },
     music: {
       label: "Album",
       Icon: IconDisc,
-      gradient: "from-rose-500 to-amber-500",
+      gradient: "from-rose-500 to-pink-500",
+      labelColor: "text-rose-600 dark:text-rose-400",
       meta: "11 tracks",
     },
   } as const;
@@ -268,7 +271,12 @@ const AcrossBothSkeleton = () => {
               })()}
             </div>
             <div className="mt-2.5 flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
+              <span
+                className={cn(
+                  "text-[10px] font-black uppercase tracking-[0.18em]",
+                  variants[mode].labelColor,
+                )}
+              >
                 {variants[mode].label}
               </span>
               <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
