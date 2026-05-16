@@ -22,12 +22,13 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
-// Keep passkey UI out of the way; browserSupported=false hides that path.
+// Hoisted so tests can flip passkey support and assert signIn calls.
+const { browserSupported, passkeySignIn } = vi.hoisted(() => ({
+  browserSupported: vi.fn(() => false),
+  passkeySignIn: vi.fn(async () => ({ error: null as string | null })),
+}));
 vi.mock("../services/passkey-service", () => ({
-  passkeyService: {
-    browserSupported: () => false,
-    signIn: vi.fn(),
-  },
+  passkeyService: { browserSupported, signIn: passkeySignIn },
 }));
 
 const makeProps = () => ({
@@ -59,6 +60,7 @@ const renderForm = (props: Partial<ReturnType<typeof makeProps>> = {}) => {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  browserSupported.mockReturnValue(false);
 });
 
 describe("AuthForm characterization", () => {
@@ -135,5 +137,92 @@ describe("AuthForm characterization", () => {
     await waitFor(() => {
       expect(props.onResetPassword).toHaveBeenCalledWith("reset@example.com");
     });
+  });
+
+  it("hides the sign-in/sign-up toggle in MFA-challenge mode", () => {
+    renderForm({ initialMfaRequired: true });
+    expect(
+      screen.queryByRole("radio", { name: "Sign in" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("radio", { name: "Sign up" }),
+    ).not.toBeInTheDocument();
+  });
+});
+
+describe("AuthForm — sign-up mode", () => {
+  const switchToSignUp = async () => {
+    await userEvent.click(screen.getByRole("radio", { name: "Sign up" }));
+  };
+
+  it("reveals the extra sign-up fields and relabels the submit", async () => {
+    renderForm();
+    await switchToSignUp();
+    expect(screen.getByLabelText("Username")).toBeInTheDocument();
+    expect(screen.getByLabelText("Age")).toBeInTheDocument();
+    expect(screen.getByLabelText("Confirm password")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Create Account" }),
+    ).toBeInTheDocument();
+  });
+
+  it("does not call onSignUp when sign-up fields are invalid", async () => {
+    const props = renderForm();
+    await switchToSignUp();
+    await userEvent.click(
+      screen.getByRole("button", { name: "Create Account" }),
+    );
+    await new Promise((r) => setTimeout(r, 50));
+    expect(props.onSignUp).not.toHaveBeenCalled();
+  });
+
+  it("calls onSignUp with valid input", async () => {
+    const props = renderForm();
+    await switchToSignUp();
+    await userEvent.type(screen.getByLabelText("Email"), "newuser@example.com");
+    await userEvent.type(screen.getByLabelText("Username"), "newuser");
+    await userEvent.type(screen.getByLabelText("Age"), "25");
+    await userEvent.type(screen.getByLabelText("Password"), "Password1!");
+    await userEvent.type(
+      screen.getByLabelText("Confirm password"),
+      "Password1!",
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "Create Account" }),
+    );
+    await waitFor(() => {
+      expect(props.onSignUp).toHaveBeenCalledWith(
+        "newuser@example.com",
+        "Password1!",
+        "newuser",
+        "newuser",
+        25,
+      );
+    });
+  });
+});
+
+describe("AuthForm — passkey", () => {
+  it("offers passkey sign-in and forwards the identifier", async () => {
+    browserSupported.mockReturnValue(true);
+    renderForm();
+    await userEvent.type(
+      screen.getByPlaceholderText("you@example.com or username"),
+      "user@example.com",
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "Sign in with a passkey" }),
+    );
+    await waitFor(() => {
+      expect(passkeySignIn).toHaveBeenCalledWith("user@example.com");
+    });
+  });
+
+  it("hides the passkey option when unsupported", () => {
+    browserSupported.mockReturnValue(false);
+    renderForm();
+    expect(
+      screen.queryByRole("button", { name: "Sign in with a passkey" }),
+    ).not.toBeInTheDocument();
   });
 });
