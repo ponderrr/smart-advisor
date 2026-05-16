@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryState, parseAsInteger } from "nuqs";
 import {
@@ -35,7 +29,6 @@ import { cn } from "@/lib/utils";
 import {
   FALLBACK_MONTHS,
   STEPS,
-  STEP_DURATION_MS,
   stepBackgrounds,
   type StoryStep,
   type StoryStats,
@@ -53,9 +46,8 @@ import {
   OutroCard,
 } from "./_components/story-cards";
 import { useWrappedData } from "./_hooks/use-wrapped-data";
+import { useStoryPlayback } from "./_hooks/use-story-playback";
 import { nativeShareOrCopy } from "@/lib/share";
-
-const SWIPE_THRESHOLD = 50;
 
 const WrappedPage = () => {
   const router = useRouter();
@@ -79,17 +71,6 @@ const WrappedPage = () => {
     currentYear,
   });
 
-  // Step index. Year change resets to intro so the story restarts from
-  // the top whenever the user picks a different year.
-  const [stepIdx, setStepIdx] = useState(0);
-  useEffect(() => {
-    setStepIdx(0);
-  }, [year]);
-
-  // Auto-advance kicks in once the user has moved past the intro. Outro
-  // stops the chain so the final card stays put for the share CTA.
-  const isPlaying = stepIdx > 0 && stepIdx < STEPS.length - 1;
-
   // Share-token state (mints lazily on dialog open, cached per year).
   const [showShare, setShowShare] = useState(false);
   const [shareToken, setShareToken] = useState<string | null>(null);
@@ -105,59 +86,20 @@ const WrappedPage = () => {
     setCanNativeShare(typeof navigator?.share === "function");
   }, []);
 
-  const totalSteps = STEPS.length;
-  const goNext = useCallback(() => {
-    setStepIdx((i) => Math.min(totalSteps - 1, i + 1));
-  }, [totalSteps]);
-  const goBack = useCallback(() => {
-    setStepIdx((i) => Math.max(0, i - 1));
-  }, []);
-  const exit = useCallback(() => {
-    router.push("/dashboard");
-  }, [router]);
-
-  // Auto-advance timer. Cleared on step change, share dialog open, year
-  // picker open, or unmount. Skipping manually (click/key) resets it.
-  useEffect(() => {
-    if (!isPlaying) return;
-    if (showShare || showYearPicker) return;
-    const timer = window.setTimeout(goNext, STEP_DURATION_MS);
-    return () => window.clearTimeout(timer);
-  }, [stepIdx, isPlaying, showShare, showYearPicker, goNext]);
-
-  // Keyboard navigation across the whole story.
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (showShare || showYearPicker) return;
-      if (e.key === "ArrowRight" || e.key === " ") {
-        e.preventDefault();
-        goNext();
-      } else if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        goBack();
-      } else if (e.key === "Escape") {
-        e.preventDefault();
-        exit();
-      }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [goNext, goBack, exit, showShare, showYearPicker]);
-
-  // Touch swipe — track start X and decide on touchend.
-  const touchStartX = useRef<number | null>(null);
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0]?.clientX ?? null;
-  };
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    const start = touchStartX.current;
-    if (start == null) return;
-    const end = e.changedTouches[0]?.clientX ?? start;
-    const delta = end - start;
-    if (delta < -SWIPE_THRESHOLD) goNext();
-    else if (delta > SWIPE_THRESHOLD) goBack();
-    touchStartX.current = null;
-  };
+  const {
+    stepIdx,
+    isPlaying,
+    totalSteps,
+    goNext,
+    goBack,
+    exit,
+    restart,
+    handleTouchStart,
+    handleTouchEnd,
+  } = useStoryPlayback({
+    year,
+    paused: showShare || showYearPicker,
+  });
 
   const handleOpenShare = async () => {
     setShowShare(true);
@@ -413,7 +355,7 @@ const WrappedPage = () => {
               <OutroCard
                 stats={stats}
                 onShare={handleOpenShare}
-                onRestart={() => setStepIdx(0)}
+                onRestart={restart}
                 onNewQuiz={() => router.push("/quiz")}
                 tStory={t}
               />
