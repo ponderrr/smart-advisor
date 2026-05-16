@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -6,6 +6,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import "./globals.css";
 import Providers from "./providers";
+import { ServiceWorkerRegister } from "@/components/service-worker-register";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -40,9 +41,24 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://smartadvisor.live"),
   alternates: { canonical: "/" },
   robots: "index, follow",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    // "default" keeps content below the iOS status bar in standalone mode.
+    // "black-translucent" would render the fixed top navbar under the
+    // clock/battery since the app has no app-wide safe-area-inset-top.
+    statusBarStyle: "default",
+    title: "Smart Advisor",
+  },
   icons: {
     icon: { url: "/svgs/smartadvisor/SmartAdvisor.svg", type: "image/svg+xml" },
+    apple: "/icons/apple-touch-icon.png",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0a0a0a",
+  viewportFit: "cover",
 };
 
 export default async function RootLayout({
@@ -66,6 +82,7 @@ export default async function RootLayout({
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Providers>{children}</Providers>
         </NextIntlClientProvider>
+        <ServiceWorkerRegister />
         <Analytics />
         <SpeedInsights />
       </body>

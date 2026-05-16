@@ -17,6 +17,7 @@ import {
   PlayCircle,
   QrCode,
   RotateCcw,
+  Share2,
   Sparkles,
   UserPlus,
   Users,
@@ -51,6 +52,7 @@ import { AppNavbar } from "@/components/app-navbar";
 import { MusicPreview } from "@/components/music-preview";
 import { PageLoader } from "@/components/ui/loader";
 import { cn } from "@/lib/utils";
+import { nativeShareOrCopy } from "@/lib/share";
 
 type LocalAnswers = Record<string, QuestionValue>;
 
@@ -192,6 +194,12 @@ const GroupQuizLobbyPage = () => {
   const [joiningHere, setJoiningHere] = useState(false);
   const [showQR, setShowQR] = useState(false);
 
+  // Native OS share sheet — resolved after mount to avoid SSR mismatch.
+  const [canNativeShare, setCanNativeShare] = useState(false);
+  useEffect(() => {
+    setCanNativeShare(typeof navigator?.share === "function");
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -320,6 +328,18 @@ const GroupQuizLobbyPage = () => {
     } catch {
       toast.error(t("linkCopyFailed"));
     }
+  };
+
+  const handleNativeShare = async () => {
+    if (!session) return;
+    const url = `${window.location.origin}/group-quiz/${session.code}`;
+    const status = await nativeShareOrCopy({
+      title: t("shareTitle"),
+      text: t("shareText", { code: session.code }),
+      url,
+    });
+    if (status === "copied") toast.success(t("linkCopied"));
+    else if (status === "failed") toast.error(t("linkShareFailed"));
   };
 
   const handleStart = async () => {
@@ -646,6 +666,16 @@ const GroupQuizLobbyPage = () => {
                     {session.code}
                   </p>
                   <div className="flex flex-wrap items-center justify-center gap-2">
+                    {canNativeShare && (
+                      <button
+                        type="button"
+                        onClick={() => void handleNativeShare()}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white/90 px-4 py-2 text-xs font-bold tracking-tight text-slate-700 shadow-sm hover:border-slate-300 hover:bg-white dark:border-slate-700 dark:bg-slate-900/65 dark:text-slate-200"
+                      >
+                        <Share2 size={12} />
+                        {t("shareLink")}
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={handleCopy}
@@ -1310,6 +1340,16 @@ const GroupQuizLobbyPage = () => {
           </div>
 
           <div className="mt-6 flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-3">
+            {canNativeShare && (
+              <button
+                type="button"
+                onClick={() => void handleNativeShare()}
+                className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold tracking-tight text-slate-700 hover:border-slate-300 sm:w-auto dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200"
+              >
+                <Share2 size={12} />
+                {t("shareLink")}
+              </button>
+            )}
             <button
               type="button"
               onClick={handleCopy}
@@ -1536,7 +1576,12 @@ const ResultCard = ({
           )}
           {type === "music" && previewUrl && (
             <div className="mt-3">
-              <MusicPreview previewUrl={previewUrl} />
+              <MusicPreview
+                previewUrl={previewUrl}
+                title={title}
+                artist={creator}
+                artworkUrl={posterUrl}
+              />
             </div>
           )}
         </div>

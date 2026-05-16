@@ -468,6 +468,14 @@
       "close": "Cancelar"
     }
   },
+  "InstallPrompt": {
+    "title": "Instala Smart Advisor",
+    "iosBody": "Toca el botón Compartir y luego “Añadir a pantalla de inicio” para instalar la app.",
+    "genericBody": "Añade Smart Advisor a tu pantalla de inicio para una experiencia más rápida y a pantalla completa.",
+    "install": "Instalar",
+    "dismiss": "Ahora no",
+    "close": "Descartar"
+  },
   "System": {
     "error": {
       "networkTitle": "No podemos conectar con nuestros servidores",
@@ -488,6 +496,16 @@
       "title": "Nuestra IA fue al cine.",
       "body": "Smart Advisor salió a ver clásicos y a hojear una novela. Volveremos pronto con un gusto más fresco."
     }
+  },
+  "ShareTarget": {
+    "eyebrow": "Compartido con Smart Advisor",
+    "title": "¿Quieres recomendaciones así?",
+    "subtitle": "No podemos recomendarte ese título exacto, pero responde unas preguntas rápidas y te buscaremos algo con la misma energía.",
+    "sharedLabel": "Compartiste",
+    "startQuiz": "Buscar recomendaciones similares",
+    "goDashboard": "Ir al panel",
+    "emptyTitle": "No llegó nada",
+    "emptySubtitle": "No recibimos nada con que trabajar — inicia un quiz y nos encargamos del resto."
   },
   "AccountSecurity": {
     "back": "Atrás",
@@ -879,11 +897,13 @@
       "dialogTitle": "Comparte tu año en revisión",
       "dialogSubtitle": "Cualquiera con este enlace o QR puede ver tus elecciones de {year}.",
       "copyLink": "Copiar enlace",
+      "shareButton": "Compartir",
       "close": "Listo",
       "signInRequired": "Vuelve a iniciar sesión para compartir tu año.",
       "failed": "No se pudo generar el enlace para compartir",
       "linkCopied": "Enlace copiado",
-      "copyFailed": "No se pudo copiar el enlace"
+      "copyFailed": "No se pudo copiar el enlace",
+      "shareFailed": "No se pudo compartir — inténtalo de nuevo"
     },
     "empty": {
       "title": "Sin recomendaciones en {year}",
@@ -1109,8 +1129,12 @@
       "backToHome": "Volver al cuestionario en grupo",
       "shareCode": "Comparte este código",
       "copyLink": "Copiar enlace",
+      "shareLink": "Compartir",
+      "shareTitle": "Únete a mi quiz grupal de Smart Advisor",
+      "shareText": "Únete a mi quiz grupal con el código {code}",
       "linkCopied": "Enlace copiado",
       "linkCopyFailed": "No se pudo copiar el enlace",
+      "linkShareFailed": "No se pudo compartir — inténtalo de nuevo",
       "qr": {
         "show": "Mostrar QR",
         "title": "Escanea para unirte",
@@ -1601,11 +1625,13 @@
         "moreAriaLabel": "Más acciones"
       },
       "shareMenu": {
+        "share": "Compartir…",
         "copy": "Copiar al portapapeles",
         "shareX": "Compartir en X",
         "shareEmail": "Compartir por correo"
       },
       "shareToasts": {
+        "shareFailed": "No se pudo compartir — inténtalo de nuevo",
         "copySuccess": "¡Copiado al portapapeles!",
         "copyFailed": "No se pudo copiar — inténtalo de nuevo",
         "favoriteFailed": "No pudimos actualizar tu favorito — inténtalo de nuevo",

@@ -46,6 +46,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { PageLoader } from "@/components/ui/loader";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { nativeShareOrCopy } from "@/lib/share";
 
 const FALLBACK_MONTHS = [
   "Jan",
@@ -148,6 +149,12 @@ const WrappedPage = () => {
 
   // Year picker dropdown (rendered as a chip in the chrome).
   const [showYearPicker, setShowYearPicker] = useState(false);
+
+  // Native OS share sheet — resolved after mount to avoid SSR mismatch.
+  const [canNativeShare, setCanNativeShare] = useState(false);
+  useEffect(() => {
+    setCanNativeShare(typeof navigator?.share === "function");
+  }, []);
 
   useEffect(() => {
     if (!ready) return;
@@ -442,6 +449,17 @@ const WrappedPage = () => {
     }
   };
 
+  const handleNativeShareLink = async () => {
+    if (!shareUrl) return;
+    const status = await nativeShareOrCopy({
+      title: t("share.dialogTitle"),
+      text: t("share.dialogSubtitle", { year }),
+      url: shareUrl,
+    });
+    if (status === "copied") toast.success(t("share.linkCopied"));
+    else if (status === "failed") toast.error(t("share.shareFailed"));
+  };
+
   if (!ready || loading) return <PageLoader text={t("loading")} />;
 
   const displayName =
@@ -677,6 +695,17 @@ const WrappedPage = () => {
             )}
           </div>
           <div className="mt-6 flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-3">
+            {canNativeShare && (
+              <button
+                type="button"
+                onClick={() => void handleNativeShareLink()}
+                disabled={!shareUrl}
+                className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold tracking-tight text-slate-700 transition-colors hover:border-slate-300 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200"
+              >
+                <Share2 size={12} />
+                {t("share.shareButton")}
+              </button>
+            )}
             <button
               type="button"
               onClick={handleCopyShareLink}

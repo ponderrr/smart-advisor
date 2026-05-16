@@ -468,6 +468,14 @@
       "close": "Cancel"
     }
   },
+  "InstallPrompt": {
+    "title": "Install Smart Advisor",
+    "iosBody": "Tap the Share button, then “Add to Home Screen” to install the app.",
+    "genericBody": "Add Smart Advisor to your home screen for a faster, full-screen experience.",
+    "install": "Install",
+    "dismiss": "Not now",
+    "close": "Dismiss"
+  },
   "System": {
     "error": {
       "networkTitle": "Can't reach our servers",
@@ -488,6 +496,16 @@
       "title": "Our AI is at the movies.",
       "body": "Smart Advisor stepped out to binge a few classics and skim a novel or two. We'll be back shortly with fresher taste."
     }
+  },
+  "ShareTarget": {
+    "eyebrow": "Shared with Smart Advisor",
+    "title": "Want picks like this?",
+    "subtitle": "We can't recommend that exact title back to you, but answer a few quick questions and we'll find you something with the same energy.",
+    "sharedLabel": "You shared",
+    "startQuiz": "Find similar picks",
+    "goDashboard": "Go to dashboard",
+    "emptyTitle": "Nothing came through",
+    "emptySubtitle": "We didn't receive anything to work with — start a quiz and we'll take it from there."
   },
   "AccountSecurity": {
     "back": "Back",
@@ -879,11 +897,13 @@
       "dialogTitle": "Share Your Year in Review",
       "dialogSubtitle": "Anyone with this link or QR can view your {year} picks.",
       "copyLink": "Copy Link",
+      "shareButton": "Share",
       "close": "Done",
       "signInRequired": "Sign in again to share your year.",
       "failed": "Couldn't generate share link",
       "linkCopied": "Link copied",
-      "copyFailed": "Couldn't copy link"
+      "copyFailed": "Couldn't copy link",
+      "shareFailed": "Couldn't share — try again"
     },
     "empty": {
       "title": "No Picks in {year}",
@@ -1109,8 +1129,12 @@
       "backToHome": "Back to Group Quiz",
       "shareCode": "Share This Code",
       "copyLink": "Copy Link",
+      "shareLink": "Share",
+      "shareTitle": "Join my Smart Advisor group quiz",
+      "shareText": "Join my group quiz with code {code}",
       "linkCopied": "Link copied",
       "linkCopyFailed": "Couldn't copy link",
+      "linkShareFailed": "Couldn't share — try again",
       "qr": {
         "show": "Show QR",
         "title": "Scan to join",
@@ -1601,11 +1625,13 @@
         "moreAriaLabel": "More actions"
       },
       "shareMenu": {
+        "share": "Share…",
         "copy": "Copy to clipboard",
         "shareX": "Share on X",
         "shareEmail": "Share via email"
       },
       "shareToasts": {
+        "shareFailed": "Couldn't share — try again",
         "copySuccess": "Copied to clipboard!",
         "copyFailed": "Couldn't copy — try again",
         "favoriteFailed": "Couldn't update your favorite — please try again",
