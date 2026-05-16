@@ -163,6 +163,10 @@ const DashboardPage = () => {
     activity,
     streak,
     ratedCount,
+    movieRail,
+    bookRail,
+    musicRail,
+    favoritesGrid,
   } = useDashboardData({ recommendations, libraryItems });
 
   const handleMarkFinished = async (item: LibraryItem) => {
@@ -249,22 +253,6 @@ const DashboardPage = () => {
   type PicksFilter = (typeof picksTabs)[number];
   const [picksFilter, setPicksFilter] = useState<PicksFilter>("all");
 
-  const movieRail = useMemo(
-    () => recommendations.filter((r) => r.type === "movie").slice(0, 15),
-    [recommendations],
-  );
-  const bookRail = useMemo(
-    () => recommendations.filter((r) => r.type === "book").slice(0, 15),
-    [recommendations],
-  );
-  const musicRail = useMemo(
-    () => recommendations.filter((r) => r.type === "music").slice(0, 15),
-    [recommendations],
-  );
-  const favoritesGrid = useMemo(
-    () => recommendations.filter((r) => r.is_favorited).slice(0, 15),
-    [recommendations],
-  );
 
   const renderPickCard = (rec: Recommendation) => (
     <PickCard

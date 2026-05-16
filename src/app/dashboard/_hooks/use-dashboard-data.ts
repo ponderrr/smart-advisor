@@ -191,6 +191,23 @@ export function useDashboardData({
     [libraryItems],
   );
 
+  const movieRail = useMemo(
+    () => recommendations.filter((r) => r.type === "movie").slice(0, 15),
+    [recommendations],
+  );
+  const bookRail = useMemo(
+    () => recommendations.filter((r) => r.type === "book").slice(0, 15),
+    [recommendations],
+  );
+  const musicRail = useMemo(
+    () => recommendations.filter((r) => r.type === "music").slice(0, 15),
+    [recommendations],
+  );
+  const favoritesGrid = useMemo(
+    () => recommendations.filter((r) => r.is_favorited).slice(0, 15),
+    [recommendations],
+  );
+
   return {
     genreChartData,
     genreByFormat,
@@ -205,5 +222,9 @@ export function useDashboardData({
     activity,
     streak,
     ratedCount,
+    movieRail,
+    bookRail,
+    musicRail,
+    favoritesGrid,
   };
 }
