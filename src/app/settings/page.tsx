@@ -58,6 +58,12 @@ import {
   SettingsInput,
 } from "./_components/settings-ui";
 import { usePasswordRules } from "./_hooks/use-password-rules";
+import {
+  useContentPreferences,
+  PREF_CONTENT_KEY,
+  PREF_CONTENT_TONE_KEY,
+  PREF_QUESTION_COUNT_KEY,
+} from "./_hooks/use-content-preferences";
 import { isValidPassword } from "@/features/auth/utils/validation";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import { PillButton } from "@/components/ui/pill-button";
@@ -104,9 +110,6 @@ const backupEmailSchema = z.object({
   backupEmail: z.string().email("Enter a valid email").trim(),
 });
 
-const PREF_CONTENT_KEY = "smart_advisor_pref_content_focus";
-const PREF_CONTENT_TONE_KEY = "smart_advisor_pref_content_tone";
-const PREF_QUESTION_COUNT_KEY = "smart_advisor_pref_question_count";
 /* ------------------------------------------------------------------ */
 /*  Main settings page                                                */
 /* ------------------------------------------------------------------ */
@@ -178,13 +181,14 @@ const SettingsPage = () => {
     text: string;
     type: "success" | "error" | "info";
   } | null>(null);
-  const [contentFocus, setContentFocus] = useState<
-    "movie" | "book" | "music" | "both" | "mix"
-  >("mix");
-  const [contentTone, setContentTone] = useState<"standard" | "family">(
-    "standard",
-  );
-  const [preferredQuestionCount, setPreferredQuestionCount] = useState(5);
+  const {
+    contentFocus,
+    setContentFocus,
+    contentTone,
+    setContentTone,
+    preferredQuestionCount,
+    setPreferredQuestionCount,
+  } = useContentPreferences(user?.content_tone);
   const [savingContent, setSavingContent] = useState(false);
   const [accountActionLoading, setAccountActionLoading] = useState(false);
   const [showMfaPanel, setShowMfaPanel] = useState(false);
@@ -458,35 +462,6 @@ const SettingsPage = () => {
     }
     router.push("/");
   };
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const sc = window.localStorage.getItem(PREF_CONTENT_KEY);
-    const st = window.localStorage.getItem(PREF_CONTENT_TONE_KEY);
-    const sq = Number(
-      window.localStorage.getItem(PREF_QUESTION_COUNT_KEY) || "5",
-    );
-    if (
-      sc === "movie" ||
-      sc === "book" ||
-      sc === "music" ||
-      sc === "both" ||
-      sc === "mix"
-    )
-      setContentFocus(sc);
-    if (st === "standard" || st === "family") setContentTone(st);
-    if (Number.isFinite(sq) && sq >= 3 && sq <= 15)
-      setPreferredQuestionCount(sq);
-  }, []);
-
-  // Profile is the source of truth for content_tone (set in onboarding,
-  // synced via useAuth). Override the localStorage value once the user
-  // loads — otherwise a cross-device user would see stale local prefs.
-  useEffect(() => {
-    if (user?.content_tone === "standard" || user?.content_tone === "family") {
-      setContentTone(user.content_tone);
-    }
-  }, [user?.content_tone]);
 
   useEffect(() => {
     if (!message) return;
