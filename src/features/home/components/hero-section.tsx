@@ -159,6 +159,13 @@ const HeroSection = () => {
             <FlipWords
               words={words}
               className="text-indigo-600 dark:text-indigo-400"
+              colorFor={(word) =>
+                ({
+                  movie: "text-amber-600 dark:text-amber-400",
+                  book: "text-emerald-600 dark:text-emerald-400",
+                  album: "text-rose-600 dark:text-rose-400",
+                })[word.toLowerCase()]
+              }
             />
           </span>
         </motion.h1>
