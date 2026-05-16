@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -65,6 +60,7 @@ import {
   PREF_QUESTION_COUNT_KEY,
 } from "./_hooks/use-content-preferences";
 import { useAvatarUpload } from "./_hooks/use-avatar-upload";
+import { useReauthVerification } from "./_hooks/use-reauth-verification";
 import { isValidPassword } from "@/features/auth/utils/validation";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import { PillButton } from "@/components/ui/pill-button";
@@ -228,77 +224,17 @@ const SettingsPage = () => {
     handleRemoveAvatar,
   } = useAvatarUpload(showMessage);
 
-  // MFA verification modal state
-  const [verifyModal, setVerifyModal] = useState<{
-    open: boolean;
-    actionLabel: string;
-    mode: "totp" | "enroll";
-  }>({ open: false, actionLabel: "", mode: "totp" });
-  const [verifyCode, setVerifyCode] = useState("");
-  const [verifyError, setVerifyError] = useState("");
-  const [verifyLoading, setVerifyLoading] = useState(false);
-  const verifyResolveRef = useRef<((ok: boolean) => void) | null>(null);
-
-  const requestVerification = useCallback(
-    (actionLabel: string): Promise<boolean> => {
-      return new Promise((resolve) => {
-        verifyResolveRef.current = resolve;
-        setVerifyCode("");
-        setVerifyError("");
-        setVerifyLoading(false);
-        setVerifyModal({
-          open: true,
-          actionLabel,
-          mode: mfaEnabled ? "totp" : "enroll",
-        });
-      });
-    },
-    [mfaEnabled],
-  );
-
-  const closeVerifyModal = useCallback((result: boolean) => {
-    setVerifyModal((prev) => ({ ...prev, open: false }));
-    verifyResolveRef.current?.(result);
-    verifyResolveRef.current = null;
-  }, []);
-
-  const handleVerifySubmit = useCallback(async () => {
-    if (verifyCode.length !== 6) {
-      setVerifyError(t("verifyModal.enterCode"));
-      return;
-    }
-    setVerifyLoading(true);
-    setVerifyError("");
-    const { data: factors } = await authService.listMFAFactors();
-    const factor = factors?.totp?.find(
-      (f: MFAFactor) => f.status === "verified",
-    );
-    if (!factor) {
-      setVerifyError(t("verifyModal.noFactor"));
-      setVerifyLoading(false);
-      return;
-    }
-    const result = await authService.verifyMFA(factor.id, verifyCode);
-    setVerifyLoading(false);
-    if (result.error) {
-      setVerifyError(result.error);
-    } else {
-      closeVerifyModal(true);
-    }
-  }, [verifyCode, closeVerifyModal, t]);
-
-  // Auto-submit the verify modal once six digits are in (TOTP mode only —
-  // the enroll mode inside this modal has its own input).
-  useEffect(() => {
-    if (
-      verifyModal.open &&
-      verifyModal.mode === "totp" &&
-      verifyCode.length === 6 &&
-      !verifyLoading
-    ) {
-      handleVerifySubmit();
-    }
-  }, [verifyCode, verifyModal.open, verifyModal.mode, verifyLoading, handleVerifySubmit]);
+  const {
+    requestVerification,
+    verifyModal,
+    verifyCode,
+    setVerifyCode,
+    verifyError,
+    setVerifyError,
+    verifyLoading,
+    closeVerifyModal,
+    handleVerifySubmit,
+  } = useReauthVerification(mfaEnabled);
 
   const sectionTabs: {
     id: SettingsSection;
