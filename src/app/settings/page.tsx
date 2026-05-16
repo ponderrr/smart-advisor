@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
@@ -30,7 +29,6 @@ import {
 import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
-import { supabase } from "@/integrations/supabase/client";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import {
   SidebarNavItem,
@@ -62,7 +60,17 @@ import {
 import { useAvatarUpload } from "./_hooks/use-avatar-upload";
 import { useReauthVerification } from "./_hooks/use-reauth-verification";
 import { useAccountActions } from "./_hooks/use-account-actions";
-import { isValidPassword } from "@/features/auth/utils/validation";
+import { useSettingsSaveHandlers } from "./_hooks/use-settings-save-handlers";
+import {
+  profileSchema,
+  emailSchema,
+  passwordSchema,
+  backupEmailSchema,
+  type ProfileForm,
+  type EmailForm,
+  type PasswordForm,
+  type BackupEmailForm,
+} from "./_lib/schemas";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import { PillButton } from "@/components/ui/pill-button";
 import { SegmentedControl } from "@/components/ui/segmented-control";
@@ -74,39 +82,6 @@ import { toast } from "sonner";
 
 type SettingsSection = "profile" | "security" | "content" | "integrations";
 
-/* ------------------------------------------------------------------ */
-/*  Zod schemas                                                       */
-/* ------------------------------------------------------------------ */
-const profileSchema = z.object({
-  newName: z.string().min(1, "Username is required").trim(),
-  age: z.coerce
-    .number()
-    .int()
-    .min(13, "Must be at least 13")
-    .max(120, "Must be 120 or under")
-    .optional()
-    .or(z.literal("")),
-});
-
-const emailSchema = z.object({
-  newEmail: z.string().email("Enter a valid email").trim(),
-});
-
-const passwordSchema = z
-  .object({
-    newPassword: z
-      .string()
-      .refine(isValidPassword, "Password doesn't meet all requirements"),
-    confirmPassword: z.string(),
-  })
-  .refine((d) => d.newPassword === d.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
-
-const backupEmailSchema = z.object({
-  backupEmail: z.string().email("Enter a valid email").trim(),
-});
 
 /* ------------------------------------------------------------------ */
 /*  Main settings page                                                */
@@ -118,13 +93,7 @@ const SettingsPage = () => {
   const router = useRouter();
   const t = useTranslations("Settings");
   const { theme, setTheme } = useTheme();
-  const {
-    user,
-    updateProfile,
-    updateEmail,
-    updatePassword,
-    refreshUser,
-  } = useAuth();
+  const { user } = useAuth();
   const { ready } = useRequireAuth();
 
   const settingsTabs: SettingsSection[] = [
@@ -153,22 +122,22 @@ const SettingsPage = () => {
     }
   };
 
-  const profileForm = useForm<z.infer<typeof profileSchema>>({
+  const profileForm = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
     defaultValues: { newName: user?.name ?? "", age: user?.age ?? 18 },
   });
 
-  const emailForm = useForm<z.infer<typeof emailSchema>>({
+  const emailForm = useForm<EmailForm>({
     resolver: zodResolver(emailSchema),
     defaultValues: { newEmail: "" },
   });
 
-  const passwordForm = useForm<z.infer<typeof passwordSchema>>({
+  const passwordForm = useForm<PasswordForm>({
     resolver: zodResolver(passwordSchema),
     defaultValues: { newPassword: "", confirmPassword: "" },
   });
 
-  const backupEmailForm = useForm<z.infer<typeof backupEmailSchema>>({
+  const backupEmailForm = useForm<BackupEmailForm>({
     resolver: zodResolver(backupEmailSchema),
     defaultValues: { backupEmail: "" },
   });
@@ -256,88 +225,28 @@ const SettingsPage = () => {
     },
   ];
 
-  const handleSaveProfile = profileForm.handleSubmit(async (data) => {
-    setMessage(null);
-    const verified = await requestVerification(t("verifyAction.save"));
-    if (!verified) return;
-    const parsedAge = typeof data.age === "number" ? data.age : 25;
-    const result = await updateProfile(data.newName, parsedAge);
-    showMessage(
-      result.error ?? t("profile.savedToast"),
-      result.error ? "error" : "success",
-    );
+  const {
+    handleSaveProfile,
+    handleSaveEmail,
+    handleSavePassword,
+    handleSaveContentPreferences,
+    handleSaveBackupEmail,
+    handleRemoveBackupEmail,
+    removingBackupEmail,
+  } = useSettingsSaveHandlers({
+    profileForm,
+    emailForm,
+    passwordForm,
+    backupEmailForm,
+    requestVerification,
+    showMessage,
+    clearMessage: () => setMessage(null),
+    contentFocus,
+    contentTone,
+    preferredQuestionCount,
+    setSavingContent,
+    setCurrentBackupEmail,
   });
-
-  const handleSaveEmail = emailForm.handleSubmit(async (data) => {
-    setMessage(null);
-    if (
-      user?.email &&
-      data.newEmail.toLowerCase() === user.email.trim().toLowerCase()
-    ) {
-      showMessage(t("email.differentRequired"), "error");
-      return;
-    }
-    const verified = await requestVerification(t("verifyAction.email"));
-    if (!verified) return;
-    const result = await updateEmail(data.newEmail);
-    showMessage(
-      result.error ?? t("email.checkInbox"),
-      result.error ? "error" : "success",
-    );
-  });
-
-  const handleSavePassword = passwordForm.handleSubmit(async (data) => {
-    setMessage(null);
-    const verified = await requestVerification(t("verifyAction.password"));
-    if (!verified) return;
-    const result = await updatePassword(data.newPassword);
-    if (result.error) {
-      showMessage(result.error, "error");
-    } else {
-      showMessage(t("password.updatedToast"), "success");
-      passwordForm.reset();
-    }
-  });
-
-  const handleSaveContentPreferences = async () => {
-    if (typeof window === "undefined") return;
-    const verified = await requestVerification(t("verifyAction.content"));
-    if (!verified) return;
-
-    setSavingContent(true);
-    try {
-      window.localStorage.setItem(PREF_CONTENT_KEY, contentFocus);
-      window.localStorage.setItem(PREF_CONTENT_TONE_KEY, contentTone);
-      window.localStorage.setItem(
-        PREF_QUESTION_COUNT_KEY,
-        String(preferredQuestionCount),
-      );
-
-      // Persist content_tone to profiles too so it survives a localStorage
-      // clear and stays consistent across devices. content_focus and the
-      // question-count slider live in localStorage only — they're per-device
-      // habits, not part of the canonical profile.
-      if (user) {
-        const { error } = await supabase
-          .from("profiles")
-          .update({
-            content_tone: contentTone,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", user.id);
-        if (error) {
-          console.error("[settings] save content_tone failed", error);
-          showMessage(t("content.saveError"), "error");
-          return;
-        }
-        await refreshUser?.();
-      }
-
-      showMessage(t("content.savedToast"), "success");
-    } finally {
-      setSavingContent(false);
-    }
-  };
 
   const { handleDisableAccount, handleDeleteAccount } = useAccountActions({
     requestVerification,
@@ -377,42 +286,6 @@ const SettingsPage = () => {
     };
     loadBackupEmail();
   }, []);
-
-  const handleSaveBackupEmail = backupEmailForm.handleSubmit(async (data) => {
-    // Backup email is an account-recovery surface — anyone with a stolen
-    // session could otherwise quietly point recovery at their own address.
-    // Gate behind MFA the same way the other sensitive saves do.
-    const verified = await requestVerification(
-      t("verifyAction.setBackupEmail"),
-    );
-    if (!verified) return;
-    const { error } = await authService.setBackupEmail(data.backupEmail);
-    if (error) {
-      showMessage(error, "error");
-    } else {
-      setCurrentBackupEmail(data.backupEmail);
-      backupEmailForm.reset();
-      showMessage(t("backupEmail.savedToast"), "success");
-    }
-  });
-
-  const [removingBackupEmail, setRemovingBackupEmail] = useState(false);
-  const handleRemoveBackupEmail = async () => {
-    const verified = await requestVerification(
-      t("verifyAction.removeBackupEmail"),
-    );
-    if (!verified) return;
-    setRemovingBackupEmail(true);
-    const { error } = await authService.removeBackupEmail();
-    setRemovingBackupEmail(false);
-    if (error) {
-      showMessage(error, "error");
-    } else {
-      setCurrentBackupEmail(null);
-      showMessage(t("backupEmail.removedToast"), "success");
-    }
-  };
-
   if (!ready) {
     return <PageLoader text="Loading..." />;
   }
