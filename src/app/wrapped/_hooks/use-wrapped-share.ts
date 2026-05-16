@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
 import { supabase } from "@/integrations/supabase/client";
+import { nativeShareOrCopy } from "@/lib/share";
 
 /**
  * Owns the wrapped share flow: the share dialog open state, the lazily
@@ -20,6 +21,12 @@ export function useWrappedShare(year: number) {
   const [shareToken, setShareToken] = useState<string | null>(null);
   const [shareTokenYear, setShareTokenYear] = useState<number | null>(null);
   const [shareTokenLoading, setShareTokenLoading] = useState(false);
+
+  // Native OS share sheet — resolved after mount to avoid SSR mismatch.
+  const [canNativeShare, setCanNativeShare] = useState(false);
+  useEffect(() => {
+    setCanNativeShare(typeof navigator?.share === "function");
+  }, []);
 
   const handleOpenShare = async () => {
     setShowShare(true);
@@ -77,13 +84,26 @@ export function useWrappedShare(year: number) {
     }
   };
 
+  const handleNativeShareLink = async () => {
+    if (!shareUrl) return;
+    const status = await nativeShareOrCopy({
+      title: t("share.dialogTitle"),
+      text: t("share.dialogSubtitle", { year }),
+      url: shareUrl,
+    });
+    if (status === "copied") toast.success(t("share.linkCopied"));
+    else if (status === "failed") toast.error(t("share.shareFailed"));
+  };
+
   return {
     showShare,
     setShowShare,
     shareToken,
     shareTokenLoading,
+    canNativeShare,
     shareUrl,
     handleOpenShare,
     handleCopyShareLink,
+    handleNativeShareLink,
   };
 }

@@ -10,6 +10,7 @@ import {
   Copy,
   Loader2,
   QrCode,
+  Share2,
   Sparkles,
   X,
 } from "lucide-react";
@@ -73,9 +74,11 @@ const WrappedPage = () => {
     setShowShare,
     shareToken,
     shareTokenLoading,
+    canNativeShare,
     shareUrl,
     handleOpenShare,
     handleCopyShareLink,
+    handleNativeShareLink,
   } = useWrappedShare(year);
 
   // Year picker dropdown (rendered as a chip in the chrome).
@@ -331,6 +334,17 @@ const WrappedPage = () => {
             )}
           </div>
           <div className="mt-6 flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-3">
+            {canNativeShare && (
+              <button
+                type="button"
+                onClick={() => void handleNativeShareLink()}
+                disabled={!shareUrl}
+                className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold tracking-tight text-slate-700 transition-colors hover:border-slate-300 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200"
+              >
+                <Share2 size={12} />
+                {t("share.shareButton")}
+              </button>
+            )}
             <button
               type="button"
               onClick={handleCopyShareLink}

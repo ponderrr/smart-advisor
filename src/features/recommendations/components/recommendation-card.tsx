@@ -382,7 +382,12 @@ export const RecommendationCard = ({
               </div>
 
               {rec.type === "music" && rec.preview_url ? (
-                <MusicPreview previewUrl={rec.preview_url} />
+                <MusicPreview
+                  previewUrl={rec.preview_url}
+                  title={rec.title}
+                  artist={rec.artist}
+                  artworkUrl={rec.poster_url}
+                />
               ) : rec.type !== "music" ? (
                 <TrailerEmbed
                   type={rec.type}

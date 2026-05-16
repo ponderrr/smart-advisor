@@ -141,7 +141,12 @@ const RecommendationModal = ({
 
         {rec.type === "music" && rec.preview_url ? (
           <div className="mt-4">
-            <MusicPreview previewUrl={rec.preview_url} />
+            <MusicPreview
+              previewUrl={rec.preview_url}
+              title={rec.title}
+              artist={rec.artist}
+              artworkUrl={rec.poster_url}
+            />
           </div>
         ) : rec.type !== "music" ? (
           <div className="mt-4">
