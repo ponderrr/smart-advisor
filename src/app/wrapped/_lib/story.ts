@@ -36,6 +36,24 @@ export const STEPS = [
 
 export type StoryStep = (typeof STEPS)[number];
 
+/** How long each card stays before auto-advancing (after Press Play).
+ *  Tuned by Spotify Wrapped — long enough to read the headline + scan
+ *  the visual, short enough to keep momentum. */
+export const STEP_DURATION_MS = 5000;
+
+/* -------------------- Per-step backdrops -------------------- */
+
+export const stepBackgrounds: Record<StoryStep, string> = {
+  intro: "from-violet-600 via-fuchsia-600 to-rose-600",
+  total: "from-indigo-700 via-indigo-600 to-violet-700",
+  format: "from-amber-500 via-rose-500 to-fuchsia-600",
+  genres: "from-fuchsia-600 via-violet-600 to-indigo-700",
+  creator: "from-amber-500 via-orange-600 to-rose-600",
+  standout: "from-orange-500 via-amber-500 to-yellow-500",
+  picks: "from-slate-900 via-slate-800 to-slate-900",
+  outro: "from-rose-500 via-fuchsia-600 to-indigo-700",
+};
+
 export interface StoryStats {
   total: number;
   movies: number;
