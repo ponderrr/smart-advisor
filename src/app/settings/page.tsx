@@ -61,6 +61,7 @@ import {
 } from "./_hooks/use-content-preferences";
 import { useAvatarUpload } from "./_hooks/use-avatar-upload";
 import { useReauthVerification } from "./_hooks/use-reauth-verification";
+import { useAccountActions } from "./_hooks/use-account-actions";
 import { isValidPassword } from "@/features/auth/utils/validation";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import { PillButton } from "@/components/ui/pill-button";
@@ -338,41 +339,12 @@ const SettingsPage = () => {
     }
   };
 
-  const handleDisableAccount = async () => {
-    if (!window.confirm(t("danger.disableConfirm"))) return;
-    const verified = await requestVerification(t("verifyAction.disable"));
-    if (!verified) return;
-    if (!window.confirm(t("danger.disableFinalConfirm"))) return;
-    setAccountActionLoading(true);
-    setMessage(null);
-    const result = await authService.disableAccount();
-    if (result.error) {
-      showMessage(result.error, "error");
-      setAccountActionLoading(false);
-      return;
-    }
-    router.push("/");
-  };
-
-  const handleDeleteAccount = async () => {
-    if (!window.confirm(t("danger.deleteConfirm"))) return;
-    const verified = await requestVerification(t("verifyAction.delete"));
-    if (!verified) return;
-    const typed = window.prompt(t("danger.typeDeletePrompt"));
-    if (typed !== "DELETE") {
-      showMessage(t("danger.deletionCanceled"), "info");
-      return;
-    }
-    setAccountActionLoading(true);
-    setMessage(null);
-    const result = await authService.deleteAccount();
-    if (result.error) {
-      showMessage(result.error, "error");
-      setAccountActionLoading(false);
-      return;
-    }
-    router.push("/");
-  };
+  const { handleDisableAccount, handleDeleteAccount } = useAccountActions({
+    requestVerification,
+    showMessage,
+    clearMessage: () => setMessage(null),
+    setAccountActionLoading,
+  });
 
   useEffect(() => {
     if (!message) return;
