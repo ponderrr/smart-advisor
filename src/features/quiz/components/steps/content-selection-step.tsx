@@ -31,6 +31,7 @@ const CARD_ACCENTS: Record<
     chipGradient: string;
     chipShadow: string;
     iconActive: string;
+    iconRest: string;
     eyebrowActive: string;
     fallbackBg: string;
     fallbackText: string;
@@ -44,6 +45,8 @@ const CARD_ACCENTS: Record<
     chipGradient: "from-amber-500 to-orange-500",
     chipShadow: "shadow-amber-500/30",
     iconActive: "bg-amber-500 text-white",
+    iconRest:
+      "bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-300",
     eyebrowActive: "text-amber-600 dark:text-amber-400",
     fallbackBg:
       "from-amber-100 via-white to-orange-100 dark:from-amber-500/10 dark:via-slate-800/40 dark:to-orange-500/10",
@@ -57,6 +60,8 @@ const CARD_ACCENTS: Record<
     chipGradient: "from-emerald-500 to-teal-500",
     chipShadow: "shadow-emerald-500/30",
     iconActive: "bg-emerald-500 text-white",
+    iconRest:
+      "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300",
     eyebrowActive: "text-emerald-600 dark:text-emerald-400",
     fallbackBg:
       "from-emerald-100 via-white to-teal-100 dark:from-emerald-500/10 dark:via-slate-800/40 dark:to-teal-500/10",
@@ -70,6 +75,8 @@ const CARD_ACCENTS: Record<
     chipGradient: "from-rose-500 to-pink-500",
     chipShadow: "shadow-rose-500/30",
     iconActive: "bg-rose-500 text-white",
+    iconRest:
+      "bg-rose-100 text-rose-600 dark:bg-rose-500/15 dark:text-rose-300",
     eyebrowActive: "text-rose-600 dark:text-rose-400",
     fallbackBg:
       "from-rose-100 via-white to-pink-100 dark:from-rose-500/10 dark:via-slate-800/40 dark:to-pink-500/10",
@@ -83,6 +90,8 @@ const CARD_ACCENTS: Record<
     chipGradient: "from-indigo-500 to-violet-500",
     chipShadow: "shadow-violet-500/30",
     iconActive: "bg-violet-500 text-white",
+    iconRest:
+      "bg-violet-100 text-violet-600 dark:bg-violet-500/15 dark:text-violet-300",
     eyebrowActive: "text-violet-600 dark:text-violet-400",
     fallbackBg:
       "from-indigo-100 via-white to-violet-100 dark:from-indigo-500/10 dark:via-slate-800/40 dark:to-violet-500/10",
@@ -211,9 +220,7 @@ const SelectionCard: React.FC<SelectionCardProps> = ({
             <span
               className={cn(
                 "flex h-7 w-7 items-center justify-center rounded-full transition-colors duration-300",
-                isSelected
-                  ? tone.iconActive
-                  : "bg-slate-100 text-slate-500 group-hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-slate-700",
+                isSelected ? tone.iconActive : tone.iconRest,
               )}
             >
               {icon}
@@ -221,9 +228,7 @@ const SelectionCard: React.FC<SelectionCardProps> = ({
             <p
               className={cn(
                 "text-[10px] font-black uppercase tracking-[0.18em] transition-colors duration-300",
-                isSelected
-                  ? tone.eyebrowActive
-                  : "text-slate-400 dark:text-slate-500",
+                tone.eyebrowActive,
               )}
             >
               {eyebrow}
