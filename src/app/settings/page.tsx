@@ -3,7 +3,6 @@
 import {
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -58,10 +57,8 @@ import {
   SectionHeader,
   SettingsInput,
 } from "./_components/settings-ui";
-import {
-  PASSWORD_RULES,
-  isValidPassword,
-} from "@/features/auth/utils/validation";
+import { usePasswordRules } from "./_hooks/use-password-rules";
+import { isValidPassword } from "@/features/auth/utils/validation";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import { PillButton } from "@/components/ui/pill-button";
 import { SegmentedControl } from "@/components/ui/segmented-control";
@@ -204,25 +201,9 @@ const SettingsPage = () => {
   const confirmPasswordAnchorRef = useRef<HTMLDivElement>(null);
   const watchedNewPassword = passwordForm.watch("newPassword");
   const watchedConfirmPassword = passwordForm.watch("confirmPassword");
-  const tPasswordRules = useTranslations("Auth.passwordRules");
-  const newPasswordRules = useMemo(
-    () =>
-      PASSWORD_RULES.map((rule) => ({
-        label: tPasswordRules(rule.key),
-        met: rule.test(watchedNewPassword || ""),
-      })),
-    [watchedNewPassword, tPasswordRules],
-  );
-  const confirmPasswordRules = useMemo(
-    () => [
-      {
-        label: t("password.matches"),
-        met:
-          !!watchedConfirmPassword &&
-          watchedConfirmPassword === watchedNewPassword,
-      },
-    ],
-    [watchedConfirmPassword, watchedNewPassword, t],
+  const { newPasswordRules, confirmPasswordRules } = usePasswordRules(
+    watchedNewPassword,
+    watchedConfirmPassword,
   );
   const [currentBackupEmail, setCurrentBackupEmail] = useState<string | null>(
     null,
