@@ -51,7 +51,7 @@ import { AppNavbar } from "@/components/app-navbar";
 import { ResultCard } from "./_components/result-card";
 import { PageLoader } from "@/components/ui/loader";
 import { cn } from "@/lib/utils";
-import { nativeShareOrCopy } from "@/lib/share";
+import { useGroupQuizShare } from "./_hooks/use-group-quiz-share";
 
 type LocalAnswers = Record<string, QuestionValue>;
 
@@ -129,12 +129,6 @@ const GroupQuizLobbyPage = () => {
   const [joinHereName, setJoinHereName] = useState("");
   const [joiningHere, setJoiningHere] = useState(false);
   const [showQR, setShowQR] = useState(false);
-
-  // Native OS share sheet — resolved after mount to avoid SSR mismatch.
-  const [canNativeShare, setCanNativeShare] = useState(false);
-  useEffect(() => {
-    setCanNativeShare(typeof navigator?.share === "function");
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -255,28 +249,8 @@ const GroupQuizLobbyPage = () => {
   // below gates on `session` being present before reading these.
   const tone = getAccentTone(session?.content_type ?? null);
 
-  const handleCopy = async () => {
-    if (!session) return;
-    const url = `${window.location.origin}/group-quiz/${session.code}`;
-    try {
-      await navigator.clipboard.writeText(url);
-      toast.success(t("linkCopied"));
-    } catch {
-      toast.error(t("linkCopyFailed"));
-    }
-  };
-
-  const handleNativeShare = async () => {
-    if (!session) return;
-    const url = `${window.location.origin}/group-quiz/${session.code}`;
-    const status = await nativeShareOrCopy({
-      title: t("shareTitle"),
-      text: t("shareText", { code: session.code }),
-      url,
-    });
-    if (status === "copied") toast.success(t("linkCopied"));
-    else if (status === "failed") toast.error(t("linkShareFailed"));
-  };
+  const { canNativeShare, handleCopy, handleNativeShare } =
+    useGroupQuizShare(session);
 
   const handleStart = async () => {
     if (!session || !user) return;
