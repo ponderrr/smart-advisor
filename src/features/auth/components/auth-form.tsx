@@ -18,7 +18,11 @@ import {
   FormField,
   PasswordInput,
 } from "./auth-shared";
-import { PASSWORD_RULES, isValidPassword } from "../utils/validation";
+import {
+  PASSWORD_RULES,
+  isValidPassword,
+  buildAuthFormErrors,
+} from "../utils/validation";
 import { MFAFactor, MFAListFactorsData } from "../types/mfa";
 import { passkeyService } from "../services/passkey-service";
 import { Fingerprint } from "lucide-react";
@@ -367,55 +371,15 @@ export const AuthForm = ({
   };
 
   const validate = () => {
-    const nextErrors: Record<string, string> = {};
-    if (!email) {
-      nextErrors.email =
-        mode === "signin" ? tv("emailOrUsernameRequired") : tv("emailRequired");
-    } else if (mode !== "signin" && !/\S+@\S+\.\S+/.test(email)) {
-      // Sign-in accepts username too — only enforce email format for signup/forgot.
-      nextErrors.email = tv("emailInvalid");
-    }
-
-    if (mode === "signin" || mode === "signup") {
-      if (!password) {
-        nextErrors.password = tv("passwordRequired");
-      } else if (mode === "signup" && !isValidPassword(password)) {
-        nextErrors.password = tv("passwordRequirementsUnmet");
-      }
-    }
-
-    if (mode === "signup") {
-      const trimmedUsername = username.trim();
-      if (!trimmedUsername) {
-        nextErrors.username = tv("usernameRequired");
-      } else if (trimmedUsername.length < 2) {
-        nextErrors.username = tv("usernameTooShort");
-      } else if (trimmedUsername.length > 24) {
-        nextErrors.username = tv("usernameTooLong");
-      } else if (!/^[a-zA-Z0-9._-]+$/.test(trimmedUsername)) {
-        nextErrors.username = tv("usernameInvalid");
-      }
-
-      const parsedAge = Number(age);
-      if (!age.trim()) {
-        nextErrors.age = tv("ageRequired");
-      } else if (!Number.isFinite(parsedAge) || !Number.isInteger(parsedAge)) {
-        nextErrors.age = tv("ageNotInteger");
-      } else if (parsedAge < 13 || parsedAge > 120) {
-        nextErrors.age = tv("ageOutOfRange");
-      }
-
-      if (!confirmPassword) {
-        nextErrors.confirmPassword = tv("confirmPasswordRequired");
-      } else if (confirmPassword !== password) {
-        nextErrors.confirmPassword = tv("passwordsDoNotMatch");
-      }
-    }
-
-    if (Object.keys(nextErrors).length > 0) {
-      nextErrors.general = tv("fixHighlightedFields");
-    }
-
+    const nextErrors = buildAuthFormErrors({
+      mode,
+      email,
+      password,
+      username,
+      age,
+      confirmPassword,
+      tv: (k: string) => tv(k),
+    });
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   };

@@ -1,5 +1,21 @@
 import { describe, it, expect } from "vitest";
-import { normalizeEmail, isValidEmail, isValidPassword } from "./validation";
+import {
+  normalizeEmail,
+  isValidEmail,
+  isValidPassword,
+  buildAuthFormErrors,
+} from "./validation";
+
+// tv() echoes the key so assertions match on the resolved key name.
+const tv = (k: string) => k;
+const base = {
+  email: "",
+  password: "",
+  username: "",
+  age: "",
+  confirmPassword: "",
+  tv,
+};
 
 describe("normalizeEmail", () => {
   it("lowercases and trims", () => {
@@ -44,5 +60,71 @@ describe("isValidPassword", () => {
 
   it("requires a special character", () => {
     expect(isValidPassword("Aa12345678")).toBe(false);
+  });
+});
+
+describe("buildAuthFormErrors", () => {
+  it("flags a missing identifier differently per mode", () => {
+    expect(buildAuthFormErrors({ ...base, mode: "signin" }).email).toBe(
+      "emailOrUsernameRequired",
+    );
+    expect(buildAuthFormErrors({ ...base, mode: "signup" }).email).toBe(
+      "emailRequired",
+    );
+  });
+
+  it("accepts a username (not just email) for sign-in", () => {
+    const errs = buildAuthFormErrors({
+      ...base,
+      mode: "signin",
+      email: "just_a_username",
+      password: "anything",
+    });
+    expect(errs.email).toBeUndefined();
+    expect(Object.keys(errs)).toHaveLength(0);
+  });
+
+  it("enforces email format + password strength on sign-up", () => {
+    const errs = buildAuthFormErrors({
+      ...base,
+      mode: "signup",
+      email: "bad-email",
+      password: "weak",
+      username: "u",
+      age: "9",
+      confirmPassword: "different",
+    });
+    expect(errs.email).toBe("emailInvalid");
+    expect(errs.password).toBe("passwordRequirementsUnmet");
+    expect(errs.username).toBe("usernameTooShort");
+    expect(errs.age).toBe("ageOutOfRange");
+    expect(errs.confirmPassword).toBe("passwordsDoNotMatch");
+    expect(errs.general).toBe("fixHighlightedFields");
+  });
+
+  it("returns no errors for a fully valid sign-up", () => {
+    const errs = buildAuthFormErrors({
+      mode: "signup",
+      email: "new@example.com",
+      password: "Password1!",
+      username: "newuser",
+      age: "25",
+      confirmPassword: "Password1!",
+      tv,
+    });
+    expect(errs).toEqual({});
+  });
+
+  it("only validates the email for forgot-password mode", () => {
+    expect(
+      buildAuthFormErrors({ ...base, mode: "forgot", email: "" }).email,
+    ).toBe("emailRequired");
+    expect(
+      buildAuthFormErrors({
+        ...base,
+        mode: "forgot",
+        email: "ok@example.com",
+      }),
+    ).toEqual({});
   });
 });
