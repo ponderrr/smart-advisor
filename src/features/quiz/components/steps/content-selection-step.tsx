@@ -304,13 +304,7 @@ export const ContentSelectionStep = ({
       title: t("contentSelection.cards.book.title"),
       description: t("contentSelection.cards.book.description"),
       icon: <BookOpen size={14} />,
-      // BookOpen and Music have visual mass weighted to the bottom of their
-      // SVG viewBox, so a flex-centered container makes them read lower than
-      // Film/Sparkles. Nudge upward to bring all four icons onto the same
-      // visual baseline.
-      fallbackIcon: (
-        <BookOpen size={72} strokeWidth={1.5} className="-translate-y-5" />
-      ),
+      fallbackIcon: <BookOpen size={72} strokeWidth={1.5} />,
       accent: "emerald",
     },
     {
@@ -319,9 +313,7 @@ export const ContentSelectionStep = ({
       title: t("contentSelection.cards.music.title"),
       description: t("contentSelection.cards.music.description"),
       icon: <Music size={14} />,
-      fallbackIcon: (
-        <Music size={72} strokeWidth={1.5} className="-translate-y-5" />
-      ),
+      fallbackIcon: <Music size={72} strokeWidth={1.5} />,
       accent: "rose",
     },
     {
