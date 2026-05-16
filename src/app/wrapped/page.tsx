@@ -46,69 +46,19 @@ import { Dialog } from "@/components/ui/dialog";
 import { PageLoader } from "@/components/ui/loader";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import {
+  FALLBACK_MONTHS,
+  STEPS,
+  type StoryStep,
+  type StoryStats,
+} from "./_lib/story";
 import { nativeShareOrCopy } from "@/lib/share";
-
-const FALLBACK_MONTHS = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
 
 const SWIPE_THRESHOLD = 50;
 /** How long each card stays before auto-advancing (after Press Play).
  *  Tuned by Spotify Wrapped — long enough to read the headline + scan
  *  the visual, short enough to keep momentum. */
 const STEP_DURATION_MS = 5000;
-const STEPS = [
-  "intro",
-  "total",
-  "format",
-  "genres",
-  "creator",
-  "standout",
-  "picks",
-  "outro",
-] as const;
-type StoryStep = (typeof STEPS)[number];
-
-interface StoryStats {
-  total: number;
-  movies: number;
-  books: number;
-  music: number;
-  favorites: number;
-  watchHours: number;
-  topGenres: Array<[string, number]>;
-  topCreator:
-    | { name: string; type: "director" | "author" | "artist"; count: number }
-    | null;
-  monthly: number[];
-  peakMonth: { idx: number; count: number };
-  longest: number;
-  topPicks: Recommendation[];
-  libraryLogged: number;
-  /** Up to 4 poster URLs per format type for use as sample artwork on
-   *  the format-split card. Falls back to empty when the user has no
-   *  picks of that type or no poster URLs were found. */
-  moviePosters: string[];
-  bookPosters: string[];
-  musicPosters: string[];
-  /** Posters from the top creator's own picks, used on the creator card
-   *  as a "cover wall" so the moment feels more concrete. */
-  creatorPosters: string[];
-  /** Mixed pool of every poster we have for the year — used to wallpaper
-   *  the intro and outro card backdrops. */
-  allPosters: string[];
-}
 
 const WrappedPage = () => {
   const router = useRouter();
