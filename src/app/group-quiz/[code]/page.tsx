@@ -225,7 +225,7 @@ const GroupQuizLobbyPage = () => {
           stepLabel={shellStepLabel}
           progress={shellProgress}
           onBack={handleBackToDashboard}
-          backLabel={tShell("back.dashboard")}
+          backLabel={user ? tShell("back.dashboard") : tShell("back.home")}
           contentType={session.content_type}
         >
           <motion.div

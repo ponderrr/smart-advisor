@@ -6,6 +6,7 @@ import {
   searchOpenLibraryDocs,
   openLibraryCoverUrl,
   searchTmdbMovies,
+  searchDeezerAlbum,
   tmdbPosterUrl,
   tmdbWebUrl,
   sanitizeHtml,
@@ -26,13 +27,15 @@ type DemoAnswer = {
   value: string | string[];
 };
 
+type DemoContentType = "movie" | "book" | "music" | "mix";
+
 type DemoRequestBody = {
-  contentType?: "movie" | "book" | "both" | "Movies" | "Books" | "Both" | string;
+  contentType?: string;
   answers?: DemoAnswer[];
 };
 
 type AiItem = {
-  type: "movie" | "book";
+  type: "movie" | "book" | "music";
   title: string;
   creator: string;
   year?: number;
@@ -43,7 +46,7 @@ type AiItem = {
 
 type DemoItem = {
   id: string;
-  type: "movie" | "book";
+  type: "movie" | "book" | "music";
   title: string;
   subtitle: string;
   description: string;
@@ -51,15 +54,19 @@ type DemoItem = {
   infoLink: string;
   reason: string;
   match_score?: number;
+  previewUrl?: string | null;
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function normalizeContentType(value: string | undefined): "movie" | "book" | "both" {
+// "Mix" is the all-three option; legacy "both"/"Both" payloads (movies +
+// books only) also map here so older sessions still resolve.
+function normalizeContentType(value: string | undefined): DemoContentType {
   const v = String(value ?? "").toLowerCase();
   if (v === "movie" || v === "movies") return "movie";
   if (v === "book" || v === "books") return "book";
-  return "both";
+  if (v === "music") return "music";
+  return "mix";
 }
 
 function getClientIp(req: NextRequest): string {
@@ -117,20 +124,32 @@ function formatAnswersForPrompt(answers: DemoAnswer[]): string {
 }
 
 function buildPrompt(
-  contentType: "movie" | "book" | "both",
+  contentType: DemoContentType,
   answers: DemoAnswer[],
 ): string {
-  const movieCount =
-    contentType === "movie" ? MAX_ITEMS : contentType === "book" ? 0 : 3;
-  const bookCount =
-    contentType === "book" ? MAX_ITEMS : contentType === "movie" ? 0 : 3;
+  // Mix splits the six slots evenly across all three media.
+  const mixEach = Math.floor(MAX_ITEMS / 3);
+  const counts =
+    contentType === "movie"
+      ? { movie: MAX_ITEMS, book: 0, music: 0 }
+      : contentType === "book"
+        ? { movie: 0, book: MAX_ITEMS, music: 0 }
+        : contentType === "music"
+          ? { movie: 0, book: 0, music: MAX_ITEMS }
+          : { movie: mixEach, book: mixEach, music: mixEach };
 
   const breakdown =
-    contentType === "both"
-      ? `Return EXACTLY ${movieCount} movies and ${bookCount} books.`
-      : `Return EXACTLY ${MAX_ITEMS} ${contentType === "movie" ? "movies" : "books"}.`;
+    contentType === "mix"
+      ? `Return EXACTLY ${counts.movie} movies, ${counts.book} books, and ${counts.music} music albums.`
+      : `Return EXACTLY ${MAX_ITEMS} ${
+          contentType === "movie"
+            ? "movies"
+            : contentType === "book"
+              ? "books"
+              : "music albums"
+        }.`;
 
-  return `You are a movie and book recommendations engine. Based on a user's quiz answers, recommend real, well-known titles that match their tastes.
+  return `You are a movie, book, and music recommendations engine. Based on a user's quiz answers, recommend real, well-known titles that match their tastes.
 
 User's answers:
 ${formatAnswersForPrompt(answers)}
@@ -138,8 +157,9 @@ ${formatAnswersForPrompt(answers)}
 ${breakdown}
 
 Rules:
-- Use real titles that can be found on TMDB (movies) or Open Library (books).
-- "creator" must be the director (movies) or author (books).
+- Use real titles that can be found on TMDB (movies), Open Library (books), or Deezer (music albums).
+- "creator" must be the director (movies), author (books), or recording artist/band (music).
+- For music, "title" must be a real studio album name, not a single or playlist.
 - "description" is a 1–2 sentence spoiler-free synopsis of the work itself.
 - "reason" is 1–2 sentences explaining specifically why THIS person will like it (must reference their answers).
 - "description" and "reason" must be different — synopsis vs. fit-for-user.
@@ -151,9 +171,9 @@ Return ONLY valid JSON in this exact shape, no markdown fences, no commentary:
 {
   "items": [
     {
-      "type": "movie" | "book",
+      "type": "movie" | "book" | "music",
       "title": "Exact title",
-      "creator": "Director or Author name",
+      "creator": "Director, Author, or Artist name",
       "year": 2020,
       "description": "Spoiler-free synopsis of the work.",
       "reason": "Why this fits the user.",
@@ -200,7 +220,9 @@ async function callAnthropic(prompt: string): Promise<AiItem[]> {
       (item): item is AiItem =>
         Boolean(
           item &&
-            (item.type === "movie" || item.type === "book") &&
+            (item.type === "movie" ||
+              item.type === "book" ||
+              item.type === "music") &&
             typeof item.title === "string" &&
             typeof item.creator === "string" &&
             typeof item.reason === "string",
@@ -271,6 +293,29 @@ async function enrichBook(item: AiItem): Promise<DemoItem | null> {
     }
   }
   return null;
+}
+
+async function enrichMusic(item: AiItem): Promise<DemoItem | null> {
+  const album = await searchDeezerAlbum(item.title, item.creator);
+  if (!album) return null;
+
+  const year = album.year ?? item.year;
+  return {
+    id: `music-${item.title}-${item.creator}`,
+    type: "music",
+    title: item.title,
+    subtitle: year ? `${item.creator} · ${year}` : item.creator,
+    description: item.description ?? "",
+    image: album.cover,
+    infoLink:
+      album.deezerUrl ??
+      `https://www.deezer.com/search/${encodeURIComponent(
+        `${item.title} ${item.creator}`,
+      )}`,
+    reason: item.reason,
+    match_score: item.match_score,
+    previewUrl: album.previewUrl,
+  };
 }
 
 // ─── Dev mock fallback ───────────────────────────────────────────────────────
@@ -349,17 +394,58 @@ const MOCK_BOOKS: AiItem[] = [
   },
 ];
 
-function getMockItems(contentType: "movie" | "book" | "both"): AiItem[] {
+const MOCK_MUSIC: AiItem[] = [
+  {
+    type: "music",
+    title: "In Rainbows",
+    creator: "Radiohead",
+    year: 2007,
+    description:
+      "A warm, intricate record that pulls the band back from electronic abstraction toward something more human — restless rhythms under some of their most direct songwriting.",
+    reason:
+      "Layered enough to reward repeat listens but immediate on the first pass. A strong fit if your answers leaned thoughtful, a little melancholy, and open to texture.",
+    match_score: 92,
+  },
+  {
+    type: "music",
+    title: "Channel Orange",
+    creator: "Frank Ocean",
+    year: 2012,
+    description:
+      "A loose, cinematic song cycle about wealth, longing, and memory, told in vignettes that drift between soul, funk, and ambient detours.",
+    reason:
+      "Emotionally generous and unhurried — best when you want something atmospheric that still has real songs at its center.",
+    match_score: 87,
+  },
+  {
+    type: "music",
+    title: "Rumours",
+    creator: "Fleetwood Mac",
+    year: 1977,
+    description:
+      "Five people turning their breakups into impossibly polished pop-rock — bright surfaces over genuine wreckage, with hooks that never miss.",
+    reason:
+      "Comfort-listening that holds up to scrutiny. A safe-but-not-boring pick when you want warmth without sentimentality.",
+    match_score: 80,
+  },
+];
+
+function getMockItems(contentType: DemoContentType): AiItem[] {
   if (contentType === "movie") return MOCK_MOVIES;
   if (contentType === "book") return MOCK_BOOKS;
-  return [...MOCK_MOVIES, ...MOCK_BOOKS];
+  if (contentType === "music") return MOCK_MUSIC;
+  return [...MOCK_MOVIES.slice(0, 2), ...MOCK_BOOKS.slice(0, 2), ...MOCK_MUSIC.slice(0, 2)];
 }
 
 async function enrichAll(items: AiItem[]): Promise<DemoItem[]> {
   const tmdbKey = process.env.TMDB_API_KEY;
   const enriched = await Promise.all(
     items.map((item) =>
-      item.type === "movie" ? enrichMovie(item, tmdbKey) : enrichBook(item),
+      item.type === "movie"
+        ? enrichMovie(item, tmdbKey)
+        : item.type === "book"
+          ? enrichBook(item)
+          : enrichMusic(item),
     ),
   );
   return enriched.filter((item): item is DemoItem => item !== null);
@@ -436,11 +522,10 @@ export async function POST(request: NextRequest) {
     newCount = typeof data === "number" ? data : null;
 
     if (newCount !== null && newCount > DAILY_LIMIT) {
+      // Structured limit only — the client renders localized copy from it
+      // so non-English users don't get an English string.
       return NextResponse.json(
-        {
-          error: "Demo limit reached",
-          message: `You have used your ${DAILY_LIMIT} free demo runs for today. Sign up for a free account to keep going.`,
-        },
+        { error: "Demo limit reached", limit: DAILY_LIMIT },
         { status: 429 },
       );
     }

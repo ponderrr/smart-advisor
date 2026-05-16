@@ -246,7 +246,9 @@ export function useGroupQuizActions({
     );
   };
 
-  const handleBackToDashboard = () => router.push("/dashboard");
+  // Guests can be in a room without an account, so their exit is the
+  // marketing home — /dashboard would just redirect them to /auth.
+  const handleBackToDashboard = () => router.push(user ? "/dashboard" : "/");
 
   return {
     handleStart,

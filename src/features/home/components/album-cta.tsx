@@ -5,8 +5,15 @@ import { motion } from "motion/react";
 import { IconArrowRight, IconDisc } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 
+import { useAuth } from "@/features/auth/hooks/use-auth";
+
 const AlbumCta = () => {
   const t = useTranslations("Home");
+  const { user } = useAuth();
+  // Signed-out visitors can't enter the auth-gated /quiz, so mirror the
+  // hero's funnel and let them try it via /demo instead of a silent
+  // bounce to /auth.
+  const ctaHref = user ? "/quiz" : "/demo";
 
   return (
     <section
@@ -60,7 +67,7 @@ const AlbumCta = () => {
             </div>
 
             <Link
-              href="/quiz"
+              href={ctaHref}
               className="group/cta relative z-10 inline-flex shrink-0 items-center gap-2 self-start rounded-full bg-slate-900 px-6 py-3 text-sm font-black tracking-tight text-white shadow-md transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98] sm:self-auto sm:text-base dark:bg-white dark:text-slate-900"
             >
               {t("albumCta.cta")}
