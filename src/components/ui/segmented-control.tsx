@@ -57,14 +57,17 @@ export function SegmentedControl<T extends string | number>({
   disabled = false,
   className,
 }: SegmentedControlProps<T>) {
-  const padding = size === "sm" ? "p-0.5" : "p-1";
+  const padding = size === "sm" ? "p-1" : "p-1.5";
+  // Roomier per-segment padding so labels like "Favorites" / "Milestones"
+  // have visual breathing room from the segment edges. iconOnly stays
+  // square; sm grows from 7→8 to match.
   const segment = iconOnly
     ? size === "sm"
-      ? "h-7 w-7 p-0"
-      : "h-8 w-8 p-0"
+      ? "h-8 w-8 p-0"
+      : "h-9 w-9 p-0"
     : size === "sm"
-      ? "px-3 py-1.5 text-xs"
-      : "px-4 py-2 text-sm";
+      ? "min-w-0 px-3.5 py-2 text-xs"
+      : "min-w-0 px-5 py-2.5 text-sm";
 
   return (
     <div
@@ -124,14 +127,14 @@ export function SegmentedControl<T extends string | number>({
             )}
             <span
               className={cn(
-                "relative z-10 inline-flex items-center gap-1.5 transition-colors duration-200",
+                "relative z-10 flex items-center justify-center gap-1 transition-colors duration-200",
                 active
                   ? (opt.activeTextClassName ?? "text-white")
                   : "text-slate-600 dark:text-slate-300",
               )}
             >
               {opt.icon}
-              {!iconOnly && opt.label}
+              {!iconOnly && <span>{opt.label}</span>}
             </span>
           </button>
         );

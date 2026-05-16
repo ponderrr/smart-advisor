@@ -15,9 +15,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 type HeroMediaResponse = {
   books: string[];
   movies: string[];
+  music: string[];
   status: {
     books: "ok" | "error";
     movies: "ok" | "error";
+    music: "ok" | "error";
   };
 };
 
@@ -56,6 +58,7 @@ const HeroSection = () => {
       messages.Home?.hero?.flipWords ?? [
         "Movie",
         "Book",
+        "Album",
         "Story",
         "Adventure",
         "Classic",
@@ -81,7 +84,11 @@ const HeroSection = () => {
 
         const data: HeroMediaResponse = await response.json();
         const mixed = uniqueUrls(
-          shuffle([...(data.books || []), ...(data.movies || [])]),
+          shuffle([
+            ...(data.books || []),
+            ...(data.movies || []),
+            ...(data.music || []),
+          ]),
         );
 
         if (active && mixed.length > 0) {
@@ -152,6 +159,13 @@ const HeroSection = () => {
             <FlipWords
               words={words}
               className="text-indigo-600 dark:text-indigo-400"
+              colorFor={(word) =>
+                ({
+                  movie: "text-amber-600 dark:text-amber-400",
+                  book: "text-emerald-600 dark:text-emerald-400",
+                  album: "text-rose-600 dark:text-rose-400",
+                })[word.toLowerCase()]
+              }
             />
           </span>
         </motion.h1>

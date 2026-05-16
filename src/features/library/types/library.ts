@@ -1,4 +1,4 @@
-export type LibraryMedium = "movie" | "book";
+export type LibraryMedium = "movie" | "book" | "music";
 export type LibraryStatus =
   | "finished"
   | "in_progress"

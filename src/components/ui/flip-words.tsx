@@ -7,10 +7,14 @@ export const FlipWords = ({
   words,
   duration = 3000,
   className,
+  colorFor,
 }: {
   words: string[];
   duration?: number;
   className?: string;
+  /** Optional per-word color override (e.g. content-type accents).
+   *  Returned classes win over `className` via tailwind-merge. */
+  colorFor?: (word: string) => string | undefined;
 }) => {
   const [currentWord, setCurrentWord] = useState(words[0]);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
@@ -60,6 +64,7 @@ export const FlipWords = ({
         className={cn(
           "z-10 inline-block relative text-left text-neutral-900 dark:text-neutral-100 px-2",
           className,
+          colorFor?.(currentWord),
         )}
         key={currentWord}
       >

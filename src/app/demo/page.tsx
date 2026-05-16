@@ -25,6 +25,7 @@ import {
 } from "@/features/quiz/utils/demo-questions";
 import { useLeaveGuard } from "@/features/quiz/hooks/use-leave-guard";
 import { QuizStepShell } from "@/features/quiz/components/quiz-step-shell";
+import { AppNavbar } from "@/components/app-navbar";
 import { PillButton } from "@/components/ui/pill-button";
 import { cn } from "@/lib/utils";
 
@@ -317,6 +318,9 @@ export default function DemoPage() {
         type="video/webm"
         crossOrigin="anonymous"
       />
+      <div className="min-h-screen w-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
+      <AppNavbar />
+      <main className="px-4 pb-20 pt-28 sm:px-6 md:pt-36">
       <QuizStepShell
         category={t("category")}
         stepLabel={t("stepLabel", {
@@ -403,6 +407,8 @@ export default function DemoPage() {
           ) : null}
         </motion.div>
       </QuizStepShell>
+      </main>
+      </div>
     </>
   );
 }

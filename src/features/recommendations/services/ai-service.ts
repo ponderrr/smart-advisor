@@ -14,20 +14,84 @@ const getContentTone = (): "standard" | "family" => {
   return value === "family" ? "family" : "standard";
 };
 
-function isNonRetryableError(error: unknown): boolean {
+/** What kind of failure callers are dealing with. Lets the UI swap messaging
+ *  (e.g. "AI is busy" vs. "Try again") and lets the retry policy back off
+ *  harder when the upstream API is collectively overloaded. */
+export type AIErrorKind = "overloaded" | "auth" | "network" | "generic";
+
+export class AIServiceError extends Error {
+  readonly kind: AIErrorKind;
+  constructor(message: string, kind: AIErrorKind) {
+    super(message);
+    this.name = "AIServiceError";
+    this.kind = kind;
+  }
+}
+
+export function isOverloadedError(error: unknown): boolean {
+  if (error instanceof AIServiceError) return error.kind === "overloaded";
   const msg =
     error instanceof Error
       ? error.message.toLowerCase()
       : String(error).toLowerCase();
+  return msg.includes("overloaded_error") || msg.includes("overloaded");
+}
 
-  // Only treat session/auth errors as non-retryable, NOT Anthropic API key errors
+function classifyDetail(detail: string): AIErrorKind {
+  const lower = detail.toLowerCase();
+  if (
+    lower.includes("overloaded_error") ||
+    lower.includes("overloaded") ||
+    lower.includes("rate limit") ||
+    lower.includes("429")
+  ) {
+    return "overloaded";
+  }
+  if (
+    lower.includes("not authenticated") ||
+    lower.includes("session is not authorized") ||
+    lower.includes("session expired") ||
+    lower.includes("unauthorized") ||
+    lower.includes("401")
+  ) {
+    return "auth";
+  }
+  if (
+    lower.includes("network error") ||
+    lower.includes("temporarily unavailable") ||
+    lower.includes("fetch failed")
+  ) {
+    return "network";
+  }
+  return "generic";
+}
+
+function isNonRetryableError(error: unknown): boolean {
+  if (error instanceof AIServiceError) return error.kind === "auth";
+  const msg =
+    error instanceof Error
+      ? error.message.toLowerCase()
+      : String(error).toLowerCase();
   if (msg.includes("anthropic api error")) return false;
-
   return (
     msg.includes("not authenticated") ||
     msg.includes("session is not authorized") ||
     msg.includes("session expired")
   );
+}
+
+/** Wait this long before the next attempt. Overloaded responses mean the
+ *  upstream API is collectively swamped — slamming it again in 2s isn't
+ *  going to help, so we back off much harder. */
+function backoffMsFor(attempt: number, kind: AIErrorKind): number {
+  if (kind === "overloaded") {
+    // 5s, 20s, then we give up (3rd backoff never used since attempt 3 fails fast).
+    const base = attempt === 1 ? 5000 : 20000;
+    return base + Math.floor(Math.random() * 2000);
+  }
+  // Generic retryable — short backoff: 1s, 3s.
+  const base = attempt === 1 ? 1000 : 3000;
+  return base + Math.floor(Math.random() * 500);
 }
 
 async function extractEdgeFunctionError(error: unknown): Promise<string> {
@@ -67,16 +131,25 @@ export interface BookRecommendation {
   explanation: string;
 }
 
+export interface MusicRecommendation {
+  title: string;
+  artist: string;
+  year: number;
+  genres: string[];
+  explanation: string;
+}
+
 export interface RecommendationData {
   movieRecommendation?: MovieRecommendation;
   bookRecommendation?: BookRecommendation;
+  musicRecommendation?: MusicRecommendation;
 }
 
 /**
  * Generates personalized recommendation questions using Supabase Edge Functions
  */
 export async function generateQuestions(
-  contentType: "movie" | "book" | "both",
+  contentType: "movie" | "book" | "music" | "both" | "mix",
   userAge: number,
   questionCount: number = 5,
   userName: string = "User",
@@ -118,16 +191,17 @@ export async function generateQuestions(
       const errorDetail = await extractEdgeFunctionError(error);
       console.error("Extracted error detail:", errorDetail);
 
-      if (
-        errorDetail.includes("session is not authorized") ||
-        errorDetail.includes("not authenticated") ||
-        errorDetail.includes("session expired")
-      ) {
-        throw new Error(
+      const kind = classifyDetail(errorDetail);
+      if (kind === "auth") {
+        throw new AIServiceError(
           "Your session is not authorized for question generation.",
+          "auth",
         );
       }
-      throw new Error(errorDetail || "Failed to generate questions");
+      throw new AIServiceError(
+        errorDetail || "Failed to generate questions",
+        kind,
+      );
     }
 
     if (!data?.questions || !Array.isArray(data.questions)) {
@@ -171,7 +245,7 @@ export async function generateQuestions(
  */
 export async function generateRecommendations(
   answers: Answer[],
-  contentType: "movie" | "book" | "both",
+  contentType: "movie" | "book" | "music" | "both" | "mix",
   userAge: number,
   userName: string = "User",
 ): Promise<RecommendationData> {
@@ -201,13 +275,17 @@ export async function generateRecommendations(
 
     if (error) {
       const errorDetail = await extractEdgeFunctionError(error);
-      if (
-        errorDetail.includes("401") ||
-        errorDetail.toLowerCase().includes("unauthorized")
-      ) {
-        throw new Error("Your session is not authorized for recommendations.");
+      const kind = classifyDetail(errorDetail);
+      if (kind === "auth") {
+        throw new AIServiceError(
+          "Your session is not authorized for recommendations.",
+          "auth",
+        );
       }
-      throw new Error(errorDetail || "Failed to generate recommendations");
+      throw new AIServiceError(
+        errorDetail || "Failed to generate recommendations",
+        kind,
+      );
     }
 
     // Transform edge function response shape into the expected RecommendationData shape
@@ -216,6 +294,7 @@ export async function generateRecommendations(
       for (const rec of data.recommendations) {
         if (rec.type === "movie") result.movieRecommendation = rec;
         if (rec.type === "book") result.bookRecommendation = rec;
+        if (rec.type === "music") result.musicRecommendation = rec;
       }
       return result;
     }
@@ -229,10 +308,13 @@ export async function generateRecommendations(
 }
 
 /**
- * Retry wrapper for question generation with exponential backoff
+ * Retry wrapper for question generation. Backoff depends on the error
+ * kind — overloaded responses get a much longer wait (5s, 20s) so the
+ * upstream API has room to recover; generic retryable errors get a
+ * snappy 1s, 3s. Both add a bit of jitter.
  */
 export async function generateQuestionsWithRetry(
-  contentType: "movie" | "book" | "both",
+  contentType: "movie" | "book" | "music" | "both" | "mix",
   userAge: number,
   questionCount: number = 5,
   userName: string = "User",
@@ -256,8 +338,11 @@ export async function generateQuestionsWithRetry(
       }
 
       if (attempt < maxRetries) {
-        const delay = Math.pow(2, attempt) * 1000;
-        await new Promise((resolve) => setTimeout(resolve, delay));
+        const kind: AIErrorKind =
+          error instanceof AIServiceError ? error.kind : "generic";
+        await new Promise((resolve) =>
+          setTimeout(resolve, backoffMsFor(attempt, kind)),
+        );
       }
     }
   }
@@ -266,11 +351,12 @@ export async function generateQuestionsWithRetry(
 }
 
 /**
- * Retry wrapper for recommendation generation w/ exponential backoff
+ * Retry wrapper for recommendation generation. Same kind-aware backoff
+ * policy as the question wrapper.
  */
 export async function generateRecommendationsWithRetry(
   answers: Answer[],
-  contentType: "movie" | "book" | "both",
+  contentType: "movie" | "book" | "music" | "both" | "mix",
   userAge: number,
   userName: string = "User",
   maxRetries: number = 3,
@@ -293,8 +379,11 @@ export async function generateRecommendationsWithRetry(
       }
 
       if (attempt < maxRetries) {
-        const delay = Math.pow(2, attempt) * 1000;
-        await new Promise((resolve) => setTimeout(resolve, delay));
+        const kind: AIErrorKind =
+          error instanceof AIServiceError ? error.kind : "generic";
+        await new Promise((resolve) =>
+          setTimeout(resolve, backoffMsFor(attempt, kind)),
+        );
       }
     }
   }

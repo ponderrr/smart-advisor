@@ -9,6 +9,12 @@ import {
 } from "motion/react";
 import { cn } from "@/lib/utils";
 
+/** Detect album covers vs movie/book posters by hostname so each tile can
+ *  render at its natural aspect ratio. Deezer's cover CDN shards over
+ *  *.dzcdn.net; anything else (TMDB, OpenLibrary) is a 2:3 portrait. */
+const isSquareCoverUrl = (url: string | null | undefined) =>
+  typeof url === "string" && url.includes("dzcdn.net");
+
 type ImagePosition = {
   src: string;
   position:
@@ -197,10 +203,21 @@ const ParallaxImage = memo(function ParallaxImage({
   );
 
   const posStyle = positionStyles[position];
+  // Same pattern as the marquee — drive the slot's aspect off the visible
+  // image, not the queued src, so a stale poster doesn't sit in a square
+  // frame during the crossfade. `layout` smooths the dimension change once
+  // the swap commits.
+  const aspectSrc = displaySrc ?? src;
 
   return (
     <motion.div
-      className="absolute aspect-[2/3] h-36 w-24 sm:h-52 sm:w-36 md:h-60 md:w-40 lg:h-64 lg:w-44 xl:h-72 xl:w-48 2xl:h-80 2xl:w-52"
+      layout
+      className={cn(
+        "absolute",
+        isSquareCoverUrl(aspectSrc)
+          ? "aspect-square h-28 w-28 sm:h-40 sm:w-40 md:h-44 md:w-44 lg:h-48 lg:w-48 xl:h-52 xl:w-52 2xl:h-56 2xl:w-56"
+          : "aspect-[2/3] h-36 w-24 sm:h-52 sm:w-36 md:h-60 md:w-40 lg:h-64 lg:w-44 xl:h-72 xl:w-48 2xl:h-80 2xl:w-52",
+      )}
       style={{
         top: posStyle.top,
         left: posStyle.left,
@@ -217,6 +234,7 @@ const ParallaxImage = memo(function ParallaxImage({
         duration: 0.7,
         delay,
         ease: [0.25, 0.1, 0.25, 1],
+        layout: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
       }}
     >
       {!!displaySrc && (

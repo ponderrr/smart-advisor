@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS public.quiz_sessions (
   status TEXT NOT NULL DEFAULT 'lobby'
     CHECK (status IN ('lobby', 'in_progress', 'completed', 'cancelled')),
   content_type TEXT NOT NULL DEFAULT 'both'
-    CHECK (content_type IN ('movie', 'book', 'both')),
+    CHECK (content_type IN ('movie', 'book', 'music', 'both', 'mix')),
   question_count INTEGER NOT NULL DEFAULT 5
     CHECK (question_count BETWEEN 3 AND 12),
   recommendation_id UUID REFERENCES public.recommendations(id) ON DELETE SET NULL,

@@ -3,7 +3,7 @@ import { Recommendation } from "@/features/recommendations/types/recommendation"
 import { User } from "@/features/auth/types/user";
 
 export interface FilterOptions {
-  contentType?: "movie" | "book" | "both";
+  contentType?: "movie" | "book" | "music" | "both";
   isFavorited?: boolean;
   startDate?: Date;
   endDate?: Date;
@@ -23,6 +23,7 @@ export interface UserStats {
   favoriteCount: number;
   movieCount: number;
   bookCount: number;
+  musicCount: number;
   thisMonthCount: number;
 }
 
@@ -50,6 +51,7 @@ class DatabaseService {
         description: recommendation.description || "",
         explanation: recommendation.explanation || "",
         poster_url: recommendation.poster_url || "",
+        preview_url: recommendation.preview_url || null,
         genre: Array.isArray(recommendation.genres)
           ? recommendation.genres.join(", ")
           : "",
@@ -58,6 +60,7 @@ class DatabaseService {
         content_type: recommendation.content_type,
         director: recommendation.director || null,
         author: recommendation.author || null,
+        artist: recommendation.artist || null,
         year: recommendation.year || null,
       };
 
@@ -76,17 +79,24 @@ class DatabaseService {
       const savedRecommendation: Recommendation = {
         id: data.id,
         user_id: data.user_id,
-        type: data.type as "movie" | "book",
+        type: data.type as "movie" | "book" | "music",
         title: data.title,
         director: data.director,
         author: data.author,
+        artist: data.artist,
         year: data.year,
         rating: data.rating || 0,
         genres: data.genre ? data.genre.split(", ").filter(Boolean) : [],
         poster_url: data.poster_url,
+        preview_url: data.preview_url,
         explanation: data.explanation,
         is_favorited: data.is_favorited || false,
-        content_type: data.content_type as "movie" | "book" | "both",
+        content_type: data.content_type as
+          | "movie"
+          | "book"
+          | "music"
+          | "both"
+          | "mix",
         created_at: data.created_at,
         description: data.description,
       };
@@ -174,7 +184,7 @@ class DatabaseService {
           const recommendation: Recommendation = {
             id: rec.id as string,
             user_id: rec.user_id as string,
-            type: rec.type as "movie" | "book",
+            type: rec.type as "movie" | "book" | "music",
             title: rec.title as string,
             genres: (() => {
               const genreStr = typeof rec.genre === "string" ? rec.genre : "";
@@ -186,17 +196,25 @@ class DatabaseService {
                 : [];
             })(),
             is_favorited: (rec.is_favorited as boolean) || false,
-            content_type: rec.content_type as "movie" | "book" | "both",
+            content_type: rec.content_type as
+              | "movie"
+              | "book"
+              | "music"
+              | "both"
+              | "mix",
             created_at: rec.created_at as string,
           };
 
           // Add optional properties only if they exist
           if (rec.director) recommendation.director = rec.director as string;
           if (rec.author) recommendation.author = rec.author as string;
+          if (rec.artist) recommendation.artist = rec.artist as string;
           if (rec.year) recommendation.year = rec.year as number;
           if (rec.rating) recommendation.rating = rec.rating as number;
           if (rec.poster_url)
             recommendation.poster_url = rec.poster_url as string;
+          if (rec.preview_url)
+            recommendation.preview_url = rec.preview_url as string;
           if (rec.explanation)
             recommendation.explanation = rec.explanation as string;
           if (rec.description)
@@ -402,6 +420,7 @@ class DatabaseService {
         favoriteCount: recommendations.filter((r) => r.is_favorited).length,
         movieCount: recommendations.filter((r) => r.type === "movie").length,
         bookCount: recommendations.filter((r) => r.type === "book").length,
+        musicCount: recommendations.filter((r) => r.type === "music").length,
         thisMonthCount: recommendations.filter(
           (r) => new Date(r.created_at) >= startOfMonth,
         ).length,

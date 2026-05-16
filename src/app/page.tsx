@@ -15,7 +15,11 @@ import { useTranslations } from "next-intl";
 import { LinkPreview } from "@/components/ui/link-preview";
 import FeaturesSectionDemo from "@/components/features-section-demo-3";
 import { AppNavbar } from "@/components/app-navbar";
-import { GroupQuizCta, HeroSection } from "@/features/home/components";
+import {
+  AlbumCta,
+  GroupQuizCta,
+  HeroSection,
+} from "@/features/home/components";
 import { cn } from "@/lib/utils";
 import {
   FAQ_CATEGORIES,
@@ -149,6 +153,9 @@ const Index = () => {
 
       {/* Features Section */}
       <FeaturesSectionDemo />
+
+      {/* Album Recommendations CTA — newest feature highlight */}
+      <AlbumCta />
 
       {/* Group Quiz CTA */}
       <GroupQuizCta />

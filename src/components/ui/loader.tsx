@@ -58,10 +58,13 @@ type PageLoaderProps = {
 };
 
 /**
- * PageLoader — full-screen three-dot loader.
+ * PageLoader — full-screen route-level loader.
  *
- * Drop-in replacement for the centered `animate-spin` route-level loaders.
- * Same min-h-screen + slate background as the rest of the app shells.
+ * Renders a thin shimmer progress bar near the top of the viewport instead
+ * of bouncing colored dots — the bar is the same visual idiom the quiz
+ * flow already uses, so route handoffs read as "the bar is still moving"
+ * rather than "a different colored loader appeared." Neutral slate tone so
+ * it doesn't clash with whichever accent the user has picked downstream.
  */
 export function PageLoader({ text = "Loading", className }: PageLoaderProps) {
   return (
@@ -69,14 +72,24 @@ export function PageLoader({ text = "Loading", className }: PageLoaderProps) {
       role="status"
       aria-label={text}
       className={cn(
-        "flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950",
+        "flex min-h-screen items-start justify-center bg-slate-50 pt-32 dark:bg-slate-950",
         className,
       )}
     >
-      <div className="flex items-center justify-center gap-2" aria-hidden>
-        <span className="h-3 w-3 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.3s]" />
-        <span className="h-3 w-3 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.15s]" />
-        <span className="h-3 w-3 animate-bounce rounded-full bg-indigo-500" />
+      <div
+        aria-hidden
+        className="relative h-1.5 w-full max-w-4xl overflow-hidden rounded-full bg-slate-200/70 dark:bg-slate-800/70"
+      >
+        <motion.span
+          className="absolute inset-y-0 left-0 w-1/3 rounded-full bg-gradient-to-r from-transparent via-slate-400/80 to-transparent dark:via-slate-500/80"
+          initial={{ x: "-100%" }}
+          animate={{ x: "300%" }}
+          transition={{
+            duration: 1.6,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
       </div>
     </div>
   );

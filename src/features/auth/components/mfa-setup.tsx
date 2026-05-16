@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import { useTranslations } from "next-intl";
+import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -43,6 +44,7 @@ export const MfaSetup = ({
   const t = useTranslations("Auth.mfaSetup");
   const [step, setStep] = useState<SetupStep>(skipIntro ? "method" : "intro");
   const [qrCode, setQrCode] = useState<string>("");
+  const [totpUri, setTotpUri] = useState<string>("");
   const [secret, setSecret] = useState<string>("");
   const [factorId, setFactorId] = useState<string>("");
   const [code, setCode] = useState("");
@@ -67,6 +69,7 @@ export const MfaSetup = ({
 
     if (data?.totp?.qr_code && data?.id) {
       setQrCode(data.totp.qr_code);
+      setTotpUri(data.totp.uri ?? "");
       setSecret(data.totp.secret || "");
       setFactorId(data.id);
       setStep("qr");
@@ -354,10 +357,31 @@ export const MfaSetup = ({
             {t("qr.body")}
           </p>
 
-          {qrCode && (
-            <div className="my-6">
-              <div className="flex justify-center rounded-xl border-4 border-white bg-white p-3 shadow-xl">
-                <img src={qrCode} alt={t("qr.imageAlt")} className="h-48 w-48" />
+          {(totpUri || qrCode) && (
+            <div className="my-6 flex justify-center">
+              {/* Prefer the SVG path from the otpauth URI — sharper at any
+                  DPI and matches the visual language of the group quiz
+                  share QR. Fall back to Supabase's pre-rendered image if
+                  the URI isn't present (defensive; the API has returned
+                  both for as long as TOTP factors have existed). */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                {totpUri ? (
+                  <QRCodeSVG
+                    value={totpUri}
+                    size={192}
+                    level="M"
+                    bgColor="#ffffff"
+                    fgColor="#0f172a"
+                    marginSize={0}
+                    aria-label={t("qr.imageAlt")}
+                  />
+                ) : (
+                  <img
+                    src={qrCode}
+                    alt={t("qr.imageAlt")}
+                    className="h-48 w-48"
+                  />
+                )}
               </div>
             </div>
           )}

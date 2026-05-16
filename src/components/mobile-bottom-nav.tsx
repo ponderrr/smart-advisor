@@ -24,15 +24,15 @@ const HIDDEN_PREFIXES = [
   "/onboarding",
   "/demo",
   "/maintenance",
-  "/content-selection",
-  "/question-count",
-  "/questionnaire",
+  "/quiz",
   "/results",
 ];
 
 // Exact-match version of the same idea — pages that shouldn't show the nav
-// but whose prefix could overlap something we DO want to show.
-const HIDDEN_EXACT = new Set(["/"]);
+// but whose prefix could overlap something we DO want to show. (Home/`/` is
+// allowed: signed-in visitors that land back on marketing still get a way
+// to jump straight to Dashboard / Library / etc. from the bottom nav.)
+const HIDDEN_EXACT = new Set<string>();
 
 const isInsideGroupQuizRoom = (pathname: string) =>
   pathname.startsWith("/group-quiz/") && pathname !== "/group-quiz/";
@@ -244,7 +244,7 @@ const QuizMiniMenu = ({ open, onClose, onPick }: QuizMiniMenuProps) => {
             <div className="mt-5 space-y-3">
               <button
                 type="button"
-                onClick={() => onPick("/content-selection")}
+                onClick={() => onPick("/quiz")}
                 className="group flex w-full items-center gap-3 rounded-2xl border border-slate-200/70 bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-700/60 dark:from-indigo-500/10 dark:via-slate-900/40 dark:to-violet-500/10"
               >
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-md">

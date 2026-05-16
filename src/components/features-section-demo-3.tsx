@@ -8,6 +8,7 @@ import {
   IconCheck,
   IconBookFilled,
   IconDeviceTv,
+  IconDisc,
   IconStarFilled,
 } from "@tabler/icons-react";
 import { useTranslations, useMessages } from "next-intl";
@@ -210,26 +211,38 @@ const TrustSkeleton = () => {
 };
 
 const AcrossBothSkeleton = () => {
-  const [mode, setMode] = useState<"book" | "movie">("book");
+  type Mode = "book" | "movie" | "music";
+  const order: Mode[] = ["book", "movie", "music"];
+  const [mode, setMode] = useState<Mode>("book");
   useEffect(() => {
     const id = setInterval(() => {
-      setMode((m) => (m === "book" ? "movie" : "book"));
+      setMode((m) => order[(order.indexOf(m) + 1) % order.length]);
     }, 2400);
     return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const variants = {
     book: {
       label: "Book",
       Icon: IconBookFilled,
-      gradient: "from-indigo-500 to-violet-500",
+      gradient: "from-emerald-500 to-teal-500",
+      labelColor: "text-emerald-600 dark:text-emerald-400",
       meta: "312 pages",
     },
     movie: {
       label: "Movie",
       Icon: IconDeviceTv,
-      gradient: "from-fuchsia-500 to-rose-500",
+      gradient: "from-amber-500 to-orange-500",
+      labelColor: "text-amber-600 dark:text-amber-400",
       meta: "1h 48m",
+    },
+    music: {
+      label: "Album",
+      Icon: IconDisc,
+      gradient: "from-rose-500 to-pink-500",
+      labelColor: "text-rose-600 dark:text-rose-400",
+      meta: "11 tracks",
     },
   } as const;
 
@@ -258,7 +271,12 @@ const AcrossBothSkeleton = () => {
               })()}
             </div>
             <div className="mt-2.5 flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
+              <span
+                className={cn(
+                  "text-[10px] font-black uppercase tracking-[0.18em]",
+                  variants[mode].labelColor,
+                )}
+              >
                 {variants[mode].label}
               </span>
               <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
@@ -280,6 +298,30 @@ const FEATURES: Feature[] = [
   { key: "trust", Skeleton: TrustSkeleton },
   { key: "both", Skeleton: AcrossBothSkeleton, wide: true },
 ];
+
+// Per-card accent so the bento reads as color-coded rather than four
+// identical indigo tiles. Stays within the app's accent palette.
+const FEATURE_ACCENTS: Record<
+  FeatureKey,
+  { divider: string; hoverBorder: string }
+> = {
+  private: {
+    divider: "from-violet-400 to-indigo-400",
+    hoverBorder: "hover:border-violet-200 dark:hover:border-violet-500/40",
+  },
+  fast: {
+    divider: "from-amber-400 to-orange-400",
+    hoverBorder: "hover:border-amber-200 dark:hover:border-amber-500/40",
+  },
+  trust: {
+    divider: "from-emerald-400 to-teal-400",
+    hoverBorder: "hover:border-emerald-200 dark:hover:border-emerald-500/40",
+  },
+  both: {
+    divider: "from-rose-400 to-fuchsia-400",
+    hoverBorder: "hover:border-rose-200 dark:hover:border-rose-500/40",
+  },
+};
 
 export default function FeaturesSectionDemo() {
   const t = useTranslations("Home.features");
@@ -304,6 +346,7 @@ export default function FeaturesSectionDemo() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
           {FEATURES.map((feature, index) => {
             const Skeleton = feature.Skeleton;
+            const accent = FEATURE_ACCENTS[feature.key];
             return (
               <motion.div
                 key={feature.key}
@@ -317,7 +360,8 @@ export default function FeaturesSectionDemo() {
                 }}
                 style={{ opacity: 0, transform: "translateY(24px)" }}
                 className={cn(
-                  "group relative flex flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-md hover:border-indigo-200 hover:shadow-lg sm:p-6 dark:border-slate-700/70 dark:bg-slate-900/65 dark:hover:border-indigo-500/40",
+                  "group relative flex flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-md hover:shadow-lg sm:p-6 dark:border-slate-700/70 dark:bg-slate-900/65",
+                  accent.hoverBorder,
                   feature.wide
                     ? "lg:col-span-2 lg:flex-row lg:items-stretch lg:gap-6"
                     : "lg:col-span-1",
@@ -342,7 +386,12 @@ export default function FeaturesSectionDemo() {
                   <p className="font-mono text-xs font-bold tracking-[0.2em] text-slate-400 dark:text-slate-500">
                     {String(index + 1).padStart(2, "0")}
                   </p>
-                  <div className="mt-2 h-px w-10 bg-gradient-to-r from-indigo-400 to-violet-400" />
+                  <div
+                    className={cn(
+                      "mt-2 h-px w-10 bg-gradient-to-r",
+                      accent.divider,
+                    )}
+                  />
                   <h3 className="mt-4 text-lg font-black tracking-tight text-slate-900 sm:text-xl dark:text-slate-100">
                     {t(`items.${feature.key}.title`)}
                   </h3>

@@ -6,7 +6,7 @@ export type QuizSessionStatus =
   | "completed"
   | "cancelled";
 
-export type QuizContentType = "movie" | "book" | "both";
+export type QuizContentType = "movie" | "book" | "music" | "both" | "mix";
 
 export interface GroupQuizResult {
   movie?: {
@@ -26,6 +26,16 @@ export interface GroupQuizResult {
     explanation?: string;
     description?: string;
     poster_url?: string;
+  };
+  music?: {
+    title: string;
+    artist?: string;
+    year?: number;
+    genres?: string[];
+    explanation?: string;
+    description?: string;
+    poster_url?: string;
+    preview_url?: string;
   };
 }
 

@@ -4,7 +4,7 @@ import {
   databaseService,
   UserStats,
 } from "@/features/recommendations/services/database-service";
-import { Heart, Film, Book, Calendar, TrendingUp } from "lucide-react";
+import { Heart, Film, Book, Music, Calendar, TrendingUp } from "lucide-react";
 
 const UserStatsCard = () => {
   const [stats, setStats] = useState<UserStats | null>(null);
@@ -67,6 +67,12 @@ const UserStatsCard = () => {
       color: "text-green-500",
     },
     {
+      icon: Music,
+      label: "Music",
+      value: stats.musicCount,
+      color: "text-rose-500",
+    },
+    {
       icon: Calendar,
       label: "This Month",
       value: stats.thisMonthCount,
@@ -80,7 +86,7 @@ const UserStatsCard = () => {
         <CardTitle className="text-textPrimary">Your Stats</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
           {statItems.map(({ icon: Icon, label, value, color }) => (
             <div key={label} className="text-center">
               <div className={`flex justify-center mb-2 ${color}`}>

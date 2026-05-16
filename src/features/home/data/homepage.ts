@@ -19,7 +19,7 @@ export const howItWorksCards = [
   {
     title: "We Narrow Down Your Best Options",
     description:
-      "Smart Advisor combines your answers with trusted movie and book details to find options that fit your mood.",
+      "Smart Advisor combines your answers with trusted movie, book, and music details to find options that fit your mood.",
     image:
       "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=80",
     hoverImage:
@@ -28,7 +28,7 @@ export const howItWorksCards = [
   {
     title: "Get Picks You Can Trust",
     description:
-      "You get curated movies and books with plain-language reasoning instead of random lists with no explanation.",
+      "You get curated movies, books, and albums with plain-language reasoning instead of random lists with no explanation.",
     image:
       "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=1200&q=80",
     hoverImage:
@@ -45,6 +45,7 @@ export const logoSets = [
       src: "https://cdn.simpleicons.org/themoviedatabase/111111",
     },
     { name: "Open Library", src: "" },
+    { name: "Deezer", src: "https://cdn.simpleicons.org/deezer/111111" },
   ],
   [
     {

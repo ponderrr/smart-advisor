@@ -1,16 +1,8 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  forwardRef,
-} from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
@@ -28,6 +20,7 @@ import {
   Check,
   Film,
   BookOpen,
+  Music,
   Sparkles,
   Sun,
   Moon,
@@ -36,7 +29,6 @@ import {
 import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
-import { supabase } from "@/integrations/supabase/client";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import {
   SidebarNavItem,
@@ -54,9 +46,31 @@ import {
 } from "@/features/auth/components";
 import { FieldRequirements } from "@/features/auth/components/auth-shared";
 import {
-  PASSWORD_RULES,
-  isValidPassword,
-} from "@/features/auth/utils/validation";
+  SectionCard,
+  SectionHeader,
+  SettingsInput,
+} from "./_components/settings-ui";
+import { usePasswordRules } from "./_hooks/use-password-rules";
+import {
+  useContentPreferences,
+  PREF_CONTENT_KEY,
+  PREF_CONTENT_TONE_KEY,
+  PREF_QUESTION_COUNT_KEY,
+} from "./_hooks/use-content-preferences";
+import { useAvatarUpload } from "./_hooks/use-avatar-upload";
+import { useReauthVerification } from "./_hooks/use-reauth-verification";
+import { useAccountActions } from "./_hooks/use-account-actions";
+import { useSettingsSaveHandlers } from "./_hooks/use-settings-save-handlers";
+import {
+  profileSchema,
+  emailSchema,
+  passwordSchema,
+  backupEmailSchema,
+  type ProfileForm,
+  type EmailForm,
+  type PasswordForm,
+  type BackupEmailForm,
+} from "./_lib/schemas";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import { PillButton } from "@/components/ui/pill-button";
 import { SegmentedControl } from "@/components/ui/segmented-control";
@@ -68,142 +82,6 @@ import { toast } from "sonner";
 
 type SettingsSection = "profile" | "security" | "content" | "integrations";
 
-/* ------------------------------------------------------------------ */
-/*  Zod schemas                                                       */
-/* ------------------------------------------------------------------ */
-const profileSchema = z.object({
-  newName: z.string().min(1, "Username is required").trim(),
-  age: z.coerce
-    .number()
-    .int()
-    .min(13, "Must be at least 13")
-    .max(120, "Must be 120 or under")
-    .optional()
-    .or(z.literal("")),
-});
-
-const emailSchema = z.object({
-  newEmail: z.string().email("Enter a valid email").trim(),
-});
-
-const passwordSchema = z
-  .object({
-    newPassword: z
-      .string()
-      .refine(isValidPassword, "Password doesn't meet all requirements"),
-    confirmPassword: z.string(),
-  })
-  .refine((d) => d.newPassword === d.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
-
-const backupEmailSchema = z.object({
-  backupEmail: z.string().email("Enter a valid email").trim(),
-});
-
-const PREF_CONTENT_KEY = "smart_advisor_pref_content_focus";
-const PREF_CONTENT_TONE_KEY = "smart_advisor_pref_content_tone";
-const PREF_QUESTION_COUNT_KEY = "smart_advisor_pref_question_count";
-
-/* ------------------------------------------------------------------ */
-/*  Reusable sub-components                                          */
-/* ------------------------------------------------------------------ */
-
-const SectionCard = ({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) => (
-  <div
-    className={cn(
-      "rounded-2xl border border-slate-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-sm dark:border-slate-700/60 dark:bg-slate-900/60 sm:p-6",
-      className,
-    )}
-  >
-    {children}
-  </div>
-);
-
-const SectionHeader = ({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) => (
-  <div className="mb-5">
-    <h2 className="text-xl font-black tracking-tight sm:text-2xl">{title}</h2>
-    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-      {description}
-    </p>
-  </div>
-);
-
-const SettingsInput = forwardRef<
-  HTMLInputElement,
-  {
-    label: string;
-    value?: string;
-    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    placeholder?: string;
-    type?: string;
-    disabled?: boolean;
-    readOnly?: boolean;
-    icon?: React.ReactNode;
-    error?: string;
-  } & Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange">
->(
-  (
-    {
-      label,
-      placeholder,
-      type = "text",
-      disabled = false,
-      readOnly = false,
-      icon,
-      error,
-      ...props
-    },
-    ref,
-  ) => (
-    <label className="block space-y-1.5">
-      <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-        {label}
-      </span>
-      <div className="relative">
-        <input
-          ref={ref}
-          placeholder={placeholder}
-          type={type}
-          disabled={disabled}
-          readOnly={readOnly}
-          className={cn(
-            "w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm transition-colors focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-100 dark:focus:border-indigo-500",
-            (disabled || readOnly) &&
-              "cursor-not-allowed bg-slate-50 text-slate-500 dark:bg-slate-800/40 dark:text-slate-400",
-            error &&
-              "border-red-300 focus:border-red-400 focus:ring-red-500/20 dark:border-red-700",
-          )}
-          {...props}
-        />
-        {icon && (
-          <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
-            {icon}
-          </div>
-        )}
-      </div>
-      {error && (
-        <p className="text-xs font-medium text-red-500 dark:text-red-400">
-          {error}
-        </p>
-      )}
-    </label>
-  ),
-);
-SettingsInput.displayName = "SettingsInput";
 
 /* ------------------------------------------------------------------ */
 /*  Main settings page                                                */
@@ -215,15 +93,7 @@ const SettingsPage = () => {
   const router = useRouter();
   const t = useTranslations("Settings");
   const { theme, setTheme } = useTheme();
-  const {
-    user,
-    updateProfile,
-    updateEmail,
-    updatePassword,
-    uploadAvatar,
-    removeAvatar,
-    refreshUser,
-  } = useAuth();
+  const { user } = useAuth();
   const { ready } = useRequireAuth();
 
   const settingsTabs: SettingsSection[] = [
@@ -252,22 +122,22 @@ const SettingsPage = () => {
     }
   };
 
-  const profileForm = useForm<z.infer<typeof profileSchema>>({
+  const profileForm = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
     defaultValues: { newName: user?.name ?? "", age: user?.age ?? 18 },
   });
 
-  const emailForm = useForm<z.infer<typeof emailSchema>>({
+  const emailForm = useForm<EmailForm>({
     resolver: zodResolver(emailSchema),
     defaultValues: { newEmail: "" },
   });
 
-  const passwordForm = useForm<z.infer<typeof passwordSchema>>({
+  const passwordForm = useForm<PasswordForm>({
     resolver: zodResolver(passwordSchema),
     defaultValues: { newPassword: "", confirmPassword: "" },
   });
 
-  const backupEmailForm = useForm<z.infer<typeof backupEmailSchema>>({
+  const backupEmailForm = useForm<BackupEmailForm>({
     resolver: zodResolver(backupEmailSchema),
     defaultValues: { backupEmail: "" },
   });
@@ -276,13 +146,14 @@ const SettingsPage = () => {
     text: string;
     type: "success" | "error" | "info";
   } | null>(null);
-  const [contentFocus, setContentFocus] = useState<"movie" | "book" | "both">(
-    "both",
-  );
-  const [contentTone, setContentTone] = useState<"standard" | "family">(
-    "standard",
-  );
-  const [preferredQuestionCount, setPreferredQuestionCount] = useState(5);
+  const {
+    contentFocus,
+    setContentFocus,
+    contentTone,
+    setContentTone,
+    preferredQuestionCount,
+    setPreferredQuestionCount,
+  } = useContentPreferences(user?.content_tone);
   const [savingContent, setSavingContent] = useState(false);
   const [accountActionLoading, setAccountActionLoading] = useState(false);
   const [showMfaPanel, setShowMfaPanel] = useState(false);
@@ -299,60 +170,13 @@ const SettingsPage = () => {
   const confirmPasswordAnchorRef = useRef<HTMLDivElement>(null);
   const watchedNewPassword = passwordForm.watch("newPassword");
   const watchedConfirmPassword = passwordForm.watch("confirmPassword");
-  const tPasswordRules = useTranslations("Auth.passwordRules");
-  const newPasswordRules = useMemo(
-    () =>
-      PASSWORD_RULES.map((rule) => ({
-        label: tPasswordRules(rule.key),
-        met: rule.test(watchedNewPassword || ""),
-      })),
-    [watchedNewPassword, tPasswordRules],
-  );
-  const confirmPasswordRules = useMemo(
-    () => [
-      {
-        label: t("password.matches"),
-        met:
-          !!watchedConfirmPassword &&
-          watchedConfirmPassword === watchedNewPassword,
-      },
-    ],
-    [watchedConfirmPassword, watchedNewPassword, t],
+  const { newPasswordRules, confirmPasswordRules } = usePasswordRules(
+    watchedNewPassword,
+    watchedConfirmPassword,
   );
   const [currentBackupEmail, setCurrentBackupEmail] = useState<string | null>(
     null,
   );
-  const [avatarUploading, setAvatarUploading] = useState(false);
-  const avatarInputRef = useRef<HTMLInputElement>(null);
-
-  const handleAvatarFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = event.target.files?.[0];
-    // Reset so re-selecting the same file still fires onChange.
-    event.target.value = "";
-    if (!file) return;
-    setAvatarUploading(true);
-    const result = await uploadAvatar(file);
-    setAvatarUploading(false);
-    if (result.error) {
-      showMessage(result.error, "error");
-    } else {
-      showMessage(t("profile.pictureUpdated"), "success");
-    }
-  };
-
-  const handleRemoveAvatar = async () => {
-    setAvatarUploading(true);
-    const result = await removeAvatar();
-    setAvatarUploading(false);
-    if (result.error) {
-      showMessage(result.error, "error");
-    } else {
-      showMessage(t("profile.pictureRemoved"), "success");
-    }
-  };
-
   const showMessage = (
     text: string,
     type: "success" | "error" | "info" = "info",
@@ -363,77 +187,24 @@ const SettingsPage = () => {
     else toast.info(text);
   };
 
-  // MFA verification modal state
-  const [verifyModal, setVerifyModal] = useState<{
-    open: boolean;
-    actionLabel: string;
-    mode: "totp" | "enroll";
-  }>({ open: false, actionLabel: "", mode: "totp" });
-  const [verifyCode, setVerifyCode] = useState("");
-  const [verifyError, setVerifyError] = useState("");
-  const [verifyLoading, setVerifyLoading] = useState(false);
-  const verifyResolveRef = useRef<((ok: boolean) => void) | null>(null);
+  const {
+    avatarUploading,
+    avatarInputRef,
+    handleAvatarFileChange,
+    handleRemoveAvatar,
+  } = useAvatarUpload(showMessage);
 
-  const requestVerification = useCallback(
-    (actionLabel: string): Promise<boolean> => {
-      return new Promise((resolve) => {
-        verifyResolveRef.current = resolve;
-        setVerifyCode("");
-        setVerifyError("");
-        setVerifyLoading(false);
-        setVerifyModal({
-          open: true,
-          actionLabel,
-          mode: mfaEnabled ? "totp" : "enroll",
-        });
-      });
-    },
-    [mfaEnabled],
-  );
-
-  const closeVerifyModal = useCallback((result: boolean) => {
-    setVerifyModal((prev) => ({ ...prev, open: false }));
-    verifyResolveRef.current?.(result);
-    verifyResolveRef.current = null;
-  }, []);
-
-  const handleVerifySubmit = useCallback(async () => {
-    if (verifyCode.length !== 6) {
-      setVerifyError(t("verifyModal.enterCode"));
-      return;
-    }
-    setVerifyLoading(true);
-    setVerifyError("");
-    const { data: factors } = await authService.listMFAFactors();
-    const factor = factors?.totp?.find(
-      (f: MFAFactor) => f.status === "verified",
-    );
-    if (!factor) {
-      setVerifyError(t("verifyModal.noFactor"));
-      setVerifyLoading(false);
-      return;
-    }
-    const result = await authService.verifyMFA(factor.id, verifyCode);
-    setVerifyLoading(false);
-    if (result.error) {
-      setVerifyError(result.error);
-    } else {
-      closeVerifyModal(true);
-    }
-  }, [verifyCode, closeVerifyModal, t]);
-
-  // Auto-submit the verify modal once six digits are in (TOTP mode only —
-  // the enroll mode inside this modal has its own input).
-  useEffect(() => {
-    if (
-      verifyModal.open &&
-      verifyModal.mode === "totp" &&
-      verifyCode.length === 6 &&
-      !verifyLoading
-    ) {
-      handleVerifySubmit();
-    }
-  }, [verifyCode, verifyModal.open, verifyModal.mode, verifyLoading, handleVerifySubmit]);
+  const {
+    requestVerification,
+    verifyModal,
+    verifyCode,
+    setVerifyCode,
+    verifyError,
+    setVerifyError,
+    verifyLoading,
+    closeVerifyModal,
+    handleVerifySubmit,
+  } = useReauthVerification(mfaEnabled);
 
   const sectionTabs: {
     id: SettingsSection;
@@ -454,147 +225,35 @@ const SettingsPage = () => {
     },
   ];
 
-  const handleSaveProfile = profileForm.handleSubmit(async (data) => {
-    setMessage(null);
-    const verified = await requestVerification(t("verifyAction.save"));
-    if (!verified) return;
-    const parsedAge = typeof data.age === "number" ? data.age : 25;
-    const result = await updateProfile(data.newName, parsedAge);
-    showMessage(
-      result.error ?? t("profile.savedToast"),
-      result.error ? "error" : "success",
-    );
+  const {
+    handleSaveProfile,
+    handleSaveEmail,
+    handleSavePassword,
+    handleSaveContentPreferences,
+    handleSaveBackupEmail,
+    handleRemoveBackupEmail,
+    removingBackupEmail,
+  } = useSettingsSaveHandlers({
+    profileForm,
+    emailForm,
+    passwordForm,
+    backupEmailForm,
+    requestVerification,
+    showMessage,
+    clearMessage: () => setMessage(null),
+    contentFocus,
+    contentTone,
+    preferredQuestionCount,
+    setSavingContent,
+    setCurrentBackupEmail,
   });
 
-  const handleSaveEmail = emailForm.handleSubmit(async (data) => {
-    setMessage(null);
-    if (
-      user?.email &&
-      data.newEmail.toLowerCase() === user.email.trim().toLowerCase()
-    ) {
-      showMessage(t("email.differentRequired"), "error");
-      return;
-    }
-    const verified = await requestVerification(t("verifyAction.email"));
-    if (!verified) return;
-    const result = await updateEmail(data.newEmail);
-    showMessage(
-      result.error ?? t("email.checkInbox"),
-      result.error ? "error" : "success",
-    );
+  const { handleDisableAccount, handleDeleteAccount } = useAccountActions({
+    requestVerification,
+    showMessage,
+    clearMessage: () => setMessage(null),
+    setAccountActionLoading,
   });
-
-  const handleSavePassword = passwordForm.handleSubmit(async (data) => {
-    setMessage(null);
-    const verified = await requestVerification(t("verifyAction.password"));
-    if (!verified) return;
-    const result = await updatePassword(data.newPassword);
-    if (result.error) {
-      showMessage(result.error, "error");
-    } else {
-      showMessage(t("password.updatedToast"), "success");
-      passwordForm.reset();
-    }
-  });
-
-  const handleSaveContentPreferences = async () => {
-    if (typeof window === "undefined") return;
-    const verified = await requestVerification(t("verifyAction.content"));
-    if (!verified) return;
-
-    setSavingContent(true);
-    try {
-      window.localStorage.setItem(PREF_CONTENT_KEY, contentFocus);
-      window.localStorage.setItem(PREF_CONTENT_TONE_KEY, contentTone);
-      window.localStorage.setItem(
-        PREF_QUESTION_COUNT_KEY,
-        String(preferredQuestionCount),
-      );
-
-      // Persist content_tone to profiles too so it survives a localStorage
-      // clear and stays consistent across devices. content_focus and the
-      // question-count slider live in localStorage only — they're per-device
-      // habits, not part of the canonical profile.
-      if (user) {
-        const { error } = await supabase
-          .from("profiles")
-          .update({
-            content_tone: contentTone,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", user.id);
-        if (error) {
-          console.error("[settings] save content_tone failed", error);
-          showMessage(t("content.saveError"), "error");
-          return;
-        }
-        await refreshUser?.();
-      }
-
-      showMessage(t("content.savedToast"), "success");
-    } finally {
-      setSavingContent(false);
-    }
-  };
-
-  const handleDisableAccount = async () => {
-    if (!window.confirm(t("danger.disableConfirm"))) return;
-    const verified = await requestVerification(t("verifyAction.disable"));
-    if (!verified) return;
-    if (!window.confirm(t("danger.disableFinalConfirm"))) return;
-    setAccountActionLoading(true);
-    setMessage(null);
-    const result = await authService.disableAccount();
-    if (result.error) {
-      showMessage(result.error, "error");
-      setAccountActionLoading(false);
-      return;
-    }
-    router.push("/");
-  };
-
-  const handleDeleteAccount = async () => {
-    if (!window.confirm(t("danger.deleteConfirm"))) return;
-    const verified = await requestVerification(t("verifyAction.delete"));
-    if (!verified) return;
-    const typed = window.prompt(t("danger.typeDeletePrompt"));
-    if (typed !== "DELETE") {
-      showMessage(t("danger.deletionCanceled"), "info");
-      return;
-    }
-    setAccountActionLoading(true);
-    setMessage(null);
-    const result = await authService.deleteAccount();
-    if (result.error) {
-      showMessage(result.error, "error");
-      setAccountActionLoading(false);
-      return;
-    }
-    router.push("/");
-  };
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const sc = window.localStorage.getItem(PREF_CONTENT_KEY);
-    const st = window.localStorage.getItem(PREF_CONTENT_TONE_KEY);
-    const sq = Number(
-      window.localStorage.getItem(PREF_QUESTION_COUNT_KEY) || "5",
-    );
-    if (sc === "movie" || sc === "book" || sc === "both")
-      setContentFocus(sc);
-    if (st === "standard" || st === "family") setContentTone(st);
-    if (Number.isFinite(sq) && sq >= 3 && sq <= 15)
-      setPreferredQuestionCount(sq);
-  }, []);
-
-  // Profile is the source of truth for content_tone (set in onboarding,
-  // synced via useAuth). Override the localStorage value once the user
-  // loads — otherwise a cross-device user would see stale local prefs.
-  useEffect(() => {
-    if (user?.content_tone === "standard" || user?.content_tone === "family") {
-      setContentTone(user.content_tone);
-    }
-  }, [user?.content_tone]);
 
   useEffect(() => {
     if (!message) return;
@@ -627,42 +286,6 @@ const SettingsPage = () => {
     };
     loadBackupEmail();
   }, []);
-
-  const handleSaveBackupEmail = backupEmailForm.handleSubmit(async (data) => {
-    // Backup email is an account-recovery surface — anyone with a stolen
-    // session could otherwise quietly point recovery at their own address.
-    // Gate behind MFA the same way the other sensitive saves do.
-    const verified = await requestVerification(
-      t("verifyAction.setBackupEmail"),
-    );
-    if (!verified) return;
-    const { error } = await authService.setBackupEmail(data.backupEmail);
-    if (error) {
-      showMessage(error, "error");
-    } else {
-      setCurrentBackupEmail(data.backupEmail);
-      backupEmailForm.reset();
-      showMessage(t("backupEmail.savedToast"), "success");
-    }
-  });
-
-  const [removingBackupEmail, setRemovingBackupEmail] = useState(false);
-  const handleRemoveBackupEmail = async () => {
-    const verified = await requestVerification(
-      t("verifyAction.removeBackupEmail"),
-    );
-    if (!verified) return;
-    setRemovingBackupEmail(true);
-    const { error } = await authService.removeBackupEmail();
-    setRemovingBackupEmail(false);
-    if (error) {
-      showMessage(error, "error");
-    } else {
-      setCurrentBackupEmail(null);
-      showMessage(t("backupEmail.removedToast"), "success");
-    }
-  };
-
   if (!ready) {
     return <PageLoader text="Loading..." />;
   }
@@ -686,7 +309,10 @@ const SettingsPage = () => {
             </p>
           </div>
 
-          {/* Mobile pill nav — desktop keeps the grouped sidebar below. */}
+          {/* Mobile pill nav — desktop keeps the grouped sidebar below.
+              Icons are omitted on mobile so "Integrations" (the longest
+              label) gets enough room inside its 1/4 segment share without
+              spilling past the pill on narrow phones. */}
           <div className="mb-4 md:hidden">
             <SegmentedControl<SettingsSection>
               layoutId="settings-mobile-tabs"
@@ -697,7 +323,6 @@ const SettingsPage = () => {
               options={sectionTabs.map((tab) => ({
                 value: tab.id,
                 label: tab.label,
-                icon: tab.icon,
                 pillClassName: "bg-indigo-500",
               }))}
             />
@@ -1256,7 +881,9 @@ const SettingsPage = () => {
                           <p className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
                             {t("content.typeLabel")}
                           </p>
-                          <SegmentedControl<"movie" | "book" | "both">
+                          <SegmentedControl<
+                            "movie" | "book" | "music" | "both" | "mix"
+                          >
                             layoutId="settings-content-focus"
                             value={contentFocus}
                             onChange={setContentFocus}
@@ -1266,19 +893,25 @@ const SettingsPage = () => {
                                 value: "movie",
                                 label: t("content.type.movie.label"),
                                 icon: <Film size={14} />,
-                                pillClassName: "bg-indigo-500",
+                                pillClassName: "bg-amber-500",
                               },
                               {
                                 value: "book",
                                 label: t("content.type.book.label"),
                                 icon: <BookOpen size={14} />,
-                                pillClassName: "bg-indigo-500",
+                                pillClassName: "bg-emerald-500",
                               },
                               {
-                                value: "both",
-                                label: t("content.type.both.label"),
+                                value: "music",
+                                label: t("content.type.music.label"),
+                                icon: <Music size={14} />,
+                                pillClassName: "bg-rose-500",
+                              },
+                              {
+                                value: "mix",
+                                label: t("content.type.mix.label"),
                                 icon: <Sparkles size={14} />,
-                                pillClassName: "bg-indigo-500",
+                                pillClassName: "bg-violet-500",
                               },
                             ]}
                           />

@@ -5,9 +5,11 @@ import { API_URLS, FETCH_TIMEOUT_MS } from "@/lib/constants";
 type HeroMediaResponse = {
   books: string[];
   movies: string[];
+  music: string[];
   status: {
     books: "ok" | "error";
     movies: "ok" | "error";
+    music: "ok" | "error";
   };
 };
 
@@ -20,6 +22,13 @@ interface OpenLibraryWork {
 interface TMDBResult {
   poster_path?: string;
   id?: number;
+}
+
+interface DeezerChartAlbum {
+  cover_xl?: string;
+  cover_big?: string;
+  cover_medium?: string;
+  cover?: string;
 }
 
 const BOOK_SUBJECTS = [
@@ -37,6 +46,12 @@ const TMDB_ENDPOINTS = [
   "discover/movie?include_adult=false&include_video=false&language=en-US&sort_by=popularity.desc",
   "discover/tv?include_adult=false&include_null_first_air_dates=false&language=en-US&sort_by=popularity.desc",
 ];
+
+// Deezer genre IDs we pull album charts from. Picked for visual variety
+// (cover-art looks different across genres) — Pop, Rock, Hip-Hop, R&B,
+// Alternative, Electronic. `0` is the global chart and stays in as a
+// catch-all. https://api.deezer.com/genre lists the full set.
+const DEEZER_GENRES = [0, 132, 152, 116, 165, 85, 106];
 
 const pickRandomUnique = <T>(items: T[], count: number) => {
   const copy = [...items];
@@ -98,6 +113,46 @@ async function fetchBookCovers(): Promise<string[]> {
   return shuffle(uniqueUrls(responses.flat())).slice(0, 10);
 }
 
+async function fetchAlbumCovers(): Promise<string[]> {
+  const selectedGenres = pickRandomUnique(DEEZER_GENRES, 2);
+  const responses = await Promise.all(
+    selectedGenres.map(async (genre) => {
+      const url = `https://api.deezer.com/chart/${genre}/albums?limit=25`;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+      try {
+        const response = await fetch(url, {
+          signal: controller.signal,
+          next: { revalidate: 0 },
+        });
+        clearTimeout(timeoutId);
+        if (!response.ok) return [] as DeezerChartAlbum[];
+        const data = await response.json();
+        return Array.isArray(data?.data)
+          ? (data.data as DeezerChartAlbum[])
+          : [];
+      } catch {
+        clearTimeout(timeoutId);
+        return [] as DeezerChartAlbum[];
+      }
+    }),
+  );
+
+  const covers = responses
+    .flat()
+    .map(
+      (album) =>
+        album.cover_xl ||
+        album.cover_big ||
+        album.cover_medium ||
+        album.cover ||
+        null,
+    )
+    .filter((url): url is string => Boolean(url));
+
+  return shuffle(uniqueUrls(covers)).slice(0, 12);
+}
+
 async function fetchMoviePosters(apiKey: string): Promise<string[]> {
   const selectedEndpoints = pickRandomUnique(TMDB_ENDPOINTS, 2);
   const responses = await Promise.all(
@@ -141,11 +196,13 @@ export async function GET() {
   const status: HeroMediaResponse["status"] = {
     books: "error",
     movies: "error",
+    music: "error",
   };
 
-  const [booksResult, moviesResult] = await Promise.allSettled([
+  const [booksResult, moviesResult, musicResult] = await Promise.allSettled([
     fetchBookCovers(),
     tmdbKey ? fetchMoviePosters(tmdbKey) : Promise.resolve([]),
+    fetchAlbumCovers(),
   ]);
 
   const books =
@@ -158,6 +215,11 @@ export async function GET() {
       ? uniqueUrls(moviesResult.value)
       : [];
 
+  const music =
+    musicResult.status === "fulfilled" && musicResult.value.length > 0
+      ? uniqueUrls(musicResult.value)
+      : [];
+
   if (booksResult.status === "fulfilled" && booksResult.value.length > 0) {
     status.books = "ok";
   }
@@ -166,9 +228,14 @@ export async function GET() {
     status.movies = "ok";
   }
 
+  if (musicResult.status === "fulfilled" && musicResult.value.length > 0) {
+    status.music = "ok";
+  }
+
   const payload: HeroMediaResponse = {
     books: shuffle(books).slice(0, 12),
     movies: shuffle(movies).slice(0, 12),
+    music: shuffle(music).slice(0, 12),
     status,
   };
 

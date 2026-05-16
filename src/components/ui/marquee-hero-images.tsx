@@ -3,6 +3,12 @@ import { memo, useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
+/** Detect album covers vs movie/book posters by hostname so each tile can
+ *  render at its natural aspect ratio. Deezer's cover CDN shards over
+ *  *.dzcdn.net; anything else (TMDB, OpenLibrary) is a 2:3 portrait. */
+const isSquareCoverUrl = (url: string | null | undefined) =>
+  typeof url === "string" && url.includes("dzcdn.net");
+
 interface MarqueeRowProps {
   images: string[];
   reverse?: boolean;
@@ -36,8 +42,15 @@ const MarqueeTile = memo(function MarqueeTile({
     loader.onerror = () => setIncomingSrc(src);
   }, [src, displaySrc, incomingSrc]);
 
+  // Drive the tile's aspect off the CURRENTLY VISIBLE image, not the
+  // incoming src, so the container doesn't reshape under a stale image
+  // during the crossfade. `layout` lets the dimension change tween
+  // smoothly once the swap commits — the marquee row absorbs the resize
+  // naturally because every tile is `shrink-0`.
+  const aspectSrc = displaySrc ?? src;
   return (
     <motion.div
+      layout
       className="shrink-0 pr-3 sm:pr-4"
       initial={mounted ? false : { opacity: 0, filter: "blur(6px)" }}
       animate={{ opacity: 1, filter: "blur(0px)" }}
@@ -45,9 +58,21 @@ const MarqueeTile = memo(function MarqueeTile({
         duration: 0.55,
         delay,
         ease: [0.25, 0.1, 0.25, 1],
+        layout: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
       }}
     >
-      <div className="relative aspect-[2/3] h-28 overflow-hidden rounded-lg opacity-70 ring-1 ring-black/10 sm:h-36 md:h-44 dark:opacity-55 dark:ring-white/10">
+      <motion.div
+        layout
+        transition={{ layout: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } }}
+        className={cn(
+          "relative h-28 overflow-hidden rounded-lg opacity-70 ring-1 ring-black/10 sm:h-36 md:h-44 dark:opacity-55 dark:ring-white/10",
+          // Album covers (Deezer) are square; TMDB posters and OpenLibrary
+          // book covers are 2:3 portrait. Detect by hostname so each tile
+          // renders at its natural aspect — no center-cropping titles off
+          // movie posters or letterboxing albums.
+          isSquareCoverUrl(aspectSrc) ? "aspect-square" : "aspect-[2/3]",
+        )}
+      >
         {!!displaySrc && (
           <img
             src={displaySrc}
@@ -73,7 +98,7 @@ const MarqueeTile = memo(function MarqueeTile({
             className="absolute inset-0 h-full w-full object-cover"
           />
         )}
-      </div>
+      </motion.div>
     </motion.div>
   );
 });

@@ -19,6 +19,11 @@ const SECTION_ACCENTS = {
     rule: "from-indigo-300/70 dark:from-indigo-500/40",
     eyebrow: "text-indigo-600 dark:text-indigo-400",
   },
+  rose: {
+    icon: "bg-rose-100 text-rose-600 dark:bg-rose-500/15 dark:text-rose-300",
+    rule: "from-rose-300/70 dark:from-rose-500/40",
+    eyebrow: "text-rose-600 dark:text-rose-400",
+  },
 } as const;
 
 interface SectionHeaderProps {
