@@ -65,7 +65,8 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     final statusIdx = _status == null ? 0 : _status!.index + 1;
     return Column(children: [
       AdaptiveSegmentedControl(
-            color: Tw.indigo500,
+        color: accentColorForLabel(
+            const ['All', 'Movie', 'Book', 'Music'][mediumIdx]),
         labels: const ['All', 'Movie', 'Book', 'Music'],
         selectedIndex: mediumIdx,
         onValueChanged: (i) => setState(() =>

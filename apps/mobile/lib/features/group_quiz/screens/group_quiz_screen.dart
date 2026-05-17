@@ -81,70 +81,177 @@ class _S extends ConsumerState<GroupQuizScreen> {
     context.go('/group-quiz/${r.session!.code}');
   }
 
+  Widget _choiceCard(ContentAccentName a, IconData icon, String title,
+      String body, VoidCallback onTap) {
+    final tone = contentAccent(a, Theme.of(context).brightness);
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 14),
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: tone.surfaceGradient),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: tone.surfaceBorder),
+        ),
+        child: Row(children: [
+          CircleAvatar(
+              radius: 24,
+              backgroundColor: tone.iconCircleBg,
+              child: Icon(icon, color: tone.iconCircleFg, size: 24)),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                        color: context.brandInk)),
+                const SizedBox(height: 3),
+                Text(body,
+                    style: TextStyle(
+                        fontSize: 13,
+                        height: 1.35,
+                        color: context.brandMuted)),
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right, color: tone.text),
+        ]),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BrandScaffold(
-      appBar: AppBar(title: const Text('Group quiz')),
       body: ListView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(20),
         children: [
+          const SizedBox(height: 8),
+          IconButton(
+            padding: EdgeInsets.zero,
+            alignment: Alignment.centerLeft,
+            icon: Icon(_path == _Path.pick
+                ? Icons.close
+                : Icons.arrow_back),
+            onPressed: () => _path == _Path.pick
+                ? context.go('/')
+                : setState(() => _path = _Path.pick),
+          ),
           const Eyebrow('Group quiz'),
           const SizedBox(height: 4),
-          const BrandHeading('Find a pick together', size: 24),
-          const SizedBox(height: 20),
+          const BrandHeading('Find a pick together', size: 26),
+          const SizedBox(height: 8),
+          Subtitle(
+              'Everyone answers; the AI blends your tastes into one pick.'),
+          const SizedBox(height: 22),
           if (_path == _Path.pick) ...[
-            AdaptiveButton(
-                onPressed: () => setState(() => _path = _Path.host),
-                label: 'Host a session'),
-            const SizedBox(height: 10),
-            AdaptiveButton(
-                onPressed: () => setState(() => _path = _Path.join),
-                label: 'Join with a code',
-                style: AdaptiveButtonStyle.bordered),
+            _choiceCard(
+                ContentAccentName.violet,
+                Icons.add_circle_outline,
+                'Host a session',
+                'Set it up and share a 6-character code.',
+                () => setState(() => _path = _Path.host)),
+            _choiceCard(
+                ContentAccentName.rose,
+                Icons.login,
+                'Join with a code',
+                'Got a code from a friend? Hop in.',
+                () => setState(() => _path = _Path.join)),
           ] else if (_path == _Path.host) ...[
-            const Eyebrow('Content'),
-            const SizedBox(height: 8),
-            AdaptiveSegmentedControl(
-            color: Tw.indigo500,
-              labels: const ['Movie', 'Book', 'Music', 'Mix'],
-              selectedIndex: _content,
-              onValueChanged: (i) => setState(() => _content = i),
+            BrandCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Eyebrow('Content'),
+                  const SizedBox(height: 8),
+                  AdaptiveSegmentedControl(
+                    color: accentColorForLabel(
+                        const ['Movie', 'Book', 'Music', 'Mix'][_content]),
+                    labels: const ['Movie', 'Book', 'Music', 'Mix'],
+                    selectedIndex: _content,
+                    onValueChanged: (i) => setState(() => _content = i),
+                  ),
+                  const SizedBox(height: 18),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Eyebrow('Questions'),
+                      Text('$_count',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              color: context.brandInk)),
+                    ],
+                  ),
+                  AdaptiveSlider(
+                      value: _count.toDouble(),
+                      min: 3,
+                      max: 15,
+                      divisions: 12,
+                      onChanged: (v) =>
+                          setState(() => _count = v.round())),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Eyebrow('Max players'),
+                      Text('$_maxP',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              color: context.brandInk)),
+                    ],
+                  ),
+                  AdaptiveSlider(
+                      value: _maxP.toDouble(),
+                      min: 2,
+                      max: 20,
+                      divisions: 18,
+                      onChanged: (v) =>
+                          setState(() => _maxP = v.round())),
+                  const SizedBox(height: 12),
+                  AdaptiveTextField(
+                      controller: _name,
+                      placeholder: 'Your display name'),
+                ],
+              ),
             ),
             const SizedBox(height: 16),
-            Subtitle('$_count questions'),
-            AdaptiveSlider(
-                value: _count.toDouble(),
-                min: 3,
-                max: 15,
-                divisions: 12,
-                onChanged: (v) => setState(() => _count = v.round())),
-            Subtitle('Up to $_maxP people'),
-            AdaptiveSlider(
-                value: _maxP.toDouble(),
-                min: 2,
-                max: 20,
-                divisions: 18,
-                onChanged: (v) => setState(() => _maxP = v.round())),
-            const SizedBox(height: 12),
-            AdaptiveTextField(
-                controller: _name, placeholder: 'Your display name'),
-            const SizedBox(height: 12),
             AdaptiveButton(
                 onPressed: _busy ? null : _host,
                 label: 'Create session'),
           ] else ...[
-            AdaptiveTextField(
-                controller: _code, placeholder: '6-char code'),
-            const SizedBox(height: 12),
-            AdaptiveTextField(
-                controller: _name, placeholder: 'Your display name'),
-            const SizedBox(height: 12),
+            BrandCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Eyebrow('Session code'),
+                  const SizedBox(height: 8),
+                  AdaptiveTextField(
+                      controller: _code, placeholder: 'ABC123'),
+                  const SizedBox(height: 14),
+                  const Eyebrow('Display name'),
+                  const SizedBox(height: 8),
+                  AdaptiveTextField(
+                      controller: _name, placeholder: 'Your name'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
             AdaptiveButton(
-                onPressed: _busy ? null : _join, label: 'Join'),
+                onPressed: _busy ? null : _join, label: 'Join session'),
           ],
           if (_error != null) ...[
-            const SizedBox(height: 12),
-            Center(child: Subtitle(_error!)),
+            const SizedBox(height: 14),
+            Center(
+                child: Text(_error!,
+                    style: TextStyle(
+                        color: context.colors.destructive,
+                        fontSize: 13))),
           ],
         ],
       ),

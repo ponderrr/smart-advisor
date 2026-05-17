@@ -61,7 +61,13 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           const BrandHeading('Past picks', size: 24),
           const SizedBox(height: 16),
           AdaptiveSegmentedControl(
-            color: Tw.indigo500,
+            color: accentColorForLabel(const [
+              'All',
+              'Movies',
+              'Books',
+              'Music',
+              'Favs'
+            ][_mediumIdx]),
             labels: const ['All', 'Movies', 'Books', 'Music', 'Favs'],
             selectedIndex: _mediumIdx,
             onValueChanged: (i) => setState(() => _mediumIdx = i),

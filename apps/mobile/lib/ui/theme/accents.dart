@@ -6,6 +6,18 @@ import 'tailwind_palette.dart';
 
 Color _a(Color c, double o) => c.withValues(alpha: o);
 
+/// Accent for a content-typed label so segmented controls match the
+/// per-type palette (music → rose, movie → amber, book → emerald,
+/// mix/other → violet/indigo).
+Color accentColorForLabel(String label) {
+  final l = label.toLowerCase();
+  if (l.contains('movie')) return Tw.amber500;
+  if (l.contains('book')) return Tw.emerald500;
+  if (l.contains('music')) return Tw.rose500;
+  if (l.contains('mix')) return Tw.violet500;
+  return Tw.indigo500;
+}
+
 /// Per-content accent, ported from web content-accent.ts
 /// (CONTENT_ACCENT_PALETTE). Tailwind `dark:` variants and `/NN` opacities
 /// are reproduced exactly. Call [resolve] with the current Brightness.

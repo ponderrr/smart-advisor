@@ -52,59 +52,12 @@ class AppShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final c = context.colors;
     final profile = ref.watch(currentProfileProvider).asData?.value;
     final bg = brandBg(Theme.of(context).brightness);
 
     return Scaffold(
       backgroundColor: bg,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(54),
-        child: SafeArea(
-          bottom: false,
-          child: Container(
-            height: 54,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: bg,
-              border: Border(bottom: BorderSide(color: c.border)),
-            ),
-            child: Row(children: [
-              const BrandHeading('Smart Advisor', size: 18),
-              const Spacer(),
-              PopupMenuButton<String>(
-                offset: const Offset(0, 44),
-                onSelected: (v) {
-                  if (v == 'account') context.go('/account');
-                  if (v == 'wrapped') context.push('/wrapped');
-                  if (v == 'signout') {
-                    ref.read(authServiceProvider).signOut();
-                    context.go('/auth');
-                  }
-                },
-                itemBuilder: (_) => const [
-                  PopupMenuItem(value: 'account', child: Text('Profile')),
-                  PopupMenuItem(
-                      value: 'wrapped', child: Text('Your Wrapped')),
-                  PopupMenuItem(value: 'signout', child: Text('Sign out')),
-                ],
-                child: CircleAvatar(
-                  radius: 16,
-                  backgroundColor: c.muted,
-                  backgroundImage: profile?.avatarUrl != null
-                      ? NetworkImage(profile!.avatarUrl!)
-                      : null,
-                  child: profile?.avatarUrl == null
-                      ? Icon(Icons.person,
-                          size: 18, color: c.mutedForeground)
-                      : null,
-                ),
-              ),
-            ]),
-          ),
-        ),
-      ),
-      body: child,
+      body: SafeArea(bottom: false, child: child),
       floatingActionButtonLocation:
           FloatingActionButtonLocation.centerDocked,
       floatingActionButton: Container(
