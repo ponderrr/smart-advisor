@@ -147,12 +147,28 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           IconButton(
             icon: Icon(Icons.delete_outline,
                 size: 20, color: context.brandMuted),
-            onPressed: () async {
-              await ref
-                  .read(databaseServiceProvider)
-                  .deleteRecommendation(r.id);
-              ref.invalidate(_historyProvider);
-            },
+            onPressed: () => AdaptiveAlertDialog.show(
+              context: context,
+              title: 'Delete recommendation?',
+              message: '“${r.title}” will be removed from your history.',
+              icon: Icons.delete_outline,
+              actions: [
+                AlertAction(
+                    title: 'Cancel',
+                    style: AlertActionStyle.cancel,
+                    onPressed: () {}),
+                AlertAction(
+                  title: 'Delete',
+                  style: AlertActionStyle.destructive,
+                  onPressed: () async {
+                    await ref
+                        .read(databaseServiceProvider)
+                        .deleteRecommendation(r.id);
+                    ref.invalidate(_historyProvider);
+                  },
+                ),
+              ],
+            ),
           ),
         ]),
         ),

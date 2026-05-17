@@ -400,10 +400,26 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         const SizedBox(height: 20),
 
         AdaptiveButton(
-          onPressed: () async {
-            await ref.read(authServiceProvider).signOut();
-            if (context.mounted) context.go('/auth');
-          },
+          onPressed: () => AdaptiveAlertDialog.show(
+            context: context,
+            title: 'Sign out?',
+            message: 'You can sign back in anytime.',
+            icon: Icons.logout,
+            actions: [
+              AlertAction(
+                  title: 'Cancel',
+                  style: AlertActionStyle.cancel,
+                  onPressed: () {}),
+              AlertAction(
+                title: 'Sign out',
+                style: AlertActionStyle.destructive,
+                onPressed: () async {
+                  await ref.read(authServiceProvider).signOut();
+                  if (context.mounted) context.go('/auth');
+                },
+              ),
+            ],
+          ),
           label: 'Sign out',
           style: AdaptiveButtonStyle.bordered,
         ),
