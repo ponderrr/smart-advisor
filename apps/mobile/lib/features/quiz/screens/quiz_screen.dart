@@ -51,6 +51,12 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       ref.read(currentProfileProvider).asData?.value?.name;
   String get _tone => ref.read(contentToneProvider);
 
+  /// Solid accent for the current content type (loaders, eyebrow, etc.).
+  Color get _accentColor => contentAccent(
+        accentForContentType(_content),
+        Theme.of(context).brightness,
+      ).text;
+
   Future<void> _loadQuestions() async {
     setState(() {
       _loadingQuestions = true;
@@ -192,7 +198,17 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       case _Step.questions:
         return _questionsStep();
       case _Step.generating:
-        return const Center(child: LoaderFive('Finding your picks'));
+        return Center(
+          child: PhasedLoader(
+            color: _accentColor,
+            phases: const [
+              'Reading your answers',
+              'Matching your taste',
+              'Curating your picks',
+              'Polishing the results',
+            ],
+          ),
+        );
       case _Step.genError:
         return _errorStep();
       case _Step.results:
@@ -331,7 +347,17 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
   Widget _questionsStep() {
     if (_loadingQuestions) {
-      return const Center(child: LoaderFive('Building your quiz'));
+      return Center(
+        child: PhasedLoader(
+          color: _accentColor,
+          phases: const [
+            'Reading your vibe',
+            'Shaping your questions',
+            'Tuning the details',
+            'Almost ready',
+          ],
+        ),
+      );
     }
     if (_error != null) {
       return Center(
@@ -368,7 +394,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             ),
             Expanded(
               child: Eyebrow(
-                  'Question ${_qIndex + 1} of ${_questions.length}'),
+                'Question ${_qIndex + 1} of ${_questions.length}',
+                color: _accentColor,
+              ),
             ),
           ]),
           const SizedBox(height: 10),
