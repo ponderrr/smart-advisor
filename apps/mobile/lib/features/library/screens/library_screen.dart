@@ -65,7 +65,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     final mediumIdx = _medium == null ? 0 : _medium!.index + 1;
     final statusIdx = _status == null ? 0 : _status!.index + 1;
     return Column(children: [
-      AdaptiveSegmentedControl(
+      BrandSegmented(
         color: accentColorForLabel(
             const ['All', 'Movie', 'Book', 'Music'][mediumIdx]),
         labels: const ['All', 'Movie', 'Book', 'Music'],
@@ -74,7 +74,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
             _medium = i == 0 ? null : LibraryMedium.values[i - 1]),
       ),
       const SizedBox(height: 8),
-      AdaptiveSegmentedControl(
+      BrandSegmented(
             color: Tw.indigo500,
         labels: const ['All', 'Finished', 'In progress', 'Wishlist',
             'Dropped'],
@@ -235,7 +235,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                 alignment: Alignment.centerLeft,
                 child: Eyebrow('Rating')),
             const SizedBox(height: 8),
-            AdaptiveSegmentedControl(
+            BrandSegmented(
               color: Tw.indigo500,
               labels: const ['👎  Nope', '😐  Meh', '👍  Loved'],
               selectedIndex: rating - 1,

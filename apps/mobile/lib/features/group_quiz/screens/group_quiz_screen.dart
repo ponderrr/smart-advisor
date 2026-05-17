@@ -171,7 +171,7 @@ class _S extends ConsumerState<GroupQuizScreen> {
                 children: [
                   const Eyebrow('Content'),
                   const SizedBox(height: 8),
-                  AdaptiveSegmentedControl(
+                  BrandSegmented(
                     color: accentColorForLabel(
                         const ['Movie', 'Book', 'Music', 'Mix'][_content]),
                     labels: const ['Movie', 'Book', 'Music', 'Mix'],

@@ -260,7 +260,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             children: [
               _rowLabel('Theme'),
               const SizedBox(height: 8),
-              AdaptiveSegmentedControl(
+              BrandSegmented(
                 color: Tw.indigo500,
                 labels: const ['System', 'Light', 'Dark'],
                 selectedIndex: switch (themeMode) {
@@ -283,7 +283,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                   ? 'Family-friendly is locked for under-18.'
                   : 'Applied to your next quiz.'),
               const SizedBox(height: 8),
-              AdaptiveSegmentedControl(
+              BrandSegmented(
                 color: (under18 || _tone == 1)
                     ? Tw.emerald500
                     : Tw.indigo500,

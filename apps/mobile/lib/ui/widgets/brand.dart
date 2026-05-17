@@ -369,6 +369,98 @@ class ContentBentoTile extends StatelessWidget {
   }
 }
 
+/// Full-width segmented control (equal segments, animated pill). Drop-in
+/// for AdaptiveSegmentedControl's API — used because the package's Material
+/// SegmentedButton is content-sized with no full-width option, and the
+/// design should fill the box on every platform.
+class BrandSegmented extends StatelessWidget {
+  const BrandSegmented({
+    super.key,
+    required this.labels,
+    required this.selectedIndex,
+    required this.onValueChanged,
+    this.color,
+    this.sfSymbols, // accepted for API parity; not shown
+  });
+
+  final List<String> labels;
+  final int selectedIndex;
+  final ValueChanged<int> onValueChanged;
+  final Color? color;
+  final List<dynamic>? sfSymbols;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final accent = color ?? Tw.indigo500;
+    final track = dark ? Tw.slate800 : Tw.slate200;
+    final pill = dark ? Tw.slate950 : Tw.white;
+    final muted = dark ? Tw.slate400 : Tw.slate500;
+
+    return LayoutBuilder(builder: (context, box) {
+      final n = labels.length;
+      final segW = (box.maxWidth - 8) / n; // inner width after 4px padding
+      return Container(
+        height: 42,
+        width: double.infinity,
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: track,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Stack(children: [
+          if (selectedIndex >= 0 && selectedIndex < n)
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
+              left: selectedIndex * segW,
+              top: 0,
+              bottom: 0,
+              width: segW,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: pill,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.black
+                            .withValues(alpha: dark ? 0.3 : 0.08),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2)),
+                  ],
+                ),
+              ),
+            ),
+          Row(
+            children: [
+              for (var i = 0; i < n; i++)
+                Expanded(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => onValueChanged(i),
+                    child: Center(
+                      child: AnimatedDefaultTextStyle(
+                        duration: const Duration(milliseconds: 160),
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: i == selectedIndex ? accent : muted,
+                        ),
+                        child: Text(labels[i],
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ]),
+      );
+    });
+  }
+}
+
 /// Shared poster/cover thumbnail with a graceful fallback. Music art is
 /// square; movies/books are 2:3.
 class PosterThumb extends StatelessWidget {

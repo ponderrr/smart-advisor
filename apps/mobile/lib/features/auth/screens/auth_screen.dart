@@ -180,7 +180,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     Eyebrow(_eyebrow),
                     const SizedBox(height: 16),
                     if (showToggle) ...[
-                      AdaptiveSegmentedControl(
+                      BrandSegmented(
                         color: Tw.indigo500,
                         labels: const ['Sign in', 'Create account'],
                         selectedIndex: _mode == AuthMode.signin ? 0 : 1,

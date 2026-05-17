@@ -87,7 +87,7 @@ class _S extends ConsumerState<OnboardingScreen> {
                   AdaptiveTextField(
                       controller: _name, placeholder: 'Display name'),
                   const SizedBox(height: 16),
-                  AdaptiveSegmentedControl(
+                  BrandSegmented(
             color: Tw.indigo500,
                     labels: const ['English', 'Español'],
                     selectedIndex: _locale,
