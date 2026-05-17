@@ -106,4 +106,18 @@ class MfaService {
 
   AuthMFAGetAuthenticatorAssuranceLevelResponse aalLevel() =>
       _auth.mfa.getAuthenticatorAssuranceLevel();
+
+  /// True when the current session is already stepped-up to AAL2.
+  bool get isAal2 =>
+      aalLevel().currentLevel == AuthenticatorAssuranceLevels.aal2;
+
+  /// The id of a usable (verified) TOTP factor, or null if the user has no
+  /// second factor enrolled (AAL2 then unreachable).
+  Future<String?> verifiedTotpFactorId() async {
+    final r = await listFactors();
+    final f = (r.data ?? const <Factor>[]).where((x) =>
+        x.factorType == FactorType.totp &&
+        x.status == FactorStatus.verified);
+    return f.isEmpty ? null : f.first.id;
+  }
 }

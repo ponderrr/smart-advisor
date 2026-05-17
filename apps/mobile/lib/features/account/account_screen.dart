@@ -48,6 +48,46 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     setState(() => _msg = r.isError ? r.error : 'Photo updated');
   }
 
+  /// Ensures the session is AAL2 before an AAL2-gated change. Returns false
+  /// (and explains why) if it can't be satisfied.
+  Future<bool> _ensureAal2() async {
+    final mfa = ref.read(mfaServiceProvider);
+    if (mfa.isAal2) return true;
+
+    final factorId = await mfa.verifiedTotpFactorId();
+    if (factorId == null) {
+      showBanner('Set up two-factor authentication first');
+      if (mounted) context.push('/account/mfa-setup');
+      return false;
+    }
+    if (!mounted) return false;
+    final code = await AdaptiveAlertDialog.inputShow(
+      context: context,
+      title: 'Verify it\'s you',
+      message: 'Enter the 6-digit code from your authenticator app.',
+      icon: Icons.shield_outlined,
+      input: const AdaptiveAlertDialogInput(
+          placeholder: '6-digit code'),
+      actions: [
+        AlertAction(
+            title: 'Cancel',
+            style: AlertActionStyle.cancel,
+            onPressed: () {}),
+        AlertAction(
+            title: 'Verify',
+            style: AlertActionStyle.primary,
+            onPressed: () {}),
+      ],
+    );
+    if (code == null || code.trim().isEmpty) return false;
+    final r = await mfa.verify(factorId, code.trim());
+    if (r.isError) {
+      showBanner(r.error!);
+      return false;
+    }
+    return true;
+  }
+
   Future<void> _editField({
     required String title,
     required String hint,
@@ -307,22 +347,27 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 onTap: () => context.push('/account/mfa-setup')),
             _tile(Icons.mail_outline, 'Change email',
                 subtitle: 'Requires 2FA',
-                onTap: () => _editField(
-                      title: 'New email',
-                      hint: 'name@example.com',
-                      onSave: (v) =>
-                          ref.read(authServiceProvider).changeEmail(v),
-                    )),
+                onTap: () async {
+                  if (!await _ensureAal2()) return;
+                  await _editField(
+                    title: 'New email',
+                    hint: 'name@example.com',
+                    onSave: (v) =>
+                        ref.read(authServiceProvider).changeEmail(v),
+                  );
+                }),
             _tile(Icons.lock_outline, 'Change password',
                 subtitle: 'Requires 2FA',
-                onTap: () => _editField(
-                      title: 'New password',
-                      hint: '8+ chars, mixed case, number, symbol',
-                      obscure: true,
-                      onSave: (v) => ref
-                          .read(authServiceProvider)
-                          .changePassword(v),
-                    )),
+                onTap: () async {
+                  if (!await _ensureAal2()) return;
+                  await _editField(
+                    title: 'New password',
+                    hint: '8+ chars, mixed case, number, symbol',
+                    obscure: true,
+                    onSave: (v) =>
+                        ref.read(authServiceProvider).changePassword(v),
+                  );
+                }),
           ]),
         ),
 
@@ -351,7 +396,9 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         BrandCard(
           child: Column(children: [
             _tile(Icons.pause_circle_outline, 'Disable account',
-                onTap: () => _confirmDanger(
+                onTap: () async {
+                  if (!await _ensureAal2()) return;
+                  await _confirmDanger(
                       'Disable account?',
                       'You will be signed out and locked out until '
                           're-enabled.',
@@ -364,10 +411,13 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                         }
                         return r.error;
                       },
-                    )),
+                    );
+                }),
             _tile(Icons.delete_forever_outlined, 'Delete account',
                 destructive: true,
-                onTap: () => _confirmDanger(
+                onTap: () async {
+                  if (!await _ensureAal2()) return;
+                  await _confirmDanger(
                       'Delete account?',
                       'This permanently erases your data. Cannot be '
                           'undone.',
@@ -380,7 +430,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                         }
                         return r.error;
                       },
-                    )),
+                    );
+                }),
           ]),
         ),
         const SizedBox(height: 20),
