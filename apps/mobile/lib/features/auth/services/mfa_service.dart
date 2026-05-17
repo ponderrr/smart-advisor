@@ -39,6 +39,8 @@ class MfaService {
           '${friendlyName ?? 'Authenticator'} · ${DateTime.now().toIso8601String().split('T').first}';
       final res = await _auth.mfa.enroll(
         factorType: FactorType.totp,
+        // gotrue requires an issuer for TOTP — shown in the auth app.
+        issuer: 'Smart Advisor',
         friendlyName: label,
       );
       return ServiceResult.ok(MfaEnrollment(
