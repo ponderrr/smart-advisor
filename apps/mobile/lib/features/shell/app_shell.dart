@@ -49,11 +49,18 @@ class AppShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final wide = MediaQuery.sizeOf(context).width >= 720;
 
+    // The PWA renders every page on the slate-50/950 background; the tab
+    // screens are plain lists, so the shell provides it here.
+    final bg = brandBg(Theme.of(context).brightness);
+    final tinted = Container(color: bg, child: child);
+
     if (wide) {
       return Scaffold(
+        backgroundColor: bg,
         body: Row(
           children: [
             NavigationRail(
+              backgroundColor: bg,
               selectedIndex: _index,
               onDestinationSelected: (i) => _go(context, i),
               labelType: NavigationRailLabelType.all,
@@ -67,14 +74,14 @@ class AppShell extends StatelessWidget {
               ],
             ),
             const VerticalDivider(width: 1),
-            Expanded(child: child),
+            Expanded(child: tinted),
           ],
         ),
       );
     }
 
     return AdaptiveScaffold(
-      body: child,
+      body: tinted,
       bottomNavigationBar: AdaptiveBottomNavigationBar(
         selectedIndex: _index,
         onTap: (i) => _go(context, i),
