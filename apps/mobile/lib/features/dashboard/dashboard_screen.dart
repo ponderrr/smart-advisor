@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/models/recommendation.dart';
 import '../../core/services/service_providers.dart';
@@ -234,7 +235,9 @@ class DashboardScreen extends ConsumerWidget {
     final mt = matchToneColors(ms.tone, b);
     final who = r.director ?? r.author ?? r.artist;
 
-    return Container(
+    return GestureDetector(
+      onTap: () => context.push('/pick', extra: r),
+      child: Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -329,6 +332,7 @@ class DashboardScreen extends ConsumerWidget {
           ),
         ),
       ]),
+      ),
     );
   }
 }

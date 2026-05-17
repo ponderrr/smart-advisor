@@ -55,12 +55,8 @@ void main() {
     expect(find.text('93%'), findsOneWidget); // match_score used verbatim
     expect(find.text('88%'), findsOneWidget);
 
-    // First card is expanded by default → why-this-pick callout visible
-    // (Eyebrow renders uppercased) plus the explanation text.
-    expect(find.text('WHY THIS PICK'), findsOneWidget);
-    expect(
-      find.text('You said you like quiet, aching stories.'),
-      findsOneWidget,
-    );
+    // Cards are tappable summaries now (tap opens the dedicated detail
+    // page); why-this-pick lives there, not inline.
+    expect(find.text('Get another'), findsOneWidget);
   });
 }

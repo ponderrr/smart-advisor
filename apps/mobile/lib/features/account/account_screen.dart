@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../ui/ui.dart';
 import '../auth/auth_providers.dart';
 import '../notifications/notification_service.dart';
+import '../notifications/notifications_center.dart';
 import '../security/biometric.dart';
 import '../settings/settings_service.dart';
 
@@ -187,14 +188,19 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                       label: 'Remove',
                       style: AdaptiveButtonStyle.plain),
               ]),
+              const SizedBox(height: 16),
+              _rowLabel('Display name'),
+              const SizedBox(height: 6),
+              AdaptiveTextField(
+                  controller: _name, placeholder: 'Your name'),
               const SizedBox(height: 12),
-              AdaptiveTextField(controller: _name, placeholder: 'Name'),
-              const SizedBox(height: 8),
+              _rowLabel('Age'),
+              const SizedBox(height: 6),
               AdaptiveTextField(
                   controller: _age,
-                  placeholder: 'Age',
+                  placeholder: 'Your age',
                   keyboardType: TextInputType.number),
-              const SizedBox(height: 10),
+              const SizedBox(height: 14),
               AdaptiveButton(
                 onPressed: () async {
                   final age = int.tryParse(_age.text.trim()) ?? 0;
@@ -288,8 +294,15 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
               title: const Text('Weekly quiz reminder'),
               value: ref.watch(remindersProvider),
               activeThumbColor: Tw.indigo500,
-              onChanged: (v) =>
-                  ref.read(remindersProvider.notifier).set(v),
+              onChanged: (v) async {
+                await ref.read(remindersProvider.notifier).set(v);
+                if (v) {
+                  await ref
+                      .read(notificationsCenterProvider.notifier)
+                      .add('Weekly reminder on',
+                          'We\'ll nudge you weekly to discover something.');
+                }
+              },
             ),
             _divider(context),
             _tile(Icons.security, 'Two-factor authentication',
@@ -318,6 +331,33 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         _section('Your data'),
         BrandCard(
           child: Column(children: [
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: Icon(Icons.notifications_none,
+                  color: context.colors.foreground),
+              title: const Text('Notifications'),
+              trailing: Builder(builder: (_) {
+                final unread = ref.watch(unreadCountProvider);
+                return Row(mainAxisSize: MainAxisSize.min, children: [
+                  if (unread > 0)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 7, vertical: 2),
+                      decoration: const BoxDecoration(
+                          color: Tw.indigo500,
+                          shape: BoxShape.circle),
+                      child: Text('$unread',
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700)),
+                    ),
+                  Icon(Icons.chevron_right,
+                      color: context.colors.mutedForeground),
+                ]);
+              }),
+              onTap: () => context.push('/notifications'),
+            ),
             _tile(Icons.history, 'Recommendation history',
                 onTap: () => context.push('/history')),
             _tile(Icons.auto_awesome, 'Your Wrapped',

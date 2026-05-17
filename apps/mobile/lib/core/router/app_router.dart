@@ -14,8 +14,11 @@ import '../../features/group_quiz/screens/group_quiz_screen.dart';
 import '../../features/group_quiz/screens/group_quiz_session_screen.dart';
 import '../../features/history/history_screen.dart';
 import '../../features/library/screens/library_screen.dart';
+import '../../features/notifications/notifications_screen.dart';
 import '../../features/maintenance/maintenance_screen.dart';
+import '../../core/models/recommendation.dart';
 import '../../features/onboarding/onboarding_screen.dart';
+import '../../features/recommendations/screens/recommendation_detail_screen.dart';
 import '../../features/quiz/screens/quiz_entry_screen.dart';
 import '../../features/quiz/screens/quiz_screen.dart';
 import '../../features/wrapped/wrapped_screen.dart';
@@ -81,6 +84,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 builder: (_, s) => GroupQuizSessionScreen(
                     code: s.pathParameters['code']!)),
           ]),
+      GoRoute(
+        path: '/pick',
+        builder: (_, s) => RecommendationDetailScreen(
+            rec: s.extra as Recommendation),
+      ),
+      GoRoute(
+          path: '/notifications',
+          builder: (_, _) => const NotificationsScreen()),
       GoRoute(path: '/demo', builder: (_, _) => const DemoScreen()),
       GoRoute(path: '/wrapped', builder: (_, _) => const WrappedScreen()),
       // Quiz is full-screen (the PWA hides the bottom nav on it).

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/models/recommendation.dart';
 import '../../core/services/service_providers.dart';
@@ -93,7 +94,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     );
   }
 
-  Widget _row(Recommendation r) => BrandCard(
+  Widget _row(Recommendation r) => GestureDetector(
+        onTap: () => context.push('/pick', extra: r),
+        child: BrandCard(
         padding: const EdgeInsets.all(14),
         child: Row(children: [
           PosterThumb(url: r.posterUrl, square: r.type == 'music'),
@@ -139,5 +142,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             },
           ),
         ]),
+        ),
       );
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/models/enums.dart';
 import '../../../core/models/library_item.dart';
@@ -25,7 +26,7 @@ class ResultsView extends ConsumerStatefulWidget {
 }
 
 class _ResultsViewState extends ConsumerState<ResultsView> {
-  int _expanded = 0;
+  final int _expanded = -1; // inline expand off — tap opens detail page
   final _favorited = <String>{};
   final _logged = <String>{};
 
@@ -120,7 +121,7 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
         children: [
           GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: () => setState(() => _expanded = open ? -1 : i),
+            onTap: () => context.push('/pick', extra: r),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
