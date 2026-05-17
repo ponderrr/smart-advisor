@@ -18,7 +18,8 @@ void main() {
   testWidgets('DashboardScreen renders header', (t) async {
     await t.pumpWidget(_host(const DashboardScreen()));
     await t.pump();
-    expect(find.text('Your taste, so far'), findsOneWidget);
+    expect(find.text('DASHBOARD'), findsOneWidget);
+    expect(find.text('Start a quiz'), findsOneWidget);
     expect(t.takeException(), isNull);
   });
 

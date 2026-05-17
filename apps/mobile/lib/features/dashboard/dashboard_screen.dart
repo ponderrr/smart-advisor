@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/models/recommendation.dart';
 import '../../core/services/service_providers.dart';
 import '../../ui/ui.dart';
+import '../auth/auth_providers.dart';
 import '../recommendations/services/database_service.dart';
 import '../recommendations/utils/match_score.dart';
 
@@ -26,14 +27,13 @@ class DashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final recs = ref.watch(_dashboardRecsProvider);
+    final name = ref.watch(currentProfileProvider).asData?.value?.name;
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
       children: [
         const SizedBox(height: 8),
-        const Eyebrow('Dashboard'),
-        const SizedBox(height: 4),
-        const BrandHeading('Your taste, so far', size: 26),
-        const SizedBox(height: 18),
+        _hero(context, name),
+        const SizedBox(height: 16),
         recs.when(
           loading: () => const Padding(
               padding: EdgeInsets.all(48),
@@ -42,6 +42,8 @@ class DashboardScreen extends ConsumerWidget {
           data: (list) => list.isEmpty
               ? _empty(context)
               : Column(children: [
+                  _spotlight(context, list.first),
+                  const SizedBox(height: 14),
                   _statGrid(context, list),
                   const SizedBox(height: 14),
                   _sparkline(context, list),
@@ -64,6 +66,133 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
+  String _greeting() {
+    final h = DateTime.now().hour;
+    if (h < 12) return 'Good morning';
+    if (h < 18) return 'Good afternoon';
+    return 'Good evening';
+  }
+
+  /// Web-style hero: greeting + name, a line about the app, and the
+  /// primary "Start a quiz" call to action.
+  Widget _hero(BuildContext context, String? name) {
+    final tone = contentAccent(ContentAccentName.violet,
+        Theme.of(context).brightness);
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: tone.surfaceGradient),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: tone.surfaceBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Eyebrow('Dashboard'),
+          const SizedBox(height: 8),
+          BrandHeading(
+            name == null || name.isEmpty
+                ? '${_greeting()}.'
+                : '${_greeting()}, $name.',
+            size: 26,
+          ),
+          const SizedBox(height: 6),
+          Subtitle(
+              'Your taste, so far — and a fresh set of picks whenever '
+              'you want them.'),
+          const SizedBox(height: 16),
+          Row(children: [
+            Expanded(
+              child: AdaptiveButton(
+                onPressed: () => context.go('/quiz'),
+                label: 'Start a quiz',
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: AdaptiveButton(
+                onPressed: () => context.go('/library'),
+                label: 'My library',
+                style: AdaptiveButtonStyle.bordered,
+              ),
+            ),
+          ]),
+        ],
+      ),
+    );
+  }
+
+  /// Featured most-recent pick, larger than a list row.
+  Widget _spotlight(BuildContext context, Recommendation r) {
+    final b = Theme.of(context).brightness;
+    final accentName = switch (r.type) {
+      'movie' => ContentAccentName.amber,
+      'music' => ContentAccentName.rose,
+      _ => ContentAccentName.emerald,
+    };
+    final tone = contentAccent(accentName, b);
+    final who = r.director ?? r.author ?? r.artist;
+    return GestureDetector(
+      onTap: () => context.push('/pick', extra: r),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: tone.surfaceGradient),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: tone.surfaceBorder),
+        ),
+        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          PosterThumb(url: r.posterUrl, square: r.type == 'music', w: 72),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('LATEST PICK',
+                    style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.4,
+                        color: tone.text)),
+                const SizedBox(height: 6),
+                Text(r.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                        height: 1.15,
+                        color: context.brandInk)),
+                if (who != null)
+                  Text(
+                      '$who${r.year != null ? ' · ${r.year}' : ''}',
+                      style: TextStyle(
+                          fontSize: 12, color: context.brandMuted)),
+                if (r.explanation != null) ...[
+                  const SizedBox(height: 8),
+                  Text(r.explanation!,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          fontSize: 12.5,
+                          height: 1.4,
+                          fontStyle: FontStyle.italic,
+                          color: context.brandMuted)),
+                ],
+              ],
+            ),
+          ),
+        ]),
+      ),
+    );
+  }
+
   Widget _empty(BuildContext c) => BrandCard(
         child: Column(children: [
           Icon(Icons.auto_awesome_outlined,
@@ -76,27 +205,35 @@ class DashboardScreen extends ConsumerWidget {
 
   Widget _statGrid(BuildContext context, List<Recommendation> r) {
     int by(String t) => r.where((x) => x.type == t).length;
-    final tiles = [
+    final top = [
       ('Total', r.length, Icons.bookmark_outline, ContentAccentName.violet),
       ('Favorites', r.where((x) => x.isFavorited).length, Icons.favorite,
           ContentAccentName.rose),
+    ];
+    final byType = [
       ('Movies', by('movie'), Icons.movie_outlined,
           ContentAccentName.amber),
       ('Books', by('book'), Icons.menu_book_outlined,
           ContentAccentName.emerald),
+      ('Music', by('music'), Icons.music_note_outlined,
+          ContentAccentName.rose),
     ];
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 12,
-      crossAxisSpacing: 12,
-      childAspectRatio: 2.4,
-      children: [
-        for (final (label, n, icon, accent) in tiles)
-          _StatTile(label: label, value: n, icon: icon, accent: accent),
-      ],
-    );
+    Widget tile((String, int, IconData, ContentAccentName) t) => _StatTile(
+        label: t.$1, value: t.$2, icon: t.$3, accent: t.$4);
+    return Column(children: [
+      Row(children: [
+        Expanded(child: tile(top[0])),
+        const SizedBox(width: 12),
+        Expanded(child: tile(top[1])),
+      ]),
+      const SizedBox(height: 12),
+      Row(children: [
+        for (var i = 0; i < byType.length; i++) ...[
+          if (i > 0) const SizedBox(width: 12),
+          Expanded(child: tile(byType[i])),
+        ],
+      ]),
+    ]);
   }
 
   Widget _sparkline(BuildContext context, List<Recommendation> r) {
@@ -109,6 +246,23 @@ class DashboardScreen extends ConsumerWidget {
       if (diff >= 0 && diff < 14) counts[13 - diff]++;
     }
     final total = counts.fold<int>(0, (a, b) => a + b);
+    // This week vs the previous week (web's sevenDay / prevSevenDay).
+    var last7 = 0, prev7 = 0;
+    for (final x in r) {
+      final d = DateTime.tryParse(x.createdAt);
+      if (d == null) continue;
+      final diff = now.difference(d).inDays;
+      if (diff >= 0 && diff < 7) {
+        last7++;
+      } else if (diff >= 7 && diff < 14) {
+        prev7++;
+      }
+    }
+    final delta = last7 - prev7;
+    final up = delta >= 0;
+    final deltaTone = contentAccent(
+        up ? ContentAccentName.emerald : ContentAccentName.rose,
+        Theme.of(context).brightness);
     return BrandCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,11 +271,32 @@ class DashboardScreen extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Eyebrow('Last 14 days'),
-              Text('$total picks',
-                  style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: context.brandMuted)),
+              Row(children: [
+                if (delta != 0)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                        color: deltaTone.iconCircleBg,
+                        borderRadius: BorderRadius.circular(999)),
+                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                      Icon(up ? Icons.trending_up : Icons.trending_down,
+                          size: 12, color: deltaTone.text),
+                      const SizedBox(width: 4),
+                      Text('${up ? '+' : ''}$delta vs last wk',
+                          style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              color: deltaTone.text)),
+                    ]),
+                  ),
+                const SizedBox(width: 8),
+                Text('$total picks',
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: context.brandMuted)),
+              ]),
             ],
           ),
           const SizedBox(height: 14),
