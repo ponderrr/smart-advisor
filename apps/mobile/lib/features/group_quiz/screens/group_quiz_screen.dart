@@ -105,6 +105,7 @@ class _S extends ConsumerState<GroupQuizScreen> {
             const Eyebrow('Content'),
             const SizedBox(height: 8),
             AdaptiveSegmentedControl(
+            color: Tw.indigo500,
               labels: const ['Movie', 'Book', 'Music', 'Mix'],
               selectedIndex: _content,
               onValueChanged: (i) => setState(() => _content = i),

@@ -65,6 +65,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     final statusIdx = _status == null ? 0 : _status!.index + 1;
     return Column(children: [
       AdaptiveSegmentedControl(
+            color: Tw.indigo500,
         labels: const ['All', 'Movie', 'Book', 'Music'],
         selectedIndex: mediumIdx,
         onValueChanged: (i) => setState(() =>
@@ -72,6 +73,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
       ),
       const SizedBox(height: 8),
       AdaptiveSegmentedControl(
+            color: Tw.indigo500,
         labels: const ['All', 'Finished', 'In prog', 'Wishlist', 'Dropped'],
         selectedIndex: statusIdx,
         onValueChanged: (i) => setState(() =>

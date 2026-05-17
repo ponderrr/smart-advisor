@@ -58,12 +58,14 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         padding: const EdgeInsets.all(20),
         children: [
           AdaptiveSegmentedControl(
+            color: Tw.indigo500,
             labels: const ['All', 'Movies', 'Books', 'Music', 'Favs'],
             selectedIndex: _mediumIdx,
             onValueChanged: (i) => setState(() => _mediumIdx = i),
           ),
           const SizedBox(height: 8),
           AdaptiveSegmentedControl(
+            color: Tw.indigo500,
             labels: const ['Newest', 'Oldest'],
             selectedIndex: _sortIdx,
             onValueChanged: (i) => setState(() => _sortIdx = i),

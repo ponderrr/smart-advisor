@@ -71,6 +71,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
           ),
           _h('Adaptive segmented control (SF Symbols on iOS)'),
           AdaptiveSegmentedControl(
+            color: Tw.indigo500,
             labels: const ['Movie', 'Book', 'Music'],
             sfSymbols: const ['film.fill', 'book.fill', 'music.note'],
             selectedIndex: _seg,

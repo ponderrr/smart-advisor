@@ -188,6 +188,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
               const Eyebrow('Appearance'),
               const SizedBox(height: 10),
               AdaptiveSegmentedControl(
+            color: Tw.indigo500,
                 labels: const ['System', 'Light', 'Dark'],
                 selectedIndex: switch (themeMode) {
                   ThemeMode.system => 0,
@@ -218,6 +219,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                   : 'Applied to your next quiz.'),
               const SizedBox(height: 10),
               AdaptiveSegmentedControl(
+            color: Tw.indigo500,
                 labels: const ['Standard', 'Family'],
                 selectedIndex: under18 ? 1 : _tone,
                 onValueChanged: under18

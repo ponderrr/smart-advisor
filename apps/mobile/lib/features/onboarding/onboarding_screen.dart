@@ -88,6 +88,7 @@ class _S extends ConsumerState<OnboardingScreen> {
                       controller: _name, placeholder: 'Display name'),
                   const SizedBox(height: 16),
                   AdaptiveSegmentedControl(
+            color: Tw.indigo500,
                     labels: const ['English', 'Español'],
                     selectedIndex: _locale,
                     onValueChanged: (i) => setState(() => _locale = i),
