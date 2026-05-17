@@ -342,8 +342,6 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                   color: context.colors.mutedForeground),
               onTap: () => context.push('/notifications'),
             ),
-            _tile(Icons.history, 'Recommendation history',
-                onTap: () => context.push('/history')),
             _tile(Icons.auto_awesome, 'Your Wrapped',
                 onTap: () => context.push('/wrapped')),
           ]),
