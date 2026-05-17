@@ -57,6 +57,69 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         Theme.of(context).brightness,
       ).text;
 
+  /// Loader phases worded for the chosen content. [building] = quiz build
+  /// phase; otherwise the recommendation phase.
+  List<String> _phases({required bool building}) {
+    switch (_content) {
+      case ContentType.movie:
+        return building
+            ? const [
+                'Reading your taste in film',
+                'Framing your questions',
+                'Setting the scene',
+                'Almost rolling',
+              ]
+            : const [
+                'Screening your answers',
+                'Matching directors & tone',
+                'Curating your watchlist',
+                'Rolling the credits',
+              ];
+      case ContentType.book:
+        return building
+            ? const [
+                'Reading your literary taste',
+                'Shaping your questions',
+                'Dog-earing the details',
+                'Almost off the shelf',
+              ]
+            : const [
+                'Turning your answers over',
+                'Matching authors & themes',
+                'Curating your reading list',
+                'Closing the cover',
+              ];
+      case ContentType.music:
+        return building
+            ? const [
+                'Reading your sound',
+                'Tuning your questions',
+                'Setting the levels',
+                'Almost on the air',
+              ]
+            : const [
+                'Listening to your answers',
+                'Matching artists & mood',
+                'Sequencing your playlist',
+                'Dropping the needle',
+              ];
+      default:
+        return building
+            ? const [
+                'Reading your vibe',
+                'Shaping your questions',
+                'Tuning the details',
+                'Almost ready',
+              ]
+            : const [
+                'Reading your answers',
+                'Matching your taste',
+                'Curating your picks',
+                'Polishing the results',
+              ];
+    }
+  }
+
   Future<void> _loadQuestions() async {
     setState(() {
       _loadingQuestions = true;
@@ -201,12 +264,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         return Center(
           child: PhasedLoader(
             color: _accentColor,
-            phases: const [
-              'Reading your answers',
-              'Matching your taste',
-              'Curating your picks',
-              'Polishing the results',
-            ],
+            phases: _phases(building: false),
           ),
         );
       case _Step.genError:
@@ -350,12 +408,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       return Center(
         child: PhasedLoader(
           color: _accentColor,
-          phases: const [
-            'Reading your vibe',
-            'Shaping your questions',
-            'Tuning the details',
-            'Almost ready',
-          ],
+          phases: _phases(building: true),
         ),
       );
     }

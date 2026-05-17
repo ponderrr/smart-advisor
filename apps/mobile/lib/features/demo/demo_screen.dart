@@ -17,12 +17,11 @@ class DemoScreen extends ConsumerStatefulWidget {
 
 enum _Phase { quiz, generating, results, error }
 
-const _qs = [
-  ('What do you want?', ['Movie', 'Book', 'Music', 'Mix'], 'movie|book|music|mix'),
-  ('Pick a mood', ['Comforting', 'Suspenseful', 'Inspiring', 'Mind-bending'], ''),
-  ('A vibe you love', ['Cozy', 'Epic', 'Dark', 'Playful'], ''),
-  ('Pacing?', ['Slow burn', 'Balanced', 'Fast & intense'], ''),
-];
+// q0 is the content question (its answer is _picks[0], chosen on the
+// bento step). q1–q3 are worded for the chosen content so a book quiz
+// asks book questions, a music quiz asks music questions, etc.
+const _q0 =
+    ('What do you want?', ['Movie', 'Book', 'Music', 'Mix'], 'movie|book|music|mix');
 
 class _DemoScreenState extends ConsumerState<DemoScreen> {
   _Phase _phase = _Phase.quiz;
@@ -44,6 +43,78 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
         'Music' => 'music',
         'Movie' => 'movie',
         _ => 'mix',
+      };
+
+  /// Questions worded for the chosen content. Index 0 stays the content
+  /// question (answered on the bento step); 1–3 are content-specific.
+  List<(String, List<String>, String)> get _qs {
+    switch (_contentType) {
+      case 'movie':
+        return const [
+          _q0,
+          ('What kind of movie night?',
+              ['Comfort watch', 'Edge of my seat', 'Make me think', 'Big spectacle'], ''),
+          ('A film vibe you love',
+              ['Cozy & warm', 'Epic & sweeping', 'Dark & gritty', 'Witty & playful'], ''),
+          ('On-screen pace?',
+              ['Slow burn', 'Balanced', 'Fast & relentless'], ''),
+        ];
+      case 'book':
+        return const [
+          _q0,
+          ('What pulls you into a book?',
+              ['Cozy escape', 'Twisty plot', 'Big ideas', 'Sweeping world'], ''),
+          ('A reading vibe you love',
+              ['Warm & gentle', 'Epic & immersive', 'Dark & literary', 'Sharp & funny'], ''),
+          ('Page-turn pace?',
+              ['Slow & savored', 'Steady', 'Can\'t-put-down'], ''),
+        ];
+      case 'music':
+        return const [
+          _q0,
+          ('What are you in the mood to hear?',
+              ['Easy & comforting', 'Moody & intense', 'Uplifting', 'Adventurous'], ''),
+          ('A sound you love',
+              ['Warm & mellow', 'Big & anthemic', 'Dark & brooding', 'Bright & playful'], ''),
+          ('Energy?',
+              ['Low & slow', 'Mid-tempo', 'High & driving'], ''),
+        ];
+      default: // mix
+        return const [
+          _q0,
+          ('Pick a mood',
+              ['Comforting', 'Suspenseful', 'Inspiring', 'Mind-bending'], ''),
+          ('A vibe you love', ['Cozy', 'Epic', 'Dark', 'Playful'], ''),
+          ('Pacing?', ['Slow burn', 'Balanced', 'Fast & intense'], ''),
+        ];
+    }
+  }
+
+  Color get _accentColor =>
+      contentAccent(_accent, Theme.of(context).brightness).text;
+
+  /// Loader phases worded for the chosen content.
+  List<String> get _demoPhases => switch (_contentType) {
+        'movie' => const [
+            'Screening your answers',
+            'Matching tone & directors',
+            'Curating your picks',
+          ],
+        'book' => const [
+            'Turning your answers over',
+            'Matching authors & themes',
+            'Curating your picks',
+          ],
+        'music' => const [
+            'Listening to your answers',
+            'Matching artists & mood',
+            'Sequencing your picks',
+          ],
+        _ => const [
+            'Reading your answers',
+            'Matching your taste',
+            'Curating your picks',
+          ],
       };
 
   Future<void> _submit() async {
@@ -91,8 +162,12 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
         ),
       ],
       body: switch (_phase) {
-        _Phase.generating =>
-          const Center(child: LoaderFive('Finding your picks')),
+        _Phase.generating => Center(
+            child: PhasedLoader(
+              color: _accentColor,
+              phases: _demoPhases,
+            ),
+          ),
         _Phase.error => Center(
             child: Padding(
               padding: const EdgeInsets.all(24),
