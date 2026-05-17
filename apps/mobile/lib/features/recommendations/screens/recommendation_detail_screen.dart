@@ -1,6 +1,8 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/models/enums.dart';
 import '../../../core/models/library_item.dart';
@@ -23,6 +25,46 @@ class RecommendationDetailScreen extends ConsumerStatefulWidget {
 class _S extends ConsumerState<RecommendationDetailScreen> {
   late bool _fav = widget.rec.isFavorited;
   bool _logged = false;
+  String? _trailerUrl;
+  AudioPlayer? _audio;
+  bool _previewPlaying = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.rec.type == 'movie') _loadTrailer();
+  }
+
+  @override
+  void dispose() {
+    _audio?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadTrailer() async {
+    try {
+      final m = await ref
+          .read(tmdbServiceProvider)
+          .searchMovie(widget.rec.title);
+      if (mounted && m.trailer != null) {
+        setState(() => _trailerUrl = m.trailer);
+      }
+    } catch (_) {/* no trailer */}
+  }
+
+  Future<void> _togglePreview(String url) async {
+    _audio ??= AudioPlayer();
+    if (_previewPlaying) {
+      await _audio!.pause();
+      setState(() => _previewPlaying = false);
+    } else {
+      await _audio!.play(UrlSource(url));
+      setState(() => _previewPlaying = true);
+      _audio!.onPlayerComplete.listen((_) {
+        if (mounted) setState(() => _previewPlaying = false);
+      });
+    }
+  }
 
   ContentAccentName get _accentName => switch (widget.rec.type) {
         'movie' => ContentAccentName.amber,
@@ -137,6 +179,47 @@ class _S extends ConsumerState<RecommendationDetailScreen> {
                     fontSize: 14, height: 1.5, color: context.brandInk)),
           ],
           const SizedBox(height: 24),
+          if (r.type == 'movie' && _trailerUrl != null) ...[
+            AdaptiveButton.child(
+              onPressed: () => launchUrl(Uri.parse(_trailerUrl!),
+                  mode: LaunchMode.externalApplication),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.play_circle_outline,
+                      color: Colors.white, size: 18),
+                  SizedBox(width: 8),
+                  Text('Watch trailer',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
+          if (r.type == 'music' && r.previewUrl != null) ...[
+            AdaptiveButton.child(
+              onPressed: () => _togglePreview(r.previewUrl!),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                      _previewPlaying
+                          ? Icons.pause_circle_outline
+                          : Icons.play_circle_outline,
+                      color: Colors.white,
+                      size: 18),
+                  const SizedBox(width: 8),
+                  Text(_previewPlaying ? 'Pause preview' : 'Play preview',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
           AdaptiveButton(
             onPressed: _logged ? null : _log,
             label: _logged ? 'In your library' : 'Log to library',

@@ -93,7 +93,7 @@ serve(async (req) => {
         // Truncate to 2-3 sentences
         const sentences = detailsData.overview
           .split(/[.!?]+/)
-          .filter((s) => s.trim().length > 0);
+          .filter((s: string) => s.trim().length > 0);
         description =
           sentences.slice(0, 3).join(". ") + (sentences.length > 3 ? "." : "");
         if (description.length > 200) {
@@ -103,6 +103,29 @@ serve(async (req) => {
       if (Array.isArray(detailsData.genres)) {
         genres = detailsData.genres.map((g: { name: string }) => g.name);
       }
+    }
+
+    // Best-effort YouTube trailer.
+    let trailer: string | null = null;
+    try {
+      const vidRes = await fetch(
+        `https://api.themoviedb.org/3/movie/${movie.id}/videos?api_key=${tmdbApiKey}&language=en-US`,
+      );
+      if (vidRes.ok) {
+        const vids = (await vidRes.json()).results ?? [];
+        const pick = vids.find(
+          (v: { site: string; type: string; key: string }) =>
+            v.site === "YouTube" && v.type === "Trailer",
+        ) ??
+          vids.find(
+            (v: { site: string; key: string }) => v.site === "YouTube",
+          );
+        if (pick?.key) {
+          trailer = `https://www.youtube.com/watch?v=${pick.key}`;
+        }
+      }
+    } catch (_) {
+      // no trailer — fine
     }
 
     const result = {
@@ -117,6 +140,7 @@ serve(async (req) => {
         : 7.5,
       description: description,
       genres: genres,
+      trailer: trailer,
     };
 
     console.log("Returning movie data:", result);

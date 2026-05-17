@@ -10,6 +10,7 @@ class MovieSearchResult {
     required this.rating,
     required this.description,
     this.genres = const <String>[],
+    this.trailer,
   });
 
   final String poster;
@@ -17,6 +18,7 @@ class MovieSearchResult {
   final double rating;
   final String description;
   final List<String> genres;
+  final String? trailer; // YouTube URL, if found
 
   factory MovieSearchResult.fromJson(Map<String, dynamic> json) {
     return MovieSearchResult(
@@ -25,6 +27,7 @@ class MovieSearchResult {
       rating: (json['rating'] as num?)?.toDouble() ?? 7.5,
       description: json['description'] as String? ?? '',
       genres: (json['genres'] as List?)?.cast<String>() ?? const <String>[],
+      trailer: json['trailer'] as String?,
     );
   }
 }
