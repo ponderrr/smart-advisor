@@ -136,7 +136,23 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
   Future<void> _action(LibraryItem i, String v) async {
     final svc = ref.read(libraryServiceProvider);
     if (v == 'remove') {
-      await svc.remove(i.id);
+      await AdaptiveAlertDialog.show(
+        context: context,
+        title: 'Remove from library?',
+        message: '“${i.title}” will be removed.',
+        icon: Icons.delete_outline,
+        actions: [
+          AlertAction(
+              title: 'Cancel',
+              style: AlertActionStyle.cancel,
+              onPressed: () {}),
+          AlertAction(
+            title: 'Remove',
+            style: AlertActionStyle.destructive,
+            onPressed: () async => svc.remove(i.id),
+          ),
+        ],
+      );
     } else if (v == 'edit') {
       await _editDialog(i);
     } else {

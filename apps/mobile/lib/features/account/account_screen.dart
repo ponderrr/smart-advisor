@@ -54,54 +54,49 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     bool obscure = false,
     required Future<dynamic> Function(String) onSave,
   }) async {
-    final ctrl = TextEditingController();
-    await showDialog<void>(
+    final value = await AdaptiveAlertDialog.inputShow(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(title),
-        content: AdaptiveTextField(
-            controller: ctrl, placeholder: hint, obscureText: obscure),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel')),
-          TextButton(
-            onPressed: () async {
-              final r = await onSave(ctrl.text.trim());
-              if (!ctx.mounted) return;
-              Navigator.pop(ctx);
-              setState(() => _msg = r.isError ? r.error : 'Saved');
-            },
-            child: const Text('Save'),
-          ),
-        ],
-      ),
+      title: title,
+      icon: Icons.edit_outlined,
+      input: AdaptiveAlertDialogInput(
+          placeholder: hint, obscureText: obscure),
+      actions: [
+        AlertAction(
+            title: 'Cancel',
+            style: AlertActionStyle.cancel,
+            onPressed: () {}),
+        AlertAction(
+            title: 'Save',
+            style: AlertActionStyle.primary,
+            onPressed: () {}),
+      ],
     );
-    ctrl.dispose();
+    if (value == null || value.trim().isEmpty) return;
+    final r = await onSave(value.trim());
+    showBanner(r.isError ? r.error! : 'Saved');
   }
 
   Future<void> _confirmDanger(
       String title, String body, Future<String?> Function() run) async {
-    await showDialog<void>(
+    await AdaptiveAlertDialog.show(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(title),
-        content: Text(body),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel')),
-          TextButton(
-            onPressed: () async {
-              final err = await run();
-              if (!ctx.mounted) return;
-              Navigator.pop(ctx);
-              if (err != null) setState(() => _msg = err);
-            },
-            child: const Text('Confirm'),
-          ),
-        ],
-      ),
+      title: title,
+      message: body,
+      icon: Icons.warning_amber_rounded,
+      actions: [
+        AlertAction(
+            title: 'Cancel',
+            style: AlertActionStyle.cancel,
+            onPressed: () {}),
+        AlertAction(
+          title: 'Confirm',
+          style: AlertActionStyle.destructive,
+          onPressed: () async {
+            final err = await run();
+            if (err != null) showBanner(err);
+          },
+        ),
+      ],
     );
   }
 
