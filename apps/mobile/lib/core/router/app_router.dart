@@ -3,9 +3,14 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/account/account_screen.dart';
+import '../../features/account/mfa_setup_screen.dart';
 import '../../features/auth/auth_providers.dart';
 import '../../features/auth/screens/auth_screen.dart';
 import '../../features/auth/screens/reset_password_screen.dart';
+import '../../features/dashboard/dashboard_screen.dart';
+import '../../features/history/history_screen.dart';
+import '../../features/library/screens/library_screen.dart';
 import '../../features/maintenance/maintenance_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/quiz/screens/quiz_screen.dart';
@@ -62,21 +67,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
           path: '/maintenance',
           builder: (_, _) => const MaintenanceScreen()),
+      GoRoute(
+          path: '/history', builder: (_, _) => const HistoryScreen()),
+      GoRoute(
+          path: '/account/mfa-setup',
+          builder: (_, _) => const MfaSetupScreen()),
       ShellRoute(
         builder: (context, state, child) =>
             AppShell(location: state.matchedLocation, child: child),
         routes: [
           GoRoute(
-              path: '/',
-              builder: (_, _) => const PlaceholderTab('Home')),
+              path: '/', builder: (_, _) => const DashboardScreen()),
           GoRoute(
               path: '/quiz', builder: (_, _) => const QuizScreen()),
           GoRoute(
               path: '/library',
-              builder: (_, _) => const PlaceholderTab('Library')),
+              builder: (_, _) => const LibraryScreen()),
           GoRoute(
               path: '/account',
-              builder: (_, _) => const PlaceholderTab('Account')),
+              builder: (_, _) => const AccountScreen()),
         ],
       ),
     ],

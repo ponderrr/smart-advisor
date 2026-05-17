@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/config/env.dart';
 import 'core/router/app_router.dart';
 import 'core/supabase/supabase_providers.dart';
+import 'features/settings/settings_service.dart';
 import 'ui/adaptive.dart';
 import 'ui/theme/app_theme.dart';
 
@@ -42,7 +43,7 @@ class SmartAdvisorApp extends ConsumerWidget {
     return AdaptiveApp.router(
       title: 'Smart Advisor',
       routerConfig: router,
-      themeMode: ThemeMode.system,
+      themeMode: ref.watch(themeModeProvider),
       materialLightTheme: AppTheme.light(),
       materialDarkTheme: AppTheme.dark(),
     );
