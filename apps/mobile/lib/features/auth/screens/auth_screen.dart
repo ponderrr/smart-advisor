@@ -280,18 +280,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           const SizedBox(height: 16),
           AdaptiveButton(
               onPressed: _busy ? null : _submitSignIn, label: 'Sign in'),
-          const SizedBox(height: 8),
-          AdaptiveButton(
-              onPressed: _busy
-                  ? null
-                  : () => _run(() async {
-                        final r = await ref
-                            .read(authServiceProvider)
-                            .signInWithGoogle();
-                        if (r.isError) setState(() => _error = r.error);
-                      }),
-              label: 'Continue with Google',
-              style: AdaptiveButtonStyle.bordered),
           const SizedBox(height: 12),
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
             _switchLink('Create account', AuthMode.signup),

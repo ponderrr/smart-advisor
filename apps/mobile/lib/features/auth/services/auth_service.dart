@@ -112,19 +112,6 @@ class AuthService {
     }
   }
 
-  Future<ServiceResult<void>> signInWithGoogle() async {
-    try {
-      await _auth.signInWithOAuth(
-        OAuthProvider.google,
-        redirectTo: 'live.smartadvisor://auth/callback',
-      );
-      return ServiceResult.ok(null);
-    } on AuthException catch (e) {
-      return ServiceResult.fail(
-          toUserFriendlyError(e.message, 'Google sign-in failed.'));
-    }
-  }
-
   Future<ServiceResult<void>> resetPassword(String email) async {
     try {
       await _auth.resetPasswordForEmail(_norm(email),
