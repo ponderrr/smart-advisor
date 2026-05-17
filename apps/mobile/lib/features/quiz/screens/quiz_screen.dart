@@ -139,25 +139,46 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Interactive steps live in a centered, max-width branded card like the
+    // web /quiz. Generating + results stay full-bleed (their own scrollers).
+    final framed = _step == _Step.content ||
+        _step == _Step.count ||
+        _step == _Step.questions ||
+        _step == _Step.genError;
+
+    final switcher = AnimatedSwitcher(
+      duration: const Duration(milliseconds: 320),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      transitionBuilder: (child, animation) => FadeTransition(
+        opacity: animation,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: Offset(0.22 * _dir, 0),
+            end: Offset.zero,
+          ).animate(animation),
+          child: child,
+        ),
+      ),
+      child: KeyedSubtree(
+          key: ValueKey('${_step}_$_qIndex'), child: _content_()),
+    );
+
     return BrandScaffold(
       body: SafeArea(
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 320),
-          switchInCurve: Curves.easeOutCubic,
-          switchOutCurve: Curves.easeInCubic,
-          transitionBuilder: (child, animation) => FadeTransition(
-            opacity: animation,
-            child: SlideTransition(
-              position: Tween<Offset>(
-                begin: Offset(0.22 * _dir, 0),
-                end: Offset.zero,
-              ).animate(animation),
-              child: child,
-            ),
-          ),
-          child: KeyedSubtree(
-              key: ValueKey('${_step}_$_qIndex'), child: _content_()),
-        ),
+        child: framed
+            ? Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 480),
+                    child: BrandCard(
+                        padding: const EdgeInsets.all(24),
+                        child: switcher),
+                  ),
+                ),
+              )
+            : switcher,
       ),
     );
   }
@@ -183,9 +204,6 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     }
   }
 
-  Widget _pad(Widget child) =>
-      Padding(padding: const EdgeInsets.all(24), child: child);
-
   Widget _contentStep() {
     const opts = [
       (ContentType.movie, 'Movie', 'Films picked for your taste',
@@ -197,19 +215,19 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       (ContentType.mix, 'Mix', 'A little of everything',
           Icons.auto_awesome_outlined),
     ];
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-        const SizedBox(height: 4),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
         Align(
           alignment: Alignment.centerLeft,
           child: IconButton(
             padding: EdgeInsets.zero,
             icon: const Icon(Icons.arrow_back),
-            onPressed: () =>
-                context.canPop() ? context.pop() : context.go('/'),
+            // First step: leave the quiz entirely. (Solo enters via
+            // /quiz/solo, a child of /quiz, so pop() would just reveal a
+            // duplicate quiz — go home instead.)
+            onPressed: () => context.go('/'),
           ),
         ),
         const Eyebrow('Smart Advisor'),
@@ -239,8 +257,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           },
           label: 'Continue',
         ),
-        ],
-      ),
+      ],
     );
   }
 
@@ -248,9 +265,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     final accent = accentForContentType(_content);
     final tone =
         contentAccent(accent, Theme.of(context).brightness);
-    return _pad(Column(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const BrandHeading('How many questions?', size: 24),
         const SizedBox(height: 16),
@@ -309,7 +326,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           ),
         ]),
       ],
-    ));
+    );
   }
 
   Widget _questionsStep() {
@@ -331,9 +348,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         ? (v is List<String> && v.isNotEmpty)
         : (v is String && v.trim().isNotEmpty);
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-      child: Column(
+    return Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(children: [
@@ -367,8 +383,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             Subtitle('Pick all that apply'),
           ],
           const SizedBox(height: 18),
-          Expanded(child: SingleChildScrollView(child: _questionInput(q))),
-          const SizedBox(height: 8),
+          _questionInput(q),
+          const SizedBox(height: 16),
           Row(children: [
             Expanded(
               child: AdaptiveButton(
@@ -389,7 +405,6 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             ),
           ]),
         ],
-      ),
     );
   }
 
@@ -477,8 +492,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
   Widget _errorStep() {
     final c = context.colors;
-    return _pad(Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(_genOverloaded ? 'Our AI is busy' : 'Something went wrong',
             style: TextStyle(
@@ -495,6 +510,6 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         const SizedBox(height: 16),
         AdaptiveButton(onPressed: _generate, label: 'Try again'),
       ],
-    ));
+    );
   }
 }
