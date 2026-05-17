@@ -205,48 +205,74 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
   Future<void> _editDialog(LibraryItem i) async {
     final reaction = TextEditingController(text: i.reaction ?? '');
     var rating = i.rating ?? 2;
-    await showDialog<void>(
+    await showModalBottomSheet<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Edit'),
-        content: Column(mainAxisSize: MainAxisSize.min, children: [
-          StatefulBuilder(
-            builder: (_, setSB) => Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                for (final (r, icon) in [
-                  (1, Icons.thumb_down_outlined),
-                  (2, Icons.remove),
-                  (3, Icons.thumb_up_outlined),
-                ])
-                  IconButton(
-                    icon: Icon(icon,
-                        color: rating == r
-                            ? Tw.indigo500
-                            : context.brandMuted),
-                    onPressed: () => setSB(() => rating = r),
-                  ),
-              ],
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (_, setSB) => Container(
+          padding: EdgeInsets.fromLTRB(
+              20, 16, 20, MediaQuery.of(ctx).viewInsets.bottom + 24),
+          decoration: BoxDecoration(
+            color: brandBg(Theme.of(ctx).brightness),
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Container(
+              width: 44,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                  color: ctx.colors.border,
+                  borderRadius: BorderRadius.circular(999)),
             ),
-          ),
-          AdaptiveTextField(
-              controller: reaction, placeholder: 'One-line reaction'),
-        ]),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel')),
-          TextButton(
-            onPressed: () async {
-              await ref.read(libraryServiceProvider).update(
-                  i.id,
-                  UpdateLibraryInput(
-                      rating: rating, reaction: reaction.text.trim()));
-              if (ctx.mounted) Navigator.pop(ctx);
-            },
-            child: const Text('Save'),
-          ),
-        ],
+            Align(
+                alignment: Alignment.centerLeft,
+                child: BrandHeading(i.title, size: 20)),
+            const SizedBox(height: 16),
+            const Align(
+                alignment: Alignment.centerLeft,
+                child: Eyebrow('Rating')),
+            const SizedBox(height: 8),
+            AdaptiveSegmentedControl(
+              color: Tw.indigo500,
+              labels: const ['👎  Nope', '😐  Meh', '👍  Loved'],
+              selectedIndex: rating - 1,
+              onValueChanged: (idx) => setSB(() => rating = idx + 1),
+            ),
+            const SizedBox(height: 16),
+            const Align(
+                alignment: Alignment.centerLeft,
+                child: Eyebrow('Reaction')),
+            const SizedBox(height: 8),
+            AdaptiveTextField(
+                controller: reaction, placeholder: 'One-line reaction'),
+            const SizedBox(height: 20),
+            Row(children: [
+              Expanded(
+                child: AdaptiveButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    label: 'Cancel',
+                    style: AdaptiveButtonStyle.bordered),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: AdaptiveButton(
+                  onPressed: () async {
+                    await ref.read(libraryServiceProvider).update(
+                        i.id,
+                        UpdateLibraryInput(
+                            rating: rating,
+                            reaction: reaction.text.trim()));
+                    if (ctx.mounted) Navigator.pop(ctx);
+                  },
+                  label: 'Save',
+                ),
+              ),
+            ]),
+          ]),
+        ),
       ),
     );
     reaction.dispose();
