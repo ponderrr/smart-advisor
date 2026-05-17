@@ -293,6 +293,17 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
             _switchLink('Create account', AuthMode.signup),
             _switchLink('Forgot password?', AuthMode.forgot),
           ]),
+          const SizedBox(height: 12),
+          Center(
+            child: GestureDetector(
+              onTap: () => context.go('/demo'),
+              child: Text('Try the demo first',
+                  style: TextStyle(
+                      color: context.colors.mutedForeground,
+                      fontSize: 13,
+                      decoration: TextDecoration.underline)),
+            ),
+          ),
         ];
     }
   }

@@ -31,6 +31,63 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     super.dispose();
   }
 
+  Future<void> _editField({
+    required String title,
+    required String hint,
+    bool obscure = false,
+    required Future<dynamic> Function(String) onSave,
+  }) async {
+    final ctrl = TextEditingController();
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(title),
+        content: AdaptiveTextField(
+            controller: ctrl, placeholder: hint, obscureText: obscure),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel')),
+          TextButton(
+            onPressed: () async {
+              final r = await onSave(ctrl.text.trim());
+              if (!ctx.mounted) return;
+              Navigator.pop(ctx);
+              setState(() => _msg = r.isError ? r.error : 'Saved');
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    ctrl.dispose();
+  }
+
+  Future<void> _confirmDanger(
+      String title, String body, Future<String?> Function() run) async {
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(title),
+        content: Text(body),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel')),
+          TextButton(
+            onPressed: () async {
+              final err = await run();
+              if (!ctx.mounted) return;
+              Navigator.pop(ctx);
+              if (err != null) setState(() => _msg = err);
+            },
+            child: const Text('Confirm'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final profile = ref.watch(currentProfileProvider).asData?.value;
@@ -160,12 +217,70 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Eyebrow('Managed on the web'),
+              const Eyebrow('Security'),
               const SizedBox(height: 6),
-              Subtitle(
-                  'Email/password changes, account deletion, and session '
-                  'management require extra verification and are handled on '
-                  'smartadvisor.live for now.'),
+              Subtitle('These require 2FA verification (AAL2).'),
+              const SizedBox(height: 10),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.mail_outline),
+                title: const Text('Change email'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _editField(
+                  title: 'New email',
+                  hint: 'name@example.com',
+                  onSave: (v) =>
+                      ref.read(authServiceProvider).changeEmail(v),
+                ),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.lock_outline),
+                title: const Text('Change password'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _editField(
+                  title: 'New password',
+                  hint: '8+ chars, mixed case, number, symbol',
+                  obscure: true,
+                  onSave: (v) =>
+                      ref.read(authServiceProvider).changePassword(v),
+                ),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.pause_circle_outline),
+                title: const Text('Disable account'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _confirmDanger(
+                  'Disable account?',
+                  'You will be signed out and locked out until re-enabled.',
+                  () async {
+                    final r = await ref
+                        .read(authServiceProvider)
+                        .disableAccount();
+                    if (!r.isError && context.mounted) context.go('/auth');
+                    return r.error;
+                  },
+                ),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(Icons.delete_forever_outlined,
+                    color: context.colors.destructive),
+                title: Text('Delete account',
+                    style: TextStyle(color: context.colors.destructive)),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _confirmDanger(
+                  'Delete account?',
+                  'This permanently erases your data. Cannot be undone.',
+                  () async {
+                    final r =
+                        await ref.read(authServiceProvider).deleteAccount();
+                    if (!r.isError && context.mounted) context.go('/auth');
+                    return r.error;
+                  },
+                ),
+              ),
             ],
           ),
         ),

@@ -149,6 +149,46 @@ class AuthService {
     }
   }
 
+  /// AAL2-gated account ops via the Edge Functions (account-*). The
+  /// function verifies the token's aal claim; a 403 means the user must
+  /// step up (re-verify 2FA) first.
+  Future<ServiceResult<void>> _invokeAccount(
+      String fn, Map<String, dynamic>? body) async {
+    try {
+      final res = await _c.functions.invoke(fn, body: body ?? {});
+      final data = res.data;
+      if (data is Map && (data['ok'] == true || data['success'] == true)) {
+        return ServiceResult.ok(null);
+      }
+      final msg = (data is Map ? data['error'] : null) as String?;
+      return ServiceResult.fail(msg ?? 'Request failed.');
+    } on FunctionException catch (e) {
+      final d = e.details;
+      if (e.status == 403) {
+        return ServiceResult.fail(
+            'Verify your second factor (2FA) before changing this.');
+      }
+      return ServiceResult.fail(
+          (d is Map && d['error'] is String) ? d['error'] as String
+              : 'Request failed (${e.status}).');
+    }
+  }
+
+  Future<ServiceResult<void>> changeEmail(String email) =>
+      _invokeAccount('account-email', {'email': email.trim().toLowerCase()});
+
+  Future<ServiceResult<void>> changePassword(String password) =>
+      _invokeAccount('account-password', {'password': password});
+
+  Future<ServiceResult<void>> disableAccount() =>
+      _invokeAccount('account-disable', null);
+
+  Future<ServiceResult<void>> deleteAccount() async {
+    final r = await _invokeAccount('account-delete', null);
+    if (!r.isError) await _auth.signOut();
+    return r;
+  }
+
   Future<ServiceResult<void>> signOut() async {
     try {
       await _auth.signOut();

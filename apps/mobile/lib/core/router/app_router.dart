@@ -9,6 +9,7 @@ import '../../features/auth/auth_providers.dart';
 import '../../features/auth/screens/auth_screen.dart';
 import '../../features/auth/screens/reset_password_screen.dart';
 import '../../features/dashboard/dashboard_screen.dart';
+import '../../features/demo/demo_screen.dart';
 import '../../features/group_quiz/screens/group_quiz_screen.dart';
 import '../../features/group_quiz/screens/group_quiz_session_screen.dart';
 import '../../features/history/history_screen.dart';
@@ -78,6 +79,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 builder: (_, s) => GroupQuizSessionScreen(
                     code: s.pathParameters['code']!)),
           ]),
+      GoRoute(path: '/demo', builder: (_, _) => const DemoScreen()),
       GoRoute(
           path: '/history', builder: (_, _) => const HistoryScreen()),
       GoRoute(

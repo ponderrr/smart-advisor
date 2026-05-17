@@ -20,3 +20,30 @@ enabled = true
 verify_jwt = false
 import_map = "./functions/google-books-proxy/import_map.json"
 entrypoint = "./functions/google-books-proxy/index.ts"
+
+# verify_jwt=false: account-* do their own AAL2 check (need the raw token);
+# demo-recommendations is intentionally unauthenticated (rate-limited by IP).
+[functions.account-email]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/account-email/index.ts"
+
+[functions.account-password]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/account-password/index.ts"
+
+[functions.account-delete]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/account-delete/index.ts"
+
+[functions.account-disable]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/account-disable/index.ts"
+
+[functions.demo-recommendations]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/demo-recommendations/index.ts"
