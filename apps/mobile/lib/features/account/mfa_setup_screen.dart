@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../ui/ui.dart';
 import '../auth/auth_providers.dart';
 import '../auth/services/mfa_service.dart';
 
-/// Port of web /account/mfa-setup (client MFA path): enroll → show QR +
-/// secret → verify 6-digit code. Backup-codes step is deferred (backup
-/// service not yet ported).
+/// Client MFA setup: enroll → show the copyable TOTP secret (no QR — you
+/// can't scan the phone you're setting up on; add the secret to an
+/// authenticator app or use the website) → verify 6-digit code → backup
+/// codes.
 class MfaSetupScreen extends ConsumerStatefulWidget {
   const MfaSetupScreen({super.key});
 
@@ -150,26 +150,31 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
               AdaptiveButton(onPressed: _start, label: 'Retry'),
             ],
           ] else ...[
-            const Eyebrow('Step 1 · Scan'),
+            const Eyebrow('Step 1 · Add the key'),
             const SizedBox(height: 8),
-            Subtitle('Scan this with your authenticator app, or enter the '
-                'secret manually.'),
+            Subtitle('Add this secret to your authenticator app (Google '
+                'Authenticator, 1Password, etc.), or set up 2FA on '
+                'smartadvisor.live. Then enter the 6-digit code below.'),
             const SizedBox(height: 16),
-            Center(
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                color: Colors.white,
-                child: QrImageView(data: _enroll!.uri, size: 180),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Center(
-              child: TextButton.icon(
-                icon: const Icon(Icons.copy, size: 16),
-                label: Text(_enroll!.secret),
-                onPressed: () => Clipboard.setData(
-                    ClipboardData(text: _enroll!.secret)),
-              ),
+            BrandCard(
+              child: Row(children: [
+                Expanded(
+                  child: SelectableText(
+                    _enroll!.secret,
+                    style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 16,
+                        letterSpacing: 2,
+                        color: context.brandInk),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.copy, size: 18),
+                  tooltip: 'Copy secret',
+                  onPressed: () => Clipboard.setData(
+                      ClipboardData(text: _enroll!.secret)),
+                ),
+              ]),
             ),
             const SizedBox(height: 20),
             const Eyebrow('Step 2 · Verify'),
