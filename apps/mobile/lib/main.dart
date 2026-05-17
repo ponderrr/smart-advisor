@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/config/env.dart';
 import 'core/router/app_router.dart';
+import 'ui/adaptive.dart';
 import 'ui/theme/app_theme.dart';
 
 Future<void> main() async {
@@ -25,13 +26,15 @@ class SmartAdvisorApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouterProvider);
-    return MaterialApp.router(
+    // Adaptive-first root: Material theming on Android, native iOS 26 on
+    // iOS. Both themes use our ported tokens so the brand colors are
+    // consistent across the platform-native chrome.
+    return AdaptiveApp.router(
       title: 'Smart Advisor',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
-      themeMode: ThemeMode.system,
       routerConfig: router,
+      themeMode: ThemeMode.system,
+      materialLightTheme: AppTheme.light(),
+      materialDarkTheme: AppTheme.dark(),
     );
   }
 }

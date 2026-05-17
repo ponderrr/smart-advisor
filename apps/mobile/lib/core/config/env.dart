@@ -25,6 +25,10 @@ class Env {
       ? _defineAnonKey
       : (dotenv.maybeGet('SUPABASE_ANON_KEY') ?? '');
 
+  /// Optional maintenance kill-switch (parity with web MAINTENANCE_MODE).
+  static bool get maintenanceMode =>
+      (dotenv.maybeGet('MAINTENANCE_MODE') ?? '').toLowerCase() == 'true';
+
   /// Loads the .env asset. Safe if it's absent (e.g. when values come from
   /// --dart-define instead) — resolution simply falls through to defines.
   static Future<void> load() async {
