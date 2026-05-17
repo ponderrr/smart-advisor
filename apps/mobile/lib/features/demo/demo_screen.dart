@@ -27,6 +27,7 @@ const _qs = [
 class _DemoScreenState extends ConsumerState<DemoScreen> {
   _Phase _phase = _Phase.quiz;
   int _i = 0;
+  int _dir = 1; // slide direction (1 forward, -1 back)
   final _picks = <int, String>{};
   final _free = TextEditingController();
   DemoResult? _result;
@@ -105,14 +106,36 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
             ),
           ),
         _Phase.results => _results(),
-        _Phase.quiz => _quiz(),
+        _Phase.quiz => AnimatedSwitcher(
+            duration: const Duration(milliseconds: 320),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            transitionBuilder: (child, anim) => FadeTransition(
+              opacity: anim,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: Offset(0.22 * _dir, 0),
+                  end: Offset.zero,
+                ).animate(anim),
+                child: child,
+              ),
+            ),
+            child: KeyedSubtree(
+                key: ValueKey(_i), child: _quiz()),
+          ),
       },
     );
   }
 
+  ContentAccentName get _accent => switch (_picks[0]) {
+        'Movie' => ContentAccentName.amber,
+        'Book' => ContentAccentName.emerald,
+        'Music' => ContentAccentName.rose,
+        _ => ContentAccentName.violet,
+      };
+
   Widget _optionTile(String label, bool selected, VoidCallback onTap) {
-    final tone = contentAccent(
-        ContentAccentName.violet, Theme.of(context).brightness);
+    final tone = contentAccent(_accent, Theme.of(context).brightness);
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -147,41 +170,108 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
     );
   }
 
+  void _back() {
+    setState(() {
+      _dir = -1;
+      if (_i > 0) _i--;
+    });
+    if (_i == 0 && context.canPop()) context.pop();
+  }
+
+  void _next() => setState(() {
+        _dir = 1;
+        _i++;
+      });
+
   Widget _quiz() {
+    final total = _qs.length + 1; // + free-text
     final last = _i == _qs.length;
+
+    // Step 0 = content selection (bento), like the real quiz.
+    if (_i == 0) {
+      const opts = [
+        ('Movie', ContentAccentName.amber, Icons.movie_outlined,
+            'Films picked for your taste'),
+        ('Book', ContentAccentName.emerald, Icons.menu_book_outlined,
+            'Reads that fit who you are'),
+        ('Music', ContentAccentName.rose, Icons.music_note_outlined,
+            'Albums tuned to your mood'),
+        ('Mix', ContentAccentName.violet, Icons.auto_awesome_outlined,
+            'A little of everything'),
+      ];
+      return ListView(padding: const EdgeInsets.all(24), children: [
+        const SizedBox(height: 4),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () =>
+                context.canPop() ? context.pop() : context.go('/auth'),
+          ),
+        ),
+        const Eyebrow('Demo'),
+        const SizedBox(height: 6),
+        const BrandHeading('What are you in the mood for?', size: 24),
+        const SizedBox(height: 20),
+        for (final (label, accent, icon, desc) in opts)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: ContentBentoTile(
+              accent: accent,
+              icon: icon,
+              label: label,
+              description: desc,
+              selected: _picks[0] == label,
+              onTap: () => setState(() => _picks[0] = label),
+            ),
+          ),
+        const SizedBox(height: 8),
+        AdaptiveButton(
+          onPressed: _picks[0] == null ? null : _next,
+          label: 'Continue',
+        ),
+      ]);
+    }
+
+    final answered = last
+        ? _free.text.trim().isNotEmpty
+        : _picks[_i] != null;
+
     return ListView(padding: const EdgeInsets.all(24), children: [
-      BrandProgressBar(
-          value: (_i + 1) / (_qs.length + 1),
-          accent: ContentAccentName.violet),
-      const SizedBox(height: 16),
-      Eyebrow('Question ${_i + 1} of ${_qs.length + 1}'),
-      const SizedBox(height: 8),
+      const SizedBox(height: 4),
+      Row(children: [
+        IconButton(
+          padding: EdgeInsets.zero,
+          icon: const Icon(Icons.arrow_back),
+          onPressed: _back,
+        ),
+        Expanded(
+            child: Eyebrow('Question ${_i + 1} of $total')),
+      ]),
+      const SizedBox(height: 10),
+      BrandProgressBar(value: (_i + 1) / total, accent: _accent),
+      const SizedBox(height: 20),
       if (!last) ...[
         BrandHeading(_qs[_i].$1, size: 22),
         const SizedBox(height: 16),
         for (final o in _qs[_i].$2)
-          _optionTile(o, _picks[_i] == o, () => setState(() {
-                _picks[_i] = o;
-                _i++;
-              })),
+          _optionTile(o, _picks[_i] == o,
+              () => setState(() => _picks[_i] = o)),
       ] else ...[
         const BrandHeading('Describe your perfect pick', size: 22),
         const SizedBox(height: 16),
         AdaptiveTextField(
             controller: _free,
             placeholder: 'e.g. a slow-burn mystery that stays with me',
-            maxLines: 3),
-        const SizedBox(height: 16),
-        AdaptiveButton(onPressed: _submit, label: 'See my picks'),
+            maxLines: 3,
+            onChanged: (_) => setState(() {})),
       ],
-      if (_i > 0)
-        Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: AdaptiveButton(
-              onPressed: () => setState(() => _i--),
-              label: 'Back',
-              style: AdaptiveButtonStyle.plain),
-        ),
+      const SizedBox(height: 16),
+      AdaptiveButton(
+        onPressed: !answered ? null : (last ? _submit : _next),
+        label: last ? 'See my picks' : 'Next',
+      ),
     ]);
   }
 

@@ -11,9 +11,9 @@ void main() {
     ));
     await t.pump();
 
-    expect(find.text('What do you want?'), findsOneWidget);
-    expect(find.text('Movie'), findsOneWidget);
-    expect(find.text('Mix'), findsOneWidget);
-    expect(find.text('Sign up'), findsOneWidget);
+    expect(find.text('What are you in the mood for?'), findsOneWidget);
+    expect(find.text('Movie'), findsWidgets);
+    expect(find.text('Mix'), findsWidgets);
+    expect(find.byIcon(Icons.arrow_back), findsOneWidget);
   });
 }
