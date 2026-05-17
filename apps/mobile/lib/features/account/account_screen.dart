@@ -271,7 +271,9 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
               contentPadding: EdgeInsets.zero,
               secondary: const Icon(Icons.fingerprint),
               title: const Text('App lock'),
-              subtitle: const Text('Face ID / Touch ID / fingerprint'),
+              subtitle: Text(PlatformInfo.isIOS
+                  ? 'Require Face ID / Touch ID to open'
+                  : 'Require fingerprint or face unlock to open'),
               value: ref.watch(biometricLockProvider),
               activeThumbColor: Tw.indigo500,
               onChanged: (v) async {
