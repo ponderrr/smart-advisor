@@ -103,6 +103,34 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     );
   }
 
+  Widget _section(String t) => Padding(
+        padding: const EdgeInsets.fromLTRB(4, 22, 4, 8),
+        child: Eyebrow(t),
+      );
+
+  Widget _rowLabel(String t) => Text(t,
+      style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w700,
+          color: context.colors.foreground));
+
+  Widget _divider(BuildContext c) =>
+      Divider(height: 28, color: c.colors.border);
+
+  Widget _tile(IconData icon, String title,
+      {String? subtitle, bool destructive = false, VoidCallback? onTap}) {
+    final col =
+        destructive ? context.colors.destructive : context.colors.foreground;
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(icon, color: col),
+      title: Text(title, style: TextStyle(color: col)),
+      subtitle: subtitle == null ? null : Text(subtitle),
+      trailing: Icon(Icons.chevron_right, color: context.colors.mutedForeground),
+      onTap: onTap,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final profile = ref.watch(currentProfileProvider).asData?.value;
@@ -183,14 +211,15 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         ),
         const SizedBox(height: 12),
 
+        _section('Preferences'),
         BrandCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Eyebrow('Appearance'),
-              const SizedBox(height: 10),
+              _rowLabel('Theme'),
+              const SizedBox(height: 8),
               AdaptiveSegmentedControl(
-            color: Tw.indigo500,
+                color: Tw.indigo500,
                 labels: const ['System', 'Light', 'Dark'],
                 selectedIndex: switch (themeMode) {
                   ThemeMode.system => 0,
@@ -205,21 +234,13 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                       _ => ThemeMode.system,
                     }),
               ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-
-        BrandCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Eyebrow('Content tone'),
-              const SizedBox(height: 6),
+              _divider(context),
+              _rowLabel('Content tone'),
+              const SizedBox(height: 2),
               Subtitle(under18
                   ? 'Family-friendly is locked for under-18.'
                   : 'Applied to your next quiz.'),
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
               AdaptiveSegmentedControl(
                 color: (under18 || _tone == 1)
                     ? Tw.emerald500
@@ -240,141 +261,107 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             ],
           ),
         ),
-        const SizedBox(height: 12),
 
-        BrandCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Eyebrow('Security & alerts'),
-              const SizedBox(height: 4),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('App lock (Face ID / fingerprint)'),
-                value: ref.watch(biometricLockProvider),
-                activeThumbColor: Tw.indigo500,
-                onChanged: (v) async {
-                  if (v && !await biometricAvailable()) {
-                    if (!context.mounted) return;
-                    setState(() => _msg =
-                        'No biometrics enrolled on this device.');
-                    return;
-                  }
-                  await ref.read(biometricLockProvider.notifier).set(v);
-                },
-              ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Weekly quiz reminder'),
-                value: ref.watch(remindersProvider),
-                activeThumbColor: Tw.indigo500,
-                onChanged: (v) =>
-                    ref.read(remindersProvider.notifier).set(v),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-
+        _section('Notifications & security'),
         BrandCard(
           child: Column(children: [
-            ListTile(
+            SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.security),
-              title: const Text('Two-factor authentication'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.push('/account/mfa-setup'),
+              secondary: const Icon(Icons.fingerprint),
+              title: const Text('App lock'),
+              subtitle: const Text('Face ID / Touch ID / fingerprint'),
+              value: ref.watch(biometricLockProvider),
+              activeThumbColor: Tw.indigo500,
+              onChanged: (v) async {
+                if (v && !await biometricAvailable()) {
+                  if (!context.mounted) return;
+                  setState(() => _msg =
+                      'No biometrics enrolled on this device.');
+                  return;
+                }
+                await ref.read(biometricLockProvider.notifier).set(v);
+              },
             ),
-            ListTile(
+            SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.history),
-              title: const Text('Recommendation history'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.push('/history'),
+              secondary: const Icon(Icons.notifications_none),
+              title: const Text('Weekly quiz reminder'),
+              value: ref.watch(remindersProvider),
+              activeThumbColor: Tw.indigo500,
+              onChanged: (v) =>
+                  ref.read(remindersProvider.notifier).set(v),
             ),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.auto_awesome),
-              title: const Text('Your Wrapped'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.push('/wrapped'),
-            ),
+            _divider(context),
+            _tile(Icons.security, 'Two-factor authentication',
+                onTap: () => context.push('/account/mfa-setup')),
+            _tile(Icons.mail_outline, 'Change email',
+                subtitle: 'Requires 2FA',
+                onTap: () => _editField(
+                      title: 'New email',
+                      hint: 'name@example.com',
+                      onSave: (v) =>
+                          ref.read(authServiceProvider).changeEmail(v),
+                    )),
+            _tile(Icons.lock_outline, 'Change password',
+                subtitle: 'Requires 2FA',
+                onTap: () => _editField(
+                      title: 'New password',
+                      hint: '8+ chars, mixed case, number, symbol',
+                      obscure: true,
+                      onSave: (v) => ref
+                          .read(authServiceProvider)
+                          .changePassword(v),
+                    )),
           ]),
         ),
-        const SizedBox(height: 12),
 
+        _section('Your data'),
         BrandCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Eyebrow('Security'),
-              const SizedBox(height: 6),
-              Subtitle('These require 2FA verification (AAL2).'),
-              const SizedBox(height: 10),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.mail_outline),
-                title: const Text('Change email'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => _editField(
-                  title: 'New email',
-                  hint: 'name@example.com',
-                  onSave: (v) =>
-                      ref.read(authServiceProvider).changeEmail(v),
-                ),
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.lock_outline),
-                title: const Text('Change password'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => _editField(
-                  title: 'New password',
-                  hint: '8+ chars, mixed case, number, symbol',
-                  obscure: true,
-                  onSave: (v) =>
-                      ref.read(authServiceProvider).changePassword(v),
-                ),
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.pause_circle_outline),
-                title: const Text('Disable account'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => _confirmDanger(
-                  'Disable account?',
-                  'You will be signed out and locked out until re-enabled.',
-                  () async {
-                    final r = await ref
-                        .read(authServiceProvider)
-                        .disableAccount();
-                    if (!r.isError && context.mounted) context.go('/auth');
-                    return r.error;
-                  },
-                ),
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Icon(Icons.delete_forever_outlined,
-                    color: context.colors.destructive),
-                title: Text('Delete account',
-                    style: TextStyle(color: context.colors.destructive)),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => _confirmDanger(
-                  'Delete account?',
-                  'This permanently erases your data. Cannot be undone.',
-                  () async {
-                    final r =
-                        await ref.read(authServiceProvider).deleteAccount();
-                    if (!r.isError && context.mounted) context.go('/auth');
-                    return r.error;
-                  },
-                ),
-              ),
-            ],
-          ),
+          child: Column(children: [
+            _tile(Icons.history, 'Recommendation history',
+                onTap: () => context.push('/history')),
+            _tile(Icons.auto_awesome, 'Your Wrapped',
+                onTap: () => context.push('/wrapped')),
+          ]),
         ),
-        const SizedBox(height: 16),
+
+        _section('Danger zone'),
+        BrandCard(
+          child: Column(children: [
+            _tile(Icons.pause_circle_outline, 'Disable account',
+                onTap: () => _confirmDanger(
+                      'Disable account?',
+                      'You will be signed out and locked out until '
+                          're-enabled.',
+                      () async {
+                        final r = await ref
+                            .read(authServiceProvider)
+                            .disableAccount();
+                        if (!r.isError && context.mounted) {
+                          context.go('/auth');
+                        }
+                        return r.error;
+                      },
+                    )),
+            _tile(Icons.delete_forever_outlined, 'Delete account',
+                destructive: true,
+                onTap: () => _confirmDanger(
+                      'Delete account?',
+                      'This permanently erases your data. Cannot be '
+                          'undone.',
+                      () async {
+                        final r = await ref
+                            .read(authServiceProvider)
+                            .deleteAccount();
+                        if (!r.isError && context.mounted) {
+                          context.go('/auth');
+                        }
+                        return r.error;
+                      },
+                    )),
+          ]),
+        ),
+        const SizedBox(height: 20),
 
         AdaptiveButton(
           onPressed: () async {
