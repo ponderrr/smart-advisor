@@ -118,16 +118,33 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
             ],
           ),
         ),
-        PopupMenuButton<String>(
-          onSelected: (v) => _action(i, v),
-          itemBuilder: (_) => [
-            const PopupMenuItem(value: 'finished', child: Text('Finished')),
-            const PopupMenuItem(
-                value: 'in_progress', child: Text('In progress')),
-            const PopupMenuItem(value: 'wishlist', child: Text('Wishlist')),
-            const PopupMenuItem(value: 'dropped', child: Text('Dropped')),
-            const PopupMenuItem(value: 'edit', child: Text('Edit rating')),
-            const PopupMenuItem(value: 'remove', child: Text('Remove')),
+        AdaptivePopupMenuButton.icon<String>(
+          icon: Icons.more_vert,
+          onSelected: (_, entry) {
+            if (entry.value != null) _action(i, entry.value!);
+          },
+          items: const [
+            AdaptivePopupMenuItem(
+                label: 'Finished',
+                value: 'finished',
+                icon: Icons.check_circle_outline),
+            AdaptivePopupMenuItem(
+                label: 'In progress',
+                value: 'in_progress',
+                icon: Icons.timelapse),
+            AdaptivePopupMenuItem(
+                label: 'Wishlist',
+                value: 'wishlist',
+                icon: Icons.bookmark_border),
+            AdaptivePopupMenuItem(
+                label: 'Dropped',
+                value: 'dropped',
+                icon: Icons.do_not_disturb_alt),
+            AdaptivePopupMenuDivider(),
+            AdaptivePopupMenuItem(
+                label: 'Edit rating', value: 'edit', icon: Icons.star_border),
+            AdaptivePopupMenuItem(
+                label: 'Remove', value: 'remove', icon: Icons.delete_outline),
           ],
         ),
       ]),

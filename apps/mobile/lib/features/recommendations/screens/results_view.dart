@@ -106,7 +106,26 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
     final open = _expanded == i;
     final fav = _favorited.contains(r.id);
 
-    return Container(
+    return AdaptiveContextMenu(
+      actions: [
+        AdaptiveContextMenuAction(
+          title: fav ? 'Remove favorite' : 'Favorite',
+          icon: fav ? Icons.favorite : Icons.favorite_border,
+          onPressed: () => _toggleFav(r),
+        ),
+        AdaptiveContextMenuAction(
+          title: 'Log to library',
+          icon: Icons.bookmark_add_outlined,
+          onPressed: () => _logToLibrary(r),
+        ),
+        AdaptiveContextMenuAction(
+          title: 'Copy to share',
+          icon: Icons.ios_share,
+          onPressed: () =>
+              Clipboard.setData(ClipboardData(text: _shareText())),
+        ),
+      ],
+      child: Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -223,6 +242,7 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
             ),
           ],
         ],
+      ),
       ),
     );
   }
