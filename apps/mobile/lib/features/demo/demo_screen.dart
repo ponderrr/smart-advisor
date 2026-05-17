@@ -110,6 +110,43 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
     );
   }
 
+  Widget _optionTile(String label, bool selected, VoidCallback onTap) {
+    final tone = contentAccent(
+        ContentAccentName.violet, Theme.of(context).brightness);
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 140),
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        decoration: BoxDecoration(
+          color: selected ? tone.iconCircleBg : context.colors.card,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+              color: selected ? tone.dot : context.colors.border,
+              width: selected ? 2 : 1),
+        ),
+        child: Row(children: [
+          Icon(
+              selected
+                  ? Icons.radio_button_checked
+                  : Icons.radio_button_unchecked,
+              size: 20,
+              color: selected ? tone.text : context.colors.mutedForeground),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(label,
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight:
+                        selected ? FontWeight.w700 : FontWeight.w500,
+                    color: context.brandInk)),
+          ),
+        ]),
+      ),
+    );
+  }
+
   Widget _quiz() {
     final last = _i == _qs.length;
     return ListView(padding: const EdgeInsets.all(24), children: [
@@ -123,19 +160,10 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
         BrandHeading(_qs[_i].$1, size: 22),
         const SizedBox(height: 16),
         for (final o in _qs[_i].$2)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: AdaptiveButton(
-              onPressed: () => setState(() {
+          _optionTile(o, _picks[_i] == o, () => setState(() {
                 _picks[_i] = o;
                 _i++;
-              }),
-              label: o,
-              style: _picks[_i] == o
-                  ? AdaptiveButtonStyle.filled
-                  : AdaptiveButtonStyle.bordered,
-            ),
-          ),
+              })),
       ] else ...[
         const BrandHeading('Describe your perfect pick', size: 22),
         const SizedBox(height: 16),

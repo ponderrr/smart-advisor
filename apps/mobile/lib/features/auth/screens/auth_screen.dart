@@ -162,6 +162,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final showToggle =
+        _mode == AuthMode.signin || _mode == AuthMode.signup;
     return BrandScaffold(
       body: SafeArea(
         child: Center(
@@ -177,6 +179,19 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     const SizedBox(height: 12),
                     Eyebrow(_eyebrow),
                     const SizedBox(height: 16),
+                    if (showToggle) ...[
+                      AdaptiveSegmentedControl(
+                        color: Tw.indigo500,
+                        labels: const ['Sign in', 'Create account'],
+                        selectedIndex: _mode == AuthMode.signin ? 0 : 1,
+                        onValueChanged: (i) => setState(() {
+                          _mode =
+                              i == 0 ? AuthMode.signin : AuthMode.signup;
+                          _error = null;
+                        }),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
                     ..._body(),
                     if (_error != null) ...[
                       const SizedBox(height: 12),
@@ -194,18 +209,30 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     );
   }
 
+  Widget _field(String label, Widget input) => Padding(
+        padding: const EdgeInsets.only(bottom: 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6, left: 2),
+              child: Text(label,
+                  style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: context.colors.foreground)),
+            ),
+            input,
+          ],
+        ),
+      );
+
   List<Widget> _body() {
     switch (_mode) {
       case AuthMode.verifyEmail:
         return [
-          Text('Check your email',
-              style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: context.colors.foreground)),
-          const SizedBox(height: 8),
-          Text('We sent a verification link to ${_id.text.trim()}.',
-              style: TextStyle(color: context.colors.mutedForeground)),
+          Subtitle('We sent a verification link to ${_id.text.trim()}. '
+              'Open it, then come back and sign in.'),
           const SizedBox(height: 16),
           AdaptiveButton(
               onPressed: _busy
@@ -214,109 +241,113 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                         final r = await ref
                             .read(authServiceProvider)
                             .resendVerificationEmail(_id.text.trim());
-                        setState(() => _error =
-                            r.isError ? r.error : 'Verification email resent.');
+                        setState(() => _error = r.isError
+                            ? r.error
+                            : 'Verification email resent.');
                       }),
               label: 'Resend email'),
-          const SizedBox(height: 8),
-          _switchLink('Back to sign in', AuthMode.signin),
+          const SizedBox(height: 10),
+          AdaptiveButton(
+              onPressed: () => setState(() => _mode = AuthMode.signin),
+              label: 'Back to sign in',
+              style: AdaptiveButtonStyle.plain),
         ];
       case AuthMode.mfaChallenge:
         return [
-          Text('Two-factor verification',
-              style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: context.colors.foreground)),
-          const SizedBox(height: 12),
-          AdaptiveTextField(
-              controller: _code,
-              placeholder: '6-digit code',
-              keyboardType: TextInputType.number),
-          const SizedBox(height: 12),
+          Subtitle('Enter the 6-digit code from your authenticator app.'),
+          const SizedBox(height: 14),
+          _field(
+              'Authentication code',
+              AdaptiveTextField(
+                  controller: _code,
+                  placeholder: '123456',
+                  keyboardType: TextInputType.number)),
           AdaptiveButton(
               onPressed: _busy ? null : _submitMfa, label: 'Verify'),
         ];
       case AuthMode.forgot:
         return [
-          AdaptiveTextField(
-              controller: _id,
-              placeholder: 'Email',
-              keyboardType: TextInputType.emailAddress),
-          const SizedBox(height: 12),
+          Subtitle('We\'ll email you a link to reset your password.'),
+          const SizedBox(height: 14),
+          _field(
+              'Email',
+              AdaptiveTextField(
+                  controller: _id,
+                  placeholder: 'name@example.com',
+                  keyboardType: TextInputType.emailAddress)),
           AdaptiveButton(
               onPressed: _busy ? null : _submitForgot,
               label: 'Send reset link'),
-          const SizedBox(height: 8),
-          _switchLink('Back to sign in', AuthMode.signin),
+          const SizedBox(height: 10),
+          AdaptiveButton(
+              onPressed: () => setState(() => _mode = AuthMode.signin),
+              label: 'Back to sign in',
+              style: AdaptiveButtonStyle.plain),
         ];
       case AuthMode.signup:
         return [
-          AdaptiveTextField(
-              controller: _id,
-              placeholder: 'Email',
-              keyboardType: TextInputType.emailAddress),
-          const SizedBox(height: 12),
-          AdaptiveTextField(controller: _username, placeholder: 'Username'),
-          const SizedBox(height: 12),
-          AdaptiveTextField(
-              controller: _age,
-              placeholder: 'Age',
-              keyboardType: TextInputType.number),
-          const SizedBox(height: 12),
-          AdaptiveTextField(
-              controller: _pw, placeholder: 'Password', obscureText: true),
-          const SizedBox(height: 12),
-          AdaptiveTextField(
-              controller: _pw2,
-              placeholder: 'Confirm password',
-              obscureText: true),
-          const SizedBox(height: 16),
+          _field(
+              'Email',
+              AdaptiveTextField(
+                  controller: _id,
+                  placeholder: 'name@example.com',
+                  keyboardType: TextInputType.emailAddress)),
+          _field('Username',
+              AdaptiveTextField(controller: _username, placeholder: 'jane')),
+          _field(
+              'Age',
+              AdaptiveTextField(
+                  controller: _age,
+                  placeholder: '18',
+                  keyboardType: TextInputType.number)),
+          _field(
+              'Password',
+              AdaptiveTextField(
+                  controller: _pw,
+                  placeholder: '8+ chars, mixed case, number, symbol',
+                  obscureText: true)),
+          _field(
+              'Confirm password',
+              AdaptiveTextField(
+                  controller: _pw2,
+                  placeholder: 'Re-enter password',
+                  obscureText: true)),
+          const SizedBox(height: 4),
           AdaptiveButton(
               onPressed: _busy ? null : _submitSignUp,
               label: 'Create account'),
-          const SizedBox(height: 8),
-          _switchLink('Have an account? Sign in', AuthMode.signin),
         ];
       case AuthMode.signin:
         return [
-          AdaptiveTextField(
-              controller: _id, placeholder: 'Email or username'),
-          const SizedBox(height: 12),
-          AdaptiveTextField(
-              controller: _pw, placeholder: 'Password', obscureText: true),
-          const SizedBox(height: 16),
+          _field(
+              'Email or username',
+              AdaptiveTextField(
+                  controller: _id, placeholder: 'name@example.com')),
+          _field(
+              'Password',
+              AdaptiveTextField(
+                  controller: _pw,
+                  placeholder: 'Your password',
+                  obscureText: true)),
           AdaptiveButton(
               onPressed: _busy ? null : _submitSignIn, label: 'Sign in'),
-          const SizedBox(height: 12),
-          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            _switchLink('Create account', AuthMode.signup),
-            _switchLink('Forgot password?', AuthMode.forgot),
-          ]),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Center(
             child: GestureDetector(
-              onTap: () => context.go('/demo'),
-              child: Text('Try the demo first',
+              onTap: () => setState(() => _mode = AuthMode.forgot),
+              child: Text('Forgot password?',
                   style: TextStyle(
-                      color: context.colors.mutedForeground,
+                      color: context.colors.primary,
                       fontSize: 13,
-                      decoration: TextDecoration.underline)),
+                      fontWeight: FontWeight.w600)),
             ),
           ),
+          const Divider(height: 28),
+          AdaptiveButton(
+              onPressed: () => context.go('/demo'),
+              label: 'Try the demo — no account',
+              style: AdaptiveButtonStyle.bordered),
         ];
     }
   }
-
-  Widget _switchLink(String label, AuthMode mode) => GestureDetector(
-        onTap: () => setState(() {
-          _mode = mode;
-          _error = null;
-        }),
-        child: Text(label,
-            style: TextStyle(
-                color: context.colors.primary,
-                fontSize: 13,
-                fontWeight: FontWeight.w500)),
-      );
 }
