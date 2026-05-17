@@ -55,11 +55,11 @@ class AppShell extends ConsumerWidget {
     final profile = ref.watch(currentProfileProvider).asData?.value;
     final bg = brandBg(Theme.of(context).brightness);
 
-    return Scaffold(
-      backgroundColor: bg,
-      body: SafeArea(bottom: false, child: child),
-      floatingActionButtonLocation:
-          FloatingActionButtonLocation.centerDocked,
+    return AdaptiveScaffold(
+      body: ColoredBox(
+        color: bg,
+        child: SafeArea(bottom: false, child: child),
+      ),
       floatingActionButton: Container(
         decoration: BoxDecoration(
           shape: BoxShape.circle,
@@ -73,89 +73,41 @@ class AppShell extends ConsumerWidget {
           child: const Icon(Icons.auto_awesome, color: Colors.white),
         ),
       ),
-      bottomNavigationBar: _BottomNav(
-        tabs: _tabs,
-        index: _index,
-        avatarUrl: profile?.avatarUrl,
+      bottomNavigationBar: AdaptiveBottomNavigationBar(
+        selectedIndex: _index,
         onTap: (i) => context.go(_tabs[i].path),
+        items: [
+          for (final t in _tabs)
+            AdaptiveNavigationDestination(
+              label: t.label,
+              icon: t.path == '/account'
+                  ? _avatarIcon(context, profile?.avatarUrl, false)
+                  : Icon(t.icon),
+              selectedIcon: t.path == '/account'
+                  ? _avatarIcon(context, profile?.avatarUrl, true)
+                  : Icon(t.sel),
+            ),
+        ],
       ),
     );
   }
-}
 
-class _BottomNav extends StatelessWidget {
-  const _BottomNav({
-    required this.tabs,
-    required this.index,
-    required this.avatarUrl,
-    required this.onTap,
-  });
-
-  final List<({String path, String label, IconData icon, IconData sel})>
-      tabs;
-  final int index;
-  final String? avatarUrl;
-  final ValueChanged<int> onTap;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _avatarIcon(BuildContext context, String? url, bool selected) {
     final c = context.colors;
-    // 4 tabs split around a center notch for the FAB.
-    Widget slot(int i) {
-      final t = tabs[i];
-      final active = i == index;
-      final color = active ? Tw.indigo500 : c.mutedForeground;
-      final isProfile = t.path == '/account';
-      return Expanded(
-        child: InkWell(
-          onTap: () => onTap(i),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (isProfile)
-                CircleAvatar(
-                  radius: 11,
-                  backgroundColor: c.muted,
-                  backgroundImage: avatarUrl != null
-                      ? NetworkImage(avatarUrl!)
-                      : null,
-                  child: avatarUrl == null
-                      ? Icon(active ? t.sel : t.icon,
-                          size: 13, color: color)
-                      : null,
-                )
-              else
-                Icon(active ? t.sel : t.icon, size: 22, color: color),
-              const SizedBox(height: 3),
-              Text(t.label,
-                  style: TextStyle(
-                      fontSize: 10,
-                      fontWeight:
-                          active ? FontWeight.w700 : FontWeight.w500,
-                      color: color)),
-            ],
-          ),
-        ),
-      );
-    }
-
     return Container(
       decoration: BoxDecoration(
-        color: c.background,
-        border: Border(top: BorderSide(color: c.border)),
+        shape: BoxShape.circle,
+        border: Border.all(
+            color: selected ? Tw.indigo500 : Colors.transparent,
+            width: 2),
       ),
-      child: SafeArea(
-        top: false,
-        child: SizedBox(
-          height: 64,
-          child: Row(children: [
-            slot(0),
-            slot(1),
-            const SizedBox(width: 64), // FAB notch
-            slot(2),
-            slot(3),
-          ]),
-        ),
+      child: CircleAvatar(
+        radius: 12,
+        backgroundColor: c.muted,
+        backgroundImage: url != null ? NetworkImage(url) : null,
+        child: url == null
+            ? Icon(Icons.person, size: 14, color: c.mutedForeground)
+            : null,
       ),
     );
   }
