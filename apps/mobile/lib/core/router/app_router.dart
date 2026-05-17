@@ -8,6 +8,7 @@ import '../../features/auth/screens/auth_screen.dart';
 import '../../features/auth/screens/reset_password_screen.dart';
 import '../../features/maintenance/maintenance_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
+import '../../features/quiz/screens/quiz_screen.dart';
 import '../../features/shell/app_shell.dart';
 import '../supabase/supabase_providers.dart';
 import 'redirect.dart';
@@ -69,8 +70,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               path: '/',
               builder: (_, _) => const PlaceholderTab('Home')),
           GoRoute(
-              path: '/quiz',
-              builder: (_, _) => const PlaceholderTab('Quiz')),
+              path: '/quiz', builder: (_, _) => const QuizScreen()),
           GoRoute(
               path: '/library',
               builder: (_, _) => const PlaceholderTab('Library')),

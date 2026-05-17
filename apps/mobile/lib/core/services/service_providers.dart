@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/library/services/library_service.dart';
 import '../../features/recommendations/services/ai_service.dart';
 import '../../features/recommendations/services/database_service.dart';
+import '../../features/recommendations/services/recommendation_flow.dart';
 import '../../features/recommendations/services/tmdb_service.dart';
 import '../supabase/supabase_providers.dart';
 
@@ -17,3 +18,10 @@ final databaseServiceProvider = Provider<DatabaseService>(
 
 final libraryServiceProvider = Provider<LibraryService>(
     (ref) => LibraryService(ref.watch(supabaseClientProvider)));
+
+final recommendationFlowProvider = Provider<RecommendationFlow>((ref) =>
+    RecommendationFlow(
+      ref.watch(aiServiceProvider),
+      ref.watch(tmdbServiceProvider),
+      ref.watch(databaseServiceProvider),
+    ));
