@@ -47,6 +47,64 @@ class AppShell extends ConsumerWidget {
       return 0;
     }
 
+    void onNav(int i) {
+      if (i == quizSlot) {
+        _openQuizSheet(context);
+        return;
+      }
+      context.go(switch (i) {
+        1 => '/library',
+        3 => '/history',
+        4 => '/account',
+        _ => '/',
+      });
+    }
+
+    // Tablet / wide: side NavigationRail + centered, max-width content.
+    if (MediaQuery.sizeOf(context).width >= 720) {
+      const labels = ['Home', 'Library', 'Quiz', 'History', 'Profile'];
+      const icons = [
+        Icons.dashboard_outlined,
+        Icons.bookmark_border,
+        Icons.auto_awesome,
+        Icons.history,
+        Icons.person_outline,
+      ];
+      return Scaffold(
+        backgroundColor: bg,
+        body: SafeArea(
+          child: Row(
+            children: [
+              NavigationRail(
+                backgroundColor: bg,
+                selectedIndex: navIndexFromLocation(),
+                onDestinationSelected: onNav,
+                labelType: NavigationRailLabelType.all,
+                destinations: [
+                  for (var i = 0; i < labels.length; i++)
+                    NavigationRailDestination(
+                      icon: i == 4
+                          ? _avatarIcon(context, profile?.avatarUrl, false)
+                          : Icon(icons[i]),
+                      label: Text(labels[i]),
+                    ),
+                ],
+              ),
+              const VerticalDivider(width: 1),
+              Expanded(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 760),
+                    child: child,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return AdaptiveScaffold(
       body: ColoredBox(
         color: bg,
@@ -54,18 +112,7 @@ class AppShell extends ConsumerWidget {
       ),
       bottomNavigationBar: AdaptiveBottomNavigationBar(
         selectedIndex: navIndexFromLocation(),
-        onTap: (i) {
-          if (i == quizSlot) {
-            _openQuizSheet(context);
-            return;
-          }
-          context.go(switch (i) {
-            1 => '/library',
-            3 => '/history',
-            4 => '/account',
-            _ => '/',
-          });
-        },
+        onTap: onNav,
         items: [
           const AdaptiveNavigationDestination(
               label: 'Home', icon: Icon(Icons.dashboard_outlined)),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../core/ui_messenger.dart';
 import '../../ui/ui.dart';
 import '../auth/auth_providers.dart';
 import '../notifications/notification_service.dart';
@@ -207,8 +208,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                   final r = await ref
                       .read(authServiceProvider)
                       .updateProfile(name: _name.text.trim(), age: age);
-                  setState(() =>
-                      _msg = r.isError ? r.error : 'Profile saved');
+                  showBanner(r.isError ? r.error! : 'Profile saved');
+                  ref.invalidate(currentProfileProvider);
                 },
                 label: 'Save profile',
               ),

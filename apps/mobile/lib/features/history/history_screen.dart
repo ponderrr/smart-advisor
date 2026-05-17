@@ -13,6 +13,19 @@ class _Filter {
   final bool favorites;
   final String sortBy;
   final bool asc;
+
+  // Value equality so the FutureProvider.family keys correctly — without
+  // this every rebuild made a new provider and it never finished loading.
+  @override
+  bool operator ==(Object o) =>
+      o is _Filter &&
+      o.contentType == contentType &&
+      o.favorites == favorites &&
+      o.sortBy == sortBy &&
+      o.asc == asc;
+
+  @override
+  int get hashCode => Object.hash(contentType, favorites, sortBy, asc);
 }
 
 final _historyProvider = FutureProvider.autoDispose

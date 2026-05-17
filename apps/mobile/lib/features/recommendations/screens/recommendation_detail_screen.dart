@@ -6,6 +6,7 @@ import '../../../core/models/enums.dart';
 import '../../../core/models/library_item.dart';
 import '../../../core/models/recommendation.dart';
 import '../../../core/services/service_providers.dart';
+import '../../../core/ui_messenger.dart';
 import '../../../ui/ui.dart';
 import '../utils/match_score.dart';
 
@@ -51,6 +52,9 @@ class _S extends ConsumerState<RecommendationDetailScreen> {
               await ref
                   .read(databaseServiceProvider)
                   .toggleFavorite(r.id);
+              showBanner(_fav
+                  ? '“${r.title}” added to favorites'
+                  : '“${r.title}” removed from favorites');
             },
           ),
         ],
@@ -183,8 +187,7 @@ class _S extends ConsumerState<RecommendationDetailScreen> {
         ));
     if (!mounted) return;
     if (!res.isError) setState(() => _logged = true);
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content:
-            Text(res.isError ? res.error! : 'Added to your library')));
+    showBanner(
+        res.isError ? res.error! : '“${r.title}” added to your library');
   }
 }

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/models/enums.dart';
 import '../../../core/models/library_item.dart';
+import '../../../core/ui_messenger.dart';
 import '../../../core/models/recommendation.dart';
 import '../../../core/services/service_providers.dart';
 import '../../../ui/ui.dart';
@@ -251,10 +252,12 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
       );
 
   Future<void> _toggleFav(Recommendation r) async {
-    setState(() => _favorited.contains(r.id)
-        ? _favorited.remove(r.id)
-        : _favorited.add(r.id));
+    final nowFav = !_favorited.contains(r.id);
+    setState(() => nowFav ? _favorited.add(r.id) : _favorited.remove(r.id));
     await ref.read(databaseServiceProvider).toggleFavorite(r.id);
+    showBanner(nowFav
+        ? '“${r.title}” added to favorites'
+        : '“${r.title}” removed from favorites');
   }
 
   Future<void> _logToLibrary(Recommendation r) async {
@@ -274,8 +277,6 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
         ));
     if (!mounted) return;
     if (!res.isError) setState(() => _logged.add(r.id));
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(res.isError ? res.error! : 'Added to your library'),
-    ));
+    showBanner(res.isError ? res.error! : '“${r.title}” added to your library');
   }
 }

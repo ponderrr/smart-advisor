@@ -75,7 +75,8 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
       const SizedBox(height: 8),
       AdaptiveSegmentedControl(
             color: Tw.indigo500,
-        labels: const ['All', 'Finished', 'In prog', 'Wishlist', 'Dropped'],
+        labels: const ['All', 'Finished', 'In progress', 'Wishlist',
+            'Dropped'],
         selectedIndex: statusIdx,
         onValueChanged: (i) => setState(() =>
             _status = i == 0 ? null : LibraryStatus.values[i - 1]),

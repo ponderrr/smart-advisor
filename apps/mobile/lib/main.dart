@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/config/env.dart';
 import 'core/router/app_router.dart';
 import 'core/supabase/supabase_providers.dart';
+import 'core/ui_messenger.dart';
 import 'features/notifications/notification_service.dart';
 import 'features/security/biometric.dart';
 import 'features/settings/settings_service.dart';
@@ -46,6 +47,7 @@ class SmartAdvisorApp extends ConsumerWidget {
       themeMode: ref.watch(themeModeProvider),
       materialLightTheme: AppTheme.light(),
       materialDarkTheme: AppTheme.dark(),
+      scaffoldMessengerKey: scaffoldMessengerKey,
       builder: (context, child) =>
           BiometricGate(child: child ?? const SizedBox.shrink()),
     );

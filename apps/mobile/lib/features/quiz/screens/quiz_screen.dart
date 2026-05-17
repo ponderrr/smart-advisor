@@ -194,7 +194,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           alignment: Alignment.centerLeft,
           child: IconButton(
             padding: EdgeInsets.zero,
-            icon: const Icon(Icons.close),
+            icon: const Icon(Icons.arrow_back),
             onPressed: () =>
                 context.canPop() ? context.pop() : context.go('/'),
           ),
@@ -309,72 +309,127 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         ? (v is List<String> && v.isNotEmpty)
         : (v is String && v.trim().isNotEmpty);
 
-    return _pad(Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        BrandProgressBar(
-          value: (_qIndex + 1) / _questions.length,
-          accent: accentForContentType(_content),
-        ),
-        const SizedBox(height: 12),
-        Eyebrow('Question ${_qIndex + 1} of ${_questions.length}'),
-        const SizedBox(height: 8),
-        BrandHeading(q.text, size: 20),
-        const SizedBox(height: 16),
-        Expanded(child: SingleChildScrollView(child: _questionInput(q))),
-        Row(children: [
-          if (_qIndex > 0)
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(children: [
+            IconButton(
+              padding: EdgeInsets.zero,
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => _qIndex > 0
+                  ? setState(() => _qIndex--)
+                  : setState(() => _step = _Step.count),
+            ),
+            Expanded(
+              child: Eyebrow(
+                  'Question ${_qIndex + 1} of ${_questions.length}'),
+            ),
+          ]),
+          const SizedBox(height: 10),
+          BrandProgressBar(
+            value: (_qIndex + 1) / _questions.length,
+            accent: accentForContentType(_content),
+          ),
+          const SizedBox(height: 20),
+          BrandHeading(q.text, size: 22),
+          if (q.type == QuestionType.selectAll) ...[
+            const SizedBox(height: 4),
+            Subtitle('Pick all that apply'),
+          ],
+          const SizedBox(height: 18),
+          Expanded(child: SingleChildScrollView(child: _questionInput(q))),
+          const SizedBox(height: 8),
+          Row(children: [
             Expanded(
               child: AdaptiveButton(
-                  onPressed: () => setState(() => _qIndex--),
-                  label: 'Back',
-                  style: AdaptiveButtonStyle.bordered),
+                onPressed: !answered
+                    ? null
+                    : () {
+                        if (isLast) {
+                          _generate();
+                        } else {
+                          setState(() => _qIndex++);
+                        }
+                      },
+                label: isLast ? 'See results' : 'Next',
+              ),
             ),
-          if (_qIndex > 0) const SizedBox(width: 8),
+          ]),
+        ],
+      ),
+    );
+  }
+
+  Widget _optionTile(String label, bool selected, VoidCallback onTap,
+      {bool multi = false}) {
+    final tone =
+        contentAccent(accentForContentType(_content),
+            Theme.of(context).brightness);
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 140),
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        decoration: BoxDecoration(
+          color: selected
+              ? tone.iconCircleBg
+              : context.colors.card,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+              color: selected ? tone.dot : context.colors.border,
+              width: selected ? 2 : 1),
+        ),
+        child: Row(children: [
+          Icon(
+            multi
+                ? (selected
+                    ? Icons.check_box
+                    : Icons.check_box_outline_blank)
+                : (selected
+                    ? Icons.radio_button_checked
+                    : Icons.radio_button_unchecked),
+            size: 20,
+            color: selected ? tone.text : context.colors.mutedForeground,
+          ),
+          const SizedBox(width: 12),
           Expanded(
-            child: AdaptiveButton(
-              onPressed: !answered
-                  ? null
-                  : () {
-                      if (isLast) {
-                        _generate();
-                      } else {
-                        setState(() => _qIndex++);
-                      }
-                    },
-              label: isLast ? 'See results' : 'Next',
-            ),
+            child: Text(label,
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight:
+                        selected ? FontWeight.w700 : FontWeight.w500,
+                    color: context.brandInk)),
           ),
         ]),
-      ],
-    ));
+      ),
+    );
   }
 
   Widget _questionInput(Question q) {
-    final c = context.colors;
     switch (q.type) {
       case QuestionType.fillInBlank:
         _blank.text = (_answers[q.id] as String?) ?? '';
-        return AdaptiveTextField(
-          controller: _blank,
-          placeholder: q.placeholder ?? 'Type your answer…',
-          maxLines: 3,
-          onChanged: (t) => _answers[q.id] = t,
+        return BrandCard(
+          child: AdaptiveTextField(
+            controller: _blank,
+            placeholder: q.placeholder ?? 'Type your answer…',
+            maxLines: 3,
+            onChanged: (t) => _answers[q.id] = t,
+          ),
         );
       case QuestionType.selectAll:
         final sel = (_answers[q.id] as List<String>?) ?? <String>[];
         return Column(
           children: [
             for (final o in q.options ?? const <String>[])
-              CheckboxListTile(
-                value: sel.contains(o),
-                title: Text(o, style: TextStyle(color: c.foreground)),
-                onChanged: (on) => setState(() {
-                  final next = [...sel];
-                  on == true ? next.add(o) : next.remove(o);
-                  _answers[q.id] = next;
-                }),
-              ),
+              _optionTile(o, sel.contains(o), () => setState(() {
+                    final next = [...sel];
+                    sel.contains(o) ? next.remove(o) : next.add(o);
+                    _answers[q.id] = next;
+                  }), multi: true),
           ],
         );
       case QuestionType.singleSelect:
@@ -382,16 +437,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         return Column(
           children: [
             for (final o in q.options ?? const <String>[])
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: AdaptiveButton(
-                  onPressed: () => setState(() => _answers[q.id] = o),
-                  label: o,
-                  style: cur == o
-                      ? AdaptiveButtonStyle.filled
-                      : AdaptiveButtonStyle.bordered,
-                ),
-              ),
+              _optionTile(o, cur == o,
+                  () => setState(() => _answers[q.id] = o)),
           ],
         );
     }
