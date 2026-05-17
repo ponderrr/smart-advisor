@@ -31,6 +31,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
   List<Question> _questions = [];
   int _qIndex = 0;
+  int _dir = 1; // 1 = moving forward, -1 = backward (drives slide)
   final _answers = <String, dynamic>{}; // questionId -> String | List<String>
   final _blank = TextEditingController();
 
@@ -141,7 +142,19 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     return BrandScaffold(
       body: SafeArea(
         child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 250),
+          duration: const Duration(milliseconds: 320),
+          switchInCurve: Curves.easeOutCubic,
+          switchOutCurve: Curves.easeInCubic,
+          transitionBuilder: (child, animation) => FadeTransition(
+            opacity: animation,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: Offset(0.22 * _dir, 0),
+                end: Offset.zero,
+              ).animate(animation),
+              child: child,
+            ),
+          ),
           child: KeyedSubtree(
               key: ValueKey('${_step}_$_qIndex'), child: _content_()),
         ),
@@ -219,7 +232,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         AdaptiveButton(
           onPressed: () {
             ref.read(quizStoreProvider.notifier).setRecommendations([]);
-            setState(() => _step = _Step.count);
+            setState(() {
+              _dir = 1;
+              _step = _Step.count;
+            });
           },
           label: 'Continue',
         ),
@@ -271,7 +287,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         Row(children: [
           Expanded(
             child: AdaptiveButton(
-                onPressed: () => setState(() => _step = _Step.content),
+                onPressed: () => setState(() {
+                  _dir = -1;
+                  _step = _Step.content;
+                }),
                 label: 'Back',
                 style: AdaptiveButtonStyle.bordered),
           ),
@@ -279,7 +298,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           Expanded(
             child: AdaptiveButton(
               onPressed: () {
-                setState(() => _step = _Step.questions);
+                setState(() {
+                  _dir = 1;
+                  _step = _Step.questions;
+                });
                 _loadQuestions();
               },
               label: 'Start',
@@ -319,8 +341,14 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               padding: EdgeInsets.zero,
               icon: const Icon(Icons.arrow_back),
               onPressed: () => _qIndex > 0
-                  ? setState(() => _qIndex--)
-                  : setState(() => _step = _Step.count),
+                  ? setState(() {
+                      _dir = -1;
+                      _qIndex--;
+                    })
+                  : setState(() {
+                      _dir = -1;
+                      _step = _Step.count;
+                    }),
             ),
             Expanded(
               child: Eyebrow(
@@ -350,7 +378,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                         if (isLast) {
                           _generate();
                         } else {
-                          setState(() => _qIndex++);
+                          setState(() {
+                            _dir = 1;
+                            _qIndex++;
+                          });
                         }
                       },
                 label: isLast ? 'See results' : 'Next',

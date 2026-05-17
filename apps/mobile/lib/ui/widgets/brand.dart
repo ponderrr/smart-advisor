@@ -214,12 +214,18 @@ class BrandProgressBar extends StatelessWidget {
       borderRadius: BorderRadius.circular(999),
       child: Stack(children: [
         Container(height: 6, color: track),
-        FractionallySizedBox(
-          widthFactor: value.clamp(0, 1),
-          child: Container(
-            height: 6,
-            decoration: BoxDecoration(
-                gradient: LinearGradient(colors: tone.barGradient)),
+        // Animates whenever `value` changes (re-tweens from current width).
+        TweenAnimationBuilder<double>(
+          tween: Tween(end: value.clamp(0, 1)),
+          duration: const Duration(milliseconds: 360),
+          curve: Curves.easeOutCubic,
+          builder: (_, v, _) => FractionallySizedBox(
+            widthFactor: v,
+            child: Container(
+              height: 6,
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: tone.barGradient)),
+            ),
           ),
         ),
       ]),

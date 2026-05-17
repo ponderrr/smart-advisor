@@ -19,7 +19,6 @@ import '../../features/maintenance/maintenance_screen.dart';
 import '../../core/models/recommendation.dart';
 import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/recommendations/screens/recommendation_detail_screen.dart';
-import '../../features/quiz/screens/quiz_entry_screen.dart';
 import '../../features/quiz/screens/quiz_screen.dart';
 import '../../features/wrapped/wrapped_screen.dart';
 import '../../features/shell/app_shell.dart';
@@ -94,10 +93,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           builder: (_, _) => const NotificationsScreen()),
       GoRoute(path: '/demo', builder: (_, _) => const DemoScreen()),
       GoRoute(path: '/wrapped', builder: (_, _) => const WrappedScreen()),
-      // Quiz is full-screen (the PWA hides the bottom nav on it).
+      // Quiz is full-screen (the PWA hides the bottom nav on it). The
+      // Solo/Group choice is the bottom sheet from the Quiz nav item, so
+      // /quiz (and /quiz/solo alias) go straight into the quiz.
       GoRoute(
         path: '/quiz',
-        builder: (_, _) => const QuizEntryScreen(),
+        builder: (_, _) => const QuizScreen(),
         routes: [
           GoRoute(path: 'solo', builder: (_, _) => const QuizScreen()),
         ],
