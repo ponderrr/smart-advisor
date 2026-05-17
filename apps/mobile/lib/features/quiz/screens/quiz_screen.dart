@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/models/answer.dart';
 import '../../../core/models/enums.dart';
@@ -188,7 +189,16 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-        const SizedBox(height: 12),
+        const SizedBox(height: 4),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            icon: const Icon(Icons.close),
+            onPressed: () =>
+                context.canPop() ? context.pop() : context.go('/'),
+          ),
+        ),
         const Eyebrow('Smart Advisor'),
         const SizedBox(height: 6),
         const BrandHeading('What are you in the mood for?', size: 24),
