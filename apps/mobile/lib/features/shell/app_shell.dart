@@ -5,32 +5,13 @@ import 'package:go_router/go_router.dart';
 import '../../ui/ui.dart';
 import '../auth/auth_providers.dart';
 
-/// Mirrors the web mobile PWA shell: a top bar (wordmark + avatar menu) and
-/// a fixed bottom nav of 4 tabs around a raised center Quiz FAB that opens a
-/// Solo/Group bottom sheet. adaptive_platform_ui still drives in-page
-/// controls; the shell chrome is custom to match the PWA.
-const _tabs = [
-  (path: '/', label: 'Home', icon: Icons.dashboard_outlined,
-      sel: Icons.dashboard),
-  (path: '/library', label: 'Library', icon: Icons.bookmark_border,
-      sel: Icons.bookmark),
-  (path: '/history', label: 'History', icon: Icons.history,
-      sel: Icons.history),
-  (path: '/account', label: 'Profile', icon: Icons.person_outline,
-      sel: Icons.person),
-];
-
+/// App shell: native adaptive bottom bar (Home · Library · Quiz · History ·
+/// Profile). Quiz opens the Solo/Group sheet; Profile shows the avatar.
 class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.child, required this.location});
 
   final Widget child;
   final String location;
-
-  int get _index {
-    final i = _tabs.indexWhere((t) =>
-        t.path == '/' ? location == '/' : location.startsWith(t.path));
-    return i < 0 ? 0 : i;
-  }
 
   void _openQuizSheet(BuildContext context) {
     showModalBottomSheet<void>(
@@ -55,38 +36,49 @@ class AppShell extends ConsumerWidget {
     final profile = ref.watch(currentProfileProvider).asData?.value;
     final bg = brandBg(Theme.of(context).brightness);
 
+    // Native bottom bar. Quiz lives as the center nav item (opens the
+    // Solo/Group sheet) instead of a floating button.
+    const quizSlot = 2;
+    int navIndexFromLocation() {
+      if (location == '/') return 0;
+      if (location.startsWith('/library')) return 1;
+      if (location.startsWith('/history')) return 3;
+      if (location.startsWith('/account')) return 4;
+      return 0;
+    }
+
     return AdaptiveScaffold(
       body: ColoredBox(
         color: bg,
         child: SafeArea(bottom: false, child: child),
       ),
-      floatingActionButton: Container(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: bg, width: 4),
-        ),
-        child: FloatingActionButton(
-          onPressed: () => _openQuizSheet(context),
-          backgroundColor: Tw.indigo500,
-          elevation: 4,
-          shape: const CircleBorder(),
-          child: const Icon(Icons.auto_awesome, color: Colors.white),
-        ),
-      ),
       bottomNavigationBar: AdaptiveBottomNavigationBar(
-        selectedIndex: _index,
-        onTap: (i) => context.go(_tabs[i].path),
+        selectedIndex: navIndexFromLocation(),
+        onTap: (i) {
+          if (i == quizSlot) {
+            _openQuizSheet(context);
+            return;
+          }
+          context.go(switch (i) {
+            1 => '/library',
+            3 => '/history',
+            4 => '/account',
+            _ => '/',
+          });
+        },
         items: [
-          for (final t in _tabs)
-            AdaptiveNavigationDestination(
-              label: t.label,
-              icon: t.path == '/account'
-                  ? _avatarIcon(context, profile?.avatarUrl, false)
-                  : Icon(t.icon),
-              selectedIcon: t.path == '/account'
-                  ? _avatarIcon(context, profile?.avatarUrl, true)
-                  : Icon(t.sel),
-            ),
+          const AdaptiveNavigationDestination(
+              label: 'Home', icon: Icon(Icons.dashboard_outlined)),
+          const AdaptiveNavigationDestination(
+              label: 'Library', icon: Icon(Icons.bookmark_border)),
+          const AdaptiveNavigationDestination(
+              label: 'Quiz', icon: Icon(Icons.auto_awesome)),
+          const AdaptiveNavigationDestination(
+              label: 'History', icon: Icon(Icons.history)),
+          AdaptiveNavigationDestination(
+            label: 'Profile',
+            icon: _avatarIcon(context, profile?.avatarUrl, false),
+          ),
         ],
       ),
     );
