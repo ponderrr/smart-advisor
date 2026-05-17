@@ -52,11 +52,14 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final data = ref.watch(_historyProvider(_filter));
-    return BrandScaffold(
-      appBar: AppBar(title: const Text('History')),
-      body: ListView(
+    return ListView(
         padding: const EdgeInsets.all(20),
         children: [
+          const SizedBox(height: 8),
+          const Eyebrow('History'),
+          const SizedBox(height: 4),
+          const BrandHeading('Past picks', size: 24),
+          const SizedBox(height: 16),
           AdaptiveSegmentedControl(
             color: Tw.indigo500,
             labels: const ['All', 'Movies', 'Books', 'Music', 'Favs'],
@@ -81,7 +84,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 : Column(children: [for (final r in list) _row(r)]),
           ),
         ],
-      ),
     );
   }
 

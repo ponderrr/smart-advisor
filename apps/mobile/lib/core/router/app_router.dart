@@ -16,6 +16,7 @@ import '../../features/history/history_screen.dart';
 import '../../features/library/screens/library_screen.dart';
 import '../../features/maintenance/maintenance_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
+import '../../features/quiz/screens/quiz_entry_screen.dart';
 import '../../features/quiz/screens/quiz_screen.dart';
 import '../../features/wrapped/wrapped_screen.dart';
 import '../../features/shell/app_shell.dart';
@@ -82,8 +83,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ]),
       GoRoute(path: '/demo', builder: (_, _) => const DemoScreen()),
       GoRoute(path: '/wrapped', builder: (_, _) => const WrappedScreen()),
+      // Quiz is full-screen (the PWA hides the bottom nav on it).
       GoRoute(
-          path: '/history', builder: (_, _) => const HistoryScreen()),
+        path: '/quiz',
+        builder: (_, _) => const QuizEntryScreen(),
+        routes: [
+          GoRoute(path: 'solo', builder: (_, _) => const QuizScreen()),
+        ],
+      ),
       GoRoute(
           path: '/account/mfa-setup',
           builder: (_, _) => const MfaSetupScreen()),
@@ -94,10 +101,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
               path: '/', builder: (_, _) => const DashboardScreen()),
           GoRoute(
-              path: '/quiz', builder: (_, _) => const QuizScreen()),
-          GoRoute(
               path: '/library',
               builder: (_, _) => const LibraryScreen()),
+          GoRoute(
+              path: '/history', builder: (_, _) => const HistoryScreen()),
           GoRoute(
               path: '/account',
               builder: (_, _) => const AccountScreen()),

@@ -32,7 +32,7 @@ void main() {
   testWidgets('HistoryScreen renders', (t) async {
     await t.pumpWidget(_host(const HistoryScreen()));
     await t.pump();
-    expect(find.text('History'), findsWidgets);
+    expect(find.text('Past picks'), findsOneWidget);
     expect(t.takeException(), isNull);
   });
 

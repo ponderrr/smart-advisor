@@ -37,9 +37,6 @@ class SmartAdvisorApp extends ConsumerWidget {
         router.go('/auth/reset-password');
       }
     });
-    // Adaptive-first root: Material theming on Android, native iOS 26 on
-    // iOS. Both themes use our ported tokens so the brand colors are
-    // consistent across the platform-native chrome.
     return AdaptiveApp.router(
       title: 'Smart Advisor',
       routerConfig: router,
