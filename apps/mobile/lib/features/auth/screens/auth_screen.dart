@@ -151,33 +151,41 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         if (mounted) context.go('/');
       });
 
+  String get _eyebrow => switch (_mode) {
+        AuthMode.signin => 'Welcome back',
+        AuthMode.signup => 'Get started',
+        AuthMode.forgot => 'Reset password',
+        AuthMode.verifyEmail => 'Almost there',
+        AuthMode.mfaChallenge => 'One more step',
+      };
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return Scaffold(
+    return BrandScaffold(
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 420),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text('Smart Advisor',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w700,
-                          color: c.foreground)),
-                  const SizedBox(height: 24),
-                  ..._body(),
-                  if (_error != null) ...[
+              child: BrandCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const BrandHeading('Smart Advisor', size: 28),
                     const SizedBox(height: 12),
-                    Text(_error!,
-                        style: TextStyle(color: c.destructive, fontSize: 13)),
+                    Eyebrow(_eyebrow),
+                    const SizedBox(height: 16),
+                    ..._body(),
+                    if (_error != null) ...[
+                      const SizedBox(height: 12),
+                      Text(_error!,
+                          style: TextStyle(
+                              color: c.destructive, fontSize: 13)),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),

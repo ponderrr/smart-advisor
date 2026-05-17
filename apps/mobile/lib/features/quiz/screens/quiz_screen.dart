@@ -137,7 +137,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return BrandScaffold(
       body: SafeArea(
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 250),
@@ -173,35 +173,39 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       Padding(padding: const EdgeInsets.all(24), child: child);
 
   Widget _contentStep() {
-    final c = context.colors;
     const opts = [
-      (ContentType.movie, 'Movie'),
-      (ContentType.book, 'Book'),
-      (ContentType.music, 'Music'),
-      (ContentType.mix, 'Mix'),
+      (ContentType.movie, 'Movie', 'Films picked for your taste',
+          Icons.movie_outlined),
+      (ContentType.book, 'Book', 'Reads that fit who you are',
+          Icons.menu_book_outlined),
+      (ContentType.music, 'Music', 'Albums tuned to your mood',
+          Icons.music_note_outlined),
+      (ContentType.mix, 'Mix', 'A little of everything',
+          Icons.auto_awesome_outlined),
     ];
-    return _pad(Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text('What are you in the mood for?',
-            style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                color: c.foreground)),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+        const SizedBox(height: 12),
+        const Eyebrow('Smart Advisor'),
+        const SizedBox(height: 6),
+        const BrandHeading('What are you in the mood for?', size: 24),
         const SizedBox(height: 20),
-        for (final (ct, label) in opts)
+        for (final (ct, label, desc, icon) in opts)
           Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: AdaptiveButton(
-              onPressed: () => setState(() => _content = ct),
+            padding: const EdgeInsets.only(bottom: 12),
+            child: ContentBentoTile(
+              accent: accentForContentType(ct),
+              icon: icon,
               label: label,
-              style: _content == ct
-                  ? AdaptiveButtonStyle.filled
-                  : AdaptiveButtonStyle.bordered,
+              description: desc,
+              selected: _content == ct,
+              onTap: () => setState(() => _content = ct),
             ),
           ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         AdaptiveButton(
           onPressed: () {
             ref.read(quizStoreProvider.notifier).setRecommendations([]);
@@ -209,31 +213,49 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           },
           label: 'Continue',
         ),
-      ],
-    ));
+        ],
+      ),
+    );
   }
 
   Widget _countStep() {
-    final c = context.colors;
+    final accent = accentForContentType(_content);
+    final tone =
+        contentAccent(accent, Theme.of(context).brightness);
     return _pad(Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text('How many questions?',
-            style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                color: c.foreground)),
-        const SizedBox(height: 8),
-        Text('$_count questions · about ${(_count * 18 + 30) ~/ 60} min',
-            style: TextStyle(color: c.mutedForeground)),
+        const BrandHeading('How many questions?', size: 24),
         const SizedBox(height: 16),
-        AdaptiveSlider(
-          value: _count.toDouble(),
-          min: 3,
-          max: 15,
-          divisions: 12,
-          onChanged: (v) => setState(() => _count = v.round()),
+        BrandCard(
+          accent: accent,
+          child: Column(children: [
+            ShaderMask(
+              shaderCallback: (r) =>
+                  LinearGradient(colors: tone.barGradient).createShader(r),
+              child: Text('$_count',
+                  style: const TextStyle(
+                      fontSize: 56,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -2,
+                      color: Colors.white)),
+            ),
+            Text('about ${(_count * 18 + 30) ~/ 60 + 1} min',
+                style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.5,
+                    color: context.brandMuted)),
+            const SizedBox(height: 12),
+            AdaptiveSlider(
+              value: _count.toDouble(),
+              min: 3,
+              max: 15,
+              divisions: 12,
+              onChanged: (v) => setState(() => _count = v.round()),
+            ),
+          ]),
         ),
         const SizedBox(height: 20),
         Row(children: [
@@ -259,7 +281,6 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   }
 
   Widget _questionsStep() {
-    final c = context.colors;
     if (_loadingQuestions) {
       return const Center(child: LoaderFive('Building your quiz'));
     }
@@ -281,14 +302,14 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     return _pad(Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Question ${_qIndex + 1} of ${_questions.length}',
-            style: TextStyle(fontSize: 12, color: c.mutedForeground)),
+        BrandProgressBar(
+          value: (_qIndex + 1) / _questions.length,
+          accent: accentForContentType(_content),
+        ),
+        const SizedBox(height: 12),
+        Eyebrow('Question ${_qIndex + 1} of ${_questions.length}'),
         const SizedBox(height: 8),
-        Text(q.text,
-            style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: c.foreground)),
+        BrandHeading(q.text, size: 20),
         const SizedBox(height: 16),
         Expanded(child: SingleChildScrollView(child: _questionInput(q))),
         Row(children: [

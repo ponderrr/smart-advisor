@@ -34,6 +34,12 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
         _ => RecType.book,
       };
 
+  ContentAccentName _accentName(String t) => switch (t) {
+        'movie' => ContentAccentName.amber,
+        'music' => ContentAccentName.rose,
+        _ => ContentAccentName.emerald,
+      };
+
   String _creatorLine(Recommendation r) {
     final who = r.director ?? r.author ?? r.artist;
     final y = r.year?.toString();
@@ -49,16 +55,13 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
 
   @override
   Widget build(BuildContext context) {
-    final c = context.colors;
     final b = Theme.of(context).brightness;
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Text('Your picks',
-            style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                color: c.foreground)),
+        const Eyebrow('Your picks'),
+        const SizedBox(height: 4),
+        const BrandHeading('Made for you', size: 22),
         const SizedBox(height: 12),
         for (var i = 0; i < widget.recommendations.length; i++)
           _card(widget.recommendations[i], i, b),
@@ -90,18 +93,29 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
   Widget _card(Recommendation r, int i, Brightness b) {
     final c = context.colors;
     final accent = recTypeAccent(_recType(r.type), b);
+    final accentName = _accentName(r.type);
+    final surface = contentAccent(accentName, b);
     final ms = deriveMatchScore(id: r.id, matchScore: r.matchScore);
     final mt = matchToneColors(ms.tone, b);
     final open = _expanded == i;
     final fav = _favorited.contains(r.id);
 
-    return AdaptiveCard(
+    return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: surface.surfaceGradient),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: surface.surfaceBorder),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          InkWell(
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
             onTap: () => setState(() => _expanded = open ? -1 : i),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -166,17 +180,7 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
           if (open) ...[
             const SizedBox(height: 12),
             if (r.explanation != null)
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: accent.chipBg,
-                  borderRadius: BorderRadius.circular(AppRadius.md),
-                  border: Border(
-                      left: BorderSide(color: accent.tileText, width: 3)),
-                ),
-                child: Text('Why this pick\n${r.explanation}',
-                    style: TextStyle(fontSize: 13, color: c.foreground)),
-              ),
+              WhyThisPick(accent: accentName, text: r.explanation!),
             if (r.genres.isNotEmpty) ...[
               const SizedBox(height: 10),
               Wrap(

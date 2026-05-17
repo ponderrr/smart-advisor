@@ -46,15 +46,18 @@ void main() {
     ));
     await t.pump();
 
-    expect(find.text('Your picks'), findsOneWidget);
+    expect(find.text('YOUR PICKS'), findsOneWidget); // Eyebrow uppercases
+    expect(find.text('Made for you'), findsOneWidget);
     expect(find.text('Past Lives'), findsOneWidget);
     expect(find.text('Piranesi'), findsOneWidget);
     expect(find.text('93%'), findsOneWidget); // match_score used verbatim
     expect(find.text('88%'), findsOneWidget);
 
-    // First card is expanded by default → why-this-pick visible.
+    // First card is expanded by default → why-this-pick callout visible
+    // (Eyebrow renders uppercased) plus the explanation text.
+    expect(find.text('WHY THIS PICK'), findsOneWidget);
     expect(
-      find.textContaining('Why this pick'),
+      find.text('You said you like quiet, aching stories.'),
       findsOneWidget,
     );
   });

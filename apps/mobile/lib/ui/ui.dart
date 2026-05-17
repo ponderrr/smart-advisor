@@ -12,4 +12,5 @@ export 'theme/app_colors.dart';
 export 'theme/app_theme.dart';
 export 'theme/tailwind_palette.dart';
 export 'widgets/app_loader.dart';
+export 'widgets/brand.dart';
 export 'widgets/stateful_button.dart';
