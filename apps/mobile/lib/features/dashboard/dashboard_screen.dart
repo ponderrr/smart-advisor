@@ -212,14 +212,10 @@ class DashboardScreen extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),
                 child: Row(children: [
-                  Icon(
-                      x.type == 'movie'
-                          ? Icons.movie_outlined
-                          : x.type == 'music'
-                              ? Icons.music_note_outlined
-                              : Icons.menu_book_outlined,
-                      size: 18,
-                      color: context.brandMuted),
+                  PosterThumb(
+                      url: x.posterUrl,
+                      square: x.type == 'music',
+                      w: 32),
                   const SizedBox(width: 10),
                   Expanded(
                       child: Text(x.title,

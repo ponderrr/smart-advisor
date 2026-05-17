@@ -84,6 +84,9 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     return BrandCard(
       padding: const EdgeInsets.all(14),
       child: Row(children: [
+        PosterThumb(
+            url: i.posterUrl, square: i.medium == LibraryMedium.music),
+        const SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

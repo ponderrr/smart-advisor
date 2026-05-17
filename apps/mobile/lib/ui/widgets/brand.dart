@@ -332,6 +332,38 @@ class ContentBentoTile extends StatelessWidget {
   }
 }
 
+/// Shared poster/cover thumbnail with a graceful fallback. Music art is
+/// square; movies/books are 2:3.
+class PosterThumb extends StatelessWidget {
+  const PosterThumb({super.key, this.url, this.square = false, this.w = 44});
+  final String? url;
+  final bool square;
+  final double w;
+
+  @override
+  Widget build(BuildContext context) {
+    final h = square ? w : w * 3 / 2;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    Widget fallback() => Container(
+          width: w,
+          height: h,
+          color: dark ? Tw.slate800 : Tw.slate200,
+          child: Icon(Icons.image_not_supported_outlined,
+              size: 16, color: dark ? Tw.slate500 : Tw.slate400),
+        );
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(6),
+      child: (url == null || url!.isEmpty)
+          ? fallback()
+          : Image.network(url!,
+              width: w,
+              height: h,
+              fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => fallback()),
+    );
+  }
+}
+
 /// Small helper so screens can read the slate ink/muted colors.
 extension BrandColors on BuildContext {
   Color get brandInk => _ink(Theme.of(this).brightness);

@@ -5,22 +5,24 @@ import '../../../core/models/recommendation.dart';
 import '../../../core/result.dart';
 import 'ai_service.dart';
 import 'database_service.dart';
+import 'deezer_service.dart';
+import 'open_library_service.dart';
 import 'tmdb_service.dart';
 
-/// Trimmed stand-in for the web enhanced-recommendations-service.
-///
-/// The web service does parallel 3-per-type generation + dedup + TMDB /
-/// Open Library / Deezer enrichment. Open Library + Deezer enrichment is
-/// deferred (blocked on moving the Next.js /api routes to Edge Functions),
-/// so this generates one pick per applicable type via the
-/// anthropic-recommendations Edge Function, enriches movie posters via the
-/// tmdb-proxy Edge Function, persists each, and returns the saved rows.
+/// Stand-in for the web enhanced-recommendations-service. Generates one pick
+/// per applicable type via the anthropic-recommendations Edge Function, then
+/// enriches artwork: movies via tmdb-proxy, books via Open Library, music
+/// via Deezer (also a 30s preview). All three enrichment APIs are called
+/// directly — a native client has no browser CORS, so the web's /api
+/// proxies aren't needed. Still trimmed vs. web: 1 pick per type, no dedup.
 class RecommendationFlow {
-  RecommendationFlow(this._ai, this._tmdb, this._db);
+  RecommendationFlow(this._ai, this._tmdb, this._db, this._books, this._music);
 
   final AiService _ai;
   final TmdbService _tmdb;
   final DatabaseService _db;
+  final OpenLibraryService _books;
+  final DeezerService _music;
 
   Future<ServiceResult<List<Recommendation>>> generate({
     required List<Answer> answers,
@@ -54,15 +56,23 @@ class RecommendationFlow {
     final saved = <Recommendation>[];
     for (final item in items) {
       String? posterUrl;
+      String? previewUrl;
       num? rating = item.rating;
-      if (item.type == 'movie') {
-        try {
+      try {
+        if (item.type == 'movie') {
           final m = await _tmdb.searchMovie(item.title);
           posterUrl = m.poster;
           rating = m.rating;
-        } catch (_) {
-          // tmdb-proxy returns a safe fallback; ignore hard failures.
+        } else if (item.type == 'book') {
+          final b = await _books.searchBook(item.title, item.author);
+          posterUrl = b.cover;
+        } else if (item.type == 'music') {
+          final a = await _music.searchAlbum(item.title, item.artist);
+          posterUrl = a.cover;
+          previewUrl = a.previewUrl;
         }
+      } catch (_) {
+        // Enrichment is best-effort; a missing cover shouldn't fail the pick.
       }
       final rec = Recommendation(
         id: '',
@@ -78,6 +88,7 @@ class RecommendationFlow {
         year: item.year,
         rating: rating,
         posterUrl: posterUrl,
+        previewUrl: previewUrl,
         explanation: item.explanation,
         description: item.description,
         matchScore: item.matchScore,
@@ -89,6 +100,7 @@ class RecommendationFlow {
         matchScore: item.matchScore,
         genres: item.genres,
         posterUrl: posterUrl ?? res.data?.posterUrl,
+        previewUrl: previewUrl ?? res.data?.previewUrl,
         explanation: item.explanation,
         description: item.description,
       ));

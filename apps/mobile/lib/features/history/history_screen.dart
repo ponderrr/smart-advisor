@@ -86,6 +86,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   Widget _row(Recommendation r) => BrandCard(
         padding: const EdgeInsets.all(14),
         child: Row(children: [
+          PosterThumb(url: r.posterUrl, square: r.type == 'music'),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
