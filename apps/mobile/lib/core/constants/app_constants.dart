@@ -25,6 +25,10 @@ class StorageKeys {
   static const String prefContentTone = 'smart_advisor_pref_content_tone';
   static const String dismissedBanners = 'smart_advisor_dismissed_banners';
   static const String demoAnswers = 'smart_advisor_demo_answers';
+
+  /// Set once the pre-auth intro carousel has been seen, so returning
+  /// users go straight to the auth screen.
+  static const String introSeen = 'smart_advisor_intro_seen';
 }
 
 /// Default per-request network timeout (web FETCH_TIMEOUT_MS).

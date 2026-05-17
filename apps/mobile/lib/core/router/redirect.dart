@@ -7,6 +7,10 @@ String? resolveRedirect({
   required bool maintenance,
   required bool authenticated,
   required bool onboardingComplete,
+
+  /// Whether the pre-auth intro carousel has been seen. First-launch
+  /// unauthenticated users are sent to `/intro` before anything else.
+  required bool introSeen,
 }) {
   bool startsWith(String p) => location == p || location.startsWith('$p/');
 
@@ -18,18 +22,25 @@ String? resolveRedirect({
     return authenticated ? '/' : '/auth';
   }
 
-  // Public, no-auth-required routes (web: /, /demo*, /auth*, /group-quiz*).
-  final isPublic = location == '/' && !authenticated
-      ? false // root is the authed shell home; unauth root falls through
-      : startsWith('/auth') ||
-          startsWith('/demo') ||
-          startsWith('/group-quiz');
+  final isIntro = location == '/intro';
 
-  // 2. Unauthenticated → must be on a public route.
+  // Share / deep-link entrypoints that bypass the intro even on a fresh
+  // install (web: /demo*, /group-quiz*).
+  final isPublicDeepLink =
+      startsWith('/demo') || startsWith('/group-quiz');
+
+  // 2. Unauthenticated.
   if (!authenticated) {
-    if (isPublic) return null;
+    if (isIntro) return introSeen ? '/auth' : null;
+    if (isPublicDeepLink) return null;
+    // First launch: show the pitch before sign in / sign up.
+    if (!introSeen) return '/intro';
+    if (startsWith('/auth')) return null;
     return '/auth';
   }
+
+  // Authenticated users never sit on the pre-auth intro.
+  if (isIntro) return onboardingComplete ? '/' : '/onboarding';
 
   // 3. Authenticated but onboarding not finished → /onboarding
   //    (allow the onboarding screen and auth callback to proceed).
@@ -39,7 +50,7 @@ String? resolveRedirect({
     return '/onboarding';
   }
 
-  // 4. Authenticated + done shouldn't sit on the auth screens.
+  // 4. Authenticated + done shouldn't sit on the auth/onboarding screens.
   if (onboardingComplete &&
       (location == '/auth' || location == '/onboarding')) {
     return '/';

@@ -37,10 +37,11 @@ Future<bool> biometricAvailable() async {
   }
 }
 
-Future<bool> biometricAuthenticate() async {
+Future<bool> biometricAuthenticate(
+    {String reason = 'Unlock Smart Advisor'}) async {
   try {
     return await _localAuth.authenticate(
-      localizedReason: 'Unlock Smart Advisor',
+      localizedReason: reason,
       biometricOnly: true,
       persistAcrossBackgrounding: true,
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show SignOutScope;
 
 import '../../core/ui_messenger.dart';
 import '../../ui/ui.dart';
@@ -9,6 +10,7 @@ import '../auth/auth_providers.dart';
 import '../notifications/notification_service.dart';
 import '../notifications/notifications_center.dart';
 import '../security/biometric.dart';
+import '../security/biometric_login.dart';
 import '../settings/settings_service.dart';
 
 /// Port of web /settings (buildable sections). Profile name/age, theme,
@@ -329,6 +331,31 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
+              secondary: const Icon(Icons.fingerprint),
+              title: const Text('Biometric sign-in'),
+              subtitle: Text(PlatformInfo.isIOS
+                  ? 'Sign in with Face ID / Touch ID after signing out'
+                  : 'Sign in with fingerprint or face after signing out'),
+              value: ref.watch(biometricLoginProvider),
+              activeThumbColor: Tw.indigo500,
+              onChanged: (v) async {
+                if (v) {
+                  final ok = await ref
+                      .read(biometricLoginProvider.notifier)
+                      .enable();
+                  if (!ok && context.mounted) {
+                    setState(() => _msg =
+                        'Could not enable biometric sign-in.');
+                  }
+                } else {
+                  await ref
+                      .read(biometricLoginProvider.notifier)
+                      .disable();
+                }
+              },
+            ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
               secondary: const Icon(Icons.notifications_none),
               title: const Text('Weekly quiz reminder'),
               value: ref.watch(remindersProvider),
@@ -453,7 +480,18 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 title: 'Sign out',
                 style: AlertActionStyle.destructive,
                 onPressed: () async {
-                  await ref.read(authServiceProvider).signOut();
+                  // Keep the biometric refresh token usable: a local
+                  // sign-out clears the session without revoking it.
+                  if (ref.read(biometricLoginProvider)) {
+                    await ref
+                        .read(biometricLoginProvider.notifier)
+                        .saveSession();
+                    await ref
+                        .read(authServiceProvider)
+                        .signOut(scope: SignOutScope.local);
+                  } else {
+                    await ref.read(authServiceProvider).signOut();
+                  }
                   if (context.mounted) context.go('/auth');
                 },
               ),

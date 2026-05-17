@@ -16,7 +16,9 @@ import '../../features/history/history_screen.dart';
 import '../../features/library/screens/library_screen.dart';
 import '../../features/notifications/notifications_screen.dart';
 import '../../features/maintenance/maintenance_screen.dart';
+import '../../core/constants/app_constants.dart';
 import '../../core/models/recommendation.dart';
+import '../../features/onboarding/intro_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/recommendations/screens/recommendation_detail_screen.dart';
 import '../../features/quiz/screens/quiz_screen.dart';
@@ -30,6 +32,9 @@ class _AuthRefresh extends ChangeNotifier {
   _AuthRefresh(this._ref) {
     _ref.listen(authStateProvider, (_, _) => notifyListeners());
     _ref.listen(currentProfileProvider, (_, _) => notifyListeners());
+    // Re-run redirects once SharedPreferences resolves so first-launch
+    // users get sent to /intro after the prefs load.
+    _ref.listen(sharedPreferencesProvider, (_, _) => notifyListeners());
   }
   final Ref _ref;
 }
@@ -50,11 +55,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (authed && profile.isLoading) return null;
       final onboardingComplete =
           profile.asData?.value?.setupCompletedAt != null;
+      // Default to "seen" while prefs load so returning users never flash
+      // the intro; a fresh install flips to false once prefs resolve and
+      // the refresh listener re-runs this.
+      final introSeen = ref
+              .read(sharedPreferencesProvider)
+              .asData
+              ?.value
+              .getBool(StorageKeys.introSeen) ??
+          true;
       return resolveRedirect(
         location: state.matchedLocation,
         maintenance: maintenance,
         authenticated: authed,
         onboardingComplete: onboardingComplete,
+        introSeen: introSeen,
       );
     },
     routes: [
@@ -69,6 +84,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: 'verified',
                 builder: (_, _) => const VerifiedScreen()),
           ]),
+      GoRoute(path: '/intro', builder: (_, _) => const IntroScreen()),
       GoRoute(
           path: '/onboarding', builder: (_, _) => const OnboardingScreen()),
       GoRoute(

@@ -6,12 +6,14 @@ String? r({
   bool maintenance = false,
   bool authed = false,
   bool onboarded = false,
+  bool introSeen = true,
 }) =>
     resolveRedirect(
       location: loc,
       maintenance: maintenance,
       authenticated: authed,
       onboardingComplete: onboarded,
+      introSeen: introSeen,
     );
 
 void main() {
@@ -36,6 +38,26 @@ void main() {
       expect(r(loc: '/auth/reset-password'), isNull);
       expect(r(loc: '/demo'), isNull);
       expect(r(loc: '/group-quiz/ABC'), isNull);
+    });
+  });
+
+  group('pre-auth intro', () {
+    test('first launch forces /intro before auth', () {
+      expect(r(loc: '/', introSeen: false), '/intro');
+      expect(r(loc: '/auth', introSeen: false), '/intro');
+      expect(r(loc: '/library', introSeen: false), '/intro');
+      expect(r(loc: '/intro', introSeen: false), isNull);
+    });
+    test('deep links still bypass the intro', () {
+      expect(r(loc: '/demo', introSeen: false), isNull);
+      expect(r(loc: '/group-quiz/ABC', introSeen: false), isNull);
+    });
+    test('once seen, /intro bounces to /auth when unauthed', () {
+      expect(r(loc: '/intro'), '/auth');
+    });
+    test('authenticated users never sit on /intro', () {
+      expect(r(loc: '/intro', authed: true), '/onboarding');
+      expect(r(loc: '/intro', authed: true, onboarded: true), '/');
     });
   });
 

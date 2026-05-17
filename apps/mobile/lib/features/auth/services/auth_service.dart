@@ -263,9 +263,13 @@ class AuthService {
     }
   }
 
-  Future<ServiceResult<void>> signOut() async {
+  /// [scope] defaults to global (revokes the refresh token server-side).
+  /// Pass [SignOutScope.local] to only clear the local session — used when
+  /// biometric sign-in is on, so its stored refresh token stays valid.
+  Future<ServiceResult<void>> signOut(
+      {SignOutScope scope = SignOutScope.global}) async {
     try {
-      await _auth.signOut();
+      await _auth.signOut(scope: scope);
       return ServiceResult.ok(null);
     } on AuthException catch (e) {
       return ServiceResult.fail(e.message);
