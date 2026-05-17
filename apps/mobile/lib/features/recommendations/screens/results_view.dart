@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/enums.dart';
@@ -64,7 +65,10 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
         const BrandHeading('Made for you', size: 22),
         const SizedBox(height: 12),
         for (var i = 0; i < widget.recommendations.length; i++)
-          _card(widget.recommendations[i], i, b),
+          _card(widget.recommendations[i], i, b)
+              .animate()
+              .fadeIn(delay: (i * 90).ms, duration: 360.ms)
+              .slideY(begin: 0.08, curve: Curves.easeOutCubic),
         const SizedBox(height: 8),
         Row(children: [
           Expanded(

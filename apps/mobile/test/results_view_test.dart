@@ -45,6 +45,8 @@ void main() {
       ),
     ));
     await t.pump();
+    // Let the staggered flutter_animate entrance finish.
+    await t.pump(const Duration(milliseconds: 800));
 
     expect(find.text('YOUR PICKS'), findsOneWidget); // Eyebrow uppercases
     expect(find.text('Made for you'), findsOneWidget);
