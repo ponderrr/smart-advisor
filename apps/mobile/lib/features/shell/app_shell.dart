@@ -90,7 +90,6 @@ class AppShell extends ConsumerWidget {
                     ),
                 ],
               ),
-              const VerticalDivider(width: 1),
               Expanded(
                 child: Center(
                   child: ConstrainedBox(

@@ -140,9 +140,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     );
   }
 
-  Widget _section(String t) => Padding(
+  Widget _section(String t, {bool destructive = false}) => Padding(
         padding: const EdgeInsets.fromLTRB(4, 22, 4, 8),
-        child: Eyebrow(t),
+        child: Eyebrow(t,
+            color: destructive ? context.colors.destructive : null),
       );
 
   Widget _rowLabel(String t) => Text(t,
@@ -392,10 +393,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           ]),
         ),
 
-        _section('Danger zone'),
+        _section('Danger zone', destructive: true),
         BrandCard(
           child: Column(children: [
             _tile(Icons.pause_circle_outline, 'Disable account',
+                destructive: true,
                 onTap: () async {
                   if (!await _ensureAal2()) return;
                   await _confirmDanger(
