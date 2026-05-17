@@ -5,6 +5,8 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../ui/ui.dart';
 import '../auth/auth_providers.dart';
+import '../notifications/notification_service.dart';
+import '../security/biometric.dart';
 import '../settings/settings_service.dart';
 
 /// Port of web /settings (buildable sections). Profile name/age, theme,
@@ -219,7 +221,9 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                   : 'Applied to your next quiz.'),
               const SizedBox(height: 10),
               AdaptiveSegmentedControl(
-            color: Tw.indigo500,
+                color: (under18 || _tone == 1)
+                    ? Tw.emerald500
+                    : Tw.indigo500,
                 labels: const ['Standard', 'Family'],
                 selectedIndex: under18 ? 1 : _tone,
                 onValueChanged: under18
@@ -232,6 +236,40 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                                 contentTone:
                                     i == 1 ? 'family' : 'standard');
                       },
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        BrandCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Eyebrow('Security & alerts'),
+              const SizedBox(height: 4),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('App lock (Face ID / fingerprint)'),
+                value: ref.watch(biometricLockProvider),
+                activeThumbColor: Tw.indigo500,
+                onChanged: (v) async {
+                  if (v && !await biometricAvailable()) {
+                    if (!context.mounted) return;
+                    setState(() => _msg =
+                        'No biometrics enrolled on this device.');
+                    return;
+                  }
+                  await ref.read(biometricLockProvider.notifier).set(v);
+                },
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Weekly quiz reminder'),
+                value: ref.watch(remindersProvider),
+                activeThumbColor: Tw.indigo500,
+                onChanged: (v) =>
+                    ref.read(remindersProvider.notifier).set(v),
               ),
             ],
           ),

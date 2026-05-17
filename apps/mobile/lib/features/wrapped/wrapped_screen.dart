@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../core/models/recommendation.dart';
@@ -18,31 +21,230 @@ final _wrappedProvider =
   return res.data ?? const [];
 });
 
-/// Port of the web "wrapped" year-in-review. The web also mints a signed
-/// share-token + public page (web-only); mobile instead renders the card to
-/// a PNG via RepaintBoundary and uses the native share sheet.
 class WrappedScreen extends ConsumerWidget {
   const WrappedScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final recs = ref.watch(_wrappedProvider);
-    return BrandScaffold(
-      appBar: AppBar(title: const Text('Your Wrapped')),
+    return Scaffold(
+      backgroundColor: Colors.black,
       body: recs.when(
-        loading: () => const Center(child: LoaderFive('Crunching your year')),
-        error: (e, _) => Center(child: Subtitle('$e')),
-        data: (list) => _WrappedBody(recs: list),
+        loading: () => const Center(
+            child: CircularProgressIndicator(color: Colors.white)),
+        error: (e, _) => Center(
+            child: Text('$e',
+                style: const TextStyle(color: Colors.white70))),
+        data: (list) => _Story(recs: list),
       ),
     );
   }
 }
 
-class _WrappedBody extends StatelessWidget {
-  const _WrappedBody({required this.recs});
+class _Slide {
+  const _Slide(this.colors, this.builder);
+  final List<Color> colors;
+  final Widget Function(BuildContext) builder;
+}
+
+class _Story extends StatefulWidget {
+  const _Story({required this.recs});
   final List<Recommendation> recs;
 
-  final _shotKey = const GlobalObjectKey('wrapped-card');
+  @override
+  State<_Story> createState() => _StoryState();
+}
+
+class _StoryState extends State<_Story> {
+  int _i = 0;
+  Timer? _timer;
+  final _shotKey = GlobalKey();
+
+  static const _slideDuration = Duration(seconds: 5);
+
+  late final List<_Slide> _slides = _build();
+
+  @override
+  void initState() {
+    super.initState();
+    _arm();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _arm() {
+    _timer?.cancel();
+    _timer = Timer(_slideDuration, () => _go(1));
+  }
+
+  void _go(int d) {
+    final n = _i + d;
+    if (n < 0) return;
+    if (n >= _slides.length) return;
+    setState(() => _i = n);
+    _arm();
+  }
+
+  final int _year = DateTime.now().year;
+
+  List<_Slide> _build() {
+    final yr = widget.recs.where((r) {
+      final dt = DateTime.tryParse(r.createdAt);
+      return dt != null && dt.year == _year;
+    }).toList();
+    int by(String t) => yr.where((x) => x.type == t).length;
+    final genres = <String, int>{};
+    final creators = <String, int>{};
+    for (final r in yr) {
+      for (final g in r.genres) {
+        final k = g.trim();
+        if (k.isNotEmpty) genres[k] = (genres[k] ?? 0) + 1;
+      }
+      final who = r.director ?? r.author ?? r.artist;
+      if (who != null && who.isNotEmpty) {
+        creators[who] = (creators[who] ?? 0) + 1;
+      }
+    }
+    String top(Map<String, int> m) => m.isEmpty
+        ? '—'
+        : (m.entries.toList()
+              ..sort((a, b) => b.value.compareTo(a.value)))
+            .first
+            .key;
+    final topGenres = (genres.entries.toList()
+          ..sort((a, b) => b.value.compareTo(a.value)))
+        .take(3)
+        .map((e) => e.key)
+        .toList();
+    final fav = yr.where((r) => r.isFavorited).toList();
+    final standout = fav.isNotEmpty ? fav.first : (yr.isNotEmpty ? yr.first : null);
+
+    Widget big(String kicker, String value, String label) => Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(kicker.toUpperCase(),
+                    style: const TextStyle(
+                        color: Colors.white70,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 3,
+                        fontSize: 13))
+                .animate()
+                .fadeIn(duration: 400.ms),
+            const SizedBox(height: 10),
+            Text(value,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                        height: 1,
+                        fontSize: 72))
+                .animate()
+                .fadeIn(delay: 150.ms, duration: 500.ms)
+                .slideY(begin: 0.15, curve: Curves.easeOut),
+            const SizedBox(height: 10),
+            Text(label,
+                    style: const TextStyle(
+                        color: Colors.white, fontSize: 20, height: 1.3))
+                .animate()
+                .fadeIn(delay: 350.ms, duration: 450.ms),
+          ],
+        );
+
+    return [
+      _Slide(const [Tw.indigo500, Tw.violet600], (_) {
+        return Center(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            const Text('🎬 📚 🎧',
+                    style: TextStyle(fontSize: 44))
+                .animate()
+                .scale(duration: 500.ms, curve: Curves.easeOutBack),
+            const SizedBox(height: 16),
+            Text('Your $_year\nWrapped',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 40,
+                        height: 1.1,
+                        fontWeight: FontWeight.w900))
+                .animate()
+                .fadeIn(delay: 200.ms),
+          ]),
+        );
+      }),
+      _Slide(const [Tw.violet600, Tw.rose500],
+          (_) => big('This year', '${yr.length}', 'recommendations you got')),
+      _Slide(const [Tw.amber500, Tw.orange500],
+          (_) => big('Your mix', '${by('movie')}·${by('book')}·${by('music')}',
+              'movies · books · music')),
+      _Slide(const [Tw.emerald500, Tw.teal500],
+          (_) => big('Your vibe', topGenres.isEmpty ? '—' : topGenres.first,
+              topGenres.length > 1
+                  ? 'also ${topGenres.skip(1).join(', ')}'
+                  : 'your top genre')),
+      _Slide(const [Tw.rose500, Tw.fuchsia500],
+          (_) => big('On repeat', top(creators),
+              'your most-recommended creator')),
+      _Slide(const [Tw.indigo900, Tw.violet600], (_) {
+        return big('Standout', standout?.title ?? '—',
+            standout != null ? 'a favorite this year' : 'take a quiz!');
+      }),
+      _Slide(const [Tw.indigo500, Tw.rose500], (_) => _outro(yr.length)),
+    ];
+  }
+
+  Widget _outro(int total) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        RepaintBoundary(
+          key: _shotKey,
+          child: Container(
+            padding: const EdgeInsets.all(28),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                  colors: [Tw.indigo500, Tw.violet600, Tw.rose500]),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              Text('$_year Wrapped',
+                  style: const TextStyle(
+                      color: Colors.white70,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 3)),
+              const SizedBox(height: 10),
+              Text('$total picks',
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 44,
+                      fontWeight: FontWeight.w900)),
+              const SizedBox(height: 6),
+              const Text('Smart Advisor',
+                  style: TextStyle(color: Colors.white70)),
+            ]),
+          ),
+        ),
+        const SizedBox(height: 24),
+        FilledButton.icon(
+          style: FilledButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black),
+          onPressed: _share,
+          icon: const Icon(Icons.ios_share),
+          label: const Text('Share'),
+        ),
+        const SizedBox(height: 10),
+        TextButton(
+          onPressed: () => context.pop(),
+          child: const Text('Done',
+              style: TextStyle(color: Colors.white70)),
+        ),
+      ],
+    );
+  }
 
   Future<void> _share() async {
     final boundary = _shotKey.currentContext?.findRenderObject()
@@ -54,128 +256,63 @@ class _WrappedBody extends StatelessWidget {
     await SharePlus.instance.share(ShareParams(
       files: [
         XFile.fromData(bytes.buffer.asUint8List(),
-            mimeType: 'image/png', name: 'smart-advisor-wrapped.png'),
+            mimeType: 'image/png', name: 'wrapped.png')
       ],
-      text: 'My Smart Advisor year in review',
+      text: 'My Smart Advisor $_year Wrapped',
     ));
   }
 
   @override
   Widget build(BuildContext context) {
-    final year = DateTime.now().year;
-    final yr = recs.where((r) {
-      final d = DateTime.tryParse(r.createdAt);
-      return d != null && d.year == year;
-    }).toList();
-    int by(String t) => yr.where((r) => r.type == t).length;
-
-    final genres = <String, int>{};
-    for (final r in yr) {
-      for (final g in r.genres) {
-        final k = g.trim();
-        if (k.isNotEmpty) genres[k] = (genres[k] ?? 0) + 1;
-      }
-    }
-    final topGenres = (genres.entries.toList()
-          ..sort((a, b) => b.value.compareTo(a.value)))
-        .take(3)
-        .map((e) => e.key)
-        .toList();
-
-    return ListView(
-      padding: const EdgeInsets.all(20),
-      children: [
-        RepaintBoundary(
-          key: _shotKey,
-          child: Container(
-            padding: const EdgeInsets.all(28),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Tw.indigo500, Tw.violet600, Tw.rose500],
+    final s = _slides[_i];
+    return GestureDetector(
+      onTapUp: (e) {
+        final w = MediaQuery.sizeOf(context).width;
+        _go(e.globalPosition.dx < w * 0.32 ? -1 : 1);
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 450),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: s.colors),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(10),
+                child: Row(
+                  children: [
+                    for (var k = 0; k < _slides.length; k++)
+                      Expanded(
+                        child: Container(
+                          height: 3,
+                          margin:
+                              const EdgeInsets.symmetric(horizontal: 2),
+                          decoration: BoxDecoration(
+                            color: k <= _i
+                                ? Colors.white
+                                : Colors.white.withValues(alpha: 0.3),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('$year',
-                    style: const TextStyle(
-                        color: Colors.white70,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 16,
-                        letterSpacing: 4)),
-                const SizedBox(height: 4),
-                const Text('Smart Advisor Wrapped',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 26,
-                        fontWeight: FontWeight.w900)),
-                const SizedBox(height: 24),
-                _big('${yr.length}', 'recommendations'),
-                const SizedBox(height: 16),
-                Row(children: [
-                  Expanded(child: _stat('${by('movie')}', 'movies')),
-                  Expanded(child: _stat('${by('book')}', 'books')),
-                  Expanded(child: _stat('${by('music')}', 'music')),
-                ]),
-                const SizedBox(height: 16),
-                _stat('${yr.where((r) => r.isFavorited).length}',
-                    'favorites'),
-                if (topGenres.isNotEmpty) ...[
-                  const SizedBox(height: 20),
-                  const Text('Top genres',
-                      style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 2)),
-                  const SizedBox(height: 6),
-                  Text(topGenres.join(' · '),
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700)),
-                ],
-                const SizedBox(height: 24),
-                const Text('smartadvisor.live',
-                    style:
-                        TextStyle(color: Colors.white70, fontSize: 12)),
-              ],
-            ),
+              Expanded(
+                child: Padding(
+                  key: ValueKey(_i),
+                  padding: const EdgeInsets.fromLTRB(28, 0, 28, 28),
+                  child: s.builder(context),
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 20),
-        AdaptiveButton(onPressed: _share, label: 'Share my Wrapped'),
-      ],
+      ),
     );
   }
-
-  Widget _big(String n, String label) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(n,
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 56,
-                  fontWeight: FontWeight.w900,
-                  height: 1)),
-          Text(label,
-              style: const TextStyle(color: Colors.white70, fontSize: 14)),
-        ],
-      );
-
-  Widget _stat(String n, String label) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(n,
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900)),
-          Text(label,
-              style: const TextStyle(color: Colors.white70, fontSize: 12)),
-        ],
-      );
 }
