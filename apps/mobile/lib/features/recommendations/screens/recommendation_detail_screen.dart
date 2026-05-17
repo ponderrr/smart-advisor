@@ -40,25 +40,20 @@ class _S extends ConsumerState<RecommendationDetailScreen> {
     final who = r.director ?? r.author ?? r.artist;
 
     return BrandScaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: Icon(_fav ? Icons.favorite : Icons.favorite_border,
-                color: _fav ? tone.text : context.brandMuted),
-            onPressed: () async {
-              setState(() => _fav = !_fav);
-              await ref
-                  .read(databaseServiceProvider)
-                  .toggleFavorite(r.id);
-              showBanner(_fav
-                  ? '“${r.title}” added to favorites'
-                  : '“${r.title}” removed from favorites');
-            },
-          ),
-        ],
-      ),
+      title: r.type[0].toUpperCase() + r.type.substring(1),
+      actions: [
+        AdaptiveAppBarAction(
+          icon: _fav ? Icons.favorite : Icons.favorite_border,
+          iosSymbol: _fav ? 'heart.fill' : 'heart',
+          onPressed: () async {
+            setState(() => _fav = !_fav);
+            await ref.read(databaseServiceProvider).toggleFavorite(r.id);
+            showBanner(_fav
+                ? '“${r.title}” added to favorites'
+                : '“${r.title}” removed from favorites');
+          },
+        ),
+      ],
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
         children: [

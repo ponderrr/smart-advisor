@@ -80,14 +80,15 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
   @override
   Widget build(BuildContext context) {
     return BrandScaffold(
-      appBar: AppBar(
-        title: const Text('Try the demo'),
-        actions: [
-          TextButton(
-              onPressed: () => context.go('/auth'),
-              child: const Text('Sign up')),
-        ],
-      ),
+      title: 'Try the demo',
+      actions: [
+        AdaptiveAppBarAction(
+          title: 'Sign up',
+          icon: Icons.person_add_alt,
+          iosSymbol: 'person.badge.plus',
+          onPressed: () => context.go('/auth'),
+        ),
+      ],
       body: switch (_phase) {
         _Phase.generating =>
           const Center(child: LoaderFive('Finding your picks')),

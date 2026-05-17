@@ -25,7 +25,7 @@ class GroupQuizSessionScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final id = ref.watch(_resolveProvider(code));
     return BrandScaffold(
-      appBar: AppBar(title: Text('Session $code')),
+      title: 'Session $code',
       body: id.when(
         loading: () => const Center(child: LoaderFive('Joining')),
         error: (e, _) => Center(child: Subtitle('$e')),

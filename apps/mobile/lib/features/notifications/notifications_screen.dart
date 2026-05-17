@@ -15,17 +15,17 @@ class NotificationsScreen extends ConsumerWidget {
           ref.read(notificationsCenterProvider.notifier).markAllRead());
     }
     return BrandScaffold(
-      appBar: AppBar(
-        title: const Text('Notifications'),
-        actions: [
-          if (items.isNotEmpty)
-            TextButton(
-              onPressed: () =>
-                  ref.read(notificationsCenterProvider.notifier).clear(),
-              child: const Text('Clear'),
-            ),
-        ],
-      ),
+      title: 'Notifications',
+      actions: [
+        if (items.isNotEmpty)
+          AdaptiveAppBarAction(
+            title: 'Clear',
+            icon: Icons.delete_outline,
+            iosSymbol: 'trash',
+            onPressed: () =>
+                ref.read(notificationsCenterProvider.notifier).clear(),
+          ),
+      ],
       body: items.isEmpty
           ? Center(child: Subtitle('No notifications yet.'))
           : ListView(

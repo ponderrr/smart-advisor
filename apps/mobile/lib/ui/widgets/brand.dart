@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../adaptive.dart';
 import '../theme/accents.dart';
 import '../theme/tailwind_palette.dart';
 
@@ -17,16 +18,46 @@ Color _muted(Brightness b) =>
 
 /// Page scaffold on the slate-50/950 background the web uses everywhere.
 class BrandScaffold extends StatelessWidget {
-  const BrandScaffold({super.key, required this.body, this.appBar});
+  const BrandScaffold({
+    super.key,
+    required this.body,
+    this.appBar,
+    this.title,
+    this.actions,
+    this.leading,
+  });
+
   final Widget body;
+
+  /// Legacy: a Material PreferredSizeWidget app bar.
   final PreferredSizeWidget? appBar;
 
+  /// Preferred: a [title]/[actions]/[leading] renders a native iOS 26
+  /// AdaptiveAppBar (Liquid Glass toolbar) over the brand background.
+  final String? title;
+  final List<AdaptiveAppBarAction>? actions;
+  final Widget? leading;
+
   @override
-  Widget build(BuildContext context) => Scaffold(
-        backgroundColor: brandBg(Theme.of(context).brightness),
-        appBar: appBar,
-        body: body,
+  Widget build(BuildContext context) {
+    final bg = brandBg(Theme.of(context).brightness);
+    if (title != null || actions != null || leading != null) {
+      return AdaptiveScaffold(
+        appBar: AdaptiveAppBar(
+          title: title,
+          actions: actions,
+          leading: leading,
+          useNativeToolbar: true,
+        ),
+        body: ColoredBox(color: bg, child: body),
       );
+    }
+    return Scaffold(
+      backgroundColor: bg,
+      appBar: appBar,
+      body: body,
+    );
+  }
 }
 
 /// `text-[10px] font-black uppercase tracking-[0.18em]` accent eyebrow.

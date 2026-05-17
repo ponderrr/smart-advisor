@@ -91,7 +91,7 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
   @override
   Widget build(BuildContext context) {
     return BrandScaffold(
-      appBar: AppBar(title: const Text('Two-factor setup')),
+      title: 'Two-factor setup',
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
