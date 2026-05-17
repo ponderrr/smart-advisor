@@ -4,6 +4,7 @@ import '../../core/config/env.dart';
 import '../../core/models/app_user.dart';
 import '../../core/supabase/supabase_providers.dart';
 import 'services/auth_service.dart';
+import 'services/backup_service.dart';
 import 'services/mfa_service.dart';
 
 final authServiceProvider =
@@ -11,6 +12,9 @@ final authServiceProvider =
 
 final mfaServiceProvider =
     Provider<MfaService>((ref) => MfaService(ref.watch(supabaseClientProvider)));
+
+final backupServiceProvider = Provider<BackupService>(
+    (ref) => BackupService(ref.watch(supabaseClientProvider)));
 
 /// Current user's profile row (drives the onboarding-incomplete redirect via
 /// setup_completed_at). Refreshes when auth state changes.

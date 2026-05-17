@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/models/app_user.dart';
@@ -187,6 +189,78 @@ class AuthService {
     final r = await _invokeAccount('account-delete', null);
     if (!r.isError) await _auth.signOut();
     return r;
+  }
+
+  /// Avatar upload to the public `avatars` bucket at `<uid>/avatar.<ext>`,
+  /// then profiles.avatar_url. Magic-byte + 5MB validated like the web.
+  Future<ServiceResult<String>> uploadAvatar(
+      List<int> bytes, String contentType) async {
+    final uid = _auth.currentUser?.id;
+    if (uid == null) return ServiceResult.fail('Not authenticated');
+    if (bytes.length > 5 * 1024 * 1024) {
+      return ServiceResult.fail('Image must be under 5MB.');
+    }
+    final b = bytes;
+    bool starts(List<int> sig, [int off = 0]) {
+      if (b.length < off + sig.length) return false;
+      for (var i = 0; i < sig.length; i++) {
+        if (b[off + i] != sig[i]) return false;
+      }
+      return true;
+    }
+
+    String? ext;
+    if (starts([0xFF, 0xD8, 0xFF])) {
+      ext = 'jpg';
+    } else if (starts([0x89, 0x50, 0x4E, 0x47])) {
+      ext = 'png';
+    } else if (starts([0x47, 0x49, 0x46, 0x38])) {
+      ext = 'gif';
+    } else if (starts([0x52, 0x49, 0x46, 0x46]) &&
+        starts([0x57, 0x45, 0x42, 0x50], 8)) {
+      ext = 'webp';
+    }
+    if (ext == null) {
+      return ServiceResult.fail('Use a JPEG, PNG, GIF, or WebP image.');
+    }
+
+    final path = '$uid/avatar.$ext';
+    try {
+      await _c.storage.from('avatars').uploadBinary(
+            path,
+            Uint8List.fromList(b),
+            fileOptions: FileOptions(contentType: contentType, upsert: true),
+          );
+      final url =
+          '${_c.storage.from('avatars').getPublicUrl(path)}?t=${DateTime.now().millisecondsSinceEpoch}';
+      await _c.from('profiles').update({
+        'avatar_url': url,
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+      }).eq('id', uid);
+      return ServiceResult.ok(url);
+    } on StorageException catch (e) {
+      return ServiceResult.fail(e.message);
+    }
+  }
+
+  Future<ServiceResult<void>> removeAvatar() async {
+    final uid = _auth.currentUser?.id;
+    if (uid == null) return ServiceResult.fail('Not authenticated');
+    try {
+      final files = await _c.storage.from('avatars').list(path: uid);
+      if (files.isNotEmpty) {
+        await _c.storage
+            .from('avatars')
+            .remove(files.map((f) => '$uid/${f.name}').toList());
+      }
+      await _c.from('profiles').update({
+        'avatar_url': null,
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+      }).eq('id', uid);
+      return ServiceResult.ok(null);
+    } on StorageException catch (e) {
+      return ServiceResult.fail(e.message);
+    }
   }
 
   Future<ServiceResult<void>> signOut() async {

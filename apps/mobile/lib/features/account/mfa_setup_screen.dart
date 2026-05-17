@@ -24,6 +24,21 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
   String? _error;
   bool _busy = false;
   bool _done = false;
+  List<String>? _backupCodes;
+
+  Future<void> _genBackupCodes() async {
+    setState(() => _busy = true);
+    final r = await ref.read(backupServiceProvider).generateBackupCodes();
+    if (!mounted) return;
+    setState(() {
+      _busy = false;
+      if (r.error == null) {
+        _backupCodes = r.codes;
+      } else {
+        _error = r.error;
+      }
+    });
+  }
 
   @override
   void initState() {
@@ -88,6 +103,40 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
             Subtitle(
                 'Your authenticator app will now be required at sign-in.'),
             const SizedBox(height: 20),
+            if (_backupCodes == null)
+              AdaptiveButton(
+                  onPressed: _busy ? null : _genBackupCodes,
+                  label: 'Generate backup codes',
+                  style: AdaptiveButtonStyle.tinted)
+            else ...[
+              const Eyebrow('Backup codes — save these'),
+              const SizedBox(height: 8),
+              BrandCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    for (final code in _backupCodes!)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 3),
+                        child: SelectableText(code,
+                            style: TextStyle(
+                                fontFamily: 'monospace',
+                                fontSize: 15,
+                                letterSpacing: 1,
+                                color: context.brandInk)),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextButton.icon(
+                icon: const Icon(Icons.copy, size: 16),
+                label: const Text('Copy all'),
+                onPressed: () => Clipboard.setData(
+                    ClipboardData(text: _backupCodes!.join('\n'))),
+              ),
+            ],
+            const SizedBox(height: 12),
             AdaptiveButton(
                 onPressed: () => context.pop(), label: 'Done'),
           ] else if (_enroll == null) ...[

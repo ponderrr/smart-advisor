@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../ui/ui.dart';
 import '../auth/auth_providers.dart';
@@ -29,6 +30,18 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     _name.dispose();
     _age.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickAvatar() async {
+    final picked = await ImagePicker()
+        .pickImage(source: ImageSource.gallery, maxWidth: 1024);
+    if (picked == null) return;
+    final bytes = await picked.readAsBytes();
+    final r = await ref.read(authServiceProvider).uploadAvatar(
+        bytes, picked.mimeType ?? 'image/jpeg');
+    if (!mounted) return;
+    ref.invalidate(currentProfileProvider);
+    setState(() => _msg = r.isError ? r.error : 'Photo updated');
   }
 
   Future<void> _editField({
@@ -115,6 +128,36 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             children: [
               const Eyebrow('Profile'),
               const SizedBox(height: 10),
+              Row(children: [
+                CircleAvatar(
+                  radius: 28,
+                  backgroundColor: context.colors.muted,
+                  backgroundImage: (profile?.avatarUrl != null)
+                      ? NetworkImage(profile!.avatarUrl!)
+                      : null,
+                  child: profile?.avatarUrl == null
+                      ? Icon(Icons.person,
+                          color: context.colors.mutedForeground)
+                      : null,
+                ),
+                const SizedBox(width: 12),
+                AdaptiveButton(
+                    onPressed: _pickAvatar,
+                    label: 'Change photo',
+                    style: AdaptiveButtonStyle.bordered),
+                const SizedBox(width: 8),
+                if (profile?.avatarUrl != null)
+                  AdaptiveButton(
+                      onPressed: () async {
+                        await ref
+                            .read(authServiceProvider)
+                            .removeAvatar();
+                        ref.invalidate(currentProfileProvider);
+                      },
+                      label: 'Remove',
+                      style: AdaptiveButtonStyle.plain),
+              ]),
+              const SizedBox(height: 12),
               AdaptiveTextField(controller: _name, placeholder: 'Name'),
               const SizedBox(height: 8),
               AdaptiveTextField(
@@ -208,6 +251,13 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
               title: const Text('Recommendation history'),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => context.push('/history'),
+            ),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.auto_awesome),
+              title: const Text('Your Wrapped'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/wrapped'),
             ),
           ]),
         ),

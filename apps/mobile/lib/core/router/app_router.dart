@@ -17,6 +17,7 @@ import '../../features/library/screens/library_screen.dart';
 import '../../features/maintenance/maintenance_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/quiz/screens/quiz_screen.dart';
+import '../../features/wrapped/wrapped_screen.dart';
 import '../../features/shell/app_shell.dart';
 import '../supabase/supabase_providers.dart';
 import 'redirect.dart';
@@ -80,6 +81,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     code: s.pathParameters['code']!)),
           ]),
       GoRoute(path: '/demo', builder: (_, _) => const DemoScreen()),
+      GoRoute(path: '/wrapped', builder: (_, _) => const WrappedScreen()),
       GoRoute(
           path: '/history', builder: (_, _) => const HistoryScreen()),
       GoRoute(

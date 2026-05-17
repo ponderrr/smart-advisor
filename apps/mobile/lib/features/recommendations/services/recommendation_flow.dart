@@ -31,23 +31,53 @@ class RecommendationFlow {
     required String contentTone,
     String? userName,
   }) async {
-    final RecommendationData data;
+    // Web enhanced-recommendations parity: 3 of a single type, 1+1+1 for
+    // mix, 2 movies+1 book for legacy "both". Each EF call returns one of
+    // each type, so fan out N parallel calls and dedup by title.
+    final (int movieT, int bookT, int musicT) = switch (contentType) {
+      ContentType.movie => (3, 0, 0),
+      ContentType.book => (0, 3, 0),
+      ContentType.music => (0, 0, 3),
+      ContentType.both => (2, 1, 0),
+      ContentType.mix => (1, 1, 1),
+    };
+    final calls =
+        [movieT, bookT, musicT].reduce((a, b) => a > b ? a : b);
+
+    final List<RecommendationData> results;
     try {
-      data = await _ai.generateRecommendationsWithRetry(
-        answers: answers,
-        contentType: contentType,
-        userAge: userAge,
-        contentTone: contentTone,
-        userName: userName,
-      );
+      results = await Future.wait(List.generate(
+        calls,
+        (_) => _ai.generateRecommendationsWithRetry(
+          answers: answers,
+          contentType: contentType,
+          userAge: userAge,
+          contentTone: contentTone,
+          userName: userName,
+        ),
+      ));
     } on AiServiceException catch (e) {
       return ServiceResult.fail(e.message);
     }
 
+    final seen = <String>{};
+    final byType = {'movie': <AiRecommendationItem>[], 'book': <AiRecommendationItem>[], 'music': <AiRecommendationItem>[]};
+    for (final d in results) {
+      for (final it in [
+        d.movieRecommendation,
+        d.bookRecommendation,
+        d.musicRecommendation,
+      ]) {
+        if (it == null) continue;
+        final key = '${it.type}:${it.title.toLowerCase().trim()}';
+        if (!seen.add(key)) continue;
+        byType[it.type]?.add(it);
+      }
+    }
     final items = <AiRecommendationItem>[
-      if (data.movieRecommendation != null) data.movieRecommendation!,
-      if (data.bookRecommendation != null) data.bookRecommendation!,
-      if (data.musicRecommendation != null) data.musicRecommendation!,
+      ...byType['movie']!.take(movieT),
+      ...byType['book']!.take(bookT),
+      ...byType['music']!.take(musicT),
     ];
     if (items.isEmpty) {
       return ServiceResult.fail('No recommendations came back. Try again.');
