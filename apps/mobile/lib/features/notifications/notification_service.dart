@@ -17,18 +17,25 @@ class NotificationService {
 
   static Future<void> init() async {
     if (_ready) return;
-    tzdata.initializeTimeZones();
-    await _plugin.initialize(
-      settings: const InitializationSettings(
-        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
-        iOS: DarwinInitializationSettings(),
-      ),
-    );
-    _ready = true;
+    try {
+      tzdata.initializeTimeZones();
+      await _plugin.initialize(
+        settings: const InitializationSettings(
+          android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+          iOS: DarwinInitializationSettings(),
+          linux:
+              LinuxInitializationSettings(defaultActionName: 'Open'),
+        ),
+      );
+      _ready = true;
+    } catch (_) {
+      // Notifications unavailable on this platform — never crash startup.
+    }
   }
 
   static Future<bool> requestPermission() async {
     await init();
+    if (!_ready) return false;
     final ios = _plugin.resolvePlatformSpecificImplementation<
         IOSFlutterLocalNotificationsPlugin>();
     final android = _plugin.resolvePlatformSpecificImplementation<
@@ -41,7 +48,9 @@ class NotificationService {
   /// A gentle weekly "come back and discover something" reminder.
   static Future<void> scheduleWeeklyReminder() async {
     await init();
-    await _plugin.zonedSchedule(
+    if (!_ready) return;
+    try {
+      await _plugin.zonedSchedule(
       id: 42,
       title: 'Discover something new',
       body: 'Take a 2-minute quiz and get a fresh pick.',
@@ -54,13 +63,15 @@ class NotificationService {
             importance: Importance.defaultImportance),
         iOS: DarwinNotificationDetails(),
       ),
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
-    );
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+      );
+    } catch (_) {/* unsupported platform — ignore */}
   }
 
   static Future<void> cancelAll() async {
     await init();
+    if (!_ready) return;
     await _plugin.cancelAll();
   }
 }
