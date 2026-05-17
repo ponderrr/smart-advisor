@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/models/recommendation.dart';
 import '../../core/services/service_providers.dart';
+import '../../core/ui_messenger.dart';
 import '../../ui/ui.dart';
 import '../recommendations/services/database_service.dart';
 
@@ -132,19 +133,24 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               ],
             ),
           ),
-          IconButton(
-            icon: Icon(
-                r.isFavorited ? Icons.favorite : Icons.favorite_border,
-                size: 20,
-                color: r.isFavorited ? Tw.rose500 : context.brandMuted),
-            onPressed: () async {
-              await ref
-                  .read(databaseServiceProvider)
-                  .toggleFavorite(r.id);
-              ref.invalidate(_historyProvider);
-            },
+          AdaptiveTooltip(
+            message: r.isFavorited ? 'Remove favorite' : 'Favorite',
+            child: IconButton(
+              icon: Icon(
+                  r.isFavorited ? Icons.favorite : Icons.favorite_border,
+                  size: 20,
+                  color: r.isFavorited ? Tw.rose500 : context.brandMuted),
+              onPressed: () async {
+                await ref
+                    .read(databaseServiceProvider)
+                    .toggleFavorite(r.id);
+                ref.invalidate(_historyProvider);
+              },
+            ),
           ),
-          IconButton(
+          AdaptiveTooltip(
+            message: 'Delete',
+            child: IconButton(
             icon: Icon(Icons.delete_outline,
                 size: 20, color: context.brandMuted),
             onPressed: () => AdaptiveAlertDialog.show(
@@ -161,14 +167,20 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   title: 'Delete',
                   style: AlertActionStyle.destructive,
                   onPressed: () async {
-                    await ref
-                        .read(databaseServiceProvider)
-                        .deleteRecommendation(r.id);
+                    final db = ref.read(databaseServiceProvider);
+                    await db.deleteRecommendation(r.id);
                     ref.invalidate(_historyProvider);
+                    showBanner('“${r.title}” deleted',
+                        type: AdaptiveSnackBarType.warning,
+                        action: 'Undo', onAction: () async {
+                      await db.saveRecommendation(r);
+                      ref.invalidate(_historyProvider);
+                    });
                   },
                 ),
               ],
             ),
+          ),
           ),
         ]),
         ),

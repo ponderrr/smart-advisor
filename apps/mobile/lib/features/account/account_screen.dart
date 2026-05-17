@@ -329,29 +329,15 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           child: Column(children: [
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: Icon(Icons.notifications_none,
-                  color: context.colors.foreground),
+              leading: AdaptiveBadge(
+                count: ref.watch(unreadCountProvider),
+                backgroundColor: Tw.indigo500,
+                child: Icon(Icons.notifications_none,
+                    color: context.colors.foreground),
+              ),
               title: const Text('Notifications'),
-              trailing: Builder(builder: (_) {
-                final unread = ref.watch(unreadCountProvider);
-                return Row(mainAxisSize: MainAxisSize.min, children: [
-                  if (unread > 0)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 7, vertical: 2),
-                      decoration: const BoxDecoration(
-                          color: Tw.indigo500,
-                          shape: BoxShape.circle),
-                      child: Text('$unread',
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700)),
-                    ),
-                  Icon(Icons.chevron_right,
-                      color: context.colors.mutedForeground),
-                ]);
-              }),
+              trailing: Icon(Icons.chevron_right,
+                  color: context.colors.mutedForeground),
               onTap: () => context.push('/notifications'),
             ),
             _tile(Icons.history, 'Recommendation history',

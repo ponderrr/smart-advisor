@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/models/library_item.dart';
 import '../../../core/services/service_providers.dart';
+import '../../../core/ui_messenger.dart';
 import '../../../ui/ui.dart';
 
 final _libraryProvider =
@@ -149,7 +150,26 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
           AlertAction(
             title: 'Remove',
             style: AlertActionStyle.destructive,
-            onPressed: () async => svc.remove(i.id),
+            onPressed: () async {
+              await svc.remove(i.id);
+              ref.invalidate(_libraryProvider);
+              showBanner('“${i.title}” removed',
+                  type: AdaptiveSnackBarType.warning,
+                  action: 'Undo', onAction: () async {
+                await svc.log(LogLibraryInput(
+                  medium: i.medium,
+                  title: i.title,
+                  creator: i.creator,
+                  year: i.year,
+                  posterUrl: i.posterUrl,
+                  status: i.status,
+                  rating: i.rating,
+                  reaction: i.reaction,
+                  sourceRecommendationId: i.sourceRecommendationId,
+                ));
+                ref.invalidate(_libraryProvider);
+              });
+            },
           ),
         ],
       );
