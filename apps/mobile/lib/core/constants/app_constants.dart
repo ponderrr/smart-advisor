@@ -29,6 +29,16 @@ class StorageKeys {
   /// Set once the pre-auth intro carousel has been seen, so returning
   /// users go straight to the auth screen.
   static const String introSeen = 'smart_advisor_intro_seen';
+
+  /// Feed profile visibility ("public"|"private"). Same key string as the
+  /// web localStorage (use-feed-visibility.ts) so a future shared backend
+  /// migration is mechanical.
+  static const String prefFeedVisibility =
+      'smart_advisor_pref_feed_visibility';
+
+  /// Per-device feed display prefs (view/scope/community/commentSort) as a
+  /// single JSON blob — exact web key string (use-feed-prefs.ts).
+  static const String prefFeedPrefs = 'smart_advisor_pref_feed_prefs';
 }
 
 /// Default per-request network timeout (web FETCH_TIMEOUT_MS).

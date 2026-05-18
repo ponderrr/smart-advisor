@@ -11,6 +11,10 @@ import '../../features/dashboard/dashboard_screen.dart';
 import '../../features/dashboard/milestones_screen.dart';
 import '../../features/demo/demo_screen.dart';
 import '../../features/feed/feed_screen.dart';
+import '../../features/feed/models/feed_models.dart';
+import '../../features/feed/screens/community_screen.dart';
+import '../../features/feed/screens/post_detail_screen.dart';
+import '../../features/feed/screens/user_profile_screen.dart';
 import '../../features/group_quiz/screens/group_quiz_screen.dart';
 import '../../features/group_quiz/screens/group_quiz_session_screen.dart';
 import '../../features/history/history_screen.dart';
@@ -181,7 +185,28 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           // Dashboard is kept intact at /dashboard — a one-line swap
           // restores it as home if web parity is ever needed again.
           GoRoute(
-              path: '/', builder: (_, _) => const FeedScreen()),
+              path: '/',
+              builder: (_, _) => const FeedScreen(),
+              // Feed sub-pages: full-page pushes that keep the 5-tab nav
+              // (web parity — /feed/[id], /feed/u/[name], /feed/c/[community]).
+              // Cold deep-links here while unauthenticated already route to
+              // /auth via resolveRedirect's !authenticated branch.
+              routes: [
+                GoRoute(
+                    path: 'feed/:id',
+                    builder: (_, s) => PostDetailScreen(
+                        postId: s.pathParameters['id']!)),
+                GoRoute(
+                    path: 'feed/u/:name',
+                    builder: (_, s) => UserProfileScreen(
+                        username: Uri.decodeComponent(
+                            s.pathParameters['name']!))),
+                GoRoute(
+                    path: 'feed/c/:community',
+                    builder: (_, s) => CommunityScreen(
+                        community: feedCommunityFromWire(
+                            s.pathParameters['community']!))),
+              ]),
           GoRoute(
               path: '/dashboard',
               builder: (_, _) => const DashboardScreen()),
