@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../core/models/enums.dart';
 import '../../../core/models/library_item.dart';
@@ -86,14 +86,8 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
           ),
           const SizedBox(width: 8),
           AdaptiveButton.icon(
-            onPressed: () async {
-              await Clipboard.setData(ClipboardData(text: _shareText()));
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Copied to clipboard')),
-                );
-              }
-            },
+            onPressed: () => SharePlus.instance
+                .share(ShareParams(text: _shareText())),
             icon: Icons.share,
             style: AdaptiveButtonStyle.bordered,
           ),
@@ -126,10 +120,10 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
           onPressed: () => _logToLibrary(r),
         ),
         AdaptiveContextMenuAction(
-          title: 'Copy to share',
+          title: 'Share',
           icon: Icons.ios_share,
-          onPressed: () =>
-              Clipboard.setData(ClipboardData(text: _shareText())),
+          onPressed: () => SharePlus.instance
+              .share(ShareParams(text: _shareText())),
         ),
       ],
       child: Container(

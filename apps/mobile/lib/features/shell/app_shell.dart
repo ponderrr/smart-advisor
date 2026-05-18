@@ -21,11 +21,13 @@ class AppShell extends ConsumerWidget {
       builder: (ctx) => _QuizSheet(
         onSolo: () {
           Navigator.pop(ctx);
-          context.go('/quiz/solo');
+          // push (not go) so the shell stays mounted underneath and the
+          // quiz pops back down on exit instead of replacing the stack.
+          context.push('/quiz/solo');
         },
         onGroup: () {
           Navigator.pop(ctx);
-          context.go('/group-quiz');
+          context.push('/group-quiz');
         },
       ),
     );
@@ -38,12 +40,13 @@ class AppShell extends ConsumerWidget {
 
     // Native bottom bar. Quiz lives as the center nav item (opens the
     // Solo/Group sheet) instead of a floating button.
-    const quizSlot = 2;
+    const quizSlot = 3;
     int navIndexFromLocation() {
       if (location == '/') return 0;
-      if (location.startsWith('/library')) return 1;
-      if (location.startsWith('/history')) return 3;
-      if (location.startsWith('/account')) return 4;
+      if (location.startsWith('/feed')) return 1;
+      if (location.startsWith('/library')) return 2;
+      if (location.startsWith('/history')) return 4;
+      if (location.startsWith('/account')) return 5;
       return 0;
     }
 
@@ -53,18 +56,27 @@ class AppShell extends ConsumerWidget {
         return;
       }
       context.go(switch (i) {
-        1 => '/library',
-        3 => '/history',
-        4 => '/account',
+        1 => '/feed',
+        2 => '/library',
+        4 => '/history',
+        5 => '/account',
         _ => '/',
       });
     }
 
     // Tablet / wide: side NavigationRail + centered, max-width content.
     if (MediaQuery.sizeOf(context).width >= 720) {
-      const labels = ['Home', 'Library', 'Quiz', 'History', 'Profile'];
+      const labels = [
+        'Home',
+        'Feed',
+        'Library',
+        'Quiz',
+        'History',
+        'Profile'
+      ];
       const icons = [
         Icons.dashboard_outlined,
+        Icons.forum_outlined,
         Icons.bookmark_border,
         Icons.auto_awesome,
         Icons.history,
@@ -83,7 +95,7 @@ class AppShell extends ConsumerWidget {
                 destinations: [
                   for (var i = 0; i < labels.length; i++)
                     NavigationRailDestination(
-                      icon: i == 4
+                      icon: i == 5
                           ? _avatarIcon(context, profile?.avatarUrl, false)
                           : Icon(icons[i]),
                       label: Text(labels[i]),
@@ -115,6 +127,8 @@ class AppShell extends ConsumerWidget {
         items: [
           const AdaptiveNavigationDestination(
               label: 'Home', icon: Icon(Icons.dashboard_outlined)),
+          const AdaptiveNavigationDestination(
+              label: 'Feed', icon: Icon(Icons.forum_outlined)),
           const AdaptiveNavigationDestination(
               label: 'Library', icon: Icon(Icons.bookmark_border)),
           const AdaptiveNavigationDestination(

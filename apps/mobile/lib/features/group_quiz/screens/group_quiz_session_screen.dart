@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../core/models/enums.dart';
 import '../../../core/models/question.dart';
@@ -21,17 +22,47 @@ class GroupQuizSessionScreen extends ConsumerWidget {
   const GroupQuizSessionScreen({super.key, required this.code});
   final String code;
 
+  void _confirmLeave(BuildContext context) {
+    AdaptiveAlertDialog.show(
+      context: context,
+      title: 'Leave the session?',
+      message: 'You’ll drop out of this group quiz.',
+      icon: Icons.logout,
+      actions: [
+        AlertAction(
+            title: 'Stay',
+            style: AlertActionStyle.cancel,
+            onPressed: () {}),
+        AlertAction(
+          title: 'Leave',
+          style: AlertActionStyle.destructive,
+          onPressed: () => context.canPop()
+              ? context.pop()
+              : context.go('/'),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final id = ref.watch(_resolveProvider(code));
-    return BrandScaffold(
-      title: 'Session $code',
-      body: id.when(
-        loading: () => const Center(child: LoaderFive('Joining')),
-        error: (e, _) => Center(child: Subtitle('$e')),
-        data: (sessionId) => sessionId == null
-            ? Center(child: Subtitle('Session not found or expired.'))
-            : _Body(code: code, sessionId: sessionId),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        _confirmLeave(context);
+      },
+      child: ModalSheet(
+        title: 'Session $code',
+        onClose: () => _confirmLeave(context),
+        child: id.when(
+          loading: () => const Center(child: LoaderFive('Joining')),
+          error: (e, _) => Center(child: Subtitle('$e')),
+          data: (sessionId) => sessionId == null
+              ? Center(child: Subtitle('Session not found or expired.'))
+              : _Body(code: code, sessionId: sessionId),
+        ),
       ),
     );
   }
@@ -91,11 +122,21 @@ class _BodyState extends ConsumerState<_Body> {
                       fontWeight: FontWeight.w900,
                       letterSpacing: 4,
                       color: context.brandInk)),
-              IconButton(
-                icon: const Icon(Icons.copy),
-                onPressed: () => Clipboard.setData(
-                    ClipboardData(text: s.code)),
-              ),
+              Row(mainAxisSize: MainAxisSize.min, children: [
+                IconButton(
+                  icon: const Icon(Icons.copy),
+                  tooltip: 'Copy code',
+                  onPressed: () => Clipboard.setData(
+                      ClipboardData(text: s.code)),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.ios_share),
+                  tooltip: 'Share',
+                  onPressed: () => SharePlus.instance.share(ShareParams(
+                      text: 'Join my Smart Advisor group quiz — '
+                          'code ${s.code}')),
+                ),
+              ]),
             ],
           ),
         ),
@@ -328,7 +369,8 @@ class _BodyState extends ConsumerState<_Body> {
           ),
       const SizedBox(height: 16),
       AdaptiveButton(
-          onPressed: () => context.go('/group-quiz'),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go('/'),
           label: 'Done',
           style: AdaptiveButtonStyle.bordered),
     ]);

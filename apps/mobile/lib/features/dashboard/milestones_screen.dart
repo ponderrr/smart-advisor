@@ -19,7 +19,9 @@ class MilestonesScreen extends ConsumerWidget {
         loading: () => const Padding(
             padding: EdgeInsets.all(48),
             child: Center(child: LoaderFive('Loading'))),
-        error: (e, _) => Center(child: Subtitle('Could not load: $e')),
+        error: (e, _) => Padding(
+            padding: const EdgeInsets.all(20),
+            child: MessageBanner.error('Could not load: $e')),
         data: (d) => ResponsiveCenter(
           maxWidth: context.isTablet ? 1000 : 640,
           child: ListView(

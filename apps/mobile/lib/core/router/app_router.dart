@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -11,6 +10,7 @@ import '../../features/auth/screens/reset_password_screen.dart';
 import '../../features/dashboard/dashboard_screen.dart';
 import '../../features/dashboard/milestones_screen.dart';
 import '../../features/demo/demo_screen.dart';
+import '../../features/feed/feed_screen.dart';
 import '../../features/group_quiz/screens/group_quiz_screen.dart';
 import '../../features/group_quiz/screens/group_quiz_session_screen.dart';
 import '../../features/history/history_screen.dart';
@@ -38,6 +38,40 @@ class _AuthRefresh extends ChangeNotifier {
     _ref.listen(sharedPreferencesProvider, (_, _) => notifyListeners());
   }
   final Ref _ref;
+}
+
+/// Slide-up modal page for focused tasks (solo + group quiz): dimmed,
+/// non-dismissible barrier so the only way out is the screen's confirmed
+/// close. Enter = fade + slide up; leave (pop) = the same reversed, so it
+/// fades + slides back down with no shell re-animation.
+CustomTransitionPage<void> _modalPage(GoRouterState state, Widget child) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    opaque: false,
+    barrierColor: const Color(0x99000000),
+    barrierDismissible: false,
+    fullscreenDialog: true,
+    transitionDuration: const Duration(milliseconds: 320),
+    reverseTransitionDuration: const Duration(milliseconds: 260),
+    child: child,
+    transitionsBuilder: (_, animation, _, c) {
+      final curved = CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOutCubic,
+        reverseCurve: Curves.easeInCubic,
+      );
+      return FadeTransition(
+        opacity: curved,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 1),
+            end: Offset.zero,
+          ).animate(curved),
+          child: c,
+        ),
+      );
+    },
+  );
 }
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -91,14 +125,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
           path: '/maintenance',
           builder: (_, _) => const MaintenanceScreen()),
+      // Group quiz is a focused modal task too (same chrome/transition as
+      // the solo quiz): slides up over a dimmed barrier, pops back down.
       GoRoute(
           path: '/group-quiz',
-          builder: (_, _) => const GroupQuizScreen(),
+          pageBuilder: (_, state) =>
+              _modalPage(state, const GroupQuizScreen()),
           routes: [
             GoRoute(
                 path: ':code',
-                builder: (_, s) => GroupQuizSessionScreen(
-                    code: s.pathParameters['code']!)),
+                pageBuilder: (_, s) => _modalPage(
+                    s,
+                    GroupQuizSessionScreen(
+                        code: s.pathParameters['code']!))),
           ]),
       GoRoute(
         path: '/pick',
@@ -113,25 +152,32 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
           path: '/milestones',
           builder: (_, _) => const MilestonesScreen()),
-      // Quiz is full-screen (the PWA hides the bottom nav on it). The
-      // Solo/Group choice is the bottom sheet from the Quiz nav item, so
-      // /quiz (and /quiz/solo alias) go straight into the quiz.
-      GoRoute(
-        path: '/quiz',
-        builder: (_, _) => const QuizScreen(),
-        routes: [
-          GoRoute(path: 'solo', builder: (_, _) => const QuizScreen()),
-        ],
-      ),
       GoRoute(
           path: '/account/mfa-setup',
           builder: (_, _) => const MfaSetupScreen()),
+      // Quiz is a focused modal task: it slides up over the shell with a
+      // dimmed barrier and a single confirmed exit (no bottom nav). The
+      // Solo/Group choice is the sheet from the Quiz nav item; /quiz and
+      // the /quiz/solo alias go straight into the quiz.
+      GoRoute(
+        path: '/quiz',
+        pageBuilder: (_, state) =>
+            _modalPage(state, const QuizScreen()),
+        routes: [
+          GoRoute(
+              path: 'solo',
+              pageBuilder: (_, state) =>
+                  _modalPage(state, const QuizScreen())),
+        ],
+      ),
       ShellRoute(
         builder: (context, state, child) =>
             AppShell(location: state.matchedLocation, child: child),
         routes: [
           GoRoute(
               path: '/', builder: (_, _) => const DashboardScreen()),
+          GoRoute(
+              path: '/feed', builder: (_, _) => const FeedScreen()),
           GoRoute(
               path: '/library',
               builder: (_, _) => const LibraryScreen()),

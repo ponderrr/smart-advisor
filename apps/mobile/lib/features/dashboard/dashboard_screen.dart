@@ -39,7 +39,8 @@ class DashboardScreen extends ConsumerWidget {
           loading: () => const Padding(
               padding: EdgeInsets.all(48),
               child: Center(child: LoaderFive('Loading'))),
-          error: (e, _) => Subtitle('Could not load: $e'),
+          error: (e, _) =>
+              MessageBanner.error('Could not load: $e'),
           data: (list) => list.isEmpty
               ? _empty(context)
               : Column(children: [
@@ -110,7 +111,7 @@ class DashboardScreen extends ConsumerWidget {
           Row(children: [
             Expanded(
               child: AdaptiveButton(
-                onPressed: () => context.go('/quiz'),
+                onPressed: () => context.push('/quiz'),
                 label: 'Start a quiz',
               ),
             ),

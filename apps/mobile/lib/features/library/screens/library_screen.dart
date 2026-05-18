@@ -36,7 +36,17 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
         const SizedBox(height: 8),
         const Eyebrow('Library'),
         const SizedBox(height: 4),
-        const BrandHeading('Logged & saved', size: 24),
+        Row(children: [
+          const Expanded(
+              child: BrandHeading('Logged & saved', size: 24)),
+          if (lib.asData?.value.isNotEmpty ?? false)
+            ClearAllButton(
+              title: 'Clear your library?',
+              message: 'Every logged & saved item will be '
+                  'permanently removed. This can’t be undone.',
+              onConfirm: _clearAll,
+            ),
+        ]),
         const SizedBox(height: 16),
         _filters(),
         const SizedBox(height: 12),
@@ -52,7 +62,8 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
           loading: () => const Padding(
               padding: EdgeInsets.all(40),
               child: Center(child: LoaderFive('Loading'))),
-          error: (e, _) => Subtitle('Could not load: $e'),
+          error: (e, _) =>
+              MessageBanner.error('Could not load: $e'),
           data: (items) {
             final filtered = items.where((i) {
               if (_medium != null && i.medium != _medium) return false;
@@ -171,6 +182,23 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     );
   }
 
+  /// Web-parity status colors: All→indigo, Finished→emerald,
+  /// In progress→amber, Wishlist→violet, Dropped→rose.
+  Color _statusColor(int idx) => switch (idx) {
+        1 => Tw.emerald500,
+        2 => Tw.amber500,
+        3 => Tw.violet500,
+        4 => Tw.rose500,
+        _ => Tw.indigo500,
+      };
+
+  String _statusLabel(LibraryStatus s) => switch (s) {
+        LibraryStatus.finished => 'Finished',
+        LibraryStatus.inProgress => 'In progress',
+        LibraryStatus.wishlist => 'Wishlist',
+        LibraryStatus.dropped => 'Dropped',
+      };
+
   Widget _filters() {
     final mediumIdx = _medium == null ? 0 : _medium!.index + 1;
     final statusIdx = _status == null ? 0 : _status!.index + 1;
@@ -185,7 +213,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
       ),
       const SizedBox(height: 8),
       BrandSegmented(
-            color: Tw.indigo500,
+        color: _statusColor(statusIdx),
         labels: const ['All', 'Finished', 'In progress', 'Wishlist',
             'Dropped'],
         selectedIndex: statusIdx,
@@ -233,6 +261,19 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     );
   }
 
+  Future<void> _clearAll() async {
+    final res = await ref.read(libraryServiceProvider).clearAll();
+    ref.invalidate(_libraryProvider);
+    showBanner(
+      res.error == null
+          ? 'Library cleared'
+          : 'Could not clear library: ${res.error}',
+      type: res.error == null
+          ? AdaptiveSnackBarType.success
+          : AdaptiveSnackBarType.error,
+    );
+  }
+
   Future<void> _action(LibraryItem i, String v) async {
     final svc = ref.read(libraryServiceProvider);
     if (v == 'remove') {
@@ -275,11 +316,11 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     } else if (v == 'edit') {
       await _editDialog(i);
     } else {
-      await svc.update(
-          i.id,
-          UpdateLibraryInput(
-              status: LibraryStatus.values
-                  .firstWhere((s) => s.wire == v)));
+      final next = LibraryStatus.values.firstWhere((s) => s.wire == v);
+      await svc.update(i.id, UpdateLibraryInput(status: next));
+      showBanner('“${i.title}” → ${_statusLabel(next)}',
+          type: AdaptiveSnackBarType.success,
+          duration: const Duration(seconds: 2));
     }
     ref.invalidate(_libraryProvider);
   }

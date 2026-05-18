@@ -74,7 +74,16 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           const SizedBox(height: 8),
           const Eyebrow('History'),
           const SizedBox(height: 4),
-          const BrandHeading('Past picks', size: 24),
+          Row(children: [
+            const Expanded(child: BrandHeading('Past picks', size: 24)),
+            if (data.asData?.value.isNotEmpty ?? false)
+              ClearAllButton(
+                title: 'Clear all history?',
+                message: 'Every past pick will be permanently '
+                    'deleted. This can’t be undone.',
+                onConfirm: _clearAll,
+              ),
+          ]),
           const SizedBox(height: 16),
           BrandSegmented(
             color: accentColorForLabel(const [
@@ -108,7 +117,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             loading: () => const Padding(
                 padding: EdgeInsets.all(40),
                 child: Center(child: LoaderFive('Loading'))),
-            error: (e, _) => Subtitle('Could not load: $e'),
+            error: (e, _) =>
+                MessageBanner.error('Could not load: $e'),
             data: (list) {
               if (list.isEmpty) {
                 return Subtitle('No recommendations yet.');
@@ -136,6 +146,20 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             },
           ),
         ],
+    );
+  }
+
+  Future<void> _clearAll() async {
+    final db = ref.read(databaseServiceProvider);
+    final res = await db.deleteAllRecommendations();
+    ref.invalidate(_historyProvider);
+    showBanner(
+      res.error == null
+          ? 'History cleared'
+          : 'Could not clear history: ${res.error}',
+      type: res.error == null
+          ? AdaptiveSnackBarType.success
+          : AdaptiveSnackBarType.error,
     );
   }
 

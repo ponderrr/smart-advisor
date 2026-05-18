@@ -57,6 +57,12 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         Theme.of(context).brightness,
       ).text;
 
+  /// Filled-button accent for the current content type.
+  Color get _accentDot => contentAccent(
+        accentForContentType(_content),
+        Theme.of(context).brightness,
+      ).dot;
+
   /// Loader phases worded for the chosen content. [building] = quiz build
   /// phase; otherwise the recommendation phase.
   List<String> _phases({required bool building}) {
@@ -195,6 +201,38 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     setState(() => _step = _Step.results);
   }
 
+  // Pop so the quiz plays its reverse (fade + slide-down) transition and
+  // the shell underneath stays put. Fallback to home only if it was a
+  // deep-link with nothing to pop back to.
+  void _leaveQuiz() =>
+      context.canPop() ? context.pop() : context.go('/');
+
+  /// Confirms before abandoning an in-progress quiz. On the results step
+  /// there's nothing to lose, so leave straight away.
+  void _confirmLeave() {
+    if (_step == _Step.results) {
+      _leaveQuiz();
+      return;
+    }
+    AdaptiveAlertDialog.show(
+      context: context,
+      title: 'Leave the quiz?',
+      message: 'Your answers so far won’t be saved.',
+      icon: Icons.logout,
+      actions: [
+        AlertAction(
+            title: 'Keep going',
+            style: AlertActionStyle.cancel,
+            onPressed: () {}),
+        AlertAction(
+          title: 'Leave',
+          style: AlertActionStyle.destructive,
+          onPressed: _leaveQuiz,
+        ),
+      ],
+    );
+  }
+
   void _restart() {
     ref.read(quizStoreProvider.notifier).reset();
     setState(() {
@@ -233,29 +271,74 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           key: ValueKey('${_step}_$_qIndex'), child: _content_()),
     );
 
-    return BrandScaffold(
-      body: SafeArea(
-        child: framed
-            ? ResponsiveCenter(
-                // Tablet: a wide card that actually uses the screen, not a
-                // skinny phone column floating in the middle.
-                maxWidth: context.isTablet ? 920 : 520,
-                alignment: Alignment.center,
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.all(context.isTablet ? 36 : 24),
-                  child: BrandCard(
-                      padding: EdgeInsets.all(context.isTablet ? 36 : 24),
-                      child: switcher),
-                ),
-              )
-            // Generating loader / results: keep full height but cap the
-            // column so the picks list doesn't stretch across a tablet.
-            // `center` keeps the loader vertically centred; the results
-            // ListView fills height regardless.
-            : ResponsiveCenter(
-                maxWidth: context.isTablet ? 1100 : 640,
-                alignment: Alignment.center,
-                child: switcher),
+    final content = framed
+        ? ResponsiveCenter(
+            // Steps sit directly on the modal surface (no card) — the
+            // sheet itself is the container now.
+            maxWidth: context.isTablet ? 920 : 520,
+            alignment: Alignment.center,
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(context.isTablet ? 36 : 24),
+              child: switcher,
+            ),
+          )
+        // Generating loader / results: keep full height but cap the
+        // column so the picks list doesn't stretch across a tablet.
+        : ResponsiveCenter(
+            maxWidth: context.isTablet ? 1100 : 640,
+            alignment: Alignment.center,
+            child: switcher);
+
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        _confirmLeave();
+      },
+      // Modal task: a rounded sheet that sits over the dimmed shell, with
+      // a grab handle + a single confirmed close (the X). No bottom nav.
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: FractionallySizedBox(
+          heightFactor: 0.95,
+          widthFactor: 1,
+          child: ClipRRect(
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(28)),
+            // Material (not a bare ColoredBox) so Slider / IconButton ink
+            // and other Material descendants have the ancestor they need.
+            child: Material(
+              color: brandBg(Theme.of(context).brightness),
+              child: SafeArea(
+                top: false,
+                child: Column(children: [
+                  const SizedBox(height: 10),
+                  Container(
+                    width: 44,
+                    height: 4,
+                    decoration: BoxDecoration(
+                        color: context.colors.border,
+                        borderRadius: BorderRadius.circular(999)),
+                  ),
+                  Padding(
+                    padding:
+                        const EdgeInsets.fromLTRB(20, 6, 8, 0),
+                    child: Row(children: [
+                      const Expanded(
+                          child: BrandHeading('Quiz', size: 20)),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        tooltip: 'Close',
+                        onPressed: _confirmLeave,
+                      ),
+                    ]),
+                  ),
+                  Expanded(child: content),
+                ]),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -301,33 +384,18 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          child: IconButton(
-            padding: EdgeInsets.zero,
-            icon: const Icon(Icons.arrow_back),
-            // First step: leave the quiz entirely. (Solo enters via
-            // /quiz/solo, a child of /quiz, so pop() would just reveal a
-            // duplicate quiz — go home instead.)
-            onPressed: () => context.go('/'),
-          ),
-        ),
-        const Eyebrow('Smart Advisor'),
+        Eyebrow('New quiz', color: _accentColor),
         const SizedBox(height: 6),
         const BrandHeading('What are you in the mood for?', size: 24),
+        const SizedBox(height: 4),
+        Subtitle('Pick a lane — every question is tailored to it.'),
         const SizedBox(height: 20),
         ResponsiveTiles(
           minTileWidth: 380,
+          tilesHaveOwnVerticalGap: true,
           children: [
             for (final (ct, label, desc, icon) in opts)
-              ContentBentoTile(
-                accent: accentForContentType(ct),
-                icon: icon,
-                label: label,
-                description: desc,
-                selected: _content == ct,
-                onTap: () => setState(() => _content = ct),
-              ),
+              _contentCard(ct, label, desc, icon),
           ],
         ),
         const SizedBox(height: 20),
@@ -340,8 +408,71 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             });
           },
           label: 'Continue',
+          color: _accentDot,
         ),
       ],
+    );
+  }
+
+  /// Feed-style selectable surface: per-content gradient + accent border,
+  /// icon circle, and a check affordance — matches the Feed/Dashboard
+  /// card language instead of the old neutral bento tile.
+  Widget _contentCard(
+      ContentType ct, String label, String desc, IconData icon) {
+    final tone = contentAccent(
+        accentForContentType(ct), Theme.of(context).brightness);
+    final selected = _content == ct;
+    return GestureDetector(
+      onTap: () => setState(() => _content = ct),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        curve: Curves.easeOut,
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: tone.surfaceGradient),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+              color: selected ? tone.dot : tone.surfaceBorder,
+              width: selected ? 2 : 1),
+        ),
+        child: Row(children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+                color: tone.iconCircleBg, shape: BoxShape.circle),
+            child: Icon(icon, color: tone.iconCircleFg, size: 22),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label,
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: context.brandInk)),
+                const SizedBox(height: 2),
+                Text(desc,
+                    style: TextStyle(
+                        fontSize: 12, color: context.brandMuted)),
+              ],
+            ),
+          ),
+          Icon(
+            selected
+                ? Icons.check_circle
+                : Icons.radio_button_unchecked,
+            color: selected ? tone.dot : tone.surfaceBorder,
+            size: 22,
+          ),
+        ]),
+      ),
     );
   }
 
@@ -349,38 +480,104 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     final accent = accentForContentType(_content);
     final tone =
         contentAccent(accent, Theme.of(context).brightness);
+    const presets = [3, 5, 8, 10, 15];
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        Eyebrow('Question count', color: tone.text),
+        const SizedBox(height: 6),
         const BrandHeading('How many questions?', size: 24),
-        const SizedBox(height: 16),
-        BrandCard(
-          accent: accent,
+        const SizedBox(height: 4),
+        Subtitle('More questions, sharper picks.'),
+        const SizedBox(height: 20),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: tone.surfaceGradient),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: tone.surfaceBorder),
+          ),
           child: Column(children: [
-            ShaderMask(
-              shaderCallback: (r) =>
-                  LinearGradient(colors: tone.barGradient).createShader(r),
-              child: Text('$_count',
-                  style: const TextStyle(
-                      fontSize: 56,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -2,
-                      color: Colors.white)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                ShaderMask(
+                  shaderCallback: (r) =>
+                      LinearGradient(colors: tone.barGradient)
+                          .createShader(r),
+                  child: Text('$_count',
+                      style: const TextStyle(
+                          fontSize: 56,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -2,
+                          color: Colors.white)),
+                ),
+                const SizedBox(width: 8),
+                Text('questions',
+                    style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: context.brandMuted)),
+              ],
             ),
-            Text('about ${(_count * 18 + 30) ~/ 60 + 1} min',
-                style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.5,
-                    color: context.brandMuted)),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 12, vertical: 5),
+              decoration: BoxDecoration(
+                  color: tone.iconCircleBg,
+                  borderRadius: BorderRadius.circular(999)),
+              child: Text(
+                  '≈ ${(_count * 18 + 30) ~/ 60 + 1} min',
+                  style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.5,
+                      color: tone.iconCircleFg)),
+            ),
+            const SizedBox(height: 16),
             AdaptiveSlider(
               value: _count.toDouble(),
               min: 3,
               max: 15,
               divisions: 12,
               onChanged: (v) => setState(() => _count = v.round()),
+            ),
+            const SizedBox(height: 14),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              alignment: WrapAlignment.center,
+              children: [
+                for (final p in presets)
+                  GestureDetector(
+                    onTap: () => setState(() => _count = p),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 140),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: _count == p
+                            ? tone.dot
+                            : tone.iconCircleBg,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text('$p',
+                          style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                              color: _count == p
+                                  ? Colors.white
+                                  : tone.iconCircleFg)),
+                    ),
+                  ),
+              ],
             ),
           ]),
         ),
@@ -406,6 +603,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                 _loadQuestions();
               },
               label: 'Start',
+              color: _accentDot,
             ),
           ),
         ]),
@@ -425,7 +623,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     if (_error != null) {
       return Center(
         child: AdaptiveButton(
-            onPressed: _loadQuestions, label: 'Try again'),
+            onPressed: _loadQuestions,
+            label: 'Try again',
+            color: _accentDot),
       );
     }
     if (_questions.isEmpty) return const SizedBox.shrink();
@@ -492,6 +692,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                         }
                       },
                 label: isLast ? 'See results' : 'Next',
+                color: _accentDot,
               ),
             ),
           ]),
@@ -586,24 +787,22 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   }
 
   Widget _errorStep() {
-    final c = context.colors;
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(_genOverloaded ? 'Our AI is busy' : 'Something went wrong',
-            style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: c.foreground)),
-        const SizedBox(height: 8),
-        Text(
-            _genOverloaded
-                ? 'High demand right now. Give it another go in a moment.'
-                : (_error ?? 'Please try again.'),
-            textAlign: TextAlign.center,
-            style: TextStyle(color: c.mutedForeground)),
+        BrandHeading(
+            _genOverloaded ? 'Our AI is busy' : 'Something went wrong',
+            size: 22),
+        const SizedBox(height: 12),
+        MessageBanner.error(_genOverloaded
+            ? 'High demand right now. Give it another go in a moment.'
+            : (_error ?? 'Please try again.')),
         const SizedBox(height: 16),
-        AdaptiveButton(onPressed: _generate, label: 'Try again'),
+        AdaptiveButton(
+            onPressed: _generate,
+            label: 'Try again',
+            color: _accentDot),
       ],
     );
   }

@@ -21,6 +21,7 @@ void showBanner(
   AdaptiveSnackBarType type = AdaptiveSnackBarType.info,
   String? action,
   VoidCallback? onAction,
+  Duration duration = const Duration(seconds: 3),
 }) {
   final ctx = messengerContextKey.currentContext;
   if (ctx == null || !ctx.mounted) return;
@@ -28,6 +29,7 @@ void showBanner(
     ctx,
     message: message,
     type: type,
+    duration: duration,
     action: action,
     onActionPressed: onAction,
   );

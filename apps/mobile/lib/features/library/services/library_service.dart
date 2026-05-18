@@ -110,6 +110,18 @@ class LibraryService {
     }
   }
 
+  /// Removes every library entry for the signed-in user.
+  Future<ServiceResult<void>> clearAll() async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return ServiceResult.fail('Not authenticated');
+    try {
+      await _client.from(_table).delete().eq('user_id', userId);
+      return ServiceResult.ok(null);
+    } on PostgrestException catch (e) {
+      return ServiceResult.fail(e.message);
+    }
+  }
+
   Future<ServiceResult<List<LibraryItem>>> recentRated(
       {int limit = 12}) async {
     final userId = _client.auth.currentUser?.id;
