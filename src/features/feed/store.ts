@@ -14,7 +14,7 @@ interface FeedState {
   commentVotes: Record<string, number>;
   toggleSave: (postId: string) => boolean;
   toggleFollow: (author: string) => boolean;
-  addComment: (postId: string, body: string) => void;
+  addComment: (postId: string, body: string, parentId?: string | null) => void;
   setCommentVote: (key: string, dir: number) => void;
   addPost: (
     p: Pick<
@@ -40,8 +40,10 @@ const SEED: FeedPost[] = [
     ageHours: 5,
     baseScore: 1284,
     comments: [
-      { id: "c1", author: "jon", body: "Chalamet finally won me over here.", ageHours: 4, score: 92 },
-      { id: "c2", author: "priya", body: "Adding this to my list now.", ageHours: 3, score: 41 },
+      { id: "c1", author: "jon", body: "Chalamet finally won me over here.", ageHours: 4, score: 92, parentId: null },
+      { id: "c1r1", author: "maya", body: "Right? The dunes-as-character thing finally clicked for me too.", ageHours: 3, score: 28, parentId: "c1" },
+      { id: "c1r2", author: "theo", body: "Hard disagree, the pacing dragged in act two.", ageHours: 2, score: 9, parentId: "c1" },
+      { id: "c2", author: "priya", body: "Adding this to my list now.", ageHours: 3, score: 41, parentId: null },
     ],
   },
   {
@@ -58,7 +60,8 @@ const SEED: FeedPost[] = [
     ageHours: 14,
     baseScore: 803,
     comments: [
-      { id: "c3", author: "maya", body: "Read it in two sittings. Couldn't stop.", ageHours: 12, score: 58 },
+      { id: "c3", author: "maya", body: "Read it in two sittings. Couldn't stop.", ageHours: 12, score: 58, parentId: null },
+      { id: "c3r1", author: "jon", body: "Same — the Rocky chapters wrecked me.", ageHours: 10, score: 22, parentId: "c3" },
     ],
   },
   {
@@ -75,7 +78,7 @@ const SEED: FeedPost[] = [
     ageHours: 9,
     baseScore: 412,
     comments: [
-      { id: "c4", author: "theo", body: "Their best yet, honestly.", ageHours: 6, score: 31 },
+      { id: "c4", author: "theo", body: "Their best yet, honestly.", ageHours: 6, score: 31, parentId: null },
     ],
   },
   {
@@ -107,7 +110,7 @@ const SEED: FeedPost[] = [
     ageHours: 40,
     baseScore: 318,
     comments: [
-      { id: "c5", author: "sam", body: "The anchoring chapter stuck with me.", ageHours: 30, score: 14 },
+      { id: "c5", author: "sam", body: "The anchoring chapter stuck with me.", ageHours: 30, score: 14, parentId: null },
     ],
   },
   {
@@ -149,7 +152,7 @@ export const useFeedStore = create<FeedState>((set, get) => ({
     return nowFollowing;
   },
 
-  addComment: (postId, body) =>
+  addComment: (postId, body, parentId = null) =>
     set((s) => ({
       posts: s.posts.map((p) =>
         p.id === postId
@@ -162,6 +165,7 @@ export const useFeedStore = create<FeedState>((set, get) => ({
                   body,
                   ageHours: 0,
                   score: 1,
+                  parentId,
                 } satisfies FeedComment,
                 ...p.comments,
               ],

@@ -1,14 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import {
   Bookmark,
   BookmarkCheck,
   MessageCircle,
-  ChevronUp,
-  ChevronDown,
   Plus,
   Users,
   Compass,
@@ -39,6 +38,9 @@ import { PageLoader } from "@/components/ui/loader";
 import { getAccentTone } from "@/features/quiz/utils/content-accent";
 import { getRecTypeAccent } from "@/features/recommendations/utils/type-accent";
 import { useFeedStore } from "@/features/feed/store";
+import { FollowButton } from "@/features/feed/components/follow-button";
+import { FeedAvatar } from "@/features/feed/components/feed-avatar";
+import { readFeedPrefs } from "@/features/feed/use-feed-prefs";
 import {
   ACTIVITY_VERB,
   COMMUNITY_CONTENT,
@@ -140,9 +142,7 @@ function PostCard({
   const t = tone(post.community);
   const ribbon = getRecTypeAccent(COMMUNITY_CONTENT[post.community]).stripe;
   const saved = useFeedStore((s) => s.saved.has(post.id));
-  const following = useFeedStore((s) => s.following.has(post.author));
   const toggleSave = useFeedStore((s) => s.toggleSave);
-  const toggleFollow = useFeedStore((s) => s.toggleFollow);
 
   if (view === "list") {
     return (
@@ -169,21 +169,9 @@ function PostCard({
             {post.title}
           </h3>
           <p className="truncate text-[11px] text-slate-500 dark:text-slate-400">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                const now = toggleFollow(post.author);
-                if (now) toast.success(`Following ${post.author}`);
-                else toast(`Unfollowed ${post.author}`);
-              }}
-              className={cn(
-                "font-bold text-slate-700 hover:underline dark:text-slate-200",
-                following && t.text,
-              )}
-            >
+            <span className="font-bold text-slate-700 dark:text-slate-200">
               {post.author}
-            </button>{" "}
+            </span>{" "}
             {ACTIVITY_VERB[post.activity]} · {agoLabel(post.ageHours)}
           </p>
         </div>
@@ -295,27 +283,22 @@ function PostCard({
             )}
           </div>
 
-          <div className="mt-2 flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                const now = toggleFollow(post.author);
-                if (now) {
-                  toast.success(`Following ${post.author}`);
-                } else {
-                  toast(`Unfollowed ${post.author}`);
-                }
-              }}
-              className={cn(
-                "font-bold text-slate-700 hover:underline dark:text-slate-200",
-                following && t.text,
-              )}
+          <div className="mt-2 flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
+            <Link
+              href={`/feed/u/${encodeURIComponent(post.author)}`}
+              onClick={(e) => e.stopPropagation()}
+              className="group/author flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-200"
             >
-              {post.author}
-            </button>
+              <FeedAvatar name={post.author} size={22} />
+              <span className="group-hover/author:underline">
+                {post.author}
+              </span>
+            </Link>
             <span>
               {ACTIVITY_VERB[post.activity]} · {agoLabel(post.ageHours)}
+            </span>
+            <span onClick={(e) => e.stopPropagation()}>
+              <FollowButton author={post.author} size="sm" />
             </span>
           </div>
 
@@ -355,10 +338,14 @@ function PostCard({
 
 /* ─── Composer ──────────────────────────────────────────────────────── */
 
-const ACTIVITIES: ReadonlyArray<{ value: FeedActivity; label: string }> = [
-  { value: "finished", label: "Finished" },
-  { value: "rated", label: "Rated" },
-  { value: "shared", label: "Recommending" },
+const ACTIVITIES: ReadonlyArray<{
+  value: FeedActivity;
+  label: string;
+  pillClassName: string;
+}> = [
+  { value: "finished", label: "Finished", pillClassName: "bg-emerald-500" },
+  { value: "rated", label: "Rated", pillClassName: "bg-amber-500" },
+  { value: "shared", label: "Recommending", pillClassName: "bg-violet-500" },
 ];
 
 function Composer({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -421,6 +408,7 @@ function Composer({ open, onClose }: { open: boolean; onClose: () => void }) {
           options={COMMUNITIES.filter((c) => c.value !== "all").map((c) => ({
             value: c.value as FeedCommunity,
             label: c.label,
+            pillClassName: c.pillClassName,
           }))}
           ariaLabel="Community"
         />
@@ -461,143 +449,10 @@ function Composer({ open, onClose }: { open: boolean; onClose: () => void }) {
   );
 }
 
-/* ─── Post detail ───────────────────────────────────────────────────── */
-
-function PostDialog({
-  post,
-  onClose,
-}: {
-  post: FeedPost | null;
-  onClose: () => void;
-}) {
-  const [draft, setDraft] = useState("");
-  const addComment = useFeedStore((s) => s.addComment);
-  const setCommentVote = useFeedStore((s) => s.setCommentVote);
-  const commentVotes = useFeedStore((s) => s.commentVotes);
-  const live = useFeedStore((s) =>
-    post ? s.posts.find((p) => p.id === post.id) ?? post : null,
-  );
-
-  if (!post || !live) return null;
-  const t = tone(live.community);
-
-  return (
-    <Dialog open onClose={onClose} ariaLabel={live.title} size="lg">
-      <div className="space-y-5 p-6">
-        <div>
-          <span
-            className={cn(
-              "rounded-full px-2 py-0.5 text-[10px] font-black",
-              t.iconCircle,
-            )}
-          >
-            {COMMUNITY_TAG[live.community]}
-          </span>
-          <h2 className="mt-3 text-2xl font-black tracking-tight">
-            {live.title}
-          </h2>
-          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            {live.author} {ACTIVITY_VERB[live.activity]} ·{" "}
-            {agoLabel(live.ageHours)}
-          </p>
-          {live.body && (
-            <p className="mt-3 text-sm leading-relaxed text-slate-700 dark:text-slate-200">
-              {live.body}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <p className="mb-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
-            {live.comments.length} comments
-          </p>
-          <div className="space-y-2">
-            {live.comments.map((c) => {
-              const key = `${live.id}#${c.id}`;
-              const vote = commentVotes[key] ?? 0;
-              return (
-                <div
-                  key={c.id}
-                  className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800"
-                >
-                  <div className="flex items-center gap-2 text-[11px]">
-                    <span className="font-extrabold text-slate-800 dark:text-slate-100">
-                      {c.author}
-                    </span>
-                    <span className="text-slate-400">
-                      {agoLabel(c.ageHours)}
-                    </span>
-                    <div className="ml-auto flex items-center gap-1">
-                      <button
-                        type="button"
-                        aria-label="Upvote"
-                        onClick={() => setCommentVote(key, 1)}
-                        className={cn(
-                          vote === 1
-                            ? "text-indigo-500"
-                            : "text-slate-400",
-                        )}
-                      >
-                        <ChevronUp size={16} />
-                      </button>
-                      <span className="text-[11px] font-bold text-slate-500">
-                        {c.score + vote}
-                      </span>
-                      <button
-                        type="button"
-                        aria-label="Downvote"
-                        onClick={() => setCommentVote(key, -1)}
-                        className={cn(
-                          vote === -1
-                            ? "text-rose-500"
-                            : "text-slate-400",
-                        )}
-                      >
-                        <ChevronDown size={16} />
-                      </button>
-                    </div>
-                  </div>
-                  <p className="mt-1.5 text-[13px] text-slate-700 dark:text-slate-200">
-                    {c.body}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Input
-            placeholder="Add a comment…"
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && draft.trim()) {
-                addComment(live.id, draft.trim());
-                setDraft("");
-                toast.success("Comment added");
-              }
-            }}
-          />
-          <Button
-            disabled={!draft.trim()}
-            onClick={() => {
-              addComment(live.id, draft.trim());
-              setDraft("");
-              toast.success("Comment added");
-            }}
-          >
-            Post
-          </Button>
-        </div>
-      </div>
-    </Dialog>
-  );
-}
-
 /* ─── Page ──────────────────────────────────────────────────────────── */
 
 export default function FeedPage() {
+  const router = useRouter();
   const { user } = useAuth();
   const { ready } = useRequireAuth();
   const [visibility] = useFeedVisibility();
@@ -607,7 +462,16 @@ export default function FeedPage() {
   const [community, setCommunity] = useState<FeedCommunity | "all">("all");
   const [view, setView] = useState<FeedView>("cards");
   const [composer, setComposer] = useState(false);
-  const [open, setOpen] = useState<FeedPost | null>(null);
+
+  // Apply the saved defaults once on mount (kept out of useState initialisers
+  // so SSR/first render stays deterministic — same pattern as the prefs
+  // hooks). The user can still switch freely afterwards this session.
+  useEffect(() => {
+    const p = readFeedPrefs();
+    setScope(p.scope);
+    setCommunity(p.community);
+    setView(p.view);
+  }, []);
 
   const visible = useMemo(() => {
     let list =
@@ -743,7 +607,7 @@ export default function FeedPage() {
                       post={p}
                       index={i}
                       view={view}
-                      onOpen={() => setOpen(p)}
+                      onOpen={() => router.push(`/feed/${p.id}`)}
                     />
                   ))
                 )}
@@ -752,7 +616,6 @@ export default function FeedPage() {
           </div>
 
           <Composer open={composer} onClose={() => setComposer(false)} />
-          <PostDialog post={open} onClose={() => setOpen(null)} />
         </div>
       </main>
     </div>

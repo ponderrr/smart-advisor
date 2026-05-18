@@ -63,6 +63,15 @@ import {
   type FeedVisibility,
 } from "@/features/feed/use-feed-visibility";
 import {
+  useFeedPrefs,
+  type FeedView,
+} from "@/features/feed/use-feed-prefs";
+import type {
+  CommentSort,
+  FeedCommunity,
+  FeedScope,
+} from "@/features/feed/types";
+import {
   profileSchema,
   emailSchema,
   passwordSchema,
@@ -115,6 +124,7 @@ const SettingsPage = () => {
   const { user } = useAuth();
   const { ready } = useRequireAuth();
   const [feedVisibility, setFeedVisibility] = useFeedVisibility();
+  const [feedPrefs, setFeedPrefs] = useFeedPrefs();
 
   const settingsTabs = SETTINGS_SECTIONS;
   // Deep-link support: /settings?section=feed opens that tab directly
@@ -1111,6 +1121,125 @@ const SettingsPage = () => {
                             ? t("feed.privateHint")
                             : t("feed.publicHint")}
                         </p>
+                      </div>
+                    </SectionCard>
+
+                    <SectionCard>
+                      <SectionHeader
+                        title={t("feed.prefsTitle")}
+                        description={t("feed.prefsDescription")}
+                      />
+                      <div className="space-y-5">
+                        <div className="space-y-2">
+                          <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+                            {t("feed.viewLabel")}
+                          </p>
+                          <SegmentedControl<FeedView>
+                            layoutId="settings-feed-view"
+                            value={feedPrefs.view}
+                            onChange={(v) => setFeedPrefs({ view: v })}
+                            ariaLabel={t("feed.viewLabel")}
+                            options={[
+                              {
+                                value: "cards",
+                                label: t("feed.viewCards"),
+                                pillClassName: "bg-violet-500",
+                              },
+                              {
+                                value: "list",
+                                label: t("feed.viewList"),
+                                pillClassName: "bg-slate-500",
+                              },
+                            ]}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+                            {t("feed.scopeLabel")}
+                          </p>
+                          <SegmentedControl<FeedScope>
+                            layoutId="settings-feed-scope"
+                            value={feedPrefs.scope}
+                            onChange={(v) => setFeedPrefs({ scope: v })}
+                            ariaLabel={t("feed.scopeLabel")}
+                            options={[
+                              {
+                                value: "friends",
+                                label: t("feed.scopeFriends"),
+                                pillClassName: "bg-indigo-500",
+                              },
+                              {
+                                value: "discover",
+                                label: t("feed.scopeDiscover"),
+                                pillClassName: "bg-violet-500",
+                              },
+                              {
+                                value: "group",
+                                label: t("feed.scopeGroup"),
+                                pillClassName: "bg-rose-500",
+                              },
+                            ]}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+                            {t("feed.communityLabel")}
+                          </p>
+                          <SegmentedControl<FeedCommunity | "all">
+                            layoutId="settings-feed-community"
+                            value={feedPrefs.community}
+                            onChange={(v) => setFeedPrefs({ community: v })}
+                            ariaLabel={t("feed.communityLabel")}
+                            options={[
+                              {
+                                value: "all",
+                                label: t("feed.communityAll"),
+                                pillClassName: "bg-violet-500",
+                              },
+                              {
+                                value: "movies",
+                                label: t("feed.communityMovies"),
+                                pillClassName: "bg-amber-500",
+                              },
+                              {
+                                value: "books",
+                                label: t("feed.communityBooks"),
+                                pillClassName: "bg-emerald-500",
+                              },
+                              {
+                                value: "music",
+                                label: t("feed.communityMusic"),
+                                pillClassName: "bg-rose-500",
+                              },
+                            ]}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+                            {t("feed.commentSortLabel")}
+                          </p>
+                          <SegmentedControl<CommentSort>
+                            layoutId="settings-feed-comment-sort"
+                            value={feedPrefs.commentSort}
+                            onChange={(v) => setFeedPrefs({ commentSort: v })}
+                            ariaLabel={t("feed.commentSortLabel")}
+                            options={[
+                              {
+                                value: "top",
+                                label: t("feed.commentSortTop"),
+                                pillClassName: "bg-violet-500",
+                              },
+                              {
+                                value: "new",
+                                label: t("feed.commentSortNew"),
+                                pillClassName: "bg-indigo-500",
+                              },
+                            ]}
+                          />
+                        </div>
                       </div>
                     </SectionCard>
                   </motion.div>

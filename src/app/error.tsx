@@ -29,9 +29,9 @@ export default function GlobalError({
         aria-hidden
       />
 
-      <div className="flex w-full max-w-md flex-col items-center text-center">
-        <div className="mb-6 rounded-2xl bg-gradient-to-br from-red-100 to-rose-100 p-4 shadow-sm dark:from-red-900/30 dark:to-rose-900/30">
-          <AlertTriangle className="h-10 w-10 text-red-600 dark:text-red-400" />
+      <div className="flex w-full max-w-md flex-col items-center rounded-3xl border border-slate-200/80 bg-white/80 px-6 py-12 text-center shadow-sm backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/65">
+        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-500/10 text-rose-600 dark:bg-rose-400/15 dark:text-rose-300">
+          <AlertTriangle className="h-9 w-9" />
         </div>
 
         <h1 className="text-3xl font-black tracking-tighter sm:text-4xl">
@@ -51,14 +51,14 @@ export default function GlobalError({
         <div className="mt-8 flex w-full flex-col-reverse gap-3 sm:flex-row sm:justify-center">
           <a
             href="/"
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-slate-200 px-6 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-6 text-sm font-bold tracking-tight text-slate-700 backdrop-blur-md transition hover:border-slate-300 hover:bg-white dark:border-slate-700/70 dark:bg-slate-900/65 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800/70"
           >
             <Home size={16} />
             {t("goHome")}
           </a>
           <button
             onClick={reset}
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-indigo-600 px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-violet-600 px-6 text-sm font-bold tracking-tight text-white shadow-sm transition hover:bg-violet-500"
           >
             <RefreshCw size={16} />
             {t("tryAgain")}

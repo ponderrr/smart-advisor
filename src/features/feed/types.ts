@@ -20,6 +20,52 @@ export interface FeedComment {
   body: string;
   ageHours: number;
   score: number;
+  /** Reddit/Lemmy-style threading. null = top-level comment. */
+  parentId: string | null;
+}
+
+/** A comment plus its nested replies — built client-side from the flat list. */
+export interface FeedCommentNode extends FeedComment {
+  replies: FeedCommentNode[];
+}
+
+export type CommentSort = "top" | "new";
+
+/** Turn the flat comment list into a reply tree. `sort` controls every
+ *  level: "top" = highest score first, "new" = most recent first. */
+export function buildCommentTree(
+  flat: FeedComment[],
+  sort: CommentSort = "top",
+): FeedCommentNode[] {
+  const nodes = new Map<string, FeedCommentNode>();
+  flat.forEach((c) => nodes.set(c.id, { ...c, replies: [] }));
+  const roots: FeedCommentNode[] = [];
+  nodes.forEach((node) => {
+    const parent = node.parentId ? nodes.get(node.parentId) : null;
+    if (parent) parent.replies.push(node);
+    else roots.push(node);
+  });
+  const cmp =
+    sort === "new"
+      ? (a: FeedCommentNode, b: FeedCommentNode) => a.ageHours - b.ageHours
+      : (a: FeedCommentNode, b: FeedCommentNode) =>
+          b.score - a.score || a.ageHours - b.ageHours;
+  const sortLevel = (list: FeedCommentNode[]) => {
+    list.sort(cmp);
+    list.forEach((n) => sortLevel(n.replies));
+  };
+  sortLevel(roots);
+  return roots;
+}
+
+/** Deterministic mock follower count so the UI has stable numbers without
+ *  a backend (replace with a real count when follows are persisted). */
+export function mockFollowerCount(author: string): number {
+  let h = 0;
+  for (let i = 0; i < author.length; i += 1) {
+    h = (h * 31 + author.charCodeAt(i)) >>> 0;
+  }
+  return 40 + (h % 960);
 }
 
 export interface FeedPost {
