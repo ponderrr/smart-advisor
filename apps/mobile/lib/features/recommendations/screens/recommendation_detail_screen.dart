@@ -76,6 +76,8 @@ class _S extends ConsumerState<RecommendationDetailScreen> {
   Widget build(BuildContext context) {
     final r = widget.rec;
     final b = Theme.of(context).brightness;
+    final accent =
+        ref.watch(posterAccentProvider(r.posterUrl ?? '')).asData?.value;
     final tone = contentAccent(_accentName, b);
     final ms = deriveMatchScore(id: r.id, matchScore: r.matchScore);
     final mt = matchToneColors(ms.tone, b);
@@ -96,7 +98,10 @@ class _S extends ConsumerState<RecommendationDetailScreen> {
           },
         ),
       ],
-      body: ListView(
+      body: Stack(
+        children: [
+          _backdrop(accent, b),
+          ListView(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
         children: [
           Center(
@@ -235,6 +240,36 @@ class _S extends ConsumerState<RecommendationDetailScreen> {
             style: AdaptiveButtonStyle.bordered,
           ),
         ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _backdrop(Color? accent, Brightness b) {
+    final dark = b == Brightness.dark;
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      height: 360,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 700),
+        curve: Curves.easeOut,
+        opacity: accent == null ? 0 : 1,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                (accent ?? Colors.transparent)
+                    .withValues(alpha: dark ? 0.42 : 0.30),
+                Colors.transparent,
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

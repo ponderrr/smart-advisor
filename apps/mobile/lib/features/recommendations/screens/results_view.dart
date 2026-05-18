@@ -66,11 +66,18 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
         const SizedBox(height: 4),
         const BrandHeading('Made for you', size: 22),
         const SizedBox(height: 12),
-        for (var i = 0; i < widget.recommendations.length; i++)
-          _card(widget.recommendations[i], i, b)
-              .animate()
-              .fadeIn(delay: (i * 90).ms, duration: 360.ms)
-              .slideY(begin: 0.08, curve: Curves.easeOutCubic),
+        ResponsiveTiles(
+          minTileWidth: 360,
+          maxColumns: 3,
+          tilesHaveOwnVerticalGap: true,
+          children: [
+            for (var i = 0; i < widget.recommendations.length; i++)
+              _card(widget.recommendations[i], i, b)
+                  .animate()
+                  .fadeIn(delay: (i * 90).ms, duration: 360.ms)
+                  .slideY(begin: 0.08, curve: Curves.easeOutCubic),
+          ],
+        ),
         const SizedBox(height: 8),
         Row(children: [
           Expanded(

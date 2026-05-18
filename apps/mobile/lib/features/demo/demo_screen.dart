@@ -180,23 +180,26 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
               ]),
             ),
           ),
-        _Phase.results => _results(),
-        _Phase.quiz => AnimatedSwitcher(
-            duration: const Duration(milliseconds: 320),
-            switchInCurve: Curves.easeOutCubic,
-            switchOutCurve: Curves.easeInCubic,
-            transitionBuilder: (child, anim) => FadeTransition(
-              opacity: anim,
-              child: SlideTransition(
-                position: Tween<Offset>(
-                  begin: Offset(0.22 * _dir, 0),
-                  end: Offset.zero,
-                ).animate(anim),
-                child: child,
+        _Phase.results => ResponsiveCenter(
+            maxWidth: context.isTablet ? 1100 : 600, child: _results()),
+        _Phase.quiz => ResponsiveCenter(
+            maxWidth: context.isTablet ? 900 : 560,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 320),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              transitionBuilder: (child, anim) => FadeTransition(
+                opacity: anim,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: Offset(0.22 * _dir, 0),
+                    end: Offset.zero,
+                  ).animate(anim),
+                  child: child,
+                ),
               ),
+              child: KeyedSubtree(key: ValueKey(_i), child: _quiz()),
             ),
-            child: KeyedSubtree(
-                key: ValueKey(_i), child: _quiz()),
           ),
       },
     );
@@ -289,19 +292,21 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
         const SizedBox(height: 6),
         const BrandHeading('What are you in the mood for?', size: 24),
         const SizedBox(height: 20),
-        for (final (label, accent, icon, desc) in opts)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: ContentBentoTile(
-              accent: accent,
-              icon: icon,
-              label: label,
-              description: desc,
-              selected: _picks[0] == label,
-              onTap: () => setState(() => _picks[0] = label),
-            ),
-          ),
-        const SizedBox(height: 8),
+        ResponsiveTiles(
+          minTileWidth: 380,
+          children: [
+            for (final (label, accent, icon, desc) in opts)
+              ContentBentoTile(
+                accent: accent,
+                icon: icon,
+                label: label,
+                description: desc,
+                selected: _picks[0] == label,
+                onTap: () => setState(() => _picks[0] = label),
+              ),
+          ],
+        ),
+        const SizedBox(height: 20),
         AdaptiveButton(
           onPressed: _picks[0] == null ? null : _next,
           label: 'Continue',
@@ -330,9 +335,15 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
       if (!last) ...[
         BrandHeading(_qs[_i].$1, size: 22),
         const SizedBox(height: 16),
-        for (final o in _qs[_i].$2)
-          _optionTile(o, _picks[_i] == o,
-              () => setState(() => _picks[_i] = o)),
+        ResponsiveTiles(
+          minTileWidth: 300,
+          tilesHaveOwnVerticalGap: true,
+          children: [
+            for (final o in _qs[_i].$2)
+              _optionTile(o, _picks[_i] == o,
+                  () => setState(() => _picks[_i] = o)),
+          ],
+        ),
       ] else ...[
         const BrandHeading('Describe your perfect pick', size: 22),
         const SizedBox(height: 16),
@@ -359,7 +370,11 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
       const SizedBox(height: 4),
       Subtitle('${_result!.remaining} demo runs left today'),
       const SizedBox(height: 16),
-      for (var i = 0; i < items.length; i++)
+      ResponsiveTiles(
+        minTileWidth: 360,
+        maxColumns: 3,
+        children: [
+        for (var i = 0; i < items.length; i++)
         BrandCard(
           accent: ContentAccentName.violet,
           padding: const EdgeInsets.all(14),
@@ -393,6 +408,8 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
             .animate()
             .fadeIn(delay: (i * 90).ms, duration: 320.ms)
             .slideY(begin: 0.08),
+        ],
+      ),
       const SizedBox(height: 16),
       AdaptiveButton(
           onPressed: () => context.go('/auth'),

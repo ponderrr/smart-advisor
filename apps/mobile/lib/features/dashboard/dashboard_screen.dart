@@ -10,6 +10,7 @@ import '../../ui/ui.dart';
 import '../auth/auth_providers.dart';
 import '../recommendations/services/database_service.dart';
 import '../recommendations/utils/match_score.dart';
+import 'milestones.dart';
 
 final _dashboardRecsProvider =
     FutureProvider.autoDispose<List<Recommendation>>((ref) async {
@@ -49,6 +50,8 @@ class DashboardScreen extends ConsumerWidget {
                   _sparkline(context, list),
                   const SizedBox(height: 14),
                   _genres(context, list),
+                  const SizedBox(height: 14),
+                  _milestonesSummary(context, ref),
                   const SizedBox(height: 22),
                   Align(
                     alignment: Alignment.centerLeft,
@@ -394,6 +397,62 @@ class DashboardScreen extends ConsumerWidget {
             const SizedBox(height: 10),
           ],
         ],
+      ),
+    );
+  }
+
+  /// Compact milestones summary (web overview parity): earned count +
+  /// tap-through to the full grid.
+  Widget _milestonesSummary(BuildContext context, WidgetRef ref) {
+    final tone = contentAccent(
+        ContentAccentName.violet, Theme.of(context).brightness);
+    final data = ref.watch(milestonesProvider);
+    final summary = data.maybeWhen(
+      data: (d) => '${d.earned} of ${d.total} earned',
+      orElse: () => '—',
+    );
+    return GestureDetector(
+      onTap: () => context.push('/milestones'),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: tone.surfaceGradient),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: tone.surfaceBorder),
+        ),
+        child: Row(children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+                color: tone.iconCircleBg, shape: BoxShape.circle),
+            child: Icon(Icons.emoji_events_outlined,
+                color: tone.iconCircleFg, size: 22),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Eyebrow('Milestones'),
+                const SizedBox(height: 4),
+                Text(summary,
+                    style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w900,
+                        color: context.brandInk)),
+                const SizedBox(height: 2),
+                Text('See every milestone, grouped by tier.',
+                    style: TextStyle(
+                        fontSize: 12, color: context.brandMuted)),
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right, color: context.brandMuted),
+        ]),
       ),
     );
   }

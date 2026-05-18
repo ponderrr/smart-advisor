@@ -53,6 +53,7 @@ class HistoryScreen extends ConsumerStatefulWidget {
 class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   int _mediumIdx = 0; // All, Movies, Books, Music, Favorites
   int _sortIdx = 0; // Newest, Oldest
+  ViewMode _view = ViewMode.list;
 
   _Filter get _filter {
     final ct = switch (_mediumIdx) {
@@ -94,15 +95,45 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             selectedIndex: _sortIdx,
             onValueChanged: (i) => setState(() => _sortIdx = i),
           ),
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerRight,
+            child: ViewModeToggle(
+              value: _view,
+              onChanged: (v) => setState(() => _view = v),
+            ),
+          ),
           const SizedBox(height: 16),
           data.when(
             loading: () => const Padding(
                 padding: EdgeInsets.all(40),
                 child: Center(child: LoaderFive('Loading'))),
             error: (e, _) => Subtitle('Could not load: $e'),
-            data: (list) => list.isEmpty
-                ? Subtitle('No recommendations yet.')
-                : Column(children: [for (final r in list) _row(r)]),
+            data: (list) {
+              if (list.isEmpty) {
+                return Subtitle('No recommendations yet.');
+              }
+              if (_view == ViewMode.grid) {
+                return LayoutBuilder(builder: (_, box) {
+                  const gap = 12.0;
+                  final cellW = (box.maxWidth - gap) / 2;
+                  return Wrap(
+                    spacing: gap,
+                    runSpacing: gap,
+                    children: [
+                      for (final r in list) _gridCard(r, cellW),
+                    ],
+                  );
+                });
+              }
+              return Column(children: [
+                for (final r in list)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _row(r),
+                  ),
+              ]);
+            },
           ),
         ],
     );
@@ -135,54 +166,117 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           ),
           AdaptiveTooltip(
             message: r.isFavorited ? 'Remove favorite' : 'Favorite',
-            child: IconButton(
-              icon: Icon(
-                  r.isFavorited ? Icons.favorite : Icons.favorite_border,
-                  size: 20,
-                  color: r.isFavorited ? Tw.rose500 : context.brandMuted),
-              onPressed: () async {
-                await ref
-                    .read(databaseServiceProvider)
-                    .toggleFavorite(r.id);
-                ref.invalidate(_historyProvider);
-              },
-            ),
+            child: _favButton(r),
           ),
           AdaptiveTooltip(
             message: 'Delete',
-            child: IconButton(
-            icon: Icon(Icons.delete_outline,
-                size: 20, color: context.brandMuted),
-            onPressed: () => AdaptiveAlertDialog.show(
-              context: context,
-              title: 'Delete recommendation?',
-              message: '“${r.title}” will be removed from your history.',
-              icon: Icons.delete_outline,
-              actions: [
-                AlertAction(
-                    title: 'Cancel',
-                    style: AlertActionStyle.cancel,
-                    onPressed: () {}),
-                AlertAction(
-                  title: 'Delete',
-                  style: AlertActionStyle.destructive,
-                  onPressed: () async {
-                    final db = ref.read(databaseServiceProvider);
-                    await db.deleteRecommendation(r.id);
-                    ref.invalidate(_historyProvider);
-                    showBanner('“${r.title}” deleted',
-                        type: AdaptiveSnackBarType.warning,
-                        action: 'Undo', onAction: () async {
-                      await db.saveRecommendation(r);
-                      ref.invalidate(_historyProvider);
-                    });
-                  },
-                ),
+            child: _delButton(r),
+          ),
+        ]),
+        ),
+      );
+
+  Widget _gridCard(Recommendation r, double w) => GestureDetector(
+        onTap: () => context.push('/pick', extra: r),
+        child: SizedBox(
+          width: w,
+          child: BrandCard(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Stack(children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: PosterThumb(
+                        url: r.posterUrl,
+                        square: r.type == 'music',
+                        w: w - 20),
+                  ),
+                  Positioned(
+                    top: 4,
+                    right: 4,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.45),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        _favButton(r, scrim: true),
+                        _delButton(r, scrim: true),
+                      ]),
+                    ),
+                  ),
+                ]),
+                const SizedBox(height: 8),
+                Text(r.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: context.brandInk)),
+                const SizedBox(height: 2),
+                Text(
+                    '${r.type} · ${r.director ?? r.author ?? r.artist ?? ''}'
+                    '${r.year != null ? ' · ${r.year}' : ''}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        fontSize: 12, color: context.brandMuted)),
               ],
             ),
           ),
-          ),
-        ]),
+        ),
+      );
+
+  Widget _favButton(Recommendation r, {bool scrim = false}) => IconButton(
+        visualDensity: scrim ? VisualDensity.compact : null,
+        constraints:
+            scrim ? const BoxConstraints(minWidth: 36, minHeight: 36) : null,
+        icon: Icon(
+            r.isFavorited ? Icons.favorite : Icons.favorite_border,
+            size: 20,
+            color: r.isFavorited
+                ? Tw.rose500
+                : (scrim ? Colors.white : context.brandMuted)),
+        onPressed: () async {
+          await ref.read(databaseServiceProvider).toggleFavorite(r.id);
+          ref.invalidate(_historyProvider);
+        },
+      );
+
+  Widget _delButton(Recommendation r, {bool scrim = false}) => IconButton(
+        visualDensity: scrim ? VisualDensity.compact : null,
+        constraints:
+            scrim ? const BoxConstraints(minWidth: 36, minHeight: 36) : null,
+        icon: Icon(Icons.delete_outline,
+            size: 20, color: scrim ? Colors.white : context.brandMuted),
+        onPressed: () => AdaptiveAlertDialog.show(
+          context: context,
+          title: 'Delete recommendation?',
+          message: '“${r.title}” will be removed from your history.',
+          icon: Icons.delete_outline,
+          actions: [
+            AlertAction(
+                title: 'Cancel',
+                style: AlertActionStyle.cancel,
+                onPressed: () {}),
+            AlertAction(
+              title: 'Delete',
+              style: AlertActionStyle.destructive,
+              onPressed: () async {
+                final db = ref.read(databaseServiceProvider);
+                await db.deleteRecommendation(r.id);
+                ref.invalidate(_historyProvider);
+                showBanner('“${r.title}” deleted',
+                    type: AdaptiveSnackBarType.warning,
+                    action: 'Undo', onAction: () async {
+                  await db.saveRecommendation(r);
+                  ref.invalidate(_historyProvider);
+                });
+              },
+            ),
+          ],
         ),
       );
 }

@@ -9,6 +9,7 @@ import '../../features/auth/auth_providers.dart';
 import '../../features/auth/screens/auth_screen.dart';
 import '../../features/auth/screens/reset_password_screen.dart';
 import '../../features/dashboard/dashboard_screen.dart';
+import '../../features/dashboard/milestones_screen.dart';
 import '../../features/demo/demo_screen.dart';
 import '../../features/group_quiz/screens/group_quiz_screen.dart';
 import '../../features/group_quiz/screens/group_quiz_session_screen.dart';
@@ -109,6 +110,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           builder: (_, _) => const NotificationsScreen()),
       GoRoute(path: '/demo', builder: (_, _) => const DemoScreen()),
       GoRoute(path: '/wrapped', builder: (_, _) => const WrappedScreen()),
+      GoRoute(
+          path: '/milestones',
+          builder: (_, _) => const MilestonesScreen()),
       // Quiz is full-screen (the PWA hides the bottom nav on it). The
       // Solo/Group choice is the bottom sheet from the Quiz nav item, so
       // /quiz (and /quiz/solo alias) go straight into the quiz.

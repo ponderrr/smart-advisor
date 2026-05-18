@@ -25,6 +25,7 @@ class LibraryScreen extends ConsumerStatefulWidget {
 class _LibraryScreenState extends ConsumerState<LibraryScreen> {
   LibraryMedium? _medium;
   LibraryStatus? _status;
+  ViewMode _view = ViewMode.list;
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +39,14 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
         const BrandHeading('Logged & saved', size: 24),
         const SizedBox(height: 16),
         _filters(),
+        const SizedBox(height: 12),
+        Align(
+          alignment: Alignment.centerRight,
+          child: ViewModeToggle(
+            value: _view,
+            onChanged: (v) => setState(() => _view = v),
+          ),
+        ),
         const SizedBox(height: 16),
         lib.when(
           loading: () => const Padding(
@@ -53,10 +62,111 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
             if (filtered.isEmpty) {
               return Subtitle('Nothing here yet.');
             }
-            return Column(
-                children: [for (final i in filtered) _row(i)]);
+            if (_view == ViewMode.grid) {
+              return LayoutBuilder(builder: (_, box) {
+                const gap = 12.0;
+                final cellW = (box.maxWidth - gap) / 2;
+                return Wrap(
+                  spacing: gap,
+                  runSpacing: gap,
+                  children: [
+                    for (final i in filtered)
+                      _gridCard(i, cellW),
+                  ],
+                );
+              });
+            }
+            return Column(children: [
+              for (final i in filtered)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _row(i),
+                ),
+            ]);
           },
         ),
+      ],
+    );
+  }
+
+  Widget _gridCard(LibraryItem i, double w) {
+    return SizedBox(
+      width: w,
+      child: BrandCard(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: PosterThumb(
+                  url: i.posterUrl,
+                  square: i.medium == LibraryMedium.music,
+                  w: w - 20,
+                ),
+              ),
+              Positioned(
+                top: 4,
+                right: 4,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.45),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: _menu(i, Colors.white),
+                ),
+              ),
+            ]),
+            const SizedBox(height: 8),
+            Text(i.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: context.brandInk)),
+            const SizedBox(height: 2),
+            Text(
+                '${i.creator ?? ''}${i.year != null ? ' · ${i.year}' : ''} · ${i.status.wire}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                    fontSize: 12, color: context.brandMuted)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _menu(LibraryItem i, Color iconColor) {
+    return AdaptivePopupMenuButton.icon<String>(
+      icon: Icons.more_vert,
+      tint: iconColor,
+      onSelected: (_, entry) {
+        if (entry.value != null) _action(i, entry.value!);
+      },
+      items: const [
+        AdaptivePopupMenuItem(
+            label: 'Finished',
+            value: 'finished',
+            icon: Icons.check_circle_outline),
+        AdaptivePopupMenuItem(
+            label: 'In progress',
+            value: 'in_progress',
+            icon: Icons.timelapse),
+        AdaptivePopupMenuItem(
+            label: 'Wishlist',
+            value: 'wishlist',
+            icon: Icons.bookmark_border),
+        AdaptivePopupMenuItem(
+            label: 'Dropped',
+            value: 'dropped',
+            icon: Icons.do_not_disturb_alt),
+        AdaptivePopupMenuDivider(),
+        AdaptivePopupMenuItem(
+            label: 'Edit rating', value: 'edit', icon: Icons.star_border),
+        AdaptivePopupMenuItem(
+            label: 'Remove', value: 'remove', icon: Icons.delete_outline),
       ],
     );
   }
@@ -118,35 +228,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
             ],
           ),
         ),
-        AdaptivePopupMenuButton.icon<String>(
-          icon: Icons.more_vert,
-          onSelected: (_, entry) {
-            if (entry.value != null) _action(i, entry.value!);
-          },
-          items: const [
-            AdaptivePopupMenuItem(
-                label: 'Finished',
-                value: 'finished',
-                icon: Icons.check_circle_outline),
-            AdaptivePopupMenuItem(
-                label: 'In progress',
-                value: 'in_progress',
-                icon: Icons.timelapse),
-            AdaptivePopupMenuItem(
-                label: 'Wishlist',
-                value: 'wishlist',
-                icon: Icons.bookmark_border),
-            AdaptivePopupMenuItem(
-                label: 'Dropped',
-                value: 'dropped',
-                icon: Icons.do_not_disturb_alt),
-            AdaptivePopupMenuDivider(),
-            AdaptivePopupMenuItem(
-                label: 'Edit rating', value: 'edit', icon: Icons.star_border),
-            AdaptivePopupMenuItem(
-                label: 'Remove', value: 'remove', icon: Icons.delete_outline),
-          ],
-        ),
+        _menu(i, context.brandMuted),
       ]),
     );
   }

@@ -14,3 +14,7 @@ export 'theme/tailwind_palette.dart';
 export 'widgets/app_loader.dart';
 export 'widgets/brand.dart';
 export 'widgets/stateful_button.dart';
+export 'widgets/view_mode_toggle.dart';
+export 'widgets/responsive_center.dart';
+export 'widgets/responsive_tiles.dart';
+export 'poster_palette.dart';

@@ -236,18 +236,26 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     return BrandScaffold(
       body: SafeArea(
         child: framed
-            ? Center(
+            ? ResponsiveCenter(
+                // Tablet: a wide card that actually uses the screen, not a
+                // skinny phone column floating in the middle.
+                maxWidth: context.isTablet ? 920 : 520,
+                alignment: Alignment.center,
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 480),
-                    child: BrandCard(
-                        padding: const EdgeInsets.all(24),
-                        child: switcher),
-                  ),
+                  padding: EdgeInsets.all(context.isTablet ? 36 : 24),
+                  child: BrandCard(
+                      padding: EdgeInsets.all(context.isTablet ? 36 : 24),
+                      child: switcher),
                 ),
               )
-            : switcher,
+            // Generating loader / results: keep full height but cap the
+            // column so the picks list doesn't stretch across a tablet.
+            // `center` keeps the loader vertically centred; the results
+            // ListView fills height regardless.
+            : ResponsiveCenter(
+                maxWidth: context.isTablet ? 1100 : 640,
+                alignment: Alignment.center,
+                child: switcher),
       ),
     );
   }
@@ -308,19 +316,21 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         const SizedBox(height: 6),
         const BrandHeading('What are you in the mood for?', size: 24),
         const SizedBox(height: 20),
-        for (final (ct, label, desc, icon) in opts)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: ContentBentoTile(
-              accent: accentForContentType(ct),
-              icon: icon,
-              label: label,
-              description: desc,
-              selected: _content == ct,
-              onTap: () => setState(() => _content = ct),
-            ),
-          ),
-        const SizedBox(height: 8),
+        ResponsiveTiles(
+          minTileWidth: 380,
+          children: [
+            for (final (ct, label, desc, icon) in opts)
+              ContentBentoTile(
+                accent: accentForContentType(ct),
+                icon: icon,
+                label: label,
+                description: desc,
+                selected: _content == ct,
+                onTap: () => setState(() => _content = ct),
+              ),
+          ],
+        ),
+        const SizedBox(height: 20),
         AdaptiveButton(
           onPressed: () {
             ref.read(quizStoreProvider.notifier).setRecommendations([]);
@@ -549,7 +559,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         );
       case QuestionType.selectAll:
         final sel = (_answers[q.id] as List<String>?) ?? <String>[];
-        return Column(
+        return ResponsiveTiles(
+          minTileWidth: 300,
+          tilesHaveOwnVerticalGap: true,
           children: [
             for (final o in q.options ?? const <String>[])
               _optionTile(o, sel.contains(o), () => setState(() {
@@ -561,7 +573,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         );
       case QuestionType.singleSelect:
         final cur = _answers[q.id] as String?;
-        return Column(
+        return ResponsiveTiles(
+          minTileWidth: 300,
+          tilesHaveOwnVerticalGap: true,
           children: [
             for (final o in q.options ?? const <String>[])
               _optionTile(o, cur == o,

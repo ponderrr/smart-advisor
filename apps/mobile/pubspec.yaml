@@ -55,6 +55,7 @@ dependencies:
   url_launcher: ^6.3.2
   audioplayers: ^6.6.0
   flutter_secure_storage: ^10.2.0
+  palette_generator: ^0.3.3+7
 
 dev_dependencies:
   flutter_test:

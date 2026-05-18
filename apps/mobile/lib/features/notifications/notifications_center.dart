@@ -97,6 +97,10 @@ class NotificationsCenter extends Notifier<List<AppNotification>> {
   Future<void> markAllRead() async =>
       _persist([for (final n in state) n.copyWith(read: true)]);
 
+  /// Remove a single notification (swipe-to-dismiss).
+  Future<void> remove(String id) async =>
+      _persist([for (final n in state) if (n.id != id) n]);
+
   Future<void> clear() async => _persist(const []);
 }
 
