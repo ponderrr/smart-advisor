@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/supabase/supabase_providers.dart';
+import '../auth/services/error_messages.dart';
 import 'biometric.dart';
 
 /// "Sign in with Face ID / fingerprint".
@@ -88,11 +89,18 @@ class BiometricLogin extends Notifier<bool> {
       return null;
     } on AuthException catch (e) {
       // Saved session is no longer valid (expired + refresh revoked).
+      // Don't surface Supabase's raw "Invalid Refresh Token: …" — map it
+      // to friendly copy and, since biometric just turned itself off,
+      // tell the user how to get it back.
       await disable();
-      return '${e.message} Sign in with your password.';
-    } catch (e) {
+      final friendly = toUserFriendlyError(
+          e.message, 'Your saved sign-in is no longer valid.');
+      return '$friendly You can set up biometric sign-in again from '
+          'Settings afterwards.';
+    } catch (_) {
       // Transient (e.g. offline) — keep the feature on so it can retry.
-      return 'Couldn\'t restore your session ($e). Try again.';
+      return "Couldn't reach the server. Check your connection and "
+          'try again.';
     }
   }
 }
