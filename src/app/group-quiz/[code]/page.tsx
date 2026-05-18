@@ -128,7 +128,7 @@ const GroupQuizLobbyPage = () => {
     handleBackToLobby,
     handleRestart,
     handleSynthesize,
-    handleBackToDashboard,
+    handleBackHome,
   } = useGroupQuizActions({
     session,
     setSession,
@@ -224,7 +224,7 @@ const GroupQuizLobbyPage = () => {
           category={shellCategory}
           stepLabel={shellStepLabel}
           progress={shellProgress}
-          onBack={handleBackToDashboard}
+          onBack={handleBackHome}
           backLabel={user ? tShell("back.dashboard") : tShell("back.home")}
           contentType={session.content_type}
         >

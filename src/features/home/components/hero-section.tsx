@@ -134,7 +134,7 @@ const HeroSection = () => {
   }, [mediaPool, heroImages]);
 
   const handlePrimaryCta = () =>
-    user ? router.push("/dashboard") : router.push("/auth");
+    user ? router.push("/feed") : router.push("/auth");
   const handleSecondaryCta = () =>
     user ? router.push("/history") : router.push("/demo");
 

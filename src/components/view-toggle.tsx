@@ -26,15 +26,13 @@ export const ViewToggle = ({ value, onChange, className }: ViewToggleProps) => (
         value: "grid",
         label: "Grid view",
         icon: <LayoutGrid size={14} />,
-        pillClassName: "bg-slate-900 dark:bg-slate-100",
-        activeTextClassName: "text-white dark:text-slate-900",
+        pillClassName: "bg-slate-500",
       },
       {
         value: "list",
         label: "List view",
         icon: <List size={14} />,
-        pillClassName: "bg-slate-900 dark:bg-slate-100",
-        activeTextClassName: "text-white dark:text-slate-900",
+        pillClassName: "bg-slate-500",
       },
     ]}
   />

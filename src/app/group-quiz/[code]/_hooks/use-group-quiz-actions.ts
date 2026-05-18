@@ -247,8 +247,8 @@ export function useGroupQuizActions({
   };
 
   // Guests can be in a room without an account, so their exit is the
-  // marketing home — /dashboard would just redirect them to /auth.
-  const handleBackToDashboard = () => router.push(user ? "/dashboard" : "/");
+  // marketing home — /feed would just redirect them to /auth.
+  const handleBackHome = () => router.push(user ? "/feed" : "/");
 
   return {
     handleStart,
@@ -259,6 +259,6 @@ export function useGroupQuizActions({
     handleBackToLobby,
     handleRestart,
     handleSynthesize,
-    handleBackToDashboard,
+    handleBackHome,
   };
 }

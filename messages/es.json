@@ -7,7 +7,17 @@
       "profile": "Perfil",
       "security": "Seguridad",
       "content": "Contenido",
+      "feed": "Feed",
       "integrations": "Integraciones"
+    },
+    "feed": {
+      "title": "Feed",
+      "description": "Controla cómo apareces en el feed social de elecciones y opiniones.",
+      "visibilityLabel": "Visibilidad del perfil",
+      "public": "Público",
+      "private": "Privado",
+      "publicHint": "Tus elecciones terminadas, valoradas y compartidas aparecen en los feeds de otras personas, y pueden seguirte directamente.",
+      "privateHint": "Puedes seguir navegando y publicando con normalidad, pero tu actividad no se difunde a otros feeds y los nuevos seguidores son solo por solicitud."
     },
     "groups": {
       "account": "Cuenta",
@@ -203,6 +213,7 @@
       "ourTeam": "Nuestro equipo",
       "faq": "Preguntas frecuentes",
       "dashboard": "Panel",
+      "feed": "Feed",
       "library": "Biblioteca",
       "history": "Historial",
       "groupQuiz": "Cuestionario en grupo",
@@ -452,6 +463,7 @@
   },
   "MobileNav": {
     "ariaLabel": "Navegación principal",
+    "feed": "Feed",
     "dashboard": "Panel",
     "library": "Biblioteca",
     "history": "Historial",

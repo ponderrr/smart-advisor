@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 import {
   BookCheck,
   Clock,
-  LayoutDashboard,
+  Newspaper,
   Sparkles,
   User,
   Users,
@@ -127,11 +127,11 @@ export const MobileBottomNav = () => {
       >
         <div className="relative mx-auto flex max-w-md items-stretch px-2">
           <Tile
-            href="/dashboard"
-            label={t("dashboard")}
-            icon={<LayoutDashboard size={18} />}
-            active={matches("/dashboard")}
-            onClick={go("/dashboard")}
+            href="/feed"
+            label={t("feed")}
+            icon={<Newspaper size={18} />}
+            active={matches("/feed")}
+            onClick={go("/feed")}
           />
           <Tile
             href="/library"

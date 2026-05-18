@@ -43,7 +43,7 @@ export function useStoryPlayback({
     setStepIdx((i) => Math.max(0, i - 1));
   }, []);
   const exit = useCallback(() => {
-    router.push("/dashboard");
+    router.push("/feed");
   }, [router]);
   const restart = useCallback(() => setStepIdx(0), []);
 

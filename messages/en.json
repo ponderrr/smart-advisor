@@ -7,7 +7,17 @@
       "profile": "Profile",
       "security": "Security",
       "content": "Content",
+      "feed": "Feed",
       "integrations": "Integrations"
+    },
+    "feed": {
+      "title": "Feed",
+      "description": "Control how you show up in the social feed of picks and takes.",
+      "visibilityLabel": "Profile visibility",
+      "public": "Public",
+      "private": "Private",
+      "publicHint": "Your finished, rated and shared picks appear in other people's feeds, and people can follow you directly.",
+      "privateHint": "You can still browse and post normally, but your activity isn't broadcast to other feeds and new followers are request-only."
     },
     "groups": {
       "account": "Account",
@@ -203,6 +213,7 @@
       "ourTeam": "Our Team",
       "faq": "FAQ",
       "dashboard": "Dashboard",
+      "feed": "Feed",
       "library": "Library",
       "history": "History",
       "groupQuiz": "Group Quiz",
@@ -452,6 +463,7 @@
   },
   "MobileNav": {
     "ariaLabel": "Primary navigation",
+    "feed": "Feed",
     "dashboard": "Dashboard",
     "library": "Library",
     "history": "History",

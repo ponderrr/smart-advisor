@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
   CircleOff,
@@ -18,13 +18,10 @@ import {
   Lock,
   X,
   Check,
-  Film,
-  BookOpen,
-  Music,
-  Sparkles,
   Sun,
   Moon,
   Monitor,
+  Newspaper,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "motion/react";
@@ -62,6 +59,10 @@ import { useReauthVerification } from "./_hooks/use-reauth-verification";
 import { useAccountActions } from "./_hooks/use-account-actions";
 import { useSettingsSaveHandlers } from "./_hooks/use-settings-save-handlers";
 import {
+  useFeedVisibility,
+  type FeedVisibility,
+} from "@/features/feed/use-feed-visibility";
+import {
   profileSchema,
   emailSchema,
   passwordSchema,
@@ -80,7 +81,24 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-type SettingsSection = "profile" | "security" | "content" | "integrations";
+type SettingsSection =
+  | "profile"
+  | "security"
+  | "content"
+  | "feed"
+  | "integrations";
+
+const SETTINGS_SECTIONS: SettingsSection[] = [
+  "profile",
+  "security",
+  "content",
+  "feed",
+  "integrations",
+];
+
+function isSettingsSection(v: string | null): v is SettingsSection {
+  return !!v && (SETTINGS_SECTIONS as string[]).includes(v);
+}
 
 
 /* ------------------------------------------------------------------ */
@@ -91,19 +109,20 @@ type ThemeChoice = "light" | "dark" | "system";
 
 const SettingsPage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const t = useTranslations("Settings");
   const { theme, setTheme } = useTheme();
   const { user } = useAuth();
   const { ready } = useRequireAuth();
+  const [feedVisibility, setFeedVisibility] = useFeedVisibility();
 
-  const settingsTabs: SettingsSection[] = [
-    "profile",
-    "security",
-    "content",
-    "integrations",
-  ];
-  const [activeSection, setActiveSection] =
-    useState<SettingsSection>("profile");
+  const settingsTabs = SETTINGS_SECTIONS;
+  // Deep-link support: /settings?section=feed opens that tab directly
+  // (used by the /feed opt-in prompt). Falls back to profile.
+  const [activeSection, setActiveSection] = useState<SettingsSection>(() => {
+    const requested = searchParams?.get("section") ?? null;
+    return isSettingsSection(requested) ? requested : "profile";
+  });
   // Section transitions always slide rightward — entering content starts on
   // the left and moves to center — so the motion feels consistent regardless
   // of which tab the user came from.
@@ -218,6 +237,7 @@ const SettingsPage = () => {
       label: t("tabs.content"),
       icon: <SlidersHorizontal size={15} />,
     },
+    { id: "feed", label: t("tabs.feed"), icon: <Newspaper size={15} /> },
     {
       id: "integrations",
       label: t("tabs.integrations"),
@@ -350,7 +370,10 @@ const SettingsPage = () => {
                 <SidebarNavGroup label={t("groups.app")} />
                 {sectionTabs
                   .filter(
-                    (tab) => tab.id === "content" || tab.id === "integrations",
+                    (tab) =>
+                      tab.id === "content" ||
+                      tab.id === "feed" ||
+                      tab.id === "integrations",
                   )
                   .map((tab) => (
                     <SidebarNavItem
@@ -892,25 +915,21 @@ const SettingsPage = () => {
                               {
                                 value: "movie",
                                 label: t("content.type.movie.label"),
-                                icon: <Film size={14} />,
                                 pillClassName: "bg-amber-500",
                               },
                               {
                                 value: "book",
                                 label: t("content.type.book.label"),
-                                icon: <BookOpen size={14} />,
                                 pillClassName: "bg-emerald-500",
                               },
                               {
                                 value: "music",
                                 label: t("content.type.music.label"),
-                                icon: <Music size={14} />,
                                 pillClassName: "bg-rose-500",
                               },
                               {
                                 value: "mix",
                                 label: t("content.type.mix.label"),
-                                icon: <Sparkles size={14} />,
                                 pillClassName: "bg-violet-500",
                               },
                             ]}
@@ -1046,6 +1065,52 @@ const SettingsPage = () => {
                         >
                           {t("content.save")}
                         </StatefulButton>
+                      </div>
+                    </SectionCard>
+                  </motion.div>
+                )}
+
+                {activeSection === "feed" && (
+                  <motion.div
+                    key="feed"
+                    initial={{ opacity: 0, x: sectionSlideDir * 30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: sectionSlideDir * -30 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-4"
+                  >
+                    <SectionCard>
+                      <SectionHeader
+                        title={t("feed.title")}
+                        description={t("feed.description")}
+                      />
+                      <div className="space-y-3">
+                        <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+                          {t("feed.visibilityLabel")}
+                        </p>
+                        <SegmentedControl<FeedVisibility>
+                          layoutId="settings-feed-visibility"
+                          value={feedVisibility}
+                          onChange={setFeedVisibility}
+                          ariaLabel={t("feed.visibilityLabel")}
+                          options={[
+                            {
+                              value: "public",
+                              label: t("feed.public"),
+                              pillClassName: "bg-violet-500",
+                            },
+                            {
+                              value: "private",
+                              label: t("feed.private"),
+                              pillClassName: "bg-slate-500",
+                            },
+                          ]}
+                        />
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                          {feedVisibility === "private"
+                            ? t("feed.privateHint")
+                            : t("feed.publicHint")}
+                        </p>
                       </div>
                     </SectionCard>
                   </motion.div>

@@ -228,11 +228,11 @@ const QuizPage = () => {
     // and the user is moments away from results.
     if (flowMode === "generating") return;
     if (flowMode === "gen-error") {
-      router.push("/dashboard");
+      router.push("/feed");
       return;
     }
     if (step === "content") {
-      router.push("/dashboard");
+      router.push("/feed");
       return;
     }
     if (step === "count") {
@@ -241,8 +241,8 @@ const QuizPage = () => {
     }
     if (step === "results") {
       // From results, back acts like the explicit "Get another" CTA — go
-      // home to the dashboard rather than re-entering the quiz mid-flow.
-      router.push("/dashboard");
+      // home to the feed rather than re-entering the quiz mid-flow.
+      router.push("/feed");
       return;
     }
     // step === "questions" — delegate so the step can handle intra-question

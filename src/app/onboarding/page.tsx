@@ -108,7 +108,7 @@ const OnboardingPage = () => {
     setSubmitting(false);
     if (!ok) return;
     toast.success(t("savedToast"));
-    router.push("/dashboard");
+    router.push("/feed");
   };
 
   const handleSkip = async () => {
@@ -116,7 +116,7 @@ const OnboardingPage = () => {
     setSubmitting(true);
     await persist(true);
     setSubmitting(false);
-    router.push("/dashboard");
+    router.push("/feed");
   };
 
   if (!mounted || loading) {

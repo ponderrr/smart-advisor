@@ -10,7 +10,7 @@ const VerifiedContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const t = useTranslations("Auth.emailVerified");
-  const next = searchParams?.get("next") ?? "/dashboard";
+  const next = searchParams?.get("next") ?? "/feed";
 
   useEffect(() => {
     // Signal the original "verify your email" tab via localStorage

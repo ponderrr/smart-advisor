@@ -12,12 +12,12 @@ describe("getPostVerifyTarget", () => {
     );
   });
 
-  it("routes magiclink directly to /dashboard", () => {
-    expect(getPostVerifyTarget("magiclink", "/dashboard")).toBe("/dashboard");
+  it("routes magiclink directly to /feed", () => {
+    expect(getPostVerifyTarget("magiclink", "/dashboard")).toBe("/feed");
   });
 
-  it("routes plain email type directly to /dashboard", () => {
-    expect(getPostVerifyTarget("email", "/dashboard")).toBe("/dashboard");
+  it("routes plain email type directly to /feed", () => {
+    expect(getPostVerifyTarget("email", "/dashboard")).toBe("/feed");
   });
 
   it("falls back to caller-provided next for other types", () => {
@@ -43,9 +43,9 @@ describe("getMfaSetupSkipTarget", () => {
     expect(getMfaSetupSkipTarget("signup")).toBe("/onboarding?from=signup");
   });
 
-  it("routes default-flow skip to /dashboard", () => {
-    expect(getMfaSetupSkipTarget()).toBe("/dashboard");
-    expect(getMfaSetupSkipTarget(null)).toBe("/dashboard");
-    expect(getMfaSetupSkipTarget("settings")).toBe("/dashboard");
+  it("routes default-flow skip to /feed", () => {
+    expect(getMfaSetupSkipTarget()).toBe("/feed");
+    expect(getMfaSetupSkipTarget(null)).toBe("/feed");
+    expect(getMfaSetupSkipTarget("settings")).toBe("/feed");
   });
 });

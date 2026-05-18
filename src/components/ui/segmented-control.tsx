@@ -4,6 +4,51 @@ import type { ReactNode } from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
+/**
+ * Mobile-app style: the active segment is a *soft tint* of its hue with
+ * the label rendered in that same hue ("the word is the colour"). Call
+ * sites keep encoding their hue via `pillClassName` (e.g. `bg-amber-500`);
+ * we read the hue from it and map to the muted pair below. Literal class
+ * strings so Tailwind's scanner keeps them in the bundle.
+ */
+const ACCENT_BY_HUE: Record<string, { tint: string; text: string }> = {
+  violet: {
+    tint: "bg-violet-500/10 dark:bg-violet-400/15",
+    text: "text-violet-600 dark:text-violet-300",
+  },
+  indigo: {
+    tint: "bg-indigo-500/10 dark:bg-indigo-400/15",
+    text: "text-indigo-600 dark:text-indigo-300",
+  },
+  rose: {
+    tint: "bg-rose-500/10 dark:bg-rose-400/15",
+    text: "text-rose-600 dark:text-rose-300",
+  },
+  pink: {
+    tint: "bg-pink-500/10 dark:bg-pink-400/15",
+    text: "text-pink-600 dark:text-pink-300",
+  },
+  amber: {
+    tint: "bg-amber-500/15 dark:bg-amber-400/15",
+    text: "text-amber-600 dark:text-amber-300",
+  },
+  emerald: {
+    tint: "bg-emerald-500/12 dark:bg-emerald-400/15",
+    text: "text-emerald-600 dark:text-emerald-300",
+  },
+  slate: {
+    tint: "bg-slate-500/10 dark:bg-slate-400/15",
+    text: "text-slate-700 dark:text-slate-200",
+  },
+};
+
+/** Pull the Tailwind hue out of a `bg-<hue>-<weight>` class, defaulting
+ *  to violet. Tinted inputs like `bg-amber-500/15` match too. */
+function accentFor(pillClassName?: string) {
+  const hue = pillClassName?.match(/bg-([a-z]+)-\d/)?.[1];
+  return (hue && ACCENT_BY_HUE[hue]) || ACCENT_BY_HUE.violet;
+}
+
 export interface SegmentedControlOption<T extends string | number> {
   value: T;
   label: string;
@@ -11,11 +56,13 @@ export interface SegmentedControlOption<T extends string | number> {
    *  `iconOnly` is set on the parent. */
   icon?: ReactNode;
   disabled?: boolean;
-  /** Tailwind class for the active pill background. Defaults to violet.
-   *  Pair with a high-contrast `activeTextClassName` if you change this
-   *  away from a 500-weight saturated color. */
+  /** The segment's hue, as any `bg-<hue>-<weight>` class (e.g.
+   *  `bg-amber-500`). The active segment renders as a soft tint of this
+   *  hue with a same-hue label — solid fills are auto-converted. Hue
+   *  defaults to violet. */
   pillClassName?: string;
-  /** Tailwind class for the active label text. Defaults to `text-white`. */
+  /** @deprecated Ignored — the active label colour is now derived from
+   *  the `pillClassName` hue so it always matches the tint. */
   activeTextClassName?: string;
 }
 
@@ -87,6 +134,7 @@ export function SegmentedControl<T extends string | number>({
       {options.map((opt) => {
         const active = value === opt.value;
         const isDisabled = disabled || opt.disabled;
+        const accent = accentFor(opt.pillClassName);
         return (
           <button
             key={opt.value}
@@ -119,18 +167,17 @@ export function SegmentedControl<T extends string | number>({
                   damping: 32,
                   mass: 0.6,
                 }}
-                className={cn(
-                  "absolute inset-0 rounded-md shadow-sm",
-                  opt.pillClassName ?? "bg-violet-500",
-                )}
+                // Mobile-app style: a soft accent tint instead of a solid
+                // saturated fill — the active *word* carries the colour.
+                className={cn("absolute inset-0 rounded-md", accent.tint)}
               />
             )}
             <span
               className={cn(
                 "relative z-10 flex items-center justify-center gap-1 transition-colors duration-200",
                 active
-                  ? (opt.activeTextClassName ?? "text-white")
-                  : "text-slate-600 dark:text-slate-300",
+                  ? accent.text
+                  : "text-slate-500 dark:text-slate-400",
               )}
             >
               {opt.icon}

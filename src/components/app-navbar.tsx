@@ -41,6 +41,9 @@ const DEMO_KEYS = [
 ] as const;
 
 const LOGGED_IN_KEYS = [
+  // The Feed is the logged-in home (/feed); the analytics dashboard is its
+  // own destination at /dashboard.
+  { key: "feed", link: "/feed" },
   { key: "dashboard", link: "/dashboard" },
   { key: "library", link: "/library" },
   { key: "history", link: "/history" },
@@ -78,17 +81,17 @@ export function AppNavbar() {
 
   const handlePrimary = () => {
     if (useMarketingVariant) {
-      router.push(user ? "/dashboard" : "/auth");
+      router.push(user ? "/feed" : "/auth");
     } else {
-      router.push("/dashboard");
+      router.push("/feed");
     }
   };
 
   const primaryLabel = useMarketingVariant
     ? user
-      ? t("items.dashboard")
+      ? t("items.feed")
       : t("getStarted")
-    : t("items.dashboard");
+    : t("items.feed");
 
   const handleSignOut = async () => {
     await signOut();
