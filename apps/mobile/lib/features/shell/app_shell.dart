@@ -5,8 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../ui/ui.dart';
 import '../auth/auth_providers.dart';
 
-/// App shell: native adaptive bottom bar (Home · Library · Quiz · History ·
-/// Profile). Quiz opens the Solo/Group sheet; Profile shows the avatar.
+/// App shell: native adaptive bottom bar (Feed · Library · Quiz · History ·
+/// Profile). Feed is the home/landing surface; Quiz (center) opens the
+/// Solo/Group sheet; Profile shows the account avatar.
 class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.child, required this.location});
 
@@ -40,14 +41,12 @@ class AppShell extends ConsumerWidget {
 
     // Native bottom bar. Quiz lives as the center nav item (opens the
     // Solo/Group sheet) instead of a floating button.
-    const quizSlot = 3;
+    const quizSlot = 2;
     int navIndexFromLocation() {
-      if (location == '/') return 0;
-      if (location.startsWith('/feed')) return 1;
-      if (location.startsWith('/library')) return 2;
-      if (location.startsWith('/history')) return 4;
-      if (location.startsWith('/account')) return 5;
-      return 0;
+      if (location.startsWith('/library')) return 1;
+      if (location.startsWith('/history')) return 3;
+      if (location.startsWith('/account')) return 4;
+      return 0; // '/' (Feed) and anything else
     }
 
     void onNav(int i) {
@@ -56,10 +55,9 @@ class AppShell extends ConsumerWidget {
         return;
       }
       context.go(switch (i) {
-        1 => '/feed',
-        2 => '/library',
-        4 => '/history',
-        5 => '/account',
+        1 => '/library',
+        3 => '/history',
+        4 => '/account',
         _ => '/',
       });
     }
@@ -67,7 +65,6 @@ class AppShell extends ConsumerWidget {
     // Tablet / wide: side NavigationRail + centered, max-width content.
     if (MediaQuery.sizeOf(context).width >= 720) {
       const labels = [
-        'Home',
         'Feed',
         'Library',
         'Quiz',
@@ -75,7 +72,6 @@ class AppShell extends ConsumerWidget {
         'Profile'
       ];
       const icons = [
-        Icons.dashboard_outlined,
         Icons.forum_outlined,
         Icons.bookmark_border,
         Icons.auto_awesome,
@@ -95,7 +91,7 @@ class AppShell extends ConsumerWidget {
                 destinations: [
                   for (var i = 0; i < labels.length; i++)
                     NavigationRailDestination(
-                      icon: i == 5
+                      icon: i == 4
                           ? _avatarIcon(context, profile?.avatarUrl, false)
                           : Icon(icons[i]),
                       label: Text(labels[i]),
@@ -125,8 +121,6 @@ class AppShell extends ConsumerWidget {
         selectedIndex: navIndexFromLocation(),
         onTap: onNav,
         items: [
-          const AdaptiveNavigationDestination(
-              label: 'Home', icon: Icon(Icons.dashboard_outlined)),
           const AdaptiveNavigationDestination(
               label: 'Feed', icon: Icon(Icons.forum_outlined)),
           const AdaptiveNavigationDestination(

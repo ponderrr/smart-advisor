@@ -174,10 +174,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state, child) =>
             AppShell(location: state.matchedLocation, child: child),
         routes: [
+          // Feed is the home/landing surface (social-first). The old
+          // Dashboard is kept intact at /dashboard — a one-line swap
+          // restores it as home if web parity is ever needed again.
           GoRoute(
-              path: '/', builder: (_, _) => const DashboardScreen()),
+              path: '/', builder: (_, _) => const FeedScreen()),
           GoRoute(
-              path: '/feed', builder: (_, _) => const FeedScreen()),
+              path: '/dashboard',
+              builder: (_, _) => const DashboardScreen()),
           GoRoute(
               path: '/library',
               builder: (_, _) => const LibraryScreen()),

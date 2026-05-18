@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/ui_messenger.dart';
 import '../../ui/ui.dart';
+import '../dashboard/dashboard_screen.dart';
 
 /// Experimental Reddit-style social feed — a *new tab* trialled alongside the
 /// existing Home/Dashboard (which is untouched and stays the fallback).
@@ -63,6 +65,26 @@ class FeedComment {
   final int score;
 }
 
+/// What a friend did with a pick — drives the activity line on each card.
+enum FeedActivity { finished, added, rated, shared, group }
+
+extension FeedActivityX on FeedActivity {
+  String get verb => switch (this) {
+        FeedActivity.finished => 'finished',
+        FeedActivity.added => 'added to library',
+        FeedActivity.rated => 'rated',
+        FeedActivity.shared => 'shared',
+        FeedActivity.group => 'group pick',
+      };
+  IconData get icon => switch (this) {
+        FeedActivity.finished => Icons.check_circle_outline,
+        FeedActivity.added => Icons.bookmark_added_outlined,
+        FeedActivity.rated => Icons.star_outline,
+        FeedActivity.shared => Icons.ios_share,
+        FeedActivity.group => Icons.groups_outlined,
+      };
+}
+
 class FeedPost {
   FeedPost({
     required this.id,
@@ -70,6 +92,8 @@ class FeedPost {
     required this.author,
     required this.title,
     required this.ageHours,
+    this.activity = FeedActivity.shared,
+    this.tasteMatch = 0,
     this.body,
     this.flair,
     this.posterUrl,
@@ -86,9 +110,15 @@ class FeedPost {
   final String author;
   final String title;
   final int ageHours;
+
+  /// What the friend did (finished / added / rated / shared / group).
+  final FeedActivity activity;
+
+  /// Taste overlap with the current user, 0–100 (in-memory mock).
+  final int tasteMatch;
   final String? body;
 
-  /// Optional Reddit-style flair: Discussion / Recommendation / etc.
+  /// Optional tag (Discussion / Recommendation / etc.).
   final String? flair;
   final String? posterUrl;
   final String? creator;
@@ -107,6 +137,10 @@ class FeedPost {
 }
 
 enum FeedSort { hot, newest, top }
+
+/// Feed scope: people you follow, discovery suggestions, or your group
+/// sessions.
+enum FeedScope { friends, discover, group }
 
 /// How each post is laid out — mirrors Reddit's Card / Compact / Media views.
 enum FeedView { card, compact, media }
@@ -176,6 +210,21 @@ class JoinedCommunitiesNotifier extends Notifier<Set<FeedCommunity>> {
   }
 }
 
+/// Picks the user saved to their library from the feed (in-memory).
+final savedProvider =
+    NotifierProvider<SavedNotifier, Set<String>>(SavedNotifier.new);
+
+class SavedNotifier extends Notifier<Set<String>> {
+  @override
+  Set<String> build() => <String>{};
+
+  void toggle(String postId) {
+    final next = {...state};
+    next.contains(postId) ? next.remove(postId) : next.add(postId);
+    state = next;
+  }
+}
+
 class FeedNotifier extends Notifier<List<FeedPost>> {
   @override
   List<FeedPost> build() => _seed();
@@ -205,7 +254,7 @@ class FeedNotifier extends Notifier<List<FeedPost>> {
     FeedCommunity community,
     String title,
     String? body, {
-    String? flair,
+    FeedActivity activity = FeedActivity.shared,
     String? posterUrl,
     String? creator,
     int? year,
@@ -218,8 +267,8 @@ class FeedNotifier extends Notifier<List<FeedPost>> {
         community: community,
         author: 'you',
         title: title,
+        activity: activity,
         body: clean(body),
-        flair: flair,
         posterUrl: clean(posterUrl),
         creator: clean(creator),
         year: year,
@@ -236,12 +285,12 @@ class FeedNotifier extends Notifier<List<FeedPost>> {
         FeedPost(
           id: '1',
           community: FeedCommunity.movies,
-          author: 'reel_takes',
-          title: 'Dune: Part Two is the rare sequel that outdoes the original',
-          flair: 'Review',
-          body:
-              'The IMAX sound design alone justifies the ticket. Villeneuve '
-              'gets the scale right without losing the characters.',
+          author: 'maya',
+          activity: FeedActivity.finished,
+          tasteMatch: 92,
+          title: 'Dune: Part Two',
+          body: 'The IMAX sound design alone justifies it — epic '
+              'without ever losing the characters.',
           posterUrl: 'https://picsum.photos/seed/dune/300/450',
           creator: 'Denis Villeneuve',
           year: 2024,
@@ -249,13 +298,13 @@ class FeedNotifier extends Notifier<List<FeedPost>> {
           baseScore: 1284,
           comments: const [
             FeedComment(
-                author: 'sandworm',
+                author: 'jon',
                 body: 'Chalamet finally won me over here.',
                 ageHours: 4,
                 score: 92),
             FeedComment(
-                author: 'spice_must_flow',
-                body: 'Part Three can not come soon enough.',
+                author: 'priya',
+                body: 'Adding this to my list now.',
                 ageHours: 3,
                 score: 41),
           ],
@@ -263,9 +312,11 @@ class FeedNotifier extends Notifier<List<FeedPost>> {
         FeedPost(
           id: '2',
           community: FeedCommunity.books,
-          author: 'pages_at_2am',
-          title: 'Project Hail Mary — the friendship subplot wrecked me',
-          body: 'Went in expecting hard sci-fi, left emotionally compromised. '
+          author: 'jon',
+          activity: FeedActivity.finished,
+          tasteMatch: 88,
+          title: 'Project Hail Mary',
+          body: 'Went in for hard sci-fi, left emotionally wrecked. '
               'No spoilers but: Rocky.',
           posterUrl: 'https://picsum.photos/seed/phm/300/450',
           creator: 'Andy Weir',
@@ -274,7 +325,7 @@ class FeedNotifier extends Notifier<List<FeedPost>> {
           baseScore: 803,
           comments: const [
             FeedComment(
-                author: 'astrophage',
+                author: 'maya',
                 body: 'Read it in two sittings. Couldn\'t stop.',
                 ageHours: 12,
                 score: 58),
@@ -283,21 +334,21 @@ class FeedNotifier extends Notifier<List<FeedPost>> {
         FeedPost(
           id: '3',
           community: FeedCommunity.music,
-          author: 'loopfiend',
-          title: 'What album have you played to death this month?',
-          flair: 'Discussion',
-          body: 'Mine is on repeat and I have no regrets. Drop yours.',
+          author: 'priya',
+          activity: FeedActivity.added,
+          tasteMatch: 74,
+          title: 'Wall of Eyes',
+          body: 'On repeat all month — the strings on track 2.',
+          posterUrl: 'https://picsum.photos/seed/album/300/300',
+          creator: 'The Smile',
+          year: 2024,
+          square: true,
           ageHours: 9,
           baseScore: 412,
           comments: const [
             FeedComment(
-                author: 'bassline',
-                body: 'Anything with a good low end honestly.',
-                ageHours: 7,
-                score: 22),
-            FeedComment(
-                author: 'vinyl_only',
-                body: 'The Smile - Wall of Eyes. Nonstop.',
+                author: 'theo',
+                body: 'Their best yet, honestly.',
                 ageHours: 6,
                 score: 31),
           ],
@@ -305,10 +356,12 @@ class FeedNotifier extends Notifier<List<FeedPost>> {
         FeedPost(
           id: '4',
           community: FeedCommunity.movies,
-          author: 'midnight_screening',
-          title: 'Oppenheimer holds up even better on a rewatch',
-          body: 'Knowing where it lands, the first hour hits completely '
-              'differently. Nolan\'s best structure work.',
+          author: 'theo',
+          activity: FeedActivity.rated,
+          tasteMatch: 95,
+          title: 'Oppenheimer',
+          body: 'Holds up even better on a rewatch — Nolan\'s best '
+              'structure work. ★★★★★',
           posterUrl: 'https://picsum.photos/seed/oppen/300/450',
           creator: 'Christopher Nolan',
           year: 2023,
@@ -317,29 +370,37 @@ class FeedNotifier extends Notifier<List<FeedPost>> {
         ),
         FeedPost(
           id: '5',
-          community: FeedCommunity.music,
-          author: 'crate_digger',
-          title: 'Underrated 2024 records that deserved more attention',
-          posterUrl: 'https://picsum.photos/seed/album/300/300',
-          creator: 'various',
-          square: true,
+          community: FeedCommunity.books,
+          author: 'lena',
+          activity: FeedActivity.rated,
+          tasteMatch: 70,
+          title: 'Thinking, Fast and Slow',
+          body: 'Rewired a few of my defaults. Dense but worth it.',
+          posterUrl: 'https://picsum.photos/seed/tfas/300/450',
+          creator: 'Daniel Kahneman',
+          year: 2011,
           ageHours: 40,
           baseScore: 318,
           comments: const [
             FeedComment(
-                author: 'tapehead',
-                body: 'Adding half of these to my list, thanks.',
+                author: 'sam',
+                body: 'The anchoring chapter stuck with me.',
                 ageHours: 30,
                 score: 14),
           ],
         ),
         FeedPost(
           id: '6',
-          community: FeedCommunity.books,
-          author: 'shelf_life',
-          title: 'Tell me a book that genuinely changed how you think',
-          body: 'Not looking for the usual list — something that actually '
-              'rewired a default for you.',
+          community: FeedCommunity.movies,
+          author: 'movie night crew',
+          activity: FeedActivity.group,
+          tasteMatch: 81,
+          title: 'Past Lives',
+          body: 'Your group quiz with 3 friends landed here — '
+              'unanimous on the vibe.',
+          posterUrl: 'https://picsum.photos/seed/pastlives/300/450',
+          creator: 'Celine Song',
+          year: 2023,
           ageHours: 52,
           baseScore: 588,
         ),
@@ -358,28 +419,43 @@ class FeedScreen extends ConsumerStatefulWidget {
 }
 
 class _FeedScreenState extends ConsumerState<FeedScreen> {
-  FeedSort _sort = FeedSort.hot;
+  FeedScope _scope = FeedScope.friends;
   FeedCommunity? _community; // null = All
   FeedView _view = FeedView.card;
 
-  List<FeedPost> _visible(List<FeedPost> posts) {
-    final filtered = _community == null
+  List<FeedPost> _visible(List<FeedPost> posts, Set<String> following) {
+    var filtered = _community == null
         ? [...posts]
         : posts.where((p) => p.community == _community).toList();
-    switch (_sort) {
-      case FeedSort.hot:
-        filtered.sort((a, b) => b.hotRank.compareTo(a.hotRank));
-      case FeedSort.newest:
-        filtered.sort((a, b) => a.ageHours.compareTo(b.ageHours));
-      case FeedSort.top:
-        filtered.sort((a, b) => b.score.compareTo(a.score));
+    switch (_scope) {
+      case FeedScope.friends:
+        // People you follow (seeded friends count as followed so the
+        // feed isn't empty before you follow anyone).
+        filtered = filtered
+            .where((p) => p.activity != FeedActivity.group)
+            .where((p) =>
+                following.isEmpty || following.contains(p.author))
+            .toList()
+          ..sort((a, b) => a.ageHours.compareTo(b.ageHours));
+      case FeedScope.discover:
+        // What's resonating across everyone, popularity-first.
+        filtered = filtered
+            .where((p) => p.activity != FeedActivity.group)
+            .toList()
+          ..sort((a, b) => b.baseScore.compareTo(a.baseScore));
+      case FeedScope.group:
+        filtered = filtered
+            .where((p) => p.activity == FeedActivity.group)
+            .toList()
+          ..sort((a, b) => a.ageHours.compareTo(b.ageHours));
     }
     return filtered;
   }
 
   @override
   Widget build(BuildContext context) {
-    final posts = _visible(ref.watch(feedProvider));
+    final posts = _visible(
+        ref.watch(feedProvider), ref.watch(followingProvider));
     final fabColor = _community == null
         ? Tw.indigo500
         : contentAccent(
@@ -390,8 +466,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       floatingActionButton: _PostFab(
         color: fabColor,
         label: _community == null
-            ? 'Post'
-            : 'Post to ${_community!.label}',
+            ? 'Share a pick'
+            : 'Share to ${_community!.label}',
         onTap: () => _openComposer(_community),
       ),
       body: ListView(
@@ -400,25 +476,26 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           Row(
             children: [
               const Expanded(child: BrandHeading('Feed', size: 26)),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                decoration: BoxDecoration(
-                  color: context.colors.muted,
-                  borderRadius: BorderRadius.circular(999),
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => _openUserProfile(context, 'you'),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                      color: context.colors.muted,
+                      shape: BoxShape.circle),
+                  child: Icon(Icons.insights_rounded,
+                      size: 18, color: context.brandMuted),
                 ),
-                child: Text('BETA',
-                    style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1,
-                        color: context.brandMuted)),
               ),
             ],
           ),
           const SizedBox(height: 4),
-          Subtitle('What people are recommending right now.'),
+          Subtitle('What your people are into right now.'),
           const SizedBox(height: 14),
+          _QuizPrompt(onTap: () => context.push('/quiz/solo')),
+          const SizedBox(height: 12),
           _communitySegmented(),
           const SizedBox(height: 8),
           Row(children: [
@@ -462,17 +539,21 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     );
   }
 
-  /// Sort — `BrandSegmented`, tinted to a per-sort accent so the active
-  /// mode is color-coded too (Hot → rose, New → emerald, Top → amber).
+  /// Scope — `BrandSegmented`, color-coded per tab (Friends → indigo,
+  /// Discover → violet, Group → rose).
   Widget _sortSegmented() {
-    const sorts = [FeedSort.hot, FeedSort.newest, FeedSort.top];
-    const colors = [Tw.rose500, Tw.emerald500, Tw.amber500];
-    final idx = sorts.indexOf(_sort);
+    const scopes = [
+      FeedScope.friends,
+      FeedScope.discover,
+      FeedScope.group
+    ];
+    const colors = [Tw.indigo500, Tw.violet500, Tw.rose500];
+    final idx = scopes.indexOf(_scope);
     return BrandSegmented(
       color: colors[idx],
-      labels: const ['Hot', 'New', 'Top'],
+      labels: const ['Friends', 'Discover', 'Group'],
       selectedIndex: idx,
-      onValueChanged: (i) => setState(() => _sort = sorts[i]),
+      onValueChanged: (i) => setState(() => _scope = scopes[i]),
     );
   }
 
@@ -667,35 +748,143 @@ class _AuthorTag extends StatelessWidget {
   }
 }
 
-class _VoteRail extends ConsumerWidget {
-  const _VoteRail({required this.post});
+/// Compact "get fresh picks" prompt atop the feed (replaces the old
+/// Dashboard's primary CTA now that Feed is home).
+class _QuizPrompt extends StatelessWidget {
+  const _QuizPrompt({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final tone = contentAccent(
+        ContentAccentName.violet, Theme.of(context).brightness);
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: tone.surfaceGradient),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: tone.surfaceBorder),
+        ),
+        child: Row(children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+                color: tone.iconCircleBg, shape: BoxShape.circle),
+            child: Icon(Icons.auto_awesome,
+                size: 19, color: tone.iconCircleFg),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Get fresh picks',
+                    style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: context.brandInk)),
+                Text('Take a quick quiz, tuned to your taste.',
+                    style: TextStyle(
+                        fontSize: 12, color: context.brandMuted)),
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right, color: tone.text),
+        ]),
+      ),
+    );
+  }
+}
+
+/// "% your taste" chip — the social signal that replaces vote score.
+class _TasteBadge extends StatelessWidget {
+  const _TasteBadge({required this.match, required this.tone});
+  final int match;
+  final ContentAccentTone tone;
+
+  @override
+  Widget build(BuildContext context) {
+    if (match <= 0) return const SizedBox.shrink();
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+          color: tone.iconCircleBg,
+          borderRadius: BorderRadius.circular(999)),
+      child: Text('$match% your taste',
+          style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+              color: tone.iconCircleFg)),
+    );
+  }
+}
+
+/// Left rail: save-to-library toggle + comment count. Replaces the old
+/// up/down vote rail — interactions here feed the taste graph.
+class _SaveRail extends ConsumerWidget {
+  const _SaveRail({required this.post});
   final FeedPost post;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final notifier = ref.read(feedProvider.notifier);
-    Color voteColor(int dir) => post.vote == dir
-        ? (dir > 0 ? Tw.indigo500 : Tw.rose500)
-        : context.brandMuted;
+    final saved = ref.watch(savedProvider).contains(post.id);
+    final tone = contentAccent(
+        post.community.accent, Theme.of(context).brightness);
+    final saveColor = saved ? tone.dot : context.brandMuted;
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         GestureDetector(
-          onTap: () => notifier.setVote(post.id, 1),
-          child: Icon(Icons.keyboard_arrow_up,
-              size: 26, color: voteColor(1)),
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            final nowSaved = !saved;
+            ref.read(savedProvider.notifier).toggle(post.id);
+            showBanner(
+              nowSaved
+                  ? '“${post.title}” saved to your library'
+                  : 'Removed from your library',
+              type: nowSaved
+                  ? AdaptiveSnackBarType.success
+                  : AdaptiveSnackBarType.info,
+              action: 'Undo',
+              onAction: () =>
+                  ref.read(savedProvider.notifier).toggle(post.id),
+            );
+          },
+          child: AnimatedScale(
+            scale: saved ? 1.12 : 1,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOutBack,
+            child: Icon(
+                saved
+                    ? Icons.bookmark_rounded
+                    : Icons.bookmark_border_rounded,
+                size: 24,
+                color: saveColor),
+          ),
         ),
-        Text(_compact(post.score),
+        const SizedBox(height: 2),
+        Text(saved ? 'Saved' : 'Save',
             style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w900,
-                color: post.vote != 0
-                    ? voteColor(post.vote)
-                    : context.brandInk)),
-        GestureDetector(
-          onTap: () => notifier.setVote(post.id, -1),
-          child: Icon(Icons.keyboard_arrow_down,
-              size: 26, color: voteColor(-1)),
-        ),
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                color: saveColor)),
+        const SizedBox(height: 12),
+        Icon(Icons.mode_comment_outlined,
+            size: 18, color: context.brandMuted),
+        const SizedBox(height: 2),
+        Text('${post.comments.length}',
+            style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: context.brandMuted)),
       ],
     );
   }
@@ -729,7 +918,7 @@ class _PostCard extends StatelessWidget {
           border: Border.all(color: tone.surfaceBorder),
         ),
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          _VoteRail(post: post),
+          _SaveRail(post: post),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -737,29 +926,19 @@ class _PostCard extends StatelessWidget {
               children: [
                 Row(children: [
                   _CommunityTag(community: post.community, tone: tone),
-                  if (post.flair != null) ...[
-                    const SizedBox(width: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                          color: (kFeedFlairs[post.flair] ??
-                                  Tw.indigo500)
-                              .withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(999)),
-                      child: Text(post.flair!,
-                          style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w900,
-                              color: kFeedFlairs[post.flair] ??
-                                  Tw.indigo500)),
-                    ),
-                  ],
-                  const SizedBox(width: 8),
-                  Expanded(
+                  const Spacer(),
+                  _TasteBadge(match: post.tasteMatch, tone: tone),
+                ]),
+                const SizedBox(height: 8),
+                Row(children: [
+                  Icon(post.activity.icon,
+                      size: 14, color: tone.text),
+                  const SizedBox(width: 5),
+                  Flexible(
                     child: _AuthorTag(
                       author: post.author,
-                      trailing: ' · ${_ago(post.ageHours)}',
+                      trailing:
+                          ' ${post.activity.verb} · ${_ago(post.ageHours)}',
                     ),
                   ),
                 ]),
@@ -802,28 +981,9 @@ class _PostCard extends StatelessWidget {
                       style: TextStyle(
                           fontSize: 13,
                           height: 1.4,
+                          fontStyle: FontStyle.italic,
                           color: context.brandMuted)),
                 ],
-                const SizedBox(height: 10),
-                Row(children: [
-                  Icon(Icons.mode_comment_outlined,
-                      size: 15, color: context.brandMuted),
-                  const SizedBox(width: 5),
-                  Text('${post.comments.length} comments',
-                      style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: context.brandMuted)),
-                  const SizedBox(width: 16),
-                  Icon(Icons.share_outlined,
-                      size: 15, color: context.brandMuted),
-                  const SizedBox(width: 5),
-                  Text('Share',
-                      style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: context.brandMuted)),
-                ]),
               ],
             ),
           ),
@@ -949,7 +1109,8 @@ class _CompactPostRow extends StatelessWidget {
                   Flexible(
                     child: _AuthorTag(
                       author: post.author,
-                      trailing: '  ·  ${_ago(post.ageHours)}',
+                      trailing:
+                          '  ${post.activity.verb}  ·  ${_ago(post.ageHours)}',
                       style: TextStyle(
                           fontSize: 10.5, color: context.brandMuted),
                     ),
@@ -959,23 +1120,26 @@ class _CompactPostRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          Column(children: [
-            Icon(Icons.keyboard_arrow_up,
-                size: 18, color: context.brandMuted),
-            Text(_compact(post.score),
-                style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w900,
-                    color: context.brandInk)),
-            Row(children: [
-              Icon(Icons.mode_comment_outlined,
-                  size: 11, color: context.brandMuted),
-              const SizedBox(width: 3),
-              Text('${post.comments.length}',
-                  style: TextStyle(
-                      fontSize: 10.5, color: context.brandMuted)),
-            ]),
-          ]),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (post.tasteMatch > 0)
+                Text('${post.tasteMatch}%',
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                        color: tone.text)),
+              const SizedBox(height: 4),
+              Row(mainAxisSize: MainAxisSize.min, children: [
+                Icon(Icons.mode_comment_outlined,
+                    size: 11, color: context.brandMuted),
+                const SizedBox(width: 3),
+                Text('${post.comments.length}',
+                    style: TextStyle(
+                        fontSize: 10.5, color: context.brandMuted)),
+              ]),
+            ],
+          ),
         ]),
       ),
     );
@@ -1061,15 +1225,16 @@ class _MediaPostCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
               child: Row(children: [
-                Icon(Icons.keyboard_arrow_up,
-                    size: 20, color: context.brandMuted),
-                const SizedBox(width: 4),
-                Text(_compact(post.score),
-                    style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w900,
-                        color: context.brandInk)),
-                const SizedBox(width: 16),
+                Icon(post.activity.icon,
+                    size: 15, color: tone.text),
+                const SizedBox(width: 5),
+                if (post.tasteMatch > 0)
+                  Text('${post.tasteMatch}% your taste',
+                      style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w900,
+                          color: tone.text)),
+                const SizedBox(width: 14),
                 Icon(Icons.mode_comment_outlined,
                     size: 16, color: context.brandMuted),
                 const SizedBox(width: 5),
@@ -1079,11 +1244,14 @@ class _MediaPostCard extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         color: context.brandMuted)),
                 const Spacer(),
-                _AuthorTag(
-                  author: post.author,
-                  trailing: ' · ${_ago(post.ageHours)}',
-                  style: TextStyle(
-                      fontSize: 11, color: context.brandMuted),
+                Flexible(
+                  child: _AuthorTag(
+                    author: post.author,
+                    trailing:
+                        ' ${post.activity.verb} · ${_ago(post.ageHours)}',
+                    style: TextStyle(
+                        fontSize: 11, color: context.brandMuted),
+                  ),
                 ),
               ]),
             ),
@@ -1172,7 +1340,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _VoteRail(post: post),
+                      _SaveRail(post: post),
                       const SizedBox(width: 14),
                       Expanded(
                         child: Column(
@@ -1273,7 +1441,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                 IconButton(
                   onPressed: _submit,
                   icon: const Icon(Icons.send_rounded),
-                  color: Tw.indigo500,
+                  color: tone.dot,
                 ),
               ]),
             ),
@@ -1376,11 +1544,15 @@ class _Composer extends ConsumerStatefulWidget {
 
 class _ComposerState extends ConsumerState<_Composer> {
   static const _maxTitle = 120;
-  static final _flairKeys = kFeedFlairs.keys.toList();
-  static final _flairLabels = ['None', ..._flairKeys];
+  // What you did with the pick (drives the activity line on the card).
+  static const _activities = <(FeedActivity, String)>[
+    (FeedActivity.finished, 'Finished'),
+    (FeedActivity.rated, 'Rated'),
+    (FeedActivity.shared, 'Recommending'),
+  ];
 
   late FeedCommunity _community = widget.initialCommunity;
-  String? _flair;
+  FeedActivity _activity = FeedActivity.finished;
   final _title = TextEditingController();
   final _body = TextEditingController();
   final _cover = TextEditingController();
@@ -1415,13 +1587,13 @@ class _ComposerState extends ConsumerState<_Composer> {
           _community,
           _title.text.trim(),
           _body.text,
-          flair: _flair,
+          activity: _activity,
           posterUrl: _cover.text,
           creator: _creator.text,
           year: int.tryParse(_year.text.trim()),
         );
     Navigator.of(context).pop();
-    showBanner('Posted to ${_community.label}',
+    showBanner('Shared with ${_community.label} friends',
         type: AdaptiveSnackBarType.success,
         duration: const Duration(seconds: 2));
   }
@@ -1458,7 +1630,7 @@ class _ComposerState extends ConsumerState<_Composer> {
                 borderRadius: BorderRadius.circular(999)),
           ),
           Row(children: [
-            const BrandHeading('New post', size: 20),
+            const BrandHeading('Share a pick', size: 20),
             const Spacer(),
             Container(
               padding: const EdgeInsets.symmetric(
@@ -1487,22 +1659,19 @@ class _ComposerState extends ConsumerState<_Composer> {
                   onValueChanged: (i) => setState(
                       () => _community = FeedCommunity.values[i]),
                 ),
-                _label('Flair'),
+                _label('What did you do?'),
                 BrandSegmented(
-                  color: _flair == null
-                      ? Tw.indigo500
-                      : kFeedFlairs[_flair]!,
-                  labels: _flairLabels,
-                  selectedIndex: _flair == null
-                      ? 0
-                      : _flairKeys.indexOf(_flair!) + 1,
-                  onValueChanged: (i) => setState(() =>
-                      _flair = i == 0 ? null : _flairKeys[i - 1]),
+                  color: _accent,
+                  labels: [for (final a in _activities) a.$2],
+                  selectedIndex: _activities
+                      .indexWhere((a) => a.$1 == _activity),
+                  onValueChanged: (i) => setState(
+                      () => _activity = _activities[i].$1),
                 ),
                 _label('Title'),
                 AdaptiveTextField(
                   controller: _title,
-                  placeholder: 'A clear, specific title',
+                  placeholder: 'What did you watch / read / hear?',
                   inputFormatters: [
                     LengthLimitingTextInputFormatter(_maxTitle)
                   ],
@@ -1520,11 +1689,11 @@ class _ComposerState extends ConsumerState<_Composer> {
                 const SizedBox(height: 10),
                 AdaptiveTextField(
                   controller: _body,
-                  placeholder: 'Say something (optional)',
+                  placeholder: 'Your take (optional)',
                   minLines: 3,
                   maxLines: 6,
                 ),
-                _label('Attach a pick (optional)'),
+                _label('Details (optional)'),
                 AdaptiveTextField(
                   controller: _cover,
                   placeholder: 'Cover image URL',
@@ -1574,19 +1743,27 @@ class _ComposerState extends ConsumerState<_Composer> {
                             crossAxisAlignment:
                                 CrossAxisAlignment.start,
                             children: [
-                              if (_flair != null)
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      bottom: 4),
-                                  child: Text(_flair!.toUpperCase(),
-                                      style: TextStyle(
-                                          fontSize: 9,
-                                          fontWeight:
-                                              FontWeight.w900,
-                                          letterSpacing: 0.5,
-                                          color: kFeedFlairs[
-                                              _flair])),
-                                ),
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                    bottom: 4),
+                                child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(_activity.icon,
+                                          size: 11,
+                                          color: _accent),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                          'you ${_activity.verb}'
+                                              .toUpperCase(),
+                                          style: TextStyle(
+                                              fontSize: 9,
+                                              fontWeight:
+                                                  FontWeight.w900,
+                                              letterSpacing: 0.5,
+                                              color: _accent)),
+                                    ]),
+                              ),
                               Text(
                                   _title.text.trim().isEmpty
                                       ? 'Your title…'
@@ -1614,7 +1791,7 @@ class _ComposerState extends ConsumerState<_Composer> {
                   width: double.infinity,
                   child: AdaptiveButton(
                     onPressed: _valid ? _post : null,
-                    label: 'Post to ${_community.label}',
+                    label: 'Share with ${_community.label}',
                     color: _accent,
                   ),
                 ),
@@ -1853,7 +2030,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
       ),
       floatingActionButton: _PostFab(
         color: tone.dot,
-        label: 'Post to ${community.label}',
+        label: 'Share to ${community.label}',
         onTap: () => showModalBottomSheet<void>(
           context: context,
           backgroundColor: Colors.transparent,
@@ -1957,8 +2134,6 @@ class UserProfileScreen extends ConsumerWidget {
     final posts =
         all.where((p) => p.author == username).toList()
           ..sort((a, b) => a.ageHours.compareTo(b.ageHours));
-    final karma =
-        posts.fold<int>(0, (s, p) => s + p.score);
     final commentsMade = all.fold<int>(
         0,
         (s, p) =>
@@ -1966,6 +2141,29 @@ class UserProfileScreen extends ConsumerWidget {
     final tone =
         contentAccent(_accent, Theme.of(context).brightness);
     final isYou = username == 'you';
+    // Your own profile *is* your taste dashboard (the old Home screen,
+    // kept intact and reused here).
+    if (isYou) {
+      return Scaffold(
+        backgroundColor: brandBg(Theme.of(context).brightness),
+        appBar: AppBar(
+          backgroundColor: brandBg(Theme.of(context).brightness),
+          title: Text('Your taste',
+              style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: context.brandInk)),
+        ),
+        body: const DashboardScreen(),
+      );
+    }
+    // Taste overlap with you: average of their posts' match, or a
+    // deterministic fallback so every profile shows a number.
+    final tasteMatch = posts.isEmpty
+        ? 60 + username.hashCode.abs() % 35
+        : (posts.fold<int>(0, (s, p) => s + p.tasteMatch) /
+                posts.length)
+            .round();
 
     Widget stat(String label, String value) => Column(
           children: [
@@ -2041,10 +2239,11 @@ class UserProfileScreen extends ConsumerWidget {
                       Text(
                           isYou
                               ? 'This is you'
-                              : 'Member of the community',
+                              : '$tasteMatch% taste match with you',
                           style: TextStyle(
                               fontSize: 12,
-                              color: context.brandMuted)),
+                              fontWeight: FontWeight.w700,
+                              color: tone.text)),
                     ],
                   ),
                 ),
@@ -2058,8 +2257,8 @@ class UserProfileScreen extends ConsumerWidget {
                 mainAxisAlignment:
                     MainAxisAlignment.spaceAround,
                 children: [
-                  stat('Posts', '${posts.length}'),
-                  stat('Karma', _compact(karma)),
+                  stat('Shared', '${posts.length}'),
+                  stat('Match', '$tasteMatch%'),
                   stat('Comments', '$commentsMade'),
                 ],
               ),
