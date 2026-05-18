@@ -34,11 +34,9 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
       padding: const EdgeInsets.all(20),
       children: [
         const SizedBox(height: 8),
-        const Eyebrow('Library'),
-        const SizedBox(height: 4),
         Row(children: [
           const Expanded(
-              child: BrandHeading('Logged & saved', size: 24)),
+              child: BrandHeading('Logged & saved', size: 32)),
           if (lib.asData?.value.isNotEmpty ?? false)
             ClearAllButton(
               title: 'Clear your library?',
@@ -49,21 +47,14 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
         ]),
         const SizedBox(height: 16),
         _filters(),
-        const SizedBox(height: 12),
-        Align(
-          alignment: Alignment.centerRight,
-          child: ViewModeToggle(
-            value: _view,
-            onChanged: (v) => setState(() => _view = v),
-          ),
-        ),
         const SizedBox(height: 16),
         lib.when(
           loading: () => const Padding(
               padding: EdgeInsets.all(40),
               child: Center(child: LoaderFive('Loading'))),
-          error: (e, _) =>
-              MessageBanner.error('Could not load: $e'),
+          error: (e, _) => const MessageBanner.error(
+              'We couldn’t load your library right now. '
+              'Please try again in a moment.'),
           data: (items) {
             final filtered = items.where((i) {
               if (_medium != null && i.medium != _medium) return false;
@@ -203,14 +194,23 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     final mediumIdx = _medium == null ? 0 : _medium!.index + 1;
     final statusIdx = _status == null ? 0 : _status!.index + 1;
     return Column(children: [
-      BrandSegmented(
-        color: accentColorForLabel(
-            const ['All', 'Movie', 'Book', 'Music'][mediumIdx]),
-        labels: const ['All', 'Movie', 'Book', 'Music'],
-        selectedIndex: mediumIdx,
-        onValueChanged: (i) => setState(() =>
-            _medium = i == 0 ? null : LibraryMedium.values[i - 1]),
-      ),
+      Row(children: [
+        Expanded(
+          child: BrandSegmented(
+            color: accentColorForLabel(
+                const ['All', 'Movie', 'Book', 'Music'][mediumIdx]),
+            labels: const ['All', 'Movie', 'Book', 'Music'],
+            selectedIndex: mediumIdx,
+            onValueChanged: (i) => setState(() =>
+                _medium = i == 0 ? null : LibraryMedium.values[i - 1]),
+          ),
+        ),
+        const SizedBox(width: 8),
+        ViewModeToggle(
+          value: _view,
+          onChanged: (v) => setState(() => _view = v),
+        ),
+      ]),
       const SizedBox(height: 8),
       BrandSegmented(
         color: _statusColor(statusIdx),

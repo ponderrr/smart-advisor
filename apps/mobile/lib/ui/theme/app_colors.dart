@@ -93,6 +93,29 @@ class AppColors {
     input: _h(217.2, 32.6, 17.5),
     ring: _h(212.7, 26.8, 83.9),
   );
+
+  /// OLED: true-black base, near-black elevated surfaces, bright text.
+  static final AppColors amoled = AppColors(
+    background: _h(0, 0, 0),
+    foreground: _h(210, 40, 98),
+    card: _h(0, 0, 0),
+    cardForeground: _h(210, 40, 98),
+    popover: _h(0, 0, 4),
+    popoverForeground: _h(210, 40, 98),
+    primary: _h(210, 40, 98),
+    primaryForeground: _h(222.2, 47.4, 11.2),
+    secondary: _h(0, 0, 9),
+    secondaryForeground: _h(210, 40, 98),
+    muted: _h(0, 0, 9),
+    mutedForeground: _h(215, 20.2, 65.1),
+    accent: _h(0, 0, 12),
+    accentForeground: _h(210, 40, 98),
+    destructive: _h(0, 62.8, 30.6),
+    destructiveForeground: _h(210, 40, 98),
+    border: _h(0, 0, 15),
+    input: _h(0, 0, 15),
+    ring: _h(212.7, 26.8, 83.9),
+  );
 }
 
 /// `--radius: 0.5rem` (8px) and the md/sm derivations from tailwind.config.ts.

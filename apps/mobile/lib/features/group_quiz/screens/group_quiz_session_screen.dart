@@ -58,7 +58,11 @@ class GroupQuizSessionScreen extends ConsumerWidget {
         onClose: () => _confirmLeave(context),
         child: id.when(
           loading: () => const Center(child: LoaderFive('Joining')),
-          error: (e, _) => Center(child: Subtitle('$e')),
+          error: (e, _) => Center(
+              child: Subtitle(
+                  'Couldn’t reach the session. Check your '
+                  'connection and try again.',
+                  center: true)),
           data: (sessionId) => sessionId == null
               ? Center(child: Subtitle('Session not found or expired.'))
               : _Body(code: code, sessionId: sessionId),
@@ -87,7 +91,11 @@ class _BodyState extends ConsumerState<_Body> {
     final async = ref.watch(groupQuizSessionProvider(widget.sessionId));
     return async.when(
       loading: () => const Center(child: LoaderFive('Loading')),
-      error: (e, _) => Center(child: Subtitle('$e')),
+      error: (e, _) => Center(
+          child: Subtitle(
+              'Something went wrong loading the session. '
+              'Please try again.',
+              center: true)),
       data: (s) {
         final session = s.session;
         final uid = ref.read(supabaseClientProvider).auth.currentUser?.id;

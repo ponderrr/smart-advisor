@@ -9,8 +9,14 @@ import '../theme/tailwind_palette.dart';
 /// why-this-pick callout, progress bar, content bento tiles). Interactive
 /// controls stay Adaptive.
 
-Color brandBg(Brightness b) =>
-    b == Brightness.dark ? Tw.slate950 : Tw.slate50;
+/// Set once from `main` (mirrors `amoledProvider`) so the many call sites
+/// of [brandBg] don't each need the flag threaded through. When true,
+/// dark-mode brand surfaces go pure black for OLED.
+bool brandAmoled = false;
+
+Color brandBg(Brightness b) => b == Brightness.dark
+    ? (brandAmoled ? const Color(0xFF000000) : Tw.slate950)
+    : Tw.slate50;
 
 Color _ink(Brightness b) => b == Brightness.dark ? Tw.slate100 : Tw.slate900;
 Color _muted(Brightness b) =>

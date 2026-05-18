@@ -25,7 +25,11 @@ class AppTheme {
   const AppTheme._();
 
   static ThemeData light() => _build(AppColors.light, Brightness.light);
-  static ThemeData dark() => _build(AppColors.dark, Brightness.dark);
+
+  /// [amoled] swaps the dark palette for the true-black OLED variant.
+  static ThemeData dark({bool amoled = false}) =>
+      _build(amoled ? AppColors.amoled : AppColors.dark,
+          Brightness.dark);
 
   static ThemeData _build(AppColors c, Brightness b) {
     final scheme = ColorScheme(

@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' show SignOutScope;
 import '../../core/ui_messenger.dart';
 import '../../ui/ui.dart';
 import '../auth/auth_providers.dart';
+import '../auth/services/error_messages.dart';
 import '../notifications/notification_service.dart';
 import '../notifications/notifications_center.dart';
 import '../security/biometric.dart';
@@ -47,7 +48,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         bytes, picked.mimeType ?? 'image/jpeg');
     if (!mounted) return;
     ref.invalidate(currentProfileProvider);
-    setState(() => _msg = r.isError ? r.error : 'Photo updated');
+    setState(() => _msg = r.isError
+        ? toUserFriendlyError(
+            r.error, 'Couldn’t update your photo. Please try again.')
+        : 'Photo updated');
   }
 
   /// Ensures the session is AAL2 before an AAL2-gated change. Returns false
@@ -84,7 +88,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     if (code == null || code.trim().isEmpty) return false;
     final r = await mfa.verify(factorId, code.trim());
     if (r.isError) {
-      showBanner(r.error!);
+      showBanner(toUserFriendlyError(
+          r.error, 'That code didn’t work. Please try again.'));
       return false;
     }
     return true;
@@ -115,7 +120,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     );
     if (value == null || value.trim().isEmpty) return;
     final r = await onSave(value.trim());
-    showBanner(r.isError ? r.error! : 'Saved');
+    showBanner(r.isError
+        ? toUserFriendlyError(
+            r.error, 'Couldn’t save that. Please try again.')
+        : 'Saved');
   }
 
   Future<void> _confirmDanger(
@@ -181,15 +189,14 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       _seeded = true;
     }
     final themeMode = ref.watch(themeModeProvider);
+    final amoled = ref.watch(amoledProvider);
     final under18 = (profile?.age ?? 99) < 18;
 
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
         const SizedBox(height: 8),
-        const Eyebrow('Account'),
-        const SizedBox(height: 4),
-        const BrandHeading('Settings', size: 24),
+        const BrandHeading('Settings', size: 32),
         const SizedBox(height: 16),
 
         BrandCard(
@@ -218,15 +225,29 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 const SizedBox(width: 8),
                 if (profile?.avatarUrl != null)
                   AdaptiveButton(
-                      onPressed: () async {
-                        await ref
-                            .read(authServiceProvider)
-                            .removeAvatar();
-                        ref.invalidate(currentProfileProvider);
-                      },
+                      onPressed: () => _confirmDanger(
+                            'Remove profile photo?',
+                            'Your avatar will be removed. You can '
+                                'add a new one anytime.',
+                            () async {
+                              final r = await ref
+                                  .read(authServiceProvider)
+                                  .removeAvatar();
+                              if (r.error == null) {
+                                ref.invalidate(
+                                    currentProfileProvider);
+                                showBanner('Profile photo removed',
+                                    type: AdaptiveSnackBarType
+                                        .success);
+                              }
+                              return r.error;
+                            },
+                          ),
                       label: 'Remove',
                       style: AdaptiveButtonStyle.plain),
               ]),
+              const SizedBox(height: 8),
+              Subtitle('JPG, PNG, GIF or WebP.'),
               const SizedBox(height: 16),
               _rowLabel('Display name'),
               const SizedBox(height: 6),
@@ -246,7 +267,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                   final r = await ref
                       .read(authServiceProvider)
                       .updateProfile(name: _name.text.trim(), age: age);
-                  showBanner(r.isError ? r.error! : 'Profile saved');
+                  showBanner(r.isError
+                      ? toUserFriendlyError(r.error,
+                          'Couldn’t save your profile. Please try again.')
+                      : 'Profile saved');
                   ref.invalidate(currentProfileProvider);
                 },
                 label: 'Save profile',
@@ -279,6 +303,24 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                       _ => ThemeMode.system,
                     }),
               ),
+              const SizedBox(height: 12),
+              Row(children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _rowLabel('AMOLED dark'),
+                      const SizedBox(height: 2),
+                      Subtitle('True-black surfaces in dark mode.'),
+                    ],
+                  ),
+                ),
+                AdaptiveSwitch(
+                  value: amoled,
+                  onChanged: (v) =>
+                      ref.read(amoledProvider.notifier).set(v),
+                ),
+              ]),
               _divider(context),
               _rowLabel('Content tone'),
               const SizedBox(height: 2),
@@ -348,9 +390,31 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                         'Could not enable biometric sign-in.');
                   }
                 } else {
-                  await ref
-                      .read(biometricLoginProvider.notifier)
-                      .disable();
+                  await AdaptiveAlertDialog.show(
+                    context: context,
+                    title: 'Turn off biometric sign-in?',
+                    message: 'You\'ll need your email and password '
+                        'to sign in next time.',
+                    icon: Icons.fingerprint,
+                    actions: [
+                      AlertAction(
+                          title: 'Keep on',
+                          style: AlertActionStyle.cancel,
+                          onPressed: () {}),
+                      AlertAction(
+                        title: 'Turn off',
+                        style: AlertActionStyle.destructive,
+                        onPressed: () async {
+                          await ref
+                              .read(biometricLoginProvider.notifier)
+                              .disable();
+                          showBanner(
+                              'Biometric sign-in turned off',
+                              type: AdaptiveSnackBarType.info);
+                        },
+                      ),
+                    ],
+                  );
                 }
               },
             ),

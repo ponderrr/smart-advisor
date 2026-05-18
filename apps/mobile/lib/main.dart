@@ -12,6 +12,7 @@ import 'features/security/biometric_login.dart';
 import 'features/settings/settings_service.dart';
 import 'ui/adaptive.dart';
 import 'ui/theme/app_theme.dart';
+import 'ui/widgets/brand.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,12 +50,16 @@ class SmartAdvisorApp extends ConsumerWidget {
         ref.read(biometricLoginProvider.notifier).saveSession();
       }
     });
+    final amoled = ref.watch(amoledProvider);
+    // Read synchronously by brandBg across the app (set before the
+    // descendant frame builds).
+    brandAmoled = amoled;
     return AdaptiveApp.router(
       title: 'Smart Advisor',
       routerConfig: router,
       themeMode: ref.watch(themeModeProvider),
       materialLightTheme: AppTheme.light(),
-      materialDarkTheme: AppTheme.dark(),
+      materialDarkTheme: AppTheme.dark(amoled: amoled),
       scaffoldMessengerKey: scaffoldMessengerKey,
       // Wrap the app in an Overlay and mark a context beneath both it and
       // the MaterialApp ScaffoldMessenger. AdaptiveSnackBar needs an

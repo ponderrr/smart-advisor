@@ -93,6 +93,94 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
   Color get _accentColor =>
       contentAccent(_accent, Theme.of(context).brightness).text;
 
+  Color get _accentDot =>
+      contentAccent(_accent, Theme.of(context).brightness).dot;
+
+  void _leaveDemo() =>
+      context.canPop() ? context.pop() : context.go('/auth');
+
+  void _confirmLeave() {
+    if (_phase == _Phase.results) {
+      _leaveDemo();
+      return;
+    }
+    AdaptiveAlertDialog.show(
+      context: context,
+      title: 'Leave the demo?',
+      message: 'Your answers so far won’t be saved.',
+      icon: Icons.logout,
+      actions: [
+        AlertAction(
+            title: 'Keep going',
+            style: AlertActionStyle.cancel,
+            onPressed: () {}),
+        AlertAction(
+          title: 'Leave',
+          style: AlertActionStyle.destructive,
+          onPressed: _leaveDemo,
+        ),
+      ],
+    );
+  }
+
+  /// Feed-style selectable content card (matches the solo quiz).
+  Widget _contentCard(String label, ContentAccentName a, IconData icon,
+      String desc) {
+    final tone = contentAccent(a, Theme.of(context).brightness);
+    final selected = _picks[0] == label;
+    return GestureDetector(
+      onTap: () => setState(() => _picks[0] = label),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: tone.surfaceGradient),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+              color: selected ? tone.dot : tone.surfaceBorder,
+              width: selected ? 2 : 1),
+        ),
+        child: Row(children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+                color: tone.iconCircleBg, shape: BoxShape.circle),
+            child: Icon(icon, color: tone.iconCircleFg, size: 22),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label,
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: context.brandInk)),
+                const SizedBox(height: 2),
+                Text(desc,
+                    style: TextStyle(
+                        fontSize: 12, color: context.brandMuted)),
+              ],
+            ),
+          ),
+          Icon(
+            selected
+                ? Icons.check_circle
+                : Icons.radio_button_unchecked,
+            color: selected ? tone.dot : tone.surfaceBorder,
+            size: 22,
+          ),
+        ]),
+      ),
+    );
+  }
+
   /// Loader phases worded for the chosen content.
   List<String> get _demoPhases => switch (_contentType) {
         'movie' => const [
@@ -151,17 +239,16 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BrandScaffold(
-      title: 'Try the demo',
-      actions: [
-        AdaptiveAppBarAction(
-          title: 'Sign up',
-          icon: Icons.person_add_alt,
-          iosSymbol: 'person.badge.plus',
-          onPressed: () => context.go('/auth'),
-        ),
-      ],
-      body: switch (_phase) {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        _confirmLeave();
+      },
+      child: ModalSheet(
+      title: 'Demo',
+      onClose: _confirmLeave,
+      child: switch (_phase) {
         _Phase.generating => Center(
             child: PhasedLoader(
               color: _accentColor,
@@ -176,7 +263,8 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
                 const SizedBox(height: 16),
                 AdaptiveButton(
                     onPressed: () => setState(() => _phase = _Phase.quiz),
-                    label: 'Try again'),
+                    label: 'Try again',
+                    color: _accentDot),
               ]),
             ),
           ),
@@ -202,6 +290,7 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
             ),
           ),
       },
+      ),
     );
   }
 
@@ -278,38 +367,26 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
             'A little of everything'),
       ];
       return ListView(padding: const EdgeInsets.all(24), children: [
-        const SizedBox(height: 4),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: IconButton(
-            padding: EdgeInsets.zero,
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () =>
-                context.canPop() ? context.pop() : context.go('/auth'),
-          ),
-        ),
-        const Eyebrow('Demo'),
+        Eyebrow('Free demo', color: _accentColor),
         const SizedBox(height: 6),
         const BrandHeading('What are you in the mood for?', size: 24),
+        const SizedBox(height: 4),
+        Subtitle('A 4-question taste of Smart Advisor — no account '
+            'needed.'),
         const SizedBox(height: 20),
         ResponsiveTiles(
           minTileWidth: 380,
+          tilesHaveOwnVerticalGap: true,
           children: [
             for (final (label, accent, icon, desc) in opts)
-              ContentBentoTile(
-                accent: accent,
-                icon: icon,
-                label: label,
-                description: desc,
-                selected: _picks[0] == label,
-                onTap: () => setState(() => _picks[0] = label),
-              ),
+              _contentCard(label, accent, icon, desc),
           ],
         ),
         const SizedBox(height: 20),
         AdaptiveButton(
           onPressed: _picks[0] == null ? null : _next,
           label: 'Continue',
+          color: _accentDot,
         ),
       ]);
     }
@@ -357,6 +434,7 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
       AdaptiveButton(
         onPressed: !answered ? null : (last ? _submit : _next),
         label: last ? 'See my picks' : 'Next',
+        color: _accentDot,
       ),
     ]);
   }
@@ -413,7 +491,8 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
       const SizedBox(height: 16),
       AdaptiveButton(
           onPressed: () => context.go('/auth'),
-          label: 'Sign up for the full quiz'),
+          label: 'Sign up for the full quiz',
+          color: _accentDot),
       const SizedBox(height: 8),
       AdaptiveButton(
         onPressed: () => setState(() {

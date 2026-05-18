@@ -72,10 +72,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         padding: const EdgeInsets.all(20),
         children: [
           const SizedBox(height: 8),
-          const Eyebrow('History'),
-          const SizedBox(height: 4),
           Row(children: [
-            const Expanded(child: BrandHeading('Past picks', size: 24)),
+            const Expanded(child: BrandHeading('Past picks', size: 32)),
             if (data.asData?.value.isNotEmpty ?? false)
               ClearAllButton(
                 title: 'Clear all history?',
@@ -98,27 +96,29 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             onValueChanged: (i) => setState(() => _mediumIdx = i),
           ),
           const SizedBox(height: 8),
-          BrandSegmented(
-            color: Tw.indigo500,
-            labels: const ['Newest', 'Oldest'],
-            selectedIndex: _sortIdx,
-            onValueChanged: (i) => setState(() => _sortIdx = i),
-          ),
-          const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerRight,
-            child: ViewModeToggle(
+          Row(children: [
+            Expanded(
+              child: BrandSegmented(
+                color: Tw.indigo500,
+                labels: const ['Newest', 'Oldest'],
+                selectedIndex: _sortIdx,
+                onValueChanged: (i) => setState(() => _sortIdx = i),
+              ),
+            ),
+            const SizedBox(width: 8),
+            ViewModeToggle(
               value: _view,
               onChanged: (v) => setState(() => _view = v),
             ),
-          ),
+          ]),
           const SizedBox(height: 16),
           data.when(
             loading: () => const Padding(
                 padding: EdgeInsets.all(40),
                 child: Center(child: LoaderFive('Loading'))),
-            error: (e, _) =>
-                MessageBanner.error('Could not load: $e'),
+            error: (e, _) => const MessageBanner.error(
+                'We couldn’t load your history right now. '
+                'Please try again in a moment.'),
             data: (list) {
               if (list.isEmpty) {
                 return Subtitle('No recommendations yet.');

@@ -228,7 +228,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 child: _ThemeToggle(onTap: _toggleTheme),
               ),
               const SizedBox(height: 4),
-              _wordmark(30),
+              _wordmark(32),
               const SizedBox(height: 14),
               BrandCard(
                 padding: const EdgeInsets.all(22),
@@ -324,7 +324,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
   /// The form body shared by both layouts (toggle + fields + error).
   Widget _formColumn() {
-    final c = context.colors;
     final showToggle =
         _mode == AuthMode.signin || _mode == AuthMode.signup;
     return Column(
@@ -337,7 +336,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Eyebrow(_eyebrow),
+              BrandHeading(_eyebrow, size: 22),
               const SizedBox(height: 6),
               Subtitle(_tagline),
             ],
@@ -379,9 +378,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           const SizedBox(height: 12),
           KeyedSubtree(
             key: ValueKey(_error),
-            child: Text(_error!,
-                    style:
-                        TextStyle(color: c.destructive, fontSize: 13))
+            child: MessageBanner.error(_error!)
                 .animate()
                 .fadeIn(duration: 220.ms)
                 .slideY(begin: 0.4, end: 0, curve: Curves.easeOut),

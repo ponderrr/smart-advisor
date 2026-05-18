@@ -475,7 +475,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
         children: [
           Row(
             children: [
-              const Expanded(child: BrandHeading('Feed', size: 26)),
+              const Expanded(child: BrandHeading('Feed', size: 32)),
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: () => _openUserProfile(context, 'you'),

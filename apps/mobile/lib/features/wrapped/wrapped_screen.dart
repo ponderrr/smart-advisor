@@ -32,9 +32,14 @@ class WrappedScreen extends ConsumerWidget {
       body: recs.when(
         loading: () => const Center(
             child: CircularProgressIndicator(color: Colors.white)),
-        error: (e, _) => Center(
-            child: Text('$e',
-                style: const TextStyle(color: Colors.white70))),
+        error: (e, _) => const Center(
+            child: Padding(
+                padding: EdgeInsets.all(24),
+                child: Text(
+                    'We couldn’t build your Wrapped right now. '
+                    'Please try again later.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white70)))),
         data: (list) => _Story(recs: list),
       ),
     );

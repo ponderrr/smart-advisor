@@ -31,6 +31,29 @@ class ThemeModeController extends Notifier<ThemeMode> {
 final themeModeProvider =
     NotifierProvider<ThemeModeController, ThemeMode>(ThemeModeController.new);
 
+const _amoledKey = 'smart_advisor_amoled';
+
+/// Pure-black surfaces in dark mode (OLED). Persisted.
+class AmoledController extends Notifier<bool> {
+  @override
+  bool build() =>
+      ref
+          .watch(sharedPreferencesProvider)
+          .asData
+          ?.value
+          .getBool(_amoledKey) ??
+      false;
+
+  Future<void> set(bool on) async {
+    state = on;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_amoledKey, on);
+  }
+}
+
+final amoledProvider =
+    NotifierProvider<AmoledController, bool>(AmoledController.new);
+
 /// Writes content preferences. Tone is also hot-cached in SharedPreferences
 /// for the AI service (parity with the web localStorage cache). Content tone
 /// is age-locked to "family" for under-18 (server still enforces).
