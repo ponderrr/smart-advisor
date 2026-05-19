@@ -1,9 +1,24 @@
+/**
+ * Streaming / rent / buy availability for a title (TMDB → JustWatch).
+ * Region-specific and volatile, so this is fetched fresh for display and
+ * never persisted on the recommendation row. "via JustWatch" attribution
+ * is required wherever this is shown, per TMDB terms.
+ */
+export interface WatchProviders {
+  link: string | null; // JustWatch deep link for the title
+  flatrate: string[]; // included with a subscription
+  rent: string[];
+  buy: string[];
+}
+
 export interface MovieSearchResult {
   poster: string;
   year: number;
   rating: number;
   description: string;
   genres?: string[];
+  trailer?: string | null;
+  watchProviders?: WatchProviders | null;
 }
 
 export interface MovieDetails {
@@ -19,12 +34,26 @@ export interface MovieDetails {
 }
 
 class TMDBService {
+  /** Best-effort 2-letter region for watch-provider lookup (default US). */
+  private region(): string {
+    try {
+      const loc =
+        typeof navigator !== "undefined" ? navigator.language : "en-US";
+      const region = new Intl.Locale(loc).region;
+      return region ? region.toUpperCase().slice(0, 2) : "US";
+    } catch {
+      return "US";
+    }
+  }
+
   async searchMovie(title: string): Promise<MovieSearchResult> {
     try {
       const response = await fetch(
         `${
           process.env.NEXT_PUBLIC_SUPABASE_URL
-        }/functions/v1/tmdb-proxy?title=${encodeURIComponent(title)}`,
+        }/functions/v1/tmdb-proxy?title=${encodeURIComponent(
+          title,
+        )}&region=${this.region()}`,
         {
           headers: {
             apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",

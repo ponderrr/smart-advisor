@@ -2040,5 +2040,12 @@
         "retake": "Repetir la demo"
       }
     }
+  },
+  "WhereToWatch": {
+    "title": "Dónde ver",
+    "flatrate": "Streaming",
+    "rent": "Alquilar",
+    "buy": "Comprar",
+    "attribution": "vía JustWatch"
   }
 }

@@ -44,6 +44,8 @@ interface TmdbProvidersResponse {
     {
       link?: string;
       flatrate?: TmdbProvider[];
+      rent?: TmdbProvider[];
+      buy?: TmdbProvider[];
     }
   >;
 }
@@ -76,6 +78,10 @@ const PROVIDER_SEARCH_URL: Record<number, (q: string) => string> = {
   300: (q) => `https://pluto.tv/en/search/${q}`, // Pluto TV
   188: (q) => `https://www.youtube.com/results?search_query=${q}`, // YouTube Premium
   192: (q) => `https://www.youtube.com/results?search_query=${q}`, // YouTube
+  // Common rent/buy storefronts
+  3: (q) => `https://play.google.com/store/search?q=${q}&c=movies`, // Google Play Movies
+  7: (q) => `https://www.vudu.com/content/movies/search?searchString=${q}`, // Fandango at Home (Vudu)
+  68: (q) => `https://www.microsoft.com/en-us/search?q=${q}`, // Microsoft Store
 };
 
 const buildProviderLink = (providerId: number, title: string) => {
@@ -139,33 +145,45 @@ async function lookupMovieTrailer(
     .filter((x) => x.s >= 0)
     .sort((a, b) => b.s - a.s)[0]?.v;
 
+  type WatchProvider = {
+    id: number;
+    name: string;
+    logo: string | null;
+    link: string | null;
+  };
   let watchProviders: {
     region: string;
-    link: string | null;
-    flatrate: {
-      id: number;
-      name: string;
-      logo: string | null;
-      link: string | null;
-    }[];
+    link: string | null; // JustWatch page for the title (attribution target)
+    flatrate: WatchProvider[]; // included with a subscription
+    rent: WatchProvider[];
+    buy: WatchProvider[];
   } | null = null;
   if (providersRes.ok) {
     const json = (await providersRes.json()) as TmdbProvidersResponse;
     const regional = json.results?.[region];
-    const flatrate = regional?.flatrate ?? [];
-    if (flatrate.length > 0) {
-      const tmdbLink = regional?.link ?? null;
+    if (regional) {
+      const tmdbLink = regional.link ?? null;
       const titleForSearch = hit.title ?? title;
-      watchProviders = {
-        region,
-        link: tmdbLink,
-        flatrate: flatrate.map((p) => ({
-          id: p.provider_id,
-          name: p.provider_name,
-          logo: p.logo_path ? `${TMDB_LOGO_BASE}${p.logo_path}` : null,
-          link: buildProviderLink(p.provider_id, titleForSearch) ?? tmdbLink,
-        })),
+      // Dedupe by provider id within a tier — TMDB sometimes repeats them.
+      const tier = (list: TmdbProvider[] | undefined): WatchProvider[] => {
+        const seen = new Set<number>();
+        return (list ?? [])
+          .filter((p) =>
+            seen.has(p.provider_id) ? false : (seen.add(p.provider_id), true),
+          )
+          .map((p) => ({
+            id: p.provider_id,
+            name: p.provider_name,
+            logo: p.logo_path ? `${TMDB_LOGO_BASE}${p.logo_path}` : null,
+            link: buildProviderLink(p.provider_id, titleForSearch) ?? tmdbLink,
+          }));
       };
+      const flatrate = tier(regional.flatrate);
+      const rent = tier(regional.rent);
+      const buy = tier(regional.buy);
+      if (flatrate.length || rent.length || buy.length) {
+        watchProviders = { region, link: tmdbLink, flatrate, rent, buy };
+      }
     }
   }
 
