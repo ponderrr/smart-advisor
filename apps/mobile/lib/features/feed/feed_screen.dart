@@ -70,6 +70,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           Row(
             children: [
               const Expanded(child: BrandHeading('Feed', size: 32)),
+              _AddFriendsButton(
+                  onTap: () => context.push('/feed/people')),
+              const SizedBox(width: 8),
               _VisibilityPill(visibility: visibility),
             ],
           ),
@@ -174,6 +177,31 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       isScrollControlled: true,
       builder: (_) =>
           Composer(initialCommunity: initial ?? FeedCommunity.movies),
+    );
+  }
+}
+
+/// Small icon button in the feed header that opens the discover-people /
+/// add-friend screen. Tinted to match the Public/Private pill's chrome.
+class _AddFriendsButton extends StatelessWidget {
+  const _AddFriendsButton({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final tone = contentAccent(
+        ContentAccentName.violet, Theme.of(context).brightness);
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        width: 38,
+        height: 38,
+        decoration: BoxDecoration(
+            color: tone.iconCircleBg, shape: BoxShape.circle),
+        child: Icon(Icons.person_add_alt,
+            size: 18, color: tone.iconCircleFg),
+      ),
     );
   }
 }

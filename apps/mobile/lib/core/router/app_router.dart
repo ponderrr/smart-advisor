@@ -4,6 +4,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/account/account_screen.dart';
 import '../../features/account/mfa_setup_screen.dart';
+import '../../features/account/screens/appearance_settings_screen.dart';
+import '../../features/account/screens/feed_settings_screen.dart';
+import '../../features/account/screens/notifications_settings_screen.dart';
+import '../../features/account/screens/profile_settings_screen.dart';
+import '../../features/account/screens/recommendations_settings_screen.dart';
+import '../../features/account/screens/security_settings_screen.dart';
 import '../../features/auth/auth_providers.dart';
 import '../../features/auth/screens/auth_screen.dart';
 import '../../features/auth/screens/reset_password_screen.dart';
@@ -12,6 +18,7 @@ import '../../features/dashboard/milestones_screen.dart';
 import '../../features/demo/demo_screen.dart';
 import '../../features/feed/feed_screen.dart';
 import '../../features/feed/models/feed_models.dart';
+import '../../features/feed/screens/add_friends_screen.dart';
 import '../../features/feed/screens/community_screen.dart';
 import '../../features/feed/screens/post_detail_screen.dart';
 import '../../features/feed/screens/user_profile_screen.dart';
@@ -162,6 +169,26 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
           path: '/account/mfa-setup',
           builder: (_, _) => const MfaSetupScreen()),
+      // Settings hub sub-screens: full-page pushes outside the shell
+      // (same registration pattern as /account/mfa-setup above).
+      GoRoute(
+          path: '/account/profile',
+          builder: (_, _) => const ProfileSettingsScreen()),
+      GoRoute(
+          path: '/account/appearance',
+          builder: (_, _) => const AppearanceSettingsScreen()),
+      GoRoute(
+          path: '/account/recommendations',
+          builder: (_, _) => const RecommendationsSettingsScreen()),
+      GoRoute(
+          path: '/account/feed',
+          builder: (_, _) => const FeedSettingsScreen()),
+      GoRoute(
+          path: '/account/notifications',
+          builder: (_, _) => const NotificationsSettingsScreen()),
+      GoRoute(
+          path: '/account/security',
+          builder: (_, _) => const SecuritySettingsScreen()),
       // Quiz is a focused modal task: it slides up over the shell with a
       // dimmed barrier and a single confirmed exit (no bottom nav). The
       // Solo/Group choice is the sheet from the Quiz nav item; /quiz and
@@ -198,6 +225,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               // Cold deep-links here while unauthenticated already route to
               // /auth via resolveRedirect's !authenticated branch.
               routes: [
+                GoRoute(
+                    path: 'feed/people',
+                    builder: (_, _) => const AddFriendsScreen()),
                 GoRoute(
                     path: 'feed/:id',
                     builder: (_, s) => PostDetailScreen(
