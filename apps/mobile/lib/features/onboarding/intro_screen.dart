@@ -61,7 +61,8 @@ class _S extends ConsumerState<IntroScreen> {
               alignment: Alignment.centerRight,
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(0, 6, 8, 0),
-                child: TextButton(
+                child: AdaptiveButton.child(
+                  style: AdaptiveButtonStyle.plain,
                   onPressed: _done,
                   child: Text('Skip',
                       style: TextStyle(
@@ -99,7 +100,8 @@ class _S extends ConsumerState<IntroScreen> {
             child: AnimatedOpacity(
               duration: const Duration(milliseconds: 200),
               opacity: _page == 0 ? 0 : 1,
-              child: TextButton(
+              child: AdaptiveButton.child(
+                style: AdaptiveButtonStyle.plain,
                 onPressed: _page == 0 ? null : _back,
                 child: Text('Back',
                     style: TextStyle(

@@ -61,16 +61,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
         : contentAccent(
                 prefs.community!.accent, Theme.of(context).brightness)
             .dot;
-    return Scaffold(
-      backgroundColor: brandBg(Theme.of(context).brightness),
-      floatingActionButton: PostFab(
-        color: fabColor,
-        label: prefs.community == null
-            ? 'Share a pick'
-            : 'Share to ${prefs.community!.label}',
-        onTap: () => _openComposer(prefs.community),
-      ),
-      body: ListView(
+    return BrandScaffold(
+      body: Stack(
+        children: [
+          ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
         children: [
           Row(
@@ -109,6 +103,19 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                   .animate()
                   .fadeIn(delay: (i * 60).ms, duration: 280.ms)
                   .slideY(begin: 0.05, curve: Curves.easeOut),
+        ],
+          ),
+          Positioned(
+            right: 16,
+            bottom: 16,
+            child: PostFab(
+              color: fabColor,
+              label: prefs.community == null
+                  ? 'Share a pick'
+                  : 'Share to ${prefs.community!.label}',
+              onTap: () => _openComposer(prefs.community),
+            ),
+          ),
         ],
       ),
     );

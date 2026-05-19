@@ -171,8 +171,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       {String? subtitle, bool destructive = false, VoidCallback? onTap}) {
     final col =
         destructive ? context.colors.destructive : context.colors.foreground;
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
+    return AdaptiveListTile(
+      padding: EdgeInsets.zero,
       leading: Icon(icon, color: col),
       title: Text(title, style: TextStyle(color: col)),
       subtitle: subtitle == null ? null : Text(subtitle),
@@ -357,35 +357,38 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         _section('Notifications & security'),
         BrandCard(
           child: Column(children: [
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              secondary: const Icon(Icons.fingerprint),
+            AdaptiveListTile(
+              padding: EdgeInsets.zero,
+              leading: const Icon(Icons.fingerprint),
               title: const Text('App lock'),
               subtitle: Text(PlatformInfo.isIOS
                   ? 'Require Face ID / Touch ID to open'
                   : 'Require fingerprint or face unlock to open'),
-              value: ref.watch(biometricLockProvider),
-              activeThumbColor: Tw.indigo500,
-              onChanged: (v) async {
-                if (v && !await biometricAvailable()) {
-                  if (!context.mounted) return;
-                  setState(() => _msg =
-                      'No biometrics enrolled on this device.');
-                  return;
-                }
-                await ref.read(biometricLockProvider.notifier).set(v);
-              },
+              trailing: AdaptiveSwitch(
+                value: ref.watch(biometricLockProvider),
+                activeColor: Tw.indigo500,
+                onChanged: (v) async {
+                  if (v && !await biometricAvailable()) {
+                    if (!context.mounted) return;
+                    setState(() => _msg =
+                        'No biometrics enrolled on this device.');
+                    return;
+                  }
+                  await ref.read(biometricLockProvider.notifier).set(v);
+                },
+              ),
             ),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              secondary: const Icon(Icons.fingerprint),
+            AdaptiveListTile(
+              padding: EdgeInsets.zero,
+              leading: const Icon(Icons.fingerprint),
               title: const Text('Biometric sign-in'),
               subtitle: Text(PlatformInfo.isIOS
                   ? 'Sign in with Face ID / Touch ID after signing out'
                   : 'Sign in with fingerprint or face after signing out'),
-              value: ref.watch(biometricLoginProvider),
-              activeThumbColor: Tw.indigo500,
-              onChanged: (v) async {
+              trailing: AdaptiveSwitch(
+                value: ref.watch(biometricLoginProvider),
+                activeColor: Tw.indigo500,
+                onChanged: (v) async {
                 if (v) {
                   final ok = await ref
                       .read(biometricLoginProvider.notifier)
@@ -422,22 +425,25 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                   );
                 }
               },
+              ),
             ),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              secondary: const Icon(Icons.notifications_none),
+            AdaptiveListTile(
+              padding: EdgeInsets.zero,
+              leading: const Icon(Icons.notifications_none),
               title: const Text('Weekly quiz reminder'),
-              value: ref.watch(remindersProvider),
-              activeThumbColor: Tw.indigo500,
-              onChanged: (v) async {
-                await ref.read(remindersProvider.notifier).set(v);
-                if (v) {
-                  await ref
-                      .read(notificationsCenterProvider.notifier)
-                      .add('Weekly reminder on',
-                          'We\'ll nudge you weekly to discover something.');
-                }
-              },
+              trailing: AdaptiveSwitch(
+                value: ref.watch(remindersProvider),
+                activeColor: Tw.indigo500,
+                onChanged: (v) async {
+                  await ref.read(remindersProvider.notifier).set(v);
+                  if (v) {
+                    await ref
+                        .read(notificationsCenterProvider.notifier)
+                        .add('Weekly reminder on',
+                            'We\'ll nudge you weekly to discover something.');
+                  }
+                },
+              ),
             ),
             _divider(context),
             _tile(Icons.security, 'Two-factor authentication',
@@ -471,8 +477,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         _section('Your data'),
         BrandCard(
           child: Column(children: [
-            ListTile(
-              contentPadding: EdgeInsets.zero,
+            AdaptiveListTile(
+              padding: EdgeInsets.zero,
               leading: AdaptiveBadge(
                 count: ref.watch(unreadCountProvider),
                 backgroundColor: Tw.indigo500,

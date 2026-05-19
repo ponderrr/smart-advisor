@@ -326,9 +326,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                     child: Row(children: [
                       const Expanded(
                           child: BrandHeading('Quiz', size: 20)),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        tooltip: 'Close',
+                      AdaptiveButton.icon(
+                        icon: Icons.close,
+                        style: AdaptiveButtonStyle.plain,
                         onPressed: _confirmLeave,
                       ),
                     ]),
@@ -642,9 +642,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(children: [
-            IconButton(
+            AdaptiveButton.icon(
               padding: EdgeInsets.zero,
-              icon: const Icon(Icons.arrow_back),
+              icon: Icons.arrow_back,
+              style: AdaptiveButtonStyle.plain,
               onPressed: () => _qIndex > 0
                   ? setState(() {
                       _dir = -1;

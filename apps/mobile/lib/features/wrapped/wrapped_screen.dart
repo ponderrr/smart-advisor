@@ -233,17 +233,25 @@ class _StoryState extends State<_Story> {
           ),
         ),
         const SizedBox(height: 24),
-        FilledButton.icon(
-          style: FilledButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.black),
+        AdaptiveButton.child(
           onPressed: _share,
-          icon: const Icon(Icons.ios_share),
-          label: const Text('Share'),
+          color: Colors.white,
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.ios_share, color: Colors.black, size: 18),
+              SizedBox(width: 8),
+              Text('Share',
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.w700)),
+            ],
+          ),
         ),
         const SizedBox(height: 10),
-        TextButton(
+        AdaptiveButton.child(
           onPressed: () => context.pop(),
+          style: AdaptiveButtonStyle.plain,
           child: const Text('Done',
               style: TextStyle(color: Colors.white70)),
         ),

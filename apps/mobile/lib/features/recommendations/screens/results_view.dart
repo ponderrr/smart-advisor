@@ -193,9 +193,10 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
                     ],
                   ),
                 ),
-                IconButton(
-                  icon: Icon(fav ? Icons.favorite : Icons.favorite_border,
-                      color: fav ? accent.tileText : c.mutedForeground),
+                AdaptiveButton.icon(
+                  style: AdaptiveButtonStyle.plain,
+                  icon: fav ? Icons.favorite : Icons.favorite_border,
+                  iconColor: fav ? accent.tileText : c.mutedForeground,
                   onPressed: () => _toggleFav(r),
                 ),
                 Icon(open ? Icons.expand_less : Icons.expand_more,

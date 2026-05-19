@@ -551,15 +551,11 @@ class _ThemeToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
-    return IconButton(
+    return AdaptiveButton.icon(
       onPressed: onTap,
-      visualDensity: VisualDensity.compact,
-      tooltip: dark ? 'Light mode' : 'Dark mode',
-      icon: Icon(
-        dark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
-        size: 20,
-        color: dark ? Tw.slate400 : Tw.slate500,
-      ),
+      icon: dark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+      iconColor: dark ? Tw.slate400 : Tw.slate500,
+      style: AdaptiveButtonStyle.plain,
     );
   }
 }

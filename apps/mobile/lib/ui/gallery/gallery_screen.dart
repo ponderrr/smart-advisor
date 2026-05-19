@@ -33,8 +33,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
     final c = context.colors;
     final b = Theme.of(context).brightness;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Design System · adaptive')),
+    return BrandScaffold(
+      title: 'Design System · adaptive',
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

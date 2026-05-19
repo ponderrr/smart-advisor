@@ -40,8 +40,8 @@ class _S extends ConsumerState<ResetPasswordScreen> {
     // A recovery session must exist (set by the reset deep link).
     final hasSession = ref.watch(currentSessionProvider) != null;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Reset password')),
+    return BrandScaffold(
+      title: 'Reset password',
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 420),

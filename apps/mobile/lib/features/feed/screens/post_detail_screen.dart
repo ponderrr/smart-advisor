@@ -61,28 +61,8 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
       if (post.year != null) '${post.year}',
     ].join(' · ');
 
-    return Scaffold(
-      backgroundColor: brandBg(Theme.of(context).brightness),
-      appBar: AppBar(
-        backgroundColor: brandBg(Theme.of(context).brightness),
-        title: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () => openCommunity(context, post.community),
-          child: Text(post.community.tag,
-              style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
-                  color: context.brandInk)),
-        ),
-        actions: [
-          _CommentSortMenu(
-            value: ref.watch(feedPrefsProvider).commentSort,
-            onChanged: (s) => ref
-                .read(feedPrefsProvider.notifier)
-                .setCommentSort(s),
-          ),
-        ],
-      ),
+    return BrandScaffold(
+      title: post.community.tag,
       body: Column(
         children: [
           Expanded(
@@ -180,7 +160,17 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                Eyebrow('${post.comments.length} comments'),
+                Row(children: [
+                  Expanded(
+                    child: Eyebrow('${post.comments.length} comments'),
+                  ),
+                  _CommentSortMenu(
+                    value: ref.watch(feedPrefsProvider).commentSort,
+                    onChanged: (s) => ref
+                        .read(feedPrefsProvider.notifier)
+                        .setCommentSort(s),
+                  ),
+                ]),
                 const SizedBox(height: 12),
                 if (tree.isEmpty)
                   Subtitle('No comments yet — start the thread.')
@@ -197,30 +187,20 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
               padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
               child: Row(children: [
                 Expanded(
-                  child: TextField(
+                  child: AdaptiveTextField(
                     controller: _ctrl,
+                    placeholder: 'Add to the discussion…',
                     minLines: 1,
                     maxLines: 4,
                     textInputAction: TextInputAction.send,
                     onSubmitted: (_) => _submitTopLevel(),
-                    decoration: InputDecoration(
-                      hintText: 'Add to the discussion…',
-                      isDense: true,
-                      filled: true,
-                      fillColor: context.colors.muted,
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(999),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
                   ),
                 ),
-                IconButton(
+                AdaptiveButton.icon(
                   onPressed: _submitTopLevel,
-                  icon: const Icon(Icons.send_rounded),
-                  color: tone.dot,
+                  icon: Icons.send_rounded,
+                  iconColor: tone.dot,
+                  style: AdaptiveButtonStyle.plain,
                 ),
               ]),
             ),
@@ -231,10 +211,8 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
   }
 
   Widget _unavailable(BuildContext context) {
-    return Scaffold(
-      backgroundColor: brandBg(Theme.of(context).brightness),
-      appBar: AppBar(
-          backgroundColor: brandBg(Theme.of(context).brightness)),
+    return BrandScaffold(
+      title: 'Post',
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(28),
@@ -440,26 +418,12 @@ class _CommentNodeState extends ConsumerState<_CommentNode> {
                   ),
                   if (_replying) ...[
                     const SizedBox(height: 8),
-                    TextField(
+                    AdaptiveTextField(
                       controller: _draft,
+                      placeholder: 'Reply to ${node.author}…',
                       autofocus: true,
                       minLines: 2,
                       maxLines: 4,
-                      decoration: InputDecoration(
-                        hintText: 'Reply to ${node.author}…',
-                        isDense: true,
-                        filled: true,
-                        fillColor:
-                            brandBg(Theme.of(context).brightness),
-                        contentPadding:
-                            const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 10),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                              color: context.colors.border),
-                        ),
-                      ),
                     ),
                     const SizedBox(height: 8),
                     Row(children: [
@@ -536,11 +500,14 @@ class _CommentSortMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PopupMenuButton<CommentSort>(
-      tooltip: 'Sort comments',
-      initialValue: value,
-      onSelected: onChanged,
-      icon: Row(mainAxisSize: MainAxisSize.min, children: [
+    return AdaptivePopupMenuButton.widget<CommentSort>(
+      items: const [
+        AdaptivePopupMenuItem(label: 'Top', value: CommentSort.top),
+        AdaptivePopupMenuItem(
+            label: 'New', value: CommentSort.newest),
+      ],
+      onSelected: (_, entry) => onChanged(entry.value as CommentSort),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
         Icon(Icons.sort, size: 18, color: context.brandInk),
         const SizedBox(width: 4),
         Text(value == CommentSort.newest ? 'New' : 'Top',
@@ -550,10 +517,6 @@ class _CommentSortMenu extends StatelessWidget {
                 color: context.brandInk)),
         const SizedBox(width: 6),
       ]),
-      itemBuilder: (_) => const [
-        PopupMenuItem(value: CommentSort.top, child: Text('Top')),
-        PopupMenuItem(value: CommentSort.newest, child: Text('New')),
-      ],
     );
   }
 }

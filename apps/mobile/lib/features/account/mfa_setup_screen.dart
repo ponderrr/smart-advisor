@@ -129,11 +129,18 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              TextButton.icon(
-                icon: const Icon(Icons.copy, size: 16),
-                label: const Text('Copy all'),
+              AdaptiveButton.child(
+                style: AdaptiveButtonStyle.plain,
                 onPressed: () => Clipboard.setData(
                     ClipboardData(text: _backupCodes!.join('\n'))),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.copy, size: 16),
+                    SizedBox(width: 6),
+                    Text('Copy all'),
+                  ],
+                ),
               ),
             ],
             const SizedBox(height: 12),
@@ -168,9 +175,9 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
                         color: context.brandInk),
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.copy, size: 18),
-                  tooltip: 'Copy secret',
+                AdaptiveButton.icon(
+                  icon: Icons.copy,
+                  style: AdaptiveButtonStyle.plain,
                   onPressed: () => Clipboard.setData(
                       ClipboardData(text: _enroll!.secret)),
                 ),

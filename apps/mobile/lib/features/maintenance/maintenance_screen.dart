@@ -9,7 +9,7 @@ class MaintenanceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return Scaffold(
+    return BrandScaffold(
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -58,7 +58,7 @@ class VerifiedScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return Scaffold(
+    return BrandScaffold(
       body: Center(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Icon(Icons.check_circle, color: c.primary, size: 48),

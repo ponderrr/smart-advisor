@@ -38,17 +38,9 @@ class UserProfileScreen extends ConsumerWidget {
     final isYou = username == 'you';
 
     if (isYou) {
-      return Scaffold(
-        backgroundColor: brandBg(Theme.of(context).brightness),
-        appBar: AppBar(
-          backgroundColor: brandBg(Theme.of(context).brightness),
-          title: Text('Your taste',
-              style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
-                  color: context.brandInk)),
-        ),
-        body: const DashboardScreen(),
+      return const BrandScaffold(
+        title: 'Your taste',
+        body: DashboardScreen(),
       );
     }
 
@@ -69,16 +61,8 @@ class UserProfileScreen extends ConsumerWidget {
           ],
         );
 
-    return Scaffold(
-      backgroundColor: brandBg(Theme.of(context).brightness),
-      appBar: AppBar(
-        backgroundColor: brandBg(Theme.of(context).brightness),
-        title: Text('u/$username',
-            style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w800,
-                color: context.brandInk)),
-      ),
+    return BrandScaffold(
+      title: 'u/$username',
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [

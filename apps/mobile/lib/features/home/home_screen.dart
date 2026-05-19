@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../ui/ui.dart';
+
 /// Phase 0 placeholder. Confirms the app boots, Riverpod is wired, and the
 /// Supabase client initialized against the existing project. Replaced by the
 /// real shell + screens in Phase 3+.
@@ -18,8 +20,8 @@ class HomeScreen extends ConsumerWidget {
     } catch (_) {
       session = null;
     }
-    return Scaffold(
-      appBar: AppBar(title: const Text('Smart Advisor')),
+    return BrandScaffold(
+      title: 'Smart Advisor',
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,

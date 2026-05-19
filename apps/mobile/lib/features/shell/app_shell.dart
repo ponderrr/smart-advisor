@@ -78,8 +78,7 @@ class AppShell extends ConsumerWidget {
         Icons.history,
         Icons.person_outline,
       ];
-      return Scaffold(
-        backgroundColor: bg,
+      return BrandScaffold(
         body: SafeArea(
           child: Row(
             children: [

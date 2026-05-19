@@ -253,28 +253,24 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         ),
       );
 
-  Widget _favButton(Recommendation r, {bool scrim = false}) => IconButton(
-        visualDensity: scrim ? VisualDensity.compact : null,
-        constraints:
-            scrim ? const BoxConstraints(minWidth: 36, minHeight: 36) : null,
-        icon: Icon(
-            r.isFavorited ? Icons.favorite : Icons.favorite_border,
-            size: 20,
-            color: r.isFavorited
-                ? Tw.rose500
-                : (scrim ? Colors.white : context.brandMuted)),
+  Widget _favButton(Recommendation r, {bool scrim = false}) =>
+      AdaptiveButton.icon(
+        style: AdaptiveButtonStyle.plain,
+        icon: r.isFavorited ? Icons.favorite : Icons.favorite_border,
+        iconColor: r.isFavorited
+            ? Tw.rose500
+            : (scrim ? Colors.white : context.brandMuted),
         onPressed: () async {
           await ref.read(databaseServiceProvider).toggleFavorite(r.id);
           ref.invalidate(_historyProvider);
         },
       );
 
-  Widget _delButton(Recommendation r, {bool scrim = false}) => IconButton(
-        visualDensity: scrim ? VisualDensity.compact : null,
-        constraints:
-            scrim ? const BoxConstraints(minWidth: 36, minHeight: 36) : null,
-        icon: Icon(Icons.delete_outline,
-            size: 20, color: scrim ? Colors.white : context.brandMuted),
+  Widget _delButton(Recommendation r, {bool scrim = false}) =>
+      AdaptiveButton.icon(
+        style: AdaptiveButtonStyle.plain,
+        icon: Icons.delete_outline,
+        iconColor: scrim ? Colors.white : context.brandMuted,
         onPressed: () => AdaptiveAlertDialog.show(
           context: context,
           title: 'Delete recommendation?',

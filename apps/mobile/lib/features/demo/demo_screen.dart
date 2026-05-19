@@ -398,9 +398,10 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
     return ListView(padding: const EdgeInsets.all(24), children: [
       const SizedBox(height: 4),
       Row(children: [
-        IconButton(
+        AdaptiveButton.icon(
           padding: EdgeInsets.zero,
-          icon: const Icon(Icons.arrow_back),
+          style: AdaptiveButtonStyle.plain,
+          icon: Icons.arrow_back,
           onPressed: _back,
         ),
         Expanded(

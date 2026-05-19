@@ -68,27 +68,11 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
           ],
         );
 
-    return Scaffold(
-      backgroundColor: brandBg(Theme.of(context).brightness),
-      appBar: AppBar(
-        backgroundColor: brandBg(Theme.of(context).brightness),
-        title: Text(community.tag,
-            style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w800,
-                color: context.brandInk)),
-      ),
-      floatingActionButton: PostFab(
-        color: tone.dot,
-        label: 'Share to ${community.label}',
-        onTap: () => showModalBottomSheet<void>(
-          context: context,
-          backgroundColor: Colors.transparent,
-          isScrollControlled: true,
-          builder: (_) => Composer(initialCommunity: community),
-        ),
-      ),
-      body: ListView(
+    return BrandScaffold(
+      title: community.tag,
+      body: Stack(
+        children: [
+          ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
         children: [
           Container(
@@ -159,6 +143,22 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
               PostCard(
                   post: p,
                   onOpen: () => openPost(context, p.id)),
+        ],
+          ),
+          Positioned(
+            right: 16,
+            bottom: 16,
+            child: PostFab(
+              color: tone.dot,
+              label: 'Share to ${community.label}',
+              onTap: () => showModalBottomSheet<void>(
+                context: context,
+                backgroundColor: Colors.transparent,
+                isScrollControlled: true,
+                builder: (_) => Composer(initialCommunity: community),
+              ),
+            ),
+          ),
         ],
       ),
     );

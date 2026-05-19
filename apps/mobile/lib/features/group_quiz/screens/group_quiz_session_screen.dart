@@ -131,15 +131,15 @@ class _BodyState extends ConsumerState<_Body> {
                       letterSpacing: 4,
                       color: context.brandInk)),
               Row(mainAxisSize: MainAxisSize.min, children: [
-                IconButton(
-                  icon: const Icon(Icons.copy),
-                  tooltip: 'Copy code',
+                AdaptiveButton.icon(
+                  icon: Icons.copy,
+                  style: AdaptiveButtonStyle.plain,
                   onPressed: () => Clipboard.setData(
                       ClipboardData(text: s.code)),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.ios_share),
-                  tooltip: 'Share',
+                AdaptiveButton.icon(
+                  icon: Icons.ios_share,
+                  style: AdaptiveButtonStyle.plain,
                   onPressed: () => SharePlus.instance.share(ShareParams(
                       text: 'Join my Smart Advisor group quiz — '
                           'code ${s.code}')),
@@ -276,19 +276,26 @@ class _BodyState extends ConsumerState<_Body> {
           ..removeWhere((e) => e.isEmpty);
         return Column(children: [
           for (final o in q.options ?? const <String>[])
-            CheckboxListTile(
-              value: sel.contains(o),
+            AdaptiveListTile(
+              leading: AdaptiveCheckbox(
+                value: sel.contains(o),
+                onChanged: (on) => setState(() {
+                  final next = [...sel];
+                  on == true ? next.add(o) : next.remove(o);
+                  _answers[_q] = next.join(', ');
+                }),
+              ),
               title: Text(o),
-              onChanged: (on) => setState(() {
+              onTap: () => setState(() {
                 final next = [...sel];
-                on == true ? next.add(o) : next.remove(o);
+                sel.contains(o) ? next.remove(o) : next.add(o);
                 _answers[_q] = next.join(', ');
               }),
             ),
         ]);
       case QuestionType.fillInBlank:
-        return TextField(
-          decoration: InputDecoration(hintText: q.placeholder),
+        return AdaptiveTextField(
+          placeholder: q.placeholder,
           onChanged: (t) => _answers[_q] = t,
         );
     }
