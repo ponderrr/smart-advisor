@@ -72,7 +72,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               const Expanded(child: BrandHeading('Feed', size: 32)),
               _AddFriendsButton(
                   onTap: () => context.push('/feed/people')),
-              const SizedBox(width: 8),
+              const SizedBox(width: 2),
               _VisibilityPill(visibility: visibility),
             ],
           ),
@@ -191,16 +191,25 @@ class _AddFriendsButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final tone = contentAccent(
         ContentAccentName.violet, Theme.of(context).brightness);
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: Container(
-        width: 38,
-        height: 38,
-        decoration: BoxDecoration(
-            color: tone.iconCircleBg, shape: BoxShape.circle),
-        child: Icon(Icons.person_add_alt,
-            size: 18, color: tone.iconCircleFg),
+    return Semantics(
+      button: true,
+      label: 'Find people to follow',
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Container(
+          width: 44,
+          height: 44,
+          alignment: Alignment.center,
+          child: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+                color: tone.iconCircleBg, shape: BoxShape.circle),
+            child: Icon(Icons.person_add_alt,
+                size: 18, color: tone.iconCircleFg),
+          ),
+        ),
       ),
     );
   }
@@ -218,26 +227,34 @@ class _VisibilityPill extends StatelessWidget {
     final tone = contentAccent(
         isPrivate ? ContentAccentName.rose : ContentAccentName.emerald,
         Theme.of(context).brightness);
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => context.push('/account'),
-      child: Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-        decoration: BoxDecoration(
-          color: tone.iconCircleBg,
-          borderRadius: BorderRadius.circular(999),
+    return Semantics(
+      button: true,
+      label: isPrivate
+          ? 'Profile is private. Edit feed visibility'
+          : 'Profile is public. Edit feed visibility',
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => context.push('/account'),
+        child: ExcludeSemantics(
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+                horizontal: 12, vertical: 7),
+            decoration: BoxDecoration(
+              color: tone.iconCircleBg,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              Icon(isPrivate ? Icons.lock_outline : Icons.public,
+                  size: 14, color: tone.iconCircleFg),
+              const SizedBox(width: 6),
+              Text(isPrivate ? 'Private' : 'Public',
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                      color: tone.iconCircleFg)),
+            ]),
+          ),
         ),
-        child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Icon(isPrivate ? Icons.lock_outline : Icons.public,
-              size: 14, color: tone.iconCircleFg),
-          const SizedBox(width: 6),
-          Text(isPrivate ? 'Private' : 'Public',
-              style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w900,
-                  color: tone.iconCircleFg)),
-        ]),
       ),
     );
   }

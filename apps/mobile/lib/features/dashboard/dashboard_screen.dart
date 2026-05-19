@@ -289,7 +289,11 @@ class DashboardScreen extends ConsumerWidget {
         border: Border.all(color: tone.surfaceBorder),
       ),
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        PosterThumb(url: r.posterUrl, square: r.type == 'music', w: 50),
+        PosterThumb(
+            url: r.posterUrl,
+            square: r.type == 'music',
+            w: 50,
+            semanticLabel: '${r.title} cover'),
         const SizedBox(width: 12),
         Expanded(
           child: Column(

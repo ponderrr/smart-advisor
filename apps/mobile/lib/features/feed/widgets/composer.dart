@@ -112,7 +112,8 @@ class _ComposerState extends ConsumerState<Composer> {
                 borderRadius: BorderRadius.circular(999)),
           ),
           Row(children: [
-            const BrandHeading('Share a pick', size: 20),
+            const Flexible(
+                child: BrandHeading('Share a pick', size: 20)),
             const Spacer(),
             Container(
               padding: const EdgeInsets.symmetric(
@@ -235,7 +236,8 @@ class _ComposerState extends ConsumerState<Composer> {
                             url: _cover.text.trim(),
                             square:
                                 _community == FeedCommunity.music,
-                            w: 44),
+                            w: 44,
+                            semanticLabel: 'Cover image preview'),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(

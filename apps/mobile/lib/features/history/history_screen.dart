@@ -168,7 +168,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         child: BrandCard(
         padding: const EdgeInsets.all(14),
         child: Row(children: [
-          PosterThumb(url: r.posterUrl, square: r.type == 'music'),
+          PosterThumb(
+              url: r.posterUrl,
+              square: r.type == 'music',
+              semanticLabel: '${r.title} cover'),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -215,7 +218,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     child: PosterThumb(
                         url: r.posterUrl,
                         square: r.type == 'music',
-                        w: w - 20),
+                        w: w - 20,
+                        semanticLabel: '${r.title} cover'),
                   ),
                   Positioned(
                     top: 4,
@@ -226,8 +230,18 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Row(mainAxisSize: MainAxisSize.min, children: [
-                        _favButton(r, scrim: true),
-                        _delButton(r, scrim: true),
+                        Semantics(
+                          button: true,
+                          label: r.isFavorited
+                              ? 'Remove “${r.title}” from favorites'
+                              : 'Add “${r.title}” to favorites',
+                          child: _favButton(r, scrim: true),
+                        ),
+                        Semantics(
+                          button: true,
+                          label: 'Delete “${r.title}”',
+                          child: _delButton(r, scrim: true),
+                        ),
                       ]),
                     ),
                   ),

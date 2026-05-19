@@ -12,11 +12,16 @@ class FeedAvatar extends StatelessWidget {
     required this.name,
     this.url,
     this.size = 32,
+    this.semanticLabel,
   });
 
   final String name;
   final String? url;
   final double size;
+
+  /// Accessible label for screen readers. Defaults to the author's name so
+  /// the avatar isn't announced as a bare image.
+  final String? semanticLabel;
 
   /// Same six hues + order as the web PALETTE. Each entry is a single base
   /// hue; the tinted background and readable initials colour are derived
@@ -51,18 +56,27 @@ class FeedAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final label = semanticLabel ?? name;
     if (url != null && url!.trim().isNotEmpty) {
-      return ClipOval(
-        child: Image.network(
-          url!,
-          width: size,
-          height: size,
-          fit: BoxFit.cover,
-          errorBuilder: (_, _, _) => _initialsBox(context),
+      return Semantics(
+        image: true,
+        label: label,
+        child: ClipOval(
+          child: Image.network(
+            url!,
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+            errorBuilder: (_, _, _) => _initialsBox(context),
+          ),
         ),
       );
     }
-    return _initialsBox(context);
+    return Semantics(
+      image: true,
+      label: label,
+      child: _initialsBox(context),
+    );
   }
 
   Widget _initialsBox(BuildContext context) {

@@ -103,11 +103,15 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
                 onPressed: widget.onRestart, label: 'Get another'),
           ),
           const SizedBox(width: 8),
-          AdaptiveButton.icon(
-            onPressed: () => SharePlus.instance
-                .share(ShareParams(text: _shareText())),
-            icon: Icons.share,
-            style: AdaptiveButtonStyle.bordered,
+          Semantics(
+            button: true,
+            label: 'Share your picks',
+            child: AdaptiveButton.icon(
+              onPressed: () => SharePlus.instance
+                  .share(ShareParams(text: _shareText())),
+              icon: Icons.share,
+              style: AdaptiveButtonStyle.bordered,
+            ),
           ),
         ]),
         const SizedBox(height: 24),
@@ -211,11 +215,18 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
                     ],
                   ),
                 ),
-                AdaptiveButton.icon(
-                  style: AdaptiveButtonStyle.plain,
-                  icon: fav ? Icons.favorite : Icons.favorite_border,
-                  iconColor: fav ? accent.tileText : c.mutedForeground,
-                  onPressed: () => _toggleFav(r),
+                Semantics(
+                  button: true,
+                  label: fav
+                      ? 'Remove “${r.title}” from favorites'
+                      : 'Add “${r.title}” to favorites',
+                  child: AdaptiveButton.icon(
+                    style: AdaptiveButtonStyle.plain,
+                    icon: fav ? Icons.favorite : Icons.favorite_border,
+                    iconColor:
+                        fav ? accent.tileText : c.mutedForeground,
+                    onPressed: () => _toggleFav(r),
+                  ),
                 ),
                 Icon(open ? Icons.expand_less : Icons.expand_more,
                     color: c.mutedForeground),
@@ -278,6 +289,7 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
               width: w,
               height: h,
               fit: BoxFit.cover,
+              semanticLabel: '${r.title} cover',
               errorBuilder: (_, _, _) => _posterFallback(w, h))
           : _posterFallback(w, h),
     );

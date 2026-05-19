@@ -117,6 +117,7 @@ class _S extends ConsumerState<RecommendationDetailScreen> {
               child: r.posterUrl != null
                   ? Image.network(r.posterUrl!,
                       height: 260, fit: BoxFit.cover,
+                      semanticLabel: '${r.title} cover',
                       errorBuilder: (_, _, _) =>
                           _posterFallback(context))
                   : _posterFallback(context),
@@ -389,10 +390,14 @@ class _WhereToWatch extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         child: SizedBox(width: double.infinity, child: body));
     if (link == null) return card;
-    return GestureDetector(
-      onTap: () => launchUrl(Uri.parse(link),
-          mode: LaunchMode.externalApplication),
-      child: card,
+    return Semantics(
+      button: true,
+      label: 'Where to watch. Opens JustWatch',
+      child: GestureDetector(
+        onTap: () => launchUrl(Uri.parse(link),
+            mode: LaunchMode.externalApplication),
+        child: card,
+      ),
     );
   }
 }

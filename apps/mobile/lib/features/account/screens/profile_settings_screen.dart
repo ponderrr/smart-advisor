@@ -108,33 +108,43 @@ class _ProfileSettingsScreenState
                           : null,
                     ),
                     const SizedBox(width: 12),
-                    AdaptiveButton(
-                        onPressed: _pickAvatar,
-                        label: 'Change photo',
-                        style: AdaptiveButtonStyle.bordered),
-                    const SizedBox(width: 8),
-                    if (profile?.avatarUrl != null)
-                      AdaptiveButton(
-                          onPressed: () => _confirmDanger(
-                                'Remove profile photo?',
-                                'Your avatar will be removed. You can '
-                                    'add a new one anytime.',
-                                () async {
-                                  final r = await ref
-                                      .read(authServiceProvider)
-                                      .removeAvatar();
-                                  if (r.error == null) {
-                                    ref.invalidate(
-                                        currentProfileProvider);
-                                    showBanner('Profile photo removed',
-                                        type: AdaptiveSnackBarType
-                                            .success);
-                                  }
-                                  return r.error;
-                                },
-                              ),
-                          label: 'Remove',
-                          style: AdaptiveButtonStyle.plain),
+                    Expanded(
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          AdaptiveButton(
+                              onPressed: _pickAvatar,
+                              label: 'Change photo',
+                              style: AdaptiveButtonStyle.bordered),
+                          if (profile?.avatarUrl != null)
+                            AdaptiveButton(
+                                onPressed: () => _confirmDanger(
+                                      'Remove profile photo?',
+                                      'Your avatar will be removed. '
+                                          'You can add a new one '
+                                          'anytime.',
+                                      () async {
+                                        final r = await ref
+                                            .read(authServiceProvider)
+                                            .removeAvatar();
+                                        if (r.error == null) {
+                                          ref.invalidate(
+                                              currentProfileProvider);
+                                          showBanner(
+                                              'Profile photo removed',
+                                              type: AdaptiveSnackBarType
+                                                  .success);
+                                        }
+                                        return r.error;
+                                      },
+                                    ),
+                                label: 'Remove',
+                                style: AdaptiveButtonStyle.plain),
+                        ],
+                      ),
+                    ),
                   ]),
                   const SizedBox(height: 8),
                   Subtitle('JPG, PNG, GIF or WebP.'),

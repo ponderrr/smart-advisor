@@ -299,7 +299,13 @@ class _StoryState extends State<_Story> {
   @override
   Widget build(BuildContext context) {
     final s = _slides[_i];
-    return GestureDetector(
+    return Semantics(
+      label: 'Wrapped story, slide ${_i + 1} of ${_slides.length}',
+      hint: 'Swipe up for next, swipe down for previous',
+      onTap: () => _go(1),
+      onIncrease: () => _go(1),
+      onDecrease: () => _go(-1),
+      child: GestureDetector(
       onTapUp: (e) {
         final w = MediaQuery.sizeOf(context).width;
         _go(e.globalPosition.dx < w * 0.32 ? -1 : 1);
@@ -346,6 +352,7 @@ class _StoryState extends State<_Story> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

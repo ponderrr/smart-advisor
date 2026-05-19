@@ -152,50 +152,75 @@ class SaveRail extends ConsumerWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () {
-            final nowSaved =
-                ref.read(savedProvider.notifier).toggle(post.id);
-            showBanner(
-              nowSaved
-                  ? '“${post.title}” saved to your library'
-                  : 'Removed from your library',
-              type: nowSaved
-                  ? AdaptiveSnackBarType.success
-                  : AdaptiveSnackBarType.info,
-              action: 'Undo',
-              onAction: () =>
-                  ref.read(savedProvider.notifier).toggle(post.id),
-            );
-          },
-          child: AnimatedScale(
-            scale: saved ? 1.12 : 1,
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOutBack,
-            child: Icon(
-                saved
-                    ? Icons.bookmark_rounded
-                    : Icons.bookmark_border_rounded,
-                size: 24,
-                color: saveColor),
+        Semantics(
+          button: true,
+          label: saved
+              ? 'Saved to library. Tap to remove “${post.title}”'
+              : 'Save “${post.title}” to library',
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              final nowSaved =
+                  ref.read(savedProvider.notifier).toggle(post.id);
+              showBanner(
+                nowSaved
+                    ? '“${post.title}” saved to your library'
+                    : 'Removed from your library',
+                type: nowSaved
+                    ? AdaptiveSnackBarType.success
+                    : AdaptiveSnackBarType.info,
+                action: 'Undo',
+                onAction: () =>
+                    ref.read(savedProvider.notifier).toggle(post.id),
+              );
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: 44,
+                  height: 32,
+                  child: Center(
+                    child: AnimatedScale(
+                      scale: saved ? 1.12 : 1,
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOutBack,
+                      child: Icon(
+                          saved
+                              ? Icons.bookmark_rounded
+                              : Icons.bookmark_border_rounded,
+                          size: 24,
+                          color: saveColor),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(saved ? 'Saved' : 'Save',
+                    style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: saveColor)),
+              ],
+            ),
           ),
         ),
-        const SizedBox(height: 2),
-        Text(saved ? 'Saved' : 'Save',
-            style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
-                color: saveColor)),
         const SizedBox(height: 12),
-        Icon(Icons.mode_comment_outlined,
-            size: 18, color: context.brandMuted),
-        const SizedBox(height: 2),
-        Text('${post.comments.length}',
-            style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: context.brandMuted)),
+        Semantics(
+          label: '${post.comments.length} comments',
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.mode_comment_outlined,
+                  size: 18, color: context.brandMuted),
+              const SizedBox(height: 2),
+              Text('${post.comments.length}',
+                  style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: context.brandMuted)),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -272,7 +297,8 @@ class PostCard extends StatelessWidget {
                       PosterThumb(
                           url: post.posterUrl,
                           square: post.square,
-                          w: 52),
+                          w: 52,
+                          semanticLabel: '${post.title} cover'),
                       const SizedBox(width: 10),
                       if (meta.isNotEmpty)
                         Expanded(
@@ -402,7 +428,10 @@ class CompactPostRow extends StatelessWidget {
             Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           if (post.posterUrl != null) ...[
             PosterThumb(
-                url: post.posterUrl, square: post.square, w: 34),
+                url: post.posterUrl,
+                square: post.square,
+                w: 34,
+                semanticLabel: '${post.title} cover'),
             const SizedBox(width: 10),
           ],
           Expanded(
@@ -503,6 +532,7 @@ class MediaPostCard extends StatelessWidget {
                 if (post.posterUrl != null)
                   Image.network(post.posterUrl!,
                       fit: BoxFit.cover,
+                      semanticLabel: '${post.title} cover',
                       errorBuilder: (_, _, _) =>
                           ColoredBox(color: tone.iconCircleBg))
                 else

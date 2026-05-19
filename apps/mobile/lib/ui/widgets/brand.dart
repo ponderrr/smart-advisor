@@ -470,10 +470,19 @@ class BrandSegmented extends StatelessWidget {
 /// Shared poster/cover thumbnail with a graceful fallback. Music art is
 /// square; movies/books are 2:3.
 class PosterThumb extends StatelessWidget {
-  const PosterThumb({super.key, this.url, this.square = false, this.w = 44});
+  const PosterThumb(
+      {super.key,
+      this.url,
+      this.square = false,
+      this.w = 44,
+      this.semanticLabel});
   final String? url;
   final bool square;
   final double w;
+
+  /// Accessible description (e.g. '<title> poster'). When null the thumb is
+  /// treated as decorative and hidden from assistive tech.
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -486,7 +495,7 @@ class PosterThumb extends StatelessWidget {
           child: Icon(Icons.image_not_supported_outlined,
               size: 16, color: dark ? Tw.slate500 : Tw.slate400),
         );
-    return ClipRRect(
+    final thumb = ClipRRect(
       borderRadius: BorderRadius.circular(6),
       child: (url == null || url!.isEmpty)
           ? fallback()
@@ -496,6 +505,8 @@ class PosterThumb extends StatelessWidget {
               fit: BoxFit.cover,
               errorBuilder: (_, _, _) => fallback()),
     );
+    if (semanticLabel == null || semanticLabel!.isEmpty) return thumb;
+    return Semantics(image: true, label: semanticLabel, child: thumb);
   }
 }
 

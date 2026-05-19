@@ -387,10 +387,14 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                     child: Row(children: [
                       const Expanded(
                           child: BrandHeading('Quiz', size: 20)),
-                      AdaptiveButton.icon(
-                        icon: Icons.close,
-                        style: AdaptiveButtonStyle.plain,
-                        onPressed: _confirmLeave,
+                      Semantics(
+                        button: true,
+                        label: 'Close quiz',
+                        child: AdaptiveButton.icon(
+                          icon: Icons.close,
+                          style: AdaptiveButtonStyle.plain,
+                          onPressed: _confirmLeave,
+                        ),
                       ),
                     ]),
                   ),
@@ -704,7 +708,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(children: [
-            AdaptiveButton.icon(
+            Semantics(
+              button: true,
+              label: 'Previous question',
+              child: AdaptiveButton.icon(
               padding: EdgeInsets.zero,
               icon: Icons.arrow_back,
               style: AdaptiveButtonStyle.plain,
@@ -717,6 +724,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                       _dir = -1;
                       _step = _Step.count;
                     }),
+              ),
             ),
             Expanded(
               child: Eyebrow(

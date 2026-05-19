@@ -106,6 +106,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                   url: i.posterUrl,
                   square: i.medium == LibraryMedium.music,
                   w: w - 20,
+                  semanticLabel: '${i.title} cover',
                 ),
               ),
               Positioned(
@@ -141,7 +142,10 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
   }
 
   Widget _menu(LibraryItem i, Color iconColor) {
-    return AdaptivePopupMenuButton.icon<String>(
+    return Semantics(
+      button: true,
+      label: 'More options for “${i.title}”',
+      child: AdaptivePopupMenuButton.icon<String>(
       icon: Icons.more_vert,
       tint: iconColor,
       onSelected: (_, entry) {
@@ -170,6 +174,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
         AdaptivePopupMenuItem(
             label: 'Remove', value: 'remove', icon: Icons.delete_outline),
       ],
+      ),
     );
   }
 
@@ -228,7 +233,9 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
       padding: const EdgeInsets.all(14),
       child: Row(children: [
         PosterThumb(
-            url: i.posterUrl, square: i.medium == LibraryMedium.music),
+            url: i.posterUrl,
+            square: i.medium == LibraryMedium.music,
+            semanticLabel: '${i.title} cover'),
         const SizedBox(width: 12),
         Expanded(
           child: Column(

@@ -136,10 +136,16 @@ class _PersonRow extends StatelessWidget {
     return BrandCard(
       padding: const EdgeInsets.all(12),
       child: Row(children: [
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () => context.push('/feed/u/$username'),
-          child: FeedAvatar(name: username, size: 44),
+        Semantics(
+          button: true,
+          label: "Open u/$username's profile",
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => context.push('/feed/u/$username'),
+            child: ExcludeSemantics(
+              child: FeedAvatar(name: username, size: 44),
+            ),
+          ),
         ),
         const SizedBox(width: 12),
         Expanded(

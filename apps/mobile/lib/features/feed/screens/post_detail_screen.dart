@@ -90,12 +90,18 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                               CrossAxisAlignment.start,
                           children: [
                             Row(children: [
-                              GestureDetector(
-                                behavior: HitTestBehavior.opaque,
-                                onTap: () => openUserProfile(
-                                    context, post.author),
-                                child: FeedAvatar(
-                                    name: post.author, size: 28),
+                              Semantics(
+                                button: true,
+                                label: "Open ${post.author}'s profile",
+                                child: GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () => openUserProfile(
+                                      context, post.author),
+                                  child: ExcludeSemantics(
+                                    child: FeedAvatar(
+                                        name: post.author, size: 28),
+                                  ),
+                                ),
                               ),
                               const SizedBox(width: 8),
                               Flexible(
@@ -129,7 +135,9 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                                   PosterThumb(
                                       url: post.posterUrl,
                                       square: post.square,
-                                      w: 64),
+                                      w: 64,
+                                      semanticLabel:
+                                          '${post.title} cover'),
                                   const SizedBox(width: 12),
                                   if (meta.isNotEmpty)
                                     Expanded(
@@ -314,27 +322,40 @@ class _CommentNodeState extends ConsumerState<_CommentNode> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(children: [
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () =>
-                        setState(() => _collapsed = !_collapsed),
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 6),
-                      child: Text('[${_collapsed ? '+' : '−'}]',
-                          style: TextStyle(
-                              fontSize: 12,
-                              fontFeatures: const [
-                                FontFeature.tabularFigures()
-                              ],
-                              fontWeight: FontWeight.w800,
-                              color: context.brandMuted)),
+                  Semantics(
+                    button: true,
+                    label: _collapsed
+                        ? 'Expand comment thread'
+                        : 'Collapse comment thread',
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () =>
+                          setState(() => _collapsed = !_collapsed),
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: Text('[${_collapsed ? '+' : '−'}]',
+                            style: TextStyle(
+                                fontSize: 12,
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures()
+                                ],
+                                fontWeight: FontWeight.w800,
+                                color: context.brandMuted)),
+                      ),
                     ),
                   ),
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () =>
-                        openUserProfile(context, node.author),
-                    child: FeedAvatar(name: node.author, size: 22),
+                  Semantics(
+                    button: true,
+                    label: "Open ${node.author}'s profile",
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () =>
+                          openUserProfile(context, node.author),
+                      child: ExcludeSemantics(
+                        child:
+                            FeedAvatar(name: node.author, size: 22),
+                      ),
+                    ),
                   ),
                   const SizedBox(width: 7),
                   Flexible(
@@ -362,16 +383,23 @@ class _CommentNodeState extends ConsumerState<_CommentNode> {
                       ),
                     ),
                   const Spacer(),
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => voteNotifier.setVote(key, 1),
-                    child: Padding(
-                      padding: const EdgeInsets.all(2),
-                      child: Icon(Icons.keyboard_arrow_up,
-                          size: 18, color: voteColor(1)),
+                  Semantics(
+                    button: true,
+                    selected: vote > 0,
+                    label: 'Upvote comment',
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => voteNotifier.setVote(key, 1),
+                      child: SizedBox(
+                        width: 32,
+                        height: 32,
+                        child: Center(
+                          child: Icon(Icons.keyboard_arrow_up,
+                              size: 18, color: voteColor(1)),
+                        ),
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 2),
                   Text('${node.score + vote}',
                       style: TextStyle(
                           fontSize: 11,
@@ -379,14 +407,21 @@ class _CommentNodeState extends ConsumerState<_CommentNode> {
                           color: vote != 0
                               ? voteColor(vote)
                               : context.brandInk)),
-                  const SizedBox(width: 2),
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => voteNotifier.setVote(key, -1),
-                    child: Padding(
-                      padding: const EdgeInsets.all(2),
-                      child: Icon(Icons.keyboard_arrow_down,
-                          size: 18, color: voteColor(-1)),
+                  Semantics(
+                    button: true,
+                    selected: vote < 0,
+                    label: 'Downvote comment',
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => voteNotifier.setVote(key, -1),
+                      child: SizedBox(
+                        width: 32,
+                        height: 32,
+                        child: Center(
+                          child: Icon(Icons.keyboard_arrow_down,
+                              size: 18, color: voteColor(-1)),
+                        ),
+                      ),
                     ),
                   ),
                 ]),
