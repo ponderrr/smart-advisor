@@ -102,7 +102,8 @@ class _SecuritySettingsScreenState
   Widget build(BuildContext context) {
     return BrandScaffold(
       title: 'Security',
-      body: SingleChildScrollView(
+      body: ResponsiveCenter(
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -219,6 +220,7 @@ class _SecuritySettingsScreenState
             const SizedBox(height: 24),
           ],
         ),
+      ),
       ),
     );
   }

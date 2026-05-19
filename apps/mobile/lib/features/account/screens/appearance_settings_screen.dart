@@ -16,7 +16,8 @@ class AppearanceSettingsScreen extends ConsumerWidget {
 
     return BrandScaffold(
       title: 'Appearance',
-      body: SingleChildScrollView(
+      body: ResponsiveCenter(
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: BrandCard(
           child: Column(
@@ -69,6 +70,7 @@ class AppearanceSettingsScreen extends ConsumerWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }

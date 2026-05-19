@@ -5,9 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../ui/ui.dart';
 import '../auth/auth_providers.dart';
 
-/// App shell: native adaptive bottom bar (Feed · Library · Quiz · History ·
-/// Profile). Feed is the home/landing surface; Quiz (center) opens the
-/// Solo/Group sheet; Profile shows the account avatar.
+/// App shell: native adaptive bottom bar (Home · Library · Discover ·
+/// History · Profile). Home is the landing surface; Discover (center)
+/// opens the Solo/Group/Surprise sheet; Profile shows the account avatar.
 class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.child, required this.location});
 
@@ -69,9 +69,9 @@ class AppShell extends ConsumerWidget {
     // Tablet / wide: side NavigationRail + centered, max-width content.
     if (MediaQuery.sizeOf(context).width >= 720) {
       const labels = [
-        'Feed',
+        'Home',
         'Library',
-        'Quiz',
+        'Discover',
         'History',
         'Profile'
       ];
@@ -125,11 +125,11 @@ class AppShell extends ConsumerWidget {
         onTap: onNav,
         items: [
           const AdaptiveNavigationDestination(
-              label: 'Feed', icon: Icon(Icons.forum_outlined)),
+              label: 'Home', icon: Icon(Icons.forum_outlined)),
           const AdaptiveNavigationDestination(
               label: 'Library', icon: Icon(Icons.bookmark_border)),
           const AdaptiveNavigationDestination(
-              label: 'Quiz', icon: Icon(Icons.auto_awesome)),
+              label: 'Discover', icon: Icon(Icons.auto_awesome)),
           const AdaptiveNavigationDestination(
               label: 'History', icon: Icon(Icons.history)),
           AdaptiveNavigationDestination(

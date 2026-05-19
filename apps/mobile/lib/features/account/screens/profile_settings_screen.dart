@@ -82,7 +82,8 @@ class _ProfileSettingsScreenState
 
     return BrandScaffold(
       title: 'Profile',
-      body: SingleChildScrollView(
+      body: ResponsiveCenter(
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -175,6 +176,7 @@ class _ProfileSettingsScreenState
             const SizedBox(height: 24),
           ],
         ),
+      ),
       ),
     );
   }

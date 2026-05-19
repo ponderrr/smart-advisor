@@ -36,7 +36,8 @@ class _RecommendationsSettingsScreenState
 
     return BrandScaffold(
       title: 'Recommendations',
-      body: SingleChildScrollView(
+      body: ResponsiveCenter(
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,6 +81,7 @@ class _RecommendationsSettingsScreenState
             const SizedBox(height: 24),
           ],
         ),
+      ),
       ),
     );
   }

@@ -93,7 +93,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
   Widget build(BuildContext context) {
     final profile = ref.watch(currentProfileProvider).asData?.value;
 
-    return ListView(
+    return ResponsiveCenter(
+      child: ListView(
       padding: const EdgeInsets.all(20),
       children: [
         const SizedBox(height: 8),
@@ -243,6 +244,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         ),
         const SizedBox(height: 24),
       ],
+    ),
     );
   }
 }

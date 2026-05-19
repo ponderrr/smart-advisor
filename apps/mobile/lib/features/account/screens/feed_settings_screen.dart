@@ -16,7 +16,8 @@ class FeedSettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return BrandScaffold(
       title: 'Feed',
-      body: SingleChildScrollView(
+      body: ResponsiveCenter(
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,6 +38,7 @@ class FeedSettingsScreen extends ConsumerWidget {
             const SizedBox(height: 24),
           ],
         ),
+      ),
       ),
     );
   }
