@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -15,6 +15,7 @@ import { toast } from "sonner";
 
 import { AppNavbar } from "@/components/app-navbar";
 import { PageLoader } from "@/components/ui/loader";
+import { FileUpload } from "@/components/ui/file-upload";
 import { PillButton } from "@/components/ui/pill-button";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
@@ -48,7 +49,8 @@ const ImportPage = () => {
   const [mismatch, setMismatch] = useState<ImportSource | null>(null);
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<ImportResult | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  // Bumped on reset to remount FileUpload (it owns its own file state).
+  const [uploadKey, setUploadKey] = useState(0);
 
   if (!ready) {
     return <PageLoader text={tc("loading")} />;
@@ -116,7 +118,7 @@ const ImportPage = () => {
     setMismatch(null);
     setProgress(0);
     setResult(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+    setUploadKey((k) => k + 1);
   };
 
   const pct =
@@ -177,31 +179,15 @@ const ImportPage = () => {
                   </p>
                 </div>
 
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".csv,text/csv"
-                  className="sr-only"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) void handleFile(f);
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex w-full flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/60 px-6 py-10 text-center transition-colors hover:border-indigo-400 hover:bg-indigo-50/40 dark:border-slate-700 dark:bg-slate-800/40 dark:hover:border-indigo-500/60 dark:hover:bg-indigo-500/5"
-                >
-                  <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-md">
-                    <Upload size={22} />
-                  </span>
-                  <span className="text-sm font-black tracking-tight">
-                    {t("choose")}
-                  </span>
-                  <span className="text-xs text-slate-500 dark:text-slate-400">
-                    {t("chooseHint")}
-                  </span>
-                </button>
+                <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-700">
+                  <FileUpload
+                    key={uploadKey}
+                    onChange={(files) => {
+                      const f = files[0];
+                      if (f) void handleFile(f);
+                    }}
+                  />
+                </div>
               </div>
             )}
 
