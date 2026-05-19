@@ -1384,6 +1384,11 @@
         "parse": "Couldn't parse that file."
       }
     },
+    "finishReminder": {
+      "eyebrow": "Pick up where you left off",
+      "title": "{count, plural, one {You've got # title still in progress} other {You've got # titles still in progress}}",
+      "cta": "Open"
+    },
     "eyebrow": "Library",
     "title": "What You've Watched and Read",
     "subtitle": "Reactions you save here become a taste signal the AI uses on your next quiz.",
