@@ -958,6 +958,7 @@
     },
     "empty": {
       "title": "Sin recomendaciones en {year}",
+      "titleMonth": "Sin recomendaciones en {period}",
       "current": "Haz un cuestionario y empieza a llenar tu año.",
       "past": "Elige otro año arriba, o inicia un nuevo cuestionario."
     },
@@ -1010,8 +1011,11 @@
       "pickYear": "Año",
       "intro": {
         "eyebrow": "Año en revisión",
+        "eyebrowMonth": "Mes en revisión",
         "kicker": "Tu {year}",
+        "kickerMonth": "Tu {period}",
         "subhead": "Dale play al año que pasó.",
+        "subheadMonth": "Dale play al mes que pasó.",
         "cta": "Ver tu año",
         "keyHint": "Usa las flechas para navegar"
       },

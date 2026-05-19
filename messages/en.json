@@ -958,6 +958,7 @@
     },
     "empty": {
       "title": "No Picks in {year}",
+      "titleMonth": "No Picks in {period}",
       "current": "Take a quiz and start filling out your year.",
       "past": "Pick a different year above, or start a new quiz."
     },
@@ -1010,8 +1011,11 @@
       "pickYear": "Year",
       "intro": {
         "eyebrow": "Year in Review",
+        "eyebrowMonth": "Month in Review",
         "kicker": "Your {year}",
+        "kickerMonth": "Your {period}",
         "subhead": "Press play on the year that was.",
+        "subheadMonth": "Press play on the month that was.",
         "cta": "See your year",
         "keyHint": "Arrow keys to navigate"
       },

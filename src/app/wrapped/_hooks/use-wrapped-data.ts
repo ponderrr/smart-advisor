@@ -12,6 +12,9 @@ interface UseWrappedDataParams {
   ready: boolean;
   year: number;
   currentYear: number;
+  /** 0–11. When provided, narrows the recap to that month within `year`
+   *  (monthly Wrapped). Omit for the full-year Wrapped. */
+  month?: number | null;
 }
 
 /**
@@ -25,6 +28,7 @@ export function useWrappedData({
   ready,
   year,
   currentYear,
+  month,
 }: UseWrappedDataParams) {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [libraryItems, setLibraryItems] = useState<LibraryItem[]>([]);
@@ -63,12 +67,19 @@ export function useWrappedData({
   }, [recommendations, libraryItems, currentYear]);
 
   const stats = useMemo<StoryStats>(() => {
-    const yearRecs = recommendations.filter(
-      (r) => new Date(r.created_at).getFullYear() === year,
-    );
-    const yearLibrary = libraryItems.filter(
-      (i) => new Date(i.logged_at).getFullYear() === year,
-    );
+    // In month mode the period collapses to {year, month}; otherwise it's
+    // the full year. Same derivations either way — the narrower window
+    // just yields a smaller roll-up. peakMonth then trivially points at
+    // the chosen month (count = total) and the daily-streak window
+    // shrinks to that month's days.
+    const inPeriod = (ts: string) => {
+      const d = new Date(ts);
+      if (d.getFullYear() !== year) return false;
+      if (month != null && d.getMonth() !== month) return false;
+      return true;
+    };
+    const yearRecs = recommendations.filter((r) => inPeriod(r.created_at));
+    const yearLibrary = libraryItems.filter((i) => inPeriod(i.logged_at));
 
     const movies = yearRecs.filter((r) => r.type === "movie").length;
     const books = yearRecs.filter((r) => r.type === "book").length;
@@ -123,15 +134,23 @@ export function useWrappedData({
       `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
     yearRecs.forEach((r) => dayKeys.add(fmt(new Date(r.created_at))));
     yearLibrary.forEach((i) => dayKeys.add(fmt(new Date(i.logged_at))));
-    const startOfYear = new Date(year, 0, 1);
-    const endOfYear =
-      year === currentYear ? new Date() : new Date(year, 11, 31);
+    const now = new Date();
+    const periodStart =
+      month != null ? new Date(year, month, 1) : new Date(year, 0, 1);
+    const periodEnd =
+      month != null
+        ? year === currentYear && month === now.getMonth()
+          ? now
+          : new Date(year, month + 1, 0)
+        : year === currentYear
+          ? now
+          : new Date(year, 11, 31);
     let longest = 0;
     let run = 0;
     const oneDay = 86400000;
     for (
-      let tDay = startOfYear.getTime();
-      tDay <= endOfYear.getTime();
+      let tDay = periodStart.getTime();
+      tDay <= periodEnd.getTime();
       tDay += oneDay
     ) {
       if (dayKeys.has(fmt(new Date(tDay)))) {
@@ -211,7 +230,7 @@ export function useWrappedData({
       creatorPosters,
       allPosters,
     };
-  }, [recommendations, libraryItems, year, currentYear]);
+  }, [recommendations, libraryItems, year, currentYear, month]);
 
   return { loading, availableYears, stats };
 }
