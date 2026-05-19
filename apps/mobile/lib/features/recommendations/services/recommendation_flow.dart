@@ -9,6 +9,7 @@ import 'ai_service.dart';
 import 'database_service.dart';
 import 'deezer_service.dart';
 import 'open_library_service.dart';
+import 'refinement_input.dart';
 import 'tmdb_service.dart';
 
 /// Stand-in for the web enhanced-recommendations-service. Generates one pick
@@ -71,6 +72,7 @@ class RecommendationFlow {
     required String contentTone,
     String? userName,
     Map<String, dynamic>? recommendationFilters,
+    RefinementInput? refinement,
   }) async {
     // Pull the user's saved hard filters once so every rec path (quiz,
     // surprise) respects them without each caller wiring it. An explicit
@@ -100,6 +102,7 @@ class RecommendationFlow {
           contentTone: contentTone,
           userName: userName,
           recommendationFilters: filters,
+          refinement: refinement,
         ),
       ));
     } on AiServiceException catch (e) {

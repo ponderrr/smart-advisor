@@ -7,6 +7,7 @@ import '../../../core/models/ai_models.dart';
 import '../../../core/models/answer.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/models/question.dart';
+import 'refinement_input.dart';
 
 /// Port of web src/features/recommendations/services/ai-service.ts.
 /// Calls the anthropic-questions / anthropic-recommendations Edge Functions
@@ -44,6 +45,7 @@ class AiService {
     required String contentTone,
     String? userName,
     Map<String, dynamic>? recommendationFilters,
+    RefinementInput? refinement,
   }) async {
     final res = await _invoke('anthropic-recommendations', <String, dynamic>{
       'name': userName ?? '',
@@ -53,6 +55,9 @@ class AiService {
       'contentTone': contentTone,
       if (recommendationFilters != null && recommendationFilters.isNotEmpty)
         'recommendationFilters': recommendationFilters,
+      if (refinement != null &&
+          refinement.feedbackText.trim().isNotEmpty)
+        'refinement': refinement.toJson(),
     });
 
     final raw = (res['recommendations'] as List?) ?? const <dynamic>[];
@@ -110,6 +115,7 @@ class AiService {
     required String contentTone,
     String? userName,
     Map<String, dynamic>? recommendationFilters,
+    RefinementInput? refinement,
     int maxRetries = 2,
   }) =>
       _withRetry(
@@ -120,6 +126,7 @@ class AiService {
           contentTone: contentTone,
           userName: userName,
           recommendationFilters: recommendationFilters,
+          refinement: refinement,
         ),
         maxRetries: maxRetries,
       );

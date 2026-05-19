@@ -10,17 +10,27 @@ import '../../../core/ui_messenger.dart';
 import '../../../core/models/recommendation.dart';
 import '../../../core/services/service_providers.dart';
 import '../../../ui/ui.dart';
+import '../services/refinement_input.dart';
 import '../utils/match_score.dart';
 
 /// Port of web ResultsView — the unified recommendation card list with
 /// expand/collapse, "why this pick", match score, favorite, and
 /// log-to-library. Trailer/music-preview media are deferred (Phase 6).
 class ResultsView extends ConsumerStatefulWidget {
-  const ResultsView(
-      {super.key, required this.recommendations, required this.onRestart});
+  const ResultsView({
+    super.key,
+    required this.recommendations,
+    required this.onRestart,
+    this.onRefine,
+  });
 
   final List<Recommendation> recommendations;
   final VoidCallback onRestart;
+
+  /// Conversational refinement: re-runs generation with the original quiz
+  /// context plus the user's free-text steer. Null → no "Refine" entry
+  /// (e.g. a caller that doesn't own the quiz state machine).
+  final Future<void> Function(RefinementInput)? onRefine;
 
   @override
   ConsumerState<ResultsView> createState() => _ResultsViewState();
@@ -79,6 +89,14 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
           ],
         ),
         const SizedBox(height: 8),
+        if (widget.onRefine != null) ...[
+          AdaptiveButton(
+            onPressed: _openRefineSheet,
+            label: 'Refine these',
+            style: AdaptiveButtonStyle.tinted,
+          ),
+          const SizedBox(height: 8),
+        ],
         Row(children: [
           Expanded(
             child: AdaptiveButton(
@@ -272,6 +290,131 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
         child: Icon(Icons.image_not_supported,
             size: 18, color: context.colors.mutedForeground),
       );
+
+  /// Free-text steer + quick-tap chips. On submit, pops the sheet then
+  /// hands the feedback + already-seen titles to the quiz state machine
+  /// (via onRefine), which replays the original context with the steer.
+  Future<void> _openRefineSheet() async {
+    final onRefine = widget.onRefine;
+    if (onRefine == null) return;
+    final text = TextEditingController();
+    // Append a chip's word to the steer without clobbering free text.
+    void addChip(StateSetter setSB, String word) {
+      final cur = text.text.trim();
+      final has = cur
+          .toLowerCase()
+          .split(RegExp(r'[\s,]+'))
+          .contains(word.toLowerCase());
+      if (has) return;
+      setSB(() {
+        text.text = cur.isEmpty ? word : '$cur, $word';
+        text.selection = TextSelection.collapsed(
+            offset: text.text.length);
+      });
+    }
+
+    const chips = [
+      'Lighter',
+      'Darker',
+      'Shorter',
+      'More obscure',
+      'More popular',
+    ];
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (_, setSB) => Container(
+          padding: EdgeInsets.fromLTRB(
+              20, 16, 20, MediaQuery.of(ctx).viewInsets.bottom + 24),
+          decoration: BoxDecoration(
+            color: brandBg(Theme.of(ctx).brightness),
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Container(
+              width: 44,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                  color: ctx.colors.border,
+                  borderRadius: BorderRadius.circular(999)),
+            ),
+            const Align(
+                alignment: Alignment.centerLeft,
+                child: Eyebrow('Refine')),
+            const SizedBox(height: 4),
+            const Align(
+                alignment: Alignment.centerLeft,
+                child: BrandHeading('Tweak these picks', size: 20)),
+            const SizedBox(height: 12),
+            AdaptiveTextField(
+              controller: text,
+              maxLines: 3,
+              placeholder:
+                  'e.g. more like Dune, lighter, nothing over 2 hours',
+            ),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final c in chips)
+                    GestureDetector(
+                      onTap: () => addChip(setSB, c),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: ctx.colors.muted,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(c,
+                            style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: ctx.colors.mutedForeground)),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(children: [
+              Expanded(
+                child: AdaptiveButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    label: 'Cancel',
+                    style: AdaptiveButtonStyle.bordered),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: AdaptiveButton(
+                  onPressed: () {
+                    final fb = text.text.trim();
+                    if (fb.isEmpty) return;
+                    Navigator.pop(ctx);
+                    onRefine(RefinementInput(
+                      feedbackText: fb,
+                      previousTitles: widget.recommendations
+                          .map((r) => r.title)
+                          .toList(),
+                    ));
+                  },
+                  label: 'Refine',
+                ),
+              ),
+            ]),
+          ]),
+        ),
+      ),
+    );
+    text.dispose();
+  }
 
   Future<void> _toggleFav(Recommendation r) async {
     final nowFav = !_favorited.contains(r.id);

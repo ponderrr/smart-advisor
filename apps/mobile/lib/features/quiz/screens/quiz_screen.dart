@@ -12,6 +12,7 @@ import '../../../core/supabase/supabase_providers.dart';
 import '../../../ui/ui.dart';
 import '../../auth/auth_providers.dart';
 import '../../recommendations/screens/results_view.dart';
+import '../../recommendations/services/refinement_input.dart';
 import '../store/quiz_store.dart';
 
 enum _Step { content, count, questions, generating, genError, results }
@@ -44,6 +45,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   bool _loadingQuestions = false;
   String? _error;
   bool _genOverloaded = false;
+  // The refinement (if any) for the in-flight / last-failed gen pass, so
+  // the error step's "Try again" replays the same steer.
+  RefinementInput? _pendingRefinement;
 
   @override
   void initState() {
@@ -207,24 +211,43 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     }).toList();
   }
 
-  Future<void> _generate() async {
+  /// One generation pass. [refinement] != null means a follow-up "refine
+  /// these" pass: the original quiz context (answers + content type) is
+  /// pulled from quizStore so we never re-ask questions, and it works
+  /// identically for the normal quiz and surprise modes (both write that
+  /// context here on the first pass). [refinement] == null is the
+  /// original behaviour, byte-for-byte.
+  Future<void> _generate({RefinementInput? refinement}) async {
     setState(() {
       _step = _Step.generating;
       _error = null;
     });
-    final answers =
-        widget.surprise ? _surpriseAnswers() : _formatAnswers();
-    ref.read(quizStoreProvider.notifier)
-      ..setContentType(_content)
-      ..setQuestionCount(_count)
-      ..setAnswers(answers);
+    // Stash the refinement so the genError "Try again" button replays the
+    // same pass instead of silently dropping the steer.
+    _pendingRefinement = refinement;
+
+    final ContentType contentType;
+    final List<Answer> answers;
+    if (refinement != null) {
+      final st = ref.read(quizStoreProvider);
+      contentType = st.contentType ?? _content;
+      answers = st.answers;
+    } else {
+      contentType = _content;
+      answers = widget.surprise ? _surpriseAnswers() : _formatAnswers();
+      ref.read(quizStoreProvider.notifier)
+        ..setContentType(_content)
+        ..setQuestionCount(_count)
+        ..setAnswers(answers);
+    }
 
     final res = await ref.read(recommendationFlowProvider).generate(
           answers: answers,
-          contentType: _content,
+          contentType: contentType,
           userAge: _age,
           contentTone: _tone,
           userName: _name,
+          refinement: refinement,
         );
     if (!mounted) return;
     if (res.isError) {
@@ -403,6 +426,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           recommendations:
               ref.watch(quizStoreProvider).recommendations,
           onRestart: _restart,
+          onRefine: _refine,
         );
     }
   }
@@ -839,10 +863,17 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             : (_error ?? 'Please try again.')),
         const SizedBox(height: 16),
         AdaptiveButton(
-            onPressed: _generate,
+            onPressed: () =>
+                _generate(refinement: _pendingRefinement),
             label: 'Try again',
             color: _accentDot),
       ],
     );
   }
+
+  /// Entry point for results_view's "Refine these": replays the original
+  /// quiz context (from quizStore) with the user's steer layered on, reusing
+  /// the generating loader + error handling + results transition.
+  Future<void> _refine(RefinementInput input) =>
+      _generate(refinement: input);
 }
