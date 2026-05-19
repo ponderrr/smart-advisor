@@ -15,8 +15,6 @@ import {
   Loader,
   Music,
   Pencil,
-  Shuffle,
-  Sparkles,
   ThumbsDown,
   ThumbsUp,
   Trash2,
@@ -45,7 +43,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { PillButton } from "@/components/ui/pill-button";
 import { SegmentedControl } from "@/components/ui/segmented-control";
-import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { Dialog } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -279,25 +276,6 @@ export default function LibraryPage() {
                 <Upload size={15} />
                 {t("import.headerCta")}
               </PillButton>
-              <PillButton
-                onClick={() => router.push("/quiz?mode=surprise")}
-                className="inline-flex items-center gap-2 whitespace-nowrap border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
-              >
-                <Shuffle size={15} />
-                {tc("surpriseMe")}
-              </PillButton>
-              <HoverBorderGradient
-                onClick={() => router.push("/quiz")}
-                idleColor="17, 24, 39"
-                darkIdleColor="255, 255, 255"
-                highlightColor="99, 102, 241"
-                darkHighlightColor="129, 140, 248"
-                containerClassName="rounded-full w-fit"
-                className="flex items-center gap-2 whitespace-nowrap bg-white px-6 py-3 text-sm font-black leading-none tracking-tight text-black dark:bg-black dark:text-white"
-              >
-                <Sparkles size={16} />
-                {t("startQuiz")}
-              </HoverBorderGradient>
             </div>
           </div>
 

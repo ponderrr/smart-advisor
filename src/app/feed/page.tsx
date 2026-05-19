@@ -9,6 +9,8 @@ import {
   BookmarkCheck,
   MessageCircle,
   Plus,
+  Shuffle,
+  Sparkles,
   Users,
   Compass,
   UserPlus,
@@ -22,6 +24,12 @@ import { motion } from "motion/react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Dialog } from "@/components/ui/dialog";
 import { SegmentedControl } from "@/components/ui/segmented-control";
@@ -542,6 +550,44 @@ export default function FeedPage() {
                 >
                   <UserPlus size={15} />
                 </button>
+                {/* Quiz launcher — single icon button with a 3-option menu.
+                    Replaces the redundant "Start Quiz" CTAs that used to
+                    live on Dashboard/Library/History headers. */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      title="Start a quiz"
+                      aria-label="Start a quiz"
+                      className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200/80 bg-white text-slate-600 transition-colors hover:border-indigo-300 hover:text-indigo-600 dark:border-slate-700/70 dark:bg-slate-900/65 dark:text-slate-300 dark:hover:border-indigo-500/60 dark:hover:text-indigo-300"
+                    >
+                      <Sparkles size={15} />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="min-w-[200px]">
+                    <DropdownMenuItem
+                      onSelect={() => router.push("/quiz")}
+                      className="gap-2"
+                    >
+                      <Sparkles size={14} />
+                      Solo quiz
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onSelect={() => router.push("/group-quiz")}
+                      className="gap-2"
+                    >
+                      <UsersRound size={14} />
+                      Group quiz
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onSelect={() => router.push("/quiz?mode=surprise")}
+                      className="gap-2"
+                    >
+                      <Shuffle size={14} />
+                      Surprise me
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <Button onClick={() => setComposer(true)} className="gap-1.5">
                   <Plus size={16} /> Share a pick
                 </Button>
