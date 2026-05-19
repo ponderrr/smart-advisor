@@ -163,7 +163,27 @@
       "appliesNext": "Applies on next quiz",
       "save": "Save Preferences",
       "savedToast": "Content preferences saved.",
-      "saveError": "We couldn't save your preferences. Please try again."
+      "saveError": "We couldn't save your preferences. Please try again.",
+      "filters": {
+        "title": "Recommendation filters",
+        "description": "Hard limits the AI must obey on every pick — solo quiz and Surprise Me. Group Quiz isn't affected.",
+        "avoidGenresLabel": "Avoid genres",
+        "runtimeLabel": "Max movie runtime",
+        "runtimeNoCap": "No cap",
+        "runtimeMinutes": "{minutes}m",
+        "runtimeHintNone": "No runtime cap — movies of any length are fair game.",
+        "runtimeHint": "Movies must run {minutes} minutes or less.",
+        "languageLabel": "Preferred language",
+        "languagePlaceholder": "e.g. Japanese, Spanish",
+        "avoidNoteLabel": "Never recommend",
+        "avoidNotePlaceholder": "Anything to avoid entirely — franchises, themes, creators…",
+        "avoidNoteHint": "Free text. Be as specific as you like.",
+        "appliesNext": "Applies on next quiz",
+        "save": "Save filters",
+        "saved": "Recommendation filters saved.",
+        "saveFailed": "We couldn't save your filters. Please try again.",
+        "notAuthed": "You need to be signed in to save filters."
+      }
     },
     "integrations": {
       "title": "Integrations",

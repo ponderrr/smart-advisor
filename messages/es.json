@@ -163,7 +163,27 @@
       "appliesNext": "Se aplica en el próximo cuestionario",
       "save": "Guardar preferencias",
       "savedToast": "Preferencias de contenido guardadas.",
-      "saveError": "No pudimos guardar tus preferencias. Inténtalo de nuevo."
+      "saveError": "No pudimos guardar tus preferencias. Inténtalo de nuevo.",
+      "filters": {
+        "title": "Filtros de recomendación",
+        "description": "Límites estrictos que la IA debe respetar en cada elección — cuestionario individual y Sorpréndeme. No afecta al cuestionario en grupo.",
+        "avoidGenresLabel": "Evitar géneros",
+        "runtimeLabel": "Duración máxima de película",
+        "runtimeNoCap": "Sin límite",
+        "runtimeMinutes": "{minutes} min",
+        "runtimeHintNone": "Sin límite de duración: películas de cualquier duración son válidas.",
+        "runtimeHint": "Las películas deben durar {minutes} minutos o menos.",
+        "languageLabel": "Idioma preferido",
+        "languagePlaceholder": "p. ej. japonés, español",
+        "avoidNoteLabel": "Nunca recomendar",
+        "avoidNotePlaceholder": "Algo que evitar por completo: franquicias, temas, creadores…",
+        "avoidNoteHint": "Texto libre. Sé tan específico como quieras.",
+        "appliesNext": "Se aplica en el próximo cuestionario",
+        "save": "Guardar filtros",
+        "saved": "Filtros de recomendación guardados.",
+        "saveFailed": "No pudimos guardar tus filtros. Inténtalo de nuevo.",
+        "notAuthed": "Debes iniciar sesión para guardar filtros."
+      }
     },
     "integrations": {
       "title": "Integraciones",

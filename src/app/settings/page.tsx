@@ -47,6 +47,7 @@ import {
   SectionHeader,
   SettingsInput,
 } from "./_components/settings-ui";
+import { RecommendationFiltersCard } from "./_components/recommendation-filters-card";
 import { usePasswordRules } from "./_hooks/use-password-rules";
 import {
   useContentPreferences,
@@ -1077,6 +1078,8 @@ const SettingsPage = () => {
                         </StatefulButton>
                       </div>
                     </SectionCard>
+
+                    <RecommendationFiltersCard />
                   </motion.div>
                 )}
 

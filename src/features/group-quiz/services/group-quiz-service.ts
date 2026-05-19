@@ -419,6 +419,8 @@ class GroupQuizService {
         hostAge,
         // Synthesizer prompt: tell the model these are multiple players.
         `${hostName} hosting a group of ${participants.length}`,
+        // A shared room must not inherit one member's personal hard filters.
+        { applyFilters: false },
       );
       const result: GroupQuizResult = {};
       if (data.movieRecommendation) {

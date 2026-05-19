@@ -33,7 +33,8 @@ serve(async (req) => {
       });
     }
 
-    const { name, age, answers, contentType, contentTone } = await req.json();
+    const { name, age, answers, contentType, contentTone, recommendationFilters } =
+      await req.json();
 
     if (!name || !age || !answers) {
       return new Response(
@@ -68,6 +69,10 @@ serve(async (req) => {
     // AND they haven't opted into family-friendly tone.
     const allowMature = !familyFriendly;
 
+    // Optional taste tuning / hard filters. Absent or empty → no change to
+    // existing behaviour. Built once, appended to each type's user prompt.
+    const hardConstraints = buildHardConstraints(recommendationFilters);
+
     if (wantsMovies) {
       const movieRec = await getRecommendation({
         type: "movie",
@@ -76,6 +81,7 @@ serve(async (req) => {
         answers,
         isAdult: allowMature,
         systemPrompt,
+        hardConstraints,
       });
       recommendations.push({ type: "movie", ...movieRec });
     }
@@ -88,6 +94,7 @@ serve(async (req) => {
         answers,
         isAdult: allowMature,
         systemPrompt,
+        hardConstraints,
       });
       recommendations.push({ type: "book", ...bookRec });
     }
@@ -100,6 +107,7 @@ serve(async (req) => {
         answers,
         isAdult: allowMature,
         systemPrompt,
+        hardConstraints,
       });
       recommendations.push({ type: "music", ...musicRec });
     }
@@ -109,12 +117,62 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error("anthropic-recommendations error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    const message = error instanceof Error ? error.message : String(error);
+    return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
+
+/**
+ * Turns the optional recommendationFilters blob into a strongly-worded
+ * HARD CONSTRAINTS block appended to the user prompt. Returns "" when the
+ * field is absent or has no meaningful values, so existing behaviour is
+ * byte-for-byte unchanged for callers that don't send filters.
+ */
+function buildHardConstraints(filters: unknown): string {
+  if (!filters || typeof filters !== "object") return "";
+  const f = filters as {
+    avoidGenres?: unknown;
+    maxRuntimeMinutes?: unknown;
+    language?: unknown;
+    avoidNote?: unknown;
+  };
+
+  const lines: string[] = [];
+
+  const genres = Array.isArray(f.avoidGenres)
+    ? f.avoidGenres
+      .map((g) => String(g).trim())
+      .filter((g) => g.length > 0)
+    : [];
+  if (genres.length > 0) {
+    lines.push(`- Do NOT recommend anything in these genres: ${genres.join(", ")}.`);
+  }
+
+  if (typeof f.maxRuntimeMinutes === "number" && f.maxRuntimeMinutes > 0) {
+    lines.push(
+      `- For movies: the runtime MUST be ${f.maxRuntimeMinutes} minutes or less. Never exceed this.`,
+    );
+  }
+
+  const language = typeof f.language === "string" ? f.language.trim() : "";
+  if (language.length > 0) {
+    lines.push(`- Strongly prefer works in this language: ${language}.`);
+  }
+
+  const note = typeof f.avoidNote === "string" ? f.avoidNote.trim() : "";
+  if (note.length > 0) {
+    lines.push(`- Never recommend the following (avoid entirely): ${note}.`);
+  }
+
+  if (lines.length === 0) return "";
+
+  return `\n\nHARD CONSTRAINTS — the recommendation MUST obey every rule below. If your first idea violates any of these, discard it and pick something else that fits the profile AND these rules. Do not apologise or mention these constraints in the response.\n${
+    lines.join("\n")
+  }`;
+}
 
 async function getRecommendation({
   type,
@@ -123,6 +181,7 @@ async function getRecommendation({
   answers,
   isAdult,
   systemPrompt,
+  hardConstraints,
 }: {
   type: "movie" | "book" | "music";
   name: string;
@@ -130,6 +189,7 @@ async function getRecommendation({
   answers: unknown;
   isAdult: boolean;
   systemPrompt: string;
+  hardConstraints?: string;
 }) {
   // Handle both Answer[] format (from frontend) and Record<string, string> (legacy)
   let answersText: string;
@@ -177,7 +237,7 @@ HARD RULES for the response:
   • 75-84: solid. Aligns with the broad strokes (genre/mood/pace) but compromises on at least one preference.
   • 65-74: soft. Plausible but reaches; you're betting on something they didn't directly ask for.
   • Below 65: only when it's the best of a weak set — never default here.
-  Do NOT cluster scores around 90-92. If you'd score every pick the same, you're not being honest. Vary based on actual fit.
+  Do NOT cluster scores around 90-92. If you'd score every pick the same, you're not being honest. Vary based on actual fit.${hardConstraints ?? ""}
 
 Return ONLY a JSON object — no markdown fences, no commentary, no preamble. Exact shape:
 {

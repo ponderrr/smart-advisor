@@ -14,6 +14,75 @@ const getContentTone = (): "standard" | "family" => {
   return value === "family" ? "family" : "standard";
 };
 
+/** Per-device mirror of the taste-tuning / hard filters blob (parity with
+ *  the content-tone cache + the mobile app's prefs hot-cache). The profile
+ *  row is the source of truth; this is only a fast hydration fallback. */
+export const PREF_RECOMMENDATION_FILTERS_KEY =
+  "smart_advisor_pref_recommendation_filters";
+
+/** Taste tuning / hard filters threaded into the recommendation prompt. */
+export interface RecommendationFilters {
+  avoidGenres?: string[];
+  maxRuntimeMinutes?: number | null;
+  language?: string | null;
+  avoidNote?: string | null;
+}
+
+/** Strips empty fields so the Edge Function only ever sees meaningful
+ *  constraints; returns null when nothing meaningful is set. */
+export function cleanRecommendationFilters(
+  raw: unknown,
+): RecommendationFilters | null {
+  if (!raw || typeof raw !== "object") return null;
+  const f = raw as Record<string, unknown>;
+  const genres = Array.isArray(f.avoidGenres)
+    ? f.avoidGenres.map((g) => String(g).trim()).filter((g) => g.length > 0)
+    : [];
+  const runtime =
+    typeof f.maxRuntimeMinutes === "number" ? f.maxRuntimeMinutes : 0;
+  const language = typeof f.language === "string" ? f.language.trim() : "";
+  const note = typeof f.avoidNote === "string" ? f.avoidNote.trim() : "";
+  const cleaned: RecommendationFilters = {
+    ...(genres.length > 0 ? { avoidGenres: genres } : {}),
+    ...(runtime > 0 ? { maxRuntimeMinutes: runtime } : {}),
+    ...(language.length > 0 ? { language } : {}),
+    ...(note.length > 0 ? { avoidNote: note } : {}),
+  };
+  return Object.keys(cleaned).length > 0 ? cleaned : null;
+}
+
+/**
+ * Pulls the signed-in user's saved taste-tuning / hard filters off their
+ * profile row. Best-effort: a fetch failure or missing column just means
+ * no filters are applied (existing behaviour). Mirrors the mobile
+ * recommendation_flow loader.
+ */
+async function loadRecommendationFilters(): Promise<RecommendationFilters | null> {
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return null;
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("recommendation_filters")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (error) return null;
+    return cleanRecommendationFilters(data?.recommendation_filters);
+  } catch {
+    return null;
+  }
+}
+
+/** Options shared by the recommendation generators. */
+export interface GenerateOptions {
+  /** When false, the user's personal hard filters are NOT applied — used by
+   *  Group Quiz so one member's "no Horror" doesn't silently constrain a
+   *  shared room. Defaults to true (solo quiz + Surprise). */
+  applyFilters?: boolean;
+}
+
 /** What kind of failure callers are dealing with. Lets the UI swap messaging
  *  (e.g. "AI is busy" vs. "Try again") and lets the retry policy back off
  *  harder when the upstream API is collectively overloaded. */
@@ -248,6 +317,7 @@ export async function generateRecommendations(
   contentType: "movie" | "book" | "music" | "both" | "mix",
   userAge: number,
   userName: string = "User",
+  options?: GenerateOptions,
 ): Promise<RecommendationData> {
   try {
     // Validate session exists
@@ -259,6 +329,13 @@ export async function generateRecommendations(
       throw new Error("User not authenticated");
     }
 
+    // Solo paths (quiz, Surprise) thread the user's saved hard filters into
+    // the prompt with no caller wiring; Group Quiz opts out.
+    const recommendationFilters =
+      options?.applyFilters === false
+        ? null
+        : await loadRecommendationFilters();
+
     // supabase.functions.invoke automatically sends the session token
     const { data, error } = await supabase.functions.invoke(
       "anthropic-recommendations",
@@ -269,6 +346,7 @@ export async function generateRecommendations(
           name: userName,
           age: userAge,
           contentTone: getContentTone(),
+          ...(recommendationFilters ? { recommendationFilters } : {}),
         },
       },
     );
@@ -360,6 +438,7 @@ export async function generateRecommendationsWithRetry(
   userAge: number,
   userName: string = "User",
   maxRetries: number = 3,
+  options?: GenerateOptions,
 ): Promise<RecommendationData> {
   let lastError;
 
@@ -370,6 +449,7 @@ export async function generateRecommendationsWithRetry(
         contentType,
         userAge,
         userName,
+        options,
       );
     } catch (error) {
       lastError = error;
