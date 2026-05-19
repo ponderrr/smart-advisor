@@ -494,6 +494,8 @@
       "soloDesc": "Un cuestionario de personalidad corto, solo para ti.",
       "group": "Cuestionario en grupo",
       "groupDesc": "Hazlo junto a tus amigos en una sala compartida.",
+      "surprise": "Sorpréndeme",
+      "surpriseDesc": "Un toque: una elección al azar, sin preguntas.",
       "close": "Cancelar"
     }
   },

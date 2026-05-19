@@ -494,6 +494,8 @@
       "soloDesc": "A short personality quiz, just for you.",
       "group": "Group Quiz",
       "groupDesc": "Take it together with friends in a shared room.",
+      "surprise": "Surprise Me",
+      "surpriseDesc": "One tap — a random pick, no questions asked.",
       "close": "Cancel"
     }
   },
