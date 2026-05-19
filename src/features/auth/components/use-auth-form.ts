@@ -107,11 +107,11 @@ export function useAuthForm(props: AuthFormProps) {
   const headingsByMode = messages.Auth?.headings ?? {};
   // Honor `?next=/some/path` after sign-in so deep-link auth (e.g. from
   // /group-quiz "Sign in to host") returns to the originating page instead
-  // of dropping people on /dashboard. Only allow same-origin relative paths.
+  // of dropping people on the home feed. Only allow same-origin relative paths.
   const postAuthDestination = (() => {
     const raw = searchParams?.get("next") ?? null;
     if (raw && raw.startsWith("/") && !raw.startsWith("//")) return raw;
-    return "/dashboard";
+    return "/feed";
   })();
   const [mode, setMode] = useState<AuthMode>(
     initialMfaRequired ? "mfa-challenge" : "signin",

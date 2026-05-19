@@ -253,6 +253,7 @@
       "feed": "Feed",
       "library": "Biblioteca",
       "history": "Historial",
+      "milestones": "Logros",
       "groupQuiz": "Cuestionario en grupo",
       "settings": "Ajustes"
     },
@@ -1899,6 +1900,8 @@
       },
       "milestones": {
         "eyebrow": "Logros",
+        "pageTitle": "Tus logros",
+        "backToFeed": "Volver al feed",
         "earnedSummary": "{earned} de {total} obtenidos",
         "unlocked": "Desbloqueado",
         "progress": "{progress}/{target}",

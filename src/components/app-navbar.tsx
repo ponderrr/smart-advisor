@@ -41,12 +41,13 @@ const DEMO_KEYS = [
 ] as const;
 
 const LOGGED_IN_KEYS = [
-  // The Feed is the logged-in home (/feed); the analytics dashboard is its
-  // own destination at /dashboard.
+  // Feed is the logged-in home. The old /dashboard route is retired —
+  // milestones moved to /milestones; analytics live in /wrapped; recent
+  // picks are in /history.
   { key: "feed", link: "/feed" },
-  { key: "dashboard", link: "/dashboard" },
   { key: "library", link: "/library" },
   { key: "history", link: "/history" },
+  { key: "milestones", link: "/milestones" },
   { key: "groupQuiz", link: "/group-quiz" },
   { key: "settings", link: "/settings" },
 ] as const;
