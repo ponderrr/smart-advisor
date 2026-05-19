@@ -39,6 +39,12 @@ class StorageKeys {
   /// Per-device feed display prefs (view/scope/community/commentSort) as a
   /// single JSON blob — exact web key string (use-feed-prefs.ts).
   static const String prefFeedPrefs = 'smart_advisor_pref_feed_prefs';
+
+  /// Taste tuning / hard filters mirror (avoidGenres / maxRuntimeMinutes /
+  /// language / avoidNote) as a single JSON blob, hot-cached for the AI
+  /// service in parity with the content-tone cache.
+  static const String prefRecommendationFilters =
+      'smart_advisor_pref_recommendation_filters';
 }
 
 /// Default per-request network timeout (web FETCH_TIMEOUT_MS).

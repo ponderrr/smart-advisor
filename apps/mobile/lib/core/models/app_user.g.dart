@@ -20,6 +20,8 @@ _AppUser _$AppUserFromJson(Map<String, dynamic> json) => _AppUser(
   contentTone: json['content_tone'] as String?,
   locale: json['locale'] as String?,
   setupCompletedAt: json['setup_completed_at'] as String?,
+  recommendationFilters:
+      json['recommendation_filters'] as Map<String, dynamic>?,
 );
 
 Map<String, dynamic> _$AppUserToJson(_AppUser instance) => <String, dynamic>{
@@ -36,4 +38,5 @@ Map<String, dynamic> _$AppUserToJson(_AppUser instance) => <String, dynamic>{
   'content_tone': instance.contentTone,
   'locale': instance.locale,
   'setup_completed_at': instance.setupCompletedAt,
+  'recommendation_filters': instance.recommendationFilters,
 };

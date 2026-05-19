@@ -21,6 +21,8 @@ abstract class AppUser with _$AppUser {
     @JsonKey(name: 'content_tone') String? contentTone,
     String? locale,
     @JsonKey(name: 'setup_completed_at') String? setupCompletedAt,
+    @JsonKey(name: 'recommendation_filters')
+    Map<String, dynamic>? recommendationFilters,
   }) = _AppUser;
 
   factory AppUser.fromJson(Map<String, dynamic> json) =>

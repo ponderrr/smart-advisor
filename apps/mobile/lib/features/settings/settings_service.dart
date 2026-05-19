@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -80,6 +82,29 @@ class SettingsService {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString(StorageKeys.prefContentTone, contentTone);
       }
+      return ServiceResult.ok(null);
+    } on PostgrestException catch (e) {
+      return ServiceResult.fail(e.message);
+    }
+  }
+
+  /// Persists the taste-tuning / hard filters blob to the profile row and
+  /// mirrors it into SharedPreferences for the AI service (parity with the
+  /// content-tone hot cache). Shape:
+  /// `{ avoidGenres: string[], maxRuntimeMinutes: int|null,
+  ///    language: string|null, avoidNote: string|null }`.
+  Future<ServiceResult<void>> updateRecommendationFilters(
+      Map<String, dynamic> filters) async {
+    final uid = _c.auth.currentUser?.id;
+    if (uid == null) return ServiceResult.fail('Not authenticated');
+    try {
+      await _c.from('profiles').update(<String, dynamic>{
+        'recommendation_filters': filters,
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+      }).eq('id', uid);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+          StorageKeys.prefRecommendationFilters, jsonEncode(filters));
       return ServiceResult.ok(null);
     } on PostgrestException catch (e) {
       return ServiceResult.fail(e.message);

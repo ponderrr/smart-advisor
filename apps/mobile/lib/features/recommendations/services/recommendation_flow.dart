@@ -1,3 +1,5 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../../../core/models/ai_models.dart';
 import '../../../core/models/answer.dart';
 import '../../../core/models/enums.dart';
@@ -16,13 +18,51 @@ import 'tmdb_service.dart';
 /// directly — a native client has no browser CORS, so the web's /api
 /// proxies aren't needed. Still trimmed vs. web: 1 pick per type, no dedup.
 class RecommendationFlow {
-  RecommendationFlow(this._ai, this._tmdb, this._db, this._books, this._music);
+  RecommendationFlow(
+      this._ai, this._tmdb, this._db, this._books, this._music, this._client);
 
   final AiService _ai;
   final TmdbService _tmdb;
   final DatabaseService _db;
   final OpenLibraryService _books;
   final DeezerService _music;
+  final SupabaseClient _client;
+
+  /// Pulls the signed-in user's saved taste-tuning / hard filters off their
+  /// profile row. Best-effort: a fetch failure or missing column just means
+  /// no filters are applied (existing behaviour). Empty fields are stripped
+  /// so the Edge Function only ever sees meaningful constraints.
+  Future<Map<String, dynamic>?> _loadFilters() async {
+    final uid = _client.auth.currentUser?.id;
+    if (uid == null) return null;
+    try {
+      final row = await _client
+          .from('profiles')
+          .select('recommendation_filters')
+          .eq('id', uid)
+          .maybeSingle();
+      final raw = row?['recommendation_filters'];
+      if (raw is! Map) return null;
+      final f = Map<String, dynamic>.from(raw);
+      final genres = (f['avoidGenres'] as List?)
+              ?.map((e) => e.toString())
+              .where((e) => e.trim().isNotEmpty)
+              .toList() ??
+          const <String>[];
+      final lang = (f['language'] as String?)?.trim();
+      final note = (f['avoidNote'] as String?)?.trim();
+      final runtime = f['maxRuntimeMinutes'];
+      final cleaned = <String, dynamic>{
+        if (genres.isNotEmpty) 'avoidGenres': genres,
+        if (runtime is int && runtime > 0) 'maxRuntimeMinutes': runtime,
+        if (lang != null && lang.isNotEmpty) 'language': lang,
+        if (note != null && note.isNotEmpty) 'avoidNote': note,
+      };
+      return cleaned.isEmpty ? null : cleaned;
+    } catch (_) {
+      return null;
+    }
+  }
 
   Future<ServiceResult<List<Recommendation>>> generate({
     required List<Answer> answers,
@@ -30,7 +70,12 @@ class RecommendationFlow {
     required int userAge,
     required String contentTone,
     String? userName,
+    Map<String, dynamic>? recommendationFilters,
   }) async {
+    // Pull the user's saved hard filters once so every rec path (quiz,
+    // surprise) respects them without each caller wiring it. An explicit
+    // override wins if a caller passes one.
+    final filters = recommendationFilters ?? await _loadFilters();
     // Web enhanced-recommendations parity: 3 of a single type, 1+1+1 for
     // mix, 2 movies+1 book for legacy "both". Each EF call returns one of
     // each type, so fan out N parallel calls and dedup by title.
@@ -54,6 +99,7 @@ class RecommendationFlow {
           userAge: userAge,
           contentTone: contentTone,
           userName: userName,
+          recommendationFilters: filters,
         ),
       ));
     } on AiServiceException catch (e) {

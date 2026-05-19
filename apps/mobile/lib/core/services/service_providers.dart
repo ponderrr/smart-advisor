@@ -34,4 +34,5 @@ final recommendationFlowProvider = Provider<RecommendationFlow>((ref) =>
       ref.watch(databaseServiceProvider),
       ref.watch(openLibraryServiceProvider),
       ref.watch(deezerServiceProvider),
+      ref.watch(supabaseClientProvider),
     ));

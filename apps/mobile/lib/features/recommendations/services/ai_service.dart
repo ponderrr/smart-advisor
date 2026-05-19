@@ -43,6 +43,7 @@ class AiService {
     required int userAge,
     required String contentTone,
     String? userName,
+    Map<String, dynamic>? recommendationFilters,
   }) async {
     final res = await _invoke('anthropic-recommendations', <String, dynamic>{
       'name': userName ?? '',
@@ -50,6 +51,8 @@ class AiService {
       'answers': answers.map((a) => a.toJson()).toList(),
       'contentType': contentType.wire,
       'contentTone': contentTone,
+      if (recommendationFilters != null && recommendationFilters.isNotEmpty)
+        'recommendationFilters': recommendationFilters,
     });
 
     final raw = (res['recommendations'] as List?) ?? const <dynamic>[];
@@ -106,6 +109,7 @@ class AiService {
     required int userAge,
     required String contentTone,
     String? userName,
+    Map<String, dynamic>? recommendationFilters,
     int maxRetries = 2,
   }) =>
       _withRetry(
@@ -115,6 +119,7 @@ class AiService {
           userAge: userAge,
           contentTone: contentTone,
           userName: userName,
+          recommendationFilters: recommendationFilters,
         ),
         maxRetries: maxRetries,
       );
