@@ -652,7 +652,10 @@ $GroupQuizPickCopyWith<$Res>? get music {
 /// @nodoc
 mixin _$QuizSession {
 
- String get id; String get code;@JsonKey(name: 'host_user_id') String? get hostUserId; QuizSessionStatus get status;@JsonKey(name: 'content_type') String get contentType;@JsonKey(name: 'question_count') int get questionCount;@JsonKey(name: 'max_participants') int get maxParticipants;@JsonKey(name: 'recommendation_id') String? get recommendationId; List<Question>? get questions; GroupQuizResult? get result;@JsonKey(name: 'created_at') String get createdAt;@JsonKey(name: 'completed_at') String? get completedAt;@JsonKey(name: 'expires_at') String get expiresAt;
+ String get id; String get code;@JsonKey(name: 'host_user_id') String? get hostUserId; QuizSessionStatus get status;@JsonKey(name: 'content_type') String get contentType;@JsonKey(name: 'question_count') int get questionCount;@JsonKey(name: 'max_participants') int get maxParticipants;@JsonKey(name: 'recommendation_id') String? get recommendationId; List<Question>? get questions; GroupQuizResult? get result;@JsonKey(name: 'created_at') String get createdAt;@JsonKey(name: 'completed_at') String? get completedAt;@JsonKey(name: 'expires_at') String get expiresAt;// Async mode (additive): a non-null deadline_at marks the session as
+// async — members answer on their own time until this instant. Live
+// sessions leave both null and the live state machine is unchanged.
+@JsonKey(name: 'deadline_at') String? get deadlineAt;@JsonKey(name: 'planned_for') String? get plannedFor;
 /// Create a copy of QuizSession
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -665,16 +668,16 @@ $QuizSessionCopyWith<QuizSession> get copyWith => _$QuizSessionCopyWithImpl<Quiz
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is QuizSession&&(identical(other.id, id) || other.id == id)&&(identical(other.code, code) || other.code == code)&&(identical(other.hostUserId, hostUserId) || other.hostUserId == hostUserId)&&(identical(other.status, status) || other.status == status)&&(identical(other.contentType, contentType) || other.contentType == contentType)&&(identical(other.questionCount, questionCount) || other.questionCount == questionCount)&&(identical(other.maxParticipants, maxParticipants) || other.maxParticipants == maxParticipants)&&(identical(other.recommendationId, recommendationId) || other.recommendationId == recommendationId)&&const DeepCollectionEquality().equals(other.questions, questions)&&(identical(other.result, result) || other.result == result)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.completedAt, completedAt) || other.completedAt == completedAt)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is QuizSession&&(identical(other.id, id) || other.id == id)&&(identical(other.code, code) || other.code == code)&&(identical(other.hostUserId, hostUserId) || other.hostUserId == hostUserId)&&(identical(other.status, status) || other.status == status)&&(identical(other.contentType, contentType) || other.contentType == contentType)&&(identical(other.questionCount, questionCount) || other.questionCount == questionCount)&&(identical(other.maxParticipants, maxParticipants) || other.maxParticipants == maxParticipants)&&(identical(other.recommendationId, recommendationId) || other.recommendationId == recommendationId)&&const DeepCollectionEquality().equals(other.questions, questions)&&(identical(other.result, result) || other.result == result)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.completedAt, completedAt) || other.completedAt == completedAt)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&(identical(other.deadlineAt, deadlineAt) || other.deadlineAt == deadlineAt)&&(identical(other.plannedFor, plannedFor) || other.plannedFor == plannedFor));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,code,hostUserId,status,contentType,questionCount,maxParticipants,recommendationId,const DeepCollectionEquality().hash(questions),result,createdAt,completedAt,expiresAt);
+int get hashCode => Object.hash(runtimeType,id,code,hostUserId,status,contentType,questionCount,maxParticipants,recommendationId,const DeepCollectionEquality().hash(questions),result,createdAt,completedAt,expiresAt,deadlineAt,plannedFor);
 
 @override
 String toString() {
-  return 'QuizSession(id: $id, code: $code, hostUserId: $hostUserId, status: $status, contentType: $contentType, questionCount: $questionCount, maxParticipants: $maxParticipants, recommendationId: $recommendationId, questions: $questions, result: $result, createdAt: $createdAt, completedAt: $completedAt, expiresAt: $expiresAt)';
+  return 'QuizSession(id: $id, code: $code, hostUserId: $hostUserId, status: $status, contentType: $contentType, questionCount: $questionCount, maxParticipants: $maxParticipants, recommendationId: $recommendationId, questions: $questions, result: $result, createdAt: $createdAt, completedAt: $completedAt, expiresAt: $expiresAt, deadlineAt: $deadlineAt, plannedFor: $plannedFor)';
 }
 
 
@@ -685,7 +688,7 @@ abstract mixin class $QuizSessionCopyWith<$Res>  {
   factory $QuizSessionCopyWith(QuizSession value, $Res Function(QuizSession) _then) = _$QuizSessionCopyWithImpl;
 @useResult
 $Res call({
- String id, String code,@JsonKey(name: 'host_user_id') String? hostUserId, QuizSessionStatus status,@JsonKey(name: 'content_type') String contentType,@JsonKey(name: 'question_count') int questionCount,@JsonKey(name: 'max_participants') int maxParticipants,@JsonKey(name: 'recommendation_id') String? recommendationId, List<Question>? questions, GroupQuizResult? result,@JsonKey(name: 'created_at') String createdAt,@JsonKey(name: 'completed_at') String? completedAt,@JsonKey(name: 'expires_at') String expiresAt
+ String id, String code,@JsonKey(name: 'host_user_id') String? hostUserId, QuizSessionStatus status,@JsonKey(name: 'content_type') String contentType,@JsonKey(name: 'question_count') int questionCount,@JsonKey(name: 'max_participants') int maxParticipants,@JsonKey(name: 'recommendation_id') String? recommendationId, List<Question>? questions, GroupQuizResult? result,@JsonKey(name: 'created_at') String createdAt,@JsonKey(name: 'completed_at') String? completedAt,@JsonKey(name: 'expires_at') String expiresAt,@JsonKey(name: 'deadline_at') String? deadlineAt,@JsonKey(name: 'planned_for') String? plannedFor
 });
 
 
@@ -702,7 +705,7 @@ class _$QuizSessionCopyWithImpl<$Res>
 
 /// Create a copy of QuizSession
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? code = null,Object? hostUserId = freezed,Object? status = null,Object? contentType = null,Object? questionCount = null,Object? maxParticipants = null,Object? recommendationId = freezed,Object? questions = freezed,Object? result = freezed,Object? createdAt = null,Object? completedAt = freezed,Object? expiresAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? code = null,Object? hostUserId = freezed,Object? status = null,Object? contentType = null,Object? questionCount = null,Object? maxParticipants = null,Object? recommendationId = freezed,Object? questions = freezed,Object? result = freezed,Object? createdAt = null,Object? completedAt = freezed,Object? expiresAt = null,Object? deadlineAt = freezed,Object? plannedFor = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
@@ -717,7 +720,9 @@ as List<Question>?,result: freezed == result ? _self.result : result // ignore: 
 as GroupQuizResult?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as String,completedAt: freezed == completedAt ? _self.completedAt : completedAt // ignore: cast_nullable_to_non_nullable
 as String?,expiresAt: null == expiresAt ? _self.expiresAt : expiresAt // ignore: cast_nullable_to_non_nullable
-as String,
+as String,deadlineAt: freezed == deadlineAt ? _self.deadlineAt : deadlineAt // ignore: cast_nullable_to_non_nullable
+as String?,plannedFor: freezed == plannedFor ? _self.plannedFor : plannedFor // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 /// Create a copy of QuizSession
@@ -814,10 +819,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String code, @JsonKey(name: 'host_user_id')  String? hostUserId,  QuizSessionStatus status, @JsonKey(name: 'content_type')  String contentType, @JsonKey(name: 'question_count')  int questionCount, @JsonKey(name: 'max_participants')  int maxParticipants, @JsonKey(name: 'recommendation_id')  String? recommendationId,  List<Question>? questions,  GroupQuizResult? result, @JsonKey(name: 'created_at')  String createdAt, @JsonKey(name: 'completed_at')  String? completedAt, @JsonKey(name: 'expires_at')  String expiresAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String code, @JsonKey(name: 'host_user_id')  String? hostUserId,  QuizSessionStatus status, @JsonKey(name: 'content_type')  String contentType, @JsonKey(name: 'question_count')  int questionCount, @JsonKey(name: 'max_participants')  int maxParticipants, @JsonKey(name: 'recommendation_id')  String? recommendationId,  List<Question>? questions,  GroupQuizResult? result, @JsonKey(name: 'created_at')  String createdAt, @JsonKey(name: 'completed_at')  String? completedAt, @JsonKey(name: 'expires_at')  String expiresAt, @JsonKey(name: 'deadline_at')  String? deadlineAt, @JsonKey(name: 'planned_for')  String? plannedFor)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _QuizSession() when $default != null:
-return $default(_that.id,_that.code,_that.hostUserId,_that.status,_that.contentType,_that.questionCount,_that.maxParticipants,_that.recommendationId,_that.questions,_that.result,_that.createdAt,_that.completedAt,_that.expiresAt);case _:
+return $default(_that.id,_that.code,_that.hostUserId,_that.status,_that.contentType,_that.questionCount,_that.maxParticipants,_that.recommendationId,_that.questions,_that.result,_that.createdAt,_that.completedAt,_that.expiresAt,_that.deadlineAt,_that.plannedFor);case _:
   return orElse();
 
 }
@@ -835,10 +840,10 @@ return $default(_that.id,_that.code,_that.hostUserId,_that.status,_that.contentT
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String code, @JsonKey(name: 'host_user_id')  String? hostUserId,  QuizSessionStatus status, @JsonKey(name: 'content_type')  String contentType, @JsonKey(name: 'question_count')  int questionCount, @JsonKey(name: 'max_participants')  int maxParticipants, @JsonKey(name: 'recommendation_id')  String? recommendationId,  List<Question>? questions,  GroupQuizResult? result, @JsonKey(name: 'created_at')  String createdAt, @JsonKey(name: 'completed_at')  String? completedAt, @JsonKey(name: 'expires_at')  String expiresAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String code, @JsonKey(name: 'host_user_id')  String? hostUserId,  QuizSessionStatus status, @JsonKey(name: 'content_type')  String contentType, @JsonKey(name: 'question_count')  int questionCount, @JsonKey(name: 'max_participants')  int maxParticipants, @JsonKey(name: 'recommendation_id')  String? recommendationId,  List<Question>? questions,  GroupQuizResult? result, @JsonKey(name: 'created_at')  String createdAt, @JsonKey(name: 'completed_at')  String? completedAt, @JsonKey(name: 'expires_at')  String expiresAt, @JsonKey(name: 'deadline_at')  String? deadlineAt, @JsonKey(name: 'planned_for')  String? plannedFor)  $default,) {final _that = this;
 switch (_that) {
 case _QuizSession():
-return $default(_that.id,_that.code,_that.hostUserId,_that.status,_that.contentType,_that.questionCount,_that.maxParticipants,_that.recommendationId,_that.questions,_that.result,_that.createdAt,_that.completedAt,_that.expiresAt);case _:
+return $default(_that.id,_that.code,_that.hostUserId,_that.status,_that.contentType,_that.questionCount,_that.maxParticipants,_that.recommendationId,_that.questions,_that.result,_that.createdAt,_that.completedAt,_that.expiresAt,_that.deadlineAt,_that.plannedFor);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -855,10 +860,10 @@ return $default(_that.id,_that.code,_that.hostUserId,_that.status,_that.contentT
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String code, @JsonKey(name: 'host_user_id')  String? hostUserId,  QuizSessionStatus status, @JsonKey(name: 'content_type')  String contentType, @JsonKey(name: 'question_count')  int questionCount, @JsonKey(name: 'max_participants')  int maxParticipants, @JsonKey(name: 'recommendation_id')  String? recommendationId,  List<Question>? questions,  GroupQuizResult? result, @JsonKey(name: 'created_at')  String createdAt, @JsonKey(name: 'completed_at')  String? completedAt, @JsonKey(name: 'expires_at')  String expiresAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String code, @JsonKey(name: 'host_user_id')  String? hostUserId,  QuizSessionStatus status, @JsonKey(name: 'content_type')  String contentType, @JsonKey(name: 'question_count')  int questionCount, @JsonKey(name: 'max_participants')  int maxParticipants, @JsonKey(name: 'recommendation_id')  String? recommendationId,  List<Question>? questions,  GroupQuizResult? result, @JsonKey(name: 'created_at')  String createdAt, @JsonKey(name: 'completed_at')  String? completedAt, @JsonKey(name: 'expires_at')  String expiresAt, @JsonKey(name: 'deadline_at')  String? deadlineAt, @JsonKey(name: 'planned_for')  String? plannedFor)?  $default,) {final _that = this;
 switch (_that) {
 case _QuizSession() when $default != null:
-return $default(_that.id,_that.code,_that.hostUserId,_that.status,_that.contentType,_that.questionCount,_that.maxParticipants,_that.recommendationId,_that.questions,_that.result,_that.createdAt,_that.completedAt,_that.expiresAt);case _:
+return $default(_that.id,_that.code,_that.hostUserId,_that.status,_that.contentType,_that.questionCount,_that.maxParticipants,_that.recommendationId,_that.questions,_that.result,_that.createdAt,_that.completedAt,_that.expiresAt,_that.deadlineAt,_that.plannedFor);case _:
   return null;
 
 }
@@ -869,8 +874,8 @@ return $default(_that.id,_that.code,_that.hostUserId,_that.status,_that.contentT
 /// @nodoc
 @JsonSerializable()
 
-class _QuizSession implements QuizSession {
-  const _QuizSession({required this.id, required this.code, @JsonKey(name: 'host_user_id') this.hostUserId, required this.status, @JsonKey(name: 'content_type') required this.contentType, @JsonKey(name: 'question_count') required this.questionCount, @JsonKey(name: 'max_participants') required this.maxParticipants, @JsonKey(name: 'recommendation_id') this.recommendationId, final  List<Question>? questions, this.result, @JsonKey(name: 'created_at') required this.createdAt, @JsonKey(name: 'completed_at') this.completedAt, @JsonKey(name: 'expires_at') required this.expiresAt}): _questions = questions;
+class _QuizSession extends QuizSession {
+  const _QuizSession({required this.id, required this.code, @JsonKey(name: 'host_user_id') this.hostUserId, required this.status, @JsonKey(name: 'content_type') required this.contentType, @JsonKey(name: 'question_count') required this.questionCount, @JsonKey(name: 'max_participants') required this.maxParticipants, @JsonKey(name: 'recommendation_id') this.recommendationId, final  List<Question>? questions, this.result, @JsonKey(name: 'created_at') required this.createdAt, @JsonKey(name: 'completed_at') this.completedAt, @JsonKey(name: 'expires_at') required this.expiresAt, @JsonKey(name: 'deadline_at') this.deadlineAt, @JsonKey(name: 'planned_for') this.plannedFor}): _questions = questions,super._();
   factory _QuizSession.fromJson(Map<String, dynamic> json) => _$QuizSessionFromJson(json);
 
 @override final  String id;
@@ -894,6 +899,11 @@ class _QuizSession implements QuizSession {
 @override@JsonKey(name: 'created_at') final  String createdAt;
 @override@JsonKey(name: 'completed_at') final  String? completedAt;
 @override@JsonKey(name: 'expires_at') final  String expiresAt;
+// Async mode (additive): a non-null deadline_at marks the session as
+// async — members answer on their own time until this instant. Live
+// sessions leave both null and the live state machine is unchanged.
+@override@JsonKey(name: 'deadline_at') final  String? deadlineAt;
+@override@JsonKey(name: 'planned_for') final  String? plannedFor;
 
 /// Create a copy of QuizSession
 /// with the given fields replaced by the non-null parameter values.
@@ -908,16 +918,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _QuizSession&&(identical(other.id, id) || other.id == id)&&(identical(other.code, code) || other.code == code)&&(identical(other.hostUserId, hostUserId) || other.hostUserId == hostUserId)&&(identical(other.status, status) || other.status == status)&&(identical(other.contentType, contentType) || other.contentType == contentType)&&(identical(other.questionCount, questionCount) || other.questionCount == questionCount)&&(identical(other.maxParticipants, maxParticipants) || other.maxParticipants == maxParticipants)&&(identical(other.recommendationId, recommendationId) || other.recommendationId == recommendationId)&&const DeepCollectionEquality().equals(other._questions, _questions)&&(identical(other.result, result) || other.result == result)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.completedAt, completedAt) || other.completedAt == completedAt)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _QuizSession&&(identical(other.id, id) || other.id == id)&&(identical(other.code, code) || other.code == code)&&(identical(other.hostUserId, hostUserId) || other.hostUserId == hostUserId)&&(identical(other.status, status) || other.status == status)&&(identical(other.contentType, contentType) || other.contentType == contentType)&&(identical(other.questionCount, questionCount) || other.questionCount == questionCount)&&(identical(other.maxParticipants, maxParticipants) || other.maxParticipants == maxParticipants)&&(identical(other.recommendationId, recommendationId) || other.recommendationId == recommendationId)&&const DeepCollectionEquality().equals(other._questions, _questions)&&(identical(other.result, result) || other.result == result)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.completedAt, completedAt) || other.completedAt == completedAt)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&(identical(other.deadlineAt, deadlineAt) || other.deadlineAt == deadlineAt)&&(identical(other.plannedFor, plannedFor) || other.plannedFor == plannedFor));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,code,hostUserId,status,contentType,questionCount,maxParticipants,recommendationId,const DeepCollectionEquality().hash(_questions),result,createdAt,completedAt,expiresAt);
+int get hashCode => Object.hash(runtimeType,id,code,hostUserId,status,contentType,questionCount,maxParticipants,recommendationId,const DeepCollectionEquality().hash(_questions),result,createdAt,completedAt,expiresAt,deadlineAt,plannedFor);
 
 @override
 String toString() {
-  return 'QuizSession(id: $id, code: $code, hostUserId: $hostUserId, status: $status, contentType: $contentType, questionCount: $questionCount, maxParticipants: $maxParticipants, recommendationId: $recommendationId, questions: $questions, result: $result, createdAt: $createdAt, completedAt: $completedAt, expiresAt: $expiresAt)';
+  return 'QuizSession(id: $id, code: $code, hostUserId: $hostUserId, status: $status, contentType: $contentType, questionCount: $questionCount, maxParticipants: $maxParticipants, recommendationId: $recommendationId, questions: $questions, result: $result, createdAt: $createdAt, completedAt: $completedAt, expiresAt: $expiresAt, deadlineAt: $deadlineAt, plannedFor: $plannedFor)';
 }
 
 
@@ -928,7 +938,7 @@ abstract mixin class _$QuizSessionCopyWith<$Res> implements $QuizSessionCopyWith
   factory _$QuizSessionCopyWith(_QuizSession value, $Res Function(_QuizSession) _then) = __$QuizSessionCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String code,@JsonKey(name: 'host_user_id') String? hostUserId, QuizSessionStatus status,@JsonKey(name: 'content_type') String contentType,@JsonKey(name: 'question_count') int questionCount,@JsonKey(name: 'max_participants') int maxParticipants,@JsonKey(name: 'recommendation_id') String? recommendationId, List<Question>? questions, GroupQuizResult? result,@JsonKey(name: 'created_at') String createdAt,@JsonKey(name: 'completed_at') String? completedAt,@JsonKey(name: 'expires_at') String expiresAt
+ String id, String code,@JsonKey(name: 'host_user_id') String? hostUserId, QuizSessionStatus status,@JsonKey(name: 'content_type') String contentType,@JsonKey(name: 'question_count') int questionCount,@JsonKey(name: 'max_participants') int maxParticipants,@JsonKey(name: 'recommendation_id') String? recommendationId, List<Question>? questions, GroupQuizResult? result,@JsonKey(name: 'created_at') String createdAt,@JsonKey(name: 'completed_at') String? completedAt,@JsonKey(name: 'expires_at') String expiresAt,@JsonKey(name: 'deadline_at') String? deadlineAt,@JsonKey(name: 'planned_for') String? plannedFor
 });
 
 
@@ -945,7 +955,7 @@ class __$QuizSessionCopyWithImpl<$Res>
 
 /// Create a copy of QuizSession
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? code = null,Object? hostUserId = freezed,Object? status = null,Object? contentType = null,Object? questionCount = null,Object? maxParticipants = null,Object? recommendationId = freezed,Object? questions = freezed,Object? result = freezed,Object? createdAt = null,Object? completedAt = freezed,Object? expiresAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? code = null,Object? hostUserId = freezed,Object? status = null,Object? contentType = null,Object? questionCount = null,Object? maxParticipants = null,Object? recommendationId = freezed,Object? questions = freezed,Object? result = freezed,Object? createdAt = null,Object? completedAt = freezed,Object? expiresAt = null,Object? deadlineAt = freezed,Object? plannedFor = freezed,}) {
   return _then(_QuizSession(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
@@ -960,7 +970,9 @@ as List<Question>?,result: freezed == result ? _self.result : result // ignore: 
 as GroupQuizResult?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as String,completedAt: freezed == completedAt ? _self.completedAt : completedAt // ignore: cast_nullable_to_non_nullable
 as String?,expiresAt: null == expiresAt ? _self.expiresAt : expiresAt // ignore: cast_nullable_to_non_nullable
-as String,
+as String,deadlineAt: freezed == deadlineAt ? _self.deadlineAt : deadlineAt // ignore: cast_nullable_to_non_nullable
+as String?,plannedFor: freezed == plannedFor ? _self.plannedFor : plannedFor // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

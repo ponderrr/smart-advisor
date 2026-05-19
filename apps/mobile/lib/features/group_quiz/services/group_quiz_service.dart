@@ -36,6 +36,10 @@ class GroupQuizService {
     required int questionCount,
     required int maxParticipants,
     required String displayName,
+    // Async mode (additive): live callers omit both and behaviour is
+    // identical to before. A non-null deadlineAt creates an async session.
+    DateTime? deadlineAt,
+    DateTime? plannedFor,
   }) async {
     final uid = _c.auth.currentUser?.id;
     if (uid == null) {
@@ -50,6 +54,10 @@ class GroupQuizService {
             'content_type': contentType,
             'question_count': questionCount,
             'max_participants': maxParticipants,
+            if (deadlineAt != null)
+              'deadline_at': deadlineAt.toUtc().toIso8601String(),
+            if (plannedFor != null)
+              'planned_for': plannedFor.toUtc().toIso8601String(),
           })
           .select()
           .single();
@@ -240,9 +248,28 @@ class GroupQuizService {
 
   /// Combine every participant's answers into one profile and synthesize a
   /// shared recommendation, then complete the session (realtime propagates).
+  ///
+  /// This is the live-mode completion entry point and is unchanged in
+  /// behaviour — it just delegates the actual synthesis+finalize to the
+  /// shared [_finalize] helper so async mode can reuse the exact same
+  /// recommendation/completion logic instead of duplicating it.
   Future<ServiceResult<void>> synthesizeRecommendation(
       QuizSession session, List<QuizParticipant> participants, int hostAge,
       String hostName,
+      {required String contentTone}) {
+    return _finalize(
+      session,
+      participants.length,
+      hostAge,
+      hostName,
+      contentTone: contentTone,
+    );
+  }
+
+  /// Shared synthesize-and-complete used by BOTH live completion and async
+  /// resolution. Sets result/status/completed_at exactly as live mode did.
+  Future<ServiceResult<void>> _finalize(
+      QuizSession session, int groupSize, int hostAge, String hostName,
       {required String contentTone}) async {
     final answerRows = await listAnswers(session.id);
     final answers = [
@@ -260,7 +287,7 @@ class GroupQuizService {
         contentType: ContentType.fromWire(session.contentType),
         userAge: hostAge,
         contentTone: contentTone,
-        userName: '$hostName hosting ${participants.length} group',
+        userName: '$hostName hosting $groupSize group',
       );
       GroupQuizPick? pick(item) => item == null
           ? null
@@ -288,6 +315,60 @@ class GroupQuizService {
     } on AiServiceException catch (e) {
       return ServiceResult.fail(e.message);
     }
+  }
+
+  /// Async-mode resolution without a server scheduler. Resolves the group
+  /// pick CLIENT-side when either condition holds:
+  ///   * every joined participant has submitted, OR
+  ///   * the deadline has passed (now >= deadline_at).
+  /// Idempotent — guarded on a non-completed async session, so concurrent
+  /// callers (last submitter + a post-deadline opener) can't double-run and
+  /// the live (deadline_at == null) path is never touched.
+  ///
+  /// Returns (resolved, error): resolved == true only when this call
+  /// actually performed the finalize; false means "not ready / already
+  /// done" (not an error).
+  Future<({bool resolved, String? error})> resolveIfReady(
+      String sessionId, int hostAge, String hostName,
+      {required String contentTone}) async {
+    final session = await getSession(sessionId);
+    if (session == null) {
+      return (resolved: false, error: 'Session not found.');
+    }
+    // Live sessions (no deadline) and already-completed sessions are
+    // explicitly out of scope — never alter the live completion path.
+    if (!session.isAsync ||
+        session.status == QuizSessionStatus.completed) {
+      return (resolved: false, error: null);
+    }
+    final parts = await listParticipants(sessionId);
+    final allIn = parts.isNotEmpty &&
+        parts.every((p) => p.answersSubmittedAt != null);
+    final deadline = session.deadlineAtUtc;
+    final past = deadline != null &&
+        !DateTime.now().toUtc().isBefore(deadline);
+    if (!allIn && !past) {
+      return (resolved: false, error: null);
+    }
+    final r = await _finalize(
+      session,
+      parts.length,
+      hostAge,
+      hostName,
+      contentTone: contentTone,
+    );
+    return (resolved: !r.isError, error: r.error);
+  }
+
+  /// Async create flow: generate the question set and move the session
+  /// straight to in_progress (no host-driven lobby start), reusing the
+  /// same question generation as live. Live mode keeps using
+  /// generateAndStartQuiz from the lobby — that path is unchanged.
+  Future<({List<Question>? questions, String? error})> startAsyncQuiz(
+      QuizSession session, int hostAge, String hostName,
+      {required String contentTone}) {
+    return generateAndStartQuiz(session, hostAge, hostName,
+        contentTone: contentTone);
   }
 
   // Guest participant id cache (parity with web localStorage).

@@ -70,10 +70,27 @@ abstract class QuizSession with _$QuizSession {
     @JsonKey(name: 'created_at') required String createdAt,
     @JsonKey(name: 'completed_at') String? completedAt,
     @JsonKey(name: 'expires_at') required String expiresAt,
+    // Async mode (additive): a non-null deadline_at marks the session as
+    // async — members answer on their own time until this instant. Live
+    // sessions leave both null and the live state machine is unchanged.
+    @JsonKey(name: 'deadline_at') String? deadlineAt,
+    @JsonKey(name: 'planned_for') String? plannedFor,
   }) = _QuizSession;
+
+  const QuizSession._();
 
   factory QuizSession.fromJson(Map<String, dynamic> json) =>
       _$QuizSessionFromJson(json);
+
+  /// Async mode is gated entirely on the presence of a deadline. When
+  /// false the live/realtime state machine runs unchanged.
+  bool get isAsync => deadlineAt != null;
+
+  DateTime? get deadlineAtUtc =>
+      deadlineAt == null ? null : DateTime.parse(deadlineAt!);
+
+  DateTime? get plannedForUtc =>
+      plannedFor == null ? null : DateTime.parse(plannedFor!);
 }
 
 @freezed

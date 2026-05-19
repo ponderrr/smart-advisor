@@ -18,7 +18,7 @@ enum _Path { pick, host, join }
 
 /// Host setup is a solo-quiz-style stepper: one decision per page,
 /// morphing in place.
-enum _HostStep { content, questions, players, confirm }
+enum _HostStep { content, questions, players, mode, confirm }
 
 class _S extends ConsumerState<GroupQuizScreen> {
   _Path _path = _Path.pick;
@@ -27,6 +27,15 @@ class _S extends ConsumerState<GroupQuizScreen> {
   int _content = 3; // 0 movie,1 book,2 music,3 mix
   int _count = 5;
   int _maxP = 8;
+  // Async mode (additive). _mode 0 = live (default, unchanged), 1 = async.
+  int _mode = 0;
+  int _deadlinePreset = 1; // index into _deadlineOptions
+  DateTime? _plannedFor;
+  static const _deadlineOptions = [
+    ('24 hours', Duration(hours: 24)),
+    ('3 days', Duration(days: 3)),
+    ('1 week', Duration(days: 7)),
+  ];
   final _name = TextEditingController();
   final _code = TextEditingController();
   String? _error;
@@ -51,11 +60,16 @@ class _S extends ConsumerState<GroupQuizScreen> {
       _busy = true;
       _error = null;
     });
+    final deadline = _mode == 1
+        ? DateTime.now().add(_deadlineOptions[_deadlinePreset].$2)
+        : null;
     final r = await ref.read(groupQuizServiceProvider).createSession(
           contentType: _contentWire,
           questionCount: _count,
           maxParticipants: _maxP,
           displayName: _name.text.trim(),
+          deadlineAt: deadline,
+          plannedFor: _mode == 1 ? _plannedFor : null,
         );
     if (!mounted) return;
     setState(() => _busy = false);
@@ -572,6 +586,115 @@ class _S extends ConsumerState<GroupQuizScreen> {
               tone: tone,
               onBack: () => _toHost(_HostStep.questions, -1),
               nextLabel: 'Continue',
+              onNext: () => _toHost(_HostStep.mode, 1),
+            ),
+          ],
+        );
+      case _HostStep.mode:
+        return Column(
+          key: const ValueKey('host_mode'),
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _header(tone, 'Step 4', 'When do you answer?',
+                'Everyone together now, or on their own time.'),
+            BrandSegmented(
+              labels: const ['Together now', 'By a deadline'],
+              selectedIndex: _mode,
+              color: tone.dot,
+              onValueChanged: (i) => setState(() => _mode = i),
+            ),
+            const SizedBox(height: 16),
+            if (_mode == 1) ...[
+              Align(
+                  alignment: Alignment.centerLeft,
+                  child: Eyebrow('Answer within', color: tone.text)),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (var i = 0;
+                      i < _deadlineOptions.length;
+                      i++)
+                    GestureDetector(
+                      onTap: () =>
+                          setState(() => _deadlinePreset = i),
+                      child: AnimatedContainer(
+                        duration:
+                            const Duration(milliseconds: 140),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 9),
+                        decoration: BoxDecoration(
+                          color: _deadlinePreset == i
+                              ? tone.dot
+                              : tone.iconCircleBg,
+                          borderRadius:
+                              BorderRadius.circular(999),
+                        ),
+                        child: Text(_deadlineOptions[i].$1,
+                            style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                                color: _deadlinePreset == i
+                                    ? Colors.white
+                                    : tone.iconCircleFg)),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Align(
+                  alignment: Alignment.centerLeft,
+                  child: Eyebrow('Plan to do it together (optional)',
+                      color: tone.text)),
+              const SizedBox(height: 8),
+              AdaptiveButton(
+                style: AdaptiveButtonStyle.bordered,
+                onPressed: () async {
+                  final now = DateTime.now();
+                  final d = await AdaptiveDatePicker.show(
+                    context: context,
+                    initialDate: _plannedFor ??
+                        now.add(const Duration(days: 1)),
+                    firstDate: now,
+                    lastDate:
+                        now.add(const Duration(days: 365)),
+                  );
+                  if (d != null) {
+                    setState(() => _plannedFor = d);
+                  }
+                },
+                label: _plannedFor == null
+                    ? 'Pick a date'
+                    : '${_plannedFor!.year}-'
+                        '${_plannedFor!.month.toString().padLeft(2, '0')}-'
+                        '${_plannedFor!.day.toString().padLeft(2, '0')}',
+              ),
+              if (_plannedFor != null) ...[
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: GestureDetector(
+                    onTap: () =>
+                        setState(() => _plannedFor = null),
+                    child: Text('Clear date',
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: tone.text)),
+                  ),
+                ),
+              ],
+            ] else
+              Subtitle(
+                  'Live: everyone joins the lobby and answers in '
+                  'real time. The host reveals the pick.'),
+            const SizedBox(height: 20),
+            _nav(
+              tone: tone,
+              onBack: () => _toHost(_HostStep.players, -1),
+              nextLabel: 'Continue',
               onNext: () => _toHost(_HostStep.confirm, 1),
             ),
           ],
@@ -581,6 +704,9 @@ class _S extends ConsumerState<GroupQuizScreen> {
           ['Movie', 'Book', 'Music', 'Mix'][_content],
           '$_count questions',
           'up to $_maxP players',
+          _mode == 1
+              ? 'async · ${_deadlineOptions[_deadlinePreset].$1}'
+              : 'live · together now',
         ];
         return Column(
           key: const ValueKey('host_confirm'),
@@ -631,7 +757,7 @@ class _S extends ConsumerState<GroupQuizScreen> {
             const SizedBox(height: 20),
             _nav(
               tone: tone,
-              onBack: () => _toHost(_HostStep.players, -1),
+              onBack: () => _toHost(_HostStep.mode, -1),
               nextLabel: 'Create session',
               onNext: _busy ? null : _host,
             ),

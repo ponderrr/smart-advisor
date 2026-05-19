@@ -76,6 +76,8 @@ _QuizSession _$QuizSessionFromJson(Map<String, dynamic> json) => _QuizSession(
   createdAt: json['created_at'] as String,
   completedAt: json['completed_at'] as String?,
   expiresAt: json['expires_at'] as String,
+  deadlineAt: json['deadline_at'] as String?,
+  plannedFor: json['planned_for'] as String?,
 );
 
 Map<String, dynamic> _$QuizSessionToJson(_QuizSession instance) =>
@@ -93,6 +95,8 @@ Map<String, dynamic> _$QuizSessionToJson(_QuizSession instance) =>
       'created_at': instance.createdAt,
       'completed_at': instance.completedAt,
       'expires_at': instance.expiresAt,
+      'deadline_at': instance.deadlineAt,
+      'planned_for': instance.plannedFor,
     };
 
 const _$QuizSessionStatusEnumMap = {

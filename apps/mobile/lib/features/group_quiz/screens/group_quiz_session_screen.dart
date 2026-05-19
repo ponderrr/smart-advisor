@@ -85,6 +85,12 @@ class _BodyState extends ConsumerState<_Body> {
   final _answers = <int, String>{};
   int _q = 0;
   bool _busy = false;
+  // Async mode one-shot guards (the session provider is a realtime
+  // stream, so build runs on every change — these stop us re-kicking
+  // start/resolve on each rebuild).
+  bool _asyncStartKicked = false;
+  bool _asyncResolveKicked = false;
+  bool _submittedLocally = false;
 
   @override
   Widget build(BuildContext context) {
@@ -100,6 +106,12 @@ class _BodyState extends ConsumerState<_Body> {
         final session = s.session;
         final uid = ref.read(supabaseClientProvider).auth.currentUser?.id;
         final isHost = uid != null && uid == session.hostUserId;
+        // Async sessions take an entirely separate subtree — the live
+        // status switch below is never reached for them, so live mode
+        // is provably unchanged.
+        if (session.isAsync) {
+          return _async(session, s.participants);
+        }
         return switch (session.status) {
           QuizSessionStatus.lobby =>
             _lobby(session, s.participants, isHost),
@@ -388,6 +400,158 @@ class _BodyState extends ConsumerState<_Body> {
               context.canPop() ? context.pop() : context.go('/'),
           label: 'Done',
           style: AdaptiveButtonStyle.bordered),
+    ]);
+  }
+
+  // -------------------------------------------------------------------
+  // Async mode (deadline_at != null). Entirely separate from the live
+  // state machine above — answer on your own time, resolves client-side
+  // when everyone's in or the deadline passes.
+  // -------------------------------------------------------------------
+
+  Future<void> _kickAsyncStart(QuizSession s) async {
+    final p = ref.read(currentProfileProvider).asData?.value;
+    await ref.read(groupQuizServiceProvider).startAsyncQuiz(
+          s, p?.age ?? 18, p?.name ?? 'Host',
+          contentTone: ref.read(contentToneProvider));
+  }
+
+  Future<void> _kickAsyncResolve(QuizSession s) async {
+    final p = ref.read(currentProfileProvider).asData?.value;
+    await ref.read(groupQuizServiceProvider).resolveIfReady(
+          s.id, p?.age ?? 18, p?.name ?? 'Host',
+          contentTone: ref.read(contentToneProvider));
+  }
+
+  String _fmtWhen(DateTime? utc) {
+    if (utc == null) return '';
+    final d = utc.toLocal();
+    const m = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    final hh = d.hour.toString().padLeft(2, '0');
+    final mm = d.minute.toString().padLeft(2, '0');
+    return '${m[d.month - 1]} ${d.day}, $hh:$mm';
+  }
+
+  Widget _async(QuizSession s, List<QuizParticipant> parts) {
+    if (s.status == QuizSessionStatus.cancelled) {
+      return Center(child: Subtitle('This session was cancelled.'));
+    }
+    if (s.status == QuizSessionStatus.completed) return _completed(s);
+
+    final questions = s.questions ?? const <Question>[];
+    if (s.status == QuizSessionStatus.lobby || questions.isEmpty) {
+      if (!_asyncStartKicked) {
+        _asyncStartKicked = true;
+        Future.microtask(() => _kickAsyncStart(s));
+      }
+      return const Center(child: LoaderFive('Setting up your quiz'));
+    }
+
+    // Resolve once on entry — covers "deadline already passed" and
+    // "everyone else already submitted" on open.
+    if (!_asyncResolveKicked) {
+      _asyncResolveKicked = true;
+      Future.microtask(() => _kickAsyncResolve(s));
+    }
+
+    final uid = ref.read(supabaseClientProvider).auth.currentUser?.id;
+    final mine =
+        parts.where((p) => p.userId != null && p.userId == uid);
+    final iSubmitted = _submittedLocally ||
+        (mine.isNotEmpty && mine.first.answersSubmittedAt != null);
+    final submitted =
+        parts.where((p) => p.answersSubmittedAt != null).length;
+    final deadline = _fmtWhen(s.deadlineAtUtc);
+
+    if (!iSubmitted) {
+      final q = questions[_q];
+      final isLast = _q == questions.length - 1;
+      return ListView(padding: const EdgeInsets.all(24), children: [
+        Eyebrow('Answer by $deadline'),
+        const SizedBox(height: 8),
+        BrandProgressBar(
+            value: (_q + 1) / questions.length,
+            accent: accentForContentType(
+                ContentType.fromWire(s.contentType))),
+        const SizedBox(height: 12),
+        Eyebrow('Question ${_q + 1} of ${questions.length}'),
+        const SizedBox(height: 8),
+        BrandHeading(q.text, size: 20),
+        const SizedBox(height: 12),
+        _input(q),
+        const SizedBox(height: 16),
+        Row(children: [
+          if (_q > 0)
+            Expanded(
+                child: AdaptiveButton(
+                    onPressed: () => setState(() => _q--),
+                    label: 'Back',
+                    style: AdaptiveButtonStyle.bordered)),
+          if (_q > 0) const SizedBox(width: 8),
+          Expanded(
+            child: AdaptiveButton(
+              onPressed: (_answers[_q]?.trim().isNotEmpty ?? false)
+                  ? () async {
+                      if (isLast) {
+                        await _submitAll(s);
+                        if (!mounted) return;
+                        setState(() => _submittedLocally = true);
+                        await _kickAsyncResolve(s);
+                      } else {
+                        setState(() => _q++);
+                      }
+                    }
+                  : null,
+              label: isLast ? 'Submit answers' : 'Next',
+            ),
+          ),
+        ]),
+        const SizedBox(height: 16),
+        Center(
+            child:
+                Subtitle('$submitted of ${parts.length} submitted')),
+      ]);
+    }
+
+    return ListView(padding: const EdgeInsets.all(24), children: [
+      const Eyebrow('Answers in'),
+      const SizedBox(height: 8),
+      const BrandHeading('Waiting on the group', size: 22),
+      const SizedBox(height: 12),
+      Subtitle("We'll reveal the group pick once everyone's "
+          'submitted or the deadline passes.'),
+      const SizedBox(height: 16),
+      BrandCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Eyebrow('$submitted of ${parts.length} submitted'),
+            const SizedBox(height: 6),
+            Text('Deadline · $deadline',
+                style: TextStyle(color: context.brandMuted)),
+            if (s.plannedForUtc != null) ...[
+              const SizedBox(height: 4),
+              Text('Planned for · ${_fmtWhen(s.plannedForUtc)}',
+                  style: TextStyle(color: context.brandMuted)),
+            ],
+          ],
+        ),
+      ),
+      const SizedBox(height: 16),
+      AdaptiveButton(
+        onPressed: _busy
+            ? null
+            : () async {
+                setState(() => _busy = true);
+                await _kickAsyncResolve(s);
+                if (mounted) setState(() => _busy = false);
+              },
+        label: 'Check now',
+        style: AdaptiveButtonStyle.bordered,
+      ),
     ]);
   }
 }
