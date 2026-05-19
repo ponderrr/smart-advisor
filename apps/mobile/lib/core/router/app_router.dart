@@ -162,7 +162,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           path: '/demo',
           pageBuilder: (_, state) =>
               _modalPage(state, const DemoScreen())),
-      GoRoute(path: '/wrapped', builder: (_, _) => const WrappedScreen()),
+      GoRoute(
+          path: '/wrapped',
+          builder: (_, _) => const WrappedScreen(),
+          routes: [
+            GoRoute(
+                path: 'month',
+                builder: (_, _) => const WrappedScreen(
+                    period: WrappedPeriod.month)),
+          ]),
       GoRoute(
           path: '/milestones',
           builder: (_, _) => const MilestonesScreen()),

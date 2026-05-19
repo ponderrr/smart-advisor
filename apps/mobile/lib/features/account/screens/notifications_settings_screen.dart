@@ -64,8 +64,13 @@ class NotificationsSettingsScreen extends ConsumerWidget {
                       color: context.colors.mutedForeground),
                   onTap: () => context.push('/notifications'),
                 ),
-                settingsTile(context, Icons.auto_awesome, 'Your Wrapped',
+                settingsTile(
+                    context, Icons.auto_awesome, 'Your year in review',
                     onTap: () => context.push('/wrapped')),
+                settingsDivider(context),
+                settingsTile(
+                    context, Icons.calendar_month, 'This month in review',
+                    onTap: () => context.push('/wrapped/month')),
               ]),
             ),
             const SizedBox(height: 24),

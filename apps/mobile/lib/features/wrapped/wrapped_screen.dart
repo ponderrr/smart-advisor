@@ -21,8 +21,13 @@ final _wrappedProvider =
   return res.data ?? const [];
 });
 
+/// Year-in-review (default) or a lighter month-in-review recap — same
+/// stories + shareable card, just a different time window.
+enum WrappedPeriod { year, month }
+
 class WrappedScreen extends ConsumerWidget {
-  const WrappedScreen({super.key});
+  const WrappedScreen({super.key, this.period = WrappedPeriod.year});
+  final WrappedPeriod period;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -40,7 +45,7 @@ class WrappedScreen extends ConsumerWidget {
                     'Please try again later.',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.white70)))),
-        data: (list) => _Story(recs: list),
+        data: (list) => _Story(recs: list, period: period),
       ),
     );
   }
@@ -53,8 +58,9 @@ class _Slide {
 }
 
 class _Story extends StatefulWidget {
-  const _Story({required this.recs});
+  const _Story({required this.recs, required this.period});
   final List<Recommendation> recs;
+  final WrappedPeriod period;
 
   @override
   State<_Story> createState() => _StoryState();
@@ -94,12 +100,24 @@ class _StoryState extends State<_Story> {
     _arm();
   }
 
-  final int _year = DateTime.now().year;
+  static const _monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June', 'July',
+    'August', 'September', 'October', 'November', 'December'
+  ];
+  final DateTime _now = DateTime.now();
+  bool get _isMonth => widget.period == WrappedPeriod.month;
+  // Headline label: "2026" for the year, "May 2026" for the month.
+  String get _periodTitle => _isMonth
+      ? '${_monthNames[_now.month - 1]} ${_now.year}'
+      : '${_now.year}';
+  // Used in copy like "This <year/month>" / "a favorite this <…>".
+  String get _scopeWord => _isMonth ? 'month' : 'year';
 
   List<_Slide> _build() {
     final yr = widget.recs.where((r) {
       final dt = DateTime.tryParse(r.createdAt);
-      return dt != null && dt.year == _year;
+      if (dt == null || dt.year != _now.year) return false;
+      return !_isMonth || dt.month == _now.month;
     }).toList();
     int by(String t) => yr.where((x) => x.type == t).length;
     final genres = <String, int>{};
@@ -168,7 +186,7 @@ class _StoryState extends State<_Story> {
                 .animate()
                 .scale(duration: 500.ms, curve: Curves.easeOutBack),
             const SizedBox(height: 16),
-            Text('Your $_year\nWrapped',
+            Text('Your $_periodTitle\nWrapped',
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                         color: Colors.white,
@@ -181,7 +199,8 @@ class _StoryState extends State<_Story> {
         );
       }),
       _Slide(const [Tw.violet600, Tw.rose500],
-          (_) => big('This year', '${yr.length}', 'recommendations you got')),
+          (_) => big('This $_scopeWord', '${yr.length}',
+              'recommendations you got')),
       _Slide(const [Tw.amber500, Tw.orange500],
           (_) => big('Your mix', '${by('movie')}·${by('book')}·${by('music')}',
               'movies · books · music')),
@@ -195,7 +214,9 @@ class _StoryState extends State<_Story> {
               'your most-recommended creator')),
       _Slide(const [Tw.indigo900, Tw.violet600], (_) {
         return big('Standout', standout?.title ?? '—',
-            standout != null ? 'a favorite this year' : 'take a quiz!');
+            standout != null
+                ? 'a favorite this $_scopeWord'
+                : 'take a quiz!');
       }),
       _Slide(const [Tw.indigo500, Tw.rose500], (_) => _outro(yr.length)),
     ];
@@ -215,7 +236,7 @@ class _StoryState extends State<_Story> {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Text('$_year Wrapped',
+              Text('$_periodTitle Wrapped',
                   style: const TextStyle(
                       color: Colors.white70,
                       fontWeight: FontWeight.w900,
@@ -271,7 +292,7 @@ class _StoryState extends State<_Story> {
         XFile.fromData(bytes.buffer.asUint8List(),
             mimeType: 'image/png', name: 'wrapped.png')
       ],
-      text: 'My Smart Advisor $_year Wrapped',
+      text: 'My Smart Advisor $_periodTitle Wrapped',
     ));
   }
 
