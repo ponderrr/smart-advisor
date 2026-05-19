@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/models/enums.dart';
 import '../../../core/models/library_item.dart';
@@ -44,13 +45,16 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
         Row(children: [
           const Expanded(
               child: BrandHeading('Logged & saved', size: 32)),
-          if (lib.asData?.value.isNotEmpty ?? false)
+          _ImportButton(onTap: () => context.push('/library/import')),
+          if (lib.asData?.value.isNotEmpty ?? false) ...[
+            const SizedBox(width: 8),
             ClearAllButton(
               title: 'Clear your library?',
               message: 'Every logged & saved item will be '
                   'permanently removed. This can’t be undone.',
               onConfirm: _clearAll,
             ),
+          ],
         ]),
         const SizedBox(height: 16),
         _filters(),
@@ -413,5 +417,41 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
       ),
     );
     reaction.dispose();
+  }
+}
+
+/// Compact "Import" pill for the Library header — same shape as
+/// [ClearAllButton] but non-destructive (indigo), pushes the CSV
+/// import flow.
+class _ImportButton extends StatelessWidget {
+  const _ImportButton({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        padding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(
+          color: Tw.indigo500.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(999),
+          border:
+              Border.all(color: Tw.indigo500.withValues(alpha: 0.4)),
+        ),
+        child: Row(mainAxisSize: MainAxisSize.min, children: const [
+          Icon(Icons.file_upload_outlined,
+              size: 16, color: Tw.indigo500),
+          SizedBox(width: 6),
+          Text('Import',
+              style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w800,
+                  color: Tw.indigo500)),
+        ]),
+      ),
+    );
   }
 }

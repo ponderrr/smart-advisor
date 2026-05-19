@@ -25,6 +25,7 @@ import '../../features/feed/screens/user_profile_screen.dart';
 import '../../features/group_quiz/screens/group_quiz_screen.dart';
 import '../../features/group_quiz/screens/group_quiz_session_screen.dart';
 import '../../features/history/history_screen.dart';
+import '../../features/library/screens/import_screen.dart';
 import '../../features/library/screens/library_screen.dart';
 import '../../features/notifications/notifications_screen.dart';
 import '../../features/maintenance/maintenance_screen.dart';
@@ -197,6 +198,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
           path: '/account/security',
           builder: (_, _) => const SecuritySettingsScreen()),
+      // Library bulk-import (Letterboxd / Goodreads CSV): a full-page
+      // push outside the shell, same pattern as the /account/* screens.
+      GoRoute(
+          path: '/library/import',
+          builder: (_, _) => const ImportScreen()),
       // Quiz is a focused modal task: it slides up over the shell with a
       // dimmed barrier and a single confirmed exit (no bottom nav). The
       // Solo/Group choice is the sheet from the Quiz nav item; /quiz and
