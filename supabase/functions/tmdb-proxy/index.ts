@@ -128,6 +128,46 @@ serve(async (req) => {
       // no trailer — fine
     }
 
+    // Best-effort streaming / rent / buy availability. TMDB sources this
+    // from JustWatch — "via JustWatch" attribution is required wherever
+    // it's displayed.
+    const region = (url.searchParams.get("region") || "US")
+      .toUpperCase()
+      .slice(0, 2);
+    let watchProviders:
+      | {
+          link: string | null;
+          flatrate: string[];
+          rent: string[];
+          buy: string[];
+        }
+      | null = null;
+    try {
+      const wpRes = await fetch(
+        `https://api.themoviedb.org/3/movie/${movie.id}/watch/providers?api_key=${tmdbApiKey}`,
+      );
+      if (wpRes.ok) {
+        const byRegion = (await wpRes.json()).results ?? {};
+        const r = byRegion[region] ?? byRegion["US"];
+        if (r) {
+          const names = (
+            list: { provider_name: string }[] | undefined,
+          ): string[] =>
+            Array.isArray(list)
+              ? [...new Set(list.map((p) => p.provider_name))]
+              : [];
+          const flatrate = names(r.flatrate);
+          const rent = names(r.rent);
+          const buy = names(r.buy);
+          if (flatrate.length || rent.length || buy.length) {
+            watchProviders = { link: r.link ?? null, flatrate, rent, buy };
+          }
+        }
+      }
+    } catch (_) {
+      // no availability — fine
+    }
+
     const result = {
       poster: movie.poster_path
         ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
@@ -141,6 +181,7 @@ serve(async (req) => {
       description: description,
       genres: genres,
       trailer: trailer,
+      watchProviders: watchProviders,
     };
 
     console.log("Returning movie data:", result);

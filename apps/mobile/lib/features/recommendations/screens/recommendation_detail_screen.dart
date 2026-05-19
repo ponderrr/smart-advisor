@@ -10,6 +10,7 @@ import '../../../core/models/recommendation.dart';
 import '../../../core/services/service_providers.dart';
 import '../../../core/ui_messenger.dart';
 import '../../../ui/ui.dart';
+import '../services/tmdb_service.dart';
 import '../utils/match_score.dart';
 
 /// Dedicated pick detail page (parity with the web recommendation detail):
@@ -26,6 +27,7 @@ class _S extends ConsumerState<RecommendationDetailScreen> {
   late bool _fav = widget.rec.isFavorited;
   bool _logged = false;
   String? _trailerUrl;
+  WatchProviders? _watch;
   AudioPlayer? _audio;
   bool _previewPlaying = false;
 
@@ -46,10 +48,15 @@ class _S extends ConsumerState<RecommendationDetailScreen> {
       final m = await ref
           .read(tmdbServiceProvider)
           .searchMovie(widget.rec.title);
-      if (mounted && m.trailer != null) {
-        setState(() => _trailerUrl = m.trailer);
+      if (!mounted) return;
+      final wp = m.watchProviders;
+      if (m.trailer != null || (wp != null && !wp.isEmpty)) {
+        setState(() {
+          _trailerUrl = m.trailer;
+          _watch = (wp != null && !wp.isEmpty) ? wp : null;
+        });
       }
-    } catch (_) {/* no trailer */}
+    } catch (_) {/* no trailer / availability */}
   }
 
   Future<void> _togglePreview(String url) async {
@@ -203,6 +210,10 @@ class _S extends ConsumerState<RecommendationDetailScreen> {
             ),
             const SizedBox(height: 10),
           ],
+          if (r.type == 'movie' && _watch != null) ...[
+            _WhereToWatch(_watch!),
+            const SizedBox(height: 10),
+          ],
           if (r.type == 'music' && r.previewUrl != null) ...[
             AdaptiveButton.child(
               onPressed: () => _togglePreview(r.previewUrl!),
@@ -302,5 +313,86 @@ class _S extends ConsumerState<RecommendationDetailScreen> {
     if (!res.isError) setState(() => _logged = true);
     showBanner(
         res.isError ? res.error! : '“${r.title}” added to your library');
+  }
+}
+
+/// Streaming / rent / buy availability (TMDB → JustWatch). Tapping opens
+/// the JustWatch page; the "via JustWatch" caption is the required
+/// attribution for this data.
+class _WhereToWatch extends StatelessWidget {
+  const _WhereToWatch(this.wp);
+  final WatchProviders wp;
+
+  @override
+  Widget build(BuildContext context) {
+    final link = wp.link;
+    Widget row(String label, List<String> names) {
+      if (names.isEmpty) return const SizedBox.shrink();
+      return Padding(
+        padding: const EdgeInsets.only(top: 8),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 56,
+              child: Text(label,
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: context.brandMuted)),
+            ),
+            Expanded(
+              child: Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  for (final n in names)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: context.colors.muted,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(n,
+                          style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: context.brandInk)),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final body = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(children: [
+          const Expanded(child: Eyebrow('Where to watch')),
+          if (link != null)
+            Icon(Icons.open_in_new, size: 14, color: context.brandMuted),
+        ]),
+        row('Stream', wp.flatrate),
+        row('Rent', wp.rent),
+        row('Buy', wp.buy),
+        const SizedBox(height: 8),
+        Text('via JustWatch',
+            style: TextStyle(fontSize: 10, color: context.brandMuted)),
+      ],
+    );
+
+    final card = BrandCard(
+        padding: const EdgeInsets.all(14),
+        child: SizedBox(width: double.infinity, child: body));
+    if (link == null) return card;
+    return GestureDetector(
+      onTap: () => launchUrl(Uri.parse(link),
+          mode: LaunchMode.externalApplication),
+      child: card,
+    );
   }
 }
