@@ -1723,6 +1723,15 @@
         "title": "No se pueden generar las recomendaciones",
         "retry": "Reintentar",
         "back": "Repetir cuestionario"
+      },
+      "refine": {
+        "cta": "Afinar estas",
+        "eyebrow": "Afinar",
+        "title": "Ajusta estas elecciones",
+        "subtitle": "Dinos cómo orientarlo: volveremos a generar con tus respuestas originales más esto.",
+        "placeholder": "p. ej. más como Dune, más ligera, nada de más de 2 horas",
+        "cancel": "Cancelar",
+        "submit": "Afinar"
       }
     }
   },

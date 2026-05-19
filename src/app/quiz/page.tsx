@@ -28,7 +28,10 @@ import { getAccentTone } from "@/features/quiz/utils/content-accent";
 import { ResultsLoadingState } from "@/features/recommendations/components/results-loading-state";
 import { ResultsView } from "@/features/recommendations/components/results-view";
 import { enhancedRecommendationsService } from "@/features/recommendations/services/enhanced-recommendations-service";
-import { isOverloadedError } from "@/features/recommendations/services/ai-service";
+import {
+  isOverloadedError,
+  type RefinementInput,
+} from "@/features/recommendations/services/ai-service";
 import { cn } from "@/lib/utils";
 
 const STEPS = ["content", "count", "questions", "results"] as const;
@@ -165,7 +168,11 @@ const QuizPage = () => {
   };
 
   const runGeneration = useCallback(
-    async (formattedAnswers: Answer[], typeOverride?: ContentType) => {
+    async (
+      formattedAnswers: Answer[],
+      typeOverride?: ContentType,
+      refinement?: RefinementInput,
+    ) => {
       // typeOverride lets surprise mode generate before the store-backed
       // contentType has propagated through a render.
       const activeType = typeOverride ?? contentType;
@@ -183,6 +190,7 @@ const QuizPage = () => {
             contentType: activeType,
             userAge: user.age,
             userName: user.name,
+            ...(refinement ? { refinement } : {}),
           },
           user.id,
         );
@@ -279,6 +287,28 @@ const QuizPage = () => {
     lastAnswersRef.current = null;
     goToStep("content", -1);
   }, [goToStep, resetStore]);
+
+  // "Refine these" from the results view — replay the ORIGINAL quiz
+  // context (buffered answers) with a free-text steer layered on top, so
+  // the user can adjust without re-walking the quiz. Works for normal and
+  // surprise modes alike (both buffer their answers in lastAnswersRef).
+  // Reuses the existing generating / error / results state machine.
+  const handleRefine = useCallback(
+    (feedbackText: string) => {
+      const answers = lastAnswersRef.current;
+      if (!answers || feedbackText.trim().length === 0) return;
+      const refinement: RefinementInput = {
+        feedbackText: feedbackText.trim(),
+        previousTitles: storeRecommendations.map((r) => r.title),
+      };
+      setSlideDirection(1);
+      setGenError(null);
+      setGenErrorIsOverloaded(false);
+      setFlowMode("generating");
+      void runGeneration(answers, undefined, refinement);
+    },
+    [storeRecommendations, runGeneration],
+  );
 
   const handleBack = () => {
     // Back button is inert while we're generating — the answers are submitted
@@ -506,6 +536,7 @@ const QuizPage = () => {
                     <ResultsView
                       recommendations={storeRecommendations}
                       onRestart={handleRestart}
+                      onRefine={handleRefine}
                     />
                   ) : null}
                 </motion.div>

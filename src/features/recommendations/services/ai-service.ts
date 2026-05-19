@@ -75,12 +75,29 @@ async function loadRecommendationFilters(): Promise<RecommendationFilters | null
   }
 }
 
+/**
+ * Conversational refinement: a follow-up generation pass that reuses the
+ * original quiz context but layers a free-text steer on top. Mirrors the
+ * mobile RefinementInput DTO; flattened into the Edge Function body.
+ */
+export interface RefinementInput {
+  /** The user's verbatim steer, e.g. "more like Dune, lighter, nothing
+   *  over 2 hours". Treated as the strongest signal server-side. */
+  feedbackText: string;
+  /** Titles already shown this session — excluded so a refine pass never
+   *  repeats picks, and so "more like <title>" has context. */
+  previousTitles?: string[];
+}
+
 /** Options shared by the recommendation generators. */
 export interface GenerateOptions {
   /** When false, the user's personal hard filters are NOT applied — used by
    *  Group Quiz so one member's "no Horror" doesn't silently constrain a
    *  shared room. Defaults to true (solo quiz + Surprise). */
   applyFilters?: boolean;
+  /** Conversational refinement steer. Absent / empty feedback → behaviour
+   *  byte-for-byte unchanged (a normal generation). */
+  refinement?: RefinementInput;
 }
 
 /** What kind of failure callers are dealing with. Lets the UI swap messaging
@@ -336,6 +353,11 @@ export async function generateRecommendations(
         ? null
         : await loadRecommendationFilters();
 
+    const refinement =
+      options?.refinement && options.refinement.feedbackText.trim().length > 0
+        ? options.refinement
+        : null;
+
     // supabase.functions.invoke automatically sends the session token
     const { data, error } = await supabase.functions.invoke(
       "anthropic-recommendations",
@@ -347,6 +369,7 @@ export async function generateRecommendations(
           age: userAge,
           contentTone: getContentTone(),
           ...(recommendationFilters ? { recommendationFilters } : {}),
+          ...(refinement ? { refinement } : {}),
         },
       },
     );

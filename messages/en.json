@@ -1723,6 +1723,15 @@
         "title": "Unable to generate recommendations",
         "retry": "Try Again",
         "back": "Retake Quiz"
+      },
+      "refine": {
+        "cta": "Refine these",
+        "eyebrow": "Refine",
+        "title": "Tweak these picks",
+        "subtitle": "Tell us how to steer it — we'll re-run with your original answers plus this.",
+        "placeholder": "e.g. more like Dune, lighter, nothing over 2 hours",
+        "cancel": "Cancel",
+        "submit": "Refine"
       }
     }
   },

@@ -1,4 +1,7 @@
-import { generateRecommendations } from "@/features/recommendations/services/ai-service";
+import {
+  generateRecommendations,
+  type RefinementInput,
+} from "@/features/recommendations/services/ai-service";
 import { tmdbService } from "@/features/recommendations/services/tmdb-service";
 import { openLibraryService } from "@/features/recommendations/services/open-library-service";
 import { deezerService } from "@/features/recommendations/services/deezer-service";
@@ -11,6 +14,9 @@ interface QuestionnaireData {
   contentType: "movie" | "book" | "music" | "both" | "mix";
   userAge: number;
   userName: string;
+  /** Optional conversational refinement steer — threaded into every EF
+   *  call for this pass so refined picks reuse the original quiz context. */
+  refinement?: RefinementInput;
 }
 
 class EnhancedRecommendationsService {
@@ -105,7 +111,9 @@ class EnhancedRecommendationsService {
     questionnaireData: QuestionnaireData,
     userId: string,
   ): Promise<Recommendation[]> {
-    const { answers, contentType, userAge, userName } = questionnaireData;
+    const { answers, contentType, userAge, userName, refinement } =
+      questionnaireData;
+    const genOpts = refinement ? { refinement } : undefined;
 
     let movieTarget: number;
     let bookTarget: number;
@@ -173,7 +181,13 @@ class EnhancedRecommendationsService {
     const parallelCalls = movieTarget + bookTarget + musicTarget + 2;
     const callResults = await Promise.allSettled(
       Array.from({ length: parallelCalls }, () =>
-        generateRecommendations(answers, contentType, userAge, userName),
+        generateRecommendations(
+          answers,
+          contentType,
+          userAge,
+          userName,
+          genOpts,
+        ),
       ),
     );
 
@@ -201,6 +215,7 @@ class EnhancedRecommendationsService {
           contentType,
           userAge,
           userName,
+          genOpts,
         );
         ingest(data);
       } catch (err) {

@@ -33,8 +33,15 @@ serve(async (req) => {
       });
     }
 
-    const { name, age, answers, contentType, contentTone, recommendationFilters } =
-      await req.json();
+    const {
+      name,
+      age,
+      answers,
+      contentType,
+      contentTone,
+      recommendationFilters,
+      refinement,
+    } = await req.json();
 
     if (!name || !age || !answers) {
       return new Response(
@@ -73,6 +80,11 @@ serve(async (req) => {
     // existing behaviour. Built once, appended to each type's user prompt.
     const hardConstraints = buildHardConstraints(recommendationFilters);
 
+    // Optional conversational refinement. Absent → behaviour unchanged.
+    // When present, a clearly-delimited block is appended after the hard
+    // constraints so the user's steer overrides earlier quiz answers.
+    const refinementBlock = buildRefinementBlock(refinement);
+
     if (wantsMovies) {
       const movieRec = await getRecommendation({
         type: "movie",
@@ -82,6 +94,7 @@ serve(async (req) => {
         isAdult: allowMature,
         systemPrompt,
         hardConstraints,
+        refinementBlock,
       });
       recommendations.push({ type: "movie", ...movieRec });
     }
@@ -95,6 +108,7 @@ serve(async (req) => {
         isAdult: allowMature,
         systemPrompt,
         hardConstraints,
+        refinementBlock,
       });
       recommendations.push({ type: "book", ...bookRec });
     }
@@ -108,6 +122,7 @@ serve(async (req) => {
         isAdult: allowMature,
         systemPrompt,
         hardConstraints,
+        refinementBlock,
       });
       recommendations.push({ type: "music", ...musicRec });
     }
@@ -174,6 +189,51 @@ function buildHardConstraints(filters: unknown): string {
   }`;
 }
 
+/**
+ * Turns the optional refinement blob into a clearly-delimited REFINEMENT
+ * block. The user's free-text feedback is the strongest signal and may
+ * override earlier quiz answers; already-seen titles are excluded so a
+ * refinement pass never repeats picks. Returns "" when absent / empty so
+ * a normal (non-refined) generation is byte-for-byte unchanged.
+ */
+function buildRefinementBlock(refinement: unknown): string {
+  if (!refinement || typeof refinement !== "object") return "";
+  const r = refinement as {
+    feedbackText?: unknown;
+    previousTitles?: unknown;
+  };
+
+  const feedback = typeof r.feedbackText === "string"
+    ? r.feedbackText.trim()
+    : "";
+  if (feedback.length === 0) return "";
+
+  const seen = Array.isArray(r.previousTitles)
+    ? r.previousTitles
+      .map((t) => String(t).trim())
+      .filter((t) => t.length > 0)
+    : [];
+
+  const lines: string[] = [
+    `The user has already seen recommendations and is now refining them. Their feedback (this is the STRONGEST signal — it overrides the quiz answers above wherever they conflict):`,
+    `"${feedback}"`,
+  ];
+  if (seen.length > 0) {
+    lines.push(
+      `Do NOT recommend any of these already-seen titles: ${
+        seen.join(", ")
+      }.`,
+    );
+  }
+  lines.push(
+    `Honour the feedback precisely while still respecting the HARD CONSTRAINTS above. Do not apologise or mention this refinement step in the response.`,
+  );
+
+  return `\n\nREFINEMENT — apply this on top of everything above.\n${
+    lines.join("\n")
+  }`;
+}
+
 async function getRecommendation({
   type,
   name,
@@ -182,6 +242,7 @@ async function getRecommendation({
   isAdult,
   systemPrompt,
   hardConstraints,
+  refinementBlock,
 }: {
   type: "movie" | "book" | "music";
   name: string;
@@ -190,6 +251,7 @@ async function getRecommendation({
   isAdult: boolean;
   systemPrompt: string;
   hardConstraints?: string;
+  refinementBlock?: string;
 }) {
   // Handle both Answer[] format (from frontend) and Record<string, string> (legacy)
   let answersText: string;
@@ -237,7 +299,7 @@ HARD RULES for the response:
   • 75-84: solid. Aligns with the broad strokes (genre/mood/pace) but compromises on at least one preference.
   • 65-74: soft. Plausible but reaches; you're betting on something they didn't directly ask for.
   • Below 65: only when it's the best of a weak set — never default here.
-  Do NOT cluster scores around 90-92. If you'd score every pick the same, you're not being honest. Vary based on actual fit.${hardConstraints ?? ""}
+  Do NOT cluster scores around 90-92. If you'd score every pick the same, you're not being honest. Vary based on actual fit.${hardConstraints ?? ""}${refinementBlock ?? ""}
 
 Return ONLY a JSON object — no markdown fences, no commentary, no preamble. Exact shape:
 {
