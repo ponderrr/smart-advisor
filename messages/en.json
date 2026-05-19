@@ -1352,6 +1352,38 @@
     }
   },
   "Library": {
+    "import": {
+      "headerCta": "Import",
+      "back": "Back to library",
+      "eyebrow": "Import",
+      "title": "Import your watchlist",
+      "subtitle": "Bring over your Letterboxd films or Goodreads books. Re-importing is safe — matching titles are updated, not duplicated.",
+      "sourceLabel": "Where's it from?",
+      "sources": {
+        "letterboxd": "Letterboxd",
+        "goodreads": "Goodreads"
+      },
+      "hint": {
+        "letterboxd": "Export from letterboxd.com/settings/data — use watchlist.csv or your full export.",
+        "goodreads": "Export from goodreads.com/review/import — the “Goodreads Library Export” CSV."
+      },
+      "choose": "Choose a .csv file",
+      "chooseHint": "Letterboxd or Goodreads CSV export",
+      "preview": "{count, plural, one {# title ready to import} other {# titles ready to import}}",
+      "mismatch": "This file looks like a {detected} export, but you picked {chosen}. Double-check before importing.",
+      "chooseDifferent": "Choose another file",
+      "importCta": "Import {count, plural, one {# title} other {# titles}}",
+      "importing": "Importing {done} of {total}…",
+      "doneTitle": "Import complete",
+      "doneSummary": "{imported} imported · {skipped} skipped · {failed} failed",
+      "importAnother": "Import another",
+      "goToLibrary": "Go to library",
+      "errors": {
+        "read": "Couldn't read that file. Try again.",
+        "empty": "That file has no rows to import.",
+        "parse": "Couldn't parse that file."
+      }
+    },
     "eyebrow": "Library",
     "title": "What You've Watched and Read",
     "subtitle": "Reactions you save here become a taste signal the AI uses on your next quiz.",

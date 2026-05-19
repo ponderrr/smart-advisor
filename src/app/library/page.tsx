@@ -19,6 +19,7 @@ import {
   ThumbsDown,
   ThumbsUp,
   Trash2,
+  Upload,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
@@ -270,6 +271,13 @@ export default function LibraryPage() {
               </p>
             </div>
             <div className="flex items-center gap-3">
+              <PillButton
+                onClick={() => router.push("/library/import")}
+                className="inline-flex items-center gap-2 whitespace-nowrap border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
+              >
+                <Upload size={15} />
+                {t("import.headerCta")}
+              </PillButton>
               <HoverBorderGradient
                 onClick={() => router.push("/quiz")}
                 idleColor="17, 24, 39"
