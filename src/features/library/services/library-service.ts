@@ -156,8 +156,11 @@ class LibraryService {
       console.error("[library/recentRated] failed", error);
       return { data: [], error: "Couldn't load taste signal." };
     }
+    // Newer @supabase/supabase-js narrows .select(...).not(...) data to
+    // never when the column isn't known to the generic — cast explicitly.
+    const rows = (data ?? []) as RawLibraryRow[];
     return {
-      data: (data ?? []).map((row: RawLibraryRow) => cast(row)),
+      data: rows.map((row) => cast(row)),
       error: null,
     };
   }

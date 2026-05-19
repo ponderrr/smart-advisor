@@ -63,7 +63,10 @@ export async function POST(req: NextRequest) {
       expectedRPID: getRpId(req),
       credential: {
         id: stored.credential_id,
-        publicKey: base64UrlToBytes(stored.public_key),
+        // base64UrlToBytes returns Uint8Array<ArrayBufferLike>; @simplewebauthn
+        // narrowed its expected input to Uint8Array<ArrayBuffer> in newer
+        // @types/node + TS lib — the runtime value is the same.
+        publicKey: base64UrlToBytes(stored.public_key) as Uint8Array<ArrayBuffer>,
         counter: Number(stored.counter ?? 0),
         transports: (stored.transports ?? undefined) as
           | AuthenticatorTransportFuture[]

@@ -30,7 +30,12 @@ export interface MFAEnrollData {
   };
 }
 
+/** Supabase widened AuthenticatorAssuranceLevels to an extensible string
+ *  union in ~v2.66+, so we mirror that here rather than re-narrowing —
+ *  in practice the values are still "aal1" / "aal2". */
+export type AALLevel = "aal1" | "aal2" | (string & {});
+
 export interface AALData {
-  currentLevel: "aal1" | "aal2" | null;
-  nextLevel: "aal1" | "aal2" | null;
+  currentLevel: AALLevel | null;
+  nextLevel: AALLevel | null;
 }
