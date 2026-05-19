@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,7 +20,11 @@ enum _Step { content, count, questions, generating, genError, results }
 /// results, morphing in place. Questions and recommendations come from the
 /// anthropic-* Edge Functions via ai_service / recommendation_flow.
 class QuizScreen extends ConsumerStatefulWidget {
-  const QuizScreen({super.key});
+  const QuizScreen({super.key, this.surprise = false});
+
+  /// One-tap mode: pick a random content type and generate immediately
+  /// from a "no constraints" prompt, skipping content/question steps.
+  final bool surprise;
 
   @override
   ConsumerState<QuizScreen> createState() => _QuizScreenState();
@@ -40,10 +46,41 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   bool _genOverloaded = false;
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.surprise) {
+      // Pick a random single type for a focused surprise, then jump
+      // straight to generating once the first frame is up.
+      const types = [
+        ContentType.movie,
+        ContentType.book,
+        ContentType.music,
+      ];
+      _content = types[Random().nextInt(types.length)];
+      _step = _Step.generating;
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => _generate());
+    }
+  }
+
+  @override
   void dispose() {
     _blank.dispose();
     super.dispose();
   }
+
+  /// A single open-ended answer so the AI returns varied, unexpected
+  /// picks instead of restarting the personality quiz.
+  List<Answer> _surpriseAnswers() => [
+        Answer(
+          id: 'a0',
+          questionId: 'surprise',
+          questionText: 'What are you in the mood for?',
+          answerText: 'Surprise me — anything great, no constraints. '
+              'Pick something I might not expect but would love.',
+          createdAt: DateTime.now().toUtc().toIso8601String(),
+        ),
+      ];
 
   int get _age =>
       ref.read(currentProfileProvider).asData?.value?.age ?? 18;
@@ -175,7 +212,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       _step = _Step.generating;
       _error = null;
     });
-    final answers = _formatAnswers();
+    final answers =
+        widget.surprise ? _surpriseAnswers() : _formatAnswers();
     ref.read(quizStoreProvider.notifier)
       ..setContentType(_content)
       ..setQuestionCount(_count)

@@ -175,6 +175,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               path: 'solo',
               pageBuilder: (_, state) =>
                   _modalPage(state, const QuizScreen())),
+          // One-tap: skips content/questions, generates straight away
+          // from a "no constraints, surprise me" prompt.
+          GoRoute(
+              path: 'surprise',
+              pageBuilder: (_, state) =>
+                  _modalPage(state, const QuizScreen(surprise: true))),
         ],
       ),
       ShellRoute(

@@ -30,6 +30,10 @@ class AppShell extends ConsumerWidget {
           Navigator.pop(ctx);
           context.push('/group-quiz');
         },
+        onSurprise: () {
+          Navigator.pop(ctx);
+          context.push('/quiz/surprise');
+        },
       ),
     );
   }
@@ -159,9 +163,14 @@ class AppShell extends ConsumerWidget {
 }
 
 class _QuizSheet extends StatelessWidget {
-  const _QuizSheet({required this.onSolo, required this.onGroup});
+  const _QuizSheet({
+    required this.onSolo,
+    required this.onGroup,
+    required this.onSurprise,
+  });
   final VoidCallback onSolo;
   final VoidCallback onGroup;
+  final VoidCallback onSurprise;
 
   @override
   Widget build(BuildContext context) {
@@ -233,6 +242,9 @@ class _QuizSheet extends StatelessWidget {
             'A short personality quiz, just for you.', onSolo),
         tile(ContentAccentName.rose, Icons.groups_outlined, 'Group Quiz',
             'Take it together with friends in a shared room.', onGroup),
+        tile(ContentAccentName.amber, Icons.auto_awesome, 'Surprise me',
+            'Skip the questions — one tap, one unexpected pick.',
+            onSurprise),
       ]),
     );
   }
