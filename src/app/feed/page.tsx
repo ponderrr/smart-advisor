@@ -11,6 +11,7 @@ import {
   Plus,
   Users,
   Compass,
+  UserPlus,
   UsersRound,
   LayoutGrid,
   List,
@@ -531,12 +532,20 @@ export default function FeedPage() {
                   </>
                 )}
               </Link>
-              <Button
-                onClick={() => setComposer(true)}
-                className="gap-1.5 self-start md:self-auto"
-              >
-                <Plus size={16} /> Share a pick
-              </Button>
+              <div className="flex items-center gap-2 self-start md:self-auto">
+                <button
+                  type="button"
+                  onClick={() => router.push("/feed/people")}
+                  title="Find friends"
+                  aria-label="Find friends"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200/80 bg-white text-slate-600 transition-colors hover:border-indigo-300 hover:text-indigo-600 dark:border-slate-700/70 dark:bg-slate-900/65 dark:text-slate-300 dark:hover:border-indigo-500/60 dark:hover:text-indigo-300"
+                >
+                  <UserPlus size={15} />
+                </button>
+                <Button onClick={() => setComposer(true)} className="gap-1.5">
+                  <Plus size={16} /> Share a pick
+                </Button>
+              </div>
             </div>
           </div>
 
