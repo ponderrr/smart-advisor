@@ -496,7 +496,8 @@
     "close": "Cerrar",
     "retry": "Reintentar",
     "yes": "Sí",
-    "no": "No"
+    "no": "No",
+    "surpriseMe": "Sorpréndeme"
   },
   "MobileNav": {
     "ariaLabel": "Navegación principal",

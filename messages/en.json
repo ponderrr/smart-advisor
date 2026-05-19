@@ -496,7 +496,8 @@
     "close": "Close",
     "retry": "Retry",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "surpriseMe": "Surprise me"
   },
   "MobileNav": {
     "ariaLabel": "Primary navigation",

@@ -15,6 +15,7 @@ import {
   Loader,
   Music,
   Pencil,
+  Shuffle,
   Sparkles,
   ThumbsDown,
   ThumbsUp,
@@ -277,6 +278,13 @@ export default function LibraryPage() {
               >
                 <Upload size={15} />
                 {t("import.headerCta")}
+              </PillButton>
+              <PillButton
+                onClick={() => router.push("/quiz?mode=surprise")}
+                className="inline-flex items-center gap-2 whitespace-nowrap border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
+              >
+                <Shuffle size={15} />
+                {tc("surpriseMe")}
               </PillButton>
               <HoverBorderGradient
                 onClick={() => router.push("/quiz")}
