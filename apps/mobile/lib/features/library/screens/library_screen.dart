@@ -6,6 +6,7 @@ import '../../../core/models/library_item.dart';
 import '../../../core/services/service_providers.dart';
 import '../../../core/ui_messenger.dart';
 import '../../../ui/ui.dart';
+import '../../notifications/notification_service.dart';
 
 final _libraryProvider =
     FutureProvider.autoDispose<List<LibraryItem>>((ref) async {
@@ -29,6 +30,12 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Keep the "finish what you started" reminder accurate whenever the
+    // library (re)loads — including after a status edit invalidates it.
+    ref.listen(_libraryProvider, (_, next) {
+      next.whenData((items) =>
+          ref.read(remindersProvider.notifier).syncInProgress(items));
+    });
     final lib = ref.watch(_libraryProvider);
     return ListView(
       padding: const EdgeInsets.all(20),
