@@ -17,6 +17,7 @@ class FeedSettingsScreen extends ConsumerWidget {
     return BrandScaffold(
       title: 'Feed',
       body: ResponsiveCenter(
+        maxWidth: 760,
         child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(

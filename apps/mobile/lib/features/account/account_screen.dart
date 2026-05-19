@@ -93,8 +93,9 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
   Widget build(BuildContext context) {
     final profile = ref.watch(currentProfileProvider).asData?.value;
 
-    return ResponsiveCenter(
-      child: ListView(
+    // A shell tab like Home/Library/History — the app shell already caps
+    // it to the same content width, so no extra ResponsiveCenter here.
+    return ListView(
       padding: const EdgeInsets.all(20),
       children: [
         const SizedBox(height: 8),
@@ -244,7 +245,6 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         ),
         const SizedBox(height: 24),
       ],
-    ),
     );
   }
 }

@@ -83,6 +83,7 @@ class _ProfileSettingsScreenState
     return BrandScaffold(
       title: 'Profile',
       body: ResponsiveCenter(
+        maxWidth: 760,
         child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(

@@ -103,6 +103,7 @@ class _SecuritySettingsScreenState
     return BrandScaffold(
       title: 'Security',
       body: ResponsiveCenter(
+        maxWidth: 760,
         child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(

@@ -17,6 +17,7 @@ class AppearanceSettingsScreen extends ConsumerWidget {
     return BrandScaffold(
       title: 'Appearance',
       body: ResponsiveCenter(
+        maxWidth: 760,
         child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: BrandCard(
