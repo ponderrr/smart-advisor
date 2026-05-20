@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/constants/app_constants.dart';
 import '../../../core/ui_messenger.dart';
 import '../../../ui/ui.dart';
 import '../../auth/auth_providers.dart';
@@ -24,6 +26,22 @@ class _RecommendationsSettingsScreenState
     extends ConsumerState<RecommendationsSettingsScreen> {
   bool _seeded = false;
   int _tone = 0; // 0 standard, 1 family
+  String _focus = 'mix'; // movie | book | music | mix
+
+  @override
+  void initState() {
+    super.initState();
+    // Hydrate content focus from the hot-cache prefs (the canonical
+    // mirror the AI service reads); profile.content_focus is the
+    // server-side truth but isn't exposed on AppUser yet.
+    SharedPreferences.getInstance().then((p) {
+      final v = p.getString(StorageKeys.prefContentFocus);
+      if (v == null || !mounted) return;
+      if (const ['movie', 'book', 'music', 'mix'].contains(v)) {
+        setState(() => _focus = v);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +89,47 @@ class _RecommendationsSettingsScreenState
                                         i == 1 ? 'family' : 'standard');
                           },
                   ),
+                ],
+              ),
+            ),
+            settingsSection(context, 'Default content'),
+            BrandCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  settingsRowLabel(context, 'What you want picks for'),
+                  const SizedBox(height: 2),
+                  Subtitle(
+                      'Pre-selects the content type on every quiz; you '
+                      'can still change it per quiz.'),
+                  const SizedBox(height: 8),
+                  Builder(builder: (context) {
+                    const values = ['movie', 'book', 'music', 'mix'];
+                    const labels = ['Movies', 'Books', 'Music', 'Mix'];
+                    const colors = [
+                      Tw.amber500,
+                      Tw.emerald500,
+                      Tw.rose500,
+                      Tw.violet500,
+                    ];
+                    final idx = values.indexOf(_focus);
+                    final active = idx < 0 ? 3 : idx;
+                    return BrandSegmented(
+                      color: colors[active],
+                      labels: labels,
+                      selectedIndex: active,
+                      onValueChanged: (i) async {
+                        setState(() => _focus = values[i]);
+                        await ref
+                            .read(settingsServiceProvider)
+                            .updateContentPreferences(
+                                contentFocus: values[i]);
+                        final p = await SharedPreferences.getInstance();
+                        await p.setString(
+                            StorageKeys.prefContentFocus, values[i]);
+                      },
+                    );
+                  }),
                 ],
               ),
             ),
