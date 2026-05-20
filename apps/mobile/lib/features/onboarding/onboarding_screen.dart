@@ -289,7 +289,9 @@ class _S extends ConsumerState<OnboardingScreen> {
         const Center(child: Eyebrow('First things first'))
             .animateFadeUp(delay: 80),
         const SizedBox(height: 8),
-        const BrandHeading('What should we call you?', size: 24)
+        const Center(
+                child:
+                    BrandHeading('What should we call you?', size: 24))
             .animateFadeUp(delay: 160),
         const SizedBox(height: 14),
         Text(
@@ -315,7 +317,8 @@ class _S extends ConsumerState<OnboardingScreen> {
       children: [
         const Center(child: Eyebrow('Language')).animateFadeUp(delay: 80),
         const SizedBox(height: 8),
-        const BrandHeading('Pick your language', size: 26)
+        const Center(
+                child: BrandHeading('Pick your language', size: 26))
             .animateFadeUp(delay: 160),
         const SizedBox(height: 24),
         BrandSegmented(
@@ -349,9 +352,10 @@ class _S extends ConsumerState<OnboardingScreen> {
         const Center(child: Eyebrow('What you want picks for'))
             .animateFadeUp(delay: 80),
         const SizedBox(height: 8),
-        const BrandHeading('Movies, books,\nmusic, or all three?',
-                size: 26)
-            .animateFadeUp(delay: 160),
+        const Center(
+          child: BrandHeading('Movies, books,\nmusic, or all three?',
+              size: 26),
+        ).animateFadeUp(delay: 160),
         const SizedBox(height: 8),
         Subtitle(
           'Sets the default for every quiz. You can change it on any quiz.',
@@ -378,8 +382,10 @@ class _S extends ConsumerState<OnboardingScreen> {
         const Center(child: Eyebrow('Anything to skip?'))
             .animateFadeUp(delay: 80),
         const SizedBox(height: 8),
-        const BrandHeading('Genres you\'d rather\nnever see.', size: 26)
-            .animateFadeUp(delay: 160),
+        const Center(
+          child: BrandHeading('Genres you\'d rather\nnever see.',
+              size: 26),
+        ).animateFadeUp(delay: 160),
         const SizedBox(height: 8),
         const Subtitle(
           'Tap any to add a hard "don\'t recommend" rule. Skip the step '
@@ -415,9 +421,10 @@ class _S extends ConsumerState<OnboardingScreen> {
         const Center(child: Eyebrow('Reminders'))
             .animateFadeUp(delay: 80),
         const SizedBox(height: 8),
-        const BrandHeading('Want a weekly\nfresh-picks nudge?',
-                size: 26)
-            .animateFadeUp(delay: 160),
+        const Center(
+          child: BrandHeading('Want a weekly\nfresh-picks nudge?',
+              size: 26),
+        ).animateFadeUp(delay: 160),
         const SizedBox(height: 8),
         const Subtitle(
           'One quiet notification per week. We\'ll also nudge you if '
