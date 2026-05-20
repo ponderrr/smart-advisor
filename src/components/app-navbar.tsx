@@ -43,12 +43,13 @@ const DEMO_KEYS = [
 const LOGGED_IN_KEYS = [
   // Feed is the logged-in home. The old /dashboard route is retired —
   // milestones moved to /milestones; analytics live in /wrapped; recent
-  // picks are in /history.
+  // picks are in /history. Group quiz isn't a top-level destination — it's
+  // a mode of "start a quiz", reachable from the Feed header's quiz
+  // dropdown (Solo / Group / Surprise).
   { key: "feed", link: "/feed" },
   { key: "library", link: "/library" },
   { key: "history", link: "/history" },
   { key: "milestones", link: "/milestones" },
-  { key: "groupQuiz", link: "/group-quiz" },
   { key: "settings", link: "/settings" },
 ] as const;
 
