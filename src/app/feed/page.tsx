@@ -52,6 +52,8 @@ import { FollowButton } from "@/features/feed/components/follow-button";
 import { FeedAvatar } from "@/features/feed/components/feed-avatar";
 import { BlockMenuButton } from "@/features/feed/components/block-menu";
 import { FinishWhatYouStartedBanner } from "@/features/library/components/finish-what-you-started-banner";
+import { AiNudgeBanner } from "@/features/feed/components/ai-nudge-banner";
+import { DashboardMovedBanner } from "@/features/feed/components/dashboard-moved-banner";
 import { readFeedPrefs } from "@/features/feed/use-feed-prefs";
 import {
   ACTIVITY_VERB,
@@ -601,7 +603,9 @@ export default function FeedPage() {
             </div>
           </div>
 
+          <DashboardMovedBanner />
           <FinishWhatYouStartedBanner />
+          <AiNudgeBanner />
 
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6">
             <SidebarNavShell className="hidden md:flex">

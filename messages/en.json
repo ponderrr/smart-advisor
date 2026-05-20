@@ -2208,5 +2208,18 @@
     "rent": "Rent",
     "buy": "Buy",
     "attribution": "via JustWatch"
+  },
+  "Feed": {
+    "aiNudge": {
+      "eyebrow": "AI nudge",
+      "title": "Need a pick fast? One tap and we'll surprise you.",
+      "cta": "Surprise Me"
+    },
+    "dashboardMoved": {
+      "eyebrow": "Heads up",
+      "title": "This is your new home.",
+      "body": "The dashboard moved — your <milestones>milestones</milestones> live there now.",
+      "dismiss": "Dismiss"
+    }
   }
 }

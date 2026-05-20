@@ -2208,5 +2208,18 @@
     "rent": "Alquilar",
     "buy": "Comprar",
     "attribution": "vía JustWatch"
+  },
+  "Feed": {
+    "aiNudge": {
+      "eyebrow": "Sugerencia IA",
+      "title": "¿Necesitas una pick rápida? Un toque y te sorprendemos.",
+      "cta": "Sorpréndeme"
+    },
+    "dashboardMoved": {
+      "eyebrow": "Aviso",
+      "title": "Esta es tu nueva pantalla principal.",
+      "body": "El panel se movió — tus <milestones>logros</milestones> ahora están allí.",
+      "dismiss": "Cerrar"
+    }
   }
 }
