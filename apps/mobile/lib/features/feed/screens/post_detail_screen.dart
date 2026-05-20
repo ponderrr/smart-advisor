@@ -6,6 +6,7 @@ import '../../../core/ui_messenger.dart';
 import '../../../ui/ui.dart';
 import '../feed_providers.dart';
 import '../models/feed_models.dart';
+import '../widgets/block_menu.dart';
 import '../widgets/feed_avatar.dart';
 import '../widgets/feed_cards.dart';
 import '../widgets/follow_button.dart';
@@ -383,47 +384,57 @@ class _CommentNodeState extends ConsumerState<_CommentNode> {
                       ),
                     ),
                   const Spacer(),
-                  Semantics(
-                    button: true,
-                    selected: vote > 0,
-                    label: 'Upvote comment',
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () => voteNotifier.setVote(key, 1),
-                      child: SizedBox(
-                        width: 32,
-                        height: 32,
-                        child: Center(
-                          child: Icon(Icons.keyboard_arrow_up,
-                              size: 18, color: voteColor(1)),
+                  // Vote group: bundled tight and flush right against
+                  // the block menu so the row reads as
+                  // "author / time ……………… ▲ 42 ▼  ⋯"
+                  Row(mainAxisSize: MainAxisSize.min, children: [
+                    Semantics(
+                      button: true,
+                      selected: vote > 0,
+                      label: 'Upvote comment',
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => voteNotifier.setVote(key, 1),
+                        child: SizedBox(
+                          width: 28,
+                          height: 28,
+                          child: Center(
+                            child: Icon(Icons.keyboard_arrow_up,
+                                size: 18, color: voteColor(1)),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  Text('${node.score + vote}',
-                      style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          color: vote != 0
-                              ? voteColor(vote)
-                              : context.brandInk)),
-                  Semantics(
-                    button: true,
-                    selected: vote < 0,
-                    label: 'Downvote comment',
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () => voteNotifier.setVote(key, -1),
-                      child: SizedBox(
-                        width: 32,
-                        height: 32,
-                        child: Center(
-                          child: Icon(Icons.keyboard_arrow_down,
-                              size: 18, color: voteColor(-1)),
+                    Text('${node.score + vote}',
+                        style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            color: vote != 0
+                                ? voteColor(vote)
+                                : context.brandInk)),
+                    Semantics(
+                      button: true,
+                      selected: vote < 0,
+                      label: 'Downvote comment',
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => voteNotifier.setVote(key, -1),
+                        child: SizedBox(
+                          width: 28,
+                          height: 28,
+                          child: Center(
+                            child: Icon(Icons.keyboard_arrow_down,
+                                size: 18, color: voteColor(-1)),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                  ]),
+                  // Block menu lives at the very end of the row.
+                  BlockMenuButton(
+                      author: node.author,
+                      iconColor: context.brandMuted,
+                      iconSize: 16),
                 ]),
                 if (!_collapsed) ...[
                   const SizedBox(height: 6),

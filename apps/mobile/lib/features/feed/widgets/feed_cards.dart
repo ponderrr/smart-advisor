@@ -6,6 +6,7 @@ import '../../../core/ui_messenger.dart';
 import '../../../ui/ui.dart';
 import '../feed_providers.dart';
 import '../models/feed_models.dart';
+import 'block_menu.dart';
 
 // ---------------------------------------------------------------------------
 // Shared formatting + navigation helpers
@@ -269,8 +270,8 @@ class PostCard extends ConsumerWidget {
                   CommunityTag(community: post.community, tone: tone),
                   const Spacer(),
                   TasteBadge(match: post.tasteMatch, tone: tone),
-                  const SizedBox(width: 6),
-                  _PostMenu(post: post, ref: ref, tone: tone),
+                  const SizedBox(width: 4),
+                  BlockMenuButton(author: post.author, iconColor: tone.text),
                 ]),
                 const SizedBox(height: 8),
                 Row(children: [
@@ -493,6 +494,8 @@ class CompactPostRow extends StatelessWidget {
               ]),
             ],
           ),
+          BlockMenuButton(
+              author: post.author, iconColor: tone.text, iconSize: 16),
         ]),
       ),
     );
@@ -561,6 +564,16 @@ class MediaPostCard extends StatelessWidget {
                   top: 12,
                   child: CommunityTag(
                       community: post.community, tone: tone),
+                ),
+                // Block menu sits on the dark scrim corner — white icon
+                // reads clearly against the poster regardless of tone.
+                Positioned(
+                  right: 4,
+                  top: 4,
+                  child: BlockMenuButton(
+                      author: post.author,
+                      iconColor: Colors.white,
+                      iconSize: 20),
                 ),
                 Positioned(
                   left: 14,
@@ -679,54 +692,3 @@ class PostFab extends StatelessWidget {
   }
 }
 
-/// Three-dot overflow menu on a feed post header. Currently surfaces a
-/// single "Block @handle" action — the feed-side entry point for the
-/// block-person feature; managed under Settings → Feed → Blocked people.
-/// stopPropagation: the menu is a tap target inside a tappable post card,
-/// so any tap on the icon or its menu items must not also trigger the
-/// card's onOpen.
-class _PostMenu extends StatelessWidget {
-  const _PostMenu({required this.post, required this.ref, required this.tone});
-  final FeedPost post;
-  final WidgetRef ref;
-  final ContentAccentTone tone;
-
-  @override
-  Widget build(BuildContext context) {
-    // "you" can't block themselves; hide the menu entirely on own posts.
-    if (post.author == 'you') return const SizedBox.shrink();
-    return GestureDetector(
-      onTap: () {}, // swallow taps so the card doesn't open behind us
-      behavior: HitTestBehavior.opaque,
-      child: PopupMenuButton<String>(
-        tooltip: 'More',
-        padding: EdgeInsets.zero,
-        offset: const Offset(0, 28),
-        icon: Icon(Icons.more_horiz, size: 18, color: tone.text),
-        onSelected: (action) {
-          if (action == 'block') {
-            final blocked =
-                ref.read(blockedProvider.notifier).block(post.author);
-            showBanner(
-              blocked
-                  ? 'Blocked @${post.author}.'
-                  : '@${post.author} is already blocked.',
-            );
-          }
-        },
-        itemBuilder: (_) => [
-          PopupMenuItem<String>(
-            value: 'block',
-            child: Row(
-              children: [
-                const Icon(Icons.block, size: 16, color: Colors.redAccent),
-                const SizedBox(width: 8),
-                Text('Block @${post.author}'),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}

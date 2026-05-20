@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/ui_messenger.dart';
 import '../../../ui/ui.dart';
 import '../../dashboard/dashboard_screen.dart';
 import '../feed_providers.dart';
@@ -105,6 +106,27 @@ class UserProfileScreen extends ConsumerWidget {
               const SizedBox(height: 14),
               FollowButton(
                   username: username, tone: tone, showCount: true),
+              const SizedBox(height: 8),
+              // Block toggle on the profile page — labelled, not hidden
+              // behind a menu, since blocking from a profile is a
+              // deliberate action and discoverability matters here.
+              Builder(builder: (context) {
+                final blocked =
+                    ref.watch(blockedProvider).contains(username.toLowerCase());
+                return AdaptiveButton(
+                  onPressed: () {
+                    if (blocked) {
+                      ref.read(blockedProvider.notifier).unblock(username);
+                      showBanner('@$username unblocked.');
+                    } else {
+                      ref.read(blockedProvider.notifier).block(username);
+                      showBanner('Blocked @$username.');
+                    }
+                  },
+                  label: blocked ? 'Unblock' : 'Block',
+                  style: AdaptiveButtonStyle.bordered,
+                );
+              }),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
