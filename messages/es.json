@@ -2212,8 +2212,28 @@
   "Feed": {
     "aiNudge": {
       "eyebrow": "Sugerencia IA",
-      "title": "¿Necesitas una pick rápida? Un toque y te sorprendemos.",
-      "cta": "Sorpréndeme"
+      "variants": {
+        "surprise": {
+          "title": "¿Necesitas una pick rápida? Un toque y te sorprendemos.",
+          "cta": "Sorpréndeme"
+        },
+        "refine": {
+          "title": "¿Una pick casi acertó? Refínala en lenguaje natural.",
+          "cta": "Refinar"
+        },
+        "group": {
+          "title": "¿Ves algo con amigos esta noche? Crea un cuestionario en grupo.",
+          "cta": "Quiz en grupo"
+        },
+        "tune": {
+          "title": "¿Las picks no terminan de encajar? Ajusta tus filtros en 30 segundos.",
+          "cta": "Ajustar gusto"
+        },
+        "solo": {
+          "title": "Cuestionario rápido, pick certera — ¿qué te apetece?",
+          "cta": "Empezar"
+        }
+      }
     },
     "dashboardMoved": {
       "eyebrow": "Aviso",

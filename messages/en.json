@@ -2212,8 +2212,28 @@
   "Feed": {
     "aiNudge": {
       "eyebrow": "AI nudge",
-      "title": "Need a pick fast? One tap and we'll surprise you.",
-      "cta": "Surprise Me"
+      "variants": {
+        "surprise": {
+          "title": "Need a pick fast? One tap and we'll surprise you.",
+          "cta": "Surprise Me"
+        },
+        "refine": {
+          "title": "Got a pick that almost worked? Refine it in plain English.",
+          "cta": "Try refining"
+        },
+        "group": {
+          "title": "Watching with friends tonight? Spin up a group quiz.",
+          "cta": "Group Quiz"
+        },
+        "tune": {
+          "title": "Picks feel off? Tune your taste filters in 30 seconds.",
+          "cta": "Tune taste"
+        },
+        "solo": {
+          "title": "Quick quiz, sharp pick — what are you in the mood for?",
+          "cta": "Start quiz"
+        }
+      }
     },
     "dashboardMoved": {
       "eyebrow": "Heads up",
