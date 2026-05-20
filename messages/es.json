@@ -1148,6 +1148,14 @@
         "questionsAria": "Número de preguntas",
         "maxPlayersLabel": "Jugadores máximos",
         "maxPlayersAria": "Número máximo de jugadores en la sala",
+        "modeLabel": "¿Cuándo?",
+        "modeLive": "Juntos ahora",
+        "modeAsync": "Antes de una fecha",
+        "modeLiveHint": "Todos entran a la sala y responden al mismo tiempo.",
+        "modeAsyncHint": "Cada miembro responde a su ritmo antes de la fecha límite.",
+        "deadlineLabel": "Fecha límite",
+        "plannedForLabel": "Planeado para (opcional)",
+        "plannedForHint": "Solo informativo — cuándo planean verlo / leerlo / escucharlo juntos.",
         "create": "Crear sesión",
         "creating": "Creando…",
         "signInTitle": "Inicia sesión para hospedar",
@@ -1181,6 +1189,14 @@
       }
     },
     "session": {
+      "async": {
+        "eyebrow": "Sesión asíncrona",
+        "deadlineInHours": "{hours, plural, one {Queda # hora} other {Quedan # horas}}",
+        "deadlineInDays": "{days, plural, one {Queda # día} other {Quedan # días}}",
+        "deadlinePassed": "Fecha límite alcanzada — finalizando",
+        "plannedFor": "Planeado para {date}",
+        "submitted": "{done}/{total} enviados"
+      },
       "loading": "Cargando sesión…",
       "notFoundTitle": "Sesión no encontrada",
       "notFoundBody": "Ese código no corresponde a una sesión activa.",

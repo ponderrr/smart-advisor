@@ -1148,6 +1148,14 @@
         "questionsAria": "Number of questions",
         "maxPlayersLabel": "Max Players",
         "maxPlayersAria": "Maximum number of players in the lobby",
+        "modeLabel": "When?",
+        "modeLive": "Together now",
+        "modeAsync": "By a deadline",
+        "modeLiveHint": "Everyone joins the lobby and answers at the same time.",
+        "modeAsyncHint": "Each member answers on their own time before the deadline.",
+        "deadlineLabel": "Deadline",
+        "plannedForLabel": "Planned for (optional)",
+        "plannedForHint": "Informational only — when you all plan to watch / read / listen together.",
         "create": "Create Session",
         "creating": "Creating…",
         "signInTitle": "Sign In to Host",
@@ -1181,6 +1189,14 @@
       }
     },
     "session": {
+      "async": {
+        "eyebrow": "Async session",
+        "deadlineInHours": "{hours, plural, one {# hour left} other {# hours left}}",
+        "deadlineInDays": "{days, plural, one {# day left} other {# days left}}",
+        "deadlinePassed": "Deadline passed — finalizing",
+        "plannedFor": "Planned for {date}",
+        "submitted": "{done}/{total} submitted"
+      },
       "loading": "Loading session…",
       "notFoundTitle": "Session Not Found",
       "notFoundBody": "That code doesn't match an active session.",

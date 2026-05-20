@@ -81,6 +81,10 @@ class GroupQuizService {
           content_type: input.content_type,
           question_count: input.question_count,
           max_participants: input.max_participants,
+          // Async mode — both nullable, omitted entirely for live sessions
+          // so the existing live INSERT shape stays byte-for-byte identical.
+          ...(input.deadline_at ? { deadline_at: input.deadline_at } : {}),
+          ...(input.planned_for ? { planned_for: input.planned_for } : {}),
         })
         .select("*")
         .single()) as { data: QuizSession | null; error: { code?: string; message: string } | null };
@@ -526,6 +530,79 @@ class GroupQuizService {
             : "Failed to synthesize recommendation",
       };
     }
+  }
+
+  /**
+   * Async-mode startup: generate questions and flip the session to
+   * in_progress, the same as live. Members then answer + submit on their
+   * own time. Wrapper exists for parity with the mobile API surface so
+   * the live path keeps using generateAndStartQuiz from the lobby and
+   * nothing about its byte-for-byte behaviour changes.
+   */
+  async startAsyncQuiz(
+    session: QuizSession,
+    hostAge: number,
+    hostName: string,
+  ): Promise<{ questions: Question[] | null; error: string | null }> {
+    return this.generateAndStartQuiz(session, hostAge, hostName);
+  }
+
+  /**
+   * Idempotent async resolver. Finalizes (synthesizes the recommendation +
+   * flips status to completed) when either:
+   *   • every joined participant has submitted, OR
+   *   • the deadline has passed (now ≥ deadline_at).
+   *
+   * Guarded on a non-completed async session, so concurrent callers (the
+   * last submitter + a post-deadline opener) can't double-run and the live
+   * (deadline_at == null) path is never touched. The deadline-passed path
+   * may be triggered by any joined participant — the migration's
+   * tightly-scoped RLS policy permits that exact case.
+   *
+   * Returns `{ resolved, error }` — `resolved: true` only when this call
+   * actually performed the finalize. `resolved: false` means "not ready /
+   * already done", not a failure (the page should keep waiting).
+   */
+  async resolveIfReady(
+    sessionId: string,
+    hostAge: number,
+    hostName: string,
+  ): Promise<{ resolved: boolean; error: string | null }> {
+    const { data: session, error: sErr } = (await sessionsTable()
+      .select("*")
+      .eq("id", sessionId)
+      .maybeSingle()) as {
+      data: QuizSession | null;
+      error: { message: string } | null;
+    };
+    if (sErr) return { resolved: false, error: sErr.message };
+    if (!session) return { resolved: false, error: "Session not found." };
+    if (!session.deadline_at || session.status === "completed") {
+      return { resolved: false, error: null };
+    }
+    const [{ data: parts, error: pErr }, { data: answers, error: aErr }] =
+      await Promise.all([
+        this.listParticipants(sessionId),
+        this.listAnswers(sessionId),
+      ]);
+    if (pErr) return { resolved: false, error: pErr };
+    if (aErr) return { resolved: false, error: aErr };
+    const allIn =
+      parts.length > 0 &&
+      parts.every((p) => p.answers_submitted_at != null);
+    const deadline = new Date(session.deadline_at);
+    const past = Date.now() >= deadline.getTime();
+    if (!allIn && !past) return { resolved: false, error: null };
+
+    const { error } = await this.synthesizeRecommendation(
+      session,
+      parts,
+      answers,
+      hostAge,
+      hostName,
+    );
+    if (error) return { resolved: false, error };
+    return { resolved: true, error: null };
   }
 }
 

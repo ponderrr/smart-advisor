@@ -37,6 +37,7 @@ import { AppNavbar } from "@/components/app-navbar";
 import { ResultCard } from "./_components/result-card";
 import { PageLoader } from "@/components/ui/loader";
 import { cn } from "@/lib/utils";
+import { groupQuizService } from "@/features/group-quiz/services/group-quiz-service";
 import { useGroupQuizShare } from "./_hooks/use-group-quiz-share";
 import { useGroupQuizSession } from "./_hooks/use-group-quiz-session";
 import { useGroupQuizActions } from "./_hooks/use-group-quiz-actions";
@@ -144,6 +145,30 @@ const GroupQuizLobbyPage = () => {
     setJoiningHere,
   });
 
+  // Async resolver — idempotent server-side, so the page can fire it on
+  // mount + every 30s while in-progress. Mobile parity (resolveIfReady).
+  // The realtime channel on quiz_sessions picks up the row patch and
+  // flips the UI to the result view — no extra refetch needed here.
+  const isAsync = session?.deadline_at != null;
+  const inProgress = session?.status === "in_progress";
+  useEffect(() => {
+    if (!isAsync || !inProgress || !session || !user) return;
+    const hostAge = user.age ?? 18;
+    const hostName =
+      user.username ?? user.name?.split(/\s+/)[0] ?? "Host";
+    let cancelled = false;
+    const tick = () => {
+      if (cancelled) return;
+      void groupQuizService.resolveIfReady(session.id, hostAge, hostName);
+    };
+    tick();
+    const id = window.setInterval(tick, 30_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, [isAsync, inProgress, session, user]);
+
   if (loading) return <PageLoader text={t("loading")} />;
 
   if (error || !session) {
@@ -228,6 +253,14 @@ const GroupQuizLobbyPage = () => {
           backLabel={user ? tShell("back.dashboard") : tShell("back.home")}
           contentType={session.content_type}
         >
+          {isAsync && session.status !== "completed" && (
+            <AsyncBanner
+              deadlineAt={session.deadline_at!}
+              plannedFor={session.planned_for}
+              submittedCount={submittedCount}
+              totalParticipants={participants.length}
+            />
+          )}
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -721,3 +754,71 @@ const GroupQuizLobbyPage = () => {
 };
 
 export default GroupQuizLobbyPage;
+
+/**
+ * Slim banner shown on async (deadline-mode) group quizzes. Surfaces the
+ * deadline countdown + the optional "planned for" date + a live N-of-M
+ * submitted readout. Re-ticks once a minute so the countdown stays fresh
+ * for users who leave the tab open.
+ */
+const AsyncBanner = ({
+  deadlineAt,
+  plannedFor,
+  submittedCount,
+  totalParticipants,
+}: {
+  deadlineAt: string;
+  plannedFor: string | null;
+  submittedCount: number;
+  totalParticipants: number;
+}) => {
+  const t = useTranslations("GroupQuiz.session.async");
+  const [, force] = useState(0);
+  useEffect(() => {
+    const id = window.setInterval(() => force((n) => n + 1), 60_000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const deadline = new Date(deadlineAt);
+  const msLeft = deadline.getTime() - Date.now();
+  const passed = msLeft <= 0;
+  const hoursLeft = Math.max(0, Math.floor(msLeft / (60 * 60 * 1000)));
+  const daysLeft = Math.floor(hoursLeft / 24);
+  const countdown = passed
+    ? t("deadlinePassed")
+    : daysLeft >= 1
+      ? t("deadlineInDays", { days: daysLeft })
+      : t("deadlineInHours", { hours: Math.max(1, hoursLeft) });
+
+  const plannedLabel = plannedFor
+    ? new Date(plannedFor).toLocaleDateString(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      })
+    : null;
+
+  return (
+    <div className="mb-4 flex flex-wrap items-center gap-3 rounded-2xl border border-amber-200/70 bg-gradient-to-br from-amber-50/80 via-white to-amber-50/40 p-4 shadow-sm backdrop-blur-md dark:border-amber-500/30 dark:from-amber-500/10 dark:via-slate-900/60 dark:to-amber-500/5">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-300">
+        <Clock size={16} />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-700 dark:text-amber-300">
+          {t("eyebrow")}
+        </p>
+        <p className="mt-0.5 text-sm font-bold tracking-tight text-slate-700 dark:text-slate-200">
+          {countdown}
+        </p>
+        {plannedLabel && (
+          <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+            {t("plannedFor", { date: plannedLabel })}
+          </p>
+        )}
+      </div>
+      <span className="rounded-full bg-white/80 px-3 py-1 text-[11px] font-bold tracking-tight text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
+        {t("submitted", { done: submittedCount, total: totalParticipants })}
+      </span>
+    </div>
+  );
+};
