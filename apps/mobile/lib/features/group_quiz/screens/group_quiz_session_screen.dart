@@ -27,15 +27,17 @@ class GroupQuizSessionScreen extends ConsumerWidget {
     AdaptiveAlertDialog.show(
       context: context,
       title: 'Leave the session?',
-      message: 'You’ll drop out of this group quiz.',
-      icon: Icons.logout,
+      message:
+          'Your answers won\'t count toward the group pick and you\'ll '
+          'need the code to rejoin.',
+      icon: Icons.exit_to_app,
       actions: [
         AlertAction(
-            title: 'Stay',
+            title: 'Keep playing',
             style: AlertActionStyle.cancel,
             onPressed: () {}),
         AlertAction(
-          title: 'Leave',
+          title: 'Leave session',
           style: AlertActionStyle.destructive,
           onPressed: () => context.canPop()
               ? context.pop()
@@ -127,12 +129,21 @@ class _BodyState extends ConsumerState<_Body> {
     );
   }
 
+  /// Session-wide content accent (movie/book/music/mix). Used to color
+  /// every eyebrow, button, and tinted surface in the session screen so
+  /// the whole flow reads as that content type — like every other screen
+  /// in the app.
+  ContentAccentTone _toneFor(QuizSession s) => contentAccent(
+      accentForContentType(ContentType.fromWire(s.contentType)),
+      Theme.of(context).brightness);
+
   Widget _lobby(
       QuizSession s, List<QuizParticipant> parts, bool isHost) {
+    final tone = _toneFor(s);
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
-        const Eyebrow('Lobby'),
+        Eyebrow('Lobby', color: tone.text),
         const SizedBox(height: 8),
         BrandCard(
           child: Row(
@@ -163,7 +174,8 @@ class _BodyState extends ConsumerState<_Body> {
           ),
         ),
         const SizedBox(height: 16),
-        Eyebrow('${parts.length} / ${s.maxParticipants} joined'),
+        Eyebrow('${parts.length} / ${s.maxParticipants} joined',
+            color: tone.text),
         const SizedBox(height: 10),
         Wrap(
           spacing: 12,
@@ -203,6 +215,7 @@ class _BodyState extends ConsumerState<_Body> {
 
   Widget _inProgress(
       QuizSession s, List<QuizParticipant> parts, bool isHost) {
+    final tone = _toneFor(s);
     final questions = s.questions ?? const <Question>[];
     if (questions.isEmpty) {
       return const Center(child: LoaderFive('Preparing questions'));
@@ -213,6 +226,8 @@ class _BodyState extends ConsumerState<_Body> {
 
     if (isHost && allIn) {
       return ListView(padding: const EdgeInsets.all(24), children: [
+        Eyebrow('Everyone\'s here', color: tone.text),
+        const SizedBox(height: 6),
         const BrandHeading('Everyone\'s in', size: 22),
         const SizedBox(height: 8),
         Subtitle('Synthesize the group\'s shared pick.'),
@@ -231,7 +246,8 @@ class _BodyState extends ConsumerState<_Body> {
           accent: accentForContentType(
               ContentType.fromWire(s.contentType))),
       const SizedBox(height: 12),
-      Eyebrow('Question ${_q + 1} of ${questions.length}'),
+      Eyebrow('Question ${_q + 1} of ${questions.length}',
+          color: tone.text),
       const SizedBox(height: 8),
       BrandHeading(q.text, size: 20),
       const SizedBox(height: 12),
@@ -377,6 +393,7 @@ class _BodyState extends ConsumerState<_Body> {
   }
 
   Widget _completed(QuizSession s, List<QuizParticipant> parts) {
+    final tone = _toneFor(s);
     final r = s.result;
     final picks = [
       if (r?.movie != null) ('Movie', r!.movie!),
@@ -384,7 +401,7 @@ class _BodyState extends ConsumerState<_Body> {
       if (r?.music != null) ('Music', r!.music!),
     ];
     return ListView(padding: const EdgeInsets.all(24), children: [
-      const Eyebrow('Your group pick'),
+      Eyebrow('Your group pick', color: tone.text),
       const SizedBox(height: 4),
       const BrandHeading('Decided together', size: 22),
       const SizedBox(height: 10),
@@ -396,25 +413,42 @@ class _BodyState extends ConsumerState<_Body> {
         Subtitle('No result.')
       else
         for (final (label, p) in picks)
-          BrandCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Eyebrow(label),
-                const SizedBox(height: 6),
-                Text(p.title,
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: context.brandInk)),
-                if (p.explanation != null) ...[
-                  const SizedBox(height: 8),
-                  Text(p.explanation!,
-                      style: TextStyle(color: context.brandMuted)),
-                ],
-              ],
-            ),
-          ),
+          Builder(builder: (context) {
+            // Per-pick accent: movies = amber, books = emerald,
+            // music = rose. Each card's surface + eyebrow speaks
+            // the type, so a mixed-mode result reads at a glance.
+            final pickAccent = label == 'Movie'
+                ? ContentAccentName.amber
+                : label == 'Book'
+                    ? ContentAccentName.emerald
+                    : ContentAccentName.rose;
+            final pickTone = contentAccent(
+                pickAccent, Theme.of(context).brightness);
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: BrandCard(
+                accent: pickAccent,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Eyebrow(label, color: pickTone.text),
+                    const SizedBox(height: 6),
+                    Text(p.title,
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: context.brandInk)),
+                    if (p.explanation != null) ...[
+                      const SizedBox(height: 8),
+                      Text(p.explanation!,
+                          style:
+                              TextStyle(color: context.brandMuted)),
+                    ],
+                  ],
+                ),
+              ),
+            );
+          }),
       const SizedBox(height: 16),
       AdaptiveButton(
           onPressed: () =>
@@ -457,6 +491,7 @@ class _BodyState extends ConsumerState<_Body> {
   }
 
   Widget _async(QuizSession s, List<QuizParticipant> parts) {
+    final tone = _toneFor(s);
     if (s.status == QuizSessionStatus.cancelled) {
       return Center(child: Subtitle('This session was cancelled.'));
     }
@@ -493,14 +528,15 @@ class _BodyState extends ConsumerState<_Body> {
       final q = questions[_q];
       final isLast = _q == questions.length - 1;
       return ListView(padding: const EdgeInsets.all(24), children: [
-        Eyebrow('Answer by $deadline'),
+        Eyebrow('Answer by $deadline', color: tone.text),
         const SizedBox(height: 8),
         BrandProgressBar(
             value: (_q + 1) / questions.length,
             accent: accentForContentType(
                 ContentType.fromWire(s.contentType))),
         const SizedBox(height: 12),
-        Eyebrow('Question ${_q + 1} of ${questions.length}'),
+        Eyebrow('Question ${_q + 1} of ${questions.length}',
+            color: tone.text),
         const SizedBox(height: 8),
         BrandHeading(q.text, size: 20),
         const SizedBox(height: 12),
@@ -540,7 +576,7 @@ class _BodyState extends ConsumerState<_Body> {
     }
 
     return ListView(padding: const EdgeInsets.all(24), children: [
-      const Eyebrow('Answers in'),
+      Eyebrow('Answers in', color: tone.text),
       const SizedBox(height: 8),
       const BrandHeading('Waiting on the group', size: 22),
       const SizedBox(height: 12),
@@ -551,7 +587,8 @@ class _BodyState extends ConsumerState<_Body> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Eyebrow('$submitted of ${parts.length} submitted'),
+            Eyebrow('$submitted of ${parts.length} submitted',
+                color: tone.text),
             const SizedBox(height: 6),
             Text('Deadline · $deadline',
                 style: TextStyle(color: context.brandMuted)),
