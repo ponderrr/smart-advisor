@@ -7,6 +7,8 @@ import '../../core/ui_messenger.dart';
 import '../../ui/ui.dart';
 import '../auth/auth_providers.dart';
 import '../auth/services/error_messages.dart';
+import '../onboarding/get_started_screen.dart';
+import '../onboarding/onboarding_screen.dart';
 import '../security/biometric_login.dart';
 import 'screens/settings_helpers.dart';
 
@@ -158,6 +160,33 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             settingsTile(context, Icons.lock_outline, 'Security',
                 subtitle: 'Biometrics, 2FA, email and password',
                 onTap: () => context.push('/account/security')),
+          ]),
+        ),
+
+        settingsSection(context, 'Help'),
+        BrandCard(
+          child: Column(children: [
+            settingsTile(context, Icons.celebration_outlined,
+                'Replay welcome',
+                subtitle: 'Re-see the Get Started screen',
+                // Push via Navigator (not GoRouter) so we bypass the
+                // /intro authed-user gate — preview mode pops back here.
+                onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (_) =>
+                              const GetStartedScreen(previewMode: true)),
+                    )),
+            settingsTile(context, Icons.account_circle_outlined,
+                'Show onboarding',
+                subtitle: 'Re-see the profile-setup screen',
+                // Same Navigator.push pattern — preview mode disables
+                // the save buttons so a replay can't clobber the real
+                // profile name / locale.
+                onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (_) =>
+                              const OnboardingScreen(previewMode: true)),
+                    )),
           ]),
         ),
 
