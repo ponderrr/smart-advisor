@@ -11,8 +11,9 @@ import '../../features/account/screens/profile_settings_screen.dart';
 import '../../features/account/screens/recommendations_settings_screen.dart';
 import '../../features/account/screens/security_settings_screen.dart';
 import '../../features/auth/auth_providers.dart';
-import '../../features/auth/screens/auth_screen.dart';
 import '../../features/auth/screens/reset_password_screen.dart';
+import '../../features/auth/screens/sign_in_screen.dart';
+import '../../features/auth/screens/sign_up_screen.dart';
 import '../../features/dashboard/dashboard_screen.dart';
 import '../../features/dashboard/milestones_screen.dart';
 import '../../features/demo/demo_screen.dart';
@@ -31,7 +32,7 @@ import '../../features/notifications/notifications_screen.dart';
 import '../../features/maintenance/maintenance_screen.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/models/recommendation.dart';
-import '../../features/onboarding/intro_screen.dart';
+import '../../features/onboarding/get_started_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/recommendations/screens/recommendation_detail_screen.dart';
 import '../../features/quiz/screens/quiz_screen.dart';
@@ -122,8 +123,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
           path: '/auth',
-          builder: (_, _) => const AuthScreen(),
+          builder: (_, _) => const SignInScreen(),
           routes: [
+            GoRoute(
+                path: 'signup', builder: (_, _) => const SignUpScreen()),
             GoRoute(
                 path: 'reset-password',
                 builder: (_, _) => const ResetPasswordScreen()),
@@ -131,7 +134,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: 'verified',
                 builder: (_, _) => const VerifiedScreen()),
           ]),
-      GoRoute(path: '/intro', builder: (_, _) => const IntroScreen()),
+      GoRoute(path: '/intro', builder: (_, _) => const GetStartedScreen()),
       GoRoute(
           path: '/onboarding', builder: (_, _) => const OnboardingScreen()),
       GoRoute(
