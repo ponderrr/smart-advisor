@@ -236,9 +236,9 @@ class _QuizSheet extends StatelessWidget {
         ),
         const Align(
             alignment: Alignment.centerLeft,
-            child: BrandHeading('Start a quiz', size: 20)),
+            child: BrandHeading('Pick your quiz', size: 20)),
         const SizedBox(height: 14),
-        tile(ContentAccentName.violet, Icons.person_outline, 'Solo Quiz',
+        tile(ContentAccentName.violet, Icons.person_outline, 'Just for you',
             'A short personality quiz, just for you.', onSolo),
         tile(ContentAccentName.rose, Icons.groups_outlined, 'Group Quiz',
             'Take it together with friends in a shared room.', onGroup),

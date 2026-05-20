@@ -9,6 +9,7 @@ import '../../../core/models/question.dart';
 import '../../../core/supabase/supabase_providers.dart';
 import '../../../ui/ui.dart';
 import '../../auth/auth_providers.dart';
+import '../../feed/widgets/feed_avatar.dart';
 import '../group_quiz_providers.dart';
 import '../models/group_quiz.dart';
 
@@ -117,7 +118,8 @@ class _BodyState extends ConsumerState<_Body> {
             _lobby(session, s.participants, isHost),
           QuizSessionStatus.inProgress =>
             _inProgress(session, s.participants, isHost),
-          QuizSessionStatus.completed => _completed(session),
+          QuizSessionStatus.completed =>
+            _completed(session, s.participants),
           QuizSessionStatus.cancelled => Center(
               child: Subtitle('This session was cancelled.')),
         };
@@ -162,15 +164,13 @@ class _BodyState extends ConsumerState<_Body> {
         ),
         const SizedBox(height: 16),
         Eyebrow('${parts.length} / ${s.maxParticipants} joined'),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: 12,
+          runSpacing: 12,
           children: [
             for (final p in parts)
-              Chip(
-                  label: Text(
-                      '${p.displayName}${p.isHost ? ' · host' : ''}')),
+              _ParticipantChip(participant: p, submitted: false),
           ],
         ),
         const SizedBox(height: 20),
@@ -263,6 +263,23 @@ class _BodyState extends ConsumerState<_Body> {
       const SizedBox(height: 16),
       Center(
           child: Subtitle('$submitted of ${parts.length} locked in')),
+      const SizedBox(height: 12),
+      // Submit-status avatar strip — same avatars used elsewhere, with
+      // a ring that's only fully drawn for participants who've already
+      // locked in. Lightweight live readout while the room answers.
+      Center(
+        child: Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          alignment: WrapAlignment.center,
+          children: [
+            for (final p in parts)
+              _SubmitStatusAvatar(
+                  name: p.displayName,
+                  submitted: p.answersSubmittedAt != null),
+          ],
+        ),
+      ),
     ]);
   }
 
@@ -359,7 +376,7 @@ class _BodyState extends ConsumerState<_Body> {
     if (mounted) setState(() => _busy = false);
   }
 
-  Widget _completed(QuizSession s) {
+  Widget _completed(QuizSession s, List<QuizParticipant> parts) {
     final r = s.result;
     final picks = [
       if (r?.movie != null) ('Movie', r!.movie!),
@@ -370,6 +387,10 @@ class _BodyState extends ConsumerState<_Body> {
       const Eyebrow('Your group pick'),
       const SizedBox(height: 4),
       const BrandHeading('Decided together', size: 22),
+      const SizedBox(height: 10),
+      // Member avatar stack — small overlapping ring of who was in the
+      // room when the pick landed.
+      if (parts.isNotEmpty) _AvatarStack(participants: parts),
       const SizedBox(height: 16),
       if (picks.isEmpty)
         Subtitle('No result.')
@@ -439,7 +460,9 @@ class _BodyState extends ConsumerState<_Body> {
     if (s.status == QuizSessionStatus.cancelled) {
       return Center(child: Subtitle('This session was cancelled.'));
     }
-    if (s.status == QuizSessionStatus.completed) return _completed(s);
+    if (s.status == QuizSessionStatus.completed) {
+      return _completed(s, parts);
+    }
 
     final questions = s.questions ?? const <Question>[];
     if (s.status == QuizSessionStatus.lobby || questions.isEmpty) {
@@ -553,5 +576,154 @@ class _BodyState extends ConsumerState<_Body> {
         style: AdaptiveButtonStyle.bordered,
       ),
     ]);
+  }
+}
+
+/// Lobby participant chip: avatar (initials on hue-by-name) + display
+/// name + a small "host" badge. Replaces the plain Material Chip so the
+/// room feels more personal.
+class _ParticipantChip extends StatelessWidget {
+  const _ParticipantChip(
+      {required this.participant, required this.submitted});
+
+  final QuizParticipant participant;
+  final bool submitted;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(6, 6, 12, 6),
+      decoration: BoxDecoration(
+        color: c.muted,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: c.border),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FeedAvatar(name: participant.displayName, size: 28),
+          const SizedBox(width: 8),
+          Text(
+            participant.displayName,
+            style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+                color: c.foreground),
+          ),
+          if (participant.isHost) ...[
+            const SizedBox(width: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Tw.amber500.withValues(alpha: .18),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                'host',
+                style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.6,
+                    color: Tw.amber500),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// In-progress submit-status avatar. Renders the same FeedAvatar with
+/// a coloured ring around it — emerald when locked in, neutral muted
+/// otherwise. Lightweight live readout while the room is answering.
+class _SubmitStatusAvatar extends StatelessWidget {
+  const _SubmitStatusAvatar({required this.name, required this.submitted});
+
+  final String name;
+  final bool submitted;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Tooltip(
+      message: submitted ? '$name · locked in' : '$name · still answering',
+      child: Container(
+        padding: const EdgeInsets.all(2),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: submitted ? Tw.emerald500 : c.border,
+            width: submitted ? 2 : 1.5,
+          ),
+        ),
+        child: FeedAvatar(name: name, size: 30),
+      ),
+    );
+  }
+}
+
+/// Overlapping avatar stack used on the result card. Shows up to 6
+/// members; if more, the trailing tile shows "+N".
+class _AvatarStack extends StatelessWidget {
+  const _AvatarStack({required this.participants});
+
+  final List<QuizParticipant> participants;
+
+  @override
+  Widget build(BuildContext context) {
+    const max = 6;
+    final shown = participants.take(max).toList();
+    final overflow = participants.length - shown.length;
+    const size = 32.0;
+    const overlap = 10.0;
+    final width = shown.length * (size - overlap) + overlap +
+        (overflow > 0 ? size - overlap : 0);
+    final c = context.colors;
+    return SizedBox(
+      height: size + 4,
+      width: width,
+      child: Stack(
+        children: [
+          for (var i = 0; i < shown.length; i++)
+            Positioned(
+              left: i * (size - overlap),
+              child: Container(
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: c.background,
+                ),
+                child: FeedAvatar(
+                  name: shown[i].displayName,
+                  size: size - 4,
+                ),
+              ),
+            ),
+          if (overflow > 0)
+            Positioned(
+              left: shown.length * (size - overlap),
+              child: Container(
+                width: size,
+                height: size,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: c.muted,
+                  border: Border.all(color: c.background, width: 2),
+                ),
+                child: Text(
+                  '+$overflow',
+                  style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w900,
+                      color: c.foreground),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 }

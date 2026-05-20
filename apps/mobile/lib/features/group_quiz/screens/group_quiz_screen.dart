@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../ui/ui.dart';
+import '../../auth/auth_providers.dart';
 import '../group_quiz_providers.dart';
 
 /// Port of web /group-quiz landing: path picker → host setup (auth) or
@@ -48,11 +49,22 @@ class _S extends ConsumerState<GroupQuizScreen> {
     super.dispose();
   }
 
+  /// Profile display name (or empty when not loaded). Used as a
+  /// placeholder hint on the join-as / host-as text fields so users can
+  /// see what we'd default to without retyping it every session.
+  String _profileName() =>
+      ref.watch(currentProfileProvider).asData?.value?.name.trim() ?? '';
+
   String get _contentWire =>
       ['movie', 'book', 'music', 'mix'][_content];
 
   Future<void> _host() async {
-    if (_name.text.trim().isEmpty) {
+    // Fall back to the user's profile display name when the field is
+    // blank — saves them retyping it for a session.
+    final profileName =
+        ref.read(currentProfileProvider).asData?.value?.name.trim() ?? '';
+    final display = _name.text.trim().isEmpty ? profileName : _name.text.trim();
+    if (display.isEmpty) {
       setState(() => _error = 'Enter a display name.');
       return;
     }
@@ -67,7 +79,7 @@ class _S extends ConsumerState<GroupQuizScreen> {
           contentType: _contentWire,
           questionCount: _count,
           maxParticipants: _maxP,
-          displayName: _name.text.trim(),
+          displayName: display,
           deadlineAt: deadline,
           plannedFor: _mode == 1 ? _plannedFor : null,
         );
@@ -81,7 +93,10 @@ class _S extends ConsumerState<GroupQuizScreen> {
   }
 
   Future<void> _join() async {
-    if (_code.text.trim().length != 6 || _name.text.trim().isEmpty) {
+    final profileName =
+        ref.read(currentProfileProvider).asData?.value?.name.trim() ?? '';
+    final display = _name.text.trim().isEmpty ? profileName : _name.text.trim();
+    if (_code.text.trim().length != 6 || display.isEmpty) {
       setState(() => _error = 'Enter the 6-char code and a display name.');
       return;
     }
@@ -90,8 +105,7 @@ class _S extends ConsumerState<GroupQuizScreen> {
       _error = null;
     });
     final r = await ref.read(groupQuizServiceProvider).joinSession(
-        code: _code.text.trim().toUpperCase(),
-        displayName: _name.text.trim());
+        code: _code.text.trim().toUpperCase(), displayName: display);
     if (!mounted) return;
     setState(() => _busy = false);
     if (r.error != null) {
@@ -480,7 +494,9 @@ class _S extends ConsumerState<GroupQuizScreen> {
               child: Eyebrow('Display name', color: tone.text)),
           const SizedBox(height: 8),
           AdaptiveTextField(
-              controller: _name, placeholder: 'Your name'),
+              controller: _name,
+              placeholder:
+                  _profileName().isNotEmpty ? _profileName() : 'Your name'),
           _errorText(tone),
           const SizedBox(height: 20),
           _nav(
@@ -752,7 +768,9 @@ class _S extends ConsumerState<GroupQuizScreen> {
             const SizedBox(height: 8),
             AdaptiveTextField(
                 controller: _name,
-                placeholder: 'Your display name'),
+                placeholder: _profileName().isNotEmpty
+                    ? _profileName()
+                    : 'Your display name'),
             _errorText(tone),
             const SizedBox(height: 20),
             _nav(
