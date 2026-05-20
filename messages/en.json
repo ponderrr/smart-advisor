@@ -166,7 +166,13 @@
       "saveError": "We couldn't save your preferences. Please try again.",
       "filters": {
         "title": "Recommendation filters",
-        "description": "Hard limits the AI must obey on every pick — solo quiz and Surprise Me. Group Quiz isn't affected.",
+        "description": "Hard limits the AI must obey on every pick — solo quiz and Surprise Me. Set them per format so avoiding a movie genre doesn't also block a book genre. Group Quiz isn't affected.",
+        "formatLabel": "Filter for",
+        "format": {
+          "movie": "Movies",
+          "book": "Books",
+          "music": "Music"
+        },
         "avoidGenresLabel": "Avoid genres",
         "runtimeLabel": "Max movie runtime",
         "runtimeNoCap": "No cap",
@@ -176,7 +182,11 @@
         "languageLabel": "Preferred language",
         "languagePlaceholder": "e.g. Japanese, Spanish",
         "avoidNoteLabel": "Never recommend",
-        "avoidNotePlaceholder": "Anything to avoid entirely — franchises, themes, creators…",
+        "avoidNotePlaceholder": {
+          "movie": "Movies to avoid entirely — franchises, directors, themes…",
+          "book": "Books to avoid entirely — series, authors, themes…",
+          "music": "Music to avoid entirely — artists, sub-genres, themes…"
+        },
         "avoidNoteHint": "Free text. Be as specific as you like.",
         "appliesNext": "Applies on next quiz",
         "save": "Save filters",

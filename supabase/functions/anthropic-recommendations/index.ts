@@ -77,8 +77,11 @@ serve(async (req) => {
     const allowMature = !familyFriendly;
 
     // Optional taste tuning / hard filters. Absent or empty → no change to
-    // existing behaviour. Built once, appended to each type's user prompt.
-    const hardConstraints = buildHardConstraints(recommendationFilters);
+    // existing behaviour. Built per-format so e.g. "avoid horror" on Movies
+    // doesn't bleed into Books picks.
+    const movieConstraints = buildHardConstraints(recommendationFilters, "movie");
+    const bookConstraints = buildHardConstraints(recommendationFilters, "book");
+    const musicConstraints = buildHardConstraints(recommendationFilters, "music");
 
     // Optional conversational refinement. Absent → behaviour unchanged.
     // When present, a clearly-delimited block is appended after the hard
@@ -93,7 +96,7 @@ serve(async (req) => {
         answers,
         isAdult: allowMature,
         systemPrompt,
-        hardConstraints,
+        hardConstraints: movieConstraints,
         refinementBlock,
       });
       recommendations.push({ type: "movie", ...movieRec });
@@ -107,7 +110,7 @@ serve(async (req) => {
         answers,
         isAdult: allowMature,
         systemPrompt,
-        hardConstraints,
+        hardConstraints: bookConstraints,
         refinementBlock,
       });
       recommendations.push({ type: "book", ...bookRec });
@@ -121,7 +124,7 @@ serve(async (req) => {
         answers,
         isAdult: allowMature,
         systemPrompt,
-        hardConstraints,
+        hardConstraints: musicConstraints,
         refinementBlock,
       });
       recommendations.push({ type: "music", ...musicRec });
@@ -142,13 +145,28 @@ serve(async (req) => {
 
 /**
  * Turns the optional recommendationFilters blob into a strongly-worded
- * HARD CONSTRAINTS block appended to the user prompt. Returns "" when the
- * field is absent or has no meaningful values, so existing behaviour is
- * byte-for-byte unchanged for callers that don't send filters.
+ * HARD CONSTRAINTS block appended to the format-specific user prompt.
+ * Returns "" when no meaningful values are set for the requested format,
+ * so existing behaviour is byte-for-byte unchanged for callers that don't
+ * send filters.
+ *
+ * Accepts both the per-format shape `{ movie: {...}, book: {...}, music:
+ * {...} }` and the legacy single-bucket shape `{ avoidGenres, language,
+ * avoidNote, maxRuntimeMinutes }` — the latter is applied to every format
+ * (the runtime line is suppressed for non-movie types).
  */
-function buildHardConstraints(filters: unknown): string {
+function buildHardConstraints(
+  filters: unknown,
+  type: "movie" | "book" | "music",
+): string {
   if (!filters || typeof filters !== "object") return "";
-  const f = filters as {
+  const root = filters as Record<string, unknown>;
+  const hasPerFormat = root.movie || root.book || root.music;
+  const slice = hasPerFormat
+    ? (root[type] as Record<string, unknown> | undefined) ?? null
+    : (root as Record<string, unknown>);
+  if (!slice) return "";
+  const f = slice as {
     avoidGenres?: unknown;
     maxRuntimeMinutes?: unknown;
     language?: unknown;
@@ -166,9 +184,13 @@ function buildHardConstraints(filters: unknown): string {
     lines.push(`- Do NOT recommend anything in these genres: ${genres.join(", ")}.`);
   }
 
-  if (typeof f.maxRuntimeMinutes === "number" && f.maxRuntimeMinutes > 0) {
+  if (
+    type === "movie" &&
+    typeof f.maxRuntimeMinutes === "number" &&
+    f.maxRuntimeMinutes > 0
+  ) {
     lines.push(
-      `- For movies: the runtime MUST be ${f.maxRuntimeMinutes} minutes or less. Never exceed this.`,
+      `- The runtime MUST be ${f.maxRuntimeMinutes} minutes or less. Never exceed this.`,
     );
   }
 

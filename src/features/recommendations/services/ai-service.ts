@@ -20,19 +20,32 @@ const getContentTone = (): "standard" | "family" => {
 export const PREF_RECOMMENDATION_FILTERS_KEY =
   "smart_advisor_pref_recommendation_filters";
 
-/** Taste tuning / hard filters threaded into the recommendation prompt. */
-export interface RecommendationFilters {
+/** Per-format taste tuning. maxRuntimeMinutes only makes sense for movies
+ *  but the field is allowed on every slice so the EF can stay shape-agnostic. */
+export interface FormatFilters {
   avoidGenres?: string[];
   maxRuntimeMinutes?: number | null;
   language?: string | null;
   avoidNote?: string | null;
 }
 
-/** Strips empty fields so the Edge Function only ever sees meaningful
- *  constraints; returns null when nothing meaningful is set. */
-export function cleanRecommendationFilters(
-  raw: unknown,
-): RecommendationFilters | null {
+/** Taste tuning / hard filters threaded into the recommendation prompt.
+ *  Stored as a per-format blob on `profiles.recommendation_filters` so the
+ *  user can avoid e.g. romance movies without nuking romance novels. */
+export interface RecommendationFilters {
+  movie?: FormatFilters;
+  book?: FormatFilters;
+  music?: FormatFilters;
+}
+
+/** The legacy shape — one shared bucket applied to every format. Kept for
+ *  backwards compatibility with rows written before per-format split. */
+type LegacyRecommendationFilters = FormatFilters;
+
+const FORMAT_KEYS = ["movie", "book", "music"] as const;
+type FormatKey = (typeof FORMAT_KEYS)[number];
+
+function cleanFormatSlice(raw: unknown): FormatFilters | null {
   if (!raw || typeof raw !== "object") return null;
   const f = raw as Record<string, unknown>;
   const genres = Array.isArray(f.avoidGenres)
@@ -42,12 +55,55 @@ export function cleanRecommendationFilters(
     typeof f.maxRuntimeMinutes === "number" ? f.maxRuntimeMinutes : 0;
   const language = typeof f.language === "string" ? f.language.trim() : "";
   const note = typeof f.avoidNote === "string" ? f.avoidNote.trim() : "";
-  const cleaned: RecommendationFilters = {
+  const cleaned: FormatFilters = {
     ...(genres.length > 0 ? { avoidGenres: genres } : {}),
     ...(runtime > 0 ? { maxRuntimeMinutes: runtime } : {}),
     ...(language.length > 0 ? { language } : {}),
     ...(note.length > 0 ? { avoidNote: note } : {}),
   };
+  return Object.keys(cleaned).length > 0 ? cleaned : null;
+}
+
+/** Migrates the legacy single-bucket blob to the per-format shape: the
+ *  whole legacy bucket is applied to every format (matches old behaviour
+ *  where one shared list filtered every rec). Returns null if the legacy
+ *  blob is empty. */
+function liftLegacyFilters(
+  legacy: LegacyRecommendationFilters | null,
+): RecommendationFilters | null {
+  if (!legacy) return null;
+  const slice = cleanFormatSlice(legacy);
+  if (!slice) return null;
+  // Runtime is movie-only — drop it from book/music slices so the prompt
+  // doesn't tell Claude to cap a novel at 90 minutes.
+  const { maxRuntimeMinutes: _runtime, ...common } = slice;
+  return {
+    movie: slice,
+    book: cleanFormatSlice(common) ?? undefined,
+    music: cleanFormatSlice(common) ?? undefined,
+  };
+}
+
+/** Strips empty slices so the Edge Function only ever sees meaningful
+ *  constraints; returns null when nothing meaningful is set across any
+ *  format. Accepts BOTH the legacy single-bucket shape and the new
+ *  per-format shape so old profile rows keep working. */
+export function cleanRecommendationFilters(
+  raw: unknown,
+): RecommendationFilters | null {
+  if (!raw || typeof raw !== "object") return null;
+  const f = raw as Record<string, unknown>;
+  const hasPerFormat = FORMAT_KEYS.some(
+    (k) => f[k] && typeof f[k] === "object",
+  );
+  if (!hasPerFormat) {
+    return liftLegacyFilters(raw as LegacyRecommendationFilters);
+  }
+  const cleaned: RecommendationFilters = {};
+  for (const key of FORMAT_KEYS) {
+    const slice = cleanFormatSlice(f[key]);
+    if (slice) cleaned[key] = slice;
+  }
   return Object.keys(cleaned).length > 0 ? cleaned : null;
 }
 

@@ -166,7 +166,13 @@
       "saveError": "No pudimos guardar tus preferencias. Inténtalo de nuevo.",
       "filters": {
         "title": "Filtros de recomendación",
-        "description": "Límites estrictos que la IA debe respetar en cada elección — cuestionario individual y Sorpréndeme. No afecta al cuestionario en grupo.",
+        "description": "Límites estrictos que la IA debe respetar en cada elección — cuestionario individual y Sorpréndeme. Configúralos por formato para que evitar un género de película no bloquee también ese género en libros. No afecta al cuestionario en grupo.",
+        "formatLabel": "Filtrar para",
+        "format": {
+          "movie": "Películas",
+          "book": "Libros",
+          "music": "Música"
+        },
         "avoidGenresLabel": "Evitar géneros",
         "runtimeLabel": "Duración máxima de película",
         "runtimeNoCap": "Sin límite",
@@ -176,7 +182,11 @@
         "languageLabel": "Idioma preferido",
         "languagePlaceholder": "p. ej. japonés, español",
         "avoidNoteLabel": "Nunca recomendar",
-        "avoidNotePlaceholder": "Algo que evitar por completo: franquicias, temas, creadores…",
+        "avoidNotePlaceholder": {
+          "movie": "Películas a evitar por completo: franquicias, directores, temas…",
+          "book": "Libros a evitar por completo: series, autores, temas…",
+          "music": "Música a evitar por completo: artistas, subgéneros, temas…"
+        },
         "avoidNoteHint": "Texto libre. Sé tan específico como quieras.",
         "appliesNext": "Se aplica en el próximo cuestionario",
         "save": "Guardar filtros",

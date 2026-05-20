@@ -9,6 +9,7 @@ import { useAuth } from "@/features/auth/hooks/use-auth";
 import {
   cleanRecommendationFilters,
   PREF_RECOMMENDATION_FILTERS_KEY,
+  type FormatFilters,
   type RecommendationFilters,
 } from "@/features/recommendations/services/ai-service";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,56 +18,140 @@ import { toast } from "sonner";
 
 import { SectionCard, SectionHeader } from "./settings-ui";
 
-/** Exact parity with the mobile app's _commonGenres list (account_screen). */
-const COMMON_GENRES = [
-  "Horror",
-  "Romance",
-  "Musical",
-  "Documentary",
-  "Anime",
-  "Reality",
-  "War",
-  "Western",
-  "Thriller",
-  "Comedy",
-] as const;
+type Format = "movie" | "book" | "music";
 
-/** Runtime caps offered, in minutes. 0 = no cap (matches mobile stops). */
+/** Curated common-genre buckets per format. Names mirror the labels used
+ *  on the in-quiz "Pick Type" control and the mobile app's filter chips. */
+const GENRES: Record<Format, readonly string[]> = {
+  movie: [
+    "Horror",
+    "Romance",
+    "Musical",
+    "Documentary",
+    "Anime",
+    "Reality",
+    "War",
+    "Western",
+    "Thriller",
+    "Comedy",
+  ],
+  book: [
+    "Sci-Fi",
+    "Fantasy",
+    "Romance",
+    "Mystery",
+    "Horror",
+    "Historical",
+    "Literary",
+    "Young Adult",
+    "Memoir",
+    "Self-Help",
+  ],
+  music: [
+    "Pop",
+    "Rock",
+    "Hip-Hop",
+    "Country",
+    "Jazz",
+    "Classical",
+    "Electronic",
+    "R&B",
+    "Metal",
+    "Indie",
+  ],
+};
+
+/** Movie runtime caps offered, in minutes. 0 = no cap. Movie-only. */
 const RUNTIME_STOPS = [0, 90, 120, 150, 180] as const;
+
+/** Per-format chip colour — matches the "Default content" picker so the
+ *  filter card visually announces which format you're tuning. */
+const ACTIVE_HUE: Record<Format, string> = {
+  movie: "bg-amber-500",
+  book: "bg-emerald-500",
+  music: "bg-rose-500",
+};
+
+const HOVER_BORDER: Record<Format, string> = {
+  movie:
+    "hover:border-amber-300 hover:text-amber-600 dark:hover:border-amber-500/60 dark:hover:text-amber-300",
+  book:
+    "hover:border-emerald-300 hover:text-emerald-600 dark:hover:border-emerald-500/60 dark:hover:text-emerald-300",
+  music:
+    "hover:border-rose-300 hover:text-rose-600 dark:hover:border-rose-500/60 dark:hover:text-rose-300",
+};
+
+const FORMATS: readonly Format[] = ["movie", "book", "music"];
+
+type SliceState = {
+  avoidGenres: Set<string>;
+  runtimeIdx: number;
+  language: string;
+  avoidNote: string;
+};
+
+const EMPTY_SLICE = (): SliceState => ({
+  avoidGenres: new Set<string>(),
+  runtimeIdx: 0,
+  language: "",
+  avoidNote: "",
+});
+
+function sliceFromBlob(raw: FormatFilters | undefined): SliceState {
+  const s = EMPTY_SLICE();
+  if (!raw) return s;
+  if (Array.isArray(raw.avoidGenres)) s.avoidGenres = new Set(raw.avoidGenres);
+  if (typeof raw.language === "string") s.language = raw.language;
+  if (typeof raw.avoidNote === "string") s.avoidNote = raw.avoidNote;
+  const rt = typeof raw.maxRuntimeMinutes === "number" ? raw.maxRuntimeMinutes : 0;
+  const i = RUNTIME_STOPS.indexOf(rt as (typeof RUNTIME_STOPS)[number]);
+  s.runtimeIdx = i < 0 ? 0 : i;
+  return s;
+}
+
+function sliceToBlob(s: SliceState, format: Format): FormatFilters {
+  const out: FormatFilters = {};
+  if (s.avoidGenres.size > 0) out.avoidGenres = Array.from(s.avoidGenres);
+  if (format === "movie") {
+    const rt = RUNTIME_STOPS[s.runtimeIdx];
+    if (rt > 0) out.maxRuntimeMinutes = rt;
+  }
+  const lang = s.language.trim();
+  if (lang.length > 0) out.language = lang;
+  const note = s.avoidNote.trim();
+  if (note.length > 0) out.avoidNote = note;
+  return out;
+}
 
 /**
  * Settings → Content "Recommendation filters" block. Lets the user set
  * explicit dislikes + hard constraints (avoid genres, max movie runtime,
- * preferred language, free-text "never recommend"). Persisted as the
- * `recommendation_filters` JSONB blob on the profile row (source of truth)
- * and mirrored to localStorage for instant hydration — parity with the
- * mobile Account > Recommendation filters section. Self-contained: owns
- * its own state + save, dropped into the content section like
- * SessionsManagement.
+ * preferred language, free-text "never recommend") PER FORMAT — so e.g.
+ * avoiding "Romance" movies doesn't also block romance novels. Persisted
+ * as the `recommendation_filters` JSONB blob on the profile row (new
+ * per-format shape; legacy single-bucket blob is migrated on read).
  */
 export const RecommendationFiltersCard = () => {
   const t = useTranslations("Settings.content.filters");
   const { user } = useAuth();
 
-  const [avoidGenres, setAvoidGenres] = useState<Set<string>>(new Set());
-  const [runtimeIdx, setRuntimeIdx] = useState(0);
-  const [language, setLanguage] = useState("");
-  const [avoidNote, setAvoidNote] = useState("");
+  const [active, setActive] = useState<Format>("movie");
+  const [slices, setSlices] = useState<Record<Format, SliceState>>(() => ({
+    movie: EMPTY_SLICE(),
+    book: EMPTY_SLICE(),
+    music: EMPTY_SLICE(),
+  }));
   const [saving, setSaving] = useState(false);
 
   const hydrate = (raw: unknown) => {
-    const f = (raw ?? {}) as RecommendationFilters;
-    setAvoidGenres(new Set(Array.isArray(f.avoidGenres) ? f.avoidGenres : []));
-    setLanguage(typeof f.language === "string" ? f.language : "");
-    setAvoidNote(typeof f.avoidNote === "string" ? f.avoidNote : "");
-    const rt =
-      typeof f.maxRuntimeMinutes === "number" ? f.maxRuntimeMinutes : 0;
-    const i = RUNTIME_STOPS.indexOf(rt as (typeof RUNTIME_STOPS)[number]);
-    setRuntimeIdx(i < 0 ? 0 : i);
+    const cleaned = cleanRecommendationFilters(raw) ?? {};
+    setSlices({
+      movie: sliceFromBlob(cleaned.movie),
+      book: sliceFromBlob(cleaned.book),
+      music: sliceFromBlob(cleaned.music),
+    });
   };
 
-  // localStorage first for instant paint, then the profile row (source of
-  // truth) overrides once it loads — same pattern as content-tone.
   useEffect(() => {
     if (typeof window !== "undefined") {
       const cached = window.localStorage.getItem(
@@ -97,13 +182,16 @@ export const RecommendationFiltersCard = () => {
     };
   }, [user?.id]);
 
-  const toggleGenre = (g: string) =>
-    setAvoidGenres((prev) => {
-      const next = new Set(prev);
-      if (next.has(g)) next.delete(g);
-      else next.add(g);
-      return next;
-    });
+  const current = slices[active];
+  const setCurrent = (next: SliceState) =>
+    setSlices((prev) => ({ ...prev, [active]: next }));
+
+  const toggleGenre = (g: string) => {
+    const nextGenres = new Set(current.avoidGenres);
+    if (nextGenres.has(g)) nextGenres.delete(g);
+    else nextGenres.add(g);
+    setCurrent({ ...current, avoidGenres: nextGenres });
+  };
 
   const handleSave = async () => {
     if (!user?.id) {
@@ -111,13 +199,15 @@ export const RecommendationFiltersCard = () => {
       return;
     }
     setSaving(true);
-    const runtime = RUNTIME_STOPS[runtimeIdx];
-    const filters = {
-      avoidGenres: Array.from(avoidGenres),
-      maxRuntimeMinutes: runtime === 0 ? null : runtime,
-      language: language.trim() || null,
-      avoidNote: avoidNote.trim() || null,
+    const filters: RecommendationFilters = {
+      movie: sliceToBlob(slices.movie, "movie"),
+      book: sliceToBlob(slices.book, "book"),
+      music: sliceToBlob(slices.music, "music"),
     };
+    // Drop empty slices so the stored blob mirrors what the EF will read.
+    for (const k of FORMATS) {
+      if (Object.keys(filters[k] ?? {}).length === 0) delete filters[k];
+    }
     try {
       const { error } = await supabase
         .from("profiles")
@@ -128,8 +218,6 @@ export const RecommendationFiltersCard = () => {
         .eq("id", user.id);
       if (error) throw error;
       if (typeof window !== "undefined") {
-        // Mirror the cleaned shape so the hot cache matches what the AI
-        // service would derive from the profile row.
         window.localStorage.setItem(
           PREF_RECOMMENDATION_FILTERS_KEY,
           JSON.stringify(cleanRecommendationFilters(filters) ?? {}),
@@ -150,22 +238,57 @@ export const RecommendationFiltersCard = () => {
       <div className="space-y-6">
         <div>
           <p className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+            {t("formatLabel")}
+          </p>
+          <SegmentedControl<Format>
+            layoutId="settings-rec-filter-format"
+            value={active}
+            onChange={setActive}
+            ariaLabel={t("formatLabel")}
+            options={[
+              {
+                value: "movie",
+                label: t("format.movie"),
+                pillClassName: "bg-amber-500",
+              },
+              {
+                value: "book",
+                label: t("format.book"),
+                pillClassName: "bg-emerald-500",
+              },
+              {
+                value: "music",
+                label: t("format.music"),
+                pillClassName: "bg-rose-500",
+              },
+            ]}
+          />
+        </div>
+
+        <div>
+          <p className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
             {t("avoidGenresLabel")}
           </p>
           <div className="flex flex-wrap gap-2">
-            {COMMON_GENRES.map((g) => {
-              const selected = avoidGenres.has(g);
+            {GENRES[active].map((g) => {
+              const selected = current.avoidGenres.has(g);
               return (
                 <button
-                  key={g}
+                  key={`${active}-${g}`}
                   type="button"
                   onClick={() => toggleGenre(g)}
                   aria-pressed={selected}
                   className={cn(
                     "rounded-full border px-3 py-1.5 text-xs font-bold tracking-tight transition-all",
                     selected
-                      ? "border-transparent bg-rose-500 text-white shadow-sm"
-                      : "border-slate-200/80 bg-white text-slate-600 hover:border-rose-300 hover:text-rose-600 dark:border-slate-700/70 dark:bg-slate-900/65 dark:text-slate-300 dark:hover:border-rose-500/60 dark:hover:text-rose-300",
+                      ? cn(
+                        "border-transparent text-white shadow-sm",
+                        ACTIVE_HUE[active],
+                      )
+                      : cn(
+                        "border-slate-200/80 bg-white text-slate-600 dark:border-slate-700/70 dark:bg-slate-900/65 dark:text-slate-300",
+                        HOVER_BORDER[active],
+                      ),
                   )}
                 >
                   {g}
@@ -175,30 +298,34 @@ export const RecommendationFiltersCard = () => {
           </div>
         </div>
 
-        <div>
-          <p className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
-            {t("runtimeLabel")}
-          </p>
-          <SegmentedControl<string>
-            layoutId="settings-rec-filter-runtime"
-            value={String(runtimeIdx)}
-            onChange={(v) => setRuntimeIdx(Number(v))}
-            ariaLabel={t("runtimeLabel")}
-            options={RUNTIME_STOPS.map((stop, i) => ({
-              value: String(i),
-              label:
-                stop === 0
-                  ? t("runtimeNoCap")
-                  : t("runtimeMinutes", { minutes: stop }),
-              pillClassName: "bg-amber-500",
-            }))}
-          />
-          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-            {runtimeIdx === 0
-              ? t("runtimeHintNone")
-              : t("runtimeHint", { minutes: RUNTIME_STOPS[runtimeIdx] })}
-          </p>
-        </div>
+        {active === "movie" && (
+          <div>
+            <p className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+              {t("runtimeLabel")}
+            </p>
+            <SegmentedControl<string>
+              layoutId="settings-rec-filter-runtime"
+              value={String(current.runtimeIdx)}
+              onChange={(v) => setCurrent({ ...current, runtimeIdx: Number(v) })}
+              ariaLabel={t("runtimeLabel")}
+              options={RUNTIME_STOPS.map((stop, i) => ({
+                value: String(i),
+                label:
+                  stop === 0
+                    ? t("runtimeNoCap")
+                    : t("runtimeMinutes", { minutes: stop }),
+                pillClassName: "bg-amber-500",
+              }))}
+            />
+            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+              {current.runtimeIdx === 0
+                ? t("runtimeHintNone")
+                : t("runtimeHint", {
+                  minutes: RUNTIME_STOPS[current.runtimeIdx],
+                })}
+            </p>
+          </div>
+        )}
 
         <label className="block space-y-1.5">
           <span className="text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
@@ -206,8 +333,10 @@ export const RecommendationFiltersCard = () => {
           </span>
           <input
             type="text"
-            value={language}
-            onChange={(e) => setLanguage(e.target.value)}
+            value={current.language}
+            onChange={(e) =>
+              setCurrent({ ...current, language: e.target.value })
+            }
             placeholder={t("languagePlaceholder")}
             className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm transition-colors focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-100 dark:focus:border-indigo-500"
           />
@@ -218,9 +347,11 @@ export const RecommendationFiltersCard = () => {
             {t("avoidNoteLabel")}
           </span>
           <textarea
-            value={avoidNote}
-            onChange={(e) => setAvoidNote(e.target.value)}
-            placeholder={t("avoidNotePlaceholder")}
+            value={current.avoidNote}
+            onChange={(e) =>
+              setCurrent({ ...current, avoidNote: e.target.value })
+            }
+            placeholder={t(`avoidNotePlaceholder.${active}`)}
             rows={3}
             maxLength={500}
             className="w-full resize-y rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm transition-colors focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-100 dark:focus:border-indigo-500"
