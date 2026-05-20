@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getAal } from "@/lib/auth/aal";
-import {
-  authRestEnrollTotp,
-  authRestListFactors,
-} from "@/lib/auth/supabase-rest";
+import { authRestEnrollTotp } from "@/lib/auth/supabase-rest";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
@@ -34,8 +31,13 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Use supabase-js with the user's JWT in the global Authorization header,
+  // so `mfa.listFactors()` calls the same underlying endpoint the browser
+  // client uses — going through raw REST hit a 405 on some deployments
+  // (Auth REST path mismatch / proxy in front of `/auth/v1/factors`).
   const anonClient = createClient(supabaseUrl, supabaseAnonKey, {
     auth: { autoRefreshToken: false, persistSession: false },
+    global: { headers: { Authorization: `Bearer ${token}` } },
   });
   const { data: userData, error: userError } =
     await anonClient.auth.getUser(token);
@@ -43,27 +45,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const factorsResult = await authRestListFactors(token);
-  if (!factorsResult.ok) {
-    // Forward the upstream Supabase status + message so the user (and the
-    // dev console) sees why MFA bootstrap actually failed — the previous
-    // generic 502 + "Couldn't read MFA state" made expired JWTs, rate
-    // limits and outages all look identical.
-    console.error(
-      "[mfa/enroll] /auth/v1/factors failed",
-      factorsResult.status,
-      factorsResult.error.message,
-    );
+  const { data: factorsData, error: factorsError } =
+    await anonClient.auth.mfa.listFactors();
+  if (factorsError) {
+    console.error("[mfa/enroll] listFactors failed", factorsError);
     return NextResponse.json(
-      {
-        error: `Couldn't read MFA state: ${factorsResult.error.message}`,
-        upstreamStatus: factorsResult.status,
-      },
-      { status: factorsResult.status >= 400 ? factorsResult.status : 502 },
+      { error: `Couldn't read MFA state: ${factorsError.message}` },
+      { status: 502 },
     );
   }
 
-  const hasVerifiedFactor = factorsResult.data.some(
+  const hasVerifiedFactor = (factorsData?.totp ?? []).some(
     (f) => f.status === "verified",
   );
 
