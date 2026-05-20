@@ -45,9 +45,21 @@ export async function POST(request: NextRequest) {
 
   const factorsResult = await authRestListFactors(token);
   if (!factorsResult.ok) {
+    // Forward the upstream Supabase status + message so the user (and the
+    // dev console) sees why MFA bootstrap actually failed — the previous
+    // generic 502 + "Couldn't read MFA state" made expired JWTs, rate
+    // limits and outages all look identical.
+    console.error(
+      "[mfa/enroll] /auth/v1/factors failed",
+      factorsResult.status,
+      factorsResult.error.message,
+    );
     return NextResponse.json(
-      { error: "Couldn't read MFA state. Please try again." },
-      { status: 502 },
+      {
+        error: `Couldn't read MFA state: ${factorsResult.error.message}`,
+        upstreamStatus: factorsResult.status,
+      },
+      { status: factorsResult.status >= 400 ? factorsResult.status : 502 },
     );
   }
 
