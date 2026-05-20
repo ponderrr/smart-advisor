@@ -3,7 +3,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/constants/app_constants.dart';
 import '../../../core/models/answer.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/models/question.dart';
@@ -64,6 +66,28 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       _step = _Step.generating;
       WidgetsBinding.instance
           .addPostFrameCallback((_) => _generate());
+    } else {
+      // Hydrate the default content selection from the user's saved
+      // preference (Settings → Recommendations → Default content). The
+      // user can still flip it on the content step; this just makes the
+      // step land on their preferred choice instead of always `mix`.
+      _hydrateContentFocus();
+    }
+  }
+
+  Future<void> _hydrateContentFocus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getString(StorageKeys.prefContentFocus);
+    if (saved == null || !mounted) return;
+    final next = switch (saved) {
+      'movie' => ContentType.movie,
+      'book' => ContentType.book,
+      'music' => ContentType.music,
+      'mix' => ContentType.mix,
+      _ => null,
+    };
+    if (next != null && next != _content) {
+      setState(() => _content = next);
     }
   }
 

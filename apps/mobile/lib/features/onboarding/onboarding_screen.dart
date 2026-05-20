@@ -283,17 +283,15 @@ class _S extends ConsumerState<OnboardingScreen> {
     final placeholder =
         ref.watch(currentProfileProvider).asData?.value?.name ?? 'Jane';
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Center(child: Eyebrow('First things first'))
-            .animateFadeUp(delay: 80),
-        const SizedBox(height: 8),
-        const Center(
-                child:
-                    BrandHeading('What should we call you?', size: 24))
+        const Eyebrow('First things first').animateFadeUp(delay: 80),
+        const SizedBox(height: 10),
+        const BrandHeading('What should we call you?',
+                size: 24, center: true)
             .animateFadeUp(delay: 160),
-        const SizedBox(height: 14),
+        const SizedBox(height: 12),
         Text(
           'We\'ll greet you by this when we surface picks.',
           textAlign: TextAlign.center,
@@ -301,9 +299,14 @@ class _S extends ConsumerState<OnboardingScreen> {
               fontSize: 14, height: 1.4, color: c.mutedForeground),
         ).animateFadeUp(delay: 240),
         const SizedBox(height: 28),
-        AdaptiveTextField(
-          controller: _name,
-          placeholder: placeholder,
+        // Cap the input width so it doesn't stretch across the full
+        // 460-wide shell on tablets / wider screens.
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 360),
+          child: AdaptiveTextField(
+            controller: _name,
+            placeholder: placeholder,
+          ),
         ).animateFadeUp(delay: 320),
       ],
     );
@@ -312,21 +315,25 @@ class _S extends ConsumerState<OnboardingScreen> {
   // ── Step 2: locale ──────────────────────────────────────────────────
   Widget _stepLocale() {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Center(child: Eyebrow('Language')).animateFadeUp(delay: 80),
-        const SizedBox(height: 8),
-        const Center(
-                child: BrandHeading('Pick your language', size: 26))
+        const Eyebrow('Language').animateFadeUp(delay: 80),
+        const SizedBox(height: 10),
+        const BrandHeading('Pick your language', size: 26, center: true)
             .animateFadeUp(delay: 160),
+        const SizedBox(height: 12),
+        const Subtitle(
+          'We\'ll translate the app interface to match.',
+          center: true,
+        ).animateFadeUp(delay: 220),
         const SizedBox(height: 24),
         BrandSegmented(
           color: Tw.indigo500,
           labels: const ['English', 'Español'],
           selectedIndex: _locale,
           onValueChanged: (i) => setState(() => _locale = i),
-        ).animateFadeUp(delay: 240),
+        ).animateFadeUp(delay: 300),
       ],
     );
   }
@@ -346,18 +353,16 @@ class _S extends ConsumerState<OnboardingScreen> {
     final idx = focusValues.indexOf(_contentFocus);
     final activeIdx = idx < 0 ? 3 : idx;
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Center(child: Eyebrow('What you want picks for'))
-            .animateFadeUp(delay: 80),
-        const SizedBox(height: 8),
-        const Center(
-          child: BrandHeading('Movies, books,\nmusic, or all three?',
-              size: 26),
-        ).animateFadeUp(delay: 160),
-        const SizedBox(height: 8),
-        Subtitle(
+        const Eyebrow('What you want picks for').animateFadeUp(delay: 80),
+        const SizedBox(height: 10),
+        const BrandHeading('Movies, books, music, or all three?',
+                size: 24, center: true)
+            .animateFadeUp(delay: 160),
+        const SizedBox(height: 12),
+        const Subtitle(
           'Sets the default for every quiz. You can change it on any quiz.',
           center: true,
         ).animateFadeUp(delay: 240),
@@ -376,17 +381,15 @@ class _S extends ConsumerState<OnboardingScreen> {
   // ── Step 4: avoid genres ───────────────────────────────────────────
   Widget _stepAvoidGenres() {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Center(child: Eyebrow('Anything to skip?'))
-            .animateFadeUp(delay: 80),
-        const SizedBox(height: 8),
-        const Center(
-          child: BrandHeading('Genres you\'d rather\nnever see.',
-              size: 26),
-        ).animateFadeUp(delay: 160),
-        const SizedBox(height: 8),
+        const Eyebrow('Anything to skip?').animateFadeUp(delay: 80),
+        const SizedBox(height: 10),
+        const BrandHeading('Genres you\'d rather never see.',
+                size: 24, center: true)
+            .animateFadeUp(delay: 160),
+        const SizedBox(height: 12),
         const Subtitle(
           'Tap any to add a hard "don\'t recommend" rule. Skip the step '
           'if nothing comes to mind.',
@@ -415,17 +418,15 @@ class _S extends ConsumerState<OnboardingScreen> {
   // ── Step 5: reminders ──────────────────────────────────────────────
   Widget _stepReminders(AppColors c) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Center(child: Eyebrow('Reminders'))
-            .animateFadeUp(delay: 80),
-        const SizedBox(height: 8),
-        const Center(
-          child: BrandHeading('Want a weekly\nfresh-picks nudge?',
-              size: 26),
-        ).animateFadeUp(delay: 160),
-        const SizedBox(height: 8),
+        const Eyebrow('Reminders').animateFadeUp(delay: 80),
+        const SizedBox(height: 10),
+        const BrandHeading('Want a weekly fresh-picks nudge?',
+                size: 24, center: true)
+            .animateFadeUp(delay: 160),
+        const SizedBox(height: 12),
         const Subtitle(
           'One quiet notification per week. We\'ll also nudge you if '
           'you\'ve got things in progress.',
@@ -460,14 +461,24 @@ class _StepShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 460),
-          child: child,
-        ),
-      ),
+    // Wrap in a LayoutBuilder + ConstrainedBox(minHeight: viewport) so the
+    // child Column's MainAxisAlignment.center actually takes effect — a
+    // bare SingleChildScrollView shrink-wraps and pins content to the top.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight - 32),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 460),
+                child: child,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

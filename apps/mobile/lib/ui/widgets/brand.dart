@@ -89,13 +89,16 @@ class Eyebrow extends StatelessWidget {
 
 /// `font-black tracking-tight` heading.
 class BrandHeading extends StatelessWidget {
-  const BrandHeading(this.text, {super.key, this.size = 24});
+  const BrandHeading(this.text,
+      {super.key, this.size = 24, this.center = false});
   final String text;
   final double size;
+  final bool center;
 
   @override
   Widget build(BuildContext context) => Text(
         text,
+        textAlign: center ? TextAlign.center : null,
         style: TextStyle(
           fontSize: size,
           fontWeight: FontWeight.w900,
