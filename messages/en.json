@@ -1524,8 +1524,42 @@
         "label": "Language",
         "en": "English",
         "es": "Español"
+      },
+      "focus": {
+        "movie": "Movies",
+        "book": "Books",
+        "music": "Music",
+        "mix": "Mix"
       }
     },
+    "steps": {
+      "name": {
+        "eyebrow": "Step 1",
+        "title": "What should we call you?",
+        "subtitle": "We'll use this across recommendations and your profile."
+      },
+      "language": {
+        "eyebrow": "Step 2",
+        "title": "Pick your language",
+        "subtitle": "We'll translate the app interface to match."
+      },
+      "focus": {
+        "eyebrow": "Step 3",
+        "title": "What do you want picks for?",
+        "subtitle": "Sets the default content type. You can still switch on every quiz.",
+        "hint": "Tip: you'll always have the option to flip this on individual quizzes."
+      },
+      "avoid": {
+        "eyebrow": "Step 4",
+        "title": "Anything you'd rather skip?",
+        "subtitle": "Tap any to add a hard \"don't recommend\" rule. Skip the step if nothing comes to mind.",
+        "emptyHint": "No filters yet — you can add some anytime in Settings.",
+        "selectedHint": "{count, plural, one {# genre} other {# genres}} you'd rather avoid."
+      }
+    },
+    "back": "Back",
+    "next": "Next",
+    "finish": "Finish setup",
     "submit": "Looks good",
     "skip": "Skip for now",
     "previewClose": "Close preview",

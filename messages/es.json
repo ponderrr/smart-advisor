@@ -1524,8 +1524,42 @@
         "label": "Idioma",
         "en": "English",
         "es": "Español"
+      },
+      "focus": {
+        "movie": "Películas",
+        "book": "Libros",
+        "music": "Música",
+        "mix": "Mixto"
       }
     },
+    "steps": {
+      "name": {
+        "eyebrow": "Paso 1",
+        "title": "¿Cómo deberíamos llamarte?",
+        "subtitle": "Lo usaremos en las recomendaciones y en tu perfil."
+      },
+      "language": {
+        "eyebrow": "Paso 2",
+        "title": "Elige tu idioma",
+        "subtitle": "Traduciremos la interfaz para que coincida."
+      },
+      "focus": {
+        "eyebrow": "Paso 3",
+        "title": "¿Para qué quieres recomendaciones?",
+        "subtitle": "Define el tipo de contenido por defecto. Aún podrás cambiarlo en cada cuestionario.",
+        "hint": "Consejo: siempre podrás cambiarlo en cuestionarios individuales."
+      },
+      "avoid": {
+        "eyebrow": "Paso 4",
+        "title": "¿Algo que prefieras evitar?",
+        "subtitle": "Toca cualquiera para añadir una regla \"nunca recomendar\". Omite el paso si nada se te ocurre.",
+        "emptyHint": "Sin filtros aún — puedes añadirlos cuando quieras en Ajustes.",
+        "selectedHint": "{count, plural, one {# género} other {# géneros}} que prefieres evitar."
+      }
+    },
+    "back": "Atrás",
+    "next": "Siguiente",
+    "finish": "Terminar",
     "submit": "Todo bien",
     "skip": "Omitir por ahora",
     "previewClose": "Cerrar vista previa",
