@@ -69,6 +69,62 @@ class FollowingNotifier extends Notifier<Set<String>> {
   }
 }
 
+/// In-memory set of blocked usernames (prototype only). Blocked authors'
+/// posts and comments are filtered out of the feed; blocking also
+/// unfollows them so the relationship is fully severed.
+final blockedProvider =
+    NotifierProvider<BlockedNotifier, Set<String>>(BlockedNotifier.new);
+
+class BlockedNotifier extends Notifier<Set<String>> {
+  @override
+  Set<String> build() => <String>{};
+
+  /// Blocks [username]. Idempotent. Also drops the follow relationship
+  /// so the user doesn't end up muted-but-followed.
+  bool block(String username) {
+    final handle = username.trim().toLowerCase();
+    if (handle.isEmpty || handle == 'you') return false;
+    if (state.contains(handle)) return false;
+    state = {...state, handle};
+    final following = ref.read(followingProvider);
+    if (following.contains(username) || following.contains(handle)) {
+      ref.read(followingProvider.notifier).toggle(username);
+    }
+    return true;
+  }
+
+  bool unblock(String username) {
+    final handle = username.trim().toLowerCase();
+    if (!state.contains(handle)) return false;
+    state = {...state}..remove(handle);
+    return true;
+  }
+
+  bool isBlocked(String username) =>
+      state.contains(username.trim().toLowerCase());
+}
+
+/// The feed with blocked authors filtered out — comments authored by a
+/// blocked user are also stripped (recursively, so a blocked user's
+/// nested replies vanish too). Use this everywhere a user-facing feed
+/// list is rendered; [feedProvider] stays the canonical store.
+final visibleFeedProvider = Provider<List<FeedPost>>((ref) {
+  final posts = ref.watch(feedProvider);
+  final blocked = ref.watch(blockedProvider);
+  if (blocked.isEmpty) return posts;
+  bool isBlocked(String author) =>
+      blocked.contains(author.trim().toLowerCase());
+  return [
+    for (final p in posts)
+      if (!isBlocked(p.author))
+        p.copyWith(
+            comments: [
+              for (final c in p.comments)
+                if (!isBlocked(c.author)) c,
+            ]),
+  ];
+});
+
 /// In-memory per-comment vote, keyed `"<postId>#<commentId>"` → -1/0/1.
 final commentVotesProvider =
     NotifierProvider<CommentVotesNotifier, Map<String, int>>(

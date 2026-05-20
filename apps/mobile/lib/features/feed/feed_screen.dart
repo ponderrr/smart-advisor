@@ -53,8 +53,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   @override
   Widget build(BuildContext context) {
     final prefs = ref.watch(feedPrefsProvider);
+    // visibleFeedProvider already filters out posts + comments authored
+    // by blocked users; we re-apply scope/community/follow filters here.
     final posts = _visible(
-        ref.watch(feedProvider), ref.watch(followingProvider), prefs);
+        ref.watch(visibleFeedProvider), ref.watch(followingProvider), prefs);
     final visibility = ref.watch(feedVisibilityProvider);
     final fabColor = prefs.community == null
         ? Tw.indigo500

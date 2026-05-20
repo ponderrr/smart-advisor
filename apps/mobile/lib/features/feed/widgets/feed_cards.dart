@@ -230,13 +230,13 @@ class SaveRail extends ConsumerWidget {
 // Card / Compact / Media post layouts
 // ---------------------------------------------------------------------------
 
-class PostCard extends StatelessWidget {
+class PostCard extends ConsumerWidget {
   const PostCard({super.key, required this.post, required this.onOpen});
   final FeedPost post;
   final VoidCallback onOpen;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final tone =
         contentAccent(post.community.accent, Theme.of(context).brightness);
     final meta = [
@@ -269,6 +269,8 @@ class PostCard extends StatelessWidget {
                   CommunityTag(community: post.community, tone: tone),
                   const Spacer(),
                   TasteBadge(match: post.tasteMatch, tone: tone),
+                  const SizedBox(width: 6),
+                  _PostMenu(post: post, ref: ref, tone: tone),
                 ]),
                 const SizedBox(height: 8),
                 Row(children: [
@@ -673,6 +675,58 @@ class PostFab extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// Three-dot overflow menu on a feed post header. Currently surfaces a
+/// single "Block @handle" action — the feed-side entry point for the
+/// block-person feature; managed under Settings → Feed → Blocked people.
+/// stopPropagation: the menu is a tap target inside a tappable post card,
+/// so any tap on the icon or its menu items must not also trigger the
+/// card's onOpen.
+class _PostMenu extends StatelessWidget {
+  const _PostMenu({required this.post, required this.ref, required this.tone});
+  final FeedPost post;
+  final WidgetRef ref;
+  final ContentAccentTone tone;
+
+  @override
+  Widget build(BuildContext context) {
+    // "you" can't block themselves; hide the menu entirely on own posts.
+    if (post.author == 'you') return const SizedBox.shrink();
+    return GestureDetector(
+      onTap: () {}, // swallow taps so the card doesn't open behind us
+      behavior: HitTestBehavior.opaque,
+      child: PopupMenuButton<String>(
+        tooltip: 'More',
+        padding: EdgeInsets.zero,
+        offset: const Offset(0, 28),
+        icon: Icon(Icons.more_horiz, size: 18, color: tone.text),
+        onSelected: (action) {
+          if (action == 'block') {
+            final blocked =
+                ref.read(blockedProvider.notifier).block(post.author);
+            showBanner(
+              blocked
+                  ? 'Blocked @${post.author}.'
+                  : '@${post.author} is already blocked.',
+            );
+          }
+        },
+        itemBuilder: (_) => [
+          PopupMenuItem<String>(
+            value: 'block',
+            child: Row(
+              children: [
+                const Icon(Icons.block, size: 16, color: Colors.redAccent),
+                const SizedBox(width: 8),
+                Text('Block @${post.author}'),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

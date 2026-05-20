@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../ui/ui.dart';
 import '../../feed/feed_providers.dart';
 import '../../feed/models/feed_models.dart';
+import '../../feed/screens/blocked_people_screen.dart';
 import 'settings_helpers.dart';
 
 /// Feed settings — the relocated `_FeedSettingsCard`, plus a navigable
@@ -31,10 +32,24 @@ class FeedSettingsScreen extends ConsumerWidget {
             BrandCard(
               padding: const EdgeInsets.symmetric(
                   horizontal: 20, vertical: 6),
-              child: settingsTile(context, Icons.person_add_alt,
-                  'Add friends',
-                  subtitle: 'Find people to follow',
-                  onTap: () => context.push('/feed/people')),
+              child: Column(children: [
+                settingsTile(context, Icons.person_add_alt, 'Add friends',
+                    subtitle: 'Find people to follow',
+                    onTap: () => context.push('/feed/people')),
+                settingsDivider(context),
+                Consumer(builder: (context, ref, _) {
+                  final blocked = ref.watch(blockedProvider);
+                  return settingsTile(context, Icons.block, 'Blocked people',
+                      subtitle: blocked.isEmpty
+                          ? 'Nobody blocked'
+                          : '${blocked.length} blocked',
+                      onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (_) =>
+                                    const BlockedPeopleScreen()),
+                          ));
+                }),
+              ]),
             ),
             const SizedBox(height: 24),
           ],
