@@ -1555,6 +1555,14 @@
         "subtitle": "Toca cualquiera para añadir una regla \"nunca recomendar\". Omite el paso si nada se te ocurre.",
         "emptyHint": "Sin filtros aún — puedes añadirlos cuando quieras en Ajustes.",
         "selectedHint": "{count, plural, one {# género} other {# géneros}} que prefieres evitar."
+      },
+      "review": {
+        "eyebrow": "Una última mirada",
+        "title": "¿Se ve bien?",
+        "subtitle": "Edita cualquier cosa que quieras cambiar antes de guardar.",
+        "edit": "Editar",
+        "empty": "—",
+        "noGenres": "Ninguno"
       }
     },
     "back": "Atrás",

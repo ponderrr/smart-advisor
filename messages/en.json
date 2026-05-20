@@ -1555,6 +1555,14 @@
         "subtitle": "Tap any to add a hard \"don't recommend\" rule. Skip the step if nothing comes to mind.",
         "emptyHint": "No filters yet — you can add some anytime in Settings.",
         "selectedHint": "{count, plural, one {# genre} other {# genres}} you'd rather avoid."
+      },
+      "review": {
+        "eyebrow": "One last look",
+        "title": "Does this look right?",
+        "subtitle": "Edit anything you'd like to change before we save it.",
+        "edit": "Edit",
+        "empty": "—",
+        "noGenres": "None"
       }
     },
     "back": "Back",

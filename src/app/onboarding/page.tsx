@@ -42,7 +42,10 @@ const COMMON_GENRES = [
   "Comedy",
 ] as const;
 
-const TOTAL_STEPS = 4;
+/** 5 paged steps: name → language → focus → avoid genres → review. The
+ *  review step is a last-look summary with per-row Edit links that jump
+ *  back to the relevant step before saving. */
+const TOTAL_STEPS = 5;
 
 const FOCUS_HUE: Record<ContentFocus, string> = {
   movie: "bg-amber-500",
@@ -374,6 +377,62 @@ const OnboardingPage = () => {
                   </p>
                 </StepShell>
               )}
+
+              {step === 4 && (
+                <StepShell
+                  eyebrow={t("steps.review.eyebrow")}
+                  title={t("steps.review.title")}
+                  subtitle={t("steps.review.subtitle")}
+                >
+                  <ul className="space-y-2 text-left">
+                    <ReviewRow
+                      label={t("steps.name.title")}
+                      value={
+                        displayName.trim() ||
+                        user.name ||
+                        t("steps.review.empty")
+                      }
+                      onEdit={() => setStep(0)}
+                      editLabel={t("steps.review.edit")}
+                    />
+                    <ReviewRow
+                      label={t("steps.language.title")}
+                      value={t(`fields.language.${locale}` as const)}
+                      onEdit={() => setStep(1)}
+                      editLabel={t("steps.review.edit")}
+                    />
+                    <ReviewRow
+                      label={t("steps.focus.title")}
+                      value={t(`fields.focus.${contentFocus}` as const, {
+                        default: contentFocus,
+                      })}
+                      onEdit={() => setStep(2)}
+                      editLabel={t("steps.review.edit")}
+                      valueClassName={cn(
+                        "font-extrabold",
+                        contentFocus === "movie" &&
+                          "text-amber-600 dark:text-amber-300",
+                        contentFocus === "book" &&
+                          "text-emerald-600 dark:text-emerald-300",
+                        contentFocus === "music" &&
+                          "text-rose-600 dark:text-rose-300",
+                        (contentFocus === "mix" || contentFocus === "both") &&
+                          "text-violet-600 dark:text-violet-300",
+                      )}
+                    />
+                    <ReviewRow
+                      label={t("steps.avoid.title")}
+                      value={
+                        avoidGenres.size === 0
+                          ? t("steps.review.noGenres")
+                          : Array.from(avoidGenres).sort().join(", ")
+                      }
+                      onEdit={() => setStep(3)}
+                      editLabel={t("steps.review.edit")}
+                    />
+                  </ul>
+                </StepShell>
+              )}
             </motion.div>
           </AnimatePresence>
         </div>
@@ -460,6 +519,46 @@ const StepShell = ({ eyebrow, title, subtitle, children }: StepShellProps) => (
     </div>
     <div>{children}</div>
   </div>
+);
+
+interface ReviewRowProps {
+  label: string;
+  value: string;
+  onEdit: () => void;
+  editLabel: string;
+  valueClassName?: string;
+}
+
+const ReviewRow = ({
+  label,
+  value,
+  onEdit,
+  editLabel,
+  valueClassName,
+}: ReviewRowProps) => (
+  <li className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-white/70 px-4 py-3 dark:border-slate-700/70 dark:bg-slate-900/55">
+    <div className="min-w-0 flex-1">
+      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">
+        {label}
+      </p>
+      <p
+        className={cn(
+          "mt-0.5 truncate text-sm font-semibold text-slate-800 dark:text-slate-100",
+          valueClassName,
+        )}
+        title={value}
+      >
+        {value}
+      </p>
+    </div>
+    <button
+      type="button"
+      onClick={onEdit}
+      className="shrink-0 rounded-full bg-indigo-500/10 px-3 py-1 text-[11px] font-bold text-indigo-700 transition-colors hover:bg-indigo-500/15 dark:bg-indigo-400/15 dark:text-indigo-300"
+    >
+      {editLabel}
+    </button>
+  </li>
 );
 
 interface ProgressDotsProps {
