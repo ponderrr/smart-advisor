@@ -8,7 +8,8 @@
       "security": "Seguridad",
       "content": "Contenido",
       "feed": "Feed",
-      "integrations": "Integraciones"
+      "integrations": "Integraciones",
+      "help": "Ayuda"
     },
     "feed": {
       "title": "Feed",
@@ -200,6 +201,14 @@
       "description": "Proveedores y servicios conectados.",
       "emptyTitle": "Aún no hay integraciones disponibles",
       "emptyBody": "Las conexiones con terceros aparecerán aquí cuando estén disponibles."
+    },
+    "help": {
+      "title": "Ayuda",
+      "description": "Vuelve a ver las pantallas de configuración de tu primer inicio de sesión.",
+      "showOnboarding": {
+        "title": "Mostrar configuración",
+        "subtitle": "Vuelve a ver la pantalla de configuración del perfil en modo previa"
+      }
     },
     "danger": {
       "title": "Zona de peligro",
@@ -1512,6 +1521,7 @@
     },
     "submit": "Todo bien",
     "skip": "Omitir por ahora",
+    "previewClose": "Cerrar vista previa",
     "errors": {
       "displayNameRequired": "Por favor, introduce un nombre para mostrar.",
       "saveFailed": "No pudimos guardar tu configuración. Inténtalo de nuevo."

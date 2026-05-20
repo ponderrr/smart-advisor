@@ -8,7 +8,8 @@
       "security": "Security",
       "content": "Content",
       "feed": "Feed",
-      "integrations": "Integrations"
+      "integrations": "Integrations",
+      "help": "Help"
     },
     "feed": {
       "title": "Feed",
@@ -200,6 +201,14 @@
       "description": "Connected providers and services.",
       "emptyTitle": "No integrations available yet",
       "emptyBody": "Third-party connections will show up here once they go live."
+    },
+    "help": {
+      "title": "Help",
+      "description": "Re-see the setup screens from your first sign-in.",
+      "showOnboarding": {
+        "title": "Show onboarding",
+        "subtitle": "Re-see the profile-setup screen in preview mode"
+      }
     },
     "danger": {
       "title": "Danger Zone",
@@ -1512,6 +1521,7 @@
     },
     "submit": "Looks good",
     "skip": "Skip for now",
+    "previewClose": "Close preview",
     "errors": {
       "displayNameRequired": "Please enter a display name.",
       "saveFailed": "We couldn't save your setup. Please try again."

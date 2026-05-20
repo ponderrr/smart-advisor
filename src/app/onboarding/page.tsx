@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "motion/react";
 import { Mail, CalendarDays } from "lucide-react";
 import { toast } from "sonner";
@@ -21,10 +21,17 @@ const CONTENT_TONE_KEY = "smart_advisor_pref_content_tone";
 
 const OnboardingPage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, session, loading, refreshUser } = useAuth();
   const t = useTranslations("Onboarding");
   const tc = useTranslations("Common");
   const currentLocale = useLocale() as Locale;
+
+  // Preview mode = a re-visit from Settings → Help → "Show onboarding".
+  // We render the form as-is so the user can see what onboarding looks
+  // like, but swap Save/Skip for a single Close button so a replay can't
+  // clobber the real profile name + locale.
+  const previewMode = searchParams.get("preview") === "true";
 
   const [mounted, setMounted] = useState(false);
   const [displayName, setDisplayName] = useState("");
@@ -102,6 +109,12 @@ const OnboardingPage = () => {
   };
 
   const handleSubmit = async () => {
+    // Defensive: hitting Enter while in preview mode could still hit the
+    // form's onSubmit even with Save/Skip buttons hidden.
+    if (previewMode) {
+      router.push("/settings?section=help");
+      return;
+    }
     setError(null);
     setSubmitting(true);
     const ok = await persist(false);
@@ -112,6 +125,10 @@ const OnboardingPage = () => {
   };
 
   const handleSkip = async () => {
+    if (previewMode) {
+      router.push("/settings?section=help");
+      return;
+    }
     setError(null);
     setSubmitting(true);
     await persist(true);
@@ -208,29 +225,42 @@ const OnboardingPage = () => {
             />
           </div>
 
-          {error && (
+          {error && !previewMode && (
             <p role="alert" className="text-sm text-red-500">
               {error}
             </p>
           )}
 
-          <StatefulButton
-            type="submit"
-            state={submitting ? "loading" : "idle"}
-            disabled={submitting}
-            className="w-full"
-          >
-            {t("submit")}
-          </StatefulButton>
+          {previewMode ? (
+            <StatefulButton
+              type="button"
+              state="idle"
+              onClick={() => router.push("/settings?section=help")}
+              className="w-full"
+            >
+              {t("previewClose")}
+            </StatefulButton>
+          ) : (
+            <>
+              <StatefulButton
+                type="submit"
+                state={submitting ? "loading" : "idle"}
+                disabled={submitting}
+                className="w-full"
+              >
+                {t("submit")}
+              </StatefulButton>
 
-          <button
-            type="button"
-            onClick={() => void handleSkip()}
-            disabled={submitting}
-            className="block w-full text-center text-sm font-medium text-slate-500 transition-colors hover:text-slate-700 disabled:opacity-60 dark:text-slate-400 dark:hover:text-slate-200"
-          >
-            {t("skip")}
-          </button>
+              <button
+                type="button"
+                onClick={() => void handleSkip()}
+                disabled={submitting}
+                className="block w-full text-center text-sm font-medium text-slate-500 transition-colors hover:text-slate-700 disabled:opacity-60 dark:text-slate-400 dark:hover:text-slate-200"
+              >
+                {t("skip")}
+              </button>
+            </>
+          )}
         </form>
       </motion.div>
     </AuthLayout>
