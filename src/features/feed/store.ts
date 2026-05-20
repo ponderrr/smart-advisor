@@ -10,10 +10,18 @@ interface FeedState {
   posts: FeedPost[];
   saved: Set<string>;
   following: Set<string>;
+  /** Lower-cased handles the current user has blocked. The feed selectors
+   *  filter posts + comments by this set so the user never has to see the
+   *  blocked person again. Matches the mobile blockedProvider. */
+  blocked: Set<string>;
   /** Comment vote, keyed `"<postId>#<commentId>"` → -1 | 0 | 1. */
   commentVotes: Record<string, number>;
   toggleSave: (postId: string) => boolean;
   toggleFollow: (author: string) => boolean;
+  /** Idempotent block. Refuses "you", lowercases the handle, and as a
+   *  side effect unfollows the person so the relationship is fully cut. */
+  block: (author: string) => boolean;
+  unblock: (author: string) => void;
   addComment: (postId: string, body: string, parentId?: string | null) => void;
   setCommentVote: (key: string, dir: number) => void;
   addPost: (
@@ -134,6 +142,7 @@ export const useFeedStore = create<FeedState>((set, get) => ({
   posts: SEED,
   saved: new Set<string>(),
   following: new Set<string>(),
+  blocked: new Set<string>(),
   commentVotes: {},
 
   toggleSave: (postId) => {
@@ -150,6 +159,28 @@ export const useFeedStore = create<FeedState>((set, get) => ({
     nowFollowing ? next.add(author) : next.delete(author);
     set({ following: next });
     return nowFollowing;
+  },
+
+  block: (author) => {
+    const handle = author.toLowerCase().trim();
+    if (!handle || handle === "you") return false;
+    const blocked = new Set(get().blocked);
+    if (blocked.has(handle)) return false;
+    blocked.add(handle);
+    // Sever the relationship — unfollow as a side effect so the feed
+    // doesn't keep treating them as a friend if you ever unblock later.
+    const following = new Set(get().following);
+    following.delete(author);
+    following.delete(handle);
+    set({ blocked, following });
+    return true;
+  },
+
+  unblock: (author) => {
+    const handle = author.toLowerCase().trim();
+    const next = new Set(get().blocked);
+    if (!next.delete(handle)) return;
+    set({ blocked: next });
   },
 
   addComment: (postId, body, parentId = null) =>

@@ -50,6 +50,7 @@ import {
   SettingsInput,
 } from "./_components/settings-ui";
 import { RecommendationFiltersCard } from "./_components/recommendation-filters-card";
+import { BlockedPeopleCard } from "./_components/blocked-people-card";
 import { usePasswordRules } from "./_hooks/use-password-rules";
 import {
   useContentPreferences,
@@ -1251,6 +1252,8 @@ const SettingsPage = () => {
                         </div>
                       </div>
                     </SectionCard>
+
+                    <BlockedPeopleCard />
                   </motion.div>
                 )}
 

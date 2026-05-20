@@ -35,7 +35,14 @@
       "communityMusic": "Música",
       "commentSortLabel": "Orden de comentarios",
       "commentSortTop": "Top",
-      "commentSortNew": "Nuevos"
+      "commentSortNew": "Nuevos",
+      "blocked": {
+        "title": "Personas bloqueadas",
+        "description": "Sus publicaciones y comentarios no aparecerán en tu feed.",
+        "empty": "No has bloqueado a nadie.",
+        "unblock": "Desbloquear",
+        "unblockedToast": "Has desbloqueado a @{handle}"
+      }
     },
     "groups": {
       "account": "Cuenta",

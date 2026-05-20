@@ -35,7 +35,14 @@
       "communityMusic": "Music",
       "commentSortLabel": "Comment sort",
       "commentSortTop": "Top",
-      "commentSortNew": "New"
+      "commentSortNew": "New",
+      "blocked": {
+        "title": "Blocked people",
+        "description": "Their posts and comments won't show up in your feed.",
+        "empty": "You haven't blocked anyone.",
+        "unblock": "Unblock",
+        "unblockedToast": "Unblocked @{handle}"
+      }
     },
     "groups": {
       "account": "Account",

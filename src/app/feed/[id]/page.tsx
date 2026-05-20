@@ -21,8 +21,10 @@ import { PageLoader } from "@/components/ui/loader";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import { getAccentTone } from "@/features/quiz/utils/content-accent";
 import { useFeedStore } from "@/features/feed/store";
+import { useVisiblePosts } from "@/features/feed/use-visible-posts";
 import { FollowButton } from "@/features/feed/components/follow-button";
 import { FeedAvatar } from "@/features/feed/components/feed-avatar";
+import { BlockMenuButton } from "@/features/feed/components/block-menu";
 import { useFeedPrefs } from "@/features/feed/use-feed-prefs";
 import {
   ACTIVITY_VERB,
@@ -125,6 +127,7 @@ function CommentNode({
             >
               <ChevronDown size={16} />
             </button>
+            <BlockMenuButton author={node.author} size={14} />
           </div>
         </div>
 
@@ -210,7 +213,13 @@ export default function FeedThreadPage() {
   const params = useParams<{ id: string }>();
   const postId = params?.id ?? "";
 
-  const post = useFeedStore((s) => s.posts.find((p) => p.id === postId));
+  // Use the block-filtered list so a blocked author's deep-link reads
+  // as "not available" instead of revealing the post anyway.
+  const visiblePosts = useVisiblePosts();
+  const post = useMemo(
+    () => visiblePosts.find((p) => p.id === postId),
+    [visiblePosts, postId],
+  );
   const saved = useFeedStore((s) => (post ? s.saved.has(post.id) : false));
   const toggleSave = useFeedStore((s) => s.toggleSave);
   const addComment = useFeedStore((s) => s.addComment);

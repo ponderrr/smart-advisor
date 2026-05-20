@@ -47,8 +47,10 @@ import { PageLoader } from "@/components/ui/loader";
 import { getAccentTone } from "@/features/quiz/utils/content-accent";
 import { getRecTypeAccent } from "@/features/recommendations/utils/type-accent";
 import { useFeedStore } from "@/features/feed/store";
+import { useVisiblePosts } from "@/features/feed/use-visible-posts";
 import { FollowButton } from "@/features/feed/components/follow-button";
 import { FeedAvatar } from "@/features/feed/components/feed-avatar";
+import { BlockMenuButton } from "@/features/feed/components/block-menu";
 import { FinishWhatYouStartedBanner } from "@/features/library/components/finish-what-you-started-banner";
 import { readFeedPrefs } from "@/features/feed/use-feed-prefs";
 import {
@@ -215,6 +217,7 @@ function PostCard({
         >
           {saved ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
         </button>
+        <BlockMenuButton author={post.author} />
       </motion.div>
     );
   }
@@ -281,16 +284,19 @@ function PostCard({
             >
               {COMMUNITY_TAG[post.community]}
             </span>
-            {post.tasteMatch > 0 && (
-              <span
-                className={cn(
-                  "rounded-full px-2 py-0.5 text-[10px] font-black",
-                  t.iconCircle,
-                )}
-              >
-                {post.tasteMatch}% your taste
-              </span>
-            )}
+            <div className="flex items-center gap-1">
+              {post.tasteMatch > 0 && (
+                <span
+                  className={cn(
+                    "rounded-full px-2 py-0.5 text-[10px] font-black",
+                    t.iconCircle,
+                  )}
+                >
+                  {post.tasteMatch}% your taste
+                </span>
+              )}
+              <BlockMenuButton author={post.author} />
+            </div>
           </div>
 
           <div className="mt-2 flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
@@ -466,7 +472,7 @@ export default function FeedPage() {
   const { user } = useAuth();
   const { ready } = useRequireAuth();
   const [visibility] = useFeedVisibility();
-  const posts = useFeedStore((s) => s.posts);
+  const posts = useVisiblePosts();
   const following = useFeedStore((s) => s.following);
   const [scope, setScope] = useState<FeedScope>("friends");
   const [community, setCommunity] = useState<FeedCommunity | "all">("all");

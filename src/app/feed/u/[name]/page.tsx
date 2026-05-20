@@ -11,6 +11,7 @@ import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import { getAccentTone } from "@/features/quiz/utils/content-accent";
 import { useFeedStore } from "@/features/feed/store";
 import { FollowButton } from "@/features/feed/components/follow-button";
+import { BlockButton } from "@/features/feed/components/block-button";
 import { FeedAvatar } from "@/features/feed/components/feed-avatar";
 import {
   ACTIVITY_VERB,
@@ -73,7 +74,12 @@ export default function FeedProfilePage() {
                 {commentCount === 1 ? "comment" : "comments"}
               </p>
             </div>
-            {!isYou && <FollowButton author={author} />}
+            {!isYou && (
+              <div className="flex items-center gap-2">
+                <FollowButton author={author} />
+                <BlockButton author={author} />
+              </div>
+            )}
           </div>
 
           {/* Their picks */}
