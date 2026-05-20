@@ -289,7 +289,7 @@ class _S extends ConsumerState<OnboardingScreen> {
         const Center(child: Eyebrow('First things first'))
             .animateFadeUp(delay: 80),
         const SizedBox(height: 8),
-        const BrandHeading('What should we\ncall you?', size: 28)
+        const BrandHeading('What should we call you?', size: 24)
             .animateFadeUp(delay: 160),
         const SizedBox(height: 14),
         Text(
@@ -332,7 +332,16 @@ class _S extends ConsumerState<OnboardingScreen> {
   Widget _stepFocus() {
     const focusValues = ['movie', 'book', 'music', 'mix'];
     const focusLabels = ['Movies', 'Books', 'Music', 'A mix'];
+    // Color-coded per the active selection — matches the rest of the app
+    // where movie = amber, book = emerald, music = rose, mix = violet.
+    const focusColors = [
+      Tw.amber500,
+      Tw.emerald500,
+      Tw.rose500,
+      Tw.violet500,
+    ];
     final idx = focusValues.indexOf(_contentFocus);
+    final activeIdx = idx < 0 ? 3 : idx;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -350,9 +359,9 @@ class _S extends ConsumerState<OnboardingScreen> {
         ).animateFadeUp(delay: 240),
         const SizedBox(height: 24),
         BrandSegmented(
-          color: Tw.indigo500,
+          color: focusColors[activeIdx],
           labels: focusLabels,
-          selectedIndex: idx < 0 ? 3 : idx,
+          selectedIndex: activeIdx,
           onValueChanged: (i) =>
               setState(() => _contentFocus = focusValues[i]),
         ).animateFadeUp(delay: 320),
@@ -417,7 +426,8 @@ class _S extends ConsumerState<OnboardingScreen> {
         ).animateFadeUp(delay: 240),
         const SizedBox(height: 24),
         BrandSegmented(
-          color: Tw.indigo500,
+          // Emerald when on (positive opt-in), neutral slate when off.
+          color: _reminders ? Tw.emerald500 : Tw.slate500,
           labels: const ['Off', 'Weekly'],
           selectedIndex: _reminders ? 1 : 0,
           onValueChanged: (i) => setState(() => _reminders = i == 1),
