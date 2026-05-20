@@ -1234,7 +1234,7 @@
       "leave": "Salir",
       "backToLobby": "Volver a la sala",
       "end": "Terminar",
-      "leaveConfirm": "¿Salir de este cuestionario en grupo?",
+      "leaveConfirm": "¿Salir de la sesión? Tus respuestas no contarán para la elección del grupo y necesitarás el código para volver a entrar.",
       "leaveQuizConfirm": "¿Salir del cuestionario en grupo? Tus respuestas no se enviarán.",
       "endConfirm": "¿Terminar esta sesión para todos?",
       "backToLobbyConfirmInProgress": "¿Enviar a todos de vuelta a la sala? Las respuestas en progreso se borrarán.",

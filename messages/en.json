@@ -1234,7 +1234,7 @@
       "leave": "Leave",
       "backToLobby": "Back to Lobby",
       "end": "End",
-      "leaveConfirm": "Leave this group quiz?",
+      "leaveConfirm": "Leave the session? Your answers won't count toward the group pick and you'll need the code to rejoin.",
       "leaveQuizConfirm": "Leave the group quiz? Your answers so far won't be submitted.",
       "endConfirm": "End this session for everyone?",
       "backToLobbyConfirmInProgress": "Send everyone back to the lobby? In-progress answers will be cleared.",
