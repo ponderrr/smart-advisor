@@ -19,7 +19,7 @@ export const SectionCard = ({
 }) => (
   <div
     className={cn(
-      "rounded-2xl border border-slate-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-sm dark:border-slate-700/60 dark:bg-slate-900/60 sm:p-6",
+      "rounded-2xl border border-slate-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/60 sm:p-6",
       className,
     )}
   >
