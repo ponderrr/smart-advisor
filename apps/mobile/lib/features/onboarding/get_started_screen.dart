@@ -280,12 +280,39 @@ class _Vignette extends StatelessWidget {
   }
 }
 
-/// The poster wall: a tilted grid of procedural poster tiles. Sized to
-/// overflow the viewport on every side so the rotated edges don't show
-/// blank background. The grid itself is plain; the personality comes
-/// from per-tile gradient + icon + accent colour.
-class _PosterWall extends StatelessWidget {
+/// The poster wall: a tilted grid of procedural poster tiles that drifts
+/// like a living mosaic. Each column scrolls vertically at its own speed,
+/// alternating up / down, so the wall feels alive rather than static.
+/// Sized to overflow the viewport on every side so the rotated, drifting
+/// edges never reveal blank background.
+class _PosterWall extends StatefulWidget {
   const _PosterWall();
+
+  @override
+  State<_PosterWall> createState() => _PosterWallState();
+}
+
+class _PosterWallState extends State<_PosterWall>
+    with SingleTickerProviderStateMixin {
+  // One long looping controller drives every column; each column derives
+  // its own offset from the shared 0→1 progress (with a per-column speed
+  // and phase) so they never march in lockstep.
+  late final AnimationController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 48),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -296,7 +323,9 @@ class _PosterWall extends StatelessWidget {
         final tileW = cons.maxWidth >= 700 ? 110.0 : 90.0;
         final cols = (cons.maxWidth / tileW).ceil() + 2; // overflow each side
         final tileH = tileW * 1.5; // 2:3 poster ratio
-        final rows = (cons.maxHeight / tileH).ceil() + 2;
+        // Enough tiles per column to cover the viewport plus a full extra
+        // screen, so the seamless wrap is always off-screen.
+        final perColumn = (cons.maxHeight / tileH).ceil() + 3;
 
         return ClipRect(
           child: OverflowBox(
@@ -307,26 +336,17 @@ class _PosterWall extends StatelessWidget {
               child: SizedBox(
                 width: cons.maxWidth + tileW * 4,
                 height: cons.maxHeight + tileH * 2,
-                child: Column(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    for (var r = 0; r < rows; r++)
-                      Padding(
-                        // Half-tile offset on odd rows for a brick layout —
-                        // breaks up the horizontal seams.
-                        padding: EdgeInsets.only(left: r.isOdd ? tileW / 2 : 0),
-                        child: Row(
-                          children: [
-                            for (var c = 0; c < cols; c++)
-                              Padding(
-                                padding: const EdgeInsets.all(4),
-                                child: _PosterTile(
-                                  seed: r * cols + c,
-                                  width: tileW - 8,
-                                  height: tileH - 8,
-                                ),
-                              ),
-                          ],
-                        ),
+                    for (var c = 0; c < cols; c++)
+                      _DriftColumn(
+                        controller: _ctrl,
+                        columnIndex: c,
+                        columnCount: cols,
+                        tileW: tileW,
+                        tileH: tileH,
+                        perColumn: perColumn,
                       ),
                   ],
                 ),
@@ -335,6 +355,79 @@ class _PosterWall extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// A single vertically-drifting column of poster tiles. The tile strip is
+/// rendered twice back-to-back; translating by exactly one strip-height
+/// per loop makes the wrap seamless. Odd columns drift up, even columns
+/// drift down, and the speed varies slightly per column.
+class _DriftColumn extends StatelessWidget {
+  const _DriftColumn({
+    required this.controller,
+    required this.columnIndex,
+    required this.columnCount,
+    required this.tileW,
+    required this.tileH,
+    required this.perColumn,
+  });
+
+  final Animation<double> controller;
+  final int columnIndex;
+  final int columnCount;
+  final double tileW;
+  final double tileH;
+  final int perColumn;
+
+  @override
+  Widget build(BuildContext context) {
+    final up = columnIndex.isOdd;
+    // Speed multiplier: 0.7–1.15, deterministic per column so it's stable
+    // across rebuilds but the columns aren't uniform.
+    final speed = 0.7 + ((columnIndex * 37) % 100) / 100 * 0.45;
+    final stripHeight = perColumn * tileH;
+
+    final strip = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var r = 0; r < perColumn; r++)
+          Padding(
+            padding: const EdgeInsets.all(4),
+            child: _PosterTile(
+              // Stagger the seed by column so neighbouring columns don't
+              // show the same poster sequence.
+              seed: columnIndex * 7 + r * columnCount,
+              width: tileW - 8,
+              height: tileH - 8,
+            ),
+          ),
+      ],
+    );
+
+    return SizedBox(
+      width: tileW,
+      child: AnimatedBuilder(
+        animation: controller,
+        builder: (context, _) {
+          // progress wraps 0→1; one strip-height of travel per loop.
+          final p = (controller.value * speed) % 1.0;
+          final dy = up ? -p * stripHeight : (p - 1) * stripHeight;
+          return ClipRect(
+            child: OverflowBox(
+              maxHeight: double.infinity,
+              alignment: Alignment.topCenter,
+              child: Transform.translate(
+                offset: Offset(0, dy),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [strip, strip],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }
