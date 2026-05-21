@@ -31,7 +31,9 @@ String? resolveRedirect({
 
   // 2. Unauthenticated.
   if (!authenticated) {
-    if (isIntro) return introSeen ? '/auth' : null;
+    // The intro is always reachable pre-auth — first launch is forced
+    // here, and the auth screen's back arrow navigates here on purpose.
+    if (isIntro) return null;
     if (isPublicDeepLink) return null;
     // First launch: show the pitch before sign in / sign up.
     if (!introSeen) return '/intro';

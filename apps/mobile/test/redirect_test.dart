@@ -52,8 +52,9 @@ void main() {
       expect(r(loc: '/demo', introSeen: false), isNull);
       expect(r(loc: '/group-quiz/ABC', introSeen: false), isNull);
     });
-    test('once seen, /intro bounces to /auth when unauthed', () {
-      expect(r(loc: '/intro'), '/auth');
+    test('/intro stays reachable pre-auth once seen (back-arrow target)',
+        () {
+      expect(r(loc: '/intro'), isNull);
     });
     test('authenticated users never sit on /intro', () {
       expect(r(loc: '/intro', authed: true), '/onboarding');

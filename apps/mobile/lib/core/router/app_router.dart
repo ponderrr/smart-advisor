@@ -87,6 +87,34 @@ CustomTransitionPage<void> _modalPage(GoRouterState state, Widget child) {
   );
 }
 
+/// Horizontal slide page for the auth screens — sign-in ↔ sign-up slide
+/// the card left/right (an iOS-style push) instead of the default
+/// fade-up. The covered screen eases partway off-screen for depth.
+CustomTransitionPage<void> _authPage(GoRouterState state, Widget child) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    transitionDuration: const Duration(milliseconds: 320),
+    reverseTransitionDuration: const Duration(milliseconds: 300),
+    child: child,
+    transitionsBuilder: (_, animation, secondaryAnimation, child) {
+      const curve = Curves.easeOutCubic;
+      final enter = Tween<Offset>(
+        begin: const Offset(1, 0),
+        end: Offset.zero,
+      ).animate(CurvedAnimation(parent: animation, curve: curve));
+      final cover = Tween<Offset>(
+        begin: Offset.zero,
+        end: const Offset(-0.25, 0),
+      ).animate(
+          CurvedAnimation(parent: secondaryAnimation, curve: curve));
+      return SlideTransition(
+        position: cover,
+        child: SlideTransition(position: enter, child: child),
+      );
+    },
+  );
+}
+
 final appRouterProvider = Provider<GoRouter>((ref) {
   final refresh = _AuthRefresh(ref);
   ref.onDispose(refresh.dispose);
@@ -103,15 +131,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (authed && profile.isLoading) return null;
       final onboardingComplete =
           profile.asData?.value?.setupCompletedAt != null;
-      // Default to "seen" while prefs load so returning users never flash
-      // the intro; a fresh install flips to false once prefs resolve and
-      // the refresh listener re-runs this.
-      final introSeen = ref
-              .read(sharedPreferencesProvider)
-              .asData
-              ?.value
-              .getBool(StorageKeys.introSeen) ??
-          true;
+      // While prefs are still loading, assume "seen" so returning users
+      // never flash the intro. Once loaded, an *unset* flag is a genuine
+      // first launch → show the intro. (The refresh listener re-runs this
+      // when SharedPreferences resolves.)
+      final prefsValue =
+          ref.read(sharedPreferencesProvider).asData?.value;
+      final introSeen = prefsValue == null
+          ? true
+          : prefsValue.getBool(StorageKeys.introSeen) ?? false;
       return resolveRedirect(
         location: state.matchedLocation,
         maintenance: maintenance,
@@ -123,10 +151,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
           path: '/auth',
-          builder: (_, _) => const SignInScreen(),
+          pageBuilder: (_, s) => _authPage(s, const SignInScreen()),
           routes: [
             GoRoute(
-                path: 'signup', builder: (_, _) => const SignUpScreen()),
+                path: 'signup',
+                pageBuilder: (_, s) =>
+                    _authPage(s, const SignUpScreen())),
             GoRoute(
                 path: 'reset-password',
                 builder: (_, _) => const ResetPasswordScreen()),
