@@ -6,6 +6,7 @@ import {
 import { Question } from "@/features/quiz/types/question";
 import { Answer } from "@/features/quiz/types/answer";
 import { supabase } from "@/integrations/supabase/client";
+import { loadDislikedTitles } from "./dislikes";
 
 /** Reads the user's saved content tone from localStorage. */
 const getContentTone = (): "standard" | "family" => {
@@ -404,10 +405,19 @@ export async function generateRecommendations(
 
     // Solo paths (quiz, Surprise) thread the user's saved hard filters into
     // the prompt with no caller wiring; Group Quiz opts out.
-    const recommendationFilters =
+    const baseFilters =
       options?.applyFilters === false
         ? null
         : await loadRecommendationFilters();
+
+    // Fold in "Not for me" pick feedback as a top-level dislikedTitles
+    // exclusion the Edge Function reads alongside the per-format filters.
+    const dislikedTitles =
+      options?.applyFilters === false ? [] : loadDislikedTitles();
+    const recommendationFilters =
+      dislikedTitles.length > 0
+        ? { ...(baseFilters ?? {}), dislikedTitles }
+        : baseFilters;
 
     const refinement =
       options?.refinement && options.refinement.feedbackText.trim().length > 0

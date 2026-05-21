@@ -1396,7 +1396,9 @@
       "byDirector": "Dirigida por {director}",
       "byArtist": "De {artist}",
       "inLibrary": "En tu biblioteca",
-      "close": "Cerrar"
+      "close": "Cerrar",
+      "dislike": "No es para mí",
+      "dislikedOn": "No se recomendará de nuevo"
     }
   },
   "Library": {

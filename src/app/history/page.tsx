@@ -14,6 +14,8 @@ import {
   Trash2,
   LayoutGrid,
   Star,
+  ThumbsDown,
+  Search,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useTranslations } from "next-intl";
@@ -37,6 +39,7 @@ import {
 } from "@/features/library/types/library";
 import { getRecTypeAccent } from "@/features/recommendations/utils/type-accent";
 import { LogToLibraryButton } from "@/features/library/components/log-to-library-button";
+import { useDislikedTitle } from "@/features/recommendations/services/dislikes";
 import { PillButton } from "@/components/ui/pill-button";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { Dialog } from "@/components/ui/dialog";
@@ -66,6 +69,7 @@ const RecommendationModal = ({
 }) => {
   const t = useTranslations("History.modal");
   const tLib = useTranslations("Library");
+  const [disliked, toggleDisliked] = useDislikedTitle(rec.title);
   return (
     <Dialog
       open={true}
@@ -196,6 +200,23 @@ const RecommendationModal = ({
             {t("close")}
           </button>
         </div>
+
+        {/* Pick feedback — adding a title makes the recommendation EF
+            exclude it from every future generation. */}
+        <button
+          type="button"
+          onClick={toggleDisliked}
+          aria-pressed={disliked}
+          className={cn(
+            "mt-2 flex w-full items-center justify-center gap-1.5 rounded-2xl py-2.5 text-sm font-bold transition-colors",
+            disliked
+              ? "bg-rose-500/15 text-rose-600 dark:text-rose-300"
+              : "bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700",
+          )}
+        >
+          <ThumbsDown size={14} />
+          {disliked ? t("dislikedOn") : t("dislike")}
+        </button>
       </div>
     </Dialog>
   );

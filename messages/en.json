@@ -1396,7 +1396,9 @@
       "byDirector": "Directed by {director}",
       "byArtist": "By {artist}",
       "inLibrary": "In your library",
-      "close": "Close"
+      "close": "Close",
+      "dislike": "Not for me",
+      "dislikedOn": "Won't recommend again"
     }
   },
   "Library": {
