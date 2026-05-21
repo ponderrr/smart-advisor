@@ -170,10 +170,14 @@ String _stripSeries(String t) =>
 bool _isBlank(List<dynamic> row) =>
     row.every((c) => '$c'.trim().isEmpty);
 
-List<List<dynamic>> _parse(String csv) {
-  if (csv.trim().isEmpty) return const [];
-  return const CsvToListConverter(
-    eol: '\n',
-    shouldParseNumbers: false,
-  ).convert(csv.replaceAll('\r\n', '\n').replaceAll('\r', '\n'));
+List<List<dynamic>> _parse(String input) {
+  if (input.trim().isEmpty) return const [];
+  // csv 8.x: the codec-style Csv().decode replaces CsvToListConverter.
+  // dynamicTyping:false keeps every field a String (old shouldParseNumbers:
+  // false); autoDetect:false pins the comma delimiter.
+  return Csv(
+    lineDelimiter: '\n',
+    dynamicTyping: false,
+    autoDetect: false,
+  ).decode(input.replaceAll('\r\n', '\n').replaceAll('\r', '\n'));
 }
