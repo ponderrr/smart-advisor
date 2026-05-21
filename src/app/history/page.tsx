@@ -50,6 +50,7 @@ import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
 import { ViewToggle } from "@/components/view-toggle";
 import { usePersistedViewMode } from "@/hooks/use-persisted-view-mode";
+import { cacheRead, cacheWrite } from "@/lib/offline-cache";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -382,16 +383,21 @@ const AccountHistoryPage = () => {
         const { data, error } =
           await databaseService.getUserRecommendations(filterConfig);
 
+        const cacheKey = `history:${filter}:${sortBy}`;
         if (error) {
           console.error("Error loading recommendations:", error);
-          setRecommendations([]);
+          // Fetch failed — fall back to the last good snapshot for this
+          // filter so an offline cold load still shows content.
+          setRecommendations(cacheRead<Recommendation>(cacheKey));
         } else {
           setRecommendations(data);
+          cacheWrite(cacheKey, data);
         }
         setLoadedFilter(filter);
       } catch (error) {
         console.error("Error loading recommendations:", error);
-        setRecommendations([]);
+        setRecommendations(cacheRead<Recommendation>(`history:${filter}:${sortBy}`));
+        setLoadedFilter(filter);
       } finally {
         setLoading(false);
       }

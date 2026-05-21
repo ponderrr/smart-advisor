@@ -55,6 +55,7 @@ import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
 import { ViewToggle } from "@/components/view-toggle";
 import { usePersistedViewMode } from "@/hooks/use-persisted-view-mode";
+import { cacheRead, cacheWrite } from "@/lib/offline-cache";
 import { cn } from "@/lib/utils";
 
 const MEDIUM_TABS = ["all", "movie", "book", "music"] as const;
@@ -177,10 +178,18 @@ export default function LibraryPage() {
     const { data, error } = await libraryService.list();
     setLoading(false);
     if (error) {
-      toast.error(error);
+      // Fetch failed — fall back to the last good snapshot so an offline
+      // cold load still shows the library instead of an empty screen.
+      const cached = cacheRead<LibraryItem>("library");
+      if (cached.length > 0) {
+        setItems(cached);
+      } else {
+        toast.error(error);
+      }
       return;
     }
     setItems(data);
+    cacheWrite("library", data);
   };
 
   useEffect(() => {
