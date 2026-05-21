@@ -68,85 +68,135 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final data = ref.watch(_historyProvider(_filter));
-    return ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          const SizedBox(height: 8),
-          Row(children: [
-            const Expanded(child: BrandHeading('Past picks', size: 32)),
-            if (data.asData?.value.isNotEmpty ?? false)
-              ClearAllButton(
-                title: 'Clear all history?',
-                message: 'Every past pick will be permanently '
-                    'deleted. This can’t be undone.',
-                onConfirm: _clearAll,
-              ),
-          ]),
-          const SizedBox(height: 16),
-          BrandSegmented(
-            color: accentColorForLabel(const [
-              'All',
-              'Movies',
-              'Books',
-              'Music',
-              'Favs'
-            ][_mediumIdx]),
-            labels: const ['All', 'Movies', 'Books', 'Music', 'Favs'],
-            selectedIndex: _mediumIdx,
-            onValueChanged: (i) => setState(() => _mediumIdx = i),
-          ),
-          const SizedBox(height: 8),
-          Row(children: [
-            Expanded(
-              child: BrandSegmented(
-                color: Tw.indigo500,
-                labels: const ['Newest', 'Oldest'],
-                selectedIndex: _sortIdx,
-                onValueChanged: (i) => setState(() => _sortIdx = i),
-              ),
-            ),
-            const SizedBox(width: 8),
-            ViewModeToggle(
-              value: _view,
-              onChanged: (v) => setState(() => _view = v),
-            ),
-          ]),
-          const SizedBox(height: 16),
-          data.when(
-            loading: () => const Padding(
-                padding: EdgeInsets.all(40),
-                child: Center(child: LoaderFive('Loading'))),
-            error: (e, _) => const MessageBanner.error(
-                'We couldn’t load your history right now. '
-                'Please try again in a moment.'),
-            data: (list) {
-              if (list.isEmpty) {
-                return Subtitle('No recommendations yet.');
-              }
-              if (_view == ViewMode.grid) {
-                return LayoutBuilder(builder: (_, box) {
-                  const gap = 12.0;
-                  final cellW = (box.maxWidth - gap) / 2;
-                  return Wrap(
-                    spacing: gap,
-                    runSpacing: gap,
-                    children: [
-                      for (final r in list) _gridCard(r, cellW),
-                    ],
-                  );
-                });
-              }
-              return Column(children: [
-                for (final r in list)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: _row(r),
+    // CustomScrollView so the item list is lazy — a plain
+    // ListView(children: [Column(...)]) built every history row up front
+    // on the first frame, which is what made this screen slower to paint
+    // than the others.
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(20, 28, 20, 16),
+          sliver: SliverToBoxAdapter(
+            child: Column(
+              children: [
+                Row(children: [
+                  const Expanded(child: BrandHeading('Past picks', size: 32)),
+                  if (data.asData?.value.isNotEmpty ?? false)
+                    ClearAllButton(
+                      title: 'Clear all history?',
+                      message: 'Every past pick will be permanently '
+                          'deleted. This can’t be undone.',
+                      onConfirm: _clearAll,
+                    ),
+                ]),
+                const SizedBox(height: 16),
+                BrandSegmented(
+                  color: accentColorForLabel(const [
+                    'All',
+                    'Movies',
+                    'Books',
+                    'Music',
+                    'Favs'
+                  ][_mediumIdx]),
+                  labels: const ['All', 'Movies', 'Books', 'Music', 'Favs'],
+                  selectedIndex: _mediumIdx,
+                  onValueChanged: (i) => setState(() => _mediumIdx = i),
+                ),
+                const SizedBox(height: 8),
+                Row(children: [
+                  Expanded(
+                    child: BrandSegmented(
+                      color: Tw.indigo500,
+                      labels: const ['Newest', 'Oldest'],
+                      selectedIndex: _sortIdx,
+                      onValueChanged: (i) => setState(() => _sortIdx = i),
+                    ),
                   ),
-              ]);
-            },
+                  const SizedBox(width: 8),
+                  ViewModeToggle(
+                    value: _view,
+                    onChanged: (v) => setState(() => _view = v),
+                  ),
+                ]),
+              ],
+            ),
           ),
-        ],
+        ),
+        ...data.when(
+          loading: () => [
+            const SliverToBoxAdapter(
+              child: Padding(
+                  padding: EdgeInsets.all(40),
+                  child: Center(child: LoaderFive('Loading'))),
+            ),
+          ],
+          error: (e, _) => [
+            const SliverPadding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              sliver: SliverToBoxAdapter(
+                child: MessageBanner.error(
+                    'We couldn’t load your history right now. '
+                    'Please try again in a moment.'),
+              ),
+            ),
+          ],
+          data: (list) => _resultSlivers(list),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 24)),
+      ],
     );
+  }
+
+  /// Lazy slivers for the loaded result set — a SliverList for list view,
+  /// a SliverGrid for grid view, so off-screen rows aren't built.
+  List<Widget> _resultSlivers(List<Recommendation> list) {
+    if (list.isEmpty) {
+      return [
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          sliver: SliverToBoxAdapter(
+            child: Subtitle('No recommendations yet.'),
+          ),
+        ),
+      ];
+    }
+    if (_view == ViewMode.grid) {
+      // Grid cards are variable height (movie/book posters are 3:2, music
+      // is square) so a SliverGrid's uniform aspect ratio would overflow
+      // or leave gaps — keep the content-sized Wrap here. Grid is the
+      // opt-in secondary view; the default list view below is lazy.
+      const gap = 12.0;
+      final cellW =
+          (MediaQuery.sizeOf(context).width - 40 - gap) / 2;
+      return [
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          sliver: SliverToBoxAdapter(
+            child: Wrap(
+              spacing: gap,
+              runSpacing: gap,
+              children: [
+                for (final r in list) _gridCard(r, cellW),
+              ],
+            ),
+          ),
+        ),
+      ];
+    }
+    return [
+      SliverPadding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        sliver: SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (_, i) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _row(list[i]),
+            ),
+            childCount: list.length,
+          ),
+        ),
+      ),
+    ];
   }
 
   Future<void> _clearAll() async {
