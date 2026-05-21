@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,6 +10,7 @@ import '../../core/models/enums.dart';
 import '../../core/models/library_item.dart';
 import '../../core/services/service_providers.dart';
 import '../../core/supabase/supabase_providers.dart';
+import 'live_update.dart';
 
 const _key = 'sa.reminders_enabled';
 
@@ -146,41 +149,38 @@ class NotificationService {
   // the same id updates the existing notification in place.
 
   /// Shows / updates the group-quiz live activity. [progress] +
-  /// [maxProgress] draw a determinate bar (e.g. players joined); omit
-  /// both for a plain ongoing line.
+  /// [maxProgress] supply the status-bar chip text (e.g. players joined).
   static Future<void> showGroupQuizLive({
     required String code,
     required String line,
     int? progress,
     int? maxProgress,
   }) async {
+    final hasBar =
+        progress != null && maxProgress != null && maxProgress > 0;
+    // Android — a true promoted "Live Update" (Android 16) via the native
+    // channel; it degrades to a plain ongoing notification on older
+    // Android, where setRequestPromotedOngoing is a no-op.
+    if (Platform.isAndroid) {
+      await LiveUpdate.post(
+        id: _groupQuizLiveId,
+        title: 'Group quiz · $code',
+        text: line,
+        chip: hasBar ? '$progress/$maxProgress' : null,
+      );
+      return;
+    }
+    // iOS — standard notification fallback (the ActivityKit Live Activity
+    // is scaffolded under ios/LiveActivity/).
     await init();
     if (!_ready) return;
-    final hasBar = progress != null && maxProgress != null && maxProgress > 0;
     try {
       await _plugin.show(
         id: _groupQuizLiveId,
         title: 'Group quiz · $code',
         body: line,
-        notificationDetails: NotificationDetails(
-          android: AndroidNotificationDetails(
-            'group_quiz_live',
-            'Group quiz',
-            channelDescription:
-                'Live status while a group quiz is running',
-            importance: Importance.low,
-            priority: Priority.low,
-            // Ongoing + only-alert-once: it stays pinned and updates
-            // silently as the session changes.
-            ongoing: true,
-            onlyAlertOnce: true,
-            showWhen: false,
-            category: AndroidNotificationCategory.progress,
-            showProgress: hasBar,
-            maxProgress: hasBar ? maxProgress : 0,
-            progress: hasBar ? progress : 0,
-          ),
-          iOS: const DarwinNotificationDetails(presentBanner: false),
+        notificationDetails: const NotificationDetails(
+          iOS: DarwinNotificationDetails(presentBanner: false),
         ),
       );
     } catch (_) {/* unsupported platform — ignore */}
@@ -188,6 +188,10 @@ class NotificationService {
 
   /// Ends the group-quiz live activity (session completed / left).
   static Future<void> cancelGroupQuizLive() async {
+    if (Platform.isAndroid) {
+      await LiveUpdate.cancel(_groupQuizLiveId);
+      return;
+    }
     await init();
     if (!_ready) return;
     await _plugin.cancel(id: _groupQuizLiveId);
