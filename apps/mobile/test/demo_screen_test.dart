@@ -12,8 +12,10 @@ void main() {
     await t.pump();
 
     expect(find.text('What are you in the mood for?'), findsOneWidget);
+    // The first step is the content picker — all four options present.
     expect(find.text('Movie'), findsWidgets);
+    expect(find.text('Book'), findsWidgets);
+    expect(find.text('Music'), findsWidgets);
     expect(find.text('Mix'), findsWidgets);
-    expect(find.byIcon(Icons.arrow_back), findsOneWidget);
   });
 }

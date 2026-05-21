@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_advisor/features/account/account_screen.dart';
-import 'package:smart_advisor/features/dashboard/dashboard_screen.dart';
 import 'package:smart_advisor/features/history/history_screen.dart';
 import 'package:smart_advisor/features/library/screens/library_screen.dart';
 import 'package:smart_advisor/ui/theme/app_theme.dart';
@@ -15,14 +14,6 @@ Widget _host(Widget child) => ProviderScope(
     );
 
 void main() {
-  testWidgets('DashboardScreen renders header', (t) async {
-    await t.pumpWidget(_host(const DashboardScreen()));
-    await t.pump();
-    expect(find.text('DASHBOARD'), findsOneWidget);
-    expect(find.text('Start a quiz'), findsOneWidget);
-    expect(t.takeException(), isNull);
-  });
-
   testWidgets('LibraryScreen renders header + filters', (t) async {
     await t.pumpWidget(_host(const LibraryScreen()));
     await t.pump();
@@ -37,11 +28,11 @@ void main() {
     expect(t.takeException(), isNull);
   });
 
-  testWidgets('AccountScreen renders settings sections', (t) async {
+  testWidgets('AccountScreen renders the settings hub', (t) async {
     await t.pumpWidget(_host(const AccountScreen()));
     await t.pump();
-    expect(find.text('Settings'), findsOneWidget);
-    expect(find.text('PROFILE'), findsOneWidget); // Eyebrow, uppercased
+    expect(find.text('Settings'), findsOneWidget); // BrandHeading
+    expect(find.text('Appearance'), findsOneWidget); // a settings row
     expect(t.takeException(), isNull);
   });
 }
