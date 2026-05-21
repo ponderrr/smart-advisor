@@ -14,7 +14,6 @@ import '../../features/auth/auth_providers.dart';
 import '../../features/auth/screens/reset_password_screen.dart';
 import '../../features/auth/screens/sign_in_screen.dart';
 import '../../features/auth/screens/sign_up_screen.dart';
-import '../../features/dashboard/dashboard_screen.dart';
 import '../../features/dashboard/milestones_screen.dart';
 import '../../features/demo/demo_screen.dart';
 import '../../features/feed/feed_screen.dart';
@@ -231,9 +230,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state, child) =>
             AppShell(location: state.matchedLocation, child: child),
         routes: [
-          // Feed is the home/landing surface (social-first). The old
-          // Dashboard is kept intact at /dashboard — a one-line swap
-          // restores it as home if web parity is ever needed again.
+          // Feed is the home/landing surface (social-first).
           GoRoute(
               path: '/',
               builder: (_, _) => const FeedScreen(),
@@ -260,9 +257,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                         community: feedCommunityFromWire(
                             s.pathParameters['community']!))),
               ]),
-          GoRoute(
-              path: '/dashboard',
-              builder: (_, _) => const DashboardScreen()),
           GoRoute(
               path: '/library',
               builder: (_, _) => const LibraryScreen()),
