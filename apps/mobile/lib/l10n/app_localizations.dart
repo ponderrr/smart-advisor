@@ -161,6 +161,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Skip for now'**
   String get skipForNow;
+
+  /// Entry-surface string: getStartedHeadline
+  ///
+  /// In en, this message translates to:
+  /// **'Pick something\nworth your night.'**
+  String get getStartedHeadline;
+
+  /// Entry-surface string: getStartedBody
+  ///
+  /// In en, this message translates to:
+  /// **'Movies. Books. Music. Tell us your mood and get a pick that fits — with a one-line reason why.'**
+  String get getStartedBody;
+
+  /// Entry-surface string: getStartedPrimary
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get getStartedPrimary;
+
+  /// Entry-surface string: getStartedSecondary
+  ///
+  /// In en, this message translates to:
+  /// **'I already have an account'**
+  String get getStartedSecondary;
+
+  /// Entry-surface string: closePreview
+  ///
+  /// In en, this message translates to:
+  /// **'Close preview'**
+  String get closePreview;
+
+  /// Entry-surface string: finish
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get finish;
+
+  /// Entry-surface string: onboardingNameEyebrow
+  ///
+  /// In en, this message translates to:
+  /// **'First things first'**
+  String get onboardingNameEyebrow;
+
+  /// Entry-surface string: onboardingNameTitle
+  ///
+  /// In en, this message translates to:
+  /// **'What should we call you?'**
+  String get onboardingNameTitle;
+
+  /// Entry-surface string: onboardingNameSubtitle
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll greet you by this when we surface picks.'**
+  String get onboardingNameSubtitle;
+
+  /// Entry-surface string: onboardingFocusEyebrow
+  ///
+  /// In en, this message translates to:
+  /// **'What you want picks for'**
+  String get onboardingFocusEyebrow;
+
+  /// Entry-surface string: onboardingFocusTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Movies, books, music, or all three?'**
+  String get onboardingFocusTitle;
+
+  /// Entry-surface string: onboardingFocusSubtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Sets the default for every quiz. You can change it on any quiz.'**
+  String get onboardingFocusSubtitle;
+
+  /// Entry-surface string: contentMovies
+  ///
+  /// In en, this message translates to:
+  /// **'Movies'**
+  String get contentMovies;
+
+  /// Entry-surface string: contentBooks
+  ///
+  /// In en, this message translates to:
+  /// **'Books'**
+  String get contentBooks;
+
+  /// Entry-surface string: contentMusic
+  ///
+  /// In en, this message translates to:
+  /// **'Music'**
+  String get contentMusic;
+
+  /// Entry-surface string: contentMix
+  ///
+  /// In en, this message translates to:
+  /// **'A mix'**
+  String get contentMix;
+
+  /// Entry-surface string: onboardingAvoidEyebrow
+  ///
+  /// In en, this message translates to:
+  /// **'Anything to skip?'**
+  String get onboardingAvoidEyebrow;
+
+  /// Entry-surface string: onboardingAvoidTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Genres you\'d rather never see.'**
+  String get onboardingAvoidTitle;
+
+  /// Entry-surface string: onboardingAvoidSubtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Tap any to add a hard \"don\'t recommend\" rule. Skip the step if nothing comes to mind.'**
+  String get onboardingAvoidSubtitle;
+
+  /// Entry-surface string: onboardingRemindersEyebrow
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get onboardingRemindersEyebrow;
+
+  /// Entry-surface string: onboardingRemindersTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Want a weekly fresh-picks nudge?'**
+  String get onboardingRemindersTitle;
+
+  /// Entry-surface string: onboardingRemindersSubtitle
+  ///
+  /// In en, this message translates to:
+  /// **'One quiet notification per week. We\'ll also nudge you if you\'ve got things in progress.'**
+  String get onboardingRemindersSubtitle;
+
+  /// Entry-surface string: remindersOff
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get remindersOff;
+
+  /// Entry-surface string: remindersWeekly
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get remindersWeekly;
+
+  /// Entry-surface string: onboardingRemindersOnHint
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll ask permission to send notifications when you finish.'**
+  String get onboardingRemindersOnHint;
+
+  /// Entry-surface string: onboardingRemindersOffHint
+  ///
+  /// In en, this message translates to:
+  /// **'You can turn this on anytime in Settings → Notifications.'**
+  String get onboardingRemindersOffHint;
 }
 
 class _AppLocalizationsDelegate

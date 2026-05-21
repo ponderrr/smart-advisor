@@ -209,7 +209,7 @@ class _S extends ConsumerState<OnboardingScreen> {
                     AdaptiveButton.child(
                       style: AdaptiveButtonStyle.plain,
                       onPressed: _busy ? null : () => _finish(skip: true),
-                      child: Text('Skip for now',
+                      child: Text(AppLocalizations.of(context).skipForNow,
                           style: TextStyle(
                               color: c.mutedForeground,
                               fontWeight: FontWeight.w600)),
@@ -259,14 +259,15 @@ class _S extends ConsumerState<OnboardingScreen> {
   /// preview mode every step's primary button is "Close preview" so
   /// the user can pop out at any time.
   Widget _controls(AppColors c) {
+    final l = AppLocalizations.of(context);
     final isLast = _page == _steps - 1;
     // Right CTA: advance to the next step, OR — on the last step —
     // call _finish (real flow → persist + go home; preview → pop). The
     // _finish method internally short-circuits to pop in previewMode,
     // so we don't need a separate handler here.
     final rightLabel = isLast
-        ? (widget.previewMode ? 'Close preview' : 'Finish')
-        : 'Next';
+        ? (widget.previewMode ? l.closePreview : l.finish)
+        : l.next;
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 8, 24, 20),
       child: Row(
@@ -279,7 +280,7 @@ class _S extends ConsumerState<OnboardingScreen> {
               child: AdaptiveButton.child(
                 style: AdaptiveButtonStyle.plain,
                 onPressed: _page == 0 ? null : _back,
-                child: Text('Back',
+                child: Text(l.back,
                     style: TextStyle(
                         color: c.foreground,
                         fontWeight: FontWeight.w600)),
@@ -301,20 +302,20 @@ class _S extends ConsumerState<OnboardingScreen> {
 
   // ── Step 1: name ────────────────────────────────────────────────────
   Widget _stepName(AppColors c) {
+    final l = AppLocalizations.of(context);
     final placeholder =
         ref.watch(currentProfileProvider).asData?.value?.name ?? 'Jane';
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Eyebrow('First things first').animateFadeUp(delay: 80),
+        Eyebrow(l.onboardingNameEyebrow).animateFadeUp(delay: 80),
         const SizedBox(height: 10),
-        const BrandHeading('What should we call you?',
-                size: 24, center: true)
+        BrandHeading(l.onboardingNameTitle, size: 24, center: true)
             .animateFadeUp(delay: 160),
         const SizedBox(height: 12),
         Text(
-          'We\'ll greet you by this when we surface picks.',
+          l.onboardingNameSubtitle,
           textAlign: TextAlign.center,
           style: TextStyle(
               fontSize: 14, height: 1.4, color: c.mutedForeground),
@@ -392,8 +393,14 @@ class _S extends ConsumerState<OnboardingScreen> {
 
   // ── Step 3: content focus ──────────────────────────────────────────
   Widget _stepFocus() {
+    final l = AppLocalizations.of(context);
     const focusValues = ['movie', 'book', 'music', 'mix'];
-    const focusLabels = ['Movies', 'Books', 'Music', 'A mix'];
+    final focusLabels = [
+      l.contentMovies,
+      l.contentBooks,
+      l.contentMusic,
+      l.contentMix,
+    ];
     // Color-coded per the active selection — matches the rest of the app
     // where movie = amber, book = emerald, music = rose, mix = violet.
     const focusColors = [
@@ -408,16 +415,13 @@ class _S extends ConsumerState<OnboardingScreen> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Eyebrow('What you want picks for').animateFadeUp(delay: 80),
+        Eyebrow(l.onboardingFocusEyebrow).animateFadeUp(delay: 80),
         const SizedBox(height: 10),
-        const BrandHeading('Movies, books, music, or all three?',
-                size: 24, center: true)
+        BrandHeading(l.onboardingFocusTitle, size: 24, center: true)
             .animateFadeUp(delay: 160),
         const SizedBox(height: 12),
-        const Subtitle(
-          'Sets the default for every quiz. You can change it on any quiz.',
-          center: true,
-        ).animateFadeUp(delay: 240),
+        Subtitle(l.onboardingFocusSubtitle, center: true)
+            .animateFadeUp(delay: 240),
         const SizedBox(height: 24),
         BrandSegmented(
           color: focusColors[activeIdx],
@@ -432,21 +436,18 @@ class _S extends ConsumerState<OnboardingScreen> {
 
   // ── Step 4: avoid genres ───────────────────────────────────────────
   Widget _stepAvoidGenres() {
+    final l = AppLocalizations.of(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Eyebrow('Anything to skip?').animateFadeUp(delay: 80),
+        Eyebrow(l.onboardingAvoidEyebrow).animateFadeUp(delay: 80),
         const SizedBox(height: 10),
-        const BrandHeading('Genres you\'d rather never see.',
-                size: 24, center: true)
+        BrandHeading(l.onboardingAvoidTitle, size: 24, center: true)
             .animateFadeUp(delay: 160),
         const SizedBox(height: 12),
-        const Subtitle(
-          'Tap any to add a hard "don\'t recommend" rule. Skip the step '
-          'if nothing comes to mind.',
-          center: true,
-        ).animateFadeUp(delay: 240),
+        Subtitle(l.onboardingAvoidSubtitle, center: true)
+            .animateFadeUp(delay: 240),
         const SizedBox(height: 22),
         Wrap(
           alignment: WrapAlignment.center,
@@ -469,34 +470,31 @@ class _S extends ConsumerState<OnboardingScreen> {
 
   // ── Step 5: reminders ──────────────────────────────────────────────
   Widget _stepReminders(AppColors c) {
+    final l = AppLocalizations.of(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Eyebrow('Reminders').animateFadeUp(delay: 80),
+        Eyebrow(l.onboardingRemindersEyebrow).animateFadeUp(delay: 80),
         const SizedBox(height: 10),
-        const BrandHeading('Want a weekly fresh-picks nudge?',
-                size: 24, center: true)
+        BrandHeading(l.onboardingRemindersTitle, size: 24, center: true)
             .animateFadeUp(delay: 160),
         const SizedBox(height: 12),
-        const Subtitle(
-          'One quiet notification per week. We\'ll also nudge you if '
-          'you\'ve got things in progress.',
-          center: true,
-        ).animateFadeUp(delay: 240),
+        Subtitle(l.onboardingRemindersSubtitle, center: true)
+            .animateFadeUp(delay: 240),
         const SizedBox(height: 24),
         BrandSegmented(
           // Emerald when on (positive opt-in), neutral slate when off.
           color: _reminders ? Tw.emerald500 : Tw.slate500,
-          labels: const ['Off', 'Weekly'],
+          labels: [l.remindersOff, l.remindersWeekly],
           selectedIndex: _reminders ? 1 : 0,
           onValueChanged: (i) => setState(() => _reminders = i == 1),
         ).animateFadeUp(delay: 320),
         const SizedBox(height: 12),
         Text(
           _reminders
-              ? 'We\'ll ask permission to send notifications when you finish.'
-              : 'You can turn this on anytime in Settings → Notifications.',
+              ? l.onboardingRemindersOnHint
+              : l.onboardingRemindersOffHint,
           textAlign: TextAlign.center,
           style: TextStyle(
               fontSize: 12, color: c.mutedForeground),

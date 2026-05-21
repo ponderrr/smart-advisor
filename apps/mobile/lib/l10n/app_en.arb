@@ -21,9 +21,119 @@
     "description": "Subtitle on the onboarding language step."
   },
   "back": "Back",
-  "@back": { "description": "Generic Back button." },
+  "@back": {
+    "description": "Generic Back button."
+  },
   "next": "Next",
-  "@next": { "description": "Generic Next button." },
+  "@next": {
+    "description": "Generic Next button."
+  },
   "skipForNow": "Skip for now",
-  "@skipForNow": { "description": "Skip action on multi-step flows." }
+  "@skipForNow": {
+    "description": "Skip action on multi-step flows."
+  },
+  "getStartedHeadline": "Pick something\nworth your night.",
+  "@getStartedHeadline": {
+    "description": "Entry-surface string: getStartedHeadline"
+  },
+  "getStartedBody": "Movies. Books. Music. Tell us your mood and get a pick that fits — with a one-line reason why.",
+  "@getStartedBody": {
+    "description": "Entry-surface string: getStartedBody"
+  },
+  "getStartedPrimary": "Get started",
+  "@getStartedPrimary": {
+    "description": "Entry-surface string: getStartedPrimary"
+  },
+  "getStartedSecondary": "I already have an account",
+  "@getStartedSecondary": {
+    "description": "Entry-surface string: getStartedSecondary"
+  },
+  "closePreview": "Close preview",
+  "@closePreview": {
+    "description": "Entry-surface string: closePreview"
+  },
+  "finish": "Finish",
+  "@finish": {
+    "description": "Entry-surface string: finish"
+  },
+  "onboardingNameEyebrow": "First things first",
+  "@onboardingNameEyebrow": {
+    "description": "Entry-surface string: onboardingNameEyebrow"
+  },
+  "onboardingNameTitle": "What should we call you?",
+  "@onboardingNameTitle": {
+    "description": "Entry-surface string: onboardingNameTitle"
+  },
+  "onboardingNameSubtitle": "We'll greet you by this when we surface picks.",
+  "@onboardingNameSubtitle": {
+    "description": "Entry-surface string: onboardingNameSubtitle"
+  },
+  "onboardingFocusEyebrow": "What you want picks for",
+  "@onboardingFocusEyebrow": {
+    "description": "Entry-surface string: onboardingFocusEyebrow"
+  },
+  "onboardingFocusTitle": "Movies, books, music, or all three?",
+  "@onboardingFocusTitle": {
+    "description": "Entry-surface string: onboardingFocusTitle"
+  },
+  "onboardingFocusSubtitle": "Sets the default for every quiz. You can change it on any quiz.",
+  "@onboardingFocusSubtitle": {
+    "description": "Entry-surface string: onboardingFocusSubtitle"
+  },
+  "contentMovies": "Movies",
+  "@contentMovies": {
+    "description": "Entry-surface string: contentMovies"
+  },
+  "contentBooks": "Books",
+  "@contentBooks": {
+    "description": "Entry-surface string: contentBooks"
+  },
+  "contentMusic": "Music",
+  "@contentMusic": {
+    "description": "Entry-surface string: contentMusic"
+  },
+  "contentMix": "A mix",
+  "@contentMix": {
+    "description": "Entry-surface string: contentMix"
+  },
+  "onboardingAvoidEyebrow": "Anything to skip?",
+  "@onboardingAvoidEyebrow": {
+    "description": "Entry-surface string: onboardingAvoidEyebrow"
+  },
+  "onboardingAvoidTitle": "Genres you'd rather never see.",
+  "@onboardingAvoidTitle": {
+    "description": "Entry-surface string: onboardingAvoidTitle"
+  },
+  "onboardingAvoidSubtitle": "Tap any to add a hard \"don't recommend\" rule. Skip the step if nothing comes to mind.",
+  "@onboardingAvoidSubtitle": {
+    "description": "Entry-surface string: onboardingAvoidSubtitle"
+  },
+  "onboardingRemindersEyebrow": "Reminders",
+  "@onboardingRemindersEyebrow": {
+    "description": "Entry-surface string: onboardingRemindersEyebrow"
+  },
+  "onboardingRemindersTitle": "Want a weekly fresh-picks nudge?",
+  "@onboardingRemindersTitle": {
+    "description": "Entry-surface string: onboardingRemindersTitle"
+  },
+  "onboardingRemindersSubtitle": "One quiet notification per week. We'll also nudge you if you've got things in progress.",
+  "@onboardingRemindersSubtitle": {
+    "description": "Entry-surface string: onboardingRemindersSubtitle"
+  },
+  "remindersOff": "Off",
+  "@remindersOff": {
+    "description": "Entry-surface string: remindersOff"
+  },
+  "remindersWeekly": "Weekly",
+  "@remindersWeekly": {
+    "description": "Entry-surface string: remindersWeekly"
+  },
+  "onboardingRemindersOnHint": "We'll ask permission to send notifications when you finish.",
+  "@onboardingRemindersOnHint": {
+    "description": "Entry-surface string: onboardingRemindersOnHint"
+  },
+  "onboardingRemindersOffHint": "You can turn this on anytime in Settings → Notifications.",
+  "@onboardingRemindersOffHint": {
+    "description": "Entry-surface string: onboardingRemindersOffHint"
+  }
 }

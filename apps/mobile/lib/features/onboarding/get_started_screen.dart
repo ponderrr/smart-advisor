@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/supabase/supabase_providers.dart';
+import '../../l10n/app_localizations.dart';
 import '../../ui/ui.dart';
 
 /// Single polished pre-auth welcome screen, shown once on first launch
@@ -54,6 +55,7 @@ class _S extends ConsumerState<GetStartedScreen> {
   @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
+    final l = AppLocalizations.of(context);
     return Scaffold(
       // No BrandScaffold — we own the background.
       backgroundColor: dark ? Tw.slate950 : Tw.slate900,
@@ -96,7 +98,7 @@ class _S extends ConsumerState<GetStartedScreen> {
                   // Hero block — centred over the bottom of the wall
                   // where the vignette is darkest.
                   Text(
-                    'Pick something\nworth your night.',
+                    l.getStartedHeadline,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
@@ -118,8 +120,7 @@ class _S extends ConsumerState<GetStartedScreen> {
                       .slideY(begin: 0.16, end: 0, curve: Curves.easeOut),
                   const SizedBox(height: 14),
                   Text(
-                    'Movies. Books. Music. Tell us your mood and get a '
-                    'pick that fits — with a one-line reason why.',
+                    l.getStartedBody,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: .82),
@@ -134,7 +135,7 @@ class _S extends ConsumerState<GetStartedScreen> {
                   const SizedBox(height: 28),
                   if (widget.previewMode)
                     _PrimaryCta(
-                      label: 'Close preview',
+                      label: l.closePreview,
                       onPressed: () => Navigator.of(context).pop(),
                     )
                         .animate()
@@ -142,7 +143,7 @@ class _S extends ConsumerState<GetStartedScreen> {
                         .slideY(begin: 0.16, end: 0, curve: Curves.easeOut)
                   else ...[
                     _PrimaryCta(
-                      label: 'Get started',
+                      label: l.getStartedPrimary,
                       onPressed: _navigating ? null : () => _go('/auth/signup'),
                     )
                         .animate()
@@ -150,7 +151,7 @@ class _S extends ConsumerState<GetStartedScreen> {
                         .slideY(begin: 0.16, end: 0, curve: Curves.easeOut),
                     const SizedBox(height: 10),
                     _SecondaryCta(
-                      label: 'I already have an account',
+                      label: l.getStartedSecondary,
                       onPressed: _navigating ? null : () => _go('/auth'),
                     )
                         .animate()
