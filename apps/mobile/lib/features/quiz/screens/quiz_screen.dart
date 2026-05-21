@@ -11,6 +11,7 @@ import '../../../core/models/answer.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/models/question.dart';
 import '../../../core/services/service_providers.dart';
+import '../../notifications/notifications_center.dart';
 import '../../../core/supabase/supabase_providers.dart';
 import '../../../ui/ui.dart';
 import '../../auth/auth_providers.dart';
@@ -284,6 +285,17 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       return;
     }
     ref.read(quizStoreProvider.notifier).setRecommendations(res.data!);
+    // Log the result to the notification center as a persistent record
+    // the user can revisit from History later.
+    final n = res.data!.length;
+    ref.read(notificationsCenterProvider.notifier).add(
+          'Your picks are ready 🍿',
+          n == 1
+              ? 'A fresh recommendation from your quiz — find it in History.'
+              : '$n fresh recommendations from your quiz — find them in History.',
+          type: AppNotificationType.quiz,
+          route: '/history',
+        );
     setState(() => _step = _Step.results);
   }
 

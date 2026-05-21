@@ -41,7 +41,8 @@ class NotificationsSettingsScreen extends ConsumerWidget {
                         await ref
                             .read(notificationsCenterProvider.notifier)
                             .add('Weekly reminder on',
-                                'We\'ll nudge you weekly to discover something.');
+                                'We\'ll nudge you weekly to discover something.',
+                                type: AppNotificationType.reminder);
                       }
                     },
                   ),

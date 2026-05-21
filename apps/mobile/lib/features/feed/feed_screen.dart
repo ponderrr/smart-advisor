@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../ui/ui.dart';
+import '../notifications/notifications_center.dart';
 import 'feed_providers.dart';
 import 'models/feed_models.dart';
 import 'widgets/ai_nudge_card.dart';
@@ -74,6 +75,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           Row(
             children: [
               const Expanded(child: BrandHeading('Feed', size: 32)),
+              const _NotificationsBell(),
               _FriendsButton(
                   onTap: () => context.push('/feed/friends')),
               const SizedBox(width: 2),
@@ -204,6 +206,77 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       isScrollControlled: true,
       builder: (_) =>
           Composer(initialCommunity: initial ?? FeedCommunity.movies),
+    );
+  }
+}
+
+/// Feed-header bell → the notification center, with an unread-count
+/// badge. Tinted to match the other header chrome.
+class _NotificationsBell extends ConsumerWidget {
+  const _NotificationsBell();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unread = ref.watch(unreadCountProvider);
+    final tone = contentAccent(
+        ContentAccentName.violet, Theme.of(context).brightness);
+    return Semantics(
+      button: true,
+      label: unread > 0
+          ? 'Notifications, $unread unread'
+          : 'Notifications',
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => context.push('/notifications'),
+        child: ExcludeSemantics(
+          child: SizedBox(
+            width: 44,
+            height: 44,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                      color: tone.iconCircleBg,
+                      shape: BoxShape.circle),
+                  child: Icon(Icons.notifications_none,
+                      size: 18, color: tone.iconCircleFg),
+                ),
+                if (unread > 0)
+                  Positioned(
+                    top: 3,
+                    right: 3,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 4, vertical: 1),
+                      constraints:
+                          const BoxConstraints(minWidth: 16),
+                      decoration: BoxDecoration(
+                        color: Tw.rose500,
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(
+                            color: brandBg(
+                                Theme.of(context).brightness),
+                            width: 1.5),
+                      ),
+                      child: Text(
+                        unread > 9 ? '9+' : '$unread',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            height: 1.35),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

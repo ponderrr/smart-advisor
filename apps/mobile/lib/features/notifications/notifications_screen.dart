@@ -1,9 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../ui/ui.dart';
 import 'notifications_center.dart';
+
+/// Per-type icon + accent for a notification card.
+({IconData icon, Color color}) _typeStyle(AppNotificationType t) =>
+    switch (t) {
+      AppNotificationType.quiz =>
+        (icon: Icons.psychology_alt, color: Tw.violet500),
+      AppNotificationType.library =>
+        (icon: Icons.bookmark_added, color: Tw.emerald500),
+      AppNotificationType.feed =>
+        (icon: Icons.forum, color: Tw.indigo500),
+      AppNotificationType.reminder =>
+        (icon: Icons.alarm, color: Tw.amber500),
+      AppNotificationType.milestone =>
+        (icon: Icons.emoji_events, color: Tw.rose500),
+      AppNotificationType.system =>
+        (icon: Icons.auto_awesome, color: Tw.slate500),
+    };
+
+/// Short relative age, e.g. "just now", "12m ago", "3d ago".
+String _ago(DateTime t) {
+  final d = DateTime.now().difference(t);
+  if (d.inMinutes < 1) return 'just now';
+  if (d.inMinutes < 60) return '${d.inMinutes}m ago';
+  if (d.inHours < 24) return '${d.inHours}h ago';
+  if (d.inDays < 7) return '${d.inDays}d ago';
+  if (d.inDays < 365) return '${d.inDays ~/ 7}w ago';
+  return '${d.inDays ~/ 365}y ago';
+}
 
 class NotificationsScreen extends ConsumerStatefulWidget {
   const NotificationsScreen({super.key});
@@ -32,7 +61,8 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   @override
   Widget build(BuildContext context) {
     final items = ref.watch(notificationsCenterProvider);
-    if (items.any((n) => !n.read)) {
+    final unread = items.where((n) => !n.read).length;
+    if (unread > 0) {
       WidgetsBinding.instance.addPostFrameCallback((_) =>
           ref.read(notificationsCenterProvider.notifier).markAllRead());
     }
@@ -56,14 +86,22 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                     Icon(Icons.notifications_none,
                         size: 32, color: context.brandMuted),
                     const SizedBox(height: 10),
-                    Subtitle('No notifications yet.', center: true),
+                    Subtitle(
+                        'You’re all caught up — no notifications.',
+                        center: true),
                   ]),
                 ),
               ),
             )
           : ListView(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
               children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Subtitle(items.length == 1
+                      ? '1 notification'
+                      : '${items.length} notifications'),
+                ),
                 for (final entry in items.asMap().entries)
                   _buildCard(context, entry.value)
                       .animate(target: _clearing ? 1 : 0)
@@ -84,6 +122,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   }
 
   Widget _buildCard(BuildContext context, AppNotification n) {
+    final style = _typeStyle(n.type);
     return Dismissible(
       key: ValueKey(n.id),
       // Swipe left→right to clear a single notification.
@@ -102,36 +141,82 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
       ),
       child: Padding(
         padding: const EdgeInsets.only(bottom: 10),
-        child: BrandCard(
-          padding: const EdgeInsets.all(14),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 8,
-                height: 8,
-                margin: const EdgeInsets.only(top: 6, right: 12),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: n.read ? Colors.transparent : Tw.indigo500,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: n.route == null
+              ? null
+              : () {
+                  ref
+                      .read(notificationsCenterProvider.notifier)
+                      .markRead(n.id);
+                  context.push(n.route!);
+                },
+          child: BrandCard(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Type icon — a tinted circle so the inbox skims by kind.
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: style.color.withValues(alpha: 0.14),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(style.icon, size: 19, color: style.color),
                 ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(n.title,
-                        style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: context.brandInk)),
-                    const SizedBox(height: 2),
-                    Text(n.body,
-                        style: TextStyle(
-                            fontSize: 13, color: context.brandMuted)),
-                  ],
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(n.title,
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    color: context.brandInk)),
+                          ),
+                          if (!n.read)
+                            Container(
+                              width: 8,
+                              height: 8,
+                              margin: const EdgeInsets.only(
+                                  top: 5, left: 8),
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Tw.indigo500,
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(n.body,
+                          style: TextStyle(
+                              fontSize: 13,
+                              height: 1.35,
+                              color: context.brandMuted)),
+                      const SizedBox(height: 6),
+                      Row(children: [
+                        Text(_ago(n.createdAt),
+                            style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: context.brandMuted)),
+                        if (n.route != null) ...[
+                          const Spacer(),
+                          Icon(Icons.chevron_right,
+                              size: 16, color: context.brandMuted),
+                        ],
+                      ]),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
