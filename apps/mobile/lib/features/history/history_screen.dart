@@ -54,6 +54,27 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   int _mediumIdx = 0; // All, Movies, Books, Music, Favorites
   int _sortIdx = 0; // Newest, Oldest
   ViewMode _view = ViewMode.list;
+  final _search = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  /// Title / creator substring filter applied client-side on top of the
+  /// server-side medium + sort query.
+  List<Recommendation> _applySearch(List<Recommendation> list) {
+    final q = _query.trim().toLowerCase();
+    if (q.isEmpty) return list;
+    return list.where((r) {
+      final hay =
+          '${r.title} ${r.director ?? r.author ?? r.artist ?? ''}'
+              .toLowerCase();
+      return hay.contains(q);
+    }).toList();
+  }
 
   _Filter get _filter {
     final ct = switch (_mediumIdx) {
@@ -118,6 +139,14 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     onChanged: (v) => setState(() => _view = v),
                   ),
                 ]),
+                const SizedBox(height: 8),
+                AdaptiveTextField(
+                  controller: _search,
+                  placeholder: 'Search past picks',
+                  prefix: Icon(Icons.search,
+                      size: 18, color: context.brandMuted),
+                  onChanged: (v) => setState(() => _query = v),
+                ),
               ],
             ),
           ),
@@ -140,7 +169,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               ),
             ),
           ],
-          data: (list) => _resultSlivers(list),
+          data: (list) => _resultSlivers(_applySearch(list)),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 24)),
       ],
@@ -155,7 +184,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           sliver: SliverToBoxAdapter(
-            child: Subtitle('No recommendations yet.'),
+            child: Subtitle(_query.trim().isNotEmpty
+                ? 'No matches for “${_query.trim()}”.'
+                : 'No recommendations yet.'),
           ),
         ),
       ];

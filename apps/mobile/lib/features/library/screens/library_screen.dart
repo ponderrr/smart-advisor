@@ -28,6 +28,14 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
   LibraryMedium? _medium;
   LibraryStatus? _status;
   ViewMode _view = ViewMode.list;
+  final _search = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,13 +75,19 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
               'We couldn’t load your library right now. '
               'Please try again in a moment.'),
           data: (items) {
+            final q = _query.trim().toLowerCase();
             final filtered = items.where((i) {
               if (_medium != null && i.medium != _medium) return false;
               if (_status != null && i.status != _status) return false;
+              if (q.isNotEmpty) {
+                final hay = '${i.title} ${i.creator ?? ''}'.toLowerCase();
+                if (!hay.contains(q)) return false;
+              }
               return true;
             }).toList();
             if (filtered.isEmpty) {
-              return Subtitle('Nothing here yet.');
+              return Subtitle(
+                  q.isNotEmpty ? 'No matches for “$_query”.' : 'Nothing here yet.');
             }
             if (_view == ViewMode.grid) {
               return LayoutBuilder(builder: (_, box) {
@@ -219,6 +233,14 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     final mediumIdx = _medium == null ? 0 : _medium!.index + 1;
     final statusIdx = _status == null ? 0 : _status!.index + 1;
     return Column(children: [
+      AdaptiveTextField(
+        controller: _search,
+        placeholder: 'Search your library',
+        prefix: Icon(Icons.search,
+            size: 18, color: context.brandMuted),
+        onChanged: (v) => setState(() => _query = v),
+      ),
+      const SizedBox(height: 8),
       Row(children: [
         Expanded(
           child: BrandSegmented(
