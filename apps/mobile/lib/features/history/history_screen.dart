@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/models/recommendation.dart';
+import '../../core/offline_cache.dart';
 import '../../core/services/service_providers.dart';
 import '../../core/ui_messenger.dart';
 import '../../ui/ui.dart';
@@ -31,15 +32,28 @@ class _Filter {
 
 final _historyProvider = FutureProvider.autoDispose
     .family<List<Recommendation>, _Filter>((ref, f) async {
-  final res = await ref.watch(databaseServiceProvider).getUserRecommendations(
-        RecommendationFilter(
-          contentType: f.contentType,
-          isFavorited: f.favorites ? true : null,
-          sortBy: f.sortBy,
-          ascending: f.asc,
-        ),
-      );
-  return res.data ?? const [];
+  final cacheKey = 'history_${f.hashCode}';
+  try {
+    final res =
+        await ref.watch(databaseServiceProvider).getUserRecommendations(
+              RecommendationFilter(
+                contentType: f.contentType,
+                isFavorited: f.favorites ? true : null,
+                sortBy: f.sortBy,
+                ascending: f.asc,
+              ),
+            );
+    if (!res.isError && res.data != null) {
+      await OfflineCache.writeList(
+          cacheKey, res.data!.map((e) => e.toJson()).toList());
+      return res.data!;
+    }
+  } catch (_) {
+    // Network failure (not a PostgrestException) — fall through to cache.
+  }
+  // Fetch failed — serve the last good snapshot for this filter.
+  final cached = await OfflineCache.readList(cacheKey);
+  return cached.map(Recommendation.fromJson).toList();
 });
 
 /// Port of web /history: medium/favorites filter, sort, favorite + delete.

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/models/enums.dart';
 import '../../../core/models/library_item.dart';
+import '../../../core/offline_cache.dart';
 import '../../../core/services/service_providers.dart';
 import '../../../core/ui_messenger.dart';
 import '../../../ui/ui.dart';
@@ -12,7 +13,16 @@ import '../../notifications/notification_service.dart';
 final _libraryProvider =
     FutureProvider.autoDispose<List<LibraryItem>>((ref) async {
   final res = await ref.watch(libraryServiceProvider).list();
-  return res.data ?? const [];
+  if (!res.isError && res.data != null) {
+    // Successful fetch — refresh the offline snapshot.
+    await OfflineCache.writeList(
+        'library', res.data!.map((e) => e.toJson()).toList());
+    return res.data!;
+  }
+  // Fetch failed — serve the last good snapshot so a cold offline
+  // launch still shows the library instead of an empty screen.
+  final cached = await OfflineCache.readList('library');
+  return cached.map(LibraryItem.fromJson).toList();
 });
 
 /// Port of web /library: medium + status filters, per-item status change,
