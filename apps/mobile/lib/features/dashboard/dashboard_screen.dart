@@ -19,8 +19,8 @@ final _dashboardRecsProvider =
   return res.data ?? const [];
 });
 
-/// Web-faithful dashboard: hero, accent stat tiles, sparkline + genre
-/// charts, and rich recent-pick cards (poster, creator, match, genres).
+/// Web-faithful dashboard: hero, accent stat tiles, a top-genres chart,
+/// and rich recent-pick cards (poster, creator, match, genres).
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
