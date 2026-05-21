@@ -218,13 +218,14 @@ class _AddFriendsButton extends StatelessWidget {
 }
 
 /// Public/Private profile pill near the feed header — mirrors the web
-/// `/feed` top pill. Taps through to the Feed settings section.
-class _VisibilityPill extends StatelessWidget {
+/// `/feed` top pill. Tapping opens an inline visibility sheet so the user
+/// can flip Public/Private without leaving the feed.
+class _VisibilityPill extends ConsumerWidget {
   const _VisibilityPill({required this.visibility});
   final FeedVisibility visibility;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isPrivate = visibility == FeedVisibility.private;
     final tone = contentAccent(
         isPrivate ? ContentAccentName.rose : ContentAccentName.emerald,
@@ -232,11 +233,11 @@ class _VisibilityPill extends StatelessWidget {
     return Semantics(
       button: true,
       label: isPrivate
-          ? 'Profile is private. Edit feed visibility'
-          : 'Profile is public. Edit feed visibility',
+          ? 'Profile is private. Change feed visibility'
+          : 'Profile is public. Change feed visibility',
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () => context.push('/account'),
+        onTap: () => _showVisibilitySheet(context, ref, visibility),
         child: ExcludeSemantics(
           child: Container(
             padding: const EdgeInsets.symmetric(
@@ -257,6 +258,141 @@ class _VisibilityPill extends StatelessWidget {
             ]),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Inline bottom sheet for flipping feed visibility — the pill used to
+/// deep-link into Settings, which was a heavy detour for a one-tap toggle.
+void _showVisibilitySheet(
+    BuildContext context, WidgetRef ref, FeedVisibility current) {
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: Colors.transparent,
+    builder: (sheetContext) {
+      final c = sheetContext.colors;
+      return SafeArea(
+        child: Container(
+          margin: const EdgeInsets.all(12),
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
+          decoration: BoxDecoration(
+            color: c.background,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: c.border),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Feed visibility',
+                  style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w900,
+                      color: c.foreground)),
+              const SizedBox(height: 14),
+              _VisibilityOption(
+                icon: Icons.public,
+                accent: ContentAccentName.emerald,
+                title: 'Public',
+                body: 'Your finished, rated and shared picks appear in '
+                    'other people\'s feeds, and people can follow you '
+                    'directly.',
+                selected: current == FeedVisibility.public,
+                onTap: () {
+                  ref
+                      .read(feedVisibilityProvider.notifier)
+                      .set(FeedVisibility.public);
+                  Navigator.of(sheetContext).pop();
+                },
+              ),
+              const SizedBox(height: 10),
+              _VisibilityOption(
+                icon: Icons.lock_outline,
+                accent: ContentAccentName.rose,
+                title: 'Private',
+                body: 'You can still browse and post normally, but your '
+                    'activity isn\'t broadcast and new followers are '
+                    'request-only.',
+                selected: current == FeedVisibility.private,
+                onTap: () {
+                  ref
+                      .read(feedVisibilityProvider.notifier)
+                      .set(FeedVisibility.private);
+                  Navigator.of(sheetContext).pop();
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+class _VisibilityOption extends StatelessWidget {
+  const _VisibilityOption({
+    required this.icon,
+    required this.accent,
+    required this.title,
+    required this.body,
+    required this.selected,
+    required this.onTap,
+  });
+  final IconData icon;
+  final ContentAccentName accent;
+  final String title;
+  final String body;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final tone = contentAccent(accent, Theme.of(context).brightness);
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: selected ? tone.iconCircleBg : c.muted,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+              color: selected ? tone.iconCircleFg : c.border),
+        ),
+        child: Row(children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+                color: tone.iconCircleBg, shape: BoxShape.circle),
+            child: Icon(icon, size: 18, color: tone.iconCircleFg),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: c.foreground)),
+                const SizedBox(height: 2),
+                Text(body,
+                    style: TextStyle(
+                        fontSize: 12,
+                        height: 1.35,
+                        color: c.mutedForeground)),
+              ],
+            ),
+          ),
+          if (selected) ...[
+            const SizedBox(width: 8),
+            Icon(Icons.check_circle, size: 20, color: tone.iconCircleFg),
+          ],
+        ]),
       ),
     );
   }
