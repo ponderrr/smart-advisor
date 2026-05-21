@@ -15,6 +15,7 @@ import { FollowButton } from "@/features/feed/components/follow-button";
 interface SuggestedProfile {
   id: string;
   name: string;
+  avatarUrl: string | null;
 }
 
 /**
@@ -33,7 +34,7 @@ const PeoplePage = () => {
 
   const suggested = useMemo<SuggestedProfile[]>(() => {
     const followed = new Set(followingIds ?? []);
-    const seen = new Map<string, string>();
+    const seen = new Map<string, SuggestedProfile>();
     for (const p of posts ?? []) {
       if (
         p.authorId &&
@@ -41,12 +42,16 @@ const PeoplePage = () => {
         !followed.has(p.authorId) &&
         !seen.has(p.authorId)
       ) {
-        seen.set(p.authorId, p.author);
+        seen.set(p.authorId, {
+          id: p.authorId,
+          name: p.author,
+          avatarUrl: p.authorAvatarUrl ?? null,
+        });
       }
     }
-    const all = [...seen.entries()]
-      .map(([id, name]) => ({ id, name }))
-      .sort((a, b) => a.name.localeCompare(b.name));
+    const all = [...seen.values()].sort((a, b) =>
+      a.name.localeCompare(b.name),
+    );
     const q = query.trim().toLowerCase();
     return q.length === 0
       ? all
@@ -117,7 +122,11 @@ const PeoplePage = () => {
                   key={profile.id}
                   className="flex items-center gap-3 px-4 py-3 sm:px-5"
                 >
-                  <FeedAvatar name={profile.name} size={36} />
+                  <FeedAvatar
+                    name={profile.name}
+                    url={profile.avatarUrl ?? undefined}
+                    size={36}
+                  />
                   <button
                     type="button"
                     onClick={() => router.push(`/feed/u/${profile.id}`)}

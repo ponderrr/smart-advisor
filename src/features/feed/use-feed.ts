@@ -126,6 +126,17 @@ export function useCreatePost() {
   });
 }
 
+export function useDeletePost() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: svc.deletePost,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: KEYS.feed });
+      qc.invalidateQueries({ queryKey: ["feed", "user-posts"] });
+    },
+  });
+}
+
 export function useCreateComment() {
   const qc = useQueryClient();
   return useMutation({

@@ -67,7 +67,11 @@ export default function FeedProfilePage() {
             <>
               {/* Profile header */}
               <div className="flex flex-col items-start gap-4 rounded-3xl border border-slate-200/80 bg-white/80 p-6 shadow-sm backdrop-blur-md sm:flex-row sm:items-center dark:border-slate-700/70 dark:bg-slate-900/65">
-                <FeedAvatar name={name} size={64} />
+                <FeedAvatar
+                  name={name}
+                  url={profile?.avatarUrl ?? undefined}
+                  size={64}
+                />
                 <div className="min-w-0 flex-1">
                   <h1 className="text-2xl font-black tracking-tight">
                     {isYou ? "You" : name}

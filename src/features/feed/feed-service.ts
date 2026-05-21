@@ -157,6 +157,16 @@ export async function createPost(input: {
   return mapPost(data as unknown as PostRow, new Map());
 }
 
+/** Deletes a post. RLS only permits the author; cascades to its
+ *  comments / saves / votes. */
+export async function deletePost(postId: string): Promise<void> {
+  const { error } = await supabase
+    .from("feed_posts")
+    .delete()
+    .eq("id", postId);
+  if (error) throw error;
+}
+
 /** Inserts a comment (optionally threaded under parentId). */
 export async function createComment(
   postId: string,

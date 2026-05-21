@@ -55,7 +55,7 @@ import {
 } from "@/features/feed/use-feed";
 import { FollowButton } from "@/features/feed/components/follow-button";
 import { FeedAvatar } from "@/features/feed/components/feed-avatar";
-import { BlockMenuButton } from "@/features/feed/components/block-menu";
+import { PostMenuButton } from "@/features/feed/components/post-menu";
 import { FinishWhatYouStartedBanner } from "@/features/library/components/finish-what-you-started-banner";
 import { AiNudgeBanner } from "@/features/feed/components/ai-nudge-banner";
 import { DashboardMovedBanner } from "@/features/feed/components/dashboard-moved-banner";
@@ -228,7 +228,12 @@ function PostCard({
         >
           {saved ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
         </button>
-        <BlockMenuButton authorId={post.authorId} author={post.author} />
+        <PostMenuButton
+          postId={post.id}
+          postTitle={post.title}
+          authorId={post.authorId}
+          author={post.author}
+        />
       </motion.div>
     );
   }
@@ -308,7 +313,12 @@ function PostCard({
                   {post.tasteMatch}% your taste
                 </span>
               )}
-              <BlockMenuButton authorId={post.authorId} author={post.author} />
+              <PostMenuButton
+                postId={post.id}
+                postTitle={post.title}
+                authorId={post.authorId}
+                author={post.author}
+              />
             </div>
           </div>
 
@@ -318,7 +328,11 @@ function PostCard({
               onClick={(e) => e.stopPropagation()}
               className="group/author flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-200"
             >
-              <FeedAvatar name={post.author} size={22} />
+              <FeedAvatar
+                name={post.author}
+                url={post.authorAvatarUrl ?? undefined}
+                size={22}
+              />
               <span className="group-hover/author:underline">
                 {post.author}
               </span>
@@ -381,6 +395,37 @@ const ACTIVITIES: ReadonlyArray<{
   { value: "shared", label: "Recommending", pillClassName: "bg-violet-500" },
 ];
 
+/** Per-community composer copy + the hover-glow hue (amber / emerald /
+ *  rose), so the share-a-pick fields speak to the content type. */
+const COMPOSER_COPY: Record<
+  FeedCommunity,
+  {
+    glow: string;
+    titlePlaceholder: string;
+    creatorPlaceholder: string;
+    takePlaceholder: string;
+  }
+> = {
+  movies: {
+    glow: "#f59e0b",
+    titlePlaceholder: "What did you watch?",
+    creatorPlaceholder: "Director (optional)",
+    takePlaceholder: "Your take on it (optional)",
+  },
+  books: {
+    glow: "#10b981",
+    titlePlaceholder: "What did you read?",
+    creatorPlaceholder: "Author (optional)",
+    takePlaceholder: "Your take on it (optional)",
+  },
+  music: {
+    glow: "#f43f5e",
+    titlePlaceholder: "What did you listen to?",
+    creatorPlaceholder: "Artist (optional)",
+    takePlaceholder: "Your take on it (optional)",
+  },
+};
+
 function Composer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const createPost = useCreatePost();
   const [visibility] = useFeedVisibility();
@@ -389,16 +434,21 @@ function Composer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [activity, setActivity] = useState<FeedActivity>("finished");
   const [title, setTitle] = useState("");
   const [creator, setCreator] = useState("");
+  const [year, setYear] = useState("");
+  const [posterUrl, setPosterUrl] = useState("");
   const [body, setBody] = useState("");
 
   function submit() {
     if (!title.trim() || createPost.isPending) return;
+    const parsedYear = Number.parseInt(year, 10);
     createPost.mutate(
       {
         community,
         title: title.trim(),
         activity,
         creator: creator || undefined,
+        year: Number.isFinite(parsedYear) ? parsedYear : undefined,
+        posterUrl: posterUrl.trim() || undefined,
         body: body || undefined,
       },
       {
@@ -410,6 +460,8 @@ function Composer({ open, onClose }: { open: boolean; onClose: () => void }) {
           );
           setTitle("");
           setCreator("");
+          setYear("");
+          setPosterUrl("");
           setBody("");
           onClose();
         },
@@ -459,21 +511,46 @@ function Composer({ open, onClose }: { open: boolean; onClose: () => void }) {
           ariaLabel="What did you do?"
         />
         <Input
-          placeholder="What did you watch / read / hear?"
+          glowColor={COMPOSER_COPY[community].glow}
+          placeholder={COMPOSER_COPY[community].titlePlaceholder}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           maxLength={120}
         />
+        <div className="flex gap-3">
+          <div className="flex-1">
+            <Input
+              glowColor={COMPOSER_COPY[community].glow}
+              placeholder={COMPOSER_COPY[community].creatorPlaceholder}
+              value={creator}
+              onChange={(e) => setCreator(e.target.value)}
+            />
+          </div>
+          <div className="w-28">
+            <Input
+              glowColor={COMPOSER_COPY[community].glow}
+              placeholder="Year"
+              value={year}
+              inputMode="numeric"
+              maxLength={4}
+              onChange={(e) =>
+                setYear(e.target.value.replace(/\D/g, "").slice(0, 4))
+              }
+            />
+          </div>
+        </div>
         <Input
-          placeholder="Creator / artist (optional)"
-          value={creator}
-          onChange={(e) => setCreator(e.target.value)}
+          glowColor={COMPOSER_COPY[community].glow}
+          placeholder="Poster image URL (optional)"
+          value={posterUrl}
+          onChange={(e) => setPosterUrl(e.target.value)}
         />
         <textarea
-          placeholder="Your take (optional)"
+          placeholder={COMPOSER_COPY[community].takePlaceholder}
           value={body}
           onChange={(e) => setBody(e.target.value)}
           rows={3}
+          style={{ ["--tw-ring-color" as string]: COMPOSER_COPY[community].glow }}
           className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-800"
         />
         <Button

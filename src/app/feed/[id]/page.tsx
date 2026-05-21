@@ -31,6 +31,7 @@ import {
 import { FollowButton } from "@/features/feed/components/follow-button";
 import { FeedAvatar } from "@/features/feed/components/feed-avatar";
 import { BlockMenuButton } from "@/features/feed/components/block-menu";
+import { PostMenuButton } from "@/features/feed/components/post-menu";
 import { useFeedPrefs } from "@/features/feed/use-feed-prefs";
 import {
   ACTIVITY_VERB,
@@ -96,7 +97,11 @@ function CommentNode({
           >
             [{collapsed ? "+" : "−"}]
           </button>
-          <FeedAvatar name={node.author} size={22} />
+          <FeedAvatar
+            name={node.author}
+            url={node.authorAvatarUrl ?? undefined}
+            size={22}
+          />
           <Link
             href={`/feed/u/${node.authorId ?? ""}`}
             className="font-extrabold text-slate-800 hover:underline dark:text-slate-100"
@@ -337,7 +342,11 @@ export default function FeedThreadPage() {
             href={`/feed/u/${post.authorId ?? ""}`}
             className="group/author flex items-center gap-2 font-bold text-slate-700 dark:text-slate-200"
           >
-            <FeedAvatar name={post.author} size={28} />
+            <FeedAvatar
+              name={post.author}
+              url={post.authorAvatarUrl ?? undefined}
+              size={28}
+            />
             <span className="group-hover/author:underline">{post.author}</span>
           </Link>
           <span>
@@ -349,6 +358,14 @@ export default function FeedThreadPage() {
             size="sm"
             className="ml-1"
           />
+          <span className="ml-auto">
+            <PostMenuButton
+              postId={post.id}
+              postTitle={post.title}
+              authorId={post.authorId}
+              author={post.author}
+            />
+          </span>
         </div>
 
         <h1 className="mt-2 text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100">
