@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/l10n/language_picker_card.dart';
 import '../../../core/ui_messenger.dart';
 import '../../../ui/ui.dart';
 import '../../auth/auth_providers.dart';
@@ -184,6 +185,8 @@ class _ProfileSettingsScreenState
               const SizedBox(height: 12),
               Center(child: Subtitle(_msg!)),
             ],
+            const SizedBox(height: 16),
+            const LanguagePickerCard(),
             const SizedBox(height: 24),
           ],
         ),
