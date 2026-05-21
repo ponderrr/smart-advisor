@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/supabase/supabase_providers.dart';
 import '../../../core/ui_messenger.dart';
@@ -39,24 +40,44 @@ class UserProfileScreen extends ConsumerWidget {
     final followerCount =
         ref.watch(followerCountProvider(profileId)).value ?? 0;
     final followers = followerCount + (isFollowing ? 1 : 0);
+    final followingCount =
+        ref.watch(followingProfilesProvider(profileId)).value?.length ?? 0;
 
     final profile = profileAsync.value;
     final name = profile?.name ?? 'Someone';
     final posts = postsAsync.value ?? const <FeedPost>[];
 
-    Widget stat(String label, String value) => Column(
-          children: [
-            Text(value,
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w900,
-                    color: context.brandInk)),
-            const SizedBox(height: 2),
-            Text(label,
-                style: TextStyle(
-                    fontSize: 11, color: context.brandMuted)),
-          ],
-        );
+    Widget stat(String label, String value, {VoidCallback? onTap}) {
+      final column = Column(
+        children: [
+          Text(value,
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                  color: context.brandInk)),
+          const SizedBox(height: 2),
+          Text(label,
+              style: TextStyle(
+                  fontSize: 11, color: context.brandMuted)),
+        ],
+      );
+      if (onTap == null) return column;
+      // Tappable stat → the friends list. Padded so it has a comfortable
+      // tap target inside the spaced-around row.
+      return Semantics(
+        button: true,
+        label: '$value $label',
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onTap,
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+            child: column,
+          ),
+        ),
+      );
+    }
 
     return BrandScaffold(
       title: isYou ? 'Your profile' : name,
@@ -146,7 +167,18 @@ class UserProfileScreen extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         stat('Picks', '${posts.length}'),
-                        stat('Followers', compactCount(followers)),
+                        // Following / Followers open the friends list —
+                        // only your own, since the list is the signed-in
+                        // user's follow graph.
+                        stat('Following', compactCount(followingCount),
+                            onTap: isYou
+                                ? () => context.push('/feed/friends')
+                                : null),
+                        stat('Followers', compactCount(followers),
+                            onTap: isYou
+                                ? () => context
+                                    .push('/feed/friends?tab=followers')
+                                : null),
                       ],
                     ),
                   ]),

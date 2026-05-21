@@ -20,6 +20,7 @@ import '../../features/feed/feed_screen.dart';
 import '../../features/feed/models/feed_models.dart';
 import '../../features/feed/screens/add_friends_screen.dart';
 import '../../features/feed/screens/community_screen.dart';
+import '../../features/feed/screens/friends_screen.dart';
 import '../../features/feed/screens/post_detail_screen.dart';
 import '../../features/feed/screens/user_profile_screen.dart';
 import '../../features/group_quiz/screens/group_quiz_screen.dart';
@@ -242,6 +243,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 GoRoute(
                     path: 'feed/people',
                     builder: (_, _) => const AddFriendsScreen()),
+                // Friends list — your follow graph. ?tab=followers opens
+                // straight to the Followers tab (used by the profile stats).
+                GoRoute(
+                    path: 'feed/friends',
+                    builder: (_, s) => FriendsScreen(
+                        initialTab:
+                            s.uri.queryParameters['tab'] == 'followers'
+                                ? 1
+                                : 0)),
                 GoRoute(
                     path: 'feed/:id',
                     builder: (_, s) => PostDetailScreen(

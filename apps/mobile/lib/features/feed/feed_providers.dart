@@ -51,6 +51,16 @@ final followerCountProvider = FutureProvider.autoDispose
     .family<int, String>(
         (ref, id) => ref.watch(feedServiceProvider).fetchFollowerCount(id));
 
+/// Profiles a given profile follows — the "Following" friends list.
+final followingProfilesProvider = FutureProvider.autoDispose.family<
+    List<({String id, String name, String? avatarUrl})>, String>(
+    (ref, id) => ref.watch(feedServiceProvider).fetchFollowingProfiles(id));
+
+/// Profiles that follow a given profile — the "Followers" friends list.
+final followerProfilesProvider = FutureProvider.autoDispose.family<
+    List<({String id, String name, String? avatarUrl})>, String>(
+    (ref, id) => ref.watch(feedServiceProvider).fetchFollowerProfiles(id));
+
 /// Posts authored by a given profile.
 final userPostsProvider = FutureProvider.autoDispose
     .family<List<FeedPost>, String>(
@@ -138,6 +148,8 @@ class FeedActions {
     final now = await _svc.toggleFollow(followeeId);
     _ref.invalidate(followingProvider);
     _ref.invalidate(followerCountProvider);
+    _ref.invalidate(followingProfilesProvider);
+    _ref.invalidate(followerProfilesProvider);
     return now;
   }
 

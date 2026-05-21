@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/supabase/supabase_providers.dart';
 import '../../../ui/ui.dart';
 import '../feed_providers.dart';
-import '../widgets/feed_avatar.dart';
-import '../widgets/follow_button.dart';
+import '../widgets/person_row.dart';
 
 /// A suggested person derived from the feed.
 typedef _Person = ({String id, String name, String? avatarUrl});
@@ -30,11 +28,6 @@ class _AddFriendsScreenState extends ConsumerState<AddFriendsScreen> {
   void dispose() {
     _search.dispose();
     super.dispose();
-  }
-
-  ContentAccentName _accentFor(String id) {
-    const names = ContentAccentName.values;
-    return names[id.hashCode.abs() % names.length];
   }
 
   @override
@@ -107,10 +100,11 @@ class _AddFriendsScreenState extends ConsumerState<AddFriendsScreen> {
                 for (final person in suggested)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10),
-                    child: _PersonRow(
-                      person: person,
-                      tone: contentAccent(_accentFor(person.id),
-                          Theme.of(context).brightness),
+                    child: PersonRow(
+                      id: person.id,
+                      name: person.name,
+                      avatarUrl: person.avatarUrl,
+                      tone: personTone(context, person.id),
                     ),
                   ),
               ];
@@ -122,48 +116,3 @@ class _AddFriendsScreenState extends ConsumerState<AddFriendsScreen> {
   }
 }
 
-/// A suggested person: avatar + name + the shared [FollowButton].
-class _PersonRow extends StatelessWidget {
-  const _PersonRow({required this.person, required this.tone});
-  final _Person person;
-  final ContentAccentTone tone;
-
-  @override
-  Widget build(BuildContext context) {
-    return BrandCard(
-      padding: const EdgeInsets.all(12),
-      child: Row(children: [
-        Semantics(
-          button: true,
-          label: "Open ${person.name}'s profile",
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () => context.push('/feed/u/${person.id}'),
-            child: ExcludeSemantics(
-              child: FeedAvatar(
-                  name: person.name, url: person.avatarUrl, size: 44),
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () => context.push('/feed/u/${person.id}'),
-            child: Text(person.name,
-                style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: context.brandInk)),
-          ),
-        ),
-        const SizedBox(width: 12),
-        SizedBox(
-          width: 132,
-          child: FollowButton(
-              authorId: person.id, authorName: person.name, tone: tone),
-        ),
-      ]),
-    );
-  }
-}

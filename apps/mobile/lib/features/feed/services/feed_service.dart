@@ -240,6 +240,52 @@ class FeedService {
     return true;
   }
 
+  /// Profiles that [profileId] follows, newest follow first — the
+  /// "Following" half of the friends list.
+  Future<List<({String id, String name, String? avatarUrl})>>
+      fetchFollowingProfiles(String profileId) async {
+    final rows = await _c
+        .from('feed_follows')
+        .select('created_at, '
+            'followee:profiles!feed_follows_followee_id_fkey '
+            '( id, name, avatar_url )')
+        .eq('follower_id', profileId)
+        .order('created_at', ascending: false);
+    return _mapPeople(rows, 'followee');
+  }
+
+  /// Profiles that follow [profileId], newest follow first — the
+  /// "Followers" half of the friends list.
+  Future<List<({String id, String name, String? avatarUrl})>>
+      fetchFollowerProfiles(String profileId) async {
+    final rows = await _c
+        .from('feed_follows')
+        .select('created_at, '
+            'follower:profiles!feed_follows_follower_id_fkey '
+            '( id, name, avatar_url )')
+        .eq('followee_id', profileId)
+        .order('created_at', ascending: false);
+    return _mapPeople(rows, 'follower');
+  }
+
+  /// Pulls the embedded profile under [key] out of each follow row.
+  List<({String id, String name, String? avatarUrl})> _mapPeople(
+      List<dynamic> rows, String key) {
+    final out = <({String id, String name, String? avatarUrl})>[];
+    for (final r in rows) {
+      final p = _embed((r as Map)[key]);
+      final id = p?['id'] as String?;
+      if (id != null) {
+        out.add((
+          id: id,
+          name: (p?['name'] as String?) ?? 'Someone',
+          avatarUrl: p?['avatar_url'] as String?,
+        ));
+      }
+    }
+    return out;
+  }
+
   Future<List<String>> fetchBlocked() async {
     final uid = _c.auth.currentUser?.id;
     if (uid == null) return [];

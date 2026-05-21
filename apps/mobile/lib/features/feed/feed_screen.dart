@@ -74,8 +74,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           Row(
             children: [
               const Expanded(child: BrandHeading('Feed', size: 32)),
-              _AddFriendsButton(
-                  onTap: () => context.push('/feed/people')),
+              _FriendsButton(
+                  onTap: () => context.push('/feed/friends')),
               const SizedBox(width: 2),
               _VisibilityPill(visibility: visibility),
             ],
@@ -208,10 +208,11 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   }
 }
 
-/// Small icon button in the feed header that opens the discover-people /
-/// add-friend screen. Tinted to match the Public/Private pill's chrome.
-class _AddFriendsButton extends StatelessWidget {
-  const _AddFriendsButton({required this.onTap});
+/// Small icon button in the feed header that opens the Friends list (your
+/// follow graph; discover-people is one tap further in). Tinted to match
+/// the Public/Private pill's chrome.
+class _FriendsButton extends StatelessWidget {
+  const _FriendsButton({required this.onTap});
   final VoidCallback onTap;
 
   @override
@@ -220,7 +221,7 @@ class _AddFriendsButton extends StatelessWidget {
         ContentAccentName.violet, Theme.of(context).brightness);
     return Semantics(
       button: true,
-      label: 'Find people to follow',
+      label: 'Your friends',
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
@@ -233,7 +234,7 @@ class _AddFriendsButton extends StatelessWidget {
             height: 38,
             decoration: BoxDecoration(
                 color: tone.iconCircleBg, shape: BoxShape.circle),
-            child: Icon(Icons.person_add_alt,
+            child: Icon(Icons.people_alt_rounded,
                 size: 18, color: tone.iconCircleFg),
           ),
         ),
