@@ -16,7 +16,12 @@ export type FeedScope = "friends" | "discover" | "group";
 
 export interface FeedComment {
   id: string;
+  /** Author's profile id (uuid). Optional during the in-memory→backend
+   *  migration; required once the feed is fully backend-backed. */
+  authorId?: string;
+  /** Display name — `profiles.name`, joined at fetch time. */
   author: string;
+  authorAvatarUrl?: string | null;
   body: string;
   ageHours: number;
   score: number;
@@ -71,7 +76,12 @@ export function mockFollowerCount(author: string): number {
 export interface FeedPost {
   id: string;
   community: FeedCommunity;
+  /** Author's profile id (uuid). Optional during the in-memory→backend
+   *  migration; required once the feed is fully backend-backed. */
+  authorId?: string;
+  /** Display name — `profiles.name`, joined at fetch time. */
   author: string;
+  authorAvatarUrl?: string | null;
   title: string;
   activity: FeedActivity;
   /** Taste overlap with the current user, 0–100. */
