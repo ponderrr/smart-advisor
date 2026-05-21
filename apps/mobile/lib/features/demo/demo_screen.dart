@@ -371,7 +371,7 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
         const SizedBox(height: 6),
         const BrandHeading('What are you in the mood for?', size: 24),
         const SizedBox(height: 4),
-        Subtitle('A 4-question taste of Smart Advisor — no account '
+        Subtitle('A quick taste of Smart Advisor — no account '
             'needed.'),
         const SizedBox(height: 20),
         ResponsiveTiles(
@@ -455,7 +455,12 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
         children: [
         for (var i = 0; i < items.length; i++)
         BrandCard(
-          accent: ContentAccentName.violet,
+          accent: switch (items[i].type) {
+            'movie' => ContentAccentName.amber,
+            'book' => ContentAccentName.emerald,
+            'music' => ContentAccentName.rose,
+            _ => ContentAccentName.violet,
+          },
           padding: const EdgeInsets.all(14),
           child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             PosterThumb(

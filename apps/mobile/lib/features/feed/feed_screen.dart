@@ -97,11 +97,14 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           ]),
           const SizedBox(height: 14),
           if (posts.isEmpty)
-            Padding(
-              padding: const EdgeInsets.all(40),
-              child: Subtitle(
-                  'Nothing here yet — be the first to post.',
-                  center: true),
+            BrandCard(
+              child: Column(children: [
+                Icon(Icons.forum_outlined,
+                    size: 32, color: context.brandMuted),
+                const SizedBox(height: 10),
+                Subtitle('Nothing here yet — be the first to post.',
+                    center: true),
+              ]),
             )
           else
             for (var i = 0; i < posts.length; i++)

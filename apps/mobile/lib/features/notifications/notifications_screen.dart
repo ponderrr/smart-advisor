@@ -48,7 +48,19 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
           ),
       ],
       body: items.isEmpty
-          ? Center(child: Subtitle('No notifications yet.'))
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: BrandCard(
+                  child: Column(children: [
+                    Icon(Icons.notifications_none,
+                        size: 32, color: context.brandMuted),
+                    const SizedBox(height: 10),
+                    Subtitle('No notifications yet.', center: true),
+                  ]),
+                ),
+              ),
+            )
           : ListView(
               padding: const EdgeInsets.all(20),
               children: [
