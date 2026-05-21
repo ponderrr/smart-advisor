@@ -1358,6 +1358,7 @@
     },
     "sortLabel": "Sort:",
     "sortAria": "Sort recommendations",
+    "searchPlaceholder": "Search past picks",
     "sort": {
       "newest": "Newest",
       "oldest": "Oldest",
@@ -1459,6 +1460,7 @@
       "music": "Music"
     },
     "statusLabel": "Status",
+    "searchPlaceholder": "Search your library",
     "filterAll": "All",
     "status": {
       "finished": "Finished",

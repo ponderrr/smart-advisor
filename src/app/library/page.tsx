@@ -19,6 +19,7 @@ import {
   ThumbsUp,
   Trash2,
   Upload,
+  Search,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
@@ -154,6 +155,7 @@ export default function LibraryPage() {
     parseAsStringLiteral(STATUS_FILTER_VALUES).withDefault("all"),
   );
   const [view, setView] = usePersistedViewMode("list");
+  const [query, setQuery] = useState("");
   const [editTarget, setEditTarget] = useState<LibraryItem | null>(null);
 
   // Snap to top instantly when the filters change so the user doesn't get
@@ -186,12 +188,17 @@ export default function LibraryPage() {
   }, [ready]);
 
   const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
     return items.filter((item) => {
       if (mediumFilter !== "all" && item.medium !== mediumFilter) return false;
       if (statusFilter !== "all" && item.status !== statusFilter) return false;
+      if (q) {
+        const hay = `${item.title ?? ""} ${item.creator ?? ""}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
       return true;
     });
-  }, [items, mediumFilter, statusFilter]);
+  }, [items, mediumFilter, statusFilter, query]);
 
   const handleStatusChange = async (
     item: LibraryItem,
@@ -457,11 +464,27 @@ export default function LibraryPage() {
                       ]}
                     />
                   </div>
-                  <ViewToggle
-                    value={view}
-                    onChange={setView}
-                    className="shrink-0"
-                  />
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <Search
+                        size={15}
+                        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                      />
+                      <input
+                        type="search"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder={t("searchPlaceholder")}
+                        aria-label={t("searchPlaceholder")}
+                        className="w-40 rounded-xl border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:w-52 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
+                      />
+                    </div>
+                    <ViewToggle
+                      value={view}
+                      onChange={setView}
+                      className="shrink-0"
+                    />
+                  </div>
                 </div>
               </div>
 

@@ -268,6 +268,7 @@ const AccountHistoryPage = () => {
   }, [filter]);
   const [view, setView] = usePersistedViewMode("grid");
   const [sortBy, setSortBy] = useState<SortMode>("newest");
+  const [query, setQuery] = useState("");
   const [selectedRec, setSelectedRec] = useState<Recommendation | null>(null);
   const [libraryItems, setLibraryItems] = useState<LibraryItem[]>([]);
 
@@ -329,15 +330,27 @@ const AccountHistoryPage = () => {
     // The current `recommendations` belong to a previous filter — wait for
     // the reload to land instead of dedup-juddering the stale rows.
     if (loadedFilter !== filter) return [];
-    if (filter !== "favorites") return recommendations;
-    const seen = new Set<string>();
-    return recommendations.filter((rec) => {
-      const key = `${rec.type}::${(rec.title ?? "").trim().toLowerCase()}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-  }, [filter, loadedFilter, recommendations]);
+    let list = recommendations;
+    if (filter === "favorites") {
+      const seen = new Set<string>();
+      list = list.filter((rec) => {
+        const key = `${rec.type}::${(rec.title ?? "").trim().toLowerCase()}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+    const q = query.trim().toLowerCase();
+    if (q) {
+      list = list.filter((rec) => {
+        const hay = `${rec.title ?? ""} ${
+          rec.artist ?? rec.author ?? rec.director ?? ""
+        }`.toLowerCase();
+        return hay.includes(q);
+      });
+    }
+    return list;
+  }, [filter, loadedFilter, recommendations, query]);
 
   const rowCount = Math.ceil(displayed.length / colCount);
 
@@ -668,7 +681,23 @@ const AccountHistoryPage = () => {
                   ))}
                 </select>
               </div>
-              <ViewToggle value={view} onChange={setView} />
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <Search
+                    size={15}
+                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+                  <input
+                    type="search"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder={t("searchPlaceholder")}
+                    aria-label={t("searchPlaceholder")}
+                    className="w-44 rounded-xl border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:w-56 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
+                  />
+                </div>
+                <ViewToggle value={view} onChange={setView} />
+              </div>
             </div>
           </div>
 

@@ -1358,6 +1358,7 @@
     },
     "sortLabel": "Ordenar:",
     "sortAria": "Ordenar recomendaciones",
+    "searchPlaceholder": "Buscar elecciones anteriores",
     "sort": {
       "newest": "Más nuevas",
       "oldest": "Más antiguas",
@@ -1459,6 +1460,7 @@
       "music": "Música"
     },
     "statusLabel": "Estado",
+    "searchPlaceholder": "Busca en tu biblioteca",
     "filterAll": "Todos",
     "status": {
       "finished": "Terminado",
