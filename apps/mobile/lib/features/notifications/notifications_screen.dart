@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:haptic_kit/haptic_kit.dart';
 
 import '../../ui/ui.dart';
 import 'notifications_center.dart';
@@ -48,6 +49,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
 
   void _clearAll(int count) {
     if (_clearing) return;
+    Haptics.impact(HapticImpactStyle.medium);
     setState(() => _clearing = true);
     // Match the longest staggered exit: last card delay + its duration.
     final total = Duration(milliseconds: (count - 1) * 50 + 280);
@@ -128,8 +130,10 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
       key: ValueKey(n.id),
       // Swipe left→right to clear a single notification.
       direction: DismissDirection.startToEnd,
-      onDismissed: (_) =>
-          ref.read(notificationsCenterProvider.notifier).remove(n.id),
+      onDismissed: (_) {
+        Haptics.impact(HapticImpactStyle.light);
+        ref.read(notificationsCenterProvider.notifier).remove(n.id);
+      },
       background: Container(
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(horizontal: 22),

@@ -59,7 +59,14 @@ final groupQuizSessionProvider = StreamProvider.autoDispose
       )
       .subscribe();
 
+  // Realtime can miss events — the socket drops on backgrounding, and
+  // changes made while suspended aren't replayed on reconnect. A light
+  // poll keeps the session (and the live-update notification that
+  // mirrors it) self-healing within a few seconds of the app resuming.
+  final poll = Timer.periodic(const Duration(seconds: 15), (_) => push());
+
   ref.onDispose(() {
+    poll.cancel();
     c.removeChannel(channel);
     controller.close();
   });
