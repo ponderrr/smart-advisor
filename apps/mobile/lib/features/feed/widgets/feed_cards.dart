@@ -247,17 +247,11 @@ class PostCard extends ConsumerWidget {
 
     return GestureDetector(
       onTap: onOpen,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: BrandCard(
+        accent: post.community.accent,
         padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: tone.surfaceGradient),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: tone.surfaceBorder),
-        ),
         child:
             Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           SaveRail(post: post),
@@ -332,6 +326,7 @@ class PostCard extends ConsumerWidget {
             ),
           ),
         ]),
+      ),
       ),
     );
   }
