@@ -235,7 +235,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               path: '/',
               builder: (_, _) => const FeedScreen(),
               // Feed sub-pages: full-page pushes that keep the 5-tab nav
-              // (web parity — /feed/[id], /feed/u/[name], /feed/c/[community]).
+              // (web parity — /feed/[id], /feed/u/[id], /feed/c/[community]).
               // Cold deep-links here while unauthenticated already route to
               // /auth via resolveRedirect's !authenticated branch.
               routes: [
@@ -247,10 +247,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     builder: (_, s) => PostDetailScreen(
                         postId: s.pathParameters['id']!)),
                 GoRoute(
-                    path: 'feed/u/:name',
+                    path: 'feed/u/:id',
                     builder: (_, s) => UserProfileScreen(
-                        username: Uri.decodeComponent(
-                            s.pathParameters['name']!))),
+                        profileId: s.pathParameters['id']!)),
                 GoRoute(
                     path: 'feed/c/:community',
                     builder: (_, s) => CommunityScreen(

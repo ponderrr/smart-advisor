@@ -33,13 +33,14 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
     super.dispose();
   }
 
-  void _submitTopLevel() {
+  Future<void> _submitTopLevel() async {
     final text = _ctrl.text.trim();
     if (text.isEmpty) return;
-    ref
-        .read(feedProvider.notifier)
+    await ref
+        .read(feedActionsProvider)
         .addComment(widget.postId, text, parentId: null);
     _ctrl.clear();
+    if (!mounted) return;
     FocusScope.of(context).unfocus();
     showBanner('Comment added',
         type: AdaptiveSnackBarType.success,
@@ -48,8 +49,15 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final matches =
-        ref.watch(feedProvider).where((p) => p.id == widget.postId);
+    final feedAsync = ref.watch(visibleFeedProvider);
+    if (feedAsync.isLoading) {
+      return const BrandScaffold(
+        title: 'Post',
+        body: Center(child: LoaderFive('Loading')),
+      );
+    }
+    final matches = (feedAsync.value ?? const <FeedPost>[])
+        .where((p) => p.id == widget.postId);
 
     if (matches.isEmpty) return _unavailable(context);
 
@@ -97,16 +105,19 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                                 child: GestureDetector(
                                   behavior: HitTestBehavior.opaque,
                                   onTap: () => openUserProfile(
-                                      context, post.author),
+                                      context, post.authorId),
                                   child: ExcludeSemantics(
                                     child: FeedAvatar(
-                                        name: post.author, size: 28),
+                                        name: post.author,
+                                        url: post.authorAvatarUrl,
+                                        size: 28),
                                   ),
                                 ),
                               ),
                               const SizedBox(width: 8),
                               Flexible(
                                 child: AuthorTag(
+                                  authorId: post.authorId,
                                   author: post.author,
                                   trailing:
                                       ' ${post.activity.verb} · ${ago(post.ageHours)}',
@@ -119,7 +130,9 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                             const SizedBox(height: 10),
                             // "you" returns nothing (web parity).
                             FollowButton(
-                                username: post.author, tone: tone),
+                                authorId: post.authorId,
+                                authorName: post.author,
+                                tone: tone),
                             const SizedBox(height: 10),
                             Text(post.title,
                                 style: TextStyle(
@@ -280,13 +293,14 @@ class _CommentNodeState extends ConsumerState<_CommentNode> {
     super.dispose();
   }
 
-  void _submitReply() {
+  Future<void> _submitReply() async {
     final text = _draft.text.trim();
     if (text.isEmpty) return;
-    ref
-        .read(feedProvider.notifier)
+    await ref
+        .read(feedActionsProvider)
         .addComment(widget.postId, text, parentId: widget.node.id);
     _draft.clear();
+    if (!mounted) return;
     setState(() => _replying = false);
     showBanner('Reply added',
         type: AdaptiveSnackBarType.success,
@@ -296,9 +310,8 @@ class _CommentNodeState extends ConsumerState<_CommentNode> {
   @override
   Widget build(BuildContext context) {
     final node = widget.node;
-    final key = '${widget.postId}#${node.id}';
-    final vote = ref.watch(commentVotesProvider)[key] ?? 0;
-    final voteNotifier = ref.read(commentVotesProvider.notifier);
+    final vote =
+        ref.watch(commentVotesProvider).value?[node.id] ?? 0;
     final replyCount = node.replies.fold<int>(
         0, (n, r) => n + 1 + countDescendants(r));
 
@@ -351,16 +364,19 @@ class _CommentNodeState extends ConsumerState<_CommentNode> {
                     child: GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: () =>
-                          openUserProfile(context, node.author),
+                          openUserProfile(context, node.authorId),
                       child: ExcludeSemantics(
-                        child:
-                            FeedAvatar(name: node.author, size: 22),
+                        child: FeedAvatar(
+                            name: node.author,
+                            url: node.authorAvatarUrl,
+                            size: 22),
                       ),
                     ),
                   ),
                   const SizedBox(width: 7),
                   Flexible(
                     child: AuthorTag(
+                      authorId: node.authorId,
                       author: node.author,
                       bold: true,
                       style: const TextStyle(fontSize: 12),
@@ -394,7 +410,9 @@ class _CommentNodeState extends ConsumerState<_CommentNode> {
                       label: 'Upvote comment',
                       child: GestureDetector(
                         behavior: HitTestBehavior.opaque,
-                        onTap: () => voteNotifier.setVote(key, 1),
+                        onTap: () => ref
+                            .read(feedActionsProvider)
+                            .setCommentVote(node.id, vote == 1 ? 0 : 1),
                         child: SizedBox(
                           width: 28,
                           height: 28,
@@ -418,7 +436,9 @@ class _CommentNodeState extends ConsumerState<_CommentNode> {
                       label: 'Downvote comment',
                       child: GestureDetector(
                         behavior: HitTestBehavior.opaque,
-                        onTap: () => voteNotifier.setVote(key, -1),
+                        onTap: () => ref
+                            .read(feedActionsProvider)
+                            .setCommentVote(node.id, vote == -1 ? 0 : -1),
                         child: SizedBox(
                           width: 28,
                           height: 28,
@@ -432,6 +452,7 @@ class _CommentNodeState extends ConsumerState<_CommentNode> {
                   ]),
                   // Block menu lives at the very end of the row.
                   BlockMenuButton(
+                      authorId: node.authorId,
                       author: node.author,
                       iconColor: context.brandMuted,
                       iconSize: 16),

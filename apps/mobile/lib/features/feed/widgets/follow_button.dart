@@ -1,49 +1,56 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/supabase/supabase_providers.dart';
 import '../../../core/ui_messenger.dart';
 import '../../../ui/ui.dart';
 import '../feed_providers.dart';
 import '../models/feed_models.dart';
 
 /// Animated Follow / Following toggle. Color + icon + label morph with a
-/// scale-fade switch and an animated background; in-memory only.
-///
-/// Parity with the web `follow-button.tsx`: you can't follow yourself
-/// (`author == 'you'` renders nothing), and [showCount] appends the
-/// deterministic mock follower count after the label.
+/// scale-fade switch and an animated background. Backed by feed_follows;
+/// you can't follow yourself.
 class FollowButton extends ConsumerWidget {
   const FollowButton({
     super.key,
-    required this.username,
+    required this.authorId,
+    required this.authorName,
     required this.tone,
     this.showCount = false,
   });
 
-  final String username;
+  final String authorId;
+  final String authorName;
   final ContentAccentTone tone;
   final bool showCount;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (username == 'you') return const SizedBox.shrink();
+    final me = ref.watch(supabaseClientProvider).auth.currentUser?.id;
+    if (authorId.isEmpty || authorId == me) return const SizedBox.shrink();
 
-    final following = ref.watch(followingProvider).contains(username);
+    final following =
+        ref.watch(followingProvider).value?.contains(authorId) ?? false;
     final fg = following ? tone.iconCircleFg : Colors.white;
-    final count = mockFollowerCount(username) + (following ? 1 : 0);
+    final baseCount = showCount
+        ? (ref.watch(followerCountProvider(authorId)).value ?? 0)
+        : 0;
+    final count = baseCount + (following ? 1 : 0);
 
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
         final nowFollowing =
-            ref.read(followingProvider.notifier).toggle(username);
+            await ref.read(feedActionsProvider).toggleFollow(authorId);
         showBanner(
-          nowFollowing ? 'Following u/$username' : 'Unfollowed u/$username',
+          nowFollowing
+              ? 'Following $authorName'
+              : 'Unfollowed $authorName',
           type: nowFollowing
               ? AdaptiveSnackBarType.success
               : AdaptiveSnackBarType.info,
           action: 'Undo',
           onAction: () =>
-              ref.read(followingProvider.notifier).toggle(username),
+              ref.read(feedActionsProvider).toggleFollow(authorId),
         );
       },
       child: AnimatedContainer(

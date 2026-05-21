@@ -34,7 +34,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
         filtered = filtered
             .where((p) => p.activity != FeedActivity.group)
             .where((p) =>
-                following.isEmpty || following.contains(p.author))
+                following.isEmpty || following.contains(p.authorId))
             .toList()
           ..sort((a, b) => a.ageHours.compareTo(b.ageHours));
       case FeedScope.discover:
@@ -56,8 +56,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     final prefs = ref.watch(feedPrefsProvider);
     // visibleFeedProvider already filters out posts + comments authored
     // by blocked users; we re-apply scope/community/follow filters here.
-    final posts = _visible(
-        ref.watch(visibleFeedProvider), ref.watch(followingProvider), prefs);
+    final feedAsync = ref.watch(visibleFeedProvider);
+    final following =
+        ref.watch(followingProvider).value?.toSet() ?? <String>{};
     final visibility = ref.watch(feedVisibilityProvider);
     final fabColor = prefs.community == null
         ? Tw.indigo500
@@ -96,22 +97,42 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
             ),
           ]),
           const SizedBox(height: 14),
-          if (posts.isEmpty)
-            BrandCard(
-              child: Column(children: [
-                Icon(Icons.forum_outlined,
-                    size: 32, color: context.brandMuted),
-                const SizedBox(height: 10),
-                Subtitle('Nothing here yet — be the first to post.',
-                    center: true),
-              ]),
-            )
-          else
-            for (var i = 0; i < posts.length; i++)
-              _postFor(posts[i], prefs.view)
-                  .animate()
-                  .fadeIn(delay: (i * 60).ms, duration: 280.ms)
-                  .slideY(begin: 0.05, curve: Curves.easeOut),
+          ...feedAsync.when(
+            loading: () => [
+              const Padding(
+                padding: EdgeInsets.all(40),
+                child: Center(child: LoaderFive('Loading feed')),
+              ),
+            ],
+            error: (_, _) => [
+              const MessageBanner.error(
+                  'We couldn’t load the feed. Please try again.'),
+            ],
+            data: (all) {
+              final posts = _visible(all, following, prefs);
+              if (posts.isEmpty) {
+                return [
+                  BrandCard(
+                    child: Column(children: [
+                      Icon(Icons.forum_outlined,
+                          size: 32, color: context.brandMuted),
+                      const SizedBox(height: 10),
+                      Subtitle(
+                          'Nothing here yet — be the first to post.',
+                          center: true),
+                    ]),
+                  ),
+                ];
+              }
+              return [
+                for (var i = 0; i < posts.length; i++)
+                  _postFor(posts[i], prefs.view)
+                      .animate()
+                      .fadeIn(delay: (i * 60).ms, duration: 280.ms)
+                      .slideY(begin: 0.05, curve: Curves.easeOut),
+              ];
+            },
+          ),
         ],
           ),
           Positioned(

@@ -143,7 +143,13 @@ abstract class FeedComment with _$FeedComment {
 
   const factory FeedComment({
     required String id,
+
+    /// Author's profile id (uuid).
+    @JsonKey(name: 'author_id') required String authorId,
+
+    /// Display name — `profiles.name`, joined at fetch time.
     required String author,
+    @JsonKey(name: 'author_avatar_url') String? authorAvatarUrl,
     required String body,
     @JsonKey(name: 'age_hours') required int ageHours,
     @Default(0) int score,
@@ -163,7 +169,9 @@ class FeedCommentNode {
   final List<FeedCommentNode> replies;
 
   String get id => comment.id;
+  String get authorId => comment.authorId;
   String get author => comment.author;
+  String? get authorAvatarUrl => comment.authorAvatarUrl;
   String get body => comment.body;
   int get ageHours => comment.ageHours;
   int get score => comment.score;
@@ -177,7 +185,13 @@ abstract class FeedPost with _$FeedPost {
   const factory FeedPost({
     required String id,
     required FeedCommunity community,
+
+    /// Author's profile id (uuid).
+    @JsonKey(name: 'author_id') required String authorId,
+
+    /// Display name — `profiles.name`, joined at fetch time.
     required String author,
+    @JsonKey(name: 'author_avatar_url') String? authorAvatarUrl,
     required String title,
     @JsonKey(name: 'age_hours') required int ageHours,
     @Default(FeedActivity.shared) FeedActivity activity,

@@ -56,19 +56,26 @@ class _ComposerState extends ConsumerState<Composer> {
 
   bool get _valid => _title.text.trim().isNotEmpty;
 
-  void _post() {
+  Future<void> _post() async {
     if (!_valid) return;
     final isPrivate = ref.read(feedVisibilityProvider) ==
         FeedVisibility.private;
-    ref.read(feedProvider.notifier).addPost(
-          _community,
-          _title.text.trim(),
-          _body.text,
-          activity: _activity,
-          posterUrl: _cover.text,
-          creator: _creator.text,
-          year: int.tryParse(_year.text.trim()),
-        );
+    try {
+      await ref.read(feedActionsProvider).createPost(
+            community: _community,
+            title: _title.text.trim(),
+            body: _body.text,
+            activity: _activity,
+            posterUrl: _cover.text,
+            creator: _creator.text,
+            year: int.tryParse(_year.text.trim()),
+          );
+    } catch (_) {
+      showBanner('Couldn\'t share your pick — please try again.',
+          type: AdaptiveSnackBarType.error);
+      return;
+    }
+    if (!mounted) return;
     Navigator.of(context).pop();
     showBanner(
         isPrivate

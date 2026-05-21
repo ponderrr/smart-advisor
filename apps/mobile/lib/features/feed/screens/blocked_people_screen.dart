@@ -15,55 +15,71 @@ class BlockedPeopleScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final blocked = ref.watch(blockedProvider);
-    final handles = blocked.toList()..sort();
+    final blocked = ref.watch(blockedProfilesProvider);
 
     return BrandScaffold(
       title: 'Blocked people',
       body: ResponsiveCenter(
         maxWidth: 560,
-        child: handles.isEmpty
-            ? Padding(
+        child: blocked.when(
+          loading: () =>
+              const Center(child: LoaderFive('Loading')),
+          error: (_, _) => const Padding(
+            padding: EdgeInsets.all(20),
+            child: MessageBanner.error(
+                'Couldn’t load your blocked list.'),
+          ),
+          data: (people) {
+            final sorted = [...people]
+              ..sort((a, b) => a.name.compareTo(b.name));
+            if (sorted.isEmpty) {
+              return Padding(
                 padding: const EdgeInsets.all(28),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.block,
-                        size: 48, color: context.colors.mutedForeground),
+                        size: 48,
+                        color: context.colors.mutedForeground),
                     const SizedBox(height: 12),
                     const BrandHeading('Nobody blocked', size: 22),
                     const SizedBox(height: 6),
                     const Subtitle(
-                      'When you block someone from the feed, they\'ll show '
-                      'up here so you can undo it.',
+                      'When you block someone from the feed, they\'ll '
+                      'show up here so you can undo it.',
                       center: true,
                     ),
                   ],
                 ),
-              )
-            : ListView.separated(
-                padding: const EdgeInsets.all(20),
-                itemCount: handles.length,
-                separatorBuilder: (_, _) => const SizedBox(height: 10),
-                itemBuilder: (context, i) {
-                  final h = handles[i];
-                  return _BlockedRow(
-                    handle: h,
-                    onUnblock: () {
-                      ref.read(blockedProvider.notifier).unblock(h);
-                      showBanner('@$h unblocked.');
-                    },
-                  );
-                },
-              ),
+              );
+            }
+            return ListView.separated(
+              padding: const EdgeInsets.all(20),
+              itemCount: sorted.length,
+              separatorBuilder: (_, _) => const SizedBox(height: 10),
+              itemBuilder: (context, i) {
+                final person = sorted[i];
+                return _BlockedRow(
+                  name: person.name,
+                  onUnblock: () {
+                    ref
+                        .read(feedActionsProvider)
+                        .unblock(person.id);
+                    showBanner('@${person.name} unblocked.');
+                  },
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
 }
 
 class _BlockedRow extends StatelessWidget {
-  const _BlockedRow({required this.handle, required this.onUnblock});
-  final String handle;
+  const _BlockedRow({required this.name, required this.onUnblock});
+  final String name;
   final VoidCallback onUnblock;
 
   @override
@@ -73,11 +89,11 @@ class _BlockedRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       child: Row(
         children: [
-          FeedAvatar(name: handle, size: 36),
+          FeedAvatar(name: name, size: 36),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              '@$handle',
+              '@$name',
               style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,

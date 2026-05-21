@@ -31,8 +31,8 @@ String compactCount(int n) {
 void openPost(BuildContext context, String id) =>
     context.push('/feed/$id');
 
-void openUserProfile(BuildContext context, String username) =>
-    context.push('/feed/u/${Uri.encodeComponent(username)}');
+void openUserProfile(BuildContext context, String profileId) =>
+    context.push('/feed/u/$profileId');
 
 void openCommunity(BuildContext context, FeedCommunity community) =>
     context.push('/feed/c/${community.wire}');
@@ -81,11 +81,13 @@ class CommunityTag extends StatelessWidget {
 class AuthorTag extends StatelessWidget {
   const AuthorTag({
     super.key,
+    required this.authorId,
     required this.author,
     this.trailing = '',
     this.style,
     this.bold = false,
   });
+  final String authorId;
   final String author;
   final String trailing;
   final TextStyle? style;
@@ -97,11 +99,11 @@ class AuthorTag extends StatelessWidget {
         style ?? TextStyle(fontSize: 11, color: context.brandMuted);
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () => openUserProfile(context, author),
+      onTap: () => openUserProfile(context, authorId),
       child: Text.rich(
         TextSpan(children: [
           TextSpan(
-              text: 'u/$author',
+              text: author,
               style: base.copyWith(
                   fontWeight: bold ? FontWeight.w800 : FontWeight.w600,
                   color: context.brandInk)),
@@ -146,7 +148,8 @@ class SaveRail extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final saved = ref.watch(savedProvider).contains(post.id);
+    final saved =
+        ref.watch(savedProvider).value?.contains(post.id) ?? false;
     final tone =
         contentAccent(post.community.accent, Theme.of(context).brightness);
     final saveColor = saved ? tone.dot : context.brandMuted;
@@ -160,9 +163,9 @@ class SaveRail extends ConsumerWidget {
               : 'Save “${post.title}” to library',
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: () {
+            onTap: () async {
               final nowSaved =
-                  ref.read(savedProvider.notifier).toggle(post.id);
+                  await ref.read(feedActionsProvider).toggleSave(post.id);
               showBanner(
                 nowSaved
                     ? '“${post.title}” saved to your library'
@@ -172,7 +175,7 @@ class SaveRail extends ConsumerWidget {
                     : AdaptiveSnackBarType.info,
                 action: 'Undo',
                 onAction: () =>
-                    ref.read(savedProvider.notifier).toggle(post.id),
+                    ref.read(feedActionsProvider).toggleSave(post.id),
               );
             },
             child: Column(
@@ -265,7 +268,12 @@ class PostCard extends ConsumerWidget {
                   const Spacer(),
                   TasteBadge(match: post.tasteMatch, tone: tone),
                   const SizedBox(width: 4),
-                  BlockMenuButton(author: post.author, iconColor: tone.text),
+                  BlockMenuButton(
+                      authorId: post.authorId,
+                      author: post.author,
+                      postId: post.id,
+                      postTitle: post.title,
+                      iconColor: tone.text),
                 ]),
                 const SizedBox(height: 8),
                 Row(children: [
@@ -273,6 +281,7 @@ class PostCard extends ConsumerWidget {
                   const SizedBox(width: 5),
                   Flexible(
                     child: AuthorTag(
+                      authorId: post.authorId,
                       author: post.author,
                       trailing:
                           ' ${post.activity.verb} · ${ago(post.ageHours)}',
@@ -457,6 +466,7 @@ class CompactPostRow extends StatelessWidget {
                           color: tone.text)),
                   Flexible(
                     child: AuthorTag(
+                      authorId: post.authorId,
                       author: post.author,
                       trailing:
                           '  ${post.activity.verb}  ·  ${ago(post.ageHours)}',
@@ -490,7 +500,12 @@ class CompactPostRow extends StatelessWidget {
             ],
           ),
           BlockMenuButton(
-              author: post.author, iconColor: tone.text, iconSize: 16),
+              authorId: post.authorId,
+              author: post.author,
+              postId: post.id,
+              postTitle: post.title,
+              iconColor: tone.text,
+              iconSize: 16),
         ]),
       ),
     );
@@ -566,7 +581,10 @@ class MediaPostCard extends StatelessWidget {
                   right: 4,
                   top: 4,
                   child: BlockMenuButton(
+                      authorId: post.authorId,
                       author: post.author,
+                      postId: post.id,
+                      postTitle: post.title,
                       iconColor: Colors.white,
                       iconSize: 20),
                 ),
@@ -608,6 +626,7 @@ class MediaPostCard extends StatelessWidget {
                 const Spacer(),
                 Flexible(
                   child: AuthorTag(
+                    authorId: post.authorId,
                     author: post.author,
                     trailing:
                         ' ${post.activity.verb} · ${ago(post.ageHours)}',

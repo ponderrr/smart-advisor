@@ -8,137 +8,164 @@ import '../../core/supabase/supabase_providers.dart';
 import 'models/feed_models.dart';
 import 'services/feed_service.dart';
 
-/// Feed data seam. Swap [InMemoryFeedService] here when a backend lands.
-final feedServiceProvider =
-    Provider<FeedService>((ref) => const InMemoryFeedService());
+/// Supabase-backed feed data layer.
+final feedServiceProvider = Provider<FeedService>(
+    (ref) => FeedService(ref.watch(supabaseClientProvider)));
 
 // ---------------------------------------------------------------------------
-// In-memory feed state (mirrors web zustand store; no persistence)
+// Feed data — backend-backed (feed_posts / comments / follows / blocks / …)
 // ---------------------------------------------------------------------------
 
-final feedProvider =
-    NotifierProvider<FeedNotifier, List<FeedPost>>(FeedNotifier.new);
+/// The whole feed, newest first. Re-fetched on invalidation after a write.
+final feedProvider = FutureProvider.autoDispose<List<FeedPost>>(
+    (ref) => ref.watch(feedServiceProvider).fetchFeed());
 
-class FeedNotifier extends Notifier<List<FeedPost>> {
-  FeedService get _svc => ref.read(feedServiceProvider);
+/// Profile ids the current user follows.
+final followingProvider = FutureProvider.autoDispose<List<String>>(
+    (ref) => ref.watch(feedServiceProvider).fetchFollowing());
 
-  @override
-  List<FeedPost> build() => _svc.seed();
+/// Profile ids the current user has blocked.
+final blockedProvider = FutureProvider.autoDispose<List<String>>(
+    (ref) => ref.watch(feedServiceProvider).fetchBlocked());
 
-  void setVote(String id, int dir) =>
-      state = _svc.setVote(state, id, dir);
+/// Blocked profiles with display names — for the Settings list.
+final blockedProfilesProvider =
+    FutureProvider.autoDispose<List<({String id, String name})>>(
+        (ref) => ref.watch(feedServiceProvider).fetchBlockedProfiles());
 
-  void addComment(String postId, String body, {String? parentId}) =>
-      state = _svc.addComment(state, postId, body, parentId: parentId);
+/// Post ids the current user has saved.
+final savedProvider = FutureProvider.autoDispose<List<String>>(
+    (ref) => ref.watch(feedServiceProvider).fetchSaved());
 
-  void addPost(
-    FeedCommunity community,
-    String title,
-    String? body, {
+/// The current user's own comment votes → { commentId: -1 | 1 }.
+final commentVotesProvider = FutureProvider.autoDispose<Map<String, int>>(
+    (ref) => ref.watch(feedServiceProvider).fetchMyCommentVotes());
+
+/// One profile's public display data.
+final feedProfileProvider = FutureProvider.autoDispose
+    .family<({String id, String name, String? avatarUrl})?, String>(
+        (ref, id) => ref.watch(feedServiceProvider).fetchProfile(id));
+
+/// How many profiles follow a given profile.
+final followerCountProvider = FutureProvider.autoDispose
+    .family<int, String>(
+        (ref, id) => ref.watch(feedServiceProvider).fetchFollowerCount(id));
+
+/// Posts authored by a given profile.
+final userPostsProvider = FutureProvider.autoDispose
+    .family<List<FeedPost>, String>(
+        (ref, id) => ref.watch(feedServiceProvider).fetchUserPosts(id));
+
+/// The feed with blocked authors filtered out — posts AND comments authored
+/// by a blocked profile are dropped. Use this everywhere a user-facing feed
+/// list is rendered.
+final visibleFeedProvider = Provider.autoDispose<AsyncValue<List<FeedPost>>>(
+    (ref) {
+  final feed = ref.watch(feedProvider);
+  final blocked = ref.watch(blockedProvider).value ?? const <String>[];
+  return feed.whenData((posts) {
+    if (blocked.isEmpty) return posts;
+    final set = blocked.toSet();
+    return [
+      for (final p in posts)
+        if (!set.contains(p.authorId))
+          p.copyWith(comments: [
+            for (final c in p.comments)
+              if (!set.contains(c.authorId)) c,
+          ]),
+    ];
+  });
+});
+
+/// Built reply tree for [postId] under the current [CommentSort] pref.
+final commentTreeProvider =
+    Provider.autoDispose.family<List<FeedCommentNode>, String>((ref, postId) {
+  final sort = ref.watch(feedPrefsProvider).commentSort;
+  final posts = ref.watch(visibleFeedProvider).value ?? const <FeedPost>[];
+  final post = posts.where((p) => p.id == postId);
+  if (post.isEmpty) return const [];
+  return buildCommentTree(post.first.comments, sort);
+});
+
+/// Feed write actions — each performs the Supabase mutation then invalidates
+/// the affected query providers so watchers re-fetch.
+class FeedActions {
+  FeedActions(this._ref);
+  final Ref _ref;
+  FeedService get _svc => _ref.read(feedServiceProvider);
+
+  Future<void> createPost({
+    required FeedCommunity community,
+    required String title,
+    String? body,
     FeedActivity activity = FeedActivity.shared,
     String? posterUrl,
     String? creator,
     int? year,
-  }) =>
-      state = _svc.addPost(
-        state,
-        community: community,
-        title: title,
-        body: body,
-        activity: activity,
-        posterUrl: posterUrl,
-        creator: creator,
-        year: year,
-      );
-}
+  }) async {
+    await _svc.createPost(
+      community: community,
+      title: title,
+      body: body,
+      activity: activity,
+      posterUrl: posterUrl,
+      creator: creator,
+      year: year,
+    );
+    _ref.invalidate(feedProvider);
+  }
 
-/// In-memory set of followed usernames (prototype only).
-final followingProvider =
-    NotifierProvider<FollowingNotifier, Set<String>>(FollowingNotifier.new);
+  Future<void> deletePost(String postId) async {
+    await _svc.deletePost(postId);
+    _ref.invalidate(feedProvider);
+    _ref.invalidate(userPostsProvider);
+  }
 
-class FollowingNotifier extends Notifier<Set<String>> {
-  @override
-  Set<String> build() => <String>{};
+  Future<void> addComment(String postId, String body,
+      {String? parentId}) async {
+    await _svc.createComment(postId, body, parentId);
+    _ref.invalidate(feedProvider);
+  }
 
-  /// Returns whether [username] is now followed (for the undo banner).
-  bool toggle(String username) {
-    final (next, nowFollowing) =
-        ref.read(feedServiceProvider).toggleIn(state, username);
-    state = next;
-    return nowFollowing;
+  Future<void> setCommentVote(String commentId, int dir) async {
+    await _svc.setCommentVote(commentId, dir);
+    _ref.invalidate(feedProvider);
+    _ref.invalidate(commentVotesProvider);
+  }
+
+  /// Returns the new following state (for undo banners).
+  Future<bool> toggleFollow(String followeeId) async {
+    final now = await _svc.toggleFollow(followeeId);
+    _ref.invalidate(followingProvider);
+    _ref.invalidate(followerCountProvider);
+    return now;
+  }
+
+  /// Returns the new saved state.
+  Future<bool> toggleSave(String postId) async {
+    final now = await _svc.toggleSave(postId);
+    _ref.invalidate(savedProvider);
+    return now;
+  }
+
+  Future<void> block(String blockedId) async {
+    await _svc.blockUser(blockedId);
+    _ref.invalidate(blockedProvider);
+    _ref.invalidate(blockedProfilesProvider);
+    _ref.invalidate(followingProvider);
+  }
+
+  Future<void> unblock(String blockedId) async {
+    await _svc.unblockUser(blockedId);
+    _ref.invalidate(blockedProvider);
+    _ref.invalidate(blockedProfilesProvider);
   }
 }
 
-/// In-memory set of blocked usernames (prototype only). Blocked authors'
-/// posts and comments are filtered out of the feed; blocking also
-/// unfollows them so the relationship is fully severed.
-final blockedProvider =
-    NotifierProvider<BlockedNotifier, Set<String>>(BlockedNotifier.new);
+final feedActionsProvider = Provider<FeedActions>(FeedActions.new);
 
-class BlockedNotifier extends Notifier<Set<String>> {
-  @override
-  Set<String> build() => <String>{};
-
-  /// Blocks [username]. Idempotent. Also drops the follow relationship
-  /// so the user doesn't end up muted-but-followed.
-  bool block(String username) {
-    final handle = username.trim().toLowerCase();
-    if (handle.isEmpty || handle == 'you') return false;
-    if (state.contains(handle)) return false;
-    state = {...state, handle};
-    final following = ref.read(followingProvider);
-    if (following.contains(username) || following.contains(handle)) {
-      ref.read(followingProvider.notifier).toggle(username);
-    }
-    return true;
-  }
-
-  bool unblock(String username) {
-    final handle = username.trim().toLowerCase();
-    if (!state.contains(handle)) return false;
-    state = {...state}..remove(handle);
-    return true;
-  }
-
-  bool isBlocked(String username) =>
-      state.contains(username.trim().toLowerCase());
-}
-
-/// The feed with blocked authors filtered out — comments authored by a
-/// blocked user are also stripped (recursively, so a blocked user's
-/// nested replies vanish too). Use this everywhere a user-facing feed
-/// list is rendered; [feedProvider] stays the canonical store.
-final visibleFeedProvider = Provider<List<FeedPost>>((ref) {
-  final posts = ref.watch(feedProvider);
-  final blocked = ref.watch(blockedProvider);
-  if (blocked.isEmpty) return posts;
-  bool isBlocked(String author) =>
-      blocked.contains(author.trim().toLowerCase());
-  return [
-    for (final p in posts)
-      if (!isBlocked(p.author))
-        p.copyWith(
-            comments: [
-              for (final c in p.comments)
-                if (!isBlocked(c.author)) c,
-            ]),
-  ];
-});
-
-/// In-memory per-comment vote, keyed `"<postId>#<commentId>"` → -1/0/1.
-final commentVotesProvider =
-    NotifierProvider<CommentVotesNotifier, Map<String, int>>(
-        CommentVotesNotifier.new);
-
-class CommentVotesNotifier extends Notifier<Map<String, int>> {
-  @override
-  Map<String, int> build() => <String, int>{};
-
-  void setVote(String key, int dir) => state =
-      ref.read(feedServiceProvider).setCommentVote(state, key, dir);
-}
-
-/// In-memory set of joined communities (prototype only).
+/// In-memory set of joined communities — a per-session prototype toggle
+/// (communities are just content lanes; there's no server table for it).
 final joinedCommunitiesProvider =
     NotifierProvider<JoinedCommunitiesNotifier, Set<FeedCommunity>>(
         JoinedCommunitiesNotifier.new);
@@ -148,38 +175,17 @@ class JoinedCommunitiesNotifier extends Notifier<Set<FeedCommunity>> {
   Set<FeedCommunity> build() => <FeedCommunity>{};
 
   bool toggle(FeedCommunity c) {
-    final (next, nowJoined) =
-        ref.read(feedServiceProvider).toggleIn(state, c);
+    final next = {...state};
+    final nowJoined = !next.contains(c);
+    if (nowJoined) {
+      next.add(c);
+    } else {
+      next.remove(c);
+    }
     state = next;
     return nowJoined;
   }
 }
-
-/// Picks the user saved to their library from the feed (in-memory).
-final savedProvider =
-    NotifierProvider<SavedNotifier, Set<String>>(SavedNotifier.new);
-
-class SavedNotifier extends Notifier<Set<String>> {
-  @override
-  Set<String> build() => <String>{};
-
-  bool toggle(String postId) {
-    final (next, nowSaved) =
-        ref.read(feedServiceProvider).toggleIn(state, postId);
-    state = next;
-    return nowSaved;
-  }
-}
-
-/// Built reply tree for [postId] under the current [CommentSort] pref.
-/// Faithful port of the web `useMemo(() => buildCommentTree(...))`.
-final commentTreeProvider =
-    Provider.family<List<FeedCommentNode>, String>((ref, postId) {
-  final sort = ref.watch(feedPrefsProvider).commentSort;
-  final post = ref.watch(feedProvider).where((p) => p.id == postId);
-  if (post.isEmpty) return const [];
-  return buildCommentTree(post.first.comments, sort);
-});
 
 // ---------------------------------------------------------------------------
 // Per-device feed visibility — public/private (web use-feed-visibility.ts)

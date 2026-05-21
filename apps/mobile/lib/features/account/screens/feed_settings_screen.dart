@@ -38,7 +38,8 @@ class FeedSettingsScreen extends ConsumerWidget {
                     onTap: () => context.push('/feed/people')),
                 settingsDivider(context),
                 Consumer(builder: (context, ref, _) {
-                  final blocked = ref.watch(blockedProvider);
+                  final blocked =
+                      ref.watch(blockedProvider).value ?? const <String>[];
                   return settingsTile(context, Icons.block, 'Blocked people',
                       subtitle: blocked.isEmpty
                           ? 'Nobody blocked'

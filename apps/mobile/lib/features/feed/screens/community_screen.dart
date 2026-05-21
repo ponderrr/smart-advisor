@@ -38,8 +38,8 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     final community = widget.community;
     final tone =
         contentAccent(community.accent, Theme.of(context).brightness);
-    final posts = ref
-        .watch(feedProvider)
+    final feedAsync = ref.watch(feedProvider);
+    final posts = (feedAsync.value ?? const <FeedPost>[])
         .where((p) => p.community == community)
         .toList();
     switch (_sort) {
@@ -132,7 +132,12 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
           const SizedBox(height: 20),
           _sortSegmented(),
           const SizedBox(height: 14),
-          if (posts.isEmpty)
+          if (feedAsync.isLoading)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: Center(child: LoaderFive('Loading')),
+            )
+          else if (posts.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 24),
               child: Subtitle('No posts yet — be the first.',

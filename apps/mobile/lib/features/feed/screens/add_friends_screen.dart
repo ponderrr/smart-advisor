@@ -2,17 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/ui_messenger.dart';
+import '../../../core/supabase/supabase_providers.dart';
 import '../../../ui/ui.dart';
 import '../feed_providers.dart';
 import '../widgets/feed_avatar.dart';
 import '../widgets/follow_button.dart';
 
-/// Discover-people / add-friend page. There's no backend — "suggested"
-/// people are the distinct post authors from the in-memory feed, minus
-/// yourself and anyone you already follow. Searching for a handle that
-/// isn't in the list offers an "Add @handle" affordance that follows that
-/// arbitrary username, consistent with the prototype mock model.
+/// A suggested person derived from the feed.
+typedef _Person = ({String id, String name, String? avatarUrl});
+
+/// Discover-people / add-friend page. "Suggested" people are the distinct
+/// authors who've posted in the feed, minus yourself and anyone you
+/// already follow. Search filters the list by display name.
 class AddFriendsScreen extends ConsumerStatefulWidget {
   const AddFriendsScreen({super.key});
 
@@ -31,32 +32,17 @@ class _AddFriendsScreenState extends ConsumerState<AddFriendsScreen> {
     super.dispose();
   }
 
-  ContentAccentName _accentFor(String username) {
+  ContentAccentName _accentFor(String id) {
     const names = ContentAccentName.values;
-    return names[username.hashCode.abs() % names.length];
+    return names[id.hashCode.abs() % names.length];
   }
 
   @override
   Widget build(BuildContext context) {
-    final following = ref.watch(followingProvider);
-    final authors = <String>{
-      for (final p in ref.watch(feedProvider)) p.author,
-    }..removeWhere((a) => a == 'you' || following.contains(a));
-
-    final q = _query.trim().toLowerCase();
-    final suggested = (q.isEmpty
-            ? authors.toList()
-            : authors
-                .where((a) => a.toLowerCase().contains(q))
-                .toList())
-      ..sort();
-
-    // Offer to follow an arbitrary handle when the typed name doesn't
-    // match any suggestion (and isn't yourself / already followed).
-    final showAddArbitrary = q.isNotEmpty &&
-        q != 'you' &&
-        !following.contains(q) &&
-        !authors.any((a) => a.toLowerCase() == q);
+    final me = ref.watch(supabaseClientProvider).auth.currentUser?.id;
+    final following =
+        ref.watch(followingProvider).value?.toSet() ?? <String>{};
+    final feed = ref.watch(feedProvider);
 
     return BrandScaffold(
       title: 'Add friends',
@@ -65,70 +51,81 @@ class _AddFriendsScreenState extends ConsumerState<AddFriendsScreen> {
         children: [
           AdaptiveTextField(
             controller: _search,
-            placeholder: 'Search by username',
+            placeholder: 'Search by name',
             onChanged: (v) => setState(() => _query = v),
           ),
           const SizedBox(height: 6),
-          Subtitle('People from your feed — this prototype follows are '
-              'in-memory only.'),
+          Subtitle("People who've shared picks in your feed."),
           const SizedBox(height: 16),
-          if (showAddArbitrary) ...[
-            _AddHandleRow(
-              handle: q,
-              onAdd: () {
-                final nowFollowing = ref
-                    .read(followingProvider.notifier)
-                    .toggle(q);
-                showBanner(
-                  nowFollowing
-                      ? 'Following u/$q'
-                      : 'Unfollowed u/$q',
-                  type: nowFollowing
-                      ? AdaptiveSnackBarType.success
-                      : AdaptiveSnackBarType.info,
-                );
-                setState(() {
-                  _search.clear();
-                  _query = '';
-                });
-              },
-            ),
-            const SizedBox(height: 16),
-          ],
           Align(
               alignment: Alignment.centerLeft,
               child: Eyebrow('Suggested')),
           const SizedBox(height: 10),
-          if (suggested.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 24),
-              child: Subtitle(
-                  q.isEmpty
-                      ? 'You already follow everyone in your feed.'
-                      : 'No one here by that name.',
-                  center: true),
-            )
-          else
-            for (final username in suggested)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: _PersonRow(
-                  username: username,
-                  tone: contentAccent(_accentFor(username),
-                      Theme.of(context).brightness),
-                ),
+          ...feed.when(
+            loading: () => [
+              const Padding(
+                padding: EdgeInsets.all(24),
+                child: Center(child: LoaderFive('Loading')),
               ),
+            ],
+            error: (_, _) => [
+              const MessageBanner.error('Couldn’t load suggestions.'),
+            ],
+            data: (posts) {
+              final seen = <String, _Person>{};
+              for (final p in posts) {
+                if (p.authorId.isNotEmpty &&
+                    p.authorId != me &&
+                    !following.contains(p.authorId) &&
+                    !seen.containsKey(p.authorId)) {
+                  seen[p.authorId] = (
+                    id: p.authorId,
+                    name: p.author,
+                    avatarUrl: p.authorAvatarUrl,
+                  );
+                }
+              }
+              final q = _query.trim().toLowerCase();
+              final suggested = seen.values
+                  .where((p) =>
+                      q.isEmpty || p.name.toLowerCase().contains(q))
+                  .toList()
+                ..sort((a, b) => a.name.compareTo(b.name));
+              if (suggested.isEmpty) {
+                return [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    child: Subtitle(
+                        q.isEmpty
+                            ? 'Nobody in your feed yet.'
+                            : 'No matches for that name.',
+                        center: true),
+                  ),
+                ];
+              }
+              return [
+                for (final person in suggested)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: _PersonRow(
+                      person: person,
+                      tone: contentAccent(_accentFor(person.id),
+                          Theme.of(context).brightness),
+                    ),
+                  ),
+              ];
+            },
+          ),
         ],
       ),
     );
   }
 }
 
-/// A suggested person: avatar + handle + the shared [FollowButton]
-/// (already toggles followingProvider and guards "you").
+/// A suggested person: avatar + name + the shared [FollowButton].
 class _PersonRow extends StatelessWidget {
-  const _PersonRow({required this.username, required this.tone});
-  final String username;
+  const _PersonRow({required this.person, required this.tone});
+  final _Person person;
   final ContentAccentTone tone;
 
   @override
@@ -138,12 +135,13 @@ class _PersonRow extends StatelessWidget {
       child: Row(children: [
         Semantics(
           button: true,
-          label: "Open u/$username's profile",
+          label: "Open ${person.name}'s profile",
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: () => context.push('/feed/u/$username'),
+            onTap: () => context.push('/feed/u/${person.id}'),
             child: ExcludeSemantics(
-              child: FeedAvatar(name: username, size: 44),
+              child: FeedAvatar(
+                  name: person.name, url: person.avatarUrl, size: 44),
             ),
           ),
         ),
@@ -151,8 +149,8 @@ class _PersonRow extends StatelessWidget {
         Expanded(
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: () => context.push('/feed/u/$username'),
-            child: Text('u/$username',
+            onTap: () => context.push('/feed/u/${person.id}'),
+            child: Text(person.name,
                 style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
@@ -162,65 +160,10 @@ class _PersonRow extends StatelessWidget {
         const SizedBox(width: 12),
         SizedBox(
           width: 132,
-          child: FollowButton(username: username, tone: tone),
+          child: FollowButton(
+              authorId: person.id, authorName: person.name, tone: tone),
         ),
       ]),
-    );
-  }
-}
-
-/// "Add @handle" affordance for an arbitrary handle not in the feed.
-class _AddHandleRow extends StatelessWidget {
-  const _AddHandleRow({required this.handle, required this.onAdd});
-  final String handle;
-  final VoidCallback onAdd;
-
-  @override
-  Widget build(BuildContext context) {
-    final tone = contentAccent(
-        ContentAccentName.violet, Theme.of(context).brightness);
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onAdd,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: tone.surfaceGradient),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: tone.surfaceBorder),
-        ),
-        child: Row(children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-                color: tone.iconCircleBg, shape: BoxShape.circle),
-            child: Icon(Icons.person_add_alt_1,
-                size: 19, color: tone.iconCircleFg),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Add @$handle',
-                    style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        color: context.brandInk)),
-                const SizedBox(height: 2),
-                Text('Follow this handle',
-                    style: TextStyle(
-                        fontSize: 12, color: tone.text)),
-              ],
-            ),
-          ),
-          Icon(Icons.chevron_right, color: tone.text),
-        ]),
-      ),
     );
   }
 }

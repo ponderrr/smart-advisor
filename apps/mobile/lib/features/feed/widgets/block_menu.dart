@@ -1,33 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/supabase/supabase_providers.dart';
 import '../../../core/ui_messenger.dart';
 import '../feed_providers.dart';
 
-/// Reusable three-dot overflow menu that surfaces the "Block @handle"
-/// action. Drop this anywhere a feed author is visible (post header,
-/// comment row, user profile) to expose blocking from that surface —
-/// writes go to [blockedProvider] which the feed already filters
-/// through.
+/// Three-dot overflow for a feed author. On a post you own it offers
+/// "Delete post"; on anyone else's post/comment it offers "Block @name".
+/// Pass [postId] to mark this as a post menu (enables delete on your own
+/// posts). Without it the menu is comment-scoped (block only).
 ///
-/// Hides itself entirely for "you" so users can't block themselves.
-/// Tap-propagation is stopped so the menu icon doesn't trigger an
-/// enclosing tap target (e.g. a tappable post card behind it).
+/// Tap-propagation is stopped so the icon doesn't trigger an enclosing
+/// tap target (e.g. a tappable post card behind it).
 class BlockMenuButton extends ConsumerWidget {
   const BlockMenuButton({
     super.key,
+    required this.authorId,
     required this.author,
+    this.postId,
+    this.postTitle,
     this.iconColor,
     this.iconSize = 18,
   });
 
+  final String authorId;
   final String author;
+  final String? postId;
+  final String? postTitle;
   final Color? iconColor;
   final double iconSize;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (author == 'you') return const SizedBox.shrink();
+    if (authorId.isEmpty) return const SizedBox.shrink();
+    final me = ref.watch(supabaseClientProvider).auth.currentUser?.id;
+    final isOwn = authorId == me;
+    final canDelete = postId != null && isOwn;
+    // Your own comment / your own post with no delete affordance — nothing
+    // to offer, so render nothing.
+    if (isOwn && !canDelete) return const SizedBox.shrink();
+
     return GestureDetector(
       onTap: () {},
       behavior: HitTestBehavior.opaque,
@@ -36,28 +48,40 @@ class BlockMenuButton extends ConsumerWidget {
         padding: EdgeInsets.zero,
         offset: const Offset(0, 28),
         icon: Icon(Icons.more_horiz, size: iconSize, color: iconColor),
-        onSelected: (action) {
-          if (action == 'block') {
-            final blocked =
-                ref.read(blockedProvider.notifier).block(author);
-            showBanner(
-              blocked
-                  ? 'Blocked @$author.'
-                  : '@$author is already blocked.',
-            );
+        onSelected: (action) async {
+          if (action == 'delete' && postId != null) {
+            await ref.read(feedActionsProvider).deletePost(postId!);
+            showBanner('Post deleted');
+          } else if (action == 'block') {
+            await ref.read(feedActionsProvider).block(authorId);
+            showBanner('Blocked @$author.');
           }
         },
         itemBuilder: (_) => [
-          PopupMenuItem<String>(
-            value: 'block',
-            child: Row(
-              children: [
-                const Icon(Icons.block, size: 16, color: Colors.redAccent),
-                const SizedBox(width: 8),
-                Text('Block @$author'),
-              ],
+          if (canDelete)
+            PopupMenuItem<String>(
+              value: 'delete',
+              child: Row(
+                children: [
+                  const Icon(Icons.delete_outline,
+                      size: 16, color: Colors.redAccent),
+                  const SizedBox(width: 8),
+                  const Text('Delete post'),
+                ],
+              ),
+            )
+          else
+            PopupMenuItem<String>(
+              value: 'block',
+              child: Row(
+                children: [
+                  const Icon(Icons.block,
+                      size: 16, color: Colors.redAccent),
+                  const SizedBox(width: 8),
+                  Text('Block @$author'),
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );

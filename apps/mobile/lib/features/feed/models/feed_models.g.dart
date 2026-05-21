@@ -8,7 +8,9 @@ part of 'feed_models.dart';
 
 _FeedComment _$FeedCommentFromJson(Map<String, dynamic> json) => _FeedComment(
   id: json['id'] as String,
+  authorId: json['author_id'] as String,
   author: json['author'] as String,
+  authorAvatarUrl: json['author_avatar_url'] as String?,
   body: json['body'] as String,
   ageHours: (json['age_hours'] as num).toInt(),
   score: (json['score'] as num?)?.toInt() ?? 0,
@@ -18,7 +20,9 @@ _FeedComment _$FeedCommentFromJson(Map<String, dynamic> json) => _FeedComment(
 Map<String, dynamic> _$FeedCommentToJson(_FeedComment instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'author_id': instance.authorId,
       'author': instance.author,
+      'author_avatar_url': instance.authorAvatarUrl,
       'body': instance.body,
       'age_hours': instance.ageHours,
       'score': instance.score,
@@ -28,7 +32,9 @@ Map<String, dynamic> _$FeedCommentToJson(_FeedComment instance) =>
 _FeedPost _$FeedPostFromJson(Map<String, dynamic> json) => _FeedPost(
   id: json['id'] as String,
   community: $enumDecode(_$FeedCommunityEnumMap, json['community']),
+  authorId: json['author_id'] as String,
   author: json['author'] as String,
+  authorAvatarUrl: json['author_avatar_url'] as String?,
   title: json['title'] as String,
   ageHours: (json['age_hours'] as num).toInt(),
   activity:
@@ -53,7 +59,9 @@ _FeedPost _$FeedPostFromJson(Map<String, dynamic> json) => _FeedPost(
 Map<String, dynamic> _$FeedPostToJson(_FeedPost instance) => <String, dynamic>{
   'id': instance.id,
   'community': _$FeedCommunityEnumMap[instance.community]!,
+  'author_id': instance.authorId,
   'author': instance.author,
+  'author_avatar_url': instance.authorAvatarUrl,
   'title': instance.title,
   'age_hours': instance.ageHours,
   'activity': _$FeedActivityEnumMap[instance.activity]!,
