@@ -84,8 +84,8 @@ const PeoplePage = () => {
             Add friends
           </h1>
           <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-            People from your feed — this prototype follows are local until a
-            backend lands.
+            People from your feed — follows are saved on this device
+            until a backend lands.
           </p>
 
           <div className="relative mt-8">

@@ -14,6 +14,7 @@ import {
   Trash2,
   LayoutGrid,
   Star,
+  Sparkles,
   ThumbsDown,
   Search,
 } from "lucide-react";
@@ -719,7 +720,11 @@ const AccountHistoryPage = () => {
           >
           {displayed.length === 0 && loadedFilter === filter ? (
             <div className="rounded-3xl border border-slate-200/80 bg-white/80 p-10 text-center shadow-sm backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/65">
-              <h2 className="text-2xl font-black tracking-tight">
+              <Sparkles
+                className="mx-auto h-10 w-10 text-slate-300 dark:text-slate-600"
+                aria-hidden="true"
+              />
+              <h2 className="mt-4 text-2xl font-black tracking-tight">
                 {t("empty.title")}
               </h2>
               <p className="mx-auto mt-2 max-w-xl text-sm text-slate-600 dark:text-slate-400">

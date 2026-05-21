@@ -665,9 +665,19 @@ export default function FeedPage() {
                 className={cn("mt-5", view === "list" ? "space-y-2" : "space-y-3")}
               >
                 {visible.length === 0 ? (
-                  <p className="py-16 text-center text-sm text-slate-400">
-                    Nothing here yet.
-                  </p>
+                  <div className="rounded-3xl border border-slate-200/80 bg-white/80 p-10 text-center shadow-sm backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/65">
+                    <Users
+                      className="mx-auto h-10 w-10 text-slate-300 dark:text-slate-600"
+                      aria-hidden="true"
+                    />
+                    <h2 className="mt-4 text-xl font-black tracking-tight text-slate-700 dark:text-slate-200">
+                      Nothing here yet
+                    </h2>
+                    <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
+                      Follow people or share a pick of your own — your
+                      feed fills up as your taste graph grows.
+                    </p>
+                  </div>
                 ) : (
                   visible.map((p, i) => (
                     <PostCard
