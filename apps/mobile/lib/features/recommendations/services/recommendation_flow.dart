@@ -31,8 +31,13 @@ class RecommendationFlow {
 
   /// Pulls the signed-in user's saved taste-tuning / hard filters off their
   /// profile row. Best-effort: a fetch failure or missing column just means
-  /// no filters are applied (existing behaviour). Empty fields are stripped
-  /// so the Edge Function only ever sees meaningful constraints.
+  /// no filters are applied (existing behaviour).
+  ///
+  /// Handles BOTH shapes: the per-format blob `{ movie: {…}, book: {…},
+  /// music: {…} }` and the legacy single-bucket `{ avoidGenres, … }`. The
+  /// raw blob is passed straight through — the Edge Function's
+  /// buildHardConstraints accepts either shape and strips empty values, so
+  /// no cleaning is needed here.
   Future<Map<String, dynamic>?> _loadFilters() async {
     final uid = _client.auth.currentUser?.id;
     if (uid == null) return null;
@@ -45,21 +50,7 @@ class RecommendationFlow {
       final raw = row?['recommendation_filters'];
       if (raw is! Map) return null;
       final f = Map<String, dynamic>.from(raw);
-      final genres = (f['avoidGenres'] as List?)
-              ?.map((e) => e.toString())
-              .where((e) => e.trim().isNotEmpty)
-              .toList() ??
-          const <String>[];
-      final lang = (f['language'] as String?)?.trim();
-      final note = (f['avoidNote'] as String?)?.trim();
-      final runtime = f['maxRuntimeMinutes'];
-      final cleaned = <String, dynamic>{
-        if (genres.isNotEmpty) 'avoidGenres': genres,
-        if (runtime is int && runtime > 0) 'maxRuntimeMinutes': runtime,
-        if (lang != null && lang.isNotEmpty) 'language': lang,
-        if (note != null && note.isNotEmpty) 'avoidNote': note,
-      };
-      return cleaned.isEmpty ? null : cleaned;
+      return f.isEmpty ? null : f;
     } catch (_) {
       return null;
     }

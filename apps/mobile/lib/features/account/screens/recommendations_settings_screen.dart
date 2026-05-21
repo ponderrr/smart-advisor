@@ -164,68 +164,163 @@ class _RecommendationFiltersCard extends ConsumerStatefulWidget {
       _RecommendationFiltersCardState();
 }
 
+/// Per-format taste-tuning state — each slice owns its own avoid-genres,
+/// runtime (Movies only), preferred language and free-text avoid note.
+class _FormatSlice {
+  final avoidGenres = <String>{};
+  final language = TextEditingController();
+  final avoidNote = TextEditingController();
+  int runtimeIdx = 0; // Movies-only; ignored elsewhere.
+
+  void dispose() {
+    language.dispose();
+    avoidNote.dispose();
+  }
+}
+
 class _RecommendationFiltersCardState
     extends ConsumerState<_RecommendationFiltersCard> {
-  static const _commonGenres = [
-    'Horror',
-    'Romance',
-    'Musical',
-    'Documentary',
-    'Anime',
-    'Reality',
-    'War',
-    'Western',
-    'Thriller',
-    'Comedy',
-  ];
-  // Off / 90 / 120 / 150 / 180 — index 0 means "no cap".
+  /// Per-format curated genre lists so the chip set matches the format
+  /// you're tuning (avoiding "Romance" on Movies doesn't also block
+  /// romance novels — that was the whole point of the per-format split).
+  static const _genresByFormat = <String, List<String>>{
+    'movie': [
+      'Horror',
+      'Romance',
+      'Musical',
+      'Documentary',
+      'Anime',
+      'Reality',
+      'War',
+      'Western',
+      'Thriller',
+      'Comedy',
+    ],
+    'book': [
+      'Sci-Fi',
+      'Fantasy',
+      'Romance',
+      'Mystery',
+      'Horror',
+      'Historical',
+      'Literary',
+      'Young Adult',
+      'Memoir',
+      'Self-Help',
+    ],
+    'music': [
+      'Pop',
+      'Rock',
+      'Hip-Hop',
+      'Country',
+      'Jazz',
+      'Classical',
+      'Electronic',
+      'R&B',
+      'Metal',
+      'Indie',
+    ],
+  };
+  static const _formats = ['movie', 'book', 'music'];
+  static const _formatLabels = ['Movies', 'Books', 'Music'];
+  static const _formatColors = [Tw.amber500, Tw.emerald500, Tw.rose500];
+
+  /// Per-format-tab avoid-note placeholders so the field reads naturally
+  /// for the format you're tuning.
+  static const _avoidNotePlaceholders = <String, String>{
+    'movie': 'e.g. franchises, directors, themes…',
+    'book': 'e.g. series, authors, themes…',
+    'music': 'e.g. artists, sub-genres, themes…',
+  };
+
+  // Off / 90 / 120 / 150 / 180 — index 0 means "no cap". Movies-only.
   static const _runtimeStops = [0, 90, 120, 150, 180];
 
-  final _language = TextEditingController();
-  final _avoidNote = TextEditingController();
-  final _avoidGenres = <String>{};
-  int _runtimeIdx = 0;
+  late final Map<String, _FormatSlice> _slices = {
+    for (final f in _formats) f: _FormatSlice(),
+  };
+  int _activeIdx = 0;
   bool _seeded = false;
   bool _saving = false;
 
+  String get _activeFormat => _formats[_activeIdx];
+  _FormatSlice get _active => _slices[_activeFormat]!;
+
   @override
   void dispose() {
-    _language.dispose();
-    _avoidNote.dispose();
+    for (final s in _slices.values) {
+      s.dispose();
+    }
     super.dispose();
   }
 
-  void _seed(Map<String, dynamic>? f) {
+  /// Seed every slice from the stored blob. Accepts BOTH the new
+  /// per-format shape `{ movie: {…}, book: {…}, music: {…} }` and the
+  /// legacy single-bucket shape (which gets applied to every slice, with
+  /// maxRuntimeMinutes kept only on Movies — same as the EF reader).
+  void _seed(Map<String, dynamic>? blob) {
     if (_seeded) return;
     _seeded = true;
-    if (f == null) return;
+    if (blob == null) return;
+    final hasPerFormat = _formats.any((f) => blob[f] is Map);
+    if (hasPerFormat) {
+      for (final f in _formats) {
+        final slice = blob[f];
+        if (slice is Map) _seedSlice(f, slice.cast<String, dynamic>());
+      }
+    } else {
+      // Legacy: apply the bucket to every slice; runtime stays on movies.
+      for (final f in _formats) {
+        _seedSlice(f, blob, dropRuntime: f != 'movie');
+      }
+    }
+  }
+
+  void _seedSlice(String format, Map<String, dynamic> f,
+      {bool dropRuntime = false}) {
+    final s = _slices[format]!;
     final genres = (f['avoidGenres'] as List?) ?? const [];
-    _avoidGenres
+    s.avoidGenres
       ..clear()
       ..addAll(genres.map((e) => e.toString()));
-    _language.text = (f['language'] as String?) ?? '';
-    _avoidNote.text = (f['avoidNote'] as String?) ?? '';
-    final rt = f['maxRuntimeMinutes'];
-    if (rt is int) {
-      final i = _runtimeStops.indexOf(rt);
-      _runtimeIdx = i < 0 ? 0 : i;
+    s.language.text = (f['language'] as String?) ?? '';
+    s.avoidNote.text = (f['avoidNote'] as String?) ?? '';
+    if (!dropRuntime) {
+      final rt = f['maxRuntimeMinutes'];
+      if (rt is int) {
+        final i = _runtimeStops.indexOf(rt);
+        s.runtimeIdx = i < 0 ? 0 : i;
+      }
     }
+  }
+
+  Map<String, dynamic> _sliceToBlob(String format) {
+    final s = _slices[format]!;
+    final out = <String, dynamic>{
+      'avoidGenres': s.avoidGenres.toList(),
+    };
+    if (format == 'movie' && s.runtimeIdx != 0) {
+      out['maxRuntimeMinutes'] = _runtimeStops[s.runtimeIdx];
+    }
+    final lang = s.language.text.trim();
+    if (lang.isNotEmpty) out['language'] = lang;
+    final note = s.avoidNote.text.trim();
+    if (note.isNotEmpty) out['avoidNote'] = note;
+    // Drop the list if it's empty so the cleaned blob doesn't carry it.
+    if ((out['avoidGenres'] as List).isEmpty) out.remove('avoidGenres');
+    return out;
   }
 
   Future<void> _save() async {
     setState(() => _saving = true);
-    final lang = _language.text.trim();
-    final note = _avoidNote.text.trim();
-    final filters = <String, dynamic>{
-      'avoidGenres': _avoidGenres.toList(),
-      'maxRuntimeMinutes':
-          _runtimeIdx == 0 ? null : _runtimeStops[_runtimeIdx],
-      'language': lang.isEmpty ? null : lang,
-      'avoidNote': note.isEmpty ? null : note,
-    };
+    final blob = <String, dynamic>{};
+    for (final f in _formats) {
+      final slice = _sliceToBlob(f);
+      if (slice.isNotEmpty) blob[f] = slice;
+    }
     final r = await ref
         .read(settingsServiceProvider)
-        .updateRecommendationFilters(filters);
+        .updateRecommendationFilters(blob);
     if (!mounted) return;
     setState(() => _saving = false);
     if (r.isError) {
@@ -242,12 +337,28 @@ class _RecommendationFiltersCardState
   Widget build(BuildContext context) {
     final profile = ref.watch(currentProfileProvider).asData?.value;
     _seed(profile?.recommendationFilters);
-    final rt = _runtimeStops[_runtimeIdx];
+    final active = _active;
+    final formatColor = _formatColors[_activeIdx];
+    final rt = _runtimeStops[active.runtimeIdx];
+    final isMovie = _activeFormat == 'movie';
+    final genres = _genresByFormat[_activeFormat]!;
 
     return BrandCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          widget.rowLabel('Filter for'),
+          const SizedBox(height: 2),
+          Subtitle(
+              'Avoiding a genre on one format won\'t affect the others.'),
+          const SizedBox(height: 10),
+          BrandSegmented(
+            color: formatColor,
+            labels: _formatLabels,
+            selectedIndex: _activeIdx,
+            onValueChanged: (i) => setState(() => _activeIdx = i),
+          ),
+          widget.divider(context),
           widget.rowLabel('Avoid genres'),
           const SizedBox(height: 2),
           Subtitle('Picks will steer clear of anything you tap.'),
@@ -256,38 +367,40 @@ class _RecommendationFiltersCardState
             spacing: 8,
             runSpacing: 8,
             children: [
-              for (final g in _commonGenres)
+              for (final g in genres)
                 _GenreChip(
                   label: g,
-                  selected: _avoidGenres.contains(g),
-                  onTap: () => setState(() => _avoidGenres.contains(g)
-                      ? _avoidGenres.remove(g)
-                      : _avoidGenres.add(g)),
+                  selected: active.avoidGenres.contains(g),
+                  onTap: () => setState(() => active.avoidGenres.contains(g)
+                      ? active.avoidGenres.remove(g)
+                      : active.avoidGenres.add(g)),
                 ),
             ],
           ),
-          widget.divider(context),
-          widget.rowLabel('Max movie runtime'),
-          const SizedBox(height: 2),
-          Subtitle(_runtimeIdx == 0
-              ? 'No runtime cap.'
-              : 'Movies over $rt min won’t be suggested.'),
-          const SizedBox(height: 8),
-          AdaptiveSlider(
-            value: _runtimeIdx.toDouble(),
-            min: 0,
-            max: (_runtimeStops.length - 1).toDouble(),
-            divisions: _runtimeStops.length - 1,
-            activeColor: Tw.indigo500,
-            label: _runtimeIdx == 0 ? 'Off' : '$rt min',
-            onChanged: (v) =>
-                setState(() => _runtimeIdx = v.round()),
-          ),
+          if (isMovie) ...[
+            widget.divider(context),
+            widget.rowLabel('Max movie runtime'),
+            const SizedBox(height: 2),
+            Subtitle(active.runtimeIdx == 0
+                ? 'No runtime cap.'
+                : 'Movies over $rt min won’t be suggested.'),
+            const SizedBox(height: 8),
+            AdaptiveSlider(
+              value: active.runtimeIdx.toDouble(),
+              min: 0,
+              max: (_runtimeStops.length - 1).toDouble(),
+              divisions: _runtimeStops.length - 1,
+              activeColor: Tw.indigo500,
+              label: active.runtimeIdx == 0 ? 'Off' : '$rt min',
+              onChanged: (v) =>
+                  setState(() => active.runtimeIdx = v.round()),
+            ),
+          ],
           widget.divider(context),
           widget.rowLabel('Preferred language'),
           const SizedBox(height: 6),
           AdaptiveTextField(
-            controller: _language,
+            controller: active.language,
             placeholder: 'e.g. English, any',
           ),
           const SizedBox(height: 12),
@@ -296,8 +409,8 @@ class _RecommendationFiltersCardState
           Subtitle('Anything here is a hard "no" for the AI.'),
           const SizedBox(height: 6),
           AdaptiveTextField(
-            controller: _avoidNote,
-            placeholder: 'e.g. graphic horror, anything by X',
+            controller: active.avoidNote,
+            placeholder: _avoidNotePlaceholders[_activeFormat]!,
             minLines: 2,
             maxLines: 4,
             keyboardType: TextInputType.multiline,
