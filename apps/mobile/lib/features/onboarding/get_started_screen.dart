@@ -319,13 +319,19 @@ class _PosterWallState extends State<_PosterWall>
     return LayoutBuilder(
       builder: (context, cons) {
         // Tile sizing — keeps the wall dense regardless of phone size.
-        // 5 tiles wide on phones, 7 on tablets.
         final tileW = cons.maxWidth >= 700 ? 110.0 : 90.0;
-        final cols = (cons.maxWidth / tileW).ceil() + 2; // overflow each side
         final tileH = tileW * 1.5; // 2:3 poster ratio
-        // Enough tiles per column to cover the viewport plus a full extra
+        // The wall is wider/taller than the viewport so the ~6° tilt never
+        // exposes a blank corner. Derive the column count from that
+        // padded width — deriving it from the bare viewport (the old
+        // bug) left the right edge of the tilted wall unpopulated on
+        // wide / tablet layouts.
+        final wallW = cons.maxWidth + tileW * 4;
+        final wallH = cons.maxHeight + tileH * 2;
+        final cols = (wallW / tileW).ceil();
+        // Enough tiles per column to cover the wall plus a full extra
         // screen, so the seamless wrap is always off-screen.
-        final perColumn = (cons.maxHeight / tileH).ceil() + 3;
+        final perColumn = (wallH / tileH).ceil() + 3;
 
         return ClipRect(
           child: OverflowBox(
@@ -334,8 +340,8 @@ class _PosterWallState extends State<_PosterWall>
             child: Transform.rotate(
               angle: -0.10, // ~6° tilt
               child: SizedBox(
-                width: cons.maxWidth + tileW * 4,
-                height: cons.maxHeight + tileH * 2,
+                width: wallW,
+                height: wallH,
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -343,7 +349,6 @@ class _PosterWallState extends State<_PosterWall>
                       _DriftColumn(
                         controller: _ctrl,
                         columnIndex: c,
-                        columnCount: cols,
                         tileW: tileW,
                         tileH: tileH,
                         perColumn: perColumn,
@@ -367,7 +372,6 @@ class _DriftColumn extends StatelessWidget {
   const _DriftColumn({
     required this.controller,
     required this.columnIndex,
-    required this.columnCount,
     required this.tileW,
     required this.tileH,
     required this.perColumn,
@@ -375,7 +379,6 @@ class _DriftColumn extends StatelessWidget {
 
   final Animation<double> controller;
   final int columnIndex;
-  final int columnCount;
   final double tileW;
   final double tileH;
   final int perColumn;
@@ -395,9 +398,12 @@ class _DriftColumn extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(4),
             child: _PosterTile(
-              // Stagger the seed by column so neighbouring columns don't
-              // show the same poster sequence.
-              seed: columnIndex * 7 + r * columnCount,
+              // Seed with multipliers coprime to the source count so a
+              // column walks through every poster before repeating, and
+              // neighbouring columns are offset. Deriving the step from
+              // columnCount (the old bug) made columns that shared a
+              // factor with the source count alternate just 2 posters.
+              seed: columnIndex * 13 + r * 17,
               width: tileW - 8,
               height: tileH - 8,
             ),
