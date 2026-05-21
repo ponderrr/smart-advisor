@@ -1,0 +1,10 @@
+{
+  "@@locale": "nl",
+  "languageName": "Nederlands",
+  "languageStepEyebrow": "Taal",
+  "languageStepTitle": "Kies je taal",
+  "languageStepSubtitle": "We vertalen de app-interface dienovereenkomstig.",
+  "back": "Terug",
+  "next": "Volgende",
+  "skipForNow": "Voorlopig overslaan"
+}

@@ -1,0 +1,10 @@
+{
+  "@@locale": "zh",
+  "languageName": "中文",
+  "languageStepEyebrow": "语言",
+  "languageStepTitle": "选择你的语言",
+  "languageStepSubtitle": "我们会将应用界面翻译为对应语言。",
+  "back": "返回",
+  "next": "下一步",
+  "skipForNow": "暂时跳过"
+}

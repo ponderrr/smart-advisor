@@ -1,0 +1,10 @@
+{
+  "@@locale": "ja",
+  "languageName": "日本語",
+  "languageStepEyebrow": "言語",
+  "languageStepTitle": "言語を選択",
+  "languageStepSubtitle": "アプリの表示を選択した言語に翻訳します。",
+  "back": "戻る",
+  "next": "次へ",
+  "skipForNow": "今はスキップ"
+}

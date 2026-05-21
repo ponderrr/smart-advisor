@@ -1,0 +1,10 @@
+{
+  "@@locale": "es",
+  "languageName": "Español",
+  "languageStepEyebrow": "Idioma",
+  "languageStepTitle": "Elige tu idioma",
+  "languageStepSubtitle": "Traduciremos la interfaz de la app para que coincida.",
+  "back": "Atrás",
+  "next": "Siguiente",
+  "skipForNow": "Omitir por ahora"
+}

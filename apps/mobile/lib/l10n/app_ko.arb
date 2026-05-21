@@ -1,0 +1,10 @@
+{
+  "@@locale": "ko",
+  "languageName": "한국어",
+  "languageStepEyebrow": "언어",
+  "languageStepTitle": "언어를 선택하세요",
+  "languageStepSubtitle": "선택한 언어에 맞게 앱 인터페이스를 번역합니다.",
+  "back": "뒤로",
+  "next": "다음",
+  "skipForNow": "나중에 하기"
+}

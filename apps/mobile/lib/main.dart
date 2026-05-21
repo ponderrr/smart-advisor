@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/config/env.dart';
+import 'core/l10n/locale_provider.dart';
 import 'core/router/app_router.dart';
 import 'core/supabase/supabase_providers.dart';
+import 'l10n/app_localizations.dart';
 import 'core/ui_messenger.dart';
 import 'features/notifications/notification_service.dart';
 import 'features/security/biometric.dart';
@@ -61,6 +64,16 @@ class SmartAdvisorApp extends ConsumerWidget {
       materialLightTheme: AppTheme.light(),
       materialDarkTheme: AppTheme.dark(amoled: amoled),
       scaffoldMessengerKey: scaffoldMessengerKey,
+      // App UI language — driven by the per-device locale pref; the
+      // onboarding language step + Settings write through localeProvider.
+      locale: ref.watch(localeProvider),
+      supportedLocales: kSupportedLocales,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
       // Wrap the app in an Overlay and mark a context beneath both it and
       // the MaterialApp ScaffoldMessenger. AdaptiveSnackBar needs an
       // Overlay ancestor (iOS banner) or a ScaffoldMessenger ancestor

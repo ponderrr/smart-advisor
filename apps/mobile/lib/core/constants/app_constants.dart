@@ -45,6 +45,11 @@ class StorageKeys {
   /// service in parity with the content-tone cache.
   static const String prefRecommendationFilters =
       'smart_advisor_pref_recommendation_filters';
+
+  /// Per-device UI language (BCP-47 code, e.g. "en", "fr", "ja"). The
+  /// onboarding language step + the server-side profile.locale stay in
+  /// sync with this; the app reads it to localise the interface.
+  static const String prefLocale = 'smart_advisor_pref_locale';
 }
 
 /// Default per-request network timeout (web FETCH_TIMEOUT_MS).

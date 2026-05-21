@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/l10n/locale_provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../../ui/ui.dart';
 import '../auth/auth_providers.dart';
 import '../notifications/notification_service.dart';
@@ -58,13 +60,21 @@ class _S extends ConsumerState<OnboardingScreen> {
 
   // Step state.
   final _name = TextEditingController();
-  int _locale = 0; // 0 = en, 1 = es
+  String _localeCode = 'en'; // BCP-47 language code
   String _contentFocus = 'mix'; // movie | book | music | mix
   final _avoidGenres = <String>{};
   bool _reminders = false;
 
   bool _busy = false;
   String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-select the language already in effect so the step reflects
+    // reality instead of defaulting to English every time.
+    _localeCode = ref.read(localeProvider).languageCode;
+  }
 
   @override
   void dispose() {
@@ -111,7 +121,7 @@ class _S extends ConsumerState<OnboardingScreen> {
         : (_name.text.trim().isEmpty
             ? (profile?.name ?? 'there')
             : _name.text.trim());
-    final locale = (!skip && _locale == 1) ? 'es' : 'en';
+    final locale = skip ? 'en' : _localeCode;
 
     final res = await ref
         .read(authServiceProvider)
@@ -124,6 +134,9 @@ class _S extends ConsumerState<OnboardingScreen> {
       });
       return;
     }
+
+    // Flip the live app language to match the saved profile locale.
+    await ref.read(localeProvider.notifier).set(locale);
 
     final prefs = await SharedPreferences.getInstance();
 
@@ -314,27 +327,44 @@ class _S extends ConsumerState<OnboardingScreen> {
 
   // ── Step 2: locale ──────────────────────────────────────────────────
   Widget _stepLocale() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        const Eyebrow('Language').animateFadeUp(delay: 80),
-        const SizedBox(height: 10),
-        const BrandHeading('Pick your language', size: 26, center: true)
-            .animateFadeUp(delay: 160),
-        const SizedBox(height: 12),
-        const Subtitle(
-          'We\'ll translate the app interface to match.',
-          center: true,
-        ).animateFadeUp(delay: 220),
-        const SizedBox(height: 24),
-        BrandSegmented(
-          color: Tw.indigo500,
-          labels: const ['English', 'Español'],
-          selectedIndex: _locale,
-          onValueChanged: (i) => setState(() => _locale = i),
-        ).animateFadeUp(delay: 300),
-      ],
+    // Override the localizations for just this subtree to the language the
+    // user is currently tapping, so the step previews live in that
+    // language before they commit — and proves the l10n wiring works.
+    return Localizations.override(
+      context: context,
+      locale: Locale(_localeCode),
+      child: Builder(builder: (context) {
+        final l = AppLocalizations.of(context);
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Eyebrow(l.languageStepEyebrow).animateFadeUp(delay: 80),
+            const SizedBox(height: 10),
+            BrandHeading(l.languageStepTitle, size: 26, center: true)
+                .animateFadeUp(delay: 160),
+            const SizedBox(height: 12),
+            Subtitle(
+              l.languageStepSubtitle,
+              center: true,
+            ).animateFadeUp(delay: 220),
+            const SizedBox(height: 24),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final entry in kLanguageNames.entries)
+                  _LanguageChip(
+                    label: entry.value,
+                    selected: _localeCode == entry.key,
+                    onTap: () => setState(() => _localeCode = entry.key),
+                  ),
+              ],
+            ).animateFadeUp(delay: 300),
+          ],
+        );
+      }),
     );
   }
 
@@ -533,6 +563,47 @@ class _GenreChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
         decoration: BoxDecoration(
           color: selected ? Tw.rose500 : c.background,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: selected
+                ? Colors.transparent
+                : c.mutedForeground.withValues(alpha: .35),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.1,
+            color: selected ? Colors.white : c.foreground,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Tap-to-select language chip — single-select, so the active one fills
+/// with the indigo accent (a positive choice, not an exclusion).
+class _LanguageChip extends StatelessWidget {
+  const _LanguageChip(
+      {required this.label, required this.selected, required this.onTap});
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+        decoration: BoxDecoration(
+          color: selected ? Tw.indigo500 : c.background,
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
             color: selected

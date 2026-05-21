@@ -1,0 +1,25 @@
+{
+  "@@locale": "en",
+  "languageName": "English",
+  "@languageName": {
+    "description": "The language's own name, shown in the language picker."
+  },
+  "languageStepEyebrow": "Language",
+  "@languageStepEyebrow": {
+    "description": "Eyebrow label on the onboarding language step."
+  },
+  "languageStepTitle": "Pick your language",
+  "@languageStepTitle": {
+    "description": "Heading on the onboarding language step."
+  },
+  "languageStepSubtitle": "We'll translate the app interface to match.",
+  "@languageStepSubtitle": {
+    "description": "Subtitle on the onboarding language step."
+  },
+  "back": "Back",
+  "@back": { "description": "Generic Back button." },
+  "next": "Next",
+  "@next": { "description": "Generic Next button." },
+  "skipForNow": "Skip for now",
+  "@skipForNow": { "description": "Skip action on multi-step flows." }
+}
