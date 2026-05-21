@@ -80,16 +80,17 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
       body: items.isEmpty
           ? Center(
               child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: BrandCard(
-                  child: Column(children: [
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                     Icon(Icons.notifications_none,
-                        size: 32, color: context.brandMuted),
-                    const SizedBox(height: 10),
+                        size: 40, color: context.brandMuted),
+                    const SizedBox(height: 12),
                     Subtitle(
                         'You’re all caught up — no notifications.',
                         center: true),
-                  ]),
+                  ],
                 ),
               ),
             )
