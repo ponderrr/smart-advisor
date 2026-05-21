@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../ui/ui.dart';
 import 'feed_providers.dart';
 import 'models/feed_models.dart';
+import 'widgets/ai_nudge_card.dart';
 import 'widgets/composer.dart';
 import 'widgets/feed_cards.dart';
 
@@ -81,7 +82,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           const SizedBox(height: 4),
           Subtitle('What your people are into right now.'),
           const SizedBox(height: 14),
-          _QuizPrompt(onTap: () => context.push('/quiz/solo')),
+          const AiNudgeCard(),
           const SizedBox(height: 12),
           _communitySegmented(prefs),
           const SizedBox(height: 8),
@@ -398,56 +399,3 @@ class _VisibilityOption extends StatelessWidget {
   }
 }
 
-/// Compact "get fresh picks" prompt atop the feed.
-class _QuizPrompt extends StatelessWidget {
-  const _QuizPrompt({required this.onTap});
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final tone = contentAccent(
-        ContentAccentName.violet, Theme.of(context).brightness);
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: tone.surfaceGradient),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: tone.surfaceBorder),
-        ),
-        child: Row(children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-                color: tone.iconCircleBg, shape: BoxShape.circle),
-            child: Icon(Icons.auto_awesome,
-                size: 19, color: tone.iconCircleFg),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Get fresh picks',
-                    style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        color: context.brandInk)),
-                Text('Take a quick quiz, tuned to your taste.',
-                    style: TextStyle(
-                        fontSize: 12, color: context.brandMuted)),
-              ],
-            ),
-          ),
-          Icon(Icons.chevron_right, color: tone.text),
-        ]),
-      ),
-    );
-  }
-}
