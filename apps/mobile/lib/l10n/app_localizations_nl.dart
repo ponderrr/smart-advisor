@@ -118,4 +118,19 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get onboardingRemindersOffHint =>
       'Je kunt dit altijd inschakelen via Instellingen → Meldingen.';
+
+  @override
+  String get navHome => 'Start';
+
+  @override
+  String get navLibrary => 'Bibliotheek';
+
+  @override
+  String get navDiscover => 'Ontdek';
+
+  @override
+  String get navHistory => 'Geschiedenis';
+
+  @override
+  String get navProfile => 'Profiel';
 }

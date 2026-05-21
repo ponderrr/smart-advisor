@@ -317,6 +317,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You can turn this on anytime in Settings → Notifications.'**
   String get onboardingRemindersOffHint;
+
+  /// Bottom-nav label: navHome
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get navHome;
+
+  /// Bottom-nav label: navLibrary
+  ///
+  /// In en, this message translates to:
+  /// **'Library'**
+  String get navLibrary;
+
+  /// Bottom-nav label: navDiscover
+  ///
+  /// In en, this message translates to:
+  /// **'Discover'**
+  String get navDiscover;
+
+  /// Bottom-nav label: navHistory
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get navHistory;
+
+  /// Bottom-nav label: navProfile
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get navProfile;
 }
 
 class _AppLocalizationsDelegate

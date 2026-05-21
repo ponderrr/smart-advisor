@@ -33,5 +33,10 @@
   "remindersOff": "オフ",
   "remindersWeekly": "毎週",
   "onboardingRemindersOnHint": "完了時に通知送信の許可をお願いします。",
-  "onboardingRemindersOffHint": "設定 → 通知でいつでもオンにできます。"
+  "onboardingRemindersOffHint": "設定 → 通知でいつでもオンにできます。",
+  "navHome": "ホーム",
+  "navLibrary": "ライブラリ",
+  "navDiscover": "見つける",
+  "navHistory": "履歴",
+  "navProfile": "プロフィール"
 }

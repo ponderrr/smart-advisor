@@ -112,4 +112,19 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get onboardingRemindersOffHint => '설정 → 알림에서 언제든 켤 수 있어요.';
+
+  @override
+  String get navHome => '홈';
+
+  @override
+  String get navLibrary => '보관함';
+
+  @override
+  String get navDiscover => '발견';
+
+  @override
+  String get navHistory => '기록';
+
+  @override
+  String get navProfile => '프로필';
 }

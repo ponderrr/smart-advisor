@@ -118,4 +118,19 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get onboardingRemindersOffHint =>
       'Puedes activarlo cuando quieras en Ajustes → Notificaciones.';
+
+  @override
+  String get navHome => 'Inicio';
+
+  @override
+  String get navLibrary => 'Biblioteca';
+
+  @override
+  String get navDiscover => 'Descubrir';
+
+  @override
+  String get navHistory => 'Historial';
+
+  @override
+  String get navProfile => 'Perfil';
 }

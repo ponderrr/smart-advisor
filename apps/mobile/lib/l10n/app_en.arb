@@ -135,5 +135,25 @@
   "onboardingRemindersOffHint": "You can turn this on anytime in Settings → Notifications.",
   "@onboardingRemindersOffHint": {
     "description": "Entry-surface string: onboardingRemindersOffHint"
+  },
+  "navHome": "Home",
+  "@navHome": {
+    "description": "Bottom-nav label: navHome"
+  },
+  "navLibrary": "Library",
+  "@navLibrary": {
+    "description": "Bottom-nav label: navLibrary"
+  },
+  "navDiscover": "Discover",
+  "@navDiscover": {
+    "description": "Bottom-nav label: navDiscover"
+  },
+  "navHistory": "History",
+  "@navHistory": {
+    "description": "Bottom-nav label: navHistory"
+  },
+  "navProfile": "Profile",
+  "@navProfile": {
+    "description": "Bottom-nav label: navProfile"
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../ui/ui.dart';
 import '../auth/auth_providers.dart';
 
@@ -42,6 +43,14 @@ class AppShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(currentProfileProvider).asData?.value;
     final bg = brandBg(Theme.of(context).brightness);
+    final l = AppLocalizations.of(context);
+    final navLabels = [
+      l.navHome,
+      l.navLibrary,
+      l.navDiscover,
+      l.navHistory,
+      l.navProfile,
+    ];
 
     // Native bottom bar. Quiz lives as the center nav item (opens the
     // Solo/Group sheet) instead of a floating button.
@@ -68,13 +77,7 @@ class AppShell extends ConsumerWidget {
 
     // Tablet / wide: side NavigationRail + centered, max-width content.
     if (MediaQuery.sizeOf(context).width >= 720) {
-      const labels = [
-        'Home',
-        'Library',
-        'Discover',
-        'History',
-        'Profile'
-      ];
+      final labels = navLabels;
       const icons = [
         Icons.forum_outlined,
         Icons.bookmark_border,
@@ -124,16 +127,19 @@ class AppShell extends ConsumerWidget {
         selectedIndex: navIndexFromLocation(),
         onTap: onNav,
         items: [
-          const AdaptiveNavigationDestination(
-              label: 'Home', icon: Icon(Icons.forum_outlined)),
-          const AdaptiveNavigationDestination(
-              label: 'Library', icon: Icon(Icons.bookmark_border)),
-          const AdaptiveNavigationDestination(
-              label: 'Discover', icon: Icon(Icons.auto_awesome)),
-          const AdaptiveNavigationDestination(
-              label: 'History', icon: Icon(Icons.history)),
           AdaptiveNavigationDestination(
-            label: 'Profile',
+              label: navLabels[0],
+              icon: const Icon(Icons.forum_outlined)),
+          AdaptiveNavigationDestination(
+              label: navLabels[1],
+              icon: const Icon(Icons.bookmark_border)),
+          AdaptiveNavigationDestination(
+              label: navLabels[2],
+              icon: const Icon(Icons.auto_awesome)),
+          AdaptiveNavigationDestination(
+              label: navLabels[3], icon: const Icon(Icons.history)),
+          AdaptiveNavigationDestination(
+            label: navLabels[4],
             icon: _avatarIcon(context, profile?.avatarUrl, false),
           ),
         ],

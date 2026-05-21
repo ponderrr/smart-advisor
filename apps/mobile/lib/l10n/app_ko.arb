@@ -33,5 +33,10 @@
   "remindersOff": "끄기",
   "remindersWeekly": "매주",
   "onboardingRemindersOnHint": "완료하면 알림 전송 권한을 요청할게요.",
-  "onboardingRemindersOffHint": "설정 → 알림에서 언제든 켤 수 있어요."
+  "onboardingRemindersOffHint": "설정 → 알림에서 언제든 켤 수 있어요.",
+  "navHome": "홈",
+  "navLibrary": "보관함",
+  "navDiscover": "발견",
+  "navHistory": "기록",
+  "navProfile": "프로필"
 }

@@ -33,5 +33,10 @@
   "remindersOff": "Uit",
   "remindersWeekly": "Wekelijks",
   "onboardingRemindersOnHint": "We vragen aan het eind toestemming om meldingen te sturen.",
-  "onboardingRemindersOffHint": "Je kunt dit altijd inschakelen via Instellingen → Meldingen."
+  "onboardingRemindersOffHint": "Je kunt dit altijd inschakelen via Instellingen → Meldingen.",
+  "navHome": "Start",
+  "navLibrary": "Bibliotheek",
+  "navDiscover": "Ontdek",
+  "navHistory": "Geschiedenis",
+  "navProfile": "Profiel"
 }

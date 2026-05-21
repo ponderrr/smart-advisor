@@ -33,5 +33,10 @@
   "remindersOff": "Desactivado",
   "remindersWeekly": "Semanal",
   "onboardingRemindersOnHint": "Te pediremos permiso para enviar notificaciones al terminar.",
-  "onboardingRemindersOffHint": "Puedes activarlo cuando quieras en Ajustes → Notificaciones."
+  "onboardingRemindersOffHint": "Puedes activarlo cuando quieras en Ajustes → Notificaciones.",
+  "navHome": "Inicio",
+  "navLibrary": "Biblioteca",
+  "navDiscover": "Descubrir",
+  "navHistory": "Historial",
+  "navProfile": "Perfil"
 }

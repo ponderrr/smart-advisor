@@ -110,4 +110,19 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get onboardingRemindersOffHint => '設定 → 通知でいつでもオンにできます。';
+
+  @override
+  String get navHome => 'ホーム';
+
+  @override
+  String get navLibrary => 'ライブラリ';
+
+  @override
+  String get navDiscover => '見つける';
+
+  @override
+  String get navHistory => '履歴';
+
+  @override
+  String get navProfile => 'プロフィール';
 }

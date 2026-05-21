@@ -33,5 +33,10 @@
   "remindersOff": "Aus",
   "remindersWeekly": "Wöchentlich",
   "onboardingRemindersOnHint": "Wir fragen am Ende nach der Erlaubnis, Benachrichtigungen zu senden.",
-  "onboardingRemindersOffHint": "Du kannst dies jederzeit in Einstellungen → Benachrichtigungen aktivieren."
+  "onboardingRemindersOffHint": "Du kannst dies jederzeit in Einstellungen → Benachrichtigungen aktivieren.",
+  "navHome": "Start",
+  "navLibrary": "Bibliothek",
+  "navDiscover": "Entdecken",
+  "navHistory": "Verlauf",
+  "navProfile": "Profil"
 }

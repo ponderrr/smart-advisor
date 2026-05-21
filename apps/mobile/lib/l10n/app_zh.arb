@@ -33,5 +33,10 @@
   "remindersOff": "关闭",
   "remindersWeekly": "每周",
   "onboardingRemindersOnHint": "完成时我们会请求发送通知的权限。",
-  "onboardingRemindersOffHint": "你可以随时在设置 → 通知中开启。"
+  "onboardingRemindersOffHint": "你可以随时在设置 → 通知中开启。",
+  "navHome": "主页",
+  "navLibrary": "收藏库",
+  "navDiscover": "发现",
+  "navHistory": "历史",
+  "navProfile": "个人资料"
 }

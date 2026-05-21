@@ -109,4 +109,19 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get onboardingRemindersOffHint => '你可以随时在设置 → 通知中开启。';
+
+  @override
+  String get navHome => '主页';
+
+  @override
+  String get navLibrary => '收藏库';
+
+  @override
+  String get navDiscover => '发现';
+
+  @override
+  String get navHistory => '历史';
+
+  @override
+  String get navProfile => '个人资料';
 }
