@@ -102,10 +102,19 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     );
   }
 
+  /// Content-type accent so library cards carry the same
+  /// movie=amber / book=emerald / music=rose tint as the feed cards.
+  static ContentAccentName _accentFor(LibraryMedium m) => switch (m) {
+        LibraryMedium.movie => ContentAccentName.amber,
+        LibraryMedium.book => ContentAccentName.emerald,
+        LibraryMedium.music => ContentAccentName.rose,
+      };
+
   Widget _gridCard(LibraryItem i, double w) {
     return SizedBox(
       width: w,
       child: BrandCard(
+        accent: _accentFor(i.medium),
         padding: const EdgeInsets.all(10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -241,6 +250,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
 
   Widget _row(LibraryItem i) {
     return BrandCard(
+      accent: _accentFor(i.medium),
       padding: const EdgeInsets.all(14),
       child: Row(children: [
         PosterThumb(

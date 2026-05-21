@@ -213,9 +213,19 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     );
   }
 
+  /// Content-type accent so library/history cards carry the same
+  /// movie=amber / book=emerald / music=rose tint as the feed cards.
+  static ContentAccentName _accentFor(String type) => switch (type) {
+        'movie' => ContentAccentName.amber,
+        'book' => ContentAccentName.emerald,
+        'music' => ContentAccentName.rose,
+        _ => ContentAccentName.violet,
+      };
+
   Widget _row(Recommendation r) => GestureDetector(
         onTap: () => context.push('/pick', extra: r),
         child: BrandCard(
+        accent: _accentFor(r.type),
         padding: const EdgeInsets.all(14),
         child: Row(children: [
           PosterThumb(
@@ -258,6 +268,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         child: SizedBox(
           width: w,
           child: BrandCard(
+            accent: _accentFor(r.type),
             padding: const EdgeInsets.all(10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
