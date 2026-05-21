@@ -1,0 +1,17 @@
+# App launcher icon — the brand bookmark mark (shared with the web PWA
+# icons at /public/icons). Regenerate after changing the source art:
+#   dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: true
+  # Full-bleed mark for legacy Android icons + iOS.
+  image_path: "assets/icon/app_icon.png"
+  # Android adaptive icon: black plate + the full-bleed mark. The mark art
+  # already carries its own padding, so the foreground is the same source
+  # as the legacy icon (the generator adds a further safe-zone inset).
+  adaptive_icon_background: "#000000"
+  adaptive_icon_foreground: "assets/icon/app_icon.png"
+  min_sdk_android: 21
+  # iOS forbids alpha — flatten the rounded corners onto black.
+  remove_alpha_ios: true
+  background_color_ios: "#000000"
