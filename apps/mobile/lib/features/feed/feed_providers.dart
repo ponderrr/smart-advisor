@@ -137,6 +137,11 @@ class FeedActions {
     _ref.invalidate(feedProvider);
   }
 
+  Future<void> deleteComment(String commentId) async {
+    await _svc.deleteComment(commentId);
+    _ref.invalidate(feedProvider);
+  }
+
   Future<void> setCommentVote(String commentId, int dir) async {
     await _svc.setCommentVote(commentId, dir);
     _ref.invalidate(feedProvider);

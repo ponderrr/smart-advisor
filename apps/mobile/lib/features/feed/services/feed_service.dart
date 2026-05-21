@@ -174,6 +174,11 @@ class FeedService {
     });
   }
 
+  /// Deletes a comment (RLS only permits the author); the parent_id FK
+  /// cascades, so any replies underneath go with it.
+  Future<void> deleteComment(String commentId) =>
+      _c.from('feed_comments').delete().eq('id', commentId);
+
   /// Sets the current user's vote on a comment. dir 0 clears it.
   Future<void> setCommentVote(String commentId, int dir) async {
     final uid = _c.auth.currentUser?.id;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:haptic_kit/haptic_kit.dart';
 
 import '../../../core/ui_messenger.dart';
 import '../../../ui/ui.dart';
@@ -410,9 +411,12 @@ class _CommentNodeState extends ConsumerState<_CommentNode> {
                       label: 'Upvote comment',
                       child: GestureDetector(
                         behavior: HitTestBehavior.opaque,
-                        onTap: () => ref
-                            .read(feedActionsProvider)
-                            .setCommentVote(node.id, vote == 1 ? 0 : 1),
+                        onTap: () {
+                          Haptics.selection();
+                          ref
+                              .read(feedActionsProvider)
+                              .setCommentVote(node.id, vote == 1 ? 0 : 1);
+                        },
                         child: SizedBox(
                           width: 28,
                           height: 28,
@@ -436,9 +440,12 @@ class _CommentNodeState extends ConsumerState<_CommentNode> {
                       label: 'Downvote comment',
                       child: GestureDetector(
                         behavior: HitTestBehavior.opaque,
-                        onTap: () => ref
-                            .read(feedActionsProvider)
-                            .setCommentVote(node.id, vote == -1 ? 0 : -1),
+                        onTap: () {
+                          Haptics.selection();
+                          ref
+                              .read(feedActionsProvider)
+                              .setCommentVote(node.id, vote == -1 ? 0 : -1);
+                        },
                         child: SizedBox(
                           width: 28,
                           height: 28,
@@ -450,10 +457,12 @@ class _CommentNodeState extends ConsumerState<_CommentNode> {
                       ),
                     ),
                   ]),
-                  // Block menu lives at the very end of the row.
+                  // Overflow menu at the end of the row: "Delete comment"
+                  // on your own, "Block @name" on someone else's.
                   BlockMenuButton(
                       authorId: node.authorId,
                       author: node.author,
+                      commentId: node.id,
                       iconColor: context.brandMuted,
                       iconSize: 16),
                 ]),

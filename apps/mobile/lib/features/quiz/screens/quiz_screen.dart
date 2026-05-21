@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:haptic_kit/haptic_kit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/constants/app_constants.dart';
@@ -513,7 +514,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         accentForContentType(ct), Theme.of(context).brightness);
     final selected = _content == ct;
     return GestureDetector(
-      onTap: () => setState(() => _content = ct),
+      onTap: () {
+        Haptics.selection();
+        setState(() => _content = ct);
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 160),
         curve: Curves.easeOut,
@@ -647,7 +651,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               children: [
                 for (final p in presets)
                   GestureDetector(
-                    onTap: () => setState(() => _count = p),
+                    onTap: () {
+                      Haptics.selection();
+                      setState(() => _count = p);
+                    },
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 140),
                       padding: const EdgeInsets.symmetric(
@@ -801,7 +808,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         contentAccent(accentForContentType(_content),
             Theme.of(context).brightness);
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        Haptics.selection();
+        onTap();
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 140),
         margin: const EdgeInsets.only(bottom: 10),

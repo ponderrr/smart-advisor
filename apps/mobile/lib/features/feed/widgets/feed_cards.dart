@@ -165,6 +165,7 @@ class SaveRail extends ConsumerWidget {
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () async {
+              Haptics.impact(HapticImpactStyle.light);
               final nowSaved =
                   await ref.read(feedActionsProvider).toggleSave(post.id);
               showBanner(

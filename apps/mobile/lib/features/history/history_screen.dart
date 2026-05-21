@@ -125,6 +125,16 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     ),
                 ]),
                 const SizedBox(height: 16),
+                // Search sits above the filters — same order as the
+                // Library screen, so the two pages feel consistent.
+                AdaptiveTextField(
+                  controller: _search,
+                  placeholder: 'Search past picks',
+                  prefix: Icon(Icons.search,
+                      size: 18, color: context.brandMuted),
+                  onChanged: (v) => setState(() => _query = v),
+                ),
+                const SizedBox(height: 8),
                 BrandSegmented(
                   color: accentColorForLabel(const [
                     'All',
@@ -153,14 +163,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     onChanged: (v) => setState(() => _view = v),
                   ),
                 ]),
-                const SizedBox(height: 8),
-                AdaptiveTextField(
-                  controller: _search,
-                  placeholder: 'Search past picks',
-                  prefix: Icon(Icons.search,
-                      size: 18, color: context.brandMuted),
-                  onChanged: (v) => setState(() => _query = v),
-                ),
               ],
             ),
           ),

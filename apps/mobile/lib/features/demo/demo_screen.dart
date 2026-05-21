@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:haptic_kit/haptic_kit.dart';
 
 import '../../ui/ui.dart';
 import 'demo_service.dart';
@@ -129,7 +130,10 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
     final tone = contentAccent(a, Theme.of(context).brightness);
     final selected = _picks[0] == label;
     return GestureDetector(
-      onTap: () => setState(() => _picks[0] = label),
+      onTap: () {
+        Haptics.selection();
+        setState(() => _picks[0] = label);
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 160),
         margin: const EdgeInsets.only(bottom: 12),
@@ -304,7 +308,10 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
   Widget _optionTile(String label, bool selected, VoidCallback onTap) {
     final tone = contentAccent(_accent, Theme.of(context).brightness);
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        Haptics.selection();
+        onTap();
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 140),
         margin: const EdgeInsets.only(bottom: 10),

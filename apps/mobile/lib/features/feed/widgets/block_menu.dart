@@ -5,10 +5,10 @@ import '../../../core/supabase/supabase_providers.dart';
 import '../../../core/ui_messenger.dart';
 import '../feed_providers.dart';
 
-/// Three-dot overflow for a feed author. On a post you own it offers
-/// "Delete post"; on anyone else's post/comment it offers "Block @name".
-/// Pass [postId] to mark this as a post menu (enables delete on your own
-/// posts). Without it the menu is comment-scoped (block only).
+/// Three-dot overflow for a feed author. On content you own it offers
+/// "Delete post" / "Delete comment"; on anyone else's it offers
+/// "Block @name". Pass [postId] for a post menu or [commentId] for a
+/// comment menu — that's what enables the delete affordance on your own.
 ///
 /// Tap-propagation is stopped so the icon doesn't trigger an enclosing
 /// tap target (e.g. a tappable post card behind it).
@@ -19,6 +19,7 @@ class BlockMenuButton extends ConsumerWidget {
     required this.author,
     this.postId,
     this.postTitle,
+    this.commentId,
     this.iconColor,
     this.iconSize = 18,
   });
@@ -27,6 +28,9 @@ class BlockMenuButton extends ConsumerWidget {
   final String author;
   final String? postId;
   final String? postTitle;
+
+  /// Set on a comment menu — enables "Delete comment" on your own comment.
+  final String? commentId;
   final Color? iconColor;
   final double iconSize;
 
@@ -35,9 +39,11 @@ class BlockMenuButton extends ConsumerWidget {
     if (authorId.isEmpty) return const SizedBox.shrink();
     final me = ref.watch(supabaseClientProvider).auth.currentUser?.id;
     final isOwn = authorId == me;
-    final canDelete = postId != null && isOwn;
-    // Your own comment / your own post with no delete affordance — nothing
-    // to offer, so render nothing.
+    final canDeletePost = postId != null && isOwn;
+    final canDeleteComment = commentId != null && isOwn;
+    final canDelete = canDeletePost || canDeleteComment;
+    // Your own content with no delete affordance — nothing to offer, so
+    // render nothing.
     if (isOwn && !canDelete) return const SizedBox.shrink();
 
     return GestureDetector(
@@ -49,9 +55,16 @@ class BlockMenuButton extends ConsumerWidget {
         offset: const Offset(0, 28),
         icon: Icon(Icons.more_horiz, size: iconSize, color: iconColor),
         onSelected: (action) async {
-          if (action == 'delete' && postId != null) {
-            await ref.read(feedActionsProvider).deletePost(postId!);
-            showBanner('Post deleted');
+          if (action == 'delete') {
+            if (postId != null) {
+              await ref.read(feedActionsProvider).deletePost(postId!);
+              showBanner('Post deleted');
+            } else if (commentId != null) {
+              await ref
+                  .read(feedActionsProvider)
+                  .deleteComment(commentId!);
+              showBanner('Comment deleted');
+            }
           } else if (action == 'block') {
             await ref.read(feedActionsProvider).block(authorId);
             showBanner('Blocked @$author.');
@@ -66,7 +79,9 @@ class BlockMenuButton extends ConsumerWidget {
                   const Icon(Icons.delete_outline,
                       size: 16, color: Colors.redAccent),
                   const SizedBox(width: 8),
-                  const Text('Delete post'),
+                  Text(canDeletePost
+                      ? 'Delete post'
+                      : 'Delete comment'),
                 ],
               ),
             )
