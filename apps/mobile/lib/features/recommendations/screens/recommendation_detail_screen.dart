@@ -11,6 +11,7 @@ import '../../../core/models/recommendation.dart';
 import '../../../core/services/service_providers.dart';
 import '../../../core/ui_messenger.dart';
 import '../../../ui/ui.dart';
+import '../dislikes_provider.dart';
 import '../services/tmdb_service.dart';
 import '../utils/match_score.dart';
 
@@ -80,6 +81,25 @@ class _S extends ConsumerState<RecommendationDetailScreen> {
         _ => ContentAccentName.emerald,
       };
 
+  /// True when the user has marked this title "Not for me".
+  bool get _disliked =>
+      ref.read(dislikedTitlesProvider.notifier).contains(widget.rec.title);
+
+  /// Toggle pick feedback — adding a title makes the recommendation EF
+  /// exclude it on every future generation.
+  Future<void> _toggleDislike(Recommendation r) async {
+    final notifier = ref.read(dislikedTitlesProvider.notifier);
+    if (notifier.contains(r.title)) {
+      await notifier.remove(r.title);
+      showBanner('Feedback cleared for “${r.title}”');
+    } else {
+      await notifier.add(r.title);
+      showBanner('Got it — we won’t recommend “${r.title}” again',
+          type: AdaptiveSnackBarType.success);
+    }
+    if (mounted) setState(() {});
+  }
+
   /// Shares a plain-text blurb of the pick via the OS share sheet.
   Future<void> _share(Recommendation r, String? who) async {
     final icon = switch (r.type) {
@@ -120,6 +140,13 @@ class _S extends ConsumerState<RecommendationDetailScreen> {
           icon: Icons.ios_share,
           iosSymbol: 'square.and.arrow.up',
           onPressed: () => _share(r, who),
+        ),
+        AdaptiveAppBarAction(
+          icon: _disliked
+              ? Icons.thumb_down
+              : Icons.thumb_down_outlined,
+          iosSymbol: _disliked ? 'hand.thumbsdown.fill' : 'hand.thumbsdown',
+          onPressed: () => _toggleDislike(r),
         ),
         AdaptiveAppBarAction(
           icon: _fav ? Icons.favorite : Icons.favorite_border,

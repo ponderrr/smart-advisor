@@ -50,6 +50,12 @@ class StorageKeys {
   /// onboarding language step + the server-side profile.locale stay in
   /// sync with this; the app reads it to localise the interface.
   static const String prefLocale = 'smart_advisor_pref_locale';
+
+  /// Titles the user marked "Not for me" — a JSON string array. Threaded
+  /// into the recommendation prompt as a hard exclusion so the AI stops
+  /// surfacing them, and pick feedback compounds over time.
+  static const String prefDislikedTitles =
+      'smart_advisor_pref_disliked_titles';
 }
 
 /// Default per-request network timeout (web FETCH_TIMEOUT_MS).

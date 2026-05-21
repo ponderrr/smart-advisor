@@ -165,8 +165,7 @@ function buildHardConstraints(
   const slice = hasPerFormat
     ? (root[type] as Record<string, unknown> | undefined) ?? null
     : (root as Record<string, unknown>);
-  if (!slice) return "";
-  const f = slice as {
+  const f = (slice ?? {}) as {
     avoidGenres?: unknown;
     maxRuntimeMinutes?: unknown;
     language?: unknown;
@@ -174,6 +173,21 @@ function buildHardConstraints(
   };
 
   const lines: string[] = [];
+
+  // Pick feedback — titles the user marked "Not for me". Top-level on the
+  // filters blob (not per-format) and applied to every type's prompt.
+  const disliked = Array.isArray(root.dislikedTitles)
+    ? root.dislikedTitles
+      .map((t) => String(t).trim())
+      .filter((t) => t.length > 0)
+    : [];
+  if (disliked.length > 0) {
+    lines.push(
+      `- The user disliked these — never recommend them again: ${
+        disliked.join("; ")
+      }.`,
+    );
+  }
 
   const genres = Array.isArray(f.avoidGenres)
     ? f.avoidGenres

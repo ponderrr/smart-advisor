@@ -1,5 +1,9 @@
+import 'dart:convert';
+
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/constants/app_constants.dart';
 import '../../../core/models/ai_models.dart';
 import '../../../core/models/answer.dart';
 import '../../../core/models/enums.dart';
@@ -56,6 +60,25 @@ class RecommendationFlow {
     }
   }
 
+  /// Reads the per-device "Not for me" title list (pick feedback). The
+  /// Edge Function threads it into the prompt as a hard exclusion so the
+  /// AI stops surfacing titles the user has rejected.
+  Future<List<String>> _loadDislikes() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(StorageKeys.prefDislikedTitles);
+      if (raw == null || raw.isEmpty) return const [];
+      final list = jsonDecode(raw);
+      if (list is! List) return const [];
+      return list
+          .map((e) => e.toString().trim())
+          .where((e) => e.isNotEmpty)
+          .toList();
+    } catch (_) {
+      return const [];
+    }
+  }
+
   Future<ServiceResult<List<Recommendation>>> generate({
     required List<Answer> answers,
     required ContentType contentType,
@@ -68,7 +91,13 @@ class RecommendationFlow {
     // Pull the user's saved hard filters once so every rec path (quiz,
     // surprise) respects them without each caller wiring it. An explicit
     // override wins if a caller passes one.
-    final filters = recommendationFilters ?? await _loadFilters();
+    var filters = recommendationFilters ?? await _loadFilters();
+    // Fold in "Not for me" pick feedback as a top-level dislikedTitles
+    // exclusion the Edge Function reads alongside the per-format filters.
+    final dislikes = await _loadDislikes();
+    if (dislikes.isNotEmpty) {
+      filters = {...?filters, 'dislikedTitles': dislikes};
+    }
     // Web enhanced-recommendations parity: 3 of a single type, 1+1+1 for
     // mix, 2 movies+1 book for legacy "both". Each EF call returns one of
     // each type, so fan out N parallel calls and dedup by title.
