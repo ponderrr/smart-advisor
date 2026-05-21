@@ -38,5 +38,10 @@
   "navLibrary": "Libreria",
   "navDiscover": "Scopri",
   "navHistory": "Cronologia",
-  "navProfile": "Profilo"
+  "navProfile": "Profilo",
+  "onboardingReviewEyebrow": "Un ultimo sguardo",
+  "onboardingReviewTitle": "Va tutto bene?",
+  "onboardingReviewSubtitle": "Modifica ciò che vuoi prima di salvare.",
+  "reviewEdit": "Modifica",
+  "reviewNone": "Nessuno"
 }

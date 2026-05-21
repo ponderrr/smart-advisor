@@ -38,5 +38,10 @@
   "navLibrary": "收藏库",
   "navDiscover": "发现",
   "navHistory": "历史",
-  "navProfile": "个人资料"
+  "navProfile": "个人资料",
+  "onboardingReviewEyebrow": "最后确认",
+  "onboardingReviewTitle": "这样对吗？",
+  "onboardingReviewSubtitle": "在保存前可编辑任何想修改的项。",
+  "reviewEdit": "编辑",
+  "reviewNone": "无"
 }

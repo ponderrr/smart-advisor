@@ -133,4 +133,20 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get navProfile => 'Perfil';
+
+  @override
+  String get onboardingReviewEyebrow => 'Uma última olhada';
+
+  @override
+  String get onboardingReviewTitle => 'Está tudo certo?';
+
+  @override
+  String get onboardingReviewSubtitle =>
+      'Edite o que quiser antes de salvarmos.';
+
+  @override
+  String get reviewEdit => 'Editar';
+
+  @override
+  String get reviewNone => 'Nenhum';
 }

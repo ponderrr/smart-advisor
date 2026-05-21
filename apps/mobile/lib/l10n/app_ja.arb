@@ -38,5 +38,10 @@
   "navLibrary": "ライブラリ",
   "navDiscover": "見つける",
   "navHistory": "履歴",
-  "navProfile": "プロフィール"
+  "navProfile": "プロフィール",
+  "onboardingReviewEyebrow": "最終確認",
+  "onboardingReviewTitle": "これで合っていますか？",
+  "onboardingReviewSubtitle": "保存する前に変更したい項目を編集できます。",
+  "reviewEdit": "編集",
+  "reviewNone": "なし"
 }

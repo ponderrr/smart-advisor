@@ -127,4 +127,19 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get navProfile => '프로필';
+
+  @override
+  String get onboardingReviewEyebrow => '마지막 확인';
+
+  @override
+  String get onboardingReviewTitle => '이대로 괜찮나요?';
+
+  @override
+  String get onboardingReviewSubtitle => '저장하기 전에 원하는 항목을 수정하세요.';
+
+  @override
+  String get reviewEdit => '편집';
+
+  @override
+  String get reviewNone => '없음';
 }

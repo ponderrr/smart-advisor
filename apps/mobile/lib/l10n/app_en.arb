@@ -155,5 +155,25 @@
   "navProfile": "Profile",
   "@navProfile": {
     "description": "Bottom-nav label: navProfile"
+  },
+  "onboardingReviewEyebrow": "One last look",
+  "@onboardingReviewEyebrow": {
+    "description": "Onboarding review step: onboardingReviewEyebrow"
+  },
+  "onboardingReviewTitle": "Does this look right?",
+  "@onboardingReviewTitle": {
+    "description": "Onboarding review step: onboardingReviewTitle"
+  },
+  "onboardingReviewSubtitle": "Edit anything you'd like to change before we save it.",
+  "@onboardingReviewSubtitle": {
+    "description": "Onboarding review step: onboardingReviewSubtitle"
+  },
+  "reviewEdit": "Edit",
+  "@reviewEdit": {
+    "description": "Onboarding review step: reviewEdit"
+  },
+  "reviewNone": "None",
+  "@reviewNone": {
+    "description": "Onboarding review step: reviewNone"
   }
 }

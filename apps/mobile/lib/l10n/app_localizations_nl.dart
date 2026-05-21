@@ -133,4 +133,20 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get navProfile => 'Profiel';
+
+  @override
+  String get onboardingReviewEyebrow => 'Nog even checken';
+
+  @override
+  String get onboardingReviewTitle => 'Klopt dit?';
+
+  @override
+  String get onboardingReviewSubtitle =>
+      'Pas aan wat je wilt voordat we het opslaan.';
+
+  @override
+  String get reviewEdit => 'Wijzig';
+
+  @override
+  String get reviewNone => 'Geen';
 }

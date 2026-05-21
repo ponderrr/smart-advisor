@@ -124,4 +124,19 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get navProfile => '个人资料';
+
+  @override
+  String get onboardingReviewEyebrow => '最后确认';
+
+  @override
+  String get onboardingReviewTitle => '这样对吗？';
+
+  @override
+  String get onboardingReviewSubtitle => '在保存前可编辑任何想修改的项。';
+
+  @override
+  String get reviewEdit => '编辑';
+
+  @override
+  String get reviewNone => '无';
 }

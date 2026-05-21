@@ -38,5 +38,10 @@
   "navLibrary": "보관함",
   "navDiscover": "발견",
   "navHistory": "기록",
-  "navProfile": "프로필"
+  "navProfile": "프로필",
+  "onboardingReviewEyebrow": "마지막 확인",
+  "onboardingReviewTitle": "이대로 괜찮나요?",
+  "onboardingReviewSubtitle": "저장하기 전에 원하는 항목을 수정하세요.",
+  "reviewEdit": "편집",
+  "reviewNone": "없음"
 }

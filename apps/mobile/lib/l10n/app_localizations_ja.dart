@@ -125,4 +125,19 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get navProfile => 'プロフィール';
+
+  @override
+  String get onboardingReviewEyebrow => '最終確認';
+
+  @override
+  String get onboardingReviewTitle => 'これで合っていますか？';
+
+  @override
+  String get onboardingReviewSubtitle => '保存する前に変更したい項目を編集できます。';
+
+  @override
+  String get reviewEdit => '編集';
+
+  @override
+  String get reviewNone => 'なし';
 }

@@ -347,6 +347,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Profile'**
   String get navProfile;
+
+  /// Onboarding review step: onboardingReviewEyebrow
+  ///
+  /// In en, this message translates to:
+  /// **'One last look'**
+  String get onboardingReviewEyebrow;
+
+  /// Onboarding review step: onboardingReviewTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Does this look right?'**
+  String get onboardingReviewTitle;
+
+  /// Onboarding review step: onboardingReviewSubtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Edit anything you\'d like to change before we save it.'**
+  String get onboardingReviewSubtitle;
+
+  /// Onboarding review step: reviewEdit
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get reviewEdit;
+
+  /// Onboarding review step: reviewNone
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get reviewNone;
 }
 
 class _AppLocalizationsDelegate

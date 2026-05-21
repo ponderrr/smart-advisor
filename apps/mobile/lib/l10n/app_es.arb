@@ -38,5 +38,10 @@
   "navLibrary": "Biblioteca",
   "navDiscover": "Descubrir",
   "navHistory": "Historial",
-  "navProfile": "Perfil"
+  "navProfile": "Perfil",
+  "onboardingReviewEyebrow": "Una última mirada",
+  "onboardingReviewTitle": "¿Se ve bien?",
+  "onboardingReviewSubtitle": "Edita lo que quieras cambiar antes de guardarlo.",
+  "reviewEdit": "Editar",
+  "reviewNone": "Ninguno"
 }

@@ -38,5 +38,10 @@
   "navLibrary": "Bibliotheek",
   "navDiscover": "Ontdek",
   "navHistory": "Geschiedenis",
-  "navProfile": "Profiel"
+  "navProfile": "Profiel",
+  "onboardingReviewEyebrow": "Nog even checken",
+  "onboardingReviewTitle": "Klopt dit?",
+  "onboardingReviewSubtitle": "Pas aan wat je wilt voordat we het opslaan.",
+  "reviewEdit": "Wijzig",
+  "reviewNone": "Geen"
 }

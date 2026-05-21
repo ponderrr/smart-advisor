@@ -53,7 +53,7 @@ const _commonGenres = <String>[
 ];
 
 class _S extends ConsumerState<OnboardingScreen> {
-  static const _steps = 5;
+  static const _steps = 6;
 
   final _pc = PageController();
   int _page = 0;
@@ -91,6 +91,13 @@ class _S extends ConsumerState<OnboardingScreen> {
     } else {
       _finish(skip: false);
     }
+  }
+
+  /// Jump straight to a step — used by the review step's Edit buttons.
+  void _jumpTo(int page) {
+    _pc.animateToPage(page,
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic);
   }
 
   void _back() {
@@ -234,6 +241,7 @@ class _S extends ConsumerState<OnboardingScreen> {
                   _StepShell(child: _stepFocus()),
                   _StepShell(child: _stepAvoidGenres()),
                   _StepShell(child: _stepReminders(c)),
+                  _StepShell(child: _stepReview()),
                 ],
               ),
             ),
@@ -500,6 +508,146 @@ class _S extends ConsumerState<OnboardingScreen> {
               fontSize: 12, color: c.mutedForeground),
         ).animateFadeUp(delay: 400),
       ],
+    );
+  }
+
+  // ── Step 6: review ─────────────────────────────────────────────────
+  Widget _stepReview() {
+    final l = AppLocalizations.of(context);
+    final profileName =
+        ref.watch(currentProfileProvider).asData?.value?.name;
+    final name = _name.text.trim().isNotEmpty
+        ? _name.text.trim()
+        : (profileName ?? 'Jane');
+    final language = _localeCode == kSystemLocaleCode
+        ? l.languageSystemDefault
+        : (kLanguageNames[_localeCode] ?? _localeCode);
+    final focus = switch (_contentFocus) {
+      'movie' => l.contentMovies,
+      'book' => l.contentBooks,
+      'music' => l.contentMusic,
+      _ => l.contentMix,
+    };
+    final avoid = _avoidGenres.isEmpty
+        ? l.reviewNone
+        : (_avoidGenres.toList()..sort()).join(', ');
+    final reminders = _reminders ? l.remindersWeekly : l.remindersOff;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Eyebrow(l.onboardingReviewEyebrow).animateFadeUp(delay: 80),
+        const SizedBox(height: 10),
+        BrandHeading(l.onboardingReviewTitle, size: 24, center: true)
+            .animateFadeUp(delay: 160),
+        const SizedBox(height: 12),
+        Subtitle(l.onboardingReviewSubtitle, center: true)
+            .animateFadeUp(delay: 240),
+        const SizedBox(height: 20),
+        _ReviewRow(
+          label: l.onboardingNameTitle,
+          value: name,
+          editLabel: l.reviewEdit,
+          onEdit: () => _jumpTo(0),
+        ).animateFadeUp(delay: 300),
+        const SizedBox(height: 8),
+        _ReviewRow(
+          label: l.languageStepEyebrow,
+          value: language,
+          editLabel: l.reviewEdit,
+          onEdit: () => _jumpTo(1),
+        ).animateFadeUp(delay: 340),
+        const SizedBox(height: 8),
+        _ReviewRow(
+          label: l.onboardingFocusEyebrow,
+          value: focus,
+          editLabel: l.reviewEdit,
+          onEdit: () => _jumpTo(2),
+        ).animateFadeUp(delay: 380),
+        const SizedBox(height: 8),
+        _ReviewRow(
+          label: l.onboardingAvoidEyebrow,
+          value: avoid,
+          editLabel: l.reviewEdit,
+          onEdit: () => _jumpTo(3),
+        ).animateFadeUp(delay: 420),
+        const SizedBox(height: 8),
+        _ReviewRow(
+          label: l.onboardingRemindersEyebrow,
+          value: reminders,
+          editLabel: l.reviewEdit,
+          onEdit: () => _jumpTo(4),
+        ).animateFadeUp(delay: 460),
+      ],
+    );
+  }
+}
+
+/// One summary row on the review step — label + value + an Edit pill
+/// that jumps back to the relevant step.
+class _ReviewRow extends StatelessWidget {
+  const _ReviewRow({
+    required this.label,
+    required this.value,
+    required this.editLabel,
+    required this.onEdit,
+  });
+  final String label;
+  final String value;
+  final String editLabel;
+  final VoidCallback onEdit;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
+      decoration: BoxDecoration(
+        color: c.muted,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: c.border),
+      ),
+      child: Row(children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label.toUpperCase(),
+                  style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.6,
+                      color: c.mutedForeground)),
+              const SizedBox(height: 2),
+              Text(value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: c.foreground)),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        GestureDetector(
+          onTap: onEdit,
+          child: Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Tw.indigo500.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(editLabel,
+                style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: Tw.indigo500)),
+          ),
+        ),
+      ]),
     );
   }
 }
