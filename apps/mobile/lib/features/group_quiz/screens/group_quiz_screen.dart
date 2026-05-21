@@ -160,7 +160,6 @@ class _S extends ConsumerState<GroupQuizScreen> {
   /// slider + color-coded preset pills.
   Widget _numberSurface({
     required ContentAccentTone tone,
-    required String eyebrow,
     required int value,
     required String unit,
     String? badge,
@@ -181,10 +180,6 @@ class _S extends ConsumerState<GroupQuizScreen> {
         border: Border.all(color: tone.surfaceBorder),
       ),
       child: Column(children: [
-        Align(
-            alignment: Alignment.centerLeft,
-            child: Eyebrow(eyebrow, color: tone.text)),
-        const SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -559,7 +554,6 @@ class _S extends ConsumerState<GroupQuizScreen> {
                 'More questions, sharper group pick.'),
             _numberSurface(
               tone: tone,
-              eyebrow: 'Questions',
               value: _count,
               unit: 'questions',
               badge: '≈ ${(_count * 18 + 30) ~/ 60 + 1} min',
@@ -588,7 +582,6 @@ class _S extends ConsumerState<GroupQuizScreen> {
                 'The most people who can join this session.'),
             _numberSurface(
               tone: tone,
-              eyebrow: 'Max players',
               value: _maxP,
               unit: 'players',
               min: 2,
