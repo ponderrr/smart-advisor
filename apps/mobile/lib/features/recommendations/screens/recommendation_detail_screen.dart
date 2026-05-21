@@ -2,6 +2,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/models/enums.dart';
@@ -79,6 +80,28 @@ class _S extends ConsumerState<RecommendationDetailScreen> {
         _ => ContentAccentName.emerald,
       };
 
+  /// Shares a plain-text blurb of the pick via the OS share sheet.
+  Future<void> _share(Recommendation r, String? who) async {
+    final icon = switch (r.type) {
+      'movie' => '🎬',
+      'music' => '🎵',
+      _ => '📚',
+    };
+    final byline = [
+      if (who != null && who.trim().isNotEmpty) who.trim(),
+      if (r.year != null) '${r.year}',
+    ].join(' · ');
+    final reason = (r.explanation ?? r.description ?? '').trim();
+    final text = [
+      '$icon ${r.title}${byline.isEmpty ? '' : '\n$byline'}',
+      if (reason.isNotEmpty) '\n$reason',
+      '\nShared from Smart Advisor',
+    ].join('\n');
+    await SharePlus.instance.share(
+      ShareParams(text: text, subject: r.title),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final r = widget.rec;
@@ -93,6 +116,11 @@ class _S extends ConsumerState<RecommendationDetailScreen> {
     return BrandScaffold(
       title: r.type[0].toUpperCase() + r.type.substring(1),
       actions: [
+        AdaptiveAppBarAction(
+          icon: Icons.ios_share,
+          iosSymbol: 'square.and.arrow.up',
+          onPressed: () => _share(r, who),
+        ),
         AdaptiveAppBarAction(
           icon: _fav ? Icons.favorite : Icons.favorite_border,
           iosSymbol: _fav ? 'heart.fill' : 'heart',
