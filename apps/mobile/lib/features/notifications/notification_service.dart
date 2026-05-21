@@ -52,7 +52,20 @@ class NotificationService {
     return (a ?? i ?? true);
   }
 
-  /// A gentle weekly "come back and discover something" reminder.
+  /// The next Saturday at 11:00 local time — a calm weekend slot for the
+  /// weekly nudge, instead of "whatever time the user toggled it on".
+  static tz.TZDateTime _nextSaturdayLateMorning() {
+    final now = tz.TZDateTime.now(tz.local);
+    var when = tz.TZDateTime(tz.local, now.year, now.month, now.day, 11);
+    // DateTime.weekday: Mon=1 … Sat=6, Sun=7.
+    var daysUntilSat = (DateTime.saturday - when.weekday) % 7;
+    // If it's already Saturday but past 11:00, jump to next week.
+    if (daysUntilSat == 0 && !when.isAfter(now)) daysUntilSat = 7;
+    return when.add(Duration(days: daysUntilSat));
+  }
+
+  /// A gentle weekly "come back and discover something" reminder. Recurs
+  /// every Saturday ~11:00 local (matchDateTimeComponents weekly repeat).
   static Future<void> scheduleWeeklyReminder() async {
     await init();
     if (!_ready) return;
@@ -61,8 +74,7 @@ class NotificationService {
       id: _weeklyId,
       title: 'Discover something new',
       body: 'Take a 2-minute quiz and get a fresh pick.',
-      scheduledDate:
-          tz.TZDateTime.now(tz.local).add(const Duration(days: 7)),
+      scheduledDate: _nextSaturdayLateMorning(),
       notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
             'reminders', 'Reminders',
