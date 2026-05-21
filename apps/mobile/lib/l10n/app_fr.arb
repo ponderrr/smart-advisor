@@ -1,6 +1,7 @@
 {
   "@@locale": "fr",
   "languageName": "Français",
+  "languageSystemDefault": "Par défaut du système",
   "languageStepEyebrow": "Langue",
   "languageStepTitle": "Choisissez votre langue",
   "languageStepSubtitle": "Nous traduirons l'interface de l'application en conséquence.",

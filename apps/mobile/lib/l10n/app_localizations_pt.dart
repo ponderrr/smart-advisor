@@ -12,6 +12,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get languageName => 'Português';
 
   @override
+  String get languageSystemDefault => 'Padrão do sistema';
+
+  @override
   String get languageStepEyebrow => 'Idioma';
 
   @override

@@ -1,6 +1,7 @@
 {
   "@@locale": "it",
   "languageName": "Italiano",
+  "languageSystemDefault": "Predefinito del sistema",
   "languageStepEyebrow": "Lingua",
   "languageStepTitle": "Scegli la tua lingua",
   "languageStepSubtitle": "Tradurremo l'interfaccia dell'app di conseguenza.",

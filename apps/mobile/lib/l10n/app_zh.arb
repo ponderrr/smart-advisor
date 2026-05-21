@@ -1,6 +1,7 @@
 {
   "@@locale": "zh",
   "languageName": "中文",
+  "languageSystemDefault": "系统默认",
   "languageStepEyebrow": "语言",
   "languageStepTitle": "选择你的语言",
   "languageStepSubtitle": "我们会将应用界面翻译为对应语言。",

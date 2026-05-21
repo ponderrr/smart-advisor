@@ -12,6 +12,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get languageName => '中文';
 
   @override
+  String get languageSystemDefault => '系统默认';
+
+  @override
   String get languageStepEyebrow => '语言';
 
   @override

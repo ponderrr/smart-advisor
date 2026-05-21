@@ -12,6 +12,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get languageName => '한국어';
 
   @override
+  String get languageSystemDefault => '시스템 기본값';
+
+  @override
   String get languageStepEyebrow => '언어';
 
   @override

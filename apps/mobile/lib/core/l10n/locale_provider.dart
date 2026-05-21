@@ -35,29 +35,41 @@ const kLanguageNames = <String, String>{
   'ko': '한국어',
 };
 
-/// App UI locale. Hydrates from the per-device [StorageKeys.prefLocale]
-/// pref; [set] persists the choice and flips the live MaterialApp locale.
-class LocaleNotifier extends Notifier<Locale> {
+/// Sentinel pref value meaning "follow the device language" — the app
+/// then passes a null locale to MaterialApp and Flutter resolves the
+/// platform locale against [kSupportedLocales].
+const kSystemLocaleCode = 'system';
+
+/// App UI locale. `null` state == follow the device / OS language (incl.
+/// Android's per-app language setting). A concrete [Locale] pins the app
+/// to that language regardless of the device. Hydrates from the
+/// per-device [StorageKeys.prefLocale] pref.
+class LocaleNotifier extends Notifier<Locale?> {
   @override
-  Locale build() {
+  Locale? build() {
     final prefs = ref.watch(sharedPreferencesProvider).asData?.value;
     return _resolve(prefs?.getString(StorageKeys.prefLocale));
   }
 
-  static Locale _resolve(String? code) {
-    if (code == null) return const Locale('en');
+  /// null / "system" / unknown → null (system default); a supported code
+  /// → that Locale.
+  static Locale? _resolve(String? code) {
+    if (code == null || code == kSystemLocaleCode) return null;
     for (final l in kSupportedLocales) {
       if (l.languageCode == code) return l;
     }
-    return const Locale('en');
+    return null;
   }
 
-  Future<void> set(String code) async {
-    state = _resolve(code);
+  /// Persist + apply a language choice. Pass [kSystemLocaleCode] (or null)
+  /// to fall back to the device language.
+  Future<void> set(String? code) async {
+    final next = code ?? kSystemLocaleCode;
+    state = _resolve(next);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(StorageKeys.prefLocale, state.languageCode);
+    await prefs.setString(StorageKeys.prefLocale, next);
   }
 }
 
 final localeProvider =
-    NotifierProvider<LocaleNotifier, Locale>(LocaleNotifier.new);
+    NotifierProvider<LocaleNotifier, Locale?>(LocaleNotifier.new);

@@ -1,6 +1,7 @@
 {
   "@@locale": "nl",
   "languageName": "Nederlands",
+  "languageSystemDefault": "Systeemstandaard",
   "languageStepEyebrow": "Taal",
   "languageStepTitle": "Kies je taal",
   "languageStepSubtitle": "We vertalen de app-interface dienovereenkomstig.",

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Declares the languages this app supports so Android 13+ surfaces the
+  per-app language picker (Settings → Apps → Smart Advisor → Language).
+  Must stay in sync with kSupportedLocales in lib/core/l10n/locale_provider.dart.
+-->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="en"/>
+    <locale android:name="es"/>
+    <locale android:name="fr"/>
+    <locale android:name="de"/>
+    <locale android:name="pt"/>
+    <locale android:name="it"/>
+    <locale android:name="nl"/>
+    <locale android:name="ja"/>
+    <locale android:name="zh"/>
+    <locale android:name="ko"/>
+</locale-config>

@@ -12,6 +12,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get languageName => 'English';
 
   @override
+  String get languageSystemDefault => 'System default';
+
+  @override
   String get languageStepEyebrow => 'Language';
 
   @override

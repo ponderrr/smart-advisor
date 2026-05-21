@@ -12,6 +12,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get languageName => 'Nederlands';
 
   @override
+  String get languageSystemDefault => 'Systeemstandaard';
+
+  @override
   String get languageStepEyebrow => 'Taal';
 
   @override

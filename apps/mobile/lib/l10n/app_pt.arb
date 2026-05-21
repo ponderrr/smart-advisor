@@ -1,6 +1,7 @@
 {
   "@@locale": "pt",
   "languageName": "Português",
+  "languageSystemDefault": "Padrão do sistema",
   "languageStepEyebrow": "Idioma",
   "languageStepTitle": "Escolha o seu idioma",
   "languageStepSubtitle": "Vamos traduzir a interface do app para corresponder.",

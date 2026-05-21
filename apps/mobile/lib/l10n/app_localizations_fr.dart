@@ -12,6 +12,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get languageName => 'Français';
 
   @override
+  String get languageSystemDefault => 'Par défaut du système';
+
+  @override
   String get languageStepEyebrow => 'Langue';
 
   @override

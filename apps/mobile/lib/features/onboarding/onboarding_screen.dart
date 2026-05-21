@@ -71,9 +71,9 @@ class _S extends ConsumerState<OnboardingScreen> {
   @override
   void initState() {
     super.initState();
-    // Pre-select the language already in effect so the step reflects
-    // reality instead of defaulting to English every time.
-    _localeCode = ref.read(localeProvider).languageCode;
+    // Pre-select the language already in effect — a concrete locale, or
+    // the "system default" sentinel when the app is following the device.
+    _localeCode = ref.read(localeProvider)?.languageCode ?? kSystemLocaleCode;
   }
 
   @override
@@ -121,11 +121,17 @@ class _S extends ConsumerState<OnboardingScreen> {
         : (_name.text.trim().isEmpty
             ? (profile?.name ?? 'there')
             : _name.text.trim());
-    final locale = skip ? 'en' : _localeCode;
+    // The per-device pref carries the "system default" sentinel, but the
+    // profile.locale column wants a concrete BCP-47 code (the web client
+    // reads it). Resolve the device language when the user is on system.
+    final localePref = skip ? kSystemLocaleCode : _localeCode;
+    final profileLocale = localePref == kSystemLocaleCode
+        ? _deviceLanguageCode()
+        : localePref;
 
     final res = await ref
         .read(authServiceProvider)
-        .completeOnboarding(name: name, locale: locale);
+        .completeOnboarding(name: name, locale: profileLocale);
     if (!mounted) return;
     if (res.isError) {
       setState(() {
@@ -135,8 +141,10 @@ class _S extends ConsumerState<OnboardingScreen> {
       return;
     }
 
-    // Flip the live app language to match the saved profile locale.
-    await ref.read(localeProvider.notifier).set(locale);
+    // Persist the language choice (the live switch already happened on
+    // tap via _pickLocale; this also covers the skip path). The sentinel
+    // is kept as-is so "system default" keeps following the device.
+    await ref.read(localeProvider.notifier).set(localePref);
 
     final prefs = await SharedPreferences.getInstance();
 
@@ -327,45 +335,59 @@ class _S extends ConsumerState<OnboardingScreen> {
 
   // ── Step 2: locale ──────────────────────────────────────────────────
   Widget _stepLocale() {
-    // Override the localizations for just this subtree to the language the
-    // user is currently tapping, so the step previews live in that
-    // language before they commit — and proves the l10n wiring works.
-    return Localizations.override(
-      context: context,
-      locale: Locale(_localeCode),
-      child: Builder(builder: (context) {
-        final l = AppLocalizations.of(context);
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
+    // The app switches language live on tap (see _pickLocale), so the
+    // whole step is already rendering in the chosen language — no
+    // Localizations.override needed.
+    final l = AppLocalizations.of(context);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Eyebrow(l.languageStepEyebrow).animateFadeUp(delay: 80),
+        const SizedBox(height: 10),
+        BrandHeading(l.languageStepTitle, size: 26, center: true)
+            .animateFadeUp(delay: 160),
+        const SizedBox(height: 12),
+        Subtitle(l.languageStepSubtitle, center: true)
+            .animateFadeUp(delay: 220),
+        const SizedBox(height: 24),
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 8,
+          runSpacing: 8,
           children: [
-            Eyebrow(l.languageStepEyebrow).animateFadeUp(delay: 80),
-            const SizedBox(height: 10),
-            BrandHeading(l.languageStepTitle, size: 26, center: true)
-                .animateFadeUp(delay: 160),
-            const SizedBox(height: 12),
-            Subtitle(
-              l.languageStepSubtitle,
-              center: true,
-            ).animateFadeUp(delay: 220),
-            const SizedBox(height: 24),
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final entry in kLanguageNames.entries)
-                  _LanguageChip(
-                    label: entry.value,
-                    selected: _localeCode == entry.key,
-                    onTap: () => setState(() => _localeCode = entry.key),
-                  ),
-              ],
-            ).animateFadeUp(delay: 300),
+            _LanguageChip(
+              label: l.languageSystemDefault,
+              selected: _localeCode == kSystemLocaleCode,
+              onTap: () => _pickLocale(kSystemLocaleCode),
+            ),
+            for (final entry in kLanguageNames.entries)
+              _LanguageChip(
+                label: entry.value,
+                selected: _localeCode == entry.key,
+                onTap: () => _pickLocale(entry.key),
+              ),
           ],
-        );
-      }),
+        ).animateFadeUp(delay: 300),
+      ],
     );
+  }
+
+  /// Records the choice AND switches the live app language immediately, so
+  /// the rest of onboarding is already in the picked language.
+  void _pickLocale(String code) {
+    setState(() => _localeCode = code);
+    ref.read(localeProvider.notifier).set(code);
+  }
+
+  /// The device's language code if the app ships translations for it,
+  /// else English — used to fill profile.locale when the user is on
+  /// "system default" (that column wants a concrete code).
+  String _deviceLanguageCode() {
+    final device = View.of(context).platformDispatcher.locale.languageCode;
+    final supported =
+        kSupportedLocales.any((l) => l.languageCode == device);
+    return supported ? device : 'en';
   }
 
   // ── Step 3: content focus ──────────────────────────────────────────

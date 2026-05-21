@@ -4,6 +4,10 @@
   "@languageName": {
     "description": "The language's own name, shown in the language picker."
   },
+  "languageSystemDefault": "System default",
+  "@languageSystemDefault": {
+    "description": "Language-picker option to follow the device language."
+  },
   "languageStepEyebrow": "Language",
   "@languageStepEyebrow": {
     "description": "Eyebrow label on the onboarding language step."

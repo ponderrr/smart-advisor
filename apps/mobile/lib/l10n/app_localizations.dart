@@ -120,6 +120,12 @@ abstract class AppLocalizations {
   /// **'English'**
   String get languageName;
 
+  /// Language-picker option to follow the device language.
+  ///
+  /// In en, this message translates to:
+  /// **'System default'**
+  String get languageSystemDefault;
+
   /// Eyebrow label on the onboarding language step.
   ///
   /// In en, this message translates to:

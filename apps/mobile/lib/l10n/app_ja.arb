@@ -1,6 +1,7 @@
 {
   "@@locale": "ja",
   "languageName": "日本語",
+  "languageSystemDefault": "システムのデフォルト",
   "languageStepEyebrow": "言語",
   "languageStepTitle": "言語を選択",
   "languageStepSubtitle": "アプリの表示を選択した言語に翻訳します。",
