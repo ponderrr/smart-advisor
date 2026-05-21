@@ -46,8 +46,13 @@ import { useFeedVisibility } from "@/features/feed/use-feed-visibility";
 import { PageLoader } from "@/components/ui/loader";
 import { getAccentTone } from "@/features/quiz/utils/content-accent";
 import { getRecTypeAccent } from "@/features/recommendations/utils/type-accent";
-import { useFeedStore } from "@/features/feed/store";
-import { useVisiblePosts } from "@/features/feed/use-visible-posts";
+import {
+  useCreatePost,
+  useFollowing,
+  useSaved,
+  useToggleSave,
+  useVisibleFeed,
+} from "@/features/feed/use-feed";
 import { FollowButton } from "@/features/feed/components/follow-button";
 import { FeedAvatar } from "@/features/feed/components/feed-avatar";
 import { BlockMenuButton } from "@/features/feed/components/block-menu";
@@ -155,8 +160,9 @@ function PostCard({
 }) {
   const t = tone(post.community);
   const ribbon = getRecTypeAccent(COMMUNITY_CONTENT[post.community]).stripe;
-  const saved = useFeedStore((s) => s.saved.has(post.id));
-  const toggleSave = useFeedStore((s) => s.toggleSave);
+  const { data: savedIds } = useSaved();
+  const saved = (savedIds ?? []).includes(post.id);
+  const toggleSave = useToggleSave();
 
   if (view === "list") {
     return (
@@ -208,9 +214,12 @@ function PostCard({
           aria-label={saved ? "Remove from library" : "Save to library"}
           onClick={(e) => {
             e.stopPropagation();
-            const now = toggleSave(post.id);
-            if (now) toast.success(`"${post.title}" saved to your library`);
-            else toast("Removed from your library");
+            toggleSave.mutate(post.id, {
+              onSuccess: (now) =>
+                now
+                  ? toast.success(`"${post.title}" saved to your library`)
+                  : toast("Removed from your library"),
+            });
           }}
           className={cn(
             "shrink-0 transition-transform hover:scale-110",
@@ -219,7 +228,7 @@ function PostCard({
         >
           {saved ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
         </button>
-        <BlockMenuButton author={post.author} />
+        <BlockMenuButton authorId={post.authorId} author={post.author} />
       </motion.div>
     );
   }
@@ -245,12 +254,14 @@ function PostCard({
             type="button"
             aria-label={saved ? "Remove from library" : "Save to library"}
             onClick={() => {
-              const now = toggleSave(post.id);
-              if (now) {
-                toast.success(`"${post.title}" saved to your library`);
-              } else {
-                toast("Removed from your library");
-              }
+              toggleSave.mutate(post.id, {
+                onSuccess: (now) =>
+                  now
+                    ? toast.success(
+                        `"${post.title}" saved to your library`,
+                      )
+                    : toast("Removed from your library"),
+              });
             }}
             className={cn(
               "transition-transform hover:scale-110",
@@ -297,13 +308,13 @@ function PostCard({
                   {post.tasteMatch}% your taste
                 </span>
               )}
-              <BlockMenuButton author={post.author} />
+              <BlockMenuButton authorId={post.authorId} author={post.author} />
             </div>
           </div>
 
           <div className="mt-2 flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
             <Link
-              href={`/feed/u/${encodeURIComponent(post.author)}`}
+              href={`/feed/u/${post.authorId ?? ""}`}
               onClick={(e) => e.stopPropagation()}
               className="group/author flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-200"
             >
@@ -316,7 +327,11 @@ function PostCard({
               {ACTIVITY_VERB[post.activity]} · {agoLabel(post.ageHours)}
             </span>
             <span onClick={(e) => e.stopPropagation()}>
-              <FollowButton author={post.author} size="sm" />
+              <FollowButton
+                authorId={post.authorId}
+                authorName={post.author}
+                size="sm"
+              />
             </span>
           </div>
 
@@ -367,7 +382,7 @@ const ACTIVITIES: ReadonlyArray<{
 ];
 
 function Composer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const addPost = useFeedStore((s) => s.addPost);
+  const createPost = useCreatePost();
   const [visibility] = useFeedVisibility();
   const isPrivate = visibility === "private";
   const [community, setCommunity] = useState<FeedCommunity>("movies");
@@ -377,25 +392,31 @@ function Composer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [body, setBody] = useState("");
 
   function submit() {
-    if (!title.trim()) return;
-    addPost({
-      community,
-      title: title.trim(),
-      activity,
-      creator: creator || undefined,
-      body: body || undefined,
-      posterUrl: undefined,
-      year: undefined,
-    });
-    toast.success(
-      isPrivate
-        ? "Saved to your picks — not broadcast (private profile)"
-        : `Shared with ${COMMUNITY_LABEL[community]} friends`,
+    if (!title.trim() || createPost.isPending) return;
+    createPost.mutate(
+      {
+        community,
+        title: title.trim(),
+        activity,
+        creator: creator || undefined,
+        body: body || undefined,
+      },
+      {
+        onSuccess: () => {
+          toast.success(
+            isPrivate
+              ? "Saved to your picks — not broadcast (private profile)"
+              : `Shared with ${COMMUNITY_LABEL[community]} friends`,
+          );
+          setTitle("");
+          setCreator("");
+          setBody("");
+          onClose();
+        },
+        onError: () =>
+          toast.error("Couldn't share your pick — please try again."),
+      },
     );
-    setTitle("");
-    setCreator("");
-    setBody("");
-    onClose();
   }
 
   return (
@@ -474,8 +495,13 @@ export default function FeedPage() {
   const { user } = useAuth();
   const { ready } = useRequireAuth();
   const [visibility] = useFeedVisibility();
-  const posts = useVisiblePosts();
-  const following = useFeedStore((s) => s.following);
+  const { posts, isLoading: feedLoading, isError: feedError } =
+    useVisibleFeed();
+  const { data: followingIds } = useFollowing();
+  const following = useMemo(
+    () => new Set(followingIds ?? []),
+    [followingIds],
+  );
   const [scope, setScope] = useState<FeedScope>("friends");
   const [community, setCommunity] = useState<FeedCommunity | "all">("all");
   const [view, setView] = useState<FeedView>("cards");
@@ -499,7 +525,11 @@ export default function FeedPage() {
     if (scope === "friends") {
       list = list
         .filter((p) => p.activity !== "group")
-        .filter((p) => following.size === 0 || following.has(p.author))
+        .filter(
+          (p) =>
+            following.size === 0 ||
+            (p.authorId != null && following.has(p.authorId)),
+        )
         .sort((a, b) => a.ageHours - b.ageHours);
     } else if (scope === "discover") {
       list = list
@@ -664,7 +694,17 @@ export default function FeedPage() {
                 key={`${scope}-${community}-${view}`}
                 className={cn("mt-5", view === "list" ? "space-y-2" : "space-y-3")}
               >
-                {visible.length === 0 ? (
+                {feedLoading ? (
+                  <div className="py-16 text-center text-sm text-slate-400">
+                    Loading your feed…
+                  </div>
+                ) : feedError ? (
+                  <div className="rounded-3xl border border-rose-200/70 bg-rose-50/60 p-10 text-center dark:border-rose-900/40 dark:bg-rose-950/20">
+                    <p className="text-sm font-semibold text-rose-700 dark:text-rose-300">
+                      We couldn&apos;t load your feed. Please try again.
+                    </p>
+                  </div>
+                ) : visible.length === 0 ? (
                   <div className="rounded-3xl border border-slate-200/80 bg-white/80 p-10 text-center shadow-sm backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/65">
                     <Users
                       className="mx-auto h-10 w-10 text-slate-300 dark:text-slate-600"

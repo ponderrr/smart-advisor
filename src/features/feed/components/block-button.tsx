@@ -5,10 +5,18 @@ import { ShieldOff, ShieldX } from "lucide-react";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
-import { useFeedStore } from "@/features/feed/store";
+import { useAuth } from "@/features/auth/hooks/use-auth";
+import {
+  useBlocked,
+  useBlockUser,
+  useUnblockUser,
+} from "@/features/feed/use-feed";
 
 interface BlockButtonProps {
-  author: string;
+  /** Profile id of the person this button blocks. */
+  authorId?: string;
+  /** Display name — used in the confirm + toast copy. */
+  authorName: string;
   size?: "sm" | "md";
   className?: string;
 }
@@ -16,45 +24,56 @@ interface BlockButtonProps {
 /**
  * Explicit Block / Unblock control for the profile page — discoverability
  * matters here, so the action is a labelled button rather than tucked
- * inside the overflow menu used on cards / comments. Mirrors the labelled
- * FollowButton pattern (the destructive action flips on hover).
+ * inside the overflow menu used on cards / comments. Backed by
+ * feed_blocks; you can't block yourself.
  */
-export function BlockButton({ author, size = "md", className }: BlockButtonProps) {
-  const blocked = useFeedStore((s) => s.blocked.has(author.toLowerCase()));
-  const block = useFeedStore((s) => s.block);
-  const unblock = useFeedStore((s) => s.unblock);
+export function BlockButton({
+  authorId,
+  authorName,
+  size = "md",
+  className,
+}: BlockButtonProps) {
+  const { user } = useAuth();
+  const { data: blockedIds } = useBlocked();
+  const blockUser = useBlockUser();
+  const unblockUser = useUnblockUser();
   const [hovered, setHovered] = useState(false);
 
-  if (author === "you") return null;
+  if (!authorId || authorId === user?.id) return null;
 
+  const blocked = (blockedIds ?? []).includes(authorId);
   const label = blocked ? (hovered ? "Unblock" : "Blocked") : "Block";
+  const pending = blockUser.isPending || unblockUser.isPending;
 
   return (
     <button
       type="button"
+      disabled={pending}
       onClick={(e) => {
         e.stopPropagation();
         e.preventDefault();
         if (blocked) {
-          unblock(author);
-          toast.message(`Unblocked @${author}`);
+          unblockUser.mutate(authorId, {
+            onSuccess: () => toast.message(`Unblocked @${authorName}`),
+          });
           return;
         }
         if (
           !window.confirm(
-            `Block @${author}? Their posts and comments will disappear from your feed. You can unblock them later in Settings → Feed.`,
+            `Block @${authorName}? Their posts and comments will disappear from your feed. You can unblock them later in Settings → Feed.`,
           )
         ) {
           return;
         }
-        const ok = block(author);
-        if (ok) toast.success(`Blocked @${author}`);
+        blockUser.mutate(authorId, {
+          onSuccess: () => toast.success(`Blocked @${authorName}`),
+        });
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       aria-pressed={blocked}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full font-bold tracking-tight transition-colors",
+        "inline-flex items-center gap-1.5 rounded-full font-bold tracking-tight transition-colors disabled:opacity-60",
         size === "sm" ? "px-2.5 py-1 text-[11px]" : "px-3.5 py-1.5 text-xs",
         blocked
           ? hovered

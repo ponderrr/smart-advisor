@@ -63,16 +63,6 @@ export function buildCommentTree(
   return roots;
 }
 
-/** Deterministic mock follower count so the UI has stable numbers without
- *  a backend (replace with a real count when follows are persisted). */
-export function mockFollowerCount(author: string): number {
-  let h = 0;
-  for (let i = 0; i < author.length; i += 1) {
-    h = (h * 31 + author.charCodeAt(i)) >>> 0;
-  }
-  return 40 + (h % 960);
-}
-
 export interface FeedPost {
   id: string;
   community: FeedCommunity;

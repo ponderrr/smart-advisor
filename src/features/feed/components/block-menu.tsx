@@ -9,10 +9,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useFeedStore } from "@/features/feed/store";
+import { useAuth } from "@/features/auth/hooks/use-auth";
+import { useBlockUser } from "@/features/feed/use-feed";
 import { cn } from "@/lib/utils";
 
 interface BlockMenuButtonProps {
+  /** Profile id of the post/comment author. */
+  authorId?: string;
+  /** Display name — used in the menu label + confirm copy. */
   author: string;
   /** Pass "media" when the menu sits over a poster image — the icon
    *  flips to white-on-scrim so it reads on any cover. Default is the
@@ -23,20 +27,21 @@ interface BlockMenuButtonProps {
 }
 
 /**
- * Three-dot overflow that drops a "Block @handle" action. Mirrors the
- * mobile BlockMenuButton — hides itself on your own posts, stops tap
- * propagation so it doesn't trigger the enclosing card's onClick, and
- * confirms via toast on success.
+ * Three-dot overflow that drops a "Block @handle" action. Hides itself
+ * on your own posts, stops tap propagation so it doesn't trigger the
+ * enclosing card's onClick, and confirms before blocking.
  */
 export function BlockMenuButton({
+  authorId,
   author,
   variant = "default",
   size = 16,
   className,
 }: BlockMenuButtonProps) {
-  const block = useFeedStore((s) => s.block);
+  const { user } = useAuth();
+  const blockUser = useBlockUser();
 
-  if (author === "you") return null;
+  if (!authorId || authorId === user?.id) return null;
 
   const buttonClasses =
     variant === "media"
@@ -76,8 +81,9 @@ export function BlockMenuButton({
             ) {
               return;
             }
-            const ok = block(author);
-            if (ok) toast.success(`Blocked @${author}`);
+            blockUser.mutate(authorId, {
+              onSuccess: () => toast.success(`Blocked @${author}`),
+            });
           }}
           className="gap-2 text-rose-600 focus:text-rose-700 dark:text-rose-400 dark:focus:text-rose-300"
         >

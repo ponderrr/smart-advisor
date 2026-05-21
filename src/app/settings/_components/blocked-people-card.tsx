@@ -5,22 +5,27 @@ import { useTranslations } from "next-intl";
 import { ShieldOff, UserX } from "lucide-react";
 import { toast } from "sonner";
 
-import { useFeedStore } from "@/features/feed/store";
+import {
+  useBlockedProfiles,
+  useUnblockUser,
+} from "@/features/feed/use-feed";
 
 import { SectionCard, SectionHeader } from "./settings-ui";
 
 /**
- * Settings → Feed "Blocked people" block. Lists every blocked handle (from
- * the in-memory feedStore.blocked set) with an unblock button. Hidden when
- * there's nothing to show so the section doesn't take up space until
- * there's a reason. Mirrors the mobile Blocked people list.
+ * Settings → Feed "Blocked people" block. Lists every blocked profile
+ * (from feed_blocks) with an unblock button. Empty-state when the list
+ * is clean.
  */
 export const BlockedPeopleCard = () => {
   const t = useTranslations("Settings.feed.blocked");
-  const blocked = useFeedStore((s) => s.blocked);
-  const unblock = useFeedStore((s) => s.unblock);
+  const { data: blocked } = useBlockedProfiles();
+  const unblockUser = useUnblockUser();
 
-  const handles = useMemo(() => Array.from(blocked).sort(), [blocked]);
+  const handles = useMemo(
+    () => [...(blocked ?? [])].sort((a, b) => a.name.localeCompare(b.name)),
+    [blocked],
+  );
 
   return (
     <SectionCard>
@@ -38,9 +43,9 @@ export const BlockedPeopleCard = () => {
         </div>
       ) : (
         <ul className="space-y-2">
-          {handles.map((handle) => (
+          {handles.map((profile) => (
             <li
-              key={handle}
+              key={profile.id}
               className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 dark:border-slate-700 dark:bg-slate-900/60"
             >
               <span className="flex items-center gap-2 text-sm">
@@ -50,14 +55,18 @@ export const BlockedPeopleCard = () => {
                   aria-hidden
                 />
                 <span className="font-semibold text-slate-800 dark:text-slate-100">
-                  @{handle}
+                  @{profile.name}
                 </span>
               </span>
               <button
                 type="button"
                 onClick={() => {
-                  unblock(handle);
-                  toast.message(t("unblockedToast", { handle }));
+                  unblockUser.mutate(profile.id, {
+                    onSuccess: () =>
+                      toast.message(
+                        t("unblockedToast", { handle: profile.name }),
+                      ),
+                  });
                 }}
                 className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-700 transition-colors hover:bg-emerald-500/15 dark:bg-emerald-400/15 dark:text-emerald-300"
               >

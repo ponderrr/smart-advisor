@@ -20,8 +20,14 @@ import { AppNavbar } from "@/components/app-navbar";
 import { PageLoader } from "@/components/ui/loader";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import { getAccentTone } from "@/features/quiz/utils/content-accent";
-import { useFeedStore } from "@/features/feed/store";
-import { useVisiblePosts } from "@/features/feed/use-visible-posts";
+import {
+  useCreateComment,
+  useMyCommentVotes,
+  useSaved,
+  useSetCommentVote,
+  useToggleSave,
+  useVisibleFeed,
+} from "@/features/feed/use-feed";
 import { FollowButton } from "@/features/feed/components/follow-button";
 import { FeedAvatar } from "@/features/feed/components/feed-avatar";
 import { BlockMenuButton } from "@/features/feed/components/block-menu";
@@ -46,26 +52,32 @@ function CommentNode({
   postId: string;
   depth: number;
 }) {
-  const setCommentVote = useFeedStore((s) => s.setCommentVote);
-  const commentVotes = useFeedStore((s) => s.commentVotes);
-  const addComment = useFeedStore((s) => s.addComment);
+  const setCommentVote = useSetCommentVote();
+  const { data: myVotes } = useMyCommentVotes();
+  const createComment = useCreateComment();
   const [collapsed, setCollapsed] = useState(false);
   const [replying, setReplying] = useState(false);
   const [draft, setDraft] = useState("");
 
-  const key = `${postId}#${node.id}`;
-  const vote = commentVotes[key] ?? 0;
+  const vote = (myVotes ?? {})[node.id] ?? 0;
   const replyCount = node.replies.reduce(
     (n, r) => n + 1 + countDescendants(r),
     0,
   );
 
   const submitReply = () => {
-    if (!draft.trim()) return;
-    addComment(postId, draft.trim(), node.id);
-    setDraft("");
-    setReplying(false);
-    toast.success("Reply added");
+    if (!draft.trim() || createComment.isPending) return;
+    createComment.mutate(
+      { postId, body: draft.trim(), parentId: node.id },
+      {
+        onSuccess: () => {
+          setDraft("");
+          setReplying(false);
+          toast.success("Reply added");
+        },
+        onError: () => toast.error("Couldn't post your reply."),
+      },
+    );
   };
 
   return (
@@ -86,7 +98,7 @@ function CommentNode({
           </button>
           <FeedAvatar name={node.author} size={22} />
           <Link
-            href={`/feed/u/${encodeURIComponent(node.author)}`}
+            href={`/feed/u/${node.authorId ?? ""}`}
             className="font-extrabold text-slate-800 hover:underline dark:text-slate-100"
           >
             {node.author}
@@ -105,7 +117,12 @@ function CommentNode({
             <button
               type="button"
               aria-label="Upvote"
-              onClick={() => setCommentVote(key, 1)}
+              onClick={() =>
+                setCommentVote.mutate({
+                  commentId: node.id,
+                  dir: vote === 1 ? 0 : 1,
+                })
+              }
               className={cn(
                 "transition-colors",
                 vote === 1 ? "text-violet-600 dark:text-violet-300" : "text-slate-400",
@@ -119,7 +136,12 @@ function CommentNode({
             <button
               type="button"
               aria-label="Downvote"
-              onClick={() => setCommentVote(key, -1)}
+              onClick={() =>
+                setCommentVote.mutate({
+                  commentId: node.id,
+                  dir: vote === -1 ? 0 : -1,
+                })
+              }
               className={cn(
                 "transition-colors",
                 vote === -1 ? "text-rose-500" : "text-slate-400",
@@ -127,7 +149,11 @@ function CommentNode({
             >
               <ChevronDown size={16} />
             </button>
-            <BlockMenuButton author={node.author} size={14} />
+            <BlockMenuButton
+              authorId={node.authorId}
+              author={node.author}
+              size={14}
+            />
           </div>
         </div>
 
@@ -215,14 +241,15 @@ export default function FeedThreadPage() {
 
   // Use the block-filtered list so a blocked author's deep-link reads
   // as "not available" instead of revealing the post anyway.
-  const visiblePosts = useVisiblePosts();
+  const { posts: visiblePosts, isLoading: feedLoading } = useVisibleFeed();
   const post = useMemo(
     () => visiblePosts.find((p) => p.id === postId),
     [visiblePosts, postId],
   );
-  const saved = useFeedStore((s) => (post ? s.saved.has(post.id) : false));
-  const toggleSave = useFeedStore((s) => s.toggleSave);
-  const addComment = useFeedStore((s) => s.addComment);
+  const { data: savedIds } = useSaved();
+  const saved = post ? (savedIds ?? []).includes(post.id) : false;
+  const toggleSave = useToggleSave();
+  const createComment = useCreateComment();
   const [draft, setDraft] = useState("");
   const [{ commentSort }] = useFeedPrefs();
 
@@ -242,8 +269,15 @@ export default function FeedThreadPage() {
     </div>
   );
 
+  if (feedLoading) {
+    return shell(
+      <div className="py-16 text-center text-sm text-slate-400">
+        Loading…
+      </div>,
+    );
+  }
+
   if (!post) {
-    // The feed store is in-memory — a cold-loaded deep link has no data yet.
     return shell(
       <div className="rounded-3xl border border-dashed border-slate-300/80 bg-white/60 px-6 py-16 text-center backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/50">
         <h1 className="text-2xl font-black tracking-tight">
@@ -300,7 +334,7 @@ export default function FeedThreadPage() {
 
         <div className="mt-3 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
           <Link
-            href={`/feed/u/${encodeURIComponent(post.author)}`}
+            href={`/feed/u/${post.authorId ?? ""}`}
             className="group/author flex items-center gap-2 font-bold text-slate-700 dark:text-slate-200"
           >
             <FeedAvatar name={post.author} size={28} />
@@ -309,7 +343,12 @@ export default function FeedThreadPage() {
           <span>
             {ACTIVITY_VERB[post.activity]} · {agoLabel(post.ageHours)}
           </span>
-          <FollowButton author={post.author} size="sm" className="ml-1" />
+          <FollowButton
+            authorId={post.authorId}
+            authorName={post.author}
+            size="sm"
+            className="ml-1"
+          />
         </div>
 
         <h1 className="mt-2 text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100">
@@ -344,11 +383,16 @@ export default function FeedThreadPage() {
         <div className="mt-4 flex items-center gap-4 border-t border-slate-200/70 pt-3 dark:border-slate-700/60">
           <button
             type="button"
-            onClick={() => {
-              const now = toggleSave(post.id);
-              if (now) toast.success(`"${post.title}" saved to your library`);
-              else toast.message("Removed from your library");
-            }}
+            onClick={() =>
+              toggleSave.mutate(post.id, {
+                onSuccess: (now) =>
+                  now
+                    ? toast.success(
+                        `"${post.title}" saved to your library`,
+                      )
+                    : toast.message("Removed from your library"),
+              })
+            }
             className={cn(
               "inline-flex items-center gap-1.5 text-xs font-bold transition-transform hover:scale-105",
               saved ? t.text : "text-slate-400 dark:text-slate-500",
@@ -374,12 +418,19 @@ export default function FeedThreadPage() {
           className="w-full rounded-2xl border border-slate-200 bg-white/70 p-3 text-sm outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-900/55"
         />
         <Button
-          disabled={!draft.trim()}
-          onClick={() => {
-            addComment(post.id, draft.trim(), null);
-            setDraft("");
-            toast.success("Comment added");
-          }}
+          disabled={!draft.trim() || createComment.isPending}
+          onClick={() =>
+            createComment.mutate(
+              { postId: post.id, body: draft.trim(), parentId: null },
+              {
+                onSuccess: () => {
+                  setDraft("");
+                  toast.success("Comment added");
+                },
+                onError: () => toast.error("Couldn't post your comment."),
+              },
+            )
+          }
         >
           Comment
         </Button>

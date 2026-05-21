@@ -253,6 +253,27 @@ export async function fetchBlocked(): Promise<string[]> {
   return (data ?? []).map((r) => (r as { blocked_id: string }).blocked_id);
 }
 
+/** Blocked profiles with display names — for the Settings list. */
+export async function fetchBlockedProfiles(): Promise<
+  { id: string; name: string }[]
+> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+  const { data } = await supabase
+    .from("feed_blocks")
+    .select("blocked:profiles!feed_blocks_blocked_id_fkey ( id, name )")
+    .eq("blocker_id", user.id);
+  const rows = (data ?? []) as unknown as {
+    blocked: ProfileEmbed | ProfileEmbed[] | null;
+  }[];
+  return rows
+    .map((r) => (Array.isArray(r.blocked) ? r.blocked[0] : r.blocked))
+    .filter((p): p is ProfileEmbed => !!p)
+    .map((p) => ({ id: p.id, name: p.name }));
+}
+
 /** Blocks a profile — also drops any follow so the tie is fully cut. */
 export async function blockUser(blockedId: string): Promise<void> {
   const {
@@ -321,6 +342,47 @@ export async function toggleSave(postId: string): Promise<boolean> {
     .from("feed_saves")
     .insert({ user_id: user.id, post_id: postId });
   return true;
+}
+
+/** A profile's public display data, or null if it doesn't exist. */
+export async function fetchProfile(
+  profileId: string,
+): Promise<{ id: string; name: string; avatarUrl: string | null } | null> {
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, name, avatar_url")
+    .eq("id", profileId)
+    .maybeSingle();
+  if (!data) return null;
+  const row = data as ProfileEmbed;
+  return { id: row.id, name: row.name, avatarUrl: row.avatar_url };
+}
+
+/** How many profiles follow [profileId]. */
+export async function fetchFollowerCount(
+  profileId: string,
+): Promise<number> {
+  const { count } = await supabase
+    .from("feed_follows")
+    .select("*", { count: "exact", head: true })
+    .eq("followee_id", profileId);
+  return count ?? 0;
+}
+
+/** Posts authored by [profileId], newest first. */
+export async function fetchUserPosts(
+  profileId: string,
+): Promise<FeedPost[]> {
+  const { data, error } = await supabase
+    .from("feed_posts")
+    .select(POST_SELECT)
+    .eq("user_id", profileId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  const rows = (data ?? []) as unknown as PostRow[];
+  const commentIds = rows.flatMap((p) => p.feed_comments.map((c) => c.id));
+  const scores = await loadCommentScores(commentIds);
+  return rows.map((p) => mapPost(p, scores));
 }
 
 /** The current user's own comment votes → { commentId: -1 | 1 }. */
