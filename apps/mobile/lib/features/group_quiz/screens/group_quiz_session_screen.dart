@@ -10,6 +10,7 @@ import '../../../core/supabase/supabase_providers.dart';
 import '../../../ui/ui.dart';
 import '../../auth/auth_providers.dart';
 import '../../feed/widgets/feed_avatar.dart';
+import '../../notifications/notification_service.dart';
 import '../group_quiz_providers.dart';
 import '../models/group_quiz.dart';
 
@@ -96,7 +97,48 @@ class _BodyState extends ConsumerState<_Body> {
   bool _submittedLocally = false;
 
   @override
+  void dispose() {
+    // Leaving the session screen ends the group-quiz live activity.
+    NotificationService.cancelGroupQuizLive();
+    super.dispose();
+  }
+
+  /// Mirrors the live session into an ongoing "live activity" — an
+  /// Android Live-Update-style progress notification (and, once the
+  /// Xcode extension is wired, an iOS ActivityKit Live Activity).
+  void _syncLiveActivity(GroupQuizState s) {
+    final session = s.session;
+    switch (session.status) {
+      case QuizSessionStatus.lobby:
+        NotificationService.showGroupQuizLive(
+          code: session.code,
+          line: '${s.participants.length}/${session.maxParticipants}'
+              ' joined · waiting to start',
+          progress: s.participants.length,
+          maxProgress: session.maxParticipants,
+        );
+      case QuizSessionStatus.inProgress:
+        NotificationService.showGroupQuizLive(
+          code: session.code,
+          line: s.participants.length == 1
+              ? 'Quiz in progress'
+              : 'Quiz in progress · ${s.participants.length} playing',
+        );
+      case QuizSessionStatus.completed:
+      case QuizSessionStatus.cancelled:
+        NotificationService.cancelGroupQuizLive();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Fires on the initial loading→data transition and every realtime
+    // session change after it, keeping the live activity in sync.
+    ref.listen(groupQuizSessionProvider(widget.sessionId), (_, next) {
+      final s = next.asData?.value;
+      if (s != null) _syncLiveActivity(s);
+    });
+
     final async = ref.watch(groupQuizSessionProvider(widget.sessionId));
     return async.when(
       loading: () => const Center(child: LoaderFive('Loading')),

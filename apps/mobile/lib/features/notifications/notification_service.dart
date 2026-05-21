@@ -11,9 +11,11 @@ import '../../core/supabase/supabase_providers.dart';
 
 const _key = 'sa.reminders_enabled';
 
-// Notification ids: 42 = weekly fresh-picks, 43 = finish-what-you-started.
+// Notification ids: 42 = weekly fresh-picks, 43 = finish-what-you-started,
+// 71 = the group-quiz live activity (ongoing).
 const _weeklyId = 42;
 const _inProgressId = 43;
+const _groupQuizLiveId = 71;
 
 /// Local notifications only. Remote push (new banners, group-quiz events)
 /// needs FCM/APNs + a server — flagged as a backend/native follow-up, not
@@ -133,6 +135,62 @@ class NotificationService {
     await init();
     if (!_ready) return;
     await _plugin.cancelAll();
+  }
+
+  // ── Group-quiz live activity ───────────────────────────────────
+  // A "live" status surface for an in-progress group quiz. On Android
+  // this is an ongoing progress notification (the basis of Android 16's
+  // Live Updates); on iOS it shows as a standard notification today, with
+  // a true ActivityKit Live Activity scaffolded under ios/LiveActivity/
+  // (see ios/LiveActivity/SETUP.md). Re-calling [showGroupQuizLive] with
+  // the same id updates the existing notification in place.
+
+  /// Shows / updates the group-quiz live activity. [progress] +
+  /// [maxProgress] draw a determinate bar (e.g. players joined); omit
+  /// both for a plain ongoing line.
+  static Future<void> showGroupQuizLive({
+    required String code,
+    required String line,
+    int? progress,
+    int? maxProgress,
+  }) async {
+    await init();
+    if (!_ready) return;
+    final hasBar = progress != null && maxProgress != null && maxProgress > 0;
+    try {
+      await _plugin.show(
+        id: _groupQuizLiveId,
+        title: 'Group quiz · $code',
+        body: line,
+        notificationDetails: NotificationDetails(
+          android: AndroidNotificationDetails(
+            'group_quiz_live',
+            'Group quiz',
+            channelDescription:
+                'Live status while a group quiz is running',
+            importance: Importance.low,
+            priority: Priority.low,
+            // Ongoing + only-alert-once: it stays pinned and updates
+            // silently as the session changes.
+            ongoing: true,
+            onlyAlertOnce: true,
+            showWhen: false,
+            category: AndroidNotificationCategory.progress,
+            showProgress: hasBar,
+            maxProgress: hasBar ? maxProgress : 0,
+            progress: hasBar ? progress : 0,
+          ),
+          iOS: const DarwinNotificationDetails(presentBanner: false),
+        ),
+      );
+    } catch (_) {/* unsupported platform — ignore */}
+  }
+
+  /// Ends the group-quiz live activity (session completed / left).
+  static Future<void> cancelGroupQuizLive() async {
+    await init();
+    if (!_ready) return;
+    await _plugin.cancel(id: _groupQuizLiveId);
   }
 }
 
