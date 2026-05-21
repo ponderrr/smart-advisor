@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:haptic_kit/haptic_kit.dart';
 
 import '../ui/adaptive.dart';
 
@@ -25,6 +26,18 @@ void showBanner(
 }) {
   final ctx = messengerContextKey.currentContext;
   if (ctx == null || !ctx.mounted) return;
+  // Semantic haptic to match the banner's tone. `info` is intentionally
+  // silent — it fires too often (and its triggers usually buzz already).
+  switch (type) {
+    case AdaptiveSnackBarType.success:
+      Haptics.notification(HapticNotificationStyle.success);
+    case AdaptiveSnackBarType.warning:
+      Haptics.notification(HapticNotificationStyle.warning);
+    case AdaptiveSnackBarType.error:
+      Haptics.notification(HapticNotificationStyle.error);
+    case AdaptiveSnackBarType.info:
+      break;
+  }
   AdaptiveSnackBar.show(
     ctx,
     message: message,

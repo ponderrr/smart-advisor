@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:haptic_kit/haptic_kit.dart';
 
 import '../../../core/supabase/supabase_providers.dart';
 import '../../../core/ui_messenger.dart';
@@ -39,6 +40,7 @@ class FollowButton extends ConsumerWidget {
 
     return GestureDetector(
       onTap: () async {
+        Haptics.impact(HapticImpactStyle.medium);
         final nowFollowing =
             await ref.read(feedActionsProvider).toggleFollow(authorId);
         showBanner(
@@ -120,6 +122,7 @@ class JoinButton extends ConsumerWidget {
     final fg = joined ? tone.iconCircleFg : Colors.white;
     return GestureDetector(
       onTap: () {
+        Haptics.impact(HapticImpactStyle.medium);
         final nowJoined = ref
             .read(joinedCommunitiesProvider.notifier)
             .toggle(community);

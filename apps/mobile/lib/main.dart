@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:haptic_kit/haptic_kit.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/config/env.dart';
@@ -27,6 +28,9 @@ Future<void> main() async {
     anonKey: Env.supabaseAnonKey,
   );
   await NotificationService.init();
+  // Pre-warm the iOS haptic generators for lowest-latency taps (no-op on
+  // Android). Fire-and-forget — startup shouldn't block on it.
+  Haptics.prepare();
 
   runApp(const ProviderScope(child: SmartAdvisorApp()));
 }

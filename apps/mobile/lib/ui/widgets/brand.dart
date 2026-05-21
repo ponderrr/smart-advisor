@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:haptic_kit/haptic_kit.dart';
 
 import '../adaptive.dart';
 import '../theme/accents.dart';
@@ -446,7 +447,11 @@ class BrandSegmented extends StatelessWidget {
                 Expanded(
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
-                    onTap: () => onValueChanged(i),
+                    onTap: () {
+                      // Selection tick only when the value actually moves.
+                      if (i != selectedIndex) Haptics.selection();
+                      onValueChanged(i);
+                    },
                     child: Center(
                       child: AnimatedDefaultTextStyle(
                         duration: const Duration(milliseconds: 160),

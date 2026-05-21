@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:haptic_kit/haptic_kit.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../ui/ui.dart';
@@ -64,9 +65,13 @@ class AppShell extends ConsumerWidget {
 
     void onNav(int i) {
       if (i == quizSlot) {
+        // Opening the quiz sheet is a deliberate action — give it weight.
+        Haptics.impact(HapticImpactStyle.medium);
         _openQuizSheet(context);
         return;
       }
+      // Selection tick when moving to a different tab, not on a re-tap.
+      if (i != navIndexFromLocation()) Haptics.selection();
       context.go(switch (i) {
         1 => '/library',
         3 => '/history',

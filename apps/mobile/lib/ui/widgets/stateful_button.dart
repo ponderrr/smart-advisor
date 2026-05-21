@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:haptic_kit/haptic_kit.dart';
 
 import '../adaptive.dart';
 import '../theme/app_theme.dart';
@@ -32,6 +33,8 @@ class _StatefulButtonState extends State<StatefulButton> {
 
   Future<void> _run() async {
     if (_state != ButtonState.idle) return;
+    // Press → light tap; the result lands as a success/error notification.
+    Haptics.impact(HapticImpactStyle.light);
     setState(() => _state = ButtonState.loading);
     bool ok;
     try {
@@ -40,6 +43,9 @@ class _StatefulButtonState extends State<StatefulButton> {
       ok = false;
     }
     if (!mounted) return;
+    Haptics.notification(ok
+        ? HapticNotificationStyle.success
+        : HapticNotificationStyle.error);
     setState(() => _state = ok ? ButtonState.success : ButtonState.error);
     await Future<void>.delayed(widget.resetDelay);
     if (mounted) setState(() => _state = ButtonState.idle);

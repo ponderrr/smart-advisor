@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:haptic_kit/haptic_kit.dart';
 
 import '../../../core/ui_messenger.dart';
 import '../../../ui/ui.dart';
@@ -670,7 +671,10 @@ class PostFab extends StatelessWidget {
           borderRadius: BorderRadius.circular(26),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
-            onTap: onTap,
+            onTap: () {
+              Haptics.impact(HapticImpactStyle.medium);
+              onTap();
+            },
             child: SizedBox(
               height: 52,
               child: AnimatedSize(
