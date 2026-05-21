@@ -123,7 +123,6 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
     final c = context.colors;
     final accent = recTypeAccent(_recType(r.type), b);
     final accentName = _accentName(r.type);
-    final surface = contentAccent(accentName, b);
     final ms = deriveMatchScore(id: r.id, matchScore: r.matchScore);
     final mt = matchToneColors(ms.tone, b);
     final open = _expanded == i;
@@ -148,17 +147,11 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
               .share(ShareParams(text: _shareText())),
         ),
       ],
-      child: Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      child: Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: BrandCard(
+      accent: accentName,
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: surface.surfaceGradient),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: surface.surfaceBorder),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -273,6 +266,7 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
             ),
           ],
         ],
+      ),
       ),
       ),
     );
