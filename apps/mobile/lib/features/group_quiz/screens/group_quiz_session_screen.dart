@@ -98,6 +98,8 @@ class _BodyState extends ConsumerState<_Body> {
   // One-shot guard so the live-activity foreground service is started
   // exactly once for this session.
   bool _liveStarted = false;
+  // One-shot guard for the async-deadline reminder.
+  bool _deadlineScheduled = false;
 
   @override
   void dispose() {
@@ -133,6 +135,14 @@ class _BodyState extends ConsumerState<_Body> {
         NotificationService.stopGroupQuizLive();
       }
       return;
+    }
+    // Async group quiz with a deadline → schedule a "responses about to
+    // expire" reminder a few hours out.
+    final deadline = s.session.deadlineAtUtc;
+    if (s.session.isAsync && deadline != null && !_deadlineScheduled) {
+      _deadlineScheduled = true;
+      NotificationService.scheduleGroupQuizDeadline(
+          deadline: deadline, code: s.session.code);
     }
     if (!_liveStarted) {
       _liveStarted = true;

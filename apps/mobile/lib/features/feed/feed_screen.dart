@@ -10,6 +10,7 @@ import 'models/feed_models.dart';
 import 'widgets/ai_nudge_card.dart';
 import 'widgets/composer.dart';
 import 'widgets/feed_cards.dart';
+import 'widgets/finished_nudge_card.dart';
 
 /// Experimental Reddit-style social taste feed — the home/landing surface.
 ///
@@ -85,6 +86,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           const SizedBox(height: 4),
           Subtitle('What your people are into right now.'),
           const SizedBox(height: 14),
+          const FinishedNudgeCard(),
           const AiNudgeCard(),
           const SizedBox(height: 12),
           _communitySegmented(prefs),

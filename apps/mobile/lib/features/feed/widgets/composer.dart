@@ -12,11 +12,21 @@ import '../models/feed_models.dart';
 /// lock hint and the success wording becomes "Saved to your picks — not
 /// broadcast (private profile)".
 class Composer extends ConsumerStatefulWidget {
-  const Composer({super.key, required this.initialCommunity, this.editPost});
+  const Composer({
+    super.key,
+    required this.initialCommunity,
+    this.editPost,
+    this.prefill,
+  });
   final FeedCommunity initialCommunity;
 
   /// When set, the composer edits this post instead of creating a new one.
   final FeedPost? editPost;
+
+  /// Pre-fills a new post (e.g. from "you recently finished X"). Ignored
+  /// when [editPost] is set.
+  final ({String title, String? creator, int? year, String? posterUrl})?
+      prefill;
 
   @override
   ConsumerState<Composer> createState() => _ComposerState();
@@ -42,6 +52,7 @@ class _ComposerState extends ConsumerState<Composer> {
   void initState() {
     super.initState();
     final edit = widget.editPost;
+    final prefill = widget.prefill;
     if (edit != null) {
       _community = edit.community;
       _activity = edit.activity;
@@ -50,6 +61,13 @@ class _ComposerState extends ConsumerState<Composer> {
       _cover.text = edit.posterUrl ?? '';
       _creator.text = edit.creator ?? '';
       _year.text = edit.year?.toString() ?? '';
+    } else if (prefill != null) {
+      // New post seeded from a finished library item.
+      _activity = FeedActivity.finished;
+      _title.text = prefill.title;
+      _creator.text = prefill.creator ?? '';
+      _year.text = prefill.year?.toString() ?? '';
+      _cover.text = prefill.posterUrl ?? '';
     }
     for (final c in [_title, _cover, _creator]) {
       c.addListener(() => setState(() {}));

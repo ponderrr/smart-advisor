@@ -16,10 +16,11 @@ import 'live_update.dart';
 const _key = 'sa.reminders_enabled';
 
 // Notification ids: 42 = weekly fresh-picks, 43 = finish-what-you-started,
-// 71 = the group-quiz live activity (ongoing).
+// 71 = the group-quiz live activity (ongoing), 72 = group-quiz deadline.
 const _weeklyId = 42;
 const _inProgressId = 43;
 const _groupQuizLiveId = 71;
+const _groupQuizDeadlineId = 72;
 
 /// Local notifications only. Remote push (new banners, group-quiz events)
 /// needs FCM/APNs + a server — flagged as a backend/native follow-up, not
@@ -182,6 +183,39 @@ class NotificationService {
         notificationDetails: const NotificationDetails(
           iOS: DarwinNotificationDetails(presentBanner: false),
         ),
+      );
+    } catch (_) {/* unsupported platform — ignore */}
+  }
+
+  /// Schedules a reminder ~3h before an async group-quiz [deadline] —
+  /// "your responses are about to expire". A fixed id, so re-scheduling
+  /// on a later visit just replaces it. Skipped if the reminder time is
+  /// already past (or too close).
+  static Future<void> scheduleGroupQuizDeadline({
+    required DateTime deadline,
+    required String code,
+  }) async {
+    await init();
+    if (!_ready) return;
+    final fireAt = tz.TZDateTime.from(deadline, tz.local)
+        .subtract(const Duration(hours: 3));
+    if (!fireAt.isAfter(
+        tz.TZDateTime.now(tz.local).add(const Duration(minutes: 5)))) {
+      return;
+    }
+    try {
+      await _plugin.zonedSchedule(
+        id: _groupQuizDeadlineId,
+        title: 'Group quiz · $code',
+        body: 'Your responses are due soon — finish before the deadline.',
+        scheduledDate: fireAt,
+        notificationDetails: const NotificationDetails(
+          android: AndroidNotificationDetails('reminders', 'Reminders',
+              channelDescription: 'Group quiz reminders',
+              importance: Importance.defaultImportance),
+          iOS: DarwinNotificationDetails(),
+        ),
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       );
     } catch (_) {/* unsupported platform — ignore */}
   }
