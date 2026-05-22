@@ -47,6 +47,8 @@ import { PageLoader } from "@/components/ui/loader";
 import { getAccentTone } from "@/features/quiz/utils/content-accent";
 import { getRecTypeAccent } from "@/features/recommendations/utils/type-accent";
 import { tmdbService } from "@/features/recommendations/services/tmdb-service";
+import { openLibraryService } from "@/features/recommendations/services/open-library-service";
+import { deezerService } from "@/features/recommendations/services/deezer-service";
 import {
   useCreatePost,
   useUpdatePost,
@@ -444,6 +446,14 @@ const COMPOSER_COPY: Record<
   },
 };
 
+/** Stock-image URL prefixes the cover proxies fall back to on a miss —
+ *  used to treat "found nothing" as an error rather than a bogus poster. */
+const COVER_MISS_PREFIX: Record<FeedCommunity, string> = {
+  movies: "https://images.unsplash.com/photo-1489599731893-01139d4e6b5b",
+  books: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570",
+  music: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f",
+};
+
 function Composer({
   open,
   onClose,
@@ -474,7 +484,7 @@ function Composer({
   const [body, setBody] = useState(editPost?.body ?? "");
   // Three-way rating, used only when activity is "rated". Defaults to Meh.
   const [rating, setRating] = useState(editPost?.rating ?? 2);
-  // True while a TMDB cover-art lookup is in flight.
+  // True while a cover-art lookup is in flight.
   const [findingCover, setFindingCover] = useState(false);
 
   // Whether the form has unsaved content worth a confirm on close. For
@@ -559,25 +569,41 @@ function Composer({
     });
   }
 
-  /** Movies only — look the title up via the tmdb-proxy and drop the
-   *  poster (and year, if blank) into the form. The proxy returns a stock
-   *  image on a miss, which we detect and treat as "nothing found". */
+  /** Look the title up via the matching cover proxy — TMDB for movies,
+   *  Open Library for books, Deezer for music — and drop the poster (and
+   *  year, if found) into the form. Each proxy returns a stock image on a
+   *  miss, which we detect and treat as "nothing found". */
   async function findCover() {
     const query = title.trim();
     if (!query || findingCover) return;
     setFindingCover(true);
     try {
-      const result = await tmdbService.searchMovie(query);
-      const missPrefix =
-        "https://images.unsplash.com/photo-1489599731893-01139d4e6b5b";
-      if (!result.poster || result.poster.startsWith(missPrefix)) {
+      const author = creator.trim() || undefined;
+      let cover = "";
+      let foundYear: number | undefined;
+      let foundCreator: string | undefined;
+      if (community === "movies") {
+        const r = await tmdbService.searchMovie(query);
+        cover = r.poster;
+        foundYear = r.year;
+        foundCreator = r.director;
+      } else if (community === "books") {
+        const r = await openLibraryService.searchBook(query, author);
+        cover = r.cover;
+        foundYear = r.year;
+      } else {
+        const r = await deezerService.searchAlbum(query, author);
+        cover = r.cover;
+        foundYear = r.year;
+      }
+      if (!cover || cover.startsWith(COVER_MISS_PREFIX[community])) {
         toast.error(`No cover art found for "${query}".`);
       } else {
-        // A fresh match overwrites year + director so switching titles
-        // re-fills them rather than keeping the previous movie's data.
-        setPosterUrl(result.poster);
-        if (result.year) setYear(String(result.year));
-        if (result.director) setCreator(result.director);
+        // A fresh match overwrites year + creator so switching titles
+        // re-fills them rather than keeping the previous pick's data.
+        setPosterUrl(cover);
+        if (foundYear) setYear(String(foundYear));
+        if (foundCreator) setCreator(foundCreator);
       }
     } catch {
       toast.error("Couldn't search for cover art — please try again.");
@@ -676,17 +702,15 @@ function Composer({
           value={posterUrl}
           onChange={(e) => setPosterUrl(e.target.value)}
         />
-        {community === "movies" && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full"
-            disabled={!title.trim() || findingCover}
-            onClick={findCover}
-          >
-            {findingCover ? "Searching…" : "Find cover art from title"}
-          </Button>
-        )}
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full"
+          disabled={!title.trim() || findingCover}
+          onClick={findCover}
+        >
+          {findingCover ? "Searching…" : "Find cover art from title"}
+        </Button>
         <textarea
           placeholder={COMPOSER_COPY[community].takePlaceholder}
           value={body}

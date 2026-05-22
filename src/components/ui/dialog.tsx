@@ -54,7 +54,15 @@ export const Dialog = ({
 }: DialogProps) => {
   const panelRef = useRef<HTMLDivElement>(null);
 
-  // Focus the panel on open and trap Tab cycling inside it.
+  // Focus the panel once, when the dialog opens. Kept separate from the
+  // keydown effect below: callers routinely pass a fresh `onClose` on
+  // every render, and re-focusing the panel on each of those renders
+  // would steal focus from an input the user is typing into.
+  useEffect(() => {
+    if (open) panelRef.current?.focus();
+  }, [open]);
+
+  // Escape-to-close + Tab focus trap.
   useEffect(() => {
     if (!open) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -86,7 +94,6 @@ export const Dialog = ({
       }
     };
     document.addEventListener("keydown", handleKeyDown);
-    panelRef.current?.focus();
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open, onClose, disableClose]);
 
