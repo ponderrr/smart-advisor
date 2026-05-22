@@ -230,10 +230,10 @@
     },
     "help": {
       "title": "Help",
-      "description": "Re-see the setup screens from your first sign-in.",
-      "showOnboarding": {
-        "title": "Show onboarding",
-        "subtitle": "Re-see the profile-setup screen in preview mode"
+      "description": "Answers to common questions about Smart Advisor.",
+      "faq": {
+        "title": "FAQ",
+        "subtitle": "Browse frequently asked questions"
       }
     },
     "danger": {
@@ -1593,7 +1593,6 @@
     "finish": "Finish setup",
     "submit": "Looks good",
     "skip": "Skip for now",
-    "previewClose": "Close preview",
     "errors": {
       "displayNameRequired": "Please enter a display name.",
       "saveFailed": "We couldn't save your setup. Please try again."

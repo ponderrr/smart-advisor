@@ -230,10 +230,10 @@
     },
     "help": {
       "title": "Ayuda",
-      "description": "Vuelve a ver las pantallas de configuración de tu primer inicio de sesión.",
-      "showOnboarding": {
-        "title": "Mostrar configuración",
-        "subtitle": "Vuelve a ver la pantalla de configuración del perfil en modo previa"
+      "description": "Respuestas a preguntas frecuentes sobre Smart Advisor.",
+      "faq": {
+        "title": "Preguntas frecuentes",
+        "subtitle": "Consulta las preguntas más frecuentes"
       }
     },
     "danger": {
@@ -1593,7 +1593,6 @@
     "finish": "Terminar",
     "submit": "Todo bien",
     "skip": "Omitir por ahora",
-    "previewClose": "Cerrar vista previa",
     "errors": {
       "displayNameRequired": "Por favor, introduce un nombre para mostrar.",
       "saveFailed": "No pudimos guardar tu configuración. Inténtalo de nuevo."

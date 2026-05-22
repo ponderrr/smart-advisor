@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
@@ -57,17 +57,10 @@ const FOCUS_HUE: Record<ContentFocus, string> = {
 
 const OnboardingPage = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { user, session, loading, refreshUser } = useAuth();
   const t = useTranslations("Onboarding");
   const tc = useTranslations("Common");
   const currentLocale = useLocale() as Locale;
-
-  // Preview mode = a re-visit from Settings → Help → "Show onboarding".
-  // We render the steps as-is so the user can see what onboarding looks
-  // like, but Finish becomes "Close preview" so a replay can't clobber
-  // the real profile / focus / filters.
-  const previewMode = searchParams.get("preview") === "true";
 
   const [mounted, setMounted] = useState(false);
   const [step, setStep] = useState(0);
@@ -170,10 +163,6 @@ const OnboardingPage = () => {
   };
 
   const finish = async (skip: boolean) => {
-    if (previewMode) {
-      router.push("/settings?section=help");
-      return;
-    }
     setError(null);
     setSubmitting(true);
     const ok = await persist(skip);
@@ -443,7 +432,7 @@ const OnboardingPage = () => {
           </AnimatePresence>
         </div>
 
-        {error && !previewMode && (
+        {error && (
           <p role="alert" className="mt-2 text-center text-sm text-red-500">
             {error}
           </p>
@@ -460,16 +449,14 @@ const OnboardingPage = () => {
               <ArrowLeft size={14} />
               {t("back")}
             </button>
-            {!previewMode && (
-              <button
-                type="button"
-                onClick={() => void finish(true)}
-                disabled={submitting}
-                className="rounded-full px-3 py-1.5 text-xs font-bold text-slate-500 transition-colors hover:text-slate-700 disabled:opacity-60 dark:text-slate-400 dark:hover:text-slate-200"
-              >
-                {t("skip")}
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => void finish(true)}
+              disabled={submitting}
+              className="rounded-full px-3 py-1.5 text-xs font-bold text-slate-500 transition-colors hover:text-slate-700 disabled:opacity-60 dark:text-slate-400 dark:hover:text-slate-200"
+            >
+              {t("skip")}
+            </button>
           </div>
           <StatefulButton
             type="button"
@@ -485,11 +472,7 @@ const OnboardingPage = () => {
             )}
           >
             {isLast ? (
-              previewMode ? (
-                t("previewClose")
-              ) : (
-                t("finish")
-              )
+              t("finish")
             ) : (
               <span className="inline-flex items-center gap-1.5">
                 {t("next")}
