@@ -162,6 +162,49 @@ class FeedService {
   Future<void> deletePost(String postId) =>
       _c.from('feed_posts').delete().eq('id', postId);
 
+  /// Updates a post's editable fields (RLS only permits the author).
+  Future<void> updatePost({
+    required String postId,
+    required FeedCommunity community,
+    required FeedActivity activity,
+    required String title,
+    String? body,
+    String? posterUrl,
+    String? creator,
+    int? year,
+  }) =>
+      _c.from('feed_posts').update({
+        'community': community.wire,
+        'activity': activity.name,
+        'title': title.trim(),
+        'body': body?.trim(),
+        'poster_url': posterUrl?.trim(),
+        'creator': creator?.trim(),
+        'year': year,
+      }).eq('id', postId);
+
+  /// Files a report on a post or a comment (exactly one id is non-null).
+  Future<void> _report({
+    String? postId,
+    String? commentId,
+    String? reason,
+  }) async {
+    final uid = _c.auth.currentUser?.id;
+    if (uid == null) throw Exception('Not signed in');
+    await _c.from('feed_reports').insert({
+      'reporter_id': uid,
+      'post_id': ?postId,
+      'comment_id': ?commentId,
+      'reason': reason,
+    });
+  }
+
+  Future<void> reportPost(String postId, {String? reason}) =>
+      _report(postId: postId, reason: reason);
+
+  Future<void> reportComment(String commentId, {String? reason}) =>
+      _report(commentId: commentId, reason: reason);
+
   Future<void> createComment(
       String postId, String body, String? parentId) async {
     final uid = _c.auth.currentUser?.id;

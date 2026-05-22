@@ -12,8 +12,11 @@ import '../models/feed_models.dart';
 /// lock hint and the success wording becomes "Saved to your picks — not
 /// broadcast (private profile)".
 class Composer extends ConsumerStatefulWidget {
-  const Composer({super.key, required this.initialCommunity});
+  const Composer({super.key, required this.initialCommunity, this.editPost});
   final FeedCommunity initialCommunity;
+
+  /// When set, the composer edits this post instead of creating a new one.
+  final FeedPost? editPost;
 
   @override
   ConsumerState<Composer> createState() => _ComposerState();
@@ -38,6 +41,16 @@ class _ComposerState extends ConsumerState<Composer> {
   @override
   void initState() {
     super.initState();
+    final edit = widget.editPost;
+    if (edit != null) {
+      _community = edit.community;
+      _activity = edit.activity;
+      _title.text = edit.title;
+      _body.text = edit.body ?? '';
+      _cover.text = edit.posterUrl ?? '';
+      _creator.text = edit.creator ?? '';
+      _year.text = edit.year?.toString() ?? '';
+    }
     for (final c in [_title, _cover, _creator]) {
       c.addListener(() => setState(() {}));
     }
@@ -58,29 +71,48 @@ class _ComposerState extends ConsumerState<Composer> {
 
   Future<void> _post() async {
     if (!_valid) return;
+    final edit = widget.editPost;
     final isPrivate = ref.read(feedVisibilityProvider) ==
         FeedVisibility.private;
     try {
-      await ref.read(feedActionsProvider).createPost(
-            community: _community,
-            title: _title.text.trim(),
-            body: _body.text,
-            activity: _activity,
-            posterUrl: _cover.text,
-            creator: _creator.text,
-            year: int.tryParse(_year.text.trim()),
-          );
+      if (edit != null) {
+        await ref.read(feedActionsProvider).updatePost(
+              postId: edit.id,
+              community: _community,
+              activity: _activity,
+              title: _title.text.trim(),
+              body: _body.text,
+              posterUrl: _cover.text,
+              creator: _creator.text,
+              year: int.tryParse(_year.text.trim()),
+            );
+      } else {
+        await ref.read(feedActionsProvider).createPost(
+              community: _community,
+              title: _title.text.trim(),
+              body: _body.text,
+              activity: _activity,
+              posterUrl: _cover.text,
+              creator: _creator.text,
+              year: int.tryParse(_year.text.trim()),
+            );
+      }
     } catch (_) {
-      showBanner('Couldn\'t share your pick — please try again.',
+      showBanner(
+          edit != null
+              ? 'Couldn\'t save your changes — please try again.'
+              : 'Couldn\'t share your pick — please try again.',
           type: AdaptiveSnackBarType.error);
       return;
     }
     if (!mounted) return;
     Navigator.of(context).pop();
     showBanner(
-        isPrivate
-            ? 'Saved to your picks — not broadcast (private profile)'
-            : 'Shared with ${_community.label} friends',
+        edit != null
+            ? 'Pick updated'
+            : isPrivate
+                ? 'Saved to your picks — not broadcast (private profile)'
+                : 'Shared with ${_community.label} friends',
         type: AdaptiveSnackBarType.success,
         duration: const Duration(seconds: 2));
   }
@@ -119,8 +151,12 @@ class _ComposerState extends ConsumerState<Composer> {
                 borderRadius: BorderRadius.circular(999)),
           ),
           Row(children: [
-            const Flexible(
-                child: BrandHeading('Share a pick', size: 20)),
+            Flexible(
+                child: BrandHeading(
+                    widget.editPost != null
+                        ? 'Edit pick'
+                        : 'Share a pick',
+                    size: 20)),
             const Spacer(),
             Container(
               padding: const EdgeInsets.symmetric(
@@ -299,9 +335,11 @@ class _ComposerState extends ConsumerState<Composer> {
                   width: double.infinity,
                   child: AdaptiveButton(
                     onPressed: _valid ? _post : null,
-                    label: isPrivate
-                        ? 'Save to your picks'
-                        : 'Share with ${_community.label}',
+                    label: widget.editPost != null
+                        ? 'Save changes'
+                        : isPrivate
+                            ? 'Save to your picks'
+                            : 'Share with ${_community.label}',
                     color: _accent,
                   ),
                 ),

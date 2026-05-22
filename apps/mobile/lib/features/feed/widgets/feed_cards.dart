@@ -273,8 +273,7 @@ class PostCard extends ConsumerWidget {
                   BlockMenuButton(
                       authorId: post.authorId,
                       author: post.author,
-                      postId: post.id,
-                      postTitle: post.title,
+                      post: post,
                       iconColor: tone.text),
                 ]),
                 const SizedBox(height: 8),
@@ -504,8 +503,7 @@ class CompactPostRow extends StatelessWidget {
           BlockMenuButton(
               authorId: post.authorId,
               author: post.author,
-              postId: post.id,
-              postTitle: post.title,
+              post: post,
               iconColor: tone.text,
               iconSize: 16),
         ]),
@@ -585,8 +583,7 @@ class MediaPostCard extends StatelessWidget {
                   child: BlockMenuButton(
                       authorId: post.authorId,
                       author: post.author,
-                      postId: post.id,
-                      postTitle: post.title,
+                      post: post,
                       iconColor: Colors.white,
                       iconSize: 20),
                 ),

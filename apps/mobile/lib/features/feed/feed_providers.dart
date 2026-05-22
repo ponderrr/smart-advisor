@@ -131,6 +131,36 @@ class FeedActions {
     _ref.invalidate(userPostsProvider);
   }
 
+  Future<void> updatePost({
+    required String postId,
+    required FeedCommunity community,
+    required FeedActivity activity,
+    required String title,
+    String? body,
+    String? posterUrl,
+    String? creator,
+    int? year,
+  }) async {
+    await _svc.updatePost(
+      postId: postId,
+      community: community,
+      activity: activity,
+      title: title,
+      body: body,
+      posterUrl: posterUrl,
+      creator: creator,
+      year: year,
+    );
+    _ref.invalidate(feedProvider);
+    _ref.invalidate(userPostsProvider);
+  }
+
+  Future<void> reportPost(String postId, {String? reason}) =>
+      _svc.reportPost(postId, reason: reason);
+
+  Future<void> reportComment(String commentId, {String? reason}) =>
+      _svc.reportComment(commentId, reason: reason);
+
   Future<void> addComment(String postId, String body,
       {String? parentId}) async {
     await _svc.createComment(postId, body, parentId);
