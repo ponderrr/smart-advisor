@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/models/enums.dart';
+import '../../../core/models/library_item.dart';
+import '../../../core/services/service_providers.dart';
 import '../../../core/supabase/supabase_providers.dart';
 import '../../../core/ui_messenger.dart';
 import '../../../ui/ui.dart';
@@ -10,6 +13,13 @@ import '../models/feed_models.dart';
 import '../widgets/feed_avatar.dart';
 import '../widgets/feed_cards.dart';
 import '../widgets/follow_button.dart';
+
+/// A profile's library — RLS returns rows only when it's public or yours.
+final _userLibraryProvider = FutureProvider.autoDispose
+    .family<List<LibraryItem>, String>((ref, id) async {
+  final r = await ref.watch(libraryServiceProvider).listForUser(id);
+  return r.data ?? const <LibraryItem>[];
+});
 
 /// Public profile — port of the web `src/app/feed/u/[id]/page.tsx`.
 /// FeedAvatar 64, "followers · picks", a [FollowButton] + Block toggle when
@@ -46,6 +56,21 @@ class UserProfileScreen extends ConsumerWidget {
     final profile = profileAsync.value;
     final name = profile?.name ?? 'Someone';
     final posts = postsAsync.value ?? const <FeedPost>[];
+
+    // Library + plan-to-watch — gated by the profile's library privacy.
+    final libraryPublic =
+        ref.watch(libraryPublicProvider(profileId)).value ?? true;
+    final library = ref.watch(_userLibraryProvider(profileId)).value ??
+        const <LibraryItem>[];
+    final logged = [
+      for (final i in library)
+        if (i.status != LibraryStatus.wishlist) i
+    ];
+    final watchlist = [
+      for (final i in library)
+        if (i.status == LibraryStatus.wishlist) i
+    ];
+    final showLibrary = isYou || libraryPublic;
 
     Widget stat(String label, String value, {VoidCallback? onTap}) {
       final column = Column(
@@ -203,8 +228,87 @@ class UserProfileScreen extends ConsumerWidget {
                     PostCard(
                         post: p,
                         onOpen: () => openPost(context, p.id)),
+                const SizedBox(height: 22),
+                if (!showLibrary)
+                  BrandCard(
+                    child: Row(children: [
+                      Icon(Icons.lock_outline,
+                          size: 18, color: context.brandMuted),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Subtitle(
+                            '$name keeps their library private.'),
+                      ),
+                    ]),
+                  )
+                else ...[
+                  Align(
+                      alignment: Alignment.centerLeft,
+                      child: Eyebrow('Library')),
+                  const SizedBox(height: 10),
+                  if (logged.isEmpty)
+                    Subtitle('Nothing logged yet.')
+                  else
+                    _PosterStrip(items: logged),
+                  if (watchlist.isNotEmpty) ...[
+                    const SizedBox(height: 20),
+                    Align(
+                        alignment: Alignment.centerLeft,
+                        child: Eyebrow('Plan to watch')),
+                    const SizedBox(height: 10),
+                    _PosterStrip(items: watchlist),
+                  ],
+                ],
               ],
             ),
+    );
+  }
+}
+
+/// Horizontal strip of library poster thumbnails for a profile section.
+class _PosterStrip extends StatelessWidget {
+  const _PosterStrip({required this.items});
+  final List<LibraryItem> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 164,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.zero,
+        itemCount: items.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
+        itemBuilder: (_, i) {
+          final it = items[i];
+          return SizedBox(
+            width: 84,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: PosterThumb(
+                    url: it.posterUrl,
+                    square: it.medium == LibraryMedium.music,
+                    w: 84,
+                    semanticLabel: '${it.title} cover',
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(it.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        height: 1.2,
+                        color: context.brandInk)),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }

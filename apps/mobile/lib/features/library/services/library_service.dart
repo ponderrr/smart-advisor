@@ -83,6 +83,27 @@ class LibraryService {
     }
   }
 
+  /// Library for an arbitrary user — used on profile pages. RLS only
+  /// returns rows when that user's library is public (or it's you), so
+  /// no extra gating is needed here.
+  Future<ServiceResult<List<LibraryItem>>> listForUser(
+    String userId, {
+    int? limit,
+  }) async {
+    try {
+      final query =
+          _client.from(_table).select().eq('user_id', userId);
+      var ordered = query.order('logged_at', ascending: false);
+      if (limit != null) ordered = ordered.limit(limit);
+      final rows = await ordered;
+      return ServiceResult.ok(rows
+          .map((r) => LibraryItem.fromJson(Map<String, dynamic>.from(r)))
+          .toList());
+    } on PostgrestException catch (e) {
+      return ServiceResult.fail(e.message);
+    }
+  }
+
   Future<ServiceResult<void>> update(
       String id, UpdateLibraryInput input) async {
     final updates = <String, dynamic>{

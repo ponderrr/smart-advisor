@@ -443,4 +443,28 @@ class FeedService {
         .eq('followee_id', profileId);
     return rows.length;
   }
+
+  /// Whether [profileId]'s library is publicly visible on their profile.
+  /// Tolerates the column not existing yet (pre-migration) → true.
+  Future<bool> fetchLibraryPublic(String profileId) async {
+    try {
+      final row = await _c
+          .from('profiles')
+          .select('library_public')
+          .eq('id', profileId)
+          .maybeSingle();
+      return (row?['library_public'] as bool?) ?? true;
+    } catch (_) {
+      return true;
+    }
+  }
+
+  /// Sets the current user's library visibility.
+  Future<void> setMyLibraryPublic(bool value) async {
+    final uid = _c.auth.currentUser?.id;
+    if (uid == null) return;
+    await _c
+        .from('profiles')
+        .update({'library_public': value}).eq('id', uid);
+  }
 }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:haptic_kit/haptic_kit.dart';
 
+import '../../../core/supabase/supabase_providers.dart';
 import '../../../ui/ui.dart';
 import '../../feed/feed_providers.dart';
 import '../../feed/models/feed_models.dart';
@@ -51,6 +53,37 @@ class FeedSettingsScreen extends ConsumerWidget {
                           ));
                 }),
               ]),
+            ),
+            settingsSection(context, 'Privacy'),
+            BrandCard(
+              child: Consumer(builder: (context, ref, _) {
+                final me = ref
+                    .watch(supabaseClientProvider)
+                    .auth
+                    .currentUser
+                    ?.id;
+                if (me == null) return const SizedBox.shrink();
+                final isPublic =
+                    ref.watch(libraryPublicProvider(me)).value ?? true;
+                return AdaptiveListTile(
+                  padding: EdgeInsets.zero,
+                  leading: const Icon(Icons.auto_stories_outlined),
+                  title: const Text('Public library'),
+                  subtitle: const Text(
+                      'Let others see your library and plan-to-watch '
+                      'on your profile'),
+                  trailing: AdaptiveSwitch(
+                    value: isPublic,
+                    activeColor: Tw.indigo500,
+                    onChanged: (v) {
+                      Haptics.selection();
+                      ref
+                          .read(feedActionsProvider)
+                          .setLibraryPublic(v);
+                    },
+                  ),
+                );
+              }),
             ),
             const SizedBox(height: 24),
           ],

@@ -61,6 +61,11 @@ final followerProfilesProvider = FutureProvider.autoDispose.family<
     List<({String id, String name, String? avatarUrl})>, String>(
     (ref, id) => ref.watch(feedServiceProvider).fetchFollowerProfiles(id));
 
+/// Whether a profile's library is publicly visible on their profile.
+final libraryPublicProvider =
+    FutureProvider.autoDispose.family<bool, String>(
+        (ref, id) => ref.watch(feedServiceProvider).fetchLibraryPublic(id));
+
 /// Posts authored by a given profile.
 final userPostsProvider = FutureProvider.autoDispose
     .family<List<FeedPost>, String>(
@@ -206,6 +211,12 @@ class FeedActions {
     await _svc.unblockUser(blockedId);
     _ref.invalidate(blockedProvider);
     _ref.invalidate(blockedProfilesProvider);
+  }
+
+  /// Sets the current user's library visibility (profile pages).
+  Future<void> setLibraryPublic(bool value) async {
+    await _svc.setMyLibraryPublic(value);
+    _ref.invalidate(libraryPublicProvider);
   }
 }
 
