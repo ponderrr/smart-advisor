@@ -42,6 +42,15 @@
         "empty": "No has bloqueado a nadie.",
         "unblock": "Desbloquear",
         "unblockedToast": "Has desbloqueado a @{handle}"
+      },
+      "reports": {
+        "title": "Reportes que has enviado",
+        "description": "Publicaciones y comentarios que has marcado. Nuestro equipo revisa cada uno.",
+        "empty": "No has enviado ningún reporte.",
+        "onPost": "En una publicación",
+        "onComment": "En un comentario",
+        "contentGone": "Contenido eliminado",
+        "statusReview": "En revisión"
       }
     },
     "groups": {

@@ -42,6 +42,15 @@
         "empty": "You haven't blocked anyone.",
         "unblock": "Unblock",
         "unblockedToast": "Unblocked @{handle}"
+      },
+      "reports": {
+        "title": "Reports you've filed",
+        "description": "Posts and comments you've flagged. Our team reviews each one.",
+        "empty": "You haven't filed any reports.",
+        "onPost": "On a post",
+        "onComment": "On a comment",
+        "contentGone": "Content removed",
+        "statusReview": "Under review"
       }
     },
     "groups": {

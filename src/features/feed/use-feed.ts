@@ -172,6 +172,13 @@ export function useReportComment() {
   });
 }
 
+export function useMyReports() {
+  return useQuery({
+    queryKey: ["feed", "my-reports"],
+    queryFn: svc.fetchMyReports,
+  });
+}
+
 export function useCreateComment() {
   const qc = useQueryClient();
   return useMutation({

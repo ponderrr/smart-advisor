@@ -270,6 +270,56 @@ export function reportComment(
   return fileReport({ commentId, reason });
 }
 
+/** A report the current user filed — for the Settings reports list. */
+export interface MyReport {
+  id: string;
+  reason: string | null;
+  createdAt: string;
+  target: "post" | "comment";
+  /** Post title / comment snippet, when the content still exists. */
+  targetLabel: string | null;
+}
+
+/** Reports the current user has filed, newest first. */
+export async function fetchMyReports(): Promise<MyReport[]> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+  const { data, error } = await supabase
+    .from("feed_reports")
+    .select(
+      `id, reason, created_at, post_id, comment_id,
+       post:feed_posts!feed_reports_post_id_fkey ( title ),
+       comment:feed_comments!feed_reports_comment_id_fkey ( body )`,
+    )
+    .eq("reporter_id", user.id)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  const rows = (data ?? []) as unknown as {
+    id: string;
+    reason: string | null;
+    created_at: string;
+    post_id: string | null;
+    comment_id: string | null;
+    post: { title: string } | { title: string }[] | null;
+    comment: { body: string } | { body: string }[] | null;
+  }[];
+  const one = <T,>(v: T | T[] | null): T | null =>
+    Array.isArray(v) ? (v[0] ?? null) : v;
+  return rows.map((r) => {
+    const post = one(r.post);
+    const comment = one(r.comment);
+    return {
+      id: r.id,
+      reason: r.reason,
+      createdAt: r.created_at,
+      target: r.post_id ? ("post" as const) : ("comment" as const),
+      targetLabel: post?.title ?? comment?.body ?? null,
+    };
+  });
+}
+
 /** Sets the current user's vote on a comment. dir 0 clears it. */
 export async function setCommentVote(
   commentId: string,
