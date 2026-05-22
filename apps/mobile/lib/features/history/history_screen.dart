@@ -213,18 +213,27 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       // or leave gaps — keep the content-sized Wrap here. Grid is the
       // opt-in secondary view; the default list view below is lazy.
       const gap = 12.0;
-      final cellW =
-          (MediaQuery.sizeOf(context).width - 40 - gap) / 2;
       return [
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           sliver: SliverToBoxAdapter(
-            child: Wrap(
-              spacing: gap,
-              runSpacing: gap,
-              children: [
-                for (final r in list) _gridCard(r, cellW),
-              ],
+            // Size cells off the real laid-out width via LayoutBuilder —
+            // a MediaQuery-width guess can over-estimate by a hair, which
+            // wraps the second card and collapses the grid to one column.
+            child: LayoutBuilder(
+              builder: (_, box) {
+                // 3 columns on a phone, more on wider screens.
+                final cols = (box.maxWidth / 150).floor().clamp(3, 5);
+                final cellW =
+                    (box.maxWidth - gap * (cols - 1)) / cols;
+                return Wrap(
+                  spacing: gap,
+                  runSpacing: gap,
+                  children: [
+                    for (final r in list) _gridCard(r, cellW),
+                  ],
+                );
+              },
             ),
           ),
         ),

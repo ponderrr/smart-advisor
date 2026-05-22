@@ -112,7 +112,11 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
               if (_view == ViewMode.grid) {
                 return LayoutBuilder(builder: (_, box) {
                   const gap = 12.0;
-                  final cellW = (box.maxWidth - gap) / 2;
+                  // 3 columns on a phone, more on wider screens.
+                  final cols =
+                      (box.maxWidth / 150).floor().clamp(3, 5);
+                  final cellW =
+                      (box.maxWidth - gap * (cols - 1)) / cols;
                   return Wrap(
                     spacing: gap,
                     runSpacing: gap,
