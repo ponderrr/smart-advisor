@@ -9,6 +9,7 @@ import '../auth/auth_providers.dart';
 import '../auth/services/error_messages.dart';
 import '../onboarding/get_started_screen.dart';
 import '../onboarding/onboarding_screen.dart';
+import '../onboarding/tutorial_screen.dart';
 import '../security/biometric_login.dart';
 import 'screens/settings_helpers.dart';
 
@@ -186,6 +187,14 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                       MaterialPageRoute(
                           builder: (_) =>
                               const OnboardingScreen(previewMode: true)),
+                    )),
+            settingsTile(context, Icons.auto_awesome_outlined,
+                'Replay tutorial',
+                subtitle: 'Re-see the how-it-works walkthrough',
+                onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (_) =>
+                              const TutorialScreen(replay: true)),
                     )),
           ]),
         ),

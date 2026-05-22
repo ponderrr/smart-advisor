@@ -53,7 +53,11 @@ const _slides = <_Slide>[
 /// app. Reached from the end of [OnboardingScreen]; "Skip" or the final
 /// "Get started" both navigate home.
 class TutorialScreen extends StatefulWidget {
-  const TutorialScreen({super.key});
+  const TutorialScreen({super.key, this.replay = false});
+
+  /// When true the tutorial was opened from Settings ("Replay tutorial")
+  /// — finishing pops back there instead of navigating into the app.
+  final bool replay;
 
   @override
   State<TutorialScreen> createState() => _TutorialScreenState();
@@ -70,7 +74,12 @@ class _TutorialScreenState extends State<TutorialScreen> {
   }
 
   void _finish() {
-    if (mounted) context.go('/');
+    if (!mounted) return;
+    if (widget.replay) {
+      Navigator.of(context).pop();
+    } else {
+      context.go('/');
+    }
   }
 
   void _next() {
