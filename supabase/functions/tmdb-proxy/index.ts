@@ -79,13 +79,15 @@ serve(async (req) => {
 
     const movie = searchData.results[0];
 
-    // Get detailed movie info for description
-    const detailsUrl = `https://api.themoviedb.org/3/movie/${movie.id}?api_key=${tmdbApiKey}&language=en-US`;
+    // Get detailed movie info — description, genres, and the director
+    // (credits.crew) in a single request via append_to_response.
+    const detailsUrl = `https://api.themoviedb.org/3/movie/${movie.id}?api_key=${tmdbApiKey}&language=en-US&append_to_response=credits`;
     const detailsResponse = await fetch(detailsUrl);
 
     let description =
       "A captivating story that will keep you entertained from start to finish.";
     let genres: string[] = [];
+    let director = "";
 
     if (detailsResponse.ok) {
       const detailsData = await detailsResponse.json();
@@ -102,6 +104,13 @@ serve(async (req) => {
       }
       if (Array.isArray(detailsData.genres)) {
         genres = detailsData.genres.map((g: { name: string }) => g.name);
+      }
+      const crew = detailsData.credits?.crew;
+      if (Array.isArray(crew)) {
+        const dir = crew.find(
+          (c: { job: string; name: string }) => c.job === "Director",
+        );
+        if (dir?.name) director = dir.name;
       }
     }
 
@@ -180,6 +189,7 @@ serve(async (req) => {
         : 7.5,
       description: description,
       genres: genres,
+      director: director,
       trailer: trailer,
       watchProviders: watchProviders,
     };

@@ -540,8 +540,11 @@ function Composer({
       if (!result.poster || result.poster.startsWith(missPrefix)) {
         toast.error(`No cover art found for "${query}".`);
       } else {
+        // A fresh match overwrites year + director so switching titles
+        // re-fills them rather than keeping the previous movie's data.
         setPosterUrl(result.poster);
-        if (!year.trim() && result.year) setYear(String(result.year));
+        if (result.year) setYear(String(result.year));
+        if (result.director) setCreator(result.director);
       }
     } catch {
       toast.error("Couldn't search for cover art — please try again.");

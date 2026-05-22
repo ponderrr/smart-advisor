@@ -17,6 +17,8 @@ export interface MovieSearchResult {
   rating: number;
   description: string;
   genres?: string[];
+  /** Director name, from the tmdb-proxy credits lookup. */
+  director?: string;
   trailer?: string | null;
   watchProviders?: WatchProviders | null;
 }
