@@ -281,7 +281,13 @@ const OnboardingPage = () => {
                   <SegmentedControl<Locale>
                     layoutId="onboarding-language"
                     value={locale}
-                    onChange={setLocale}
+                    onChange={(next) => {
+                      setLocale(next);
+                      // Switch the app locale right away so the rest of
+                      // onboarding renders in the chosen language — not
+                      // only after the final persist.
+                      void setLocaleAction(next);
+                    }}
                     disabled={submitting}
                     ariaLabel={t("fields.language.label")}
                     options={[
