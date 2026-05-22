@@ -283,6 +283,9 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
               width: w,
               height: h,
               fit: BoxFit.cover,
+              // Decode at the small thumb size × pixel ratio, not full res.
+              cacheWidth:
+                  (w * MediaQuery.devicePixelRatioOf(context)).ceil(),
               semanticLabel: '${r.title} cover',
               errorBuilder: (_, _, _) => _posterFallback(w, h))
           : _posterFallback(w, h),

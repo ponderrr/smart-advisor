@@ -56,73 +56,82 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
           ref.read(remindersProvider.notifier).syncInProgress(items));
     });
     final lib = ref.watch(_libraryProvider);
-    return ListView(
-      padding: const EdgeInsets.all(20),
-      children: [
-        const SizedBox(height: 8),
-        Row(children: [
-          const Expanded(
-              child: BrandHeading('Logged & saved', size: 32)),
-          _ImportButton(onTap: () => context.push('/library/import')),
-          if (lib.asData?.value.isNotEmpty ?? false) ...[
-            const SizedBox(width: 8),
-            ClearAllButton(
-              title: 'Clear your library?',
-              message: 'Every logged & saved item will be '
-                  'permanently removed. This can’t be undone.',
-              onConfirm: _clearAll,
-            ),
-          ],
-        ]),
-        const SizedBox(height: 16),
-        _filters(),
-        const SizedBox(height: 16),
-        lib.when(
-          loading: () => const Padding(
-              padding: EdgeInsets.all(40),
-              child: Center(child: LoaderFive('Loading'))),
-          error: (e, _) => const MessageBanner.error(
-              'We couldn’t load your library right now. '
-              'Please try again in a moment.'),
-          data: (items) {
-            final q = _query.trim().toLowerCase();
-            final filtered = items.where((i) {
-              if (_medium != null && i.medium != _medium) return false;
-              if (_status != null && i.status != _status) return false;
-              if (q.isNotEmpty) {
-                final hay = '${i.title} ${i.creator ?? ''}'.toLowerCase();
-                if (!hay.contains(q)) return false;
+    return RefreshIndicator(
+      onRefresh: () async {
+        ref.invalidate(_libraryProvider);
+        await ref.read(_libraryProvider.future);
+      },
+      child: ListView(
+        // Always scrollable so pull-to-refresh works even when the
+        // library is short or empty.
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(20),
+        children: [
+          const SizedBox(height: 8),
+          Row(children: [
+            const Expanded(
+                child: BrandHeading('Logged & saved', size: 32)),
+            _ImportButton(onTap: () => context.push('/library/import')),
+            if (lib.asData?.value.isNotEmpty ?? false) ...[
+              const SizedBox(width: 8),
+              ClearAllButton(
+                title: 'Clear your library?',
+                message: 'Every logged & saved item will be '
+                    'permanently removed. This can’t be undone.',
+                onConfirm: _clearAll,
+              ),
+            ],
+          ]),
+          const SizedBox(height: 16),
+          _filters(),
+          const SizedBox(height: 16),
+          lib.when(
+            loading: () => const Padding(
+                padding: EdgeInsets.all(40),
+                child: Center(child: LoaderFive('Loading'))),
+            error: (e, _) => const MessageBanner.error(
+                'We couldn’t load your library right now. '
+                'Please try again in a moment.'),
+            data: (items) {
+              final q = _query.trim().toLowerCase();
+              final filtered = items.where((i) {
+                if (_medium != null && i.medium != _medium) return false;
+                if (_status != null && i.status != _status) return false;
+                if (q.isNotEmpty) {
+                  final hay = '${i.title} ${i.creator ?? ''}'.toLowerCase();
+                  if (!hay.contains(q)) return false;
+                }
+                return true;
+              }).toList();
+              if (filtered.isEmpty) {
+                return Subtitle(
+                    q.isNotEmpty ? 'No matches for “$_query”.' : 'Nothing here yet.');
               }
-              return true;
-            }).toList();
-            if (filtered.isEmpty) {
-              return Subtitle(
-                  q.isNotEmpty ? 'No matches for “$_query”.' : 'Nothing here yet.');
-            }
-            if (_view == ViewMode.grid) {
-              return LayoutBuilder(builder: (_, box) {
-                const gap = 12.0;
-                final cellW = (box.maxWidth - gap) / 2;
-                return Wrap(
-                  spacing: gap,
-                  runSpacing: gap,
-                  children: [
-                    for (final i in filtered)
-                      _gridCard(i, cellW),
-                  ],
-                );
-              });
-            }
-            return Column(children: [
-              for (final i in filtered)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _row(i),
-                ),
-            ]);
-          },
-        ),
-      ],
+              if (_view == ViewMode.grid) {
+                return LayoutBuilder(builder: (_, box) {
+                  const gap = 12.0;
+                  final cellW = (box.maxWidth - gap) / 2;
+                  return Wrap(
+                    spacing: gap,
+                    runSpacing: gap,
+                    children: [
+                      for (final i in filtered)
+                        _gridCard(i, cellW),
+                    ],
+                  );
+                });
+              }
+              return Column(children: [
+                for (final i in filtered)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _row(i),
+                  ),
+              ]);
+            },
+          ),
+        ],
+      ),
     );
   }
 

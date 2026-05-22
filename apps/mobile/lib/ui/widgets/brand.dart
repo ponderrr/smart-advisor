@@ -496,6 +496,9 @@ class PosterThumb extends StatelessWidget {
   Widget build(BuildContext context) {
     final h = square ? w : w * 3 / 2;
     final dark = Theme.of(context).brightness == Brightness.dark;
+    // Decode the cover at display size × pixel ratio, not full res — a
+    // big memory + decode win when many thumbs scroll past.
+    final cacheW = (w * MediaQuery.devicePixelRatioOf(context)).ceil();
     Widget fallback() => Container(
           width: w,
           height: h,
@@ -511,6 +514,7 @@ class PosterThumb extends StatelessWidget {
               width: w,
               height: h,
               fit: BoxFit.cover,
+              cacheWidth: cacheW,
               errorBuilder: (_, _, _) => fallback()),
     );
     if (semanticLabel == null || semanticLabel!.isEmpty) return thumb;

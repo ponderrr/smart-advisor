@@ -67,6 +67,9 @@ class FeedAvatar extends StatelessWidget {
             width: size,
             height: size,
             fit: BoxFit.cover,
+            // Decode at display size × pixel ratio, not full resolution.
+            cacheWidth:
+                (size * MediaQuery.devicePixelRatioOf(context)).ceil(),
             errorBuilder: (_, _, _) => _initialsBox(context),
           ),
         ),

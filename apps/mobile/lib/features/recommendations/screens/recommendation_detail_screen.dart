@@ -172,6 +172,10 @@ class _S extends ConsumerState<RecommendationDetailScreen> {
               child: r.posterUrl != null
                   ? Image.network(r.posterUrl!,
                       height: 260, fit: BoxFit.cover,
+                      // Decode at the 260px display height × pixel ratio.
+                      cacheHeight:
+                          (260 * MediaQuery.devicePixelRatioOf(context))
+                              .ceil(),
                       semanticLabel: '${r.title} cover',
                       errorBuilder: (_, _, _) =>
                           _posterFallback(context))

@@ -547,6 +547,10 @@ class MediaPostCard extends StatelessWidget {
                 if (post.posterUrl != null)
                   Image.network(post.posterUrl!,
                       fit: BoxFit.cover,
+                      // Decode at the 200px display height × pixel ratio.
+                      cacheHeight:
+                          (200 * MediaQuery.devicePixelRatioOf(context))
+                              .ceil(),
                       semanticLabel: '${post.title} cover',
                       errorBuilder: (_, _, _) =>
                           ColoredBox(color: tone.iconCircleBg))
