@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -84,10 +86,13 @@ class _ComposerState extends ConsumerState<Composer> {
     for (final c in [_title, _body, _cover, _creator, _year]) {
       c.addListener(() => setState(() {}));
     }
+    // Auto-lookup cover art on every title pause (parity with web).
+    _title.addListener(_maybeAutoLookup);
   }
 
   @override
   void dispose() {
+    _coverDebounce?.cancel();
     for (final c in [_title, _body, _cover, _creator, _year]) {
       c.dispose();
     }
@@ -199,36 +204,101 @@ class _ComposerState extends ConsumerState<Composer> {
         duration: const Duration(seconds: 2));
   }
 
-  /// Movies only — look the title up via the tmdb-proxy Edge Function and
-  /// drop the poster (and year, if blank) into the form. The proxy returns
-  /// a generic stock image on a miss, which we detect and treat as "none".
-  Future<void> _findCover() async {
+  /// Stock-image prefixes each cover proxy returns on a miss — used to
+  /// treat "found nothing" as an error rather than a bogus poster.
+  static const _missPrefix = <FeedCommunity, String>{
+    FeedCommunity.movies:
+        'https://images.unsplash.com/photo-1489599731893-01139d4e6b5b',
+    FeedCommunity.books:
+        'https://images.unsplash.com/photo-1481627834876-b7833e8f5570',
+    FeedCommunity.music:
+        'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f',
+  };
+
+  /// Look the title up via the matching cover provider — TMDB for movies,
+  /// Open Library for books, Deezer for music — and drop the poster (and
+  /// year, if blank) into the form. Fired automatically by the debounced
+  /// listener on _title as the user types; failures stay silent so we
+  /// don't toast-spam on every half-typed word.
+  Future<void> _findCover({bool silent = true}) async {
     final title = _title.text.trim();
     if (title.isEmpty || _findingCover) return;
     setState(() => _findingCover = true);
     try {
-      final r = await ref.read(tmdbServiceProvider).searchMovie(title);
+      String? cover;
+      int? year;
+      switch (_community) {
+        case FeedCommunity.movies:
+          final r = await ref.read(tmdbServiceProvider).searchMovie(title);
+          cover = r.poster;
+          year = r.year;
+        case FeedCommunity.books:
+          final r = await ref.read(openLibraryServiceProvider).searchBook(
+                title,
+                _creator.text.trim().isEmpty ? null : _creator.text.trim(),
+              );
+          cover = r.cover;
+          year = r.year;
+        case FeedCommunity.music:
+          final r = await ref.read(deezerServiceProvider).searchAlbum(
+                title,
+                _creator.text.trim().isEmpty ? null : _creator.text.trim(),
+              );
+          cover = r.cover;
+          year = r.year;
+      }
       if (!mounted) return;
-      // The proxy's documented fallback image when nothing matches.
-      const missPrefix =
-          'https://images.unsplash.com/photo-1489599731893-01139d4e6b5b';
-      if (r.poster.isEmpty || r.poster.startsWith(missPrefix)) {
-        showBanner('No cover art found for “$title”.',
-            type: AdaptiveSnackBarType.info);
+      final missPrefix = _missPrefix[_community];
+      final missed = cover == null ||
+          cover.isEmpty ||
+          (missPrefix != null && cover.startsWith(missPrefix));
+      if (missed) {
+        if (!silent) {
+          showBanner('No cover art found for “$title”.',
+              type: AdaptiveSnackBarType.info);
+        }
       } else {
         setState(() {
-          _cover.text = r.poster;
-          if (_year.text.trim().isEmpty) _year.text = r.year.toString();
+          _cover.text = cover!;
+          if (year != null && _year.text.trim().isEmpty) {
+            _year.text = year.toString();
+          }
         });
       }
     } catch (_) {
-      if (mounted) {
+      // Silent on auto-lookup; surface only when the user pressed a button.
+      if (!silent && mounted) {
         showBanner('Couldn’t search for cover art — please try again.',
             type: AdaptiveSnackBarType.error);
       }
     } finally {
       if (mounted) setState(() => _findingCover = false);
     }
+  }
+
+  /// Debounce handle for the title-driven auto-lookup.
+  Timer? _coverDebounce;
+  /// Last (community|title) pair we kicked off a search for — guards
+  /// against re-firing for the same combination across rebuilds.
+  String? _lastAutoLookupKey;
+
+  /// Watch _title (and the current community) and fire _findCover once the
+  /// user has paused for 800ms. Wired up in initState alongside the
+  /// existing listeners. Skips trivially short titles and the seeded
+  /// title of an edit (so we don't overwrite the saved cover behind the
+  /// user's back).
+  void _maybeAutoLookup() {
+    final title = _title.text.trim();
+    if (title.length < 2) return;
+    final edit = widget.editPost;
+    if (edit != null && title == edit.title) return;
+    final key = '${_community.wire}|$title';
+    if (key == _lastAutoLookupKey) return;
+    _coverDebounce?.cancel();
+    _coverDebounce = Timer(const Duration(milliseconds: 800), () {
+      _lastAutoLookupKey = key;
+      if (mounted) _findCover(silent: true);
+    });
   }
 
   Widget _label(String text) => Padding(
@@ -318,8 +388,12 @@ class _ComposerState extends ConsumerState<Composer> {
                   color: _accent,
                   labels: const ['Movies', 'Books', 'Music'],
                   selectedIndex: _community.index,
-                  onValueChanged: (i) => setState(
-                      () => _community = FeedCommunity.values[i]),
+                  onValueChanged: (i) {
+                    setState(
+                        () => _community = FeedCommunity.values[i]);
+                    // Re-search with the new community/title pair.
+                    _maybeAutoLookup();
+                  },
                 ),
                 _label('What did you do?'),
                 BrandSegmented(
@@ -371,21 +445,19 @@ class _ComposerState extends ConsumerState<Composer> {
                   placeholder: 'Cover image URL',
                   keyboardType: TextInputType.url,
                 ),
-                // Movies can skip the URL entirely: look the poster up
-                // by title via TMDB.
-                if (_community == FeedCommunity.movies) ...[
-                  const SizedBox(height: 8),
+                // Cover art is looked up automatically as the user types
+                // the title (TMDB / Open Library / Deezer per community).
+                // We just surface the in-flight state inline.
+                if (_findingCover) ...[
+                  const SizedBox(height: 6),
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: AdaptiveButton(
-                      style: AdaptiveButtonStyle.bordered,
-                      onPressed:
-                          _title.text.trim().isEmpty || _findingCover
-                              ? null
-                              : _findCover,
-                      label: _findingCover
-                          ? 'Searching…'
-                          : 'Find cover art',
+                    child: Text(
+                      'Looking up cover art…',
+                      style: TextStyle(
+                          fontSize: 11,
+                          fontStyle: FontStyle.italic,
+                          color: context.brandMuted),
                     ),
                   ),
                 ],

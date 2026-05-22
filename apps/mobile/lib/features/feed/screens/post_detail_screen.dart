@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:haptic_kit/haptic_kit.dart';
 
+import '../../../core/supabase/supabase_providers.dart';
 import '../../../core/ui_messenger.dart';
 import '../../../ui/ui.dart';
 import '../feed_providers.dart';
@@ -286,12 +287,36 @@ class _CommentNode extends ConsumerStatefulWidget {
 class _CommentNodeState extends ConsumerState<_CommentNode> {
   bool _collapsed = false;
   bool _replying = false;
+  bool _editing = false;
   final _draft = TextEditingController();
+  late final TextEditingController _editDraft =
+      TextEditingController(text: widget.node.body);
 
   @override
   void dispose() {
     _draft.dispose();
+    _editDraft.dispose();
     super.dispose();
+  }
+
+  Future<void> _submitEdit() async {
+    final text = _editDraft.text.trim();
+    if (text.isEmpty || text == widget.node.body) {
+      setState(() => _editing = false);
+      return;
+    }
+    try {
+      await ref.read(feedActionsProvider).updateComment(widget.node.id, text);
+      if (!mounted) return;
+      setState(() => _editing = false);
+      showBanner('Comment updated',
+          type: AdaptiveSnackBarType.success,
+          duration: const Duration(seconds: 2));
+    } catch (_) {
+      if (!mounted) return;
+      showBanner("Couldn't update the comment.",
+          type: AdaptiveSnackBarType.error);
+    }
   }
 
   Future<void> _submitReply() async {
@@ -313,6 +338,8 @@ class _CommentNodeState extends ConsumerState<_CommentNode> {
     final node = widget.node;
     final vote =
         ref.watch(commentVotesProvider).value?[node.id] ?? 0;
+    final me = ref.watch(supabaseClientProvider).auth.currentUser?.id;
+    final isOwn = me != null && node.authorId == me;
     final replyCount = node.replies.fold<int>(
         0, (n, r) => n + 1 + countDescendants(r));
 
@@ -469,7 +496,33 @@ class _CommentNodeState extends ConsumerState<_CommentNode> {
                       iconColor: context.brandMuted,
                       iconSize: 16),
                 ]),
-                if (!_collapsed) ...[
+                if (!_collapsed && _editing) ...[
+                  const SizedBox(height: 6),
+                  AdaptiveTextField(
+                    controller: _editDraft,
+                    autofocus: true,
+                    minLines: 2,
+                    maxLines: 6,
+                  ),
+                  const SizedBox(height: 8),
+                  Row(children: [
+                    AdaptiveButton(
+                      onPressed: _submitEdit,
+                      label: 'Save',
+                      color: Tw.violet500,
+                    ),
+                    const SizedBox(width: 8),
+                    AdaptiveButton(
+                      onPressed: () {
+                        _editDraft.text = node.body;
+                        setState(() => _editing = false);
+                      },
+                      label: 'Cancel',
+                      style: AdaptiveButtonStyle.plain,
+                    ),
+                  ]),
+                ],
+                if (!_collapsed && !_editing) ...[
                   const SizedBox(height: 6),
                   Text(node.body,
                       style: TextStyle(
@@ -477,24 +530,49 @@ class _CommentNodeState extends ConsumerState<_CommentNode> {
                           height: 1.4,
                           color: context.brandInk)),
                   const SizedBox(height: 6),
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () =>
-                        setState(() => _replying = !_replying),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.subdirectory_arrow_right,
-                            size: 13, color: context.brandMuted),
-                        const SizedBox(width: 4),
-                        Text('Reply',
-                            style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                color: context.brandMuted)),
-                      ],
+                  Row(mainAxisSize: MainAxisSize.min, children: [
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () =>
+                          setState(() => _replying = !_replying),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.subdirectory_arrow_right,
+                              size: 13, color: context.brandMuted),
+                          const SizedBox(width: 4),
+                          Text('Reply',
+                              style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  color: context.brandMuted)),
+                        ],
+                      ),
                     ),
-                  ),
+                    if (isOwn) ...[
+                      const SizedBox(width: 14),
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          _editDraft.text = node.body;
+                          setState(() => _editing = true);
+                        },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.edit_outlined,
+                                size: 13, color: context.brandMuted),
+                            const SizedBox(width: 4),
+                            Text('Edit',
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                    color: context.brandMuted)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ]),
                   if (_replying) ...[
                     const SizedBox(height: 8),
                     AdaptiveTextField(
