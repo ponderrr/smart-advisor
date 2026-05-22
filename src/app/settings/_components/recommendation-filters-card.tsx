@@ -64,12 +64,16 @@ const GENRES: Record<Format, readonly string[]> = {
 /** Movie runtime caps offered, in minutes. 0 = no cap. Movie-only. */
 const RUNTIME_STOPS = [0, 90, 120, 150, 180] as const;
 
-/** Per-format chip colour — matches the "Default content" picker so the
- *  filter card visually announces which format you're tuning. */
+/** Per-format selected-chip style — a soft tint of the format's hue with
+ *  matching text, rather than a solid bright fill, to stay in line with
+ *  the app's muted control styling. */
 const ACTIVE_HUE: Record<Format, string> = {
-  movie: "bg-amber-500",
-  book: "bg-emerald-500",
-  music: "bg-rose-500",
+  movie:
+    "bg-amber-100 text-amber-700 ring-1 ring-inset ring-amber-300 dark:bg-amber-500/15 dark:text-amber-300 dark:ring-amber-500/40",
+  book:
+    "bg-emerald-100 text-emerald-700 ring-1 ring-inset ring-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-500/40",
+  music:
+    "bg-rose-100 text-rose-700 ring-1 ring-inset ring-rose-300 dark:bg-rose-500/15 dark:text-rose-300 dark:ring-rose-500/40",
 };
 
 const HOVER_BORDER: Record<Format, string> = {
@@ -281,10 +285,7 @@ export const RecommendationFiltersCard = () => {
                   className={cn(
                     "rounded-full border px-3 py-1.5 text-xs font-bold tracking-tight transition-all",
                     selected
-                      ? cn(
-                        "border-transparent text-white shadow-sm",
-                        ACTIVE_HUE[active],
-                      )
+                      ? cn("border-transparent", ACTIVE_HUE[active])
                       : cn(
                         "border-slate-200/80 bg-white text-slate-600 dark:border-slate-700/70 dark:bg-slate-900/65 dark:text-slate-300",
                         HOVER_BORDER[active],

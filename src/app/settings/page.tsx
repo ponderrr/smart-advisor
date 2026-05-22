@@ -142,6 +142,32 @@ const CURATED_INTERESTS = [
   "True crime",
 ] as const;
 
+/** Question-count depth tier — drives both the i18n depth label and the
+ *  hue of the slider/number, so the control colour shifts as it moves. */
+const questionTier = (
+  n: number,
+): "quick" | "focused" | "balanced" | "thorough" | "comprehensive" =>
+  n <= 4
+    ? "quick"
+    : n <= 7
+      ? "focused"
+      : n <= 10
+        ? "balanced"
+        : n <= 13
+          ? "thorough"
+          : "comprehensive";
+
+const QUESTION_TIER_STYLE: Record<
+  ReturnType<typeof questionTier>,
+  { text: string; accent: string }
+> = {
+  quick: { text: "text-emerald-500", accent: "accent-emerald-500" },
+  focused: { text: "text-sky-500", accent: "accent-sky-500" },
+  balanced: { text: "text-indigo-500", accent: "accent-indigo-500" },
+  thorough: { text: "text-amber-500", accent: "accent-amber-500" },
+  comprehensive: { text: "text-rose-500", accent: "accent-rose-500" },
+};
+
 const SettingsPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -274,6 +300,10 @@ const SettingsPage = () => {
     }
     setTagDraft("");
   };
+
+  // Hue for the question-count slider + number, by depth tier.
+  const questionStyle =
+    QUESTION_TIER_STYLE[questionTier(preferredQuestionCount)];
 
   const handleSaveAbout = async () => {
     if (!user || savingAbout) return;
@@ -663,7 +693,7 @@ const SettingsPage = () => {
                               className={cn(
                                 "rounded-full px-3 py-1 text-xs font-semibold transition-colors",
                                 on
-                                  ? "bg-indigo-500 text-white"
+                                  ? "bg-indigo-100 text-indigo-700 ring-1 ring-inset ring-indigo-300 dark:bg-indigo-500/15 dark:text-indigo-300 dark:ring-indigo-500/40"
                                   : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700",
                               )}
                             >
@@ -1208,7 +1238,10 @@ const SettingsPage = () => {
                                     duration: 0.18,
                                     ease: "easeOut",
                                   }}
-                                  className="bg-gradient-to-br from-indigo-500 to-violet-500 bg-clip-text text-5xl font-black tracking-tighter text-transparent leading-none"
+                                  className={cn(
+                                    "text-5xl font-black tracking-tighter leading-none transition-colors",
+                                    questionStyle.text,
+                                  )}
                                 >
                                   {preferredQuestionCount}
                                 </motion.p>
@@ -1218,19 +1251,16 @@ const SettingsPage = () => {
                                   })}
                                 </p>
                               </div>
-                              <p className="text-sm font-bold tracking-tight text-slate-700 dark:text-slate-200">
+                              <p
+                                className={cn(
+                                  "text-sm font-bold tracking-tight transition-colors",
+                                  questionStyle.text,
+                                )}
+                              >
                                 {t(
-                                  `content.depth.${
-                                    preferredQuestionCount <= 4
-                                      ? "quick"
-                                      : preferredQuestionCount <= 7
-                                        ? "focused"
-                                        : preferredQuestionCount <= 10
-                                          ? "balanced"
-                                          : preferredQuestionCount <= 13
-                                            ? "thorough"
-                                            : "comprehensive"
-                                  }`,
+                                  `content.depth.${questionTier(
+                                    preferredQuestionCount,
+                                  )}`,
                                 )}
                               </p>
                             </div>
@@ -1245,7 +1275,10 @@ const SettingsPage = () => {
                                 )
                               }
                               aria-label={t("content.rangeAria")}
-                              className="w-full cursor-pointer accent-indigo-500"
+                              className={cn(
+                                "w-full cursor-pointer transition-colors",
+                                questionStyle.accent,
+                              )}
                             />
                             <div className="mt-1 flex justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                               <span>3</span>
