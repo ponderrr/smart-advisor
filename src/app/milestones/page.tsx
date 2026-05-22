@@ -143,7 +143,7 @@ const MilestonesPage = () => {
           </button>
 
           <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
-            {tb("tabs.milestones")}
+            {tb("milestones.eyebrow")}
           </p>
           <h1 className="mt-2 text-2xl font-black tracking-tighter sm:text-3xl md:text-4xl">
             {tb("milestones.pageTitle")}

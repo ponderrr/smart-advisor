@@ -33,6 +33,7 @@ interface CommentRow {
   body: string;
   parent_id: string | null;
   created_at: string;
+  edited_at: string | null;
   author: ProfileEmbed | null;
 }
 
@@ -57,7 +58,7 @@ const POST_SELECT = `
   rating, base_score, created_at,
   author:profiles!feed_posts_user_id_fkey ( id, name, avatar_url ),
   feed_comments (
-    id, body, parent_id, created_at,
+    id, body, parent_id, created_at, edited_at,
     author:profiles!feed_comments_user_id_fkey ( id, name, avatar_url )
   )
 `;
@@ -71,11 +72,16 @@ function mapComment(c: CommentRow, score: number): FeedComment {
     body: c.body,
     ageHours: hoursSince(c.created_at),
     score,
+    edited: c.edited_at != null,
     parentId: c.parent_id,
   };
 }
 
-function mapPost(p: PostRow, scores: Map<string, number>): FeedPost {
+function mapPost(
+  p: PostRow,
+  commentScores: Map<string, number>,
+  postScore: number,
+): FeedPost {
   return {
     id: p.id,
     community: p.community,
@@ -92,8 +98,9 @@ function mapPost(p: PostRow, scores: Map<string, number>): FeedPost {
     year: p.year ?? undefined,
     rating: p.rating ?? undefined,
     baseScore: p.base_score,
+    score: postScore,
     comments: p.feed_comments.map((c) =>
-      mapComment(c, scores.get(c.id) ?? 0),
+      mapComment(c, commentScores.get(c.id) ?? 0),
     ),
   };
 }
@@ -114,6 +121,22 @@ async function loadCommentScores(
   return scores;
 }
 
+/** Sums feed_post_votes for the given post ids → { postId: score }. */
+async function loadPostScores(
+  postIds: string[],
+): Promise<Map<string, number>> {
+  const scores = new Map<string, number>();
+  if (postIds.length === 0) return scores;
+  const { data } = await supabase
+    .from("feed_post_votes")
+    .select("post_id, value")
+    .in("post_id", postIds);
+  for (const row of (data ?? []) as { post_id: string; value: number }[]) {
+    scores.set(row.post_id, (scores.get(row.post_id) ?? 0) + row.value);
+  }
+  return scores;
+}
+
 /** The whole feed, newest first, with comments + author display data. */
 export async function fetchFeed(): Promise<FeedPost[]> {
   const { data, error } = await supabase
@@ -123,8 +146,12 @@ export async function fetchFeed(): Promise<FeedPost[]> {
   if (error) throw error;
   const rows = (data ?? []) as unknown as PostRow[];
   const commentIds = rows.flatMap((p) => p.feed_comments.map((c) => c.id));
-  const scores = await loadCommentScores(commentIds);
-  return rows.map((p) => mapPost(p, scores));
+  const postIds = rows.map((p) => p.id);
+  const [commentScores, postScores] = await Promise.all([
+    loadCommentScores(commentIds),
+    loadPostScores(postIds),
+  ]);
+  return rows.map((p) => mapPost(p, commentScores, postScores.get(p.id) ?? 0));
 }
 
 /** Inserts a post authored by the current user; returns it mapped. */
@@ -162,7 +189,7 @@ export async function createPost(input: {
     .select(POST_SELECT)
     .single();
   if (error) throw error;
-  return mapPost(data as unknown as PostRow, new Map());
+  return mapPost(data as unknown as PostRow, new Map(), 0);
 }
 
 /** Updates an existing post's editable fields. RLS only permits the
@@ -198,7 +225,7 @@ export async function updatePost(input: {
     .select(POST_SELECT)
     .single();
   if (error) throw error;
-  return mapPost(data as unknown as PostRow, new Map());
+  return mapPost(data as unknown as PostRow, new Map(), 0);
 }
 
 /** Deletes a post. RLS only permits the author; cascades to its
@@ -235,6 +262,19 @@ export async function deleteComment(commentId: string): Promise<void> {
   const { error } = await supabase
     .from("feed_comments")
     .delete()
+    .eq("id", commentId);
+  if (error) throw error;
+}
+
+/** Updates a comment's body. RLS only permits the author. Stamps
+ *  edited_at so the UI can show "(edited)" on the byline. */
+export async function updateComment(
+  commentId: string,
+  body: string,
+): Promise<void> {
+  const { error } = await supabase
+    .from("feed_comments")
+    .update({ body: body.trim(), edited_at: new Date().toISOString() })
     .eq("id", commentId);
   if (error) throw error;
 }
@@ -343,6 +383,49 @@ export async function setCommentVote(
       { user_id: user.id, comment_id: commentId, value: dir },
       { onConflict: "user_id,comment_id" },
     );
+}
+
+/** Sets the current user's vote on a post. dir 0 clears it. Mirrors
+ *  setCommentVote — same upsert/delete pattern against feed_post_votes. */
+export async function setPostVote(
+  postId: string,
+  dir: -1 | 0 | 1,
+): Promise<void> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not signed in");
+  if (dir === 0) {
+    await supabase
+      .from("feed_post_votes")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("post_id", postId);
+    return;
+  }
+  await supabase
+    .from("feed_post_votes")
+    .upsert(
+      { user_id: user.id, post_id: postId, value: dir },
+      { onConflict: "user_id,post_id" },
+    );
+}
+
+/** The current user's own post votes → { postId: -1 | 1 }. */
+export async function fetchMyPostVotes(): Promise<Record<string, number>> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return {};
+  const { data } = await supabase
+    .from("feed_post_votes")
+    .select("post_id, value")
+    .eq("user_id", user.id);
+  const out: Record<string, number> = {};
+  for (const row of (data ?? []) as { post_id: string; value: number }[]) {
+    out[row.post_id] = row.value;
+  }
+  return out;
 }
 
 /** Profile ids the current user follows. */
@@ -541,8 +624,12 @@ export async function fetchUserPosts(
   if (error) throw error;
   const rows = (data ?? []) as unknown as PostRow[];
   const commentIds = rows.flatMap((p) => p.feed_comments.map((c) => c.id));
-  const scores = await loadCommentScores(commentIds);
-  return rows.map((p) => mapPost(p, scores));
+  const postIds = rows.map((p) => p.id);
+  const [commentScores, postScores] = await Promise.all([
+    loadCommentScores(commentIds),
+    loadPostScores(postIds),
+  ]);
+  return rows.map((p) => mapPost(p, commentScores, postScores.get(p.id) ?? 0));
 }
 
 /** The current user's own comment votes → { commentId: -1 | 1 }. */

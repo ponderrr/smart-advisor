@@ -230,10 +230,22 @@
     },
     "help": {
       "title": "Ayuda",
-      "description": "Respuestas a preguntas frecuentes sobre Smart Advisor.",
+      "description": "Respuestas a preguntas frecuentes y accesos rápidos a partes de la app que quizá te falten.",
       "faq": {
         "title": "Preguntas frecuentes",
         "subtitle": "Consulta las preguntas más frecuentes"
+      },
+      "takeQuiz": {
+        "title": "Hacer un cuestionario",
+        "subtitle": "Recibe recomendaciones nuevas en un par de minutos"
+      },
+      "findFriends": {
+        "title": "Buscar amigos",
+        "subtitle": "Descubre personas con gustos similares"
+      },
+      "milestones": {
+        "title": "Tus logros",
+        "subtitle": "Sigue tu progreso y desbloquea logros"
       }
     },
     "danger": {
@@ -2261,6 +2273,12 @@
       "eyebrow": "Aviso",
       "title": "Esta es tu nueva pantalla principal.",
       "body": "El panel se movió — tus <milestones>logros</milestones> ahora están allí.",
+      "dismiss": "Cerrar"
+    },
+    "mobileApp": {
+      "eyebrow": "Próximamente",
+      "title": "Smart Advisor para iOS y Android",
+      "body": "La app móvil nativa está en camino — inicia sesión con la misma cuenta cuando esté disponible.",
       "dismiss": "Cerrar"
     }
   }

@@ -13,6 +13,7 @@ import {
   CornerDownRight,
   Flag,
   MessageCircle,
+  Pencil,
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -27,10 +28,13 @@ import {
   useCreateComment,
   useDeleteComment,
   useMyCommentVotes,
+  useMyPostVotes,
   useReportComment,
   useSaved,
   useSetCommentVote,
+  useSetPostVote,
   useToggleSave,
+  useUpdateComment,
   useVisibleFeed,
 } from "@/features/feed/use-feed";
 import { FollowButton } from "@/features/feed/components/follow-button";
@@ -62,6 +66,7 @@ function CommentNode({
   const { data: myVotes } = useMyCommentVotes();
   const createComment = useCreateComment();
   const deleteComment = useDeleteComment();
+  const updateComment = useUpdateComment();
   const reportComment = useReportComment();
   const { user } = useAuth();
   const isOwnComment =
@@ -69,6 +74,9 @@ function CommentNode({
   const [collapsed, setCollapsed] = useState(false);
   const [replying, setReplying] = useState(false);
   const [draft, setDraft] = useState("");
+  // Edit state — only own comments can enter this branch.
+  const [editing, setEditing] = useState(false);
+  const [editDraft, setEditDraft] = useState(node.body);
 
   const vote = (myVotes ?? {})[node.id] ?? 0;
   const replyCount = node.replies.reduce(
@@ -118,7 +126,12 @@ function CommentNode({
           >
             {node.author}
           </Link>
-          <span className="text-slate-400">{agoLabel(node.ageHours)}</span>
+          <span className="text-slate-400">
+            {agoLabel(node.ageHours)}
+            {node.edited && (
+              <span className="ml-1 italic">· edited</span>
+            )}
+          </span>
           {collapsed && replyCount > 0 && (
             <button
               type="button"
@@ -172,7 +185,54 @@ function CommentNode({
           </div>
         </div>
 
-        {!collapsed && (
+        {!collapsed && editing && (
+          <div className="mt-1.5 space-y-2">
+            <textarea
+              autoFocus
+              value={editDraft}
+              onChange={(e) => setEditDraft(e.target.value)}
+              rows={3}
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-[13px] outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-800"
+            />
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                disabled={
+                  !editDraft.trim() ||
+                  editDraft.trim() === node.body ||
+                  updateComment.isPending
+                }
+                onClick={() =>
+                  updateComment.mutate(
+                    { commentId: node.id, body: editDraft.trim() },
+                    {
+                      onSuccess: () => {
+                        setEditing(false);
+                        toast.success("Comment updated");
+                      },
+                      onError: () =>
+                        toast.error("Couldn't update the comment."),
+                    },
+                  )
+                }
+              >
+                Save
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  setEditing(false);
+                  setEditDraft(node.body);
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {!collapsed && !editing && (
           <>
             <p className="mt-1.5 text-[13px] leading-relaxed text-slate-700 dark:text-slate-200">
               {node.body}
@@ -185,26 +245,38 @@ function CommentNode({
               <CornerDownRight size={12} /> Reply
             </button>
             {isOwnComment ? (
-              <button
-                type="button"
-                onClick={() => {
-                  if (
-                    !window.confirm(
-                      "Delete this comment? Any replies under it are removed too.",
-                    )
-                  ) {
-                    return;
-                  }
-                  deleteComment.mutate(node.id, {
-                    onSuccess: () => toast.success("Comment deleted"),
-                    onError: () =>
-                      toast.error("Couldn't delete the comment."),
-                  });
-                }}
-                className="ml-3 mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-slate-400 hover:text-rose-600 dark:hover:text-rose-300"
-              >
-                <Trash2 size={12} /> Delete
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditDraft(node.body);
+                    setEditing(true);
+                  }}
+                  className="ml-3 mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-slate-400 hover:text-violet-600 dark:hover:text-violet-300"
+                >
+                  <Pencil size={12} /> Edit
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (
+                      !window.confirm(
+                        "Delete this comment? Any replies under it are removed too.",
+                      )
+                    ) {
+                      return;
+                    }
+                    deleteComment.mutate(node.id, {
+                      onSuccess: () => toast.success("Comment deleted"),
+                      onError: () =>
+                        toast.error("Couldn't delete the comment."),
+                    });
+                  }}
+                  className="ml-3 mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-slate-400 hover:text-rose-600 dark:hover:text-rose-300"
+                >
+                  <Trash2 size={12} /> Delete
+                </button>
+              </>
             ) : (
               <button
                 type="button"
@@ -312,6 +384,9 @@ export default function FeedThreadPage() {
   const { data: savedIds } = useSaved();
   const saved = post ? (savedIds ?? []).includes(post.id) : false;
   const toggleSave = useToggleSave();
+  const setPostVote = useSetPostVote();
+  const { data: myPostVotes } = useMyPostVotes();
+  const postVote = post ? (myPostVotes ?? {})[post.id] ?? 0 : 0;
   const createComment = useCreateComment();
   const [draft, setDraft] = useState("");
   const [{ commentSort }] = useFeedPrefs();
@@ -456,6 +531,47 @@ export default function FeedThreadPage() {
         )}
 
         <div className="mt-4 flex items-center gap-4 border-t border-slate-200/70 pt-3 dark:border-slate-700/60">
+          <div className="inline-flex items-center gap-1">
+            <button
+              type="button"
+              aria-label="Upvote"
+              onClick={() =>
+                setPostVote.mutate({
+                  postId: post.id,
+                  dir: postVote === 1 ? 0 : 1,
+                })
+              }
+              className={cn(
+                "transition-colors",
+                postVote === 1
+                  ? "text-violet-600 dark:text-violet-300"
+                  : "text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300",
+              )}
+            >
+              <ChevronUp size={18} />
+            </button>
+            <span className="min-w-6 text-center text-xs font-bold text-slate-500 dark:text-slate-400">
+              {post.score + postVote}
+            </span>
+            <button
+              type="button"
+              aria-label="Downvote"
+              onClick={() =>
+                setPostVote.mutate({
+                  postId: post.id,
+                  dir: postVote === -1 ? 0 : -1,
+                })
+              }
+              className={cn(
+                "transition-colors",
+                postVote === -1
+                  ? "text-rose-500"
+                  : "text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300",
+              )}
+            >
+              <ChevronDown size={18} />
+            </button>
+          </div>
           <button
             type="button"
             onClick={() =>

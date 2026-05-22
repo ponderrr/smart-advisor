@@ -23,6 +23,9 @@ import {
   Monitor,
   Newspaper,
   LifeBuoy,
+  Sparkles,
+  UserPlus,
+  Trophy,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "motion/react";
@@ -1571,6 +1574,57 @@ const SettingsPage = () => {
                             </span>
                           </span>
                         </a>
+                        <button
+                          type="button"
+                          onClick={() => router.push("/quiz")}
+                          className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left transition-colors hover:border-violet-300 hover:bg-violet-50/40 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:border-violet-500/60 dark:hover:bg-violet-500/10"
+                        >
+                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-violet-600 dark:bg-violet-500/15 dark:text-violet-300">
+                            <Sparkles size={18} />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-sm font-semibold text-slate-800 dark:text-slate-100">
+                              {t("help.takeQuiz.title")}
+                            </span>
+                            <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">
+                              {t("help.takeQuiz.subtitle")}
+                            </span>
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => router.push("/feed/people")}
+                          className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left transition-colors hover:border-rose-300 hover:bg-rose-50/40 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:border-rose-500/60 dark:hover:bg-rose-500/10"
+                        >
+                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-500/15 dark:text-rose-300">
+                            <UserPlus size={18} />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-sm font-semibold text-slate-800 dark:text-slate-100">
+                              {t("help.findFriends.title")}
+                            </span>
+                            <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">
+                              {t("help.findFriends.subtitle")}
+                            </span>
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => router.push("/milestones")}
+                          className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left transition-colors hover:border-amber-300 hover:bg-amber-50/40 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:border-amber-500/60 dark:hover:bg-amber-500/10"
+                        >
+                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-500/15 dark:text-amber-300">
+                            <Trophy size={18} />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-sm font-semibold text-slate-800 dark:text-slate-100">
+                              {t("help.milestones.title")}
+                            </span>
+                            <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">
+                              {t("help.milestones.subtitle")}
+                            </span>
+                          </span>
+                        </button>
                       </div>
                     </SectionCard>
                   </motion.div>

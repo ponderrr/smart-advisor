@@ -25,6 +25,9 @@ export interface FeedComment {
   body: string;
   ageHours: number;
   score: number;
+  /** True once the author has edited the comment — drives the "(edited)"
+   *  label in the byline. Derived from feed_comments.edited_at. */
+  edited?: boolean;
   /** Reddit/Lemmy-style threading. null = top-level comment. */
   parentId: string | null;
 }
@@ -86,6 +89,8 @@ export interface FeedPost {
   rating?: number;
   /** Popularity used to order the Discover scope. */
   baseScore: number;
+  /** Sum of user up/down-votes on this post, from feed_post_votes. */
+  score: number;
   comments: FeedComment[];
 }
 

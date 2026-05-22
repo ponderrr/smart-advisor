@@ -17,6 +17,7 @@ const KEYS = {
   blocked: ["feed", "blocked"] as const,
   saved: ["feed", "saved"] as const,
   commentVotes: ["feed", "comment-votes"] as const,
+  postVotes: ["feed", "post-votes"] as const,
   profile: (id: string) => ["feed", "profile", id] as const,
   followerCount: (id: string) => ["feed", "followers", id] as const,
   userPosts: (id: string) => ["feed", "user-posts", id] as const,
@@ -54,6 +55,13 @@ export function useMyCommentVotes() {
   return useQuery({
     queryKey: KEYS.commentVotes,
     queryFn: svc.fetchMyCommentVotes,
+  });
+}
+
+export function useMyPostVotes() {
+  return useQuery({
+    queryKey: KEYS.postVotes,
+    queryFn: svc.fetchMyPostVotes,
   });
 }
 
@@ -156,6 +164,15 @@ export function useDeleteComment() {
   });
 }
 
+export function useUpdateComment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (v: { commentId: string; body: string }) =>
+      svc.updateComment(v.commentId, v.body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: KEYS.feed }),
+  });
+}
+
 /** Reporting files a moderation row — nothing in the feed changes, so
  *  these mutations don't invalidate any queries. */
 export function useReportPost() {
@@ -199,6 +216,18 @@ export function useSetCommentVote() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: KEYS.feed });
       qc.invalidateQueries({ queryKey: KEYS.commentVotes });
+    },
+  });
+}
+
+export function useSetPostVote() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (v: { postId: string; dir: -1 | 0 | 1 }) =>
+      svc.setPostVote(v.postId, v.dir),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: KEYS.feed });
+      qc.invalidateQueries({ queryKey: KEYS.postVotes });
     },
   });
 }

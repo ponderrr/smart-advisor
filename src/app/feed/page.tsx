@@ -7,6 +7,8 @@ import Link from "next/link";
 import {
   Bookmark,
   BookmarkCheck,
+  ChevronUp,
+  ChevronDown,
   MessageCircle,
   Plus,
   Shuffle,
@@ -53,7 +55,9 @@ import {
   useCreatePost,
   useUpdatePost,
   useFollowing,
+  useMyPostVotes,
   useSaved,
+  useSetPostVote,
   useToggleSave,
   useVisibleFeed,
 } from "@/features/feed/use-feed";
@@ -63,6 +67,7 @@ import { PostMenuButton } from "@/features/feed/components/post-menu";
 import { FinishWhatYouStartedBanner } from "@/features/library/components/finish-what-you-started-banner";
 import { AiNudgeBanner } from "@/features/feed/components/ai-nudge-banner";
 import { DashboardMovedBanner } from "@/features/feed/components/dashboard-moved-banner";
+import { MobileAppBanner } from "@/features/feed/components/mobile-app-banner";
 import { readFeedPrefs } from "@/features/feed/use-feed-prefs";
 import {
   activityLabel,
@@ -169,6 +174,9 @@ function PostCard({
   const { data: savedIds } = useSaved();
   const saved = (savedIds ?? []).includes(post.id);
   const toggleSave = useToggleSave();
+  const setPostVote = useSetPostVote();
+  const { data: myPostVotes } = useMyPostVotes();
+  const myVote = (myPostVotes ?? {})[post.id] ?? 0;
 
   if (view === "list") {
     return (
@@ -211,6 +219,50 @@ function PostCard({
             {post.tasteMatch}%
           </span>
         )}
+        <div
+          className="flex shrink-0 items-center gap-0.5"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            type="button"
+            aria-label="Upvote"
+            onClick={() =>
+              setPostVote.mutate({
+                postId: post.id,
+                dir: myVote === 1 ? 0 : 1,
+              })
+            }
+            className={cn(
+              "transition-colors",
+              myVote === 1
+                ? "text-violet-600 dark:text-violet-300"
+                : "text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300",
+            )}
+          >
+            <ChevronUp size={16} />
+          </button>
+          <span className="min-w-4 text-center text-[11px] font-bold text-slate-500 dark:text-slate-400">
+            {post.score + myVote}
+          </span>
+          <button
+            type="button"
+            aria-label="Downvote"
+            onClick={() =>
+              setPostVote.mutate({
+                postId: post.id,
+                dir: myVote === -1 ? 0 : -1,
+              })
+            }
+            className={cn(
+              "transition-colors",
+              myVote === -1
+                ? "text-rose-500"
+                : "text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300",
+            )}
+          >
+            <ChevronDown size={16} />
+          </button>
+        </div>
         <span className="flex shrink-0 items-center gap-1 text-slate-400 dark:text-slate-500">
           <MessageCircle size={14} />
           <span className="text-[11px] font-bold">{post.comments.length}</span>
@@ -257,11 +309,50 @@ function PostCard({
         className={cn("absolute inset-y-0 left-0 w-1", ribbon)}
       />
       <div className="flex items-start gap-3">
-        {/* Save / comment rail */}
+        {/* Vote / save / comment rail */}
         <div
           className="flex w-12 shrink-0 flex-col items-center gap-1"
           onClick={(e) => e.stopPropagation()}
         >
+          <button
+            type="button"
+            aria-label="Upvote"
+            onClick={() =>
+              setPostVote.mutate({
+                postId: post.id,
+                dir: myVote === 1 ? 0 : 1,
+              })
+            }
+            className={cn(
+              "transition-colors",
+              myVote === 1
+                ? "text-violet-600 dark:text-violet-300"
+                : "text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300",
+            )}
+          >
+            <ChevronUp size={22} />
+          </button>
+          <span className="text-[11px] font-extrabold text-slate-600 dark:text-slate-300">
+            {post.score + myVote}
+          </span>
+          <button
+            type="button"
+            aria-label="Downvote"
+            onClick={() =>
+              setPostVote.mutate({
+                postId: post.id,
+                dir: myVote === -1 ? 0 : -1,
+              })
+            }
+            className={cn(
+              "transition-colors",
+              myVote === -1
+                ? "text-rose-500"
+                : "text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300",
+            )}
+          >
+            <ChevronDown size={22} />
+          </button>
           <button
             type="button"
             aria-label={saved ? "Remove from library" : "Save to library"}
@@ -276,7 +367,7 @@ function PostCard({
               });
             }}
             className={cn(
-              "transition-transform hover:scale-110",
+              "mt-2 transition-transform hover:scale-110",
               saved ? t.text : "text-slate-400 dark:text-slate-500",
             )}
           >
@@ -571,8 +662,11 @@ function Composer({
 
   /** Look the title up via the matching cover proxy — TMDB for movies,
    *  Open Library for books, Deezer for music — and drop the poster (and
-   *  year, if found) into the form. Each proxy returns a stock image on a
-   *  miss, which we detect and treat as "nothing found". */
+   *  year, if found) into the form. Each proxy returns a stock image on
+   *  a miss, which we detect and treat as "nothing found". Fired
+   *  automatically by the debounced effect below as the user types;
+   *  failures stay silent so the composer doesn't toast-spam on every
+   *  half-typed word. */
   async function findCover() {
     const query = title.trim();
     if (!query || findingCover) return;
@@ -596,9 +690,7 @@ function Composer({
         cover = r.cover;
         foundYear = r.year;
       }
-      if (!cover || cover.startsWith(COVER_MISS_PREFIX[community])) {
-        toast.error(`No cover art found for "${query}".`);
-      } else {
+      if (cover && !cover.startsWith(COVER_MISS_PREFIX[community])) {
         // A fresh match overwrites year + creator so switching titles
         // re-fills them rather than keeping the previous pick's data.
         setPosterUrl(cover);
@@ -606,11 +698,30 @@ function Composer({
         if (foundCreator) setCreator(foundCreator);
       }
     } catch {
-      toast.error("Couldn't search for cover art — please try again.");
+      // Silent — the auto-lookup runs on every typing pause; surfacing
+      // transient network errors would just be noise.
     } finally {
       setFindingCover(false);
     }
   }
+
+  // Auto-lookup cover art as the user types the title. Debounced 800ms
+  // so we only fire once per typing pause. Skipped on the initial render
+  // of an edit (we don't want to overwrite the saved cover behind the
+  // user's back) and for titles shorter than 2 chars.
+  useEffect(() => {
+    const q = title.trim();
+    if (q.length < 2) return;
+    if (editPost && q === editPost.title) return;
+    const handle = setTimeout(() => {
+      void findCover();
+    }, 800);
+    return () => clearTimeout(handle);
+    // findCover closes over title/community/creator/findingCover but we
+    // intentionally only re-fire on title or community change — typing
+    // in the creator field shouldn't restart the lookup on every key.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [title, community, editPost]);
 
   return (
     <Dialog
@@ -702,15 +813,11 @@ function Composer({
           value={posterUrl}
           onChange={(e) => setPosterUrl(e.target.value)}
         />
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full"
-          disabled={!title.trim() || findingCover}
-          onClick={findCover}
-        >
-          {findingCover ? "Searching…" : "Find cover art from title"}
-        </Button>
+        {findingCover && (
+          <p className="-mt-2 text-[11px] italic text-slate-400 dark:text-slate-500">
+            Looking up cover art…
+          </p>
+        )}
         <textarea
           placeholder={COMPOSER_COPY[community].takePlaceholder}
           value={body}
@@ -924,6 +1031,7 @@ export default function FeedPage() {
           </div>
 
           <DashboardMovedBanner />
+          <MobileAppBanner />
           <FinishWhatYouStartedBanner />
           <AiNudgeBanner />
 
