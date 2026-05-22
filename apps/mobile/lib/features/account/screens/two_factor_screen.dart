@@ -225,17 +225,40 @@ class TwoFactorScreen extends ConsumerWidget {
           title: 'Sign out others',
           style: AlertActionStyle.destructive,
           onPressed: () async {
+            // 1. Revoke the other devices' refresh tokens server-side.
             final r = await ref
                 .read(authServiceProvider)
                 .signOut(scope: SignOutScope.others);
             if (r.isError) {
               showBanner(toUserFriendlyError(
                   r.error, 'Couldn’t sign out the other devices.'));
-            } else {
-              ref.invalidate(_devicesProvider);
-              showBanner('Signed out all other devices',
-                  type: AdaptiveSnackBarType.success);
+              return;
             }
+            // 2. signOut(others) does not touch our own `sessions`
+            //    table, so the device list would still show every
+            //    row. Mark them revoked too. This device has no
+            //    `sessions` row (mobile doesn't track itself), so
+            //    every active row is genuinely "another device".
+            final c = ref.read(supabaseClientProvider);
+            final uid = c.auth.currentUser?.id;
+            if (uid != null) {
+              try {
+                await c
+                    .from('sessions')
+                    .update({
+                      'revoked_at':
+                          DateTime.now().toUtc().toIso8601String(),
+                    })
+                    .eq('user_id', uid)
+                    .isFilter('revoked_at', null);
+              } catch (_) {
+                // Tokens are already revoked; a stale list row is
+                // cosmetic — the invalidate below still refreshes it.
+              }
+            }
+            ref.invalidate(_devicesProvider);
+            showBanner('Signed out all other devices',
+                type: AdaptiveSnackBarType.success);
           },
         ),
       ],

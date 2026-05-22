@@ -121,7 +121,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                                   authorId: post.authorId,
                                   author: post.author,
                                   trailing:
-                                      ' ${post.activity.verb} · ${ago(post.ageHours)}',
+                                      ' ${post.activityLabel} · ${ago(post.ageHours)}',
                                   style: TextStyle(
                                       fontSize: 11,
                                       color: context.brandMuted),

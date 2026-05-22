@@ -14,7 +14,7 @@ class FeedService {
 
   static const _postSelect = '''
     id, community, activity, title, body, poster_url, creator, year,
-    base_score, created_at,
+    rating, base_score, created_at,
     author:profiles!feed_posts_user_id_fkey ( id, name, avatar_url ),
     feed_comments (
       id, body, parent_id, created_at,
@@ -79,6 +79,7 @@ class FeedService {
       posterUrl: p['poster_url'] as String?,
       creator: p['creator'] as String?,
       year: p['year'] as int?,
+      rating: (p['rating'] as num?)?.toInt(),
       square: community == FeedCommunity.music,
       baseScore: (p['base_score'] as int?) ?? 0,
       comments: comments,
@@ -143,6 +144,7 @@ class FeedService {
     String? posterUrl,
     String? creator,
     int? year,
+    int? rating,
   }) async {
     final uid = _c.auth.currentUser?.id;
     if (uid == null) throw Exception('Not signed in');
@@ -155,6 +157,8 @@ class FeedService {
       'poster_url': posterUrl?.trim(),
       'creator': creator?.trim(),
       'year': year,
+      // Only meaningful for a 'rated' post; null otherwise.
+      'rating': activity == FeedActivity.rated ? rating : null,
     });
   }
 
@@ -172,6 +176,7 @@ class FeedService {
     String? posterUrl,
     String? creator,
     int? year,
+    int? rating,
   }) =>
       _c.from('feed_posts').update({
         'community': community.wire,
@@ -181,6 +186,8 @@ class FeedService {
         'poster_url': posterUrl?.trim(),
         'creator': creator?.trim(),
         'year': year,
+        // Only meaningful for a 'rated' post; cleared otherwise.
+        'rating': activity == FeedActivity.rated ? rating : null,
       }).eq('id', postId);
 
   /// Files a report on a post or a comment (exactly one id is non-null).

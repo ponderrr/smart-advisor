@@ -309,7 +309,9 @@ mixin _$FeedPost {
 @JsonKey(name: 'author_id') String get authorId;/// Display name — `profiles.name`, joined at fetch time.
  String get author;@JsonKey(name: 'author_avatar_url') String? get authorAvatarUrl; String get title;@JsonKey(name: 'age_hours') int get ageHours; FeedActivity get activity;/// Taste overlap with the current user, 0–100 (in-memory mock).
 @JsonKey(name: 'taste_match') int get tasteMatch; String? get body;/// Optional tag (Discussion / Recommendation / etc.).
- String? get flair;@JsonKey(name: 'poster_url') String? get posterUrl; String? get creator; int? get year; bool get square;@JsonKey(name: 'base_score') int get baseScore;/// -1, 0 or 1 — the current user's vote (in-memory only).
+ String? get flair;@JsonKey(name: 'poster_url') String? get posterUrl; String? get creator; int? get year;/// Three-way pick rating (1 Nope / 2 Meh / 3 Loved). Only set for
+/// `rated` posts; null for every other activity.
+ int? get rating; bool get square;@JsonKey(name: 'base_score') int get baseScore;/// -1, 0 or 1 — the current user's vote (in-memory only).
  int get vote; List<FeedComment> get comments;
 /// Create a copy of FeedPost
 /// with the given fields replaced by the non-null parameter values.
@@ -323,16 +325,16 @@ $FeedPostCopyWith<FeedPost> get copyWith => _$FeedPostCopyWithImpl<FeedPost>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FeedPost&&(identical(other.id, id) || other.id == id)&&(identical(other.community, community) || other.community == community)&&(identical(other.authorId, authorId) || other.authorId == authorId)&&(identical(other.author, author) || other.author == author)&&(identical(other.authorAvatarUrl, authorAvatarUrl) || other.authorAvatarUrl == authorAvatarUrl)&&(identical(other.title, title) || other.title == title)&&(identical(other.ageHours, ageHours) || other.ageHours == ageHours)&&(identical(other.activity, activity) || other.activity == activity)&&(identical(other.tasteMatch, tasteMatch) || other.tasteMatch == tasteMatch)&&(identical(other.body, body) || other.body == body)&&(identical(other.flair, flair) || other.flair == flair)&&(identical(other.posterUrl, posterUrl) || other.posterUrl == posterUrl)&&(identical(other.creator, creator) || other.creator == creator)&&(identical(other.year, year) || other.year == year)&&(identical(other.square, square) || other.square == square)&&(identical(other.baseScore, baseScore) || other.baseScore == baseScore)&&(identical(other.vote, vote) || other.vote == vote)&&const DeepCollectionEquality().equals(other.comments, comments));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FeedPost&&(identical(other.id, id) || other.id == id)&&(identical(other.community, community) || other.community == community)&&(identical(other.authorId, authorId) || other.authorId == authorId)&&(identical(other.author, author) || other.author == author)&&(identical(other.authorAvatarUrl, authorAvatarUrl) || other.authorAvatarUrl == authorAvatarUrl)&&(identical(other.title, title) || other.title == title)&&(identical(other.ageHours, ageHours) || other.ageHours == ageHours)&&(identical(other.activity, activity) || other.activity == activity)&&(identical(other.tasteMatch, tasteMatch) || other.tasteMatch == tasteMatch)&&(identical(other.body, body) || other.body == body)&&(identical(other.flair, flair) || other.flair == flair)&&(identical(other.posterUrl, posterUrl) || other.posterUrl == posterUrl)&&(identical(other.creator, creator) || other.creator == creator)&&(identical(other.year, year) || other.year == year)&&(identical(other.rating, rating) || other.rating == rating)&&(identical(other.square, square) || other.square == square)&&(identical(other.baseScore, baseScore) || other.baseScore == baseScore)&&(identical(other.vote, vote) || other.vote == vote)&&const DeepCollectionEquality().equals(other.comments, comments));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,community,authorId,author,authorAvatarUrl,title,ageHours,activity,tasteMatch,body,flair,posterUrl,creator,year,square,baseScore,vote,const DeepCollectionEquality().hash(comments));
+int get hashCode => Object.hashAll([runtimeType,id,community,authorId,author,authorAvatarUrl,title,ageHours,activity,tasteMatch,body,flair,posterUrl,creator,year,rating,square,baseScore,vote,const DeepCollectionEquality().hash(comments)]);
 
 @override
 String toString() {
-  return 'FeedPost(id: $id, community: $community, authorId: $authorId, author: $author, authorAvatarUrl: $authorAvatarUrl, title: $title, ageHours: $ageHours, activity: $activity, tasteMatch: $tasteMatch, body: $body, flair: $flair, posterUrl: $posterUrl, creator: $creator, year: $year, square: $square, baseScore: $baseScore, vote: $vote, comments: $comments)';
+  return 'FeedPost(id: $id, community: $community, authorId: $authorId, author: $author, authorAvatarUrl: $authorAvatarUrl, title: $title, ageHours: $ageHours, activity: $activity, tasteMatch: $tasteMatch, body: $body, flair: $flair, posterUrl: $posterUrl, creator: $creator, year: $year, rating: $rating, square: $square, baseScore: $baseScore, vote: $vote, comments: $comments)';
 }
 
 
@@ -343,7 +345,7 @@ abstract mixin class $FeedPostCopyWith<$Res>  {
   factory $FeedPostCopyWith(FeedPost value, $Res Function(FeedPost) _then) = _$FeedPostCopyWithImpl;
 @useResult
 $Res call({
- String id, FeedCommunity community,@JsonKey(name: 'author_id') String authorId, String author,@JsonKey(name: 'author_avatar_url') String? authorAvatarUrl, String title,@JsonKey(name: 'age_hours') int ageHours, FeedActivity activity,@JsonKey(name: 'taste_match') int tasteMatch, String? body, String? flair,@JsonKey(name: 'poster_url') String? posterUrl, String? creator, int? year, bool square,@JsonKey(name: 'base_score') int baseScore, int vote, List<FeedComment> comments
+ String id, FeedCommunity community,@JsonKey(name: 'author_id') String authorId, String author,@JsonKey(name: 'author_avatar_url') String? authorAvatarUrl, String title,@JsonKey(name: 'age_hours') int ageHours, FeedActivity activity,@JsonKey(name: 'taste_match') int tasteMatch, String? body, String? flair,@JsonKey(name: 'poster_url') String? posterUrl, String? creator, int? year, int? rating, bool square,@JsonKey(name: 'base_score') int baseScore, int vote, List<FeedComment> comments
 });
 
 
@@ -360,7 +362,7 @@ class _$FeedPostCopyWithImpl<$Res>
 
 /// Create a copy of FeedPost
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? community = null,Object? authorId = null,Object? author = null,Object? authorAvatarUrl = freezed,Object? title = null,Object? ageHours = null,Object? activity = null,Object? tasteMatch = null,Object? body = freezed,Object? flair = freezed,Object? posterUrl = freezed,Object? creator = freezed,Object? year = freezed,Object? square = null,Object? baseScore = null,Object? vote = null,Object? comments = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? community = null,Object? authorId = null,Object? author = null,Object? authorAvatarUrl = freezed,Object? title = null,Object? ageHours = null,Object? activity = null,Object? tasteMatch = null,Object? body = freezed,Object? flair = freezed,Object? posterUrl = freezed,Object? creator = freezed,Object? year = freezed,Object? rating = freezed,Object? square = null,Object? baseScore = null,Object? vote = null,Object? comments = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,community: null == community ? _self.community : community // ignore: cast_nullable_to_non_nullable
@@ -376,6 +378,7 @@ as String?,flair: freezed == flair ? _self.flair : flair // ignore: cast_nullabl
 as String?,posterUrl: freezed == posterUrl ? _self.posterUrl : posterUrl // ignore: cast_nullable_to_non_nullable
 as String?,creator: freezed == creator ? _self.creator : creator // ignore: cast_nullable_to_non_nullable
 as String?,year: freezed == year ? _self.year : year // ignore: cast_nullable_to_non_nullable
+as int?,rating: freezed == rating ? _self.rating : rating // ignore: cast_nullable_to_non_nullable
 as int?,square: null == square ? _self.square : square // ignore: cast_nullable_to_non_nullable
 as bool,baseScore: null == baseScore ? _self.baseScore : baseScore // ignore: cast_nullable_to_non_nullable
 as int,vote: null == vote ? _self.vote : vote // ignore: cast_nullable_to_non_nullable
@@ -465,10 +468,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  FeedCommunity community, @JsonKey(name: 'author_id')  String authorId,  String author, @JsonKey(name: 'author_avatar_url')  String? authorAvatarUrl,  String title, @JsonKey(name: 'age_hours')  int ageHours,  FeedActivity activity, @JsonKey(name: 'taste_match')  int tasteMatch,  String? body,  String? flair, @JsonKey(name: 'poster_url')  String? posterUrl,  String? creator,  int? year,  bool square, @JsonKey(name: 'base_score')  int baseScore,  int vote,  List<FeedComment> comments)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  FeedCommunity community, @JsonKey(name: 'author_id')  String authorId,  String author, @JsonKey(name: 'author_avatar_url')  String? authorAvatarUrl,  String title, @JsonKey(name: 'age_hours')  int ageHours,  FeedActivity activity, @JsonKey(name: 'taste_match')  int tasteMatch,  String? body,  String? flair, @JsonKey(name: 'poster_url')  String? posterUrl,  String? creator,  int? year,  int? rating,  bool square, @JsonKey(name: 'base_score')  int baseScore,  int vote,  List<FeedComment> comments)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FeedPost() when $default != null:
-return $default(_that.id,_that.community,_that.authorId,_that.author,_that.authorAvatarUrl,_that.title,_that.ageHours,_that.activity,_that.tasteMatch,_that.body,_that.flair,_that.posterUrl,_that.creator,_that.year,_that.square,_that.baseScore,_that.vote,_that.comments);case _:
+return $default(_that.id,_that.community,_that.authorId,_that.author,_that.authorAvatarUrl,_that.title,_that.ageHours,_that.activity,_that.tasteMatch,_that.body,_that.flair,_that.posterUrl,_that.creator,_that.year,_that.rating,_that.square,_that.baseScore,_that.vote,_that.comments);case _:
   return orElse();
 
 }
@@ -486,10 +489,10 @@ return $default(_that.id,_that.community,_that.authorId,_that.author,_that.autho
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  FeedCommunity community, @JsonKey(name: 'author_id')  String authorId,  String author, @JsonKey(name: 'author_avatar_url')  String? authorAvatarUrl,  String title, @JsonKey(name: 'age_hours')  int ageHours,  FeedActivity activity, @JsonKey(name: 'taste_match')  int tasteMatch,  String? body,  String? flair, @JsonKey(name: 'poster_url')  String? posterUrl,  String? creator,  int? year,  bool square, @JsonKey(name: 'base_score')  int baseScore,  int vote,  List<FeedComment> comments)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  FeedCommunity community, @JsonKey(name: 'author_id')  String authorId,  String author, @JsonKey(name: 'author_avatar_url')  String? authorAvatarUrl,  String title, @JsonKey(name: 'age_hours')  int ageHours,  FeedActivity activity, @JsonKey(name: 'taste_match')  int tasteMatch,  String? body,  String? flair, @JsonKey(name: 'poster_url')  String? posterUrl,  String? creator,  int? year,  int? rating,  bool square, @JsonKey(name: 'base_score')  int baseScore,  int vote,  List<FeedComment> comments)  $default,) {final _that = this;
 switch (_that) {
 case _FeedPost():
-return $default(_that.id,_that.community,_that.authorId,_that.author,_that.authorAvatarUrl,_that.title,_that.ageHours,_that.activity,_that.tasteMatch,_that.body,_that.flair,_that.posterUrl,_that.creator,_that.year,_that.square,_that.baseScore,_that.vote,_that.comments);case _:
+return $default(_that.id,_that.community,_that.authorId,_that.author,_that.authorAvatarUrl,_that.title,_that.ageHours,_that.activity,_that.tasteMatch,_that.body,_that.flair,_that.posterUrl,_that.creator,_that.year,_that.rating,_that.square,_that.baseScore,_that.vote,_that.comments);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -506,10 +509,10 @@ return $default(_that.id,_that.community,_that.authorId,_that.author,_that.autho
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  FeedCommunity community, @JsonKey(name: 'author_id')  String authorId,  String author, @JsonKey(name: 'author_avatar_url')  String? authorAvatarUrl,  String title, @JsonKey(name: 'age_hours')  int ageHours,  FeedActivity activity, @JsonKey(name: 'taste_match')  int tasteMatch,  String? body,  String? flair, @JsonKey(name: 'poster_url')  String? posterUrl,  String? creator,  int? year,  bool square, @JsonKey(name: 'base_score')  int baseScore,  int vote,  List<FeedComment> comments)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  FeedCommunity community, @JsonKey(name: 'author_id')  String authorId,  String author, @JsonKey(name: 'author_avatar_url')  String? authorAvatarUrl,  String title, @JsonKey(name: 'age_hours')  int ageHours,  FeedActivity activity, @JsonKey(name: 'taste_match')  int tasteMatch,  String? body,  String? flair, @JsonKey(name: 'poster_url')  String? posterUrl,  String? creator,  int? year,  int? rating,  bool square, @JsonKey(name: 'base_score')  int baseScore,  int vote,  List<FeedComment> comments)?  $default,) {final _that = this;
 switch (_that) {
 case _FeedPost() when $default != null:
-return $default(_that.id,_that.community,_that.authorId,_that.author,_that.authorAvatarUrl,_that.title,_that.ageHours,_that.activity,_that.tasteMatch,_that.body,_that.flair,_that.posterUrl,_that.creator,_that.year,_that.square,_that.baseScore,_that.vote,_that.comments);case _:
+return $default(_that.id,_that.community,_that.authorId,_that.author,_that.authorAvatarUrl,_that.title,_that.ageHours,_that.activity,_that.tasteMatch,_that.body,_that.flair,_that.posterUrl,_that.creator,_that.year,_that.rating,_that.square,_that.baseScore,_that.vote,_that.comments);case _:
   return null;
 
 }
@@ -521,7 +524,7 @@ return $default(_that.id,_that.community,_that.authorId,_that.author,_that.autho
 @JsonSerializable()
 
 class _FeedPost extends FeedPost {
-  const _FeedPost({required this.id, required this.community, @JsonKey(name: 'author_id') required this.authorId, required this.author, @JsonKey(name: 'author_avatar_url') this.authorAvatarUrl, required this.title, @JsonKey(name: 'age_hours') required this.ageHours, this.activity = FeedActivity.shared, @JsonKey(name: 'taste_match') this.tasteMatch = 0, this.body, this.flair, @JsonKey(name: 'poster_url') this.posterUrl, this.creator, this.year, this.square = false, @JsonKey(name: 'base_score') this.baseScore = 0, this.vote = 0, final  List<FeedComment> comments = const <FeedComment>[]}): _comments = comments,super._();
+  const _FeedPost({required this.id, required this.community, @JsonKey(name: 'author_id') required this.authorId, required this.author, @JsonKey(name: 'author_avatar_url') this.authorAvatarUrl, required this.title, @JsonKey(name: 'age_hours') required this.ageHours, this.activity = FeedActivity.shared, @JsonKey(name: 'taste_match') this.tasteMatch = 0, this.body, this.flair, @JsonKey(name: 'poster_url') this.posterUrl, this.creator, this.year, this.rating, this.square = false, @JsonKey(name: 'base_score') this.baseScore = 0, this.vote = 0, final  List<FeedComment> comments = const <FeedComment>[]}): _comments = comments,super._();
   factory _FeedPost.fromJson(Map<String, dynamic> json) => _$FeedPostFromJson(json);
 
 @override final  String id;
@@ -542,6 +545,9 @@ class _FeedPost extends FeedPost {
 @override@JsonKey(name: 'poster_url') final  String? posterUrl;
 @override final  String? creator;
 @override final  int? year;
+/// Three-way pick rating (1 Nope / 2 Meh / 3 Loved). Only set for
+/// `rated` posts; null for every other activity.
+@override final  int? rating;
 @override@JsonKey() final  bool square;
 @override@JsonKey(name: 'base_score') final  int baseScore;
 /// -1, 0 or 1 — the current user's vote (in-memory only).
@@ -567,16 +573,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FeedPost&&(identical(other.id, id) || other.id == id)&&(identical(other.community, community) || other.community == community)&&(identical(other.authorId, authorId) || other.authorId == authorId)&&(identical(other.author, author) || other.author == author)&&(identical(other.authorAvatarUrl, authorAvatarUrl) || other.authorAvatarUrl == authorAvatarUrl)&&(identical(other.title, title) || other.title == title)&&(identical(other.ageHours, ageHours) || other.ageHours == ageHours)&&(identical(other.activity, activity) || other.activity == activity)&&(identical(other.tasteMatch, tasteMatch) || other.tasteMatch == tasteMatch)&&(identical(other.body, body) || other.body == body)&&(identical(other.flair, flair) || other.flair == flair)&&(identical(other.posterUrl, posterUrl) || other.posterUrl == posterUrl)&&(identical(other.creator, creator) || other.creator == creator)&&(identical(other.year, year) || other.year == year)&&(identical(other.square, square) || other.square == square)&&(identical(other.baseScore, baseScore) || other.baseScore == baseScore)&&(identical(other.vote, vote) || other.vote == vote)&&const DeepCollectionEquality().equals(other._comments, _comments));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FeedPost&&(identical(other.id, id) || other.id == id)&&(identical(other.community, community) || other.community == community)&&(identical(other.authorId, authorId) || other.authorId == authorId)&&(identical(other.author, author) || other.author == author)&&(identical(other.authorAvatarUrl, authorAvatarUrl) || other.authorAvatarUrl == authorAvatarUrl)&&(identical(other.title, title) || other.title == title)&&(identical(other.ageHours, ageHours) || other.ageHours == ageHours)&&(identical(other.activity, activity) || other.activity == activity)&&(identical(other.tasteMatch, tasteMatch) || other.tasteMatch == tasteMatch)&&(identical(other.body, body) || other.body == body)&&(identical(other.flair, flair) || other.flair == flair)&&(identical(other.posterUrl, posterUrl) || other.posterUrl == posterUrl)&&(identical(other.creator, creator) || other.creator == creator)&&(identical(other.year, year) || other.year == year)&&(identical(other.rating, rating) || other.rating == rating)&&(identical(other.square, square) || other.square == square)&&(identical(other.baseScore, baseScore) || other.baseScore == baseScore)&&(identical(other.vote, vote) || other.vote == vote)&&const DeepCollectionEquality().equals(other._comments, _comments));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,community,authorId,author,authorAvatarUrl,title,ageHours,activity,tasteMatch,body,flair,posterUrl,creator,year,square,baseScore,vote,const DeepCollectionEquality().hash(_comments));
+int get hashCode => Object.hashAll([runtimeType,id,community,authorId,author,authorAvatarUrl,title,ageHours,activity,tasteMatch,body,flair,posterUrl,creator,year,rating,square,baseScore,vote,const DeepCollectionEquality().hash(_comments)]);
 
 @override
 String toString() {
-  return 'FeedPost(id: $id, community: $community, authorId: $authorId, author: $author, authorAvatarUrl: $authorAvatarUrl, title: $title, ageHours: $ageHours, activity: $activity, tasteMatch: $tasteMatch, body: $body, flair: $flair, posterUrl: $posterUrl, creator: $creator, year: $year, square: $square, baseScore: $baseScore, vote: $vote, comments: $comments)';
+  return 'FeedPost(id: $id, community: $community, authorId: $authorId, author: $author, authorAvatarUrl: $authorAvatarUrl, title: $title, ageHours: $ageHours, activity: $activity, tasteMatch: $tasteMatch, body: $body, flair: $flair, posterUrl: $posterUrl, creator: $creator, year: $year, rating: $rating, square: $square, baseScore: $baseScore, vote: $vote, comments: $comments)';
 }
 
 
@@ -587,7 +593,7 @@ abstract mixin class _$FeedPostCopyWith<$Res> implements $FeedPostCopyWith<$Res>
   factory _$FeedPostCopyWith(_FeedPost value, $Res Function(_FeedPost) _then) = __$FeedPostCopyWithImpl;
 @override @useResult
 $Res call({
- String id, FeedCommunity community,@JsonKey(name: 'author_id') String authorId, String author,@JsonKey(name: 'author_avatar_url') String? authorAvatarUrl, String title,@JsonKey(name: 'age_hours') int ageHours, FeedActivity activity,@JsonKey(name: 'taste_match') int tasteMatch, String? body, String? flair,@JsonKey(name: 'poster_url') String? posterUrl, String? creator, int? year, bool square,@JsonKey(name: 'base_score') int baseScore, int vote, List<FeedComment> comments
+ String id, FeedCommunity community,@JsonKey(name: 'author_id') String authorId, String author,@JsonKey(name: 'author_avatar_url') String? authorAvatarUrl, String title,@JsonKey(name: 'age_hours') int ageHours, FeedActivity activity,@JsonKey(name: 'taste_match') int tasteMatch, String? body, String? flair,@JsonKey(name: 'poster_url') String? posterUrl, String? creator, int? year, int? rating, bool square,@JsonKey(name: 'base_score') int baseScore, int vote, List<FeedComment> comments
 });
 
 
@@ -604,7 +610,7 @@ class __$FeedPostCopyWithImpl<$Res>
 
 /// Create a copy of FeedPost
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? community = null,Object? authorId = null,Object? author = null,Object? authorAvatarUrl = freezed,Object? title = null,Object? ageHours = null,Object? activity = null,Object? tasteMatch = null,Object? body = freezed,Object? flair = freezed,Object? posterUrl = freezed,Object? creator = freezed,Object? year = freezed,Object? square = null,Object? baseScore = null,Object? vote = null,Object? comments = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? community = null,Object? authorId = null,Object? author = null,Object? authorAvatarUrl = freezed,Object? title = null,Object? ageHours = null,Object? activity = null,Object? tasteMatch = null,Object? body = freezed,Object? flair = freezed,Object? posterUrl = freezed,Object? creator = freezed,Object? year = freezed,Object? rating = freezed,Object? square = null,Object? baseScore = null,Object? vote = null,Object? comments = null,}) {
   return _then(_FeedPost(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,community: null == community ? _self.community : community // ignore: cast_nullable_to_non_nullable
@@ -620,6 +626,7 @@ as String?,flair: freezed == flair ? _self.flair : flair // ignore: cast_nullabl
 as String?,posterUrl: freezed == posterUrl ? _self.posterUrl : posterUrl // ignore: cast_nullable_to_non_nullable
 as String?,creator: freezed == creator ? _self.creator : creator // ignore: cast_nullable_to_non_nullable
 as String?,year: freezed == year ? _self.year : year // ignore: cast_nullable_to_non_nullable
+as int?,rating: freezed == rating ? _self.rating : rating // ignore: cast_nullable_to_non_nullable
 as int?,square: null == square ? _self.square : square // ignore: cast_nullable_to_non_nullable
 as bool,baseScore: null == baseScore ? _self.baseScore : baseScore // ignore: cast_nullable_to_non_nullable
 as int,vote: null == vote ? _self.vote : vote // ignore: cast_nullable_to_non_nullable

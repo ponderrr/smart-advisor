@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:haptic_kit/haptic_kit.dart';
 
 import '../../ui/ui.dart';
 import '../notifications/notifications_center.dart';
@@ -56,6 +57,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   /// Pull-to-refresh — refetch the feed (and the follow graph it filters
   /// against) and wait for the result so the spinner times out cleanly.
   Future<void> _refresh() async {
+    Haptics.impact(HapticImpactStyle.medium);
     ref.invalidate(feedProvider);
     ref.invalidate(followingProvider);
     await ref.read(feedProvider.future);

@@ -285,7 +285,7 @@ class PostCard extends ConsumerWidget {
                       authorId: post.authorId,
                       author: post.author,
                       trailing:
-                          ' ${post.activity.verb} · ${ago(post.ageHours)}',
+                          ' ${post.activityLabel} · ${ago(post.ageHours)}',
                     ),
                   ),
                 ]),
@@ -470,7 +470,7 @@ class CompactPostRow extends StatelessWidget {
                       authorId: post.authorId,
                       author: post.author,
                       trailing:
-                          '  ${post.activity.verb}  ·  ${ago(post.ageHours)}',
+                          '  ${post.activityLabel}  ·  ${ago(post.ageHours)}',
                       style: TextStyle(
                           fontSize: 10.5, color: context.brandMuted),
                     ),
@@ -632,7 +632,7 @@ class MediaPostCard extends StatelessWidget {
                     authorId: post.authorId,
                     author: post.author,
                     trailing:
-                        ' ${post.activity.verb} · ${ago(post.ageHours)}',
+                        ' ${post.activityLabel} · ${ago(post.ageHours)}',
                     style: TextStyle(
                         fontSize: 11, color: context.brandMuted),
                   ),

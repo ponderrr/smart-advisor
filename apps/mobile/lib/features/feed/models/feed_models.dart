@@ -124,6 +124,11 @@ enum CommentSort {
   newest,
 }
 
+/// Three-way pick rating, shared with the library's logging UI
+/// (1 = Nope, 2 = Meh, 3 = Loved).
+const kRatingEmoji = <int, String>{1: '👎', 2: '😐', 3: '👍'};
+const kRatingWord = <int, String>{1: 'Nope', 2: 'Meh', 3: 'Loved'};
+
 /// Selectable post flairs and their accent colors.
 const kFeedFlairs = <String, Color>{
   'Discussion': Tw.violet500,
@@ -205,6 +210,10 @@ abstract class FeedPost with _$FeedPost {
     @JsonKey(name: 'poster_url') String? posterUrl,
     String? creator,
     int? year,
+
+    /// Three-way pick rating (1 Nope / 2 Meh / 3 Loved). Only set for
+    /// `rated` posts; null for every other activity.
+    int? rating,
     @Default(false) bool square,
     @JsonKey(name: 'base_score') @Default(0) int baseScore,
 
@@ -220,6 +229,13 @@ abstract class FeedPost with _$FeedPost {
 
   /// Cheap "hot" rank: score decayed by age (Reddit-ish, not exact).
   double get hotRank => score / (1 + ageHours / 12.0);
+
+  /// Activity verb for the card's byline, with the rating emoji appended
+  /// for rated posts — e.g. "rated 👍". Plain verb when there's no rating.
+  String get activityLabel =>
+      activity == FeedActivity.rated && rating != null
+          ? 'rated ${kRatingEmoji[rating] ?? ''}'.trimRight()
+          : activity.verb;
 }
 
 // ---------------------------------------------------------------------------

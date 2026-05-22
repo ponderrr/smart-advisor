@@ -122,6 +122,7 @@ class FeedActions {
     String? posterUrl,
     String? creator,
     int? year,
+    int? rating,
   }) async {
     await _svc.createPost(
       community: community,
@@ -131,6 +132,7 @@ class FeedActions {
       posterUrl: posterUrl,
       creator: creator,
       year: year,
+      rating: rating,
     );
     _ref.invalidate(feedProvider);
   }
@@ -150,6 +152,7 @@ class FeedActions {
     String? posterUrl,
     String? creator,
     int? year,
+    int? rating,
   }) async {
     await _svc.updatePost(
       postId: postId,
@@ -160,6 +163,7 @@ class FeedActions {
       posterUrl: posterUrl,
       creator: creator,
       year: year,
+      rating: rating,
     );
     _ref.invalidate(feedProvider);
     _ref.invalidate(userPostsProvider);

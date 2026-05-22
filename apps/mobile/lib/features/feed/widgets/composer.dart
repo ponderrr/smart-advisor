@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/services/service_providers.dart';
 import '../../../core/ui_messenger.dart';
 import '../../../ui/ui.dart';
 import '../feed_providers.dart';
@@ -42,6 +43,14 @@ class _ComposerState extends ConsumerState<Composer> {
 
   late FeedCommunity _community = widget.initialCommunity;
   FeedActivity _activity = FeedActivity.finished;
+
+  /// Three-way pick rating (1 Nope / 2 Meh / 3 Loved) — only sent when the
+  /// activity is "Rated". Defaults to Meh, matching the library dialog.
+  int _rating = 2;
+
+  /// True while a TMDB cover-art lookup is in flight.
+  bool _findingCover = false;
+
   final _title = TextEditingController();
   final _body = TextEditingController();
   final _cover = TextEditingController();
@@ -56,6 +65,7 @@ class _ComposerState extends ConsumerState<Composer> {
     if (edit != null) {
       _community = edit.community;
       _activity = edit.activity;
+      _rating = edit.rating ?? 2;
       _title.text = edit.title;
       _body.text = edit.body ?? '';
       _cover.text = edit.posterUrl ?? '';
@@ -93,6 +103,8 @@ class _ComposerState extends ConsumerState<Composer> {
     final isPrivate = ref.read(feedVisibilityProvider) ==
         FeedVisibility.private;
     try {
+      final rating =
+          _activity == FeedActivity.rated ? _rating : null;
       if (edit != null) {
         await ref.read(feedActionsProvider).updatePost(
               postId: edit.id,
@@ -103,6 +115,7 @@ class _ComposerState extends ConsumerState<Composer> {
               posterUrl: _cover.text,
               creator: _creator.text,
               year: int.tryParse(_year.text.trim()),
+              rating: rating,
             );
       } else {
         await ref.read(feedActionsProvider).createPost(
@@ -113,6 +126,7 @@ class _ComposerState extends ConsumerState<Composer> {
               posterUrl: _cover.text,
               creator: _creator.text,
               year: int.tryParse(_year.text.trim()),
+              rating: rating,
             );
       }
     } catch (_) {
@@ -133,6 +147,38 @@ class _ComposerState extends ConsumerState<Composer> {
                 : 'Shared with ${_community.label} friends',
         type: AdaptiveSnackBarType.success,
         duration: const Duration(seconds: 2));
+  }
+
+  /// Movies only — look the title up via the tmdb-proxy Edge Function and
+  /// drop the poster (and year, if blank) into the form. The proxy returns
+  /// a generic stock image on a miss, which we detect and treat as "none".
+  Future<void> _findCover() async {
+    final title = _title.text.trim();
+    if (title.isEmpty || _findingCover) return;
+    setState(() => _findingCover = true);
+    try {
+      final r = await ref.read(tmdbServiceProvider).searchMovie(title);
+      if (!mounted) return;
+      // The proxy's documented fallback image when nothing matches.
+      const missPrefix =
+          'https://images.unsplash.com/photo-1489599731893-01139d4e6b5b';
+      if (r.poster.isEmpty || r.poster.startsWith(missPrefix)) {
+        showBanner('No cover art found for “$title”.',
+            type: AdaptiveSnackBarType.info);
+      } else {
+        setState(() {
+          _cover.text = r.poster;
+          if (_year.text.trim().isEmpty) _year.text = r.year.toString();
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        showBanner('Couldn’t search for cover art — please try again.',
+            type: AdaptiveSnackBarType.error);
+      }
+    } finally {
+      if (mounted) setState(() => _findingCover = false);
+    }
   }
 
   Widget _label(String text) => Padding(
@@ -229,6 +275,16 @@ class _ComposerState extends ConsumerState<Composer> {
                   onValueChanged: (i) => setState(
                       () => _activity = _activities[i].$1),
                 ),
+                if (_activity == FeedActivity.rated) ...[
+                  _label('Your rating'),
+                  BrandSegmented(
+                    color: _accent,
+                    labels: const ['👎  Nope', '😐  Meh', '👍  Loved'],
+                    selectedIndex: _rating - 1,
+                    onValueChanged: (i) =>
+                        setState(() => _rating = i + 1),
+                  ),
+                ],
                 _label('Title'),
                 AdaptiveTextField(
                   controller: _title,
@@ -260,6 +316,24 @@ class _ComposerState extends ConsumerState<Composer> {
                   placeholder: 'Cover image URL',
                   keyboardType: TextInputType.url,
                 ),
+                // Movies can skip the URL entirely: look the poster up
+                // by title via TMDB.
+                if (_community == FeedCommunity.movies) ...[
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: AdaptiveButton(
+                      style: AdaptiveButtonStyle.bordered,
+                      onPressed:
+                          _title.text.trim().isEmpty || _findingCover
+                              ? null
+                              : _findCover,
+                      label: _findingCover
+                          ? 'Searching…'
+                          : 'Find cover art',
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 10),
                 Row(children: [
                   Expanded(
