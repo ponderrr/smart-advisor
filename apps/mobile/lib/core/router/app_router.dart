@@ -5,11 +5,13 @@ import 'package:go_router/go_router.dart';
 import '../../features/account/account_screen.dart';
 import '../../features/account/mfa_setup_screen.dart';
 import '../../features/account/screens/appearance_settings_screen.dart';
+import '../../features/account/screens/change_credential_screen.dart';
 import '../../features/account/screens/feed_settings_screen.dart';
 import '../../features/account/screens/notifications_settings_screen.dart';
 import '../../features/account/screens/profile_settings_screen.dart';
 import '../../features/account/screens/recommendations_settings_screen.dart';
 import '../../features/account/screens/security_settings_screen.dart';
+import '../../features/account/screens/two_factor_screen.dart';
 import '../../features/auth/auth_providers.dart';
 import '../../features/auth/screens/reset_password_screen.dart';
 import '../../features/auth/screens/sign_in_screen.dart';
@@ -231,6 +233,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
           path: '/account/security',
           builder: (_, _) => const SecuritySettingsScreen()),
+      GoRoute(
+          path: '/account/two-factor',
+          builder: (_, _) => const TwoFactorScreen()),
+      GoRoute(
+          path: '/account/change-email',
+          builder: (_, _) => const ChangeCredentialScreen(
+              kind: CredentialKind.email)),
+      GoRoute(
+          path: '/account/change-password',
+          builder: (_, _) => const ChangeCredentialScreen(
+              kind: CredentialKind.password)),
       // Library bulk-import (Letterboxd / Goodreads CSV): a full-page
       // push outside the shell, same pattern as the /account/* screens.
       GoRoute(

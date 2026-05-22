@@ -68,37 +68,6 @@ class _SecuritySettingsScreenState
     return true;
   }
 
-  Future<void> _editField({
-    required String title,
-    required String hint,
-    bool obscure = false,
-    required Future<dynamic> Function(String) onSave,
-  }) async {
-    final value = await AdaptiveAlertDialog.inputShow(
-      context: context,
-      title: title,
-      icon: Icons.edit_outlined,
-      input: AdaptiveAlertDialogInput(
-          placeholder: hint, obscureText: obscure),
-      actions: [
-        AlertAction(
-            title: 'Cancel',
-            style: AlertActionStyle.cancel,
-            onPressed: () {}),
-        AlertAction(
-            title: 'Save',
-            style: AlertActionStyle.primary,
-            onPressed: () {}),
-      ],
-    );
-    if (value == null || value.trim().isEmpty) return;
-    final r = await onSave(value.trim());
-    showBanner(r.isError
-        ? toUserFriendlyError(
-            r.error, 'Couldn’t save that. Please try again.')
-        : 'Saved');
-  }
-
   @override
   Widget build(BuildContext context) {
     return BrandScaffold(
@@ -188,32 +157,26 @@ class _SecuritySettingsScreenState
                 ),
                 settingsDivider(context),
                 settingsTile(context, Icons.security,
-                    'Two-factor authentication',
-                    onTap: () => context.push('/account/mfa-setup')),
+                    'Two-factor & devices',
+                    subtitle: 'Authenticator app and signed-in devices',
+                    onTap: () => context.push('/account/two-factor')),
                 settingsTile(context, Icons.mail_outline,
                     'Change email',
                     subtitle: 'Requires 2FA',
                     onTap: () async {
                       if (!await _ensureAal2()) return;
-                      await _editField(
-                        title: 'New email',
-                        hint: 'name@example.com',
-                        onSave: (v) =>
-                            ref.read(authServiceProvider).changeEmail(v),
-                      );
+                      if (context.mounted) {
+                        context.push('/account/change-email');
+                      }
                     }),
                 settingsTile(context, Icons.lock_outline,
                     'Change password',
                     subtitle: 'Requires 2FA',
                     onTap: () async {
                       if (!await _ensureAal2()) return;
-                      await _editField(
-                        title: 'New password',
-                        hint: '8+ chars, mixed case, number, symbol',
-                        obscure: true,
-                        onSave: (v) =>
-                            ref.read(authServiceProvider).changePassword(v),
-                      );
+                      if (context.mounted) {
+                        context.push('/account/change-password');
+                      }
                     }),
               ]),
             ),
