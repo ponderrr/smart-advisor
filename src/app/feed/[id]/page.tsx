@@ -34,7 +34,7 @@ import { BlockMenuButton } from "@/features/feed/components/block-menu";
 import { PostMenuButton } from "@/features/feed/components/post-menu";
 import { useFeedPrefs } from "@/features/feed/use-feed-prefs";
 import {
-  ACTIVITY_VERB,
+  activityLabel,
   COMMUNITY_CONTENT,
   COMMUNITY_TAG,
   agoLabel,
@@ -350,7 +350,7 @@ export default function FeedThreadPage() {
             <span className="group-hover/author:underline">{post.author}</span>
           </Link>
           <span>
-            {ACTIVITY_VERB[post.activity]} · {agoLabel(post.ageHours)}
+            {activityLabel(post)} · {agoLabel(post.ageHours)}
           </span>
           <FollowButton
             authorId={post.authorId}

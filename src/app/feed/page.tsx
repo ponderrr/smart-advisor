@@ -46,6 +46,7 @@ import { useFeedVisibility } from "@/features/feed/use-feed-visibility";
 import { PageLoader } from "@/components/ui/loader";
 import { getAccentTone } from "@/features/quiz/utils/content-accent";
 import { getRecTypeAccent } from "@/features/recommendations/utils/type-accent";
+import { tmdbService } from "@/features/recommendations/services/tmdb-service";
 import {
   useCreatePost,
   useFollowing,
@@ -61,7 +62,7 @@ import { AiNudgeBanner } from "@/features/feed/components/ai-nudge-banner";
 import { DashboardMovedBanner } from "@/features/feed/components/dashboard-moved-banner";
 import { readFeedPrefs } from "@/features/feed/use-feed-prefs";
 import {
-  ACTIVITY_VERB,
+  activityLabel,
   COMMUNITY_CONTENT,
   COMMUNITY_LABEL,
   COMMUNITY_TAG,
@@ -192,7 +193,7 @@ function PostCard({
             <span className="font-bold text-slate-700 dark:text-slate-200">
               {post.author}
             </span>{" "}
-            {ACTIVITY_VERB[post.activity]} · {agoLabel(post.ageHours)}
+            {activityLabel(post)} · {agoLabel(post.ageHours)}
           </p>
         </div>
         {post.tasteMatch > 0 && (
@@ -338,7 +339,7 @@ function PostCard({
               </span>
             </Link>
             <span>
-              {ACTIVITY_VERB[post.activity]} · {agoLabel(post.ageHours)}
+              {activityLabel(post)} · {agoLabel(post.ageHours)}
             </span>
             <span onClick={(e) => e.stopPropagation()}>
               <FollowButton
@@ -395,6 +396,18 @@ const ACTIVITIES: ReadonlyArray<{
   { value: "shared", label: "Recommending", pillClassName: "bg-violet-500" },
 ];
 
+/** Three-way pick rating — shown in the composer when activity is "Rated".
+ *  Mirrors the library's 1-3 scale (1 = Nope, 2 = Meh, 3 = Loved). */
+const RATING_OPTIONS: ReadonlyArray<{
+  value: number;
+  label: string;
+  pillClassName: string;
+}> = [
+  { value: 1, label: "👎 Nope", pillClassName: "bg-rose-500" },
+  { value: 2, label: "😐 Meh", pillClassName: "bg-slate-500" },
+  { value: 3, label: "👍 Loved", pillClassName: "bg-emerald-500" },
+];
+
 /** Per-community composer copy + the hover-glow hue (amber / emerald /
  *  rose), so the share-a-pick fields speak to the content type. */
 const COMPOSER_COPY: Record<
@@ -437,6 +450,10 @@ function Composer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [year, setYear] = useState("");
   const [posterUrl, setPosterUrl] = useState("");
   const [body, setBody] = useState("");
+  // Three-way rating, used only when activity is "rated". Defaults to Meh.
+  const [rating, setRating] = useState(2);
+  // True while a TMDB cover-art lookup is in flight.
+  const [findingCover, setFindingCover] = useState(false);
 
   function submit() {
     if (!title.trim() || createPost.isPending) return;
@@ -450,6 +467,7 @@ function Composer({ open, onClose }: { open: boolean; onClose: () => void }) {
         year: Number.isFinite(parsedYear) ? parsedYear : undefined,
         posterUrl: posterUrl.trim() || undefined,
         body: body || undefined,
+        rating: activity === "rated" ? rating : undefined,
       },
       {
         onSuccess: () => {
@@ -463,12 +481,37 @@ function Composer({ open, onClose }: { open: boolean; onClose: () => void }) {
           setYear("");
           setPosterUrl("");
           setBody("");
+          setRating(2);
           onClose();
         },
         onError: () =>
           toast.error("Couldn't share your pick — please try again."),
       },
     );
+  }
+
+  /** Movies only — look the title up via the tmdb-proxy and drop the
+   *  poster (and year, if blank) into the form. The proxy returns a stock
+   *  image on a miss, which we detect and treat as "nothing found". */
+  async function findCover() {
+    const query = title.trim();
+    if (!query || findingCover) return;
+    setFindingCover(true);
+    try {
+      const result = await tmdbService.searchMovie(query);
+      const missPrefix =
+        "https://images.unsplash.com/photo-1489599731893-01139d4e6b5b";
+      if (!result.poster || result.poster.startsWith(missPrefix)) {
+        toast.error(`No cover art found for "${query}".`);
+      } else {
+        setPosterUrl(result.poster);
+        if (!year.trim() && result.year) setYear(String(result.year));
+      }
+    } catch {
+      toast.error("Couldn't search for cover art — please try again.");
+    } finally {
+      setFindingCover(false);
+    }
   }
 
   return (
@@ -510,6 +553,15 @@ function Composer({ open, onClose }: { open: boolean; onClose: () => void }) {
           options={ACTIVITIES}
           ariaLabel="What did you do?"
         />
+        {activity === "rated" && (
+          <SegmentedControl<number>
+            layoutId="composer-rating"
+            value={rating}
+            onChange={setRating}
+            options={RATING_OPTIONS}
+            ariaLabel="Your rating"
+          />
+        )}
         <Input
           glowColor={COMPOSER_COPY[community].glow}
           placeholder={COMPOSER_COPY[community].titlePlaceholder}
@@ -545,6 +597,17 @@ function Composer({ open, onClose }: { open: boolean; onClose: () => void }) {
           value={posterUrl}
           onChange={(e) => setPosterUrl(e.target.value)}
         />
+        {community === "movies" && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full"
+            disabled={!title.trim() || findingCover}
+            onClick={findCover}
+          >
+            {findingCover ? "Searching…" : "Find cover art from title"}
+          </Button>
+        )}
         <textarea
           placeholder={COMPOSER_COPY[community].takePlaceholder}
           value={body}

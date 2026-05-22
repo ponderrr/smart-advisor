@@ -19,7 +19,7 @@ import { FollowButton } from "@/features/feed/components/follow-button";
 import { BlockButton } from "@/features/feed/components/block-button";
 import { FeedAvatar } from "@/features/feed/components/feed-avatar";
 import {
-  ACTIVITY_VERB,
+  activityLabel,
   COMMUNITY_CONTENT,
   COMMUNITY_TAG,
   agoLabel,
@@ -117,7 +117,7 @@ export default function FeedProfilePage() {
                             {COMMUNITY_TAG[p.community]}
                           </span>
                           <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                            {ACTIVITY_VERB[p.activity]} ·{" "}
+                            {activityLabel(p)} ·{" "}
                             {agoLabel(p.ageHours)}
                           </span>
                         </div>

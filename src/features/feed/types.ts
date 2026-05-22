@@ -81,6 +81,9 @@ export interface FeedPost {
   posterUrl?: string;
   creator?: string;
   year?: number;
+  /** Three-way pick rating (1 Nope / 2 Meh / 3 Loved). Only set for
+   *  `rated` posts; undefined for every other activity. */
+  rating?: number;
   /** Popularity used to order the Discover scope. */
   baseScore: number;
   comments: FeedComment[];
@@ -112,6 +115,25 @@ export const ACTIVITY_VERB: Record<FeedActivity, string> = {
   shared: "shared",
   group: "group pick",
 };
+
+/** Pick-rating emoji for the card byline — mirrors the library's 1-3
+ *  scale (1 = Nope, 2 = Meh, 3 = Loved). */
+export const RATING_EMOJI: Record<number, string> = {
+  1: "👎",
+  2: "😐",
+  3: "👍",
+};
+
+/** A post's byline verb, with the rating emoji appended for rated posts
+ *  — e.g. "rated 👍". Plain verb when there's no rating. */
+export function activityLabel(
+  post: Pick<FeedPost, "activity" | "rating">,
+): string {
+  if (post.activity === "rated" && post.rating != null) {
+    return `rated ${RATING_EMOJI[post.rating] ?? ""}`.trimEnd();
+  }
+  return ACTIVITY_VERB[post.activity];
+}
 
 export function agoLabel(hours: number): string {
   if (hours <= 0) return "just now";

@@ -45,6 +45,7 @@ interface PostRow {
   poster_url: string | null;
   creator: string | null;
   year: number | null;
+  rating: number | null;
   base_score: number;
   created_at: string;
   author: ProfileEmbed | null;
@@ -53,7 +54,7 @@ interface PostRow {
 
 const POST_SELECT = `
   id, community, activity, title, body, poster_url, creator, year,
-  base_score, created_at,
+  rating, base_score, created_at,
   author:profiles!feed_posts_user_id_fkey ( id, name, avatar_url ),
   feed_comments (
     id, body, parent_id, created_at,
@@ -89,6 +90,7 @@ function mapPost(p: PostRow, scores: Map<string, number>): FeedPost {
     posterUrl: p.poster_url ?? undefined,
     creator: p.creator ?? undefined,
     year: p.year ?? undefined,
+    rating: p.rating ?? undefined,
     baseScore: p.base_score,
     comments: p.feed_comments.map((c) =>
       mapComment(c, scores.get(c.id) ?? 0),
@@ -134,6 +136,7 @@ export async function createPost(input: {
   posterUrl?: string;
   creator?: string;
   year?: number;
+  rating?: number;
 }): Promise<FeedPost> {
   const {
     data: { user },
@@ -150,6 +153,11 @@ export async function createPost(input: {
       poster_url: input.posterUrl?.trim() || null,
       creator: input.creator?.trim() || null,
       year: input.year ?? null,
+      // Only meaningful for a 'rated' post; null otherwise.
+      rating:
+        (input.activity ?? "shared") === "rated"
+          ? input.rating ?? null
+          : null,
     })
     .select(POST_SELECT)
     .single();
