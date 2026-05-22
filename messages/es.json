@@ -300,7 +300,7 @@
       "titleLine2": "obsesión favorita en cada",
       "subtitle": "Recomendaciones de películas, libros y álbumes con IA adaptadas a tu gusto único.",
       "ctaPrimaryLoggedOut": "Comenzar",
-      "ctaPrimaryLoggedIn": "Ir al panel",
+      "ctaPrimaryLoggedIn": "Ir al Feed",
       "ctaSecondaryLoggedOut": "Probar la demo",
       "ctaSecondaryLoggedIn": "Ver historial",
       "scrollHint": "Desplázate para explorar",
@@ -448,11 +448,11 @@
         },
         "trailer-preview": {
           "question": "¿Dónde puedo ver un tráiler o vista previa?",
-          "answer": "Abre cualquier tarjeta de recomendación desde tu panel o historial. Para películas se reproduce un tráiler en línea (carga diferida, solo se activa al hacer clic), para libros aparece un enlace 'Ver en Open Library' para que explores ediciones, portadas y reseñas, y para álbumes una vista previa de 30 segundos de la primera pista está a un toque. Las películas usan el tráiler oficial de TMDB cuando está publicado; las vistas previas vienen de Deezer."
+          "answer": "Abre cualquier tarjeta de recomendación desde tu Feed o historial. Para películas se reproduce un tráiler en línea (carga diferida, solo se activa al hacer clic), para libros aparece un enlace 'Ver en Open Library' para que explores ediciones, portadas y reseñas, y para álbumes una vista previa de 30 segundos de la primera pista está a un toque. Las películas usan el tráiler oficial de TMDB cuando está publicado; las vistas previas vienen de Deezer."
         },
         "year-in-review": {
           "question": "¿Qué es Año en Revisión y cuándo aparece?",
-          "answer": "Año en Revisión es un resumen estilo Spotify Wrapped de tus recomendaciones: género principal, racha más larga, mes pico, director o autor más recomendado, mezcla de formatos y tus títulos destacados. Aparece como un banner prominente en tu panel durante diciembre (año actual) y enero (año pasado). Fuera de esa ventana la página sigue funcionando en /wrapped, solo que no se promociona."
+          "answer": "Año en Revisión es un resumen estilo Spotify Wrapped de tus recomendaciones: género principal, racha más larga, mes pico, director o autor más recomendado, mezcla de formatos y tus títulos destacados. Aparece como un banner prominente en tu Feed durante diciembre (año actual) y enero (año pasado). Fuera de esa ventana la página sigue funcionando en /wrapped, solo que no se promociona."
         },
         "group-what": {
           "question": "¿Qué es el cuestionario en grupo?",
@@ -582,7 +582,7 @@
     "subtitle": "No podemos recomendarte ese título exacto, pero responde unas preguntas rápidas y te buscaremos algo con la misma energía.",
     "sharedLabel": "Compartiste",
     "startQuiz": "Buscar recomendaciones similares",
-    "goDashboard": "Ir al panel",
+    "goDashboard": "Ir al Feed",
     "emptyTitle": "No llegó nada",
     "emptySubtitle": "No recibimos nada con que trabajar — inicia un quiz y nos encargamos del resto."
   },
@@ -685,7 +685,7 @@
     },
     "mfaChallenge": {
       "successTitle": "Verificado",
-      "successBody": "Llevándote a tu panel…",
+      "successBody": "Llevándote a tu Feed…",
       "totpTitle": "Ingresa el código de verificación",
       "totpBody": "Abre tu app autenticadora e ingresa el código de 6 dígitos.",
       "backupTitle": "Ingresa el código de respaldo",
@@ -1123,7 +1123,7 @@
       "result": "Resultado"
     },
     "back": {
-      "dashboard": "Panel",
+      "dashboard": "Feed",
       "home": "Inicio",
       "step": "Atrás",
       "leave": "Salir",
@@ -1585,7 +1585,7 @@
     "category": "Configuración del cuestionario",
     "stepOf": "Paso {current} de {total}",
     "back": {
-      "dashboard": "Panel"
+      "dashboard": "Feed"
     },
     "contentSelection": {
       "title": "¿Para qué quieres una recomendación?",
@@ -1847,8 +1847,8 @@
       "overloadedBody": "Nuestra IA está saturada en este momento. Espera un minuto y vuelve a intentarlo; ya reintentamos un par de veces por ti.",
       "confirmDialog": {
         "title": "¿Generar nuevas recomendaciones?",
-        "body": "Ya generaste recomendaciones para estas respuestas. Genera un conjunto nuevo o vuelve a tu panel.",
-        "cancel": "Ir al panel",
+        "body": "Ya generaste recomendaciones para estas respuestas. Genera un conjunto nuevo o vuelve a tu Feed.",
+        "cancel": "Ir al Feed",
         "confirm": "Generar nuevas"
       },
       "errorState": {
