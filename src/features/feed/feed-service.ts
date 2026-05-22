@@ -165,6 +165,42 @@ export async function createPost(input: {
   return mapPost(data as unknown as PostRow, new Map());
 }
 
+/** Updates an existing post's editable fields. RLS only permits the
+ *  author; returns the post mapped fresh (comments re-joined). */
+export async function updatePost(input: {
+  postId: string;
+  community: FeedCommunity;
+  title: string;
+  body?: string;
+  activity?: FeedActivity;
+  posterUrl?: string;
+  creator?: string;
+  year?: number;
+  rating?: number;
+}): Promise<FeedPost> {
+  const { data, error } = await supabase
+    .from("feed_posts")
+    .update({
+      community: input.community,
+      activity: input.activity ?? "shared",
+      title: input.title.trim(),
+      body: input.body?.trim() || null,
+      poster_url: input.posterUrl?.trim() || null,
+      creator: input.creator?.trim() || null,
+      year: input.year ?? null,
+      // Only meaningful for a 'rated' post; cleared otherwise.
+      rating:
+        (input.activity ?? "shared") === "rated"
+          ? input.rating ?? null
+          : null,
+    })
+    .eq("id", input.postId)
+    .select(POST_SELECT)
+    .single();
+  if (error) throw error;
+  return mapPost(data as unknown as PostRow, new Map());
+}
+
 /** Deletes a post. RLS only permits the author; cascades to its
  *  comments / saves / votes. */
 export async function deletePost(postId: string): Promise<void> {
@@ -192,6 +228,46 @@ export async function createComment(
     body: body.trim(),
   });
   if (error) throw error;
+}
+
+/** Deletes a comment. RLS only permits the author; cascades to replies. */
+export async function deleteComment(commentId: string): Promise<void> {
+  const { error } = await supabase
+    .from("feed_comments")
+    .delete()
+    .eq("id", commentId);
+  if (error) throw error;
+}
+
+/** Files a moderation report on a post or a comment (exactly one id is
+ *  set). Reason is optional free text. */
+async function fileReport(target: {
+  postId?: string;
+  commentId?: string;
+  reason?: string;
+}): Promise<void> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not signed in");
+  const { error } = await supabase.from("feed_reports").insert({
+    reporter_id: user.id,
+    post_id: target.postId ?? null,
+    comment_id: target.commentId ?? null,
+    reason: target.reason?.trim() || null,
+  });
+  if (error) throw error;
+}
+
+export function reportPost(postId: string, reason?: string): Promise<void> {
+  return fileReport({ postId, reason });
+}
+
+export function reportComment(
+  commentId: string,
+  reason?: string,
+): Promise<void> {
+  return fileReport({ commentId, reason });
 }
 
 /** Sets the current user's vote on a comment. dir 0 clears it. */

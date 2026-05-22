@@ -126,6 +126,17 @@ export function useCreatePost() {
   });
 }
 
+export function useUpdatePost() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: svc.updatePost,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: KEYS.feed });
+      qc.invalidateQueries({ queryKey: ["feed", "user-posts"] });
+    },
+  });
+}
+
 export function useDeletePost() {
   const qc = useQueryClient();
   return useMutation({
@@ -134,6 +145,30 @@ export function useDeletePost() {
       qc.invalidateQueries({ queryKey: KEYS.feed });
       qc.invalidateQueries({ queryKey: ["feed", "user-posts"] });
     },
+  });
+}
+
+export function useDeleteComment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: svc.deleteComment,
+    onSuccess: () => qc.invalidateQueries({ queryKey: KEYS.feed }),
+  });
+}
+
+/** Reporting files a moderation row — nothing in the feed changes, so
+ *  these mutations don't invalidate any queries. */
+export function useReportPost() {
+  return useMutation({
+    mutationFn: (v: { postId: string; reason?: string }) =>
+      svc.reportPost(v.postId, v.reason),
+  });
+}
+
+export function useReportComment() {
+  return useMutation({
+    mutationFn: (v: { commentId: string; reason?: string }) =>
+      svc.reportComment(v.commentId, v.reason),
   });
 }
 

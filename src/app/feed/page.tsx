@@ -49,6 +49,7 @@ import { getRecTypeAccent } from "@/features/recommendations/utils/type-accent";
 import { tmdbService } from "@/features/recommendations/services/tmdb-service";
 import {
   useCreatePost,
+  useUpdatePost,
   useFollowing,
   useSaved,
   useToggleSave,
@@ -151,11 +152,13 @@ function entrance(index: number) {
 function PostCard({
   post,
   onOpen,
+  onEdit,
   view,
   index,
 }: {
   post: FeedPost;
   onOpen: () => void;
+  onEdit: () => void;
   view: FeedView;
   index: number;
 }) {
@@ -234,6 +237,7 @@ function PostCard({
           postTitle={post.title}
           authorId={post.authorId}
           author={post.author}
+          onEdit={onEdit}
         />
       </motion.div>
     );
@@ -319,6 +323,7 @@ function PostCard({
                 postTitle={post.title}
                 authorId={post.authorId}
                 author={post.author}
+                onEdit={onEdit}
               />
             </div>
           </div>
@@ -439,55 +444,86 @@ const COMPOSER_COPY: Record<
   },
 };
 
-function Composer({ open, onClose }: { open: boolean; onClose: () => void }) {
+function Composer({
+  open,
+  onClose,
+  editPost,
+}: {
+  open: boolean;
+  onClose: () => void;
+  /** When set, the composer edits this post instead of creating one.
+   *  FeedPage keys the component by post id so this seeds state fresh. */
+  editPost?: FeedPost;
+}) {
   const createPost = useCreatePost();
+  const updatePost = useUpdatePost();
   const [visibility] = useFeedVisibility();
   const isPrivate = visibility === "private";
-  const [community, setCommunity] = useState<FeedCommunity>("movies");
-  const [activity, setActivity] = useState<FeedActivity>("finished");
-  const [title, setTitle] = useState("");
-  const [creator, setCreator] = useState("");
-  const [year, setYear] = useState("");
-  const [posterUrl, setPosterUrl] = useState("");
-  const [body, setBody] = useState("");
+  const [community, setCommunity] = useState<FeedCommunity>(
+    editPost?.community ?? "movies",
+  );
+  const [activity, setActivity] = useState<FeedActivity>(
+    editPost?.activity ?? "finished",
+  );
+  const [title, setTitle] = useState(editPost?.title ?? "");
+  const [creator, setCreator] = useState(editPost?.creator ?? "");
+  const [year, setYear] = useState(
+    editPost?.year != null ? String(editPost.year) : "",
+  );
+  const [posterUrl, setPosterUrl] = useState(editPost?.posterUrl ?? "");
+  const [body, setBody] = useState(editPost?.body ?? "");
   // Three-way rating, used only when activity is "rated". Defaults to Meh.
-  const [rating, setRating] = useState(2);
+  const [rating, setRating] = useState(editPost?.rating ?? 2);
   // True while a TMDB cover-art lookup is in flight.
   const [findingCover, setFindingCover] = useState(false);
 
   function submit() {
-    if (!title.trim() || createPost.isPending) return;
+    if (!title.trim() || createPost.isPending || updatePost.isPending) {
+      return;
+    }
     const parsedYear = Number.parseInt(year, 10);
-    createPost.mutate(
-      {
-        community,
-        title: title.trim(),
-        activity,
-        creator: creator || undefined,
-        year: Number.isFinite(parsedYear) ? parsedYear : undefined,
-        posterUrl: posterUrl.trim() || undefined,
-        body: body || undefined,
-        rating: activity === "rated" ? rating : undefined,
-      },
-      {
-        onSuccess: () => {
-          toast.success(
-            isPrivate
-              ? "Saved to your picks — not broadcast (private profile)"
-              : `Shared with ${COMMUNITY_LABEL[community]} friends`,
-          );
-          setTitle("");
-          setCreator("");
-          setYear("");
-          setPosterUrl("");
-          setBody("");
-          setRating(2);
-          onClose();
+    const fields = {
+      community,
+      title: title.trim(),
+      activity,
+      creator: creator || undefined,
+      year: Number.isFinite(parsedYear) ? parsedYear : undefined,
+      posterUrl: posterUrl.trim() || undefined,
+      body: body || undefined,
+      rating: activity === "rated" ? rating : undefined,
+    };
+    if (editPost) {
+      updatePost.mutate(
+        { postId: editPost.id, ...fields },
+        {
+          onSuccess: () => {
+            toast.success("Pick updated");
+            onClose();
+          },
+          onError: () =>
+            toast.error("Couldn't save your changes — please try again."),
         },
-        onError: () =>
-          toast.error("Couldn't share your pick — please try again."),
+      );
+      return;
+    }
+    createPost.mutate(fields, {
+      onSuccess: () => {
+        toast.success(
+          isPrivate
+            ? "Saved to your picks — not broadcast (private profile)"
+            : `Shared with ${COMMUNITY_LABEL[community]} friends`,
+        );
+        setTitle("");
+        setCreator("");
+        setYear("");
+        setPosterUrl("");
+        setBody("");
+        setRating(2);
+        onClose();
       },
-    );
+      onError: () =>
+        toast.error("Couldn't share your pick — please try again."),
+    });
   }
 
   /** Movies only — look the title up via the tmdb-proxy and drop the
@@ -515,9 +551,16 @@ function Composer({ open, onClose }: { open: boolean; onClose: () => void }) {
   }
 
   return (
-    <Dialog open={open} onClose={onClose} ariaLabel="Share a pick" size="md">
+    <Dialog
+      open={open}
+      onClose={onClose}
+      ariaLabel={editPost ? "Edit pick" : "Share a pick"}
+      size="md"
+    >
       <div className="space-y-4 p-6">
-        <h2 className="text-xl font-black tracking-tight">Share a pick</h2>
+        <h2 className="text-xl font-black tracking-tight">
+          {editPost ? "Edit pick" : "Share a pick"}
+        </h2>
 
         {isPrivate && (
           <div className="flex items-start gap-2 rounded-xl bg-slate-100 px-3 py-2.5 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">
@@ -621,7 +664,9 @@ function Composer({ open, onClose }: { open: boolean; onClose: () => void }) {
           disabled={!title.trim()}
           onClick={submit}
         >
-          Share with {COMMUNITY_LABEL[community]}
+          {editPost
+            ? "Save changes"
+            : `Share with ${COMMUNITY_LABEL[community]}`}
         </Button>
       </div>
     </Dialog>
@@ -646,6 +691,8 @@ export default function FeedPage() {
   const [community, setCommunity] = useState<FeedCommunity | "all">("all");
   const [view, setView] = useState<FeedView>("cards");
   const [composer, setComposer] = useState(false);
+  // When set, the composer opens in edit mode for this post.
+  const [editingPost, setEditingPost] = useState<FeedPost | null>(null);
 
   // Apply the saved defaults once on mount (kept out of useState initialisers
   // so SSR/first render stays deterministic — same pattern as the prefs
@@ -866,6 +913,7 @@ export default function FeedPage() {
                       index={i}
                       view={view}
                       onOpen={() => router.push(`/feed/${p.id}`)}
+                      onEdit={() => setEditingPost(p)}
                     />
                   ))
                 )}
@@ -873,7 +921,15 @@ export default function FeedPage() {
             </div>
           </div>
 
-          <Composer open={composer} onClose={() => setComposer(false)} />
+          <Composer
+            key={editingPost?.id ?? "new"}
+            open={composer || editingPost !== null}
+            editPost={editingPost ?? undefined}
+            onClose={() => {
+              setComposer(false);
+              setEditingPost(null);
+            }}
+          />
         </div>
       </main>
     </div>

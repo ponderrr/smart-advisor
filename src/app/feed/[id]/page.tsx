@@ -11,7 +11,9 @@ import {
   ChevronUp,
   ChevronDown,
   CornerDownRight,
+  Flag,
   MessageCircle,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -19,10 +21,13 @@ import { Button } from "@/components/ui/button";
 import { AppNavbar } from "@/components/app-navbar";
 import { PageLoader } from "@/components/ui/loader";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
+import { useAuth } from "@/features/auth/hooks/use-auth";
 import { getAccentTone } from "@/features/quiz/utils/content-accent";
 import {
   useCreateComment,
+  useDeleteComment,
   useMyCommentVotes,
+  useReportComment,
   useSaved,
   useSetCommentVote,
   useToggleSave,
@@ -56,6 +61,11 @@ function CommentNode({
   const setCommentVote = useSetCommentVote();
   const { data: myVotes } = useMyCommentVotes();
   const createComment = useCreateComment();
+  const deleteComment = useDeleteComment();
+  const reportComment = useReportComment();
+  const { user } = useAuth();
+  const isOwnComment =
+    node.authorId != null && node.authorId === user?.id;
   const [collapsed, setCollapsed] = useState(false);
   const [replying, setReplying] = useState(false);
   const [draft, setDraft] = useState("");
@@ -174,6 +184,54 @@ function CommentNode({
             >
               <CornerDownRight size={12} /> Reply
             </button>
+            {isOwnComment ? (
+              <button
+                type="button"
+                onClick={() => {
+                  if (
+                    !window.confirm(
+                      "Delete this comment? Any replies under it are removed too.",
+                    )
+                  ) {
+                    return;
+                  }
+                  deleteComment.mutate(node.id, {
+                    onSuccess: () => toast.success("Comment deleted"),
+                    onError: () =>
+                      toast.error("Couldn't delete the comment."),
+                  });
+                }}
+                className="ml-3 mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-slate-400 hover:text-rose-600 dark:hover:text-rose-300"
+              >
+                <Trash2 size={12} /> Delete
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  const reason = window.prompt(
+                    "Report this comment? Optionally tell us what's wrong:",
+                  );
+                  if (reason === null) return;
+                  reportComment.mutate(
+                    { commentId: node.id, reason: reason || undefined },
+                    {
+                      onSuccess: () =>
+                        toast.success(
+                          "Report submitted — thanks for flagging it.",
+                        ),
+                      onError: () =>
+                        toast.error(
+                          "Couldn't submit the report — try again.",
+                        ),
+                    },
+                  );
+                }}
+                className="ml-3 mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-slate-400 hover:text-amber-600 dark:hover:text-amber-300"
+              >
+                <Flag size={12} /> Report
+              </button>
+            )}
 
             {replying && (
               <div className="mt-2 space-y-2">
