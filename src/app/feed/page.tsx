@@ -659,6 +659,49 @@ function Composer({
           style={{ ["--tw-ring-color" as string]: COMPOSER_COPY[community].glow }}
           className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-800"
         />
+        {title.trim() && (
+          <div className="space-y-1.5">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              Preview
+            </p>
+            <div
+              className="flex items-start gap-3 rounded-xl border bg-slate-50/80 p-3 dark:bg-slate-800/60"
+              style={{ borderColor: `${COMPOSER_COPY[community].glow}55` }}
+            >
+              {posterUrl.trim() ? (
+                <img
+                  src={posterUrl.trim()}
+                  alt=""
+                  className="h-16 w-12 shrink-0 rounded-md object-cover"
+                />
+              ) : (
+                <div className="h-16 w-12 shrink-0 rounded-md bg-slate-200 dark:bg-slate-700" />
+              )}
+              <div className="min-w-0 flex-1">
+                <p
+                  className="text-[10px] font-black uppercase tracking-wide"
+                  style={{ color: COMPOSER_COPY[community].glow }}
+                >
+                  you{" "}
+                  {activityLabel({
+                    activity,
+                    rating: activity === "rated" ? rating : undefined,
+                  })}
+                </p>
+                <p className="mt-0.5 truncate text-sm font-extrabold text-slate-900 dark:text-slate-100">
+                  {title.trim()}
+                </p>
+                {(creator.trim() || year.trim()) && (
+                  <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                    {[creator.trim(), year.trim()]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
         <Button
           className="w-full"
           disabled={!title.trim()}
