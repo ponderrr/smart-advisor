@@ -14,6 +14,12 @@ export type FeedActivity =
 /** Friends / Discover / Group scope tabs. */
 export type FeedScope = "friends" | "discover" | "group";
 
+/** Reddit-style sort axis applied on top of the scope filter:
+ *  - "trending" — score weighted by recency (the default)
+ *  - "new"      — most recent first
+ *  - "top"      — highest score first */
+export type FeedSort = "trending" | "new" | "top";
+
 export interface FeedComment {
   id: string;
   /** Author's profile id (uuid). Optional during the in-memory→backend

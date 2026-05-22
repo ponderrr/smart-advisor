@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -26,6 +26,7 @@ import { motion } from "motion/react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -68,7 +69,8 @@ import { FinishWhatYouStartedBanner } from "@/features/library/components/finish
 import { AiNudgeBanner } from "@/features/feed/components/ai-nudge-banner";
 import { DashboardMovedBanner } from "@/features/feed/components/dashboard-moved-banner";
 import { MobileAppBanner } from "@/features/feed/components/mobile-app-banner";
-import { readFeedPrefs } from "@/features/feed/use-feed-prefs";
+import { readFeedPrefs, writeFeedPrefs } from "@/features/feed/use-feed-prefs";
+import type { FeedSort } from "@/features/feed/types";
 import {
   activityLabel,
   COMMUNITY_CONTENT,
@@ -141,6 +143,25 @@ const VIEWS: ReadonlyArray<{
   { value: "list", label: "List view", icon: <List size={16} /> },
 ];
 
+/** Reddit-style sort across the visible feed — applied on top of scope.
+ *  Trending balances score against age; New is newest first; Top is
+ *  highest score first. */
+const SORTS: ReadonlyArray<{
+  value: FeedSort;
+  label: string;
+  pillClassName: string;
+}> = [
+  { value: "trending", label: "Trending", pillClassName: "bg-orange-500" },
+  { value: "new", label: "New", pillClassName: "bg-emerald-500" },
+  { value: "top", label: "Top", pillClassName: "bg-violet-500" },
+];
+
+/** Score-with-time-decay used for the Trending sort — a post with a
+ *  small recent score beats an old post with a higher score. */
+function trendingScore(p: { score: number; ageHours: number }): number {
+  return p.score / Math.pow(p.ageHours + 2, 1.2);
+}
+
 function tone(community: FeedCommunity) {
   return getAccentTone(COMMUNITY_CONTENT[community]);
 }
@@ -160,12 +181,16 @@ function PostCard({
   post,
   onOpen,
   onEdit,
+  onCommunity,
   view,
   index,
 }: {
   post: FeedPost;
   onOpen: () => void;
   onEdit: () => void;
+  /** Filter the feed to a single community — wired to the r/movies-style
+   *  badges so a tap on the tag drills in. */
+  onCommunity: (c: FeedCommunity) => void;
   view: FeedView;
   index: number;
 }) {
@@ -190,14 +215,19 @@ function PostCard({
           aria-hidden
           className={cn("absolute inset-y-0 left-0 w-1", ribbon)}
         />
-        <span
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onCommunity(post.community);
+          }}
           className={cn(
-            "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black",
+            "shrink-0 cursor-pointer rounded-full px-2 py-0.5 text-[10px] font-black transition-transform hover:scale-105",
             t.iconCircle,
           )}
         >
           {COMMUNITY_TAG[post.community]}
-        </span>
+        </button>
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-sm font-extrabold leading-tight text-slate-900 dark:text-slate-100">
             {post.title}
@@ -242,7 +272,7 @@ function PostCard({
             <ChevronUp size={16} />
           </button>
           <span className="min-w-4 text-center text-[11px] font-bold text-slate-500 dark:text-slate-400">
-            {post.score + myVote}
+            {post.score}
           </span>
           <button
             type="button"
@@ -333,7 +363,7 @@ function PostCard({
             <ChevronUp size={22} />
           </button>
           <span className="text-[11px] font-extrabold text-slate-600 dark:text-slate-300">
-            {post.score + myVote}
+            {post.score}
           </span>
           <button
             type="button"
@@ -392,14 +422,19 @@ function PostCard({
         {/* Body */}
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
-            <span
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onCommunity(post.community);
+              }}
               className={cn(
-                "rounded-full px-2 py-0.5 text-[10px] font-black",
+                "cursor-pointer rounded-full px-2 py-0.5 text-[10px] font-black transition-transform hover:scale-105",
                 t.iconCircle,
               )}
             >
               {COMMUNITY_TAG[post.community]}
-            </span>
+            </button>
             <div className="flex items-center gap-1">
               {post.tasteMatch > 0 && (
                 <span
@@ -869,15 +904,18 @@ function Composer({
             </div>
           </div>
         )}
-        <Button
+        <StatefulButton
           className="w-full"
           disabled={!title.trim()}
+          state={
+            createPost.isPending || updatePost.isPending ? "loading" : "idle"
+          }
           onClick={submit}
         >
           {editPost
             ? "Save changes"
             : `Share with ${COMMUNITY_LABEL[community]}`}
-        </Button>
+        </StatefulButton>
       </div>
     </Dialog>
   );
@@ -887,6 +925,7 @@ function Composer({
 
 export default function FeedPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
   const { ready } = useRequireAuth();
   const [visibility] = useFeedVisibility();
@@ -899,6 +938,7 @@ export default function FeedPage() {
   );
   const [scope, setScope] = useState<FeedScope>("friends");
   const [community, setCommunity] = useState<FeedCommunity | "all">("all");
+  const [sort, setSort] = useState<FeedSort>("trending");
   const [view, setView] = useState<FeedView>("cards");
   const [composer, setComposer] = useState(false);
   // When set, the composer opens in edit mode for this post.
@@ -911,10 +951,35 @@ export default function FeedPage() {
     const p = readFeedPrefs();
     setScope(p.scope);
     setCommunity(p.community);
+    setSort(p.sort);
     setView(p.view);
   }, []);
 
+  // Query-param entry points from the thread page — the Composer dialog
+  // lives here, so "Edit post" inside a thread routes back as
+  // /feed?edit=<id>, and clicking a community tag inside a thread routes
+  // as /feed?community=<c>. We clear the query once consumed so
+  // back-navigating doesn't re-trigger the side-effect.
+  useEffect(() => {
+    const editId = searchParams?.get("edit");
+    const communityParam = searchParams?.get("community");
+    if (!editId && !communityParam) return;
+    if (editId) {
+      const p = posts.find((x) => x.id === editId);
+      if (p) setEditingPost(p);
+    }
+    if (
+      communityParam === "movies" ||
+      communityParam === "books" ||
+      communityParam === "music"
+    ) {
+      setCommunity(communityParam);
+    }
+    router.replace("/feed");
+  }, [searchParams, posts, router]);
+
   const visible = useMemo(() => {
+    // Scope = which posts make the cut; Sort = how they're ordered.
     let list =
       community === "all"
         ? [...posts]
@@ -926,19 +991,21 @@ export default function FeedPage() {
           (p) =>
             following.size === 0 ||
             (p.authorId != null && following.has(p.authorId)),
-        )
-        .sort((a, b) => a.ageHours - b.ageHours);
+        );
     } else if (scope === "discover") {
-      list = list
-        .filter((p) => p.activity !== "group")
-        .sort((a, b) => b.baseScore - a.baseScore);
+      list = list.filter((p) => p.activity !== "group");
     } else {
-      list = list
-        .filter((p) => p.activity === "group")
-        .sort((a, b) => a.ageHours - b.ageHours);
+      list = list.filter((p) => p.activity === "group");
+    }
+    if (sort === "new") {
+      list.sort((a, b) => a.ageHours - b.ageHours);
+    } else if (sort === "top") {
+      list.sort((a, b) => b.score - a.score);
+    } else {
+      list.sort((a, b) => trendingScore(b) - trendingScore(a));
     }
     return list;
-  }, [posts, community, scope, following]);
+  }, [posts, community, scope, sort, following]);
 
   if (!ready) return <PageLoader text="Loading" />;
 
@@ -1088,8 +1155,20 @@ export default function FeedPage() {
                   iconOnly
                 />
               </div>
+              <div className="mt-2">
+                <SegmentedControl<FeedSort>
+                  layoutId="feed-sort"
+                  value={sort}
+                  onChange={(next) => {
+                    setSort(next);
+                    writeFeedPrefs({ ...readFeedPrefs(), sort: next });
+                  }}
+                  options={SORTS}
+                  ariaLabel="Sort"
+                />
+              </div>
               <div
-                key={`${scope}-${community}-${view}`}
+                key={`${scope}-${community}-${sort}-${view}`}
                 className={cn("mt-5", view === "list" ? "space-y-2" : "space-y-3")}
               >
                 {feedLoading ? (
@@ -1125,6 +1204,7 @@ export default function FeedPage() {
                       view={view}
                       onOpen={() => router.push(`/feed/${p.id}`)}
                       onEdit={() => setEditingPost(p)}
+                      onCommunity={(c) => setCommunity(c)}
                     />
                   ))
                 )}

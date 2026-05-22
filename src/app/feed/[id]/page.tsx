@@ -159,7 +159,7 @@ function CommentNode({
               <ChevronUp size={16} />
             </button>
             <span className="min-w-5 text-center text-[11px] font-bold text-slate-500">
-              {node.score + vote}
+              {node.score}
             </span>
             <button
               type="button"
@@ -450,14 +450,16 @@ export default function FeedThreadPage() {
       {/* Post */}
       <article className="rounded-3xl border border-slate-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/65">
         <div className="flex flex-wrap items-center gap-2">
-          <span
+          <button
+            type="button"
+            onClick={() => router.push(`/feed?community=${post.community}`)}
             className={cn(
-              "rounded-full px-2 py-0.5 text-[10px] font-black",
+              "cursor-pointer rounded-full px-2 py-0.5 text-[10px] font-black transition-transform hover:scale-105",
               t.iconCircle,
             )}
           >
             {COMMUNITY_TAG[post.community]}
-          </span>
+          </button>
           {post.tasteMatch > 0 && (
             <span
               className={cn(
@@ -497,6 +499,7 @@ export default function FeedThreadPage() {
               postTitle={post.title}
               authorId={post.authorId}
               author={post.author}
+              onEdit={() => router.push(`/feed?edit=${post.id}`)}
             />
           </span>
         </div>
@@ -551,7 +554,7 @@ export default function FeedThreadPage() {
               <ChevronUp size={18} />
             </button>
             <span className="min-w-6 text-center text-xs font-bold text-slate-500 dark:text-slate-400">
-              {post.score + postVote}
+              {post.score}
             </span>
             <button
               type="button"

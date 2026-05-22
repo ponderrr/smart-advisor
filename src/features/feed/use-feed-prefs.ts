@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { CommentSort, FeedCommunity, FeedScope } from "./types";
+import type {
+  CommentSort,
+  FeedCommunity,
+  FeedScope,
+  FeedSort,
+} from "./types";
 
 /**
  * Per-device feed display preferences (defaults the feed opens with, plus
@@ -14,6 +19,7 @@ export interface FeedPrefs {
   view: FeedView;
   scope: FeedScope;
   community: FeedCommunity | "all";
+  sort: FeedSort;
   commentSort: CommentSort;
 }
 
@@ -21,6 +27,7 @@ export const DEFAULT_FEED_PREFS: FeedPrefs = {
   view: "cards",
   scope: "friends",
   community: "all",
+  sort: "trending",
   commentSort: "top",
 };
 
@@ -33,7 +40,10 @@ const isScope = (v: unknown): v is FeedScope =>
   v === "friends" || v === "discover" || v === "group";
 const isCommunity = (v: unknown): v is FeedCommunity | "all" =>
   v === "all" || v === "movies" || v === "books" || v === "music";
-const isSort = (v: unknown): v is CommentSort => v === "top" || v === "new";
+const isCommentSort = (v: unknown): v is CommentSort =>
+  v === "top" || v === "new";
+const isFeedSort = (v: unknown): v is FeedSort =>
+  v === "trending" || v === "new" || v === "top";
 
 /** Synchronous read, falling back to defaults for any missing/invalid key. */
 export function readFeedPrefs(): FeedPrefs {
@@ -48,7 +58,8 @@ export function readFeedPrefs(): FeedPrefs {
       community: isCommunity(p.community)
         ? p.community
         : DEFAULT_FEED_PREFS.community,
-      commentSort: isSort(p.commentSort)
+      sort: isFeedSort(p.sort) ? p.sort : DEFAULT_FEED_PREFS.sort,
+      commentSort: isCommentSort(p.commentSort)
         ? p.commentSort
         : DEFAULT_FEED_PREFS.commentSort,
     };
