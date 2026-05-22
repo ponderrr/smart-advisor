@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:haptic_kit/haptic_kit.dart';
 
 import '../../../core/supabase/supabase_providers.dart';
@@ -36,10 +35,6 @@ class FeedSettingsScreen extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(
                   horizontal: 20, vertical: 6),
               child: Column(children: [
-                settingsTile(context, Icons.person_add_alt, 'Add friends',
-                    subtitle: 'Find people to follow',
-                    onTap: () => context.push('/feed/people')),
-                settingsDivider(context),
                 Consumer(builder: (context, ref, _) {
                   final blocked =
                       ref.watch(blockedProvider).value ?? const <String>[];

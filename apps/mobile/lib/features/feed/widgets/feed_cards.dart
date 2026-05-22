@@ -665,11 +665,19 @@ class PostFab extends StatelessWidget {
       curve: Curves.easeOutCubic,
       tween: ColorTween(end: color),
       builder: (context, animColor, _) {
-        final bg = animColor ?? color;
+        final c = animColor ?? color;
+        final dark = Theme.of(context).brightness == Brightness.dark;
+        // Muted: an opaque soft tint of the accent with accent-coloured
+        // content — in line with the app's tinted buttons, not a solid
+        // bright fill.
+        final bg = Color.alphaBlend(
+          c.withValues(alpha: dark ? 0.24 : 0.14),
+          dark ? Tw.slate900 : Tw.white,
+        );
         return Material(
           color: bg,
-          elevation: 6,
-          shadowColor: bg.withValues(alpha: 0.5),
+          elevation: 3,
+          shadowColor: Colors.black.withValues(alpha: 0.18),
           borderRadius: BorderRadius.circular(26),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
@@ -687,16 +695,15 @@ class PostFab extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 20),
                   child: Row(mainAxisSize: MainAxisSize.min, children: [
-                    const Icon(Icons.edit_outlined,
-                        size: 18, color: Colors.white),
+                    Icon(Icons.edit_outlined, size: 18, color: c),
                     const SizedBox(width: 8),
                     Text(
                       label,
                       softWrap: false,
                       maxLines: 1,
                       overflow: TextOverflow.clip,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: c,
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                       ),
