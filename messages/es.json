@@ -65,7 +65,17 @@
       "age": "Edad",
       "agePlaceholder": "25",
       "save": "Guardar cambios",
-      "savedToast": "Perfil actualizado."
+      "savedToast": "Perfil actualizado.",
+      "aboutTitle": "Sobre mí",
+      "aboutDescription": "Una breve biografía y etiquetas que se muestran en tu perfil público.",
+      "bioLabel": "Biografía",
+      "bioPlaceholder": "Cuéntale a la gente qué te gusta…",
+      "interestsLabel": "Intereses",
+      "tagsLabel": "Tus etiquetas",
+      "tagsPlaceholder": "Añadir una etiqueta…",
+      "tagsAdd": "Añadir",
+      "aboutSavedToast": "Personalización del perfil guardada.",
+      "aboutSaveError": "No se pudo guardar — inténtalo de nuevo."
     },
     "email": {
       "title": "Correo electrónico",

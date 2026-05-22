@@ -28,6 +28,7 @@ import {
 import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import {
   SidebarNavItem,
@@ -122,12 +123,31 @@ function isSettingsSection(v: string | null): v is SettingsSection {
 
 type ThemeChoice = "light" | "dark" | "system";
 
+/** Curated interest tags offered as chips in the "About me" editor. */
+const CURATED_INTERESTS = [
+  "Sci-Fi",
+  "Fantasy",
+  "Horror",
+  "Thrillers",
+  "Comedy",
+  "Drama",
+  "Romance",
+  "Mystery",
+  "Action",
+  "Documentary",
+  "Animation",
+  "Indie",
+  "Classics",
+  "Non-fiction",
+  "True crime",
+] as const;
+
 const SettingsPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const t = useTranslations("Settings");
   const { theme, setTheme } = useTheme();
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const { ready } = useRequireAuth();
   const [feedVisibility, setFeedVisibility] = useFeedVisibility();
   const [feedPrefs, setFeedPrefs] = useFeedPrefs();
@@ -220,6 +240,60 @@ const SettingsPage = () => {
     if (type === "success") toast.success(text);
     else if (type === "error") toast.error(text);
     else toast.info(text);
+  };
+
+  // "About me" — bio + interest/freeform tags. Saved on its own (no
+  // re-auth gate) since it's low-sensitivity profile flavour.
+  const [aboutBio, setAboutBio] = useState(user?.bio ?? "");
+  const [aboutInterests, setAboutInterests] = useState<string[]>(
+    user?.interests ?? [],
+  );
+  const [aboutTags, setAboutTags] = useState<string[]>(user?.tags ?? []);
+  const [tagDraft, setTagDraft] = useState("");
+  const [savingAbout, setSavingAbout] = useState(false);
+
+  // Re-seed once the profile loads (user is null on the first render).
+  useEffect(() => {
+    if (!user) return;
+    setAboutBio(user.bio ?? "");
+    setAboutInterests(user.interests ?? []);
+    setAboutTags(user.tags ?? []);
+  }, [user]);
+
+  const toggleInterest = (interest: string) =>
+    setAboutInterests((prev) =>
+      prev.includes(interest)
+        ? prev.filter((i) => i !== interest)
+        : [...prev, interest],
+    );
+
+  const addTag = () => {
+    const value = tagDraft.trim().toLowerCase().replace(/^#+/, "");
+    if (value && !aboutTags.includes(value) && aboutTags.length < 10) {
+      setAboutTags((prev) => [...prev, value]);
+    }
+    setTagDraft("");
+  };
+
+  const handleSaveAbout = async () => {
+    if (!user || savingAbout) return;
+    setSavingAbout(true);
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        bio: aboutBio.trim() || null,
+        interests: aboutInterests,
+        tags: aboutTags,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", user.id);
+    setSavingAbout(false);
+    if (error) {
+      showMessage(t("profile.aboutSaveError"), "error");
+      return;
+    }
+    await refreshUser?.();
+    showMessage(t("profile.aboutSavedToast"), "success");
   };
 
   const {
@@ -547,6 +621,115 @@ const SettingsPage = () => {
                               ? "loading"
                               : "idle"
                           }
+                          className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
+                        >
+                          {t("profile.save")}
+                        </StatefulButton>
+                      </div>
+                    </SectionCard>
+
+                    {/* About me — bio + interest/freeform tags. */}
+                    <SectionCard>
+                      <SectionHeader
+                        title={t("profile.aboutTitle")}
+                        description={t("profile.aboutDescription")}
+                      />
+                      <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        {t("profile.bioLabel")}
+                      </label>
+                      <textarea
+                        value={aboutBio}
+                        onChange={(e) => setAboutBio(e.target.value)}
+                        rows={3}
+                        maxLength={300}
+                        placeholder={t("profile.bioPlaceholder")}
+                        className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-700 dark:bg-slate-800"
+                      />
+                      <p className="mt-1 text-right text-[11px] text-slate-400">
+                        {aboutBio.length}/300
+                      </p>
+
+                      <label className="mt-4 block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        {t("profile.interestsLabel")}
+                      </label>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {CURATED_INTERESTS.map((interest) => {
+                          const on = aboutInterests.includes(interest);
+                          return (
+                            <button
+                              key={interest}
+                              type="button"
+                              onClick={() => toggleInterest(interest)}
+                              className={cn(
+                                "rounded-full px-3 py-1 text-xs font-semibold transition-colors",
+                                on
+                                  ? "bg-indigo-500 text-white"
+                                  : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700",
+                              )}
+                            >
+                              {interest}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <label className="mt-4 block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        {t("profile.tagsLabel")}
+                      </label>
+                      {aboutTags.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {aboutTags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                            >
+                              #{tag}
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setAboutTags((prev) =>
+                                    prev.filter((x) => x !== tag),
+                                  )
+                                }
+                                aria-label={`Remove ${tag}`}
+                                className="text-slate-400 hover:text-rose-500"
+                              >
+                                <X size={12} />
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <div className="mt-2 flex gap-2">
+                        <input
+                          value={tagDraft}
+                          onChange={(e) => setTagDraft(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              addTag();
+                            }
+                          }}
+                          maxLength={24}
+                          placeholder={t("profile.tagsPlaceholder")}
+                          className="h-10 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-700 dark:bg-slate-800"
+                        />
+                        <button
+                          type="button"
+                          onClick={addTag}
+                          disabled={
+                            !tagDraft.trim() || aboutTags.length >= 10
+                          }
+                          className="h-10 shrink-0 rounded-full border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
+                        >
+                          {t("profile.tagsAdd")}
+                        </button>
+                      </div>
+
+                      <div className="mt-5 flex justify-end">
+                        <StatefulButton
+                          onClick={handleSaveAbout}
+                          state={savingAbout ? "loading" : "idle"}
                           className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
                         >
                           {t("profile.save")}

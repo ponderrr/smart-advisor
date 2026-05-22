@@ -80,6 +80,32 @@ export default function FeedProfilePage() {
                     {followers.toLocaleString()} followers · {authored.length}{" "}
                     {authored.length === 1 ? "pick" : "picks"}
                   </p>
+                  {profile?.bio && (
+                    <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                      {profile.bio}
+                    </p>
+                  )}
+                  {((profile?.interests?.length ?? 0) > 0 ||
+                    (profile?.tags?.length ?? 0) > 0) && (
+                    <div className="mt-2.5 flex flex-wrap gap-1.5">
+                      {profile?.interests?.map((interest) => (
+                        <span
+                          key={`interest-${interest}`}
+                          className="rounded-full bg-indigo-100 px-2.5 py-0.5 text-[11px] font-semibold text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300"
+                        >
+                          {interest}
+                        </span>
+                      ))}
+                      {profile?.tags?.map((tag) => (
+                        <span
+                          key={`tag-${tag}`}
+                          className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 {!isYou && (
                   <div className="flex items-center gap-2">

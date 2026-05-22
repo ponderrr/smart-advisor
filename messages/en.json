@@ -65,7 +65,17 @@
       "age": "Age",
       "agePlaceholder": "25",
       "save": "Save changes",
-      "savedToast": "Profile updated."
+      "savedToast": "Profile updated.",
+      "aboutTitle": "About me",
+      "aboutDescription": "A short bio and tags shown on your public profile.",
+      "bioLabel": "Bio",
+      "bioPlaceholder": "Tell people what you're into…",
+      "interestsLabel": "Interests",
+      "tagsLabel": "Your tags",
+      "tagsPlaceholder": "Add a tag…",
+      "tagsAdd": "Add",
+      "aboutSavedToast": "Profile customization saved.",
+      "aboutSaveError": "Couldn't save — please try again."
     },
     "email": {
       "title": "Email",

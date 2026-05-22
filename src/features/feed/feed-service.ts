@@ -439,17 +439,33 @@ export async function toggleSave(postId: string): Promise<boolean> {
 }
 
 /** A profile's public display data, or null if it doesn't exist. */
-export async function fetchProfile(
-  profileId: string,
-): Promise<{ id: string; name: string; avatarUrl: string | null } | null> {
+export async function fetchProfile(profileId: string): Promise<{
+  id: string;
+  name: string;
+  avatarUrl: string | null;
+  bio: string | null;
+  interests: string[];
+  tags: string[];
+} | null> {
   const { data } = await supabase
     .from("profiles")
-    .select("id, name, avatar_url")
+    .select("id, name, avatar_url, bio, interests, tags")
     .eq("id", profileId)
     .maybeSingle();
   if (!data) return null;
-  const row = data as ProfileEmbed;
-  return { id: row.id, name: row.name, avatarUrl: row.avatar_url };
+  const row = data as ProfileEmbed & {
+    bio: string | null;
+    interests: string[] | null;
+    tags: string[] | null;
+  };
+  return {
+    id: row.id,
+    name: row.name,
+    avatarUrl: row.avatar_url,
+    bio: row.bio,
+    interests: row.interests ?? [],
+    tags: row.tags ?? [],
+  };
 }
 
 /** How many profiles follow [profileId]. */
