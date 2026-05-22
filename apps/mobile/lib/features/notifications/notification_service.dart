@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
+import '../../core/config/env.dart';
 import '../../core/models/enums.dart';
 import '../../core/models/library_item.dart';
 import '../../core/services/service_providers.dart';
@@ -141,37 +142,36 @@ class NotificationService {
   }
 
   // ── Group-quiz live activity ───────────────────────────────────
-  // A "live" status surface for an in-progress group quiz. On Android
-  // this is an ongoing progress notification (the basis of Android 16's
-  // Live Updates); on iOS it shows as a standard notification today, with
-  // a true ActivityKit Live Activity scaffolded under ios/LiveActivity/
-  // (see ios/LiveActivity/SETUP.md). Re-calling [showGroupQuizLive] with
-  // the same id updates the existing notification in place.
+  // A "live" status surface for an active group quiz. On Android a
+  // foreground service (GroupQuizLiveService) polls the session and
+  // keeps a promoted Android 16 Live Update fresh even while the app is
+  // backgrounded. On iOS it's a standard notification today, with a true
+  // ActivityKit Live Activity scaffolded under ios/LiveActivity/.
 
-  /// Shows / updates the group-quiz live activity. [progress] +
-  /// [maxProgress] supply the status-bar chip text (e.g. players joined).
-  static Future<void> showGroupQuizLive({
+  /// Starts the group-quiz live activity. Android — the foreground
+  /// service that refreshes itself; iOS — a no-op (the first
+  /// [updateGroupQuizLive] posts the notification).
+  static Future<void> startGroupQuizLive({
+    required String sessionId,
+    required String code,
+  }) async {
+    if (Platform.isAndroid) {
+      await LiveUpdate.startService(
+        sessionId: sessionId,
+        code: code,
+        supabaseUrl: Env.supabaseUrl,
+        anonKey: Env.supabaseAnonKey,
+      );
+    }
+  }
+
+  /// Refreshes the live activity's status line. The Android service polls
+  /// on its own, so this only updates the iOS notification.
+  static Future<void> updateGroupQuizLive({
     required String code,
     required String line,
-    int? progress,
-    int? maxProgress,
   }) async {
-    final hasBar =
-        progress != null && maxProgress != null && maxProgress > 0;
-    // Android — a true promoted "Live Update" (Android 16) via the native
-    // channel; it degrades to a plain ongoing notification on older
-    // Android, where setRequestPromotedOngoing is a no-op.
-    if (Platform.isAndroid) {
-      await LiveUpdate.post(
-        id: _groupQuizLiveId,
-        title: 'Group quiz · $code',
-        text: line,
-        chip: hasBar ? '$progress/$maxProgress' : null,
-      );
-      return;
-    }
-    // iOS — standard notification fallback (the ActivityKit Live Activity
-    // is scaffolded under ios/LiveActivity/).
+    if (Platform.isAndroid) return;
     await init();
     if (!_ready) return;
     try {
@@ -186,10 +186,10 @@ class NotificationService {
     } catch (_) {/* unsupported platform — ignore */}
   }
 
-  /// Ends the group-quiz live activity (session completed / left).
-  static Future<void> cancelGroupQuizLive() async {
+  /// Ends the group-quiz live activity (session over / screen left).
+  static Future<void> stopGroupQuizLive() async {
     if (Platform.isAndroid) {
-      await LiveUpdate.cancel(_groupQuizLiveId);
+      await LiveUpdate.stopService();
       return;
     }
     await init();

@@ -95,39 +95,52 @@ class _BodyState extends ConsumerState<_Body> {
   bool _asyncStartKicked = false;
   bool _asyncResolveKicked = false;
   bool _submittedLocally = false;
+  // One-shot guard so the live-activity foreground service is started
+  // exactly once for this session.
+  bool _liveStarted = false;
 
   @override
   void dispose() {
     // Leaving the session screen ends the group-quiz live activity.
-    NotificationService.cancelGroupQuizLive();
+    NotificationService.stopGroupQuizLive();
     super.dispose();
   }
 
-  /// Mirrors the live session into an ongoing "live activity" — an
-  /// Android Live-Update-style progress notification (and, once the
-  /// Xcode extension is wired, an iOS ActivityKit Live Activity).
+  /// Status line for the iOS live notification — the Android foreground
+  /// service builds its own (richer) line natively as it polls.
+  String _liveLine(GroupQuizState s) {
+    final n = s.participants.length;
+    final max = s.session.maxParticipants;
+    return switch (s.session.status) {
+      QuizSessionStatus.lobby => n >= max
+          ? 'Lobby full — starting soon'
+          : 'Waiting for players — $n of $max joined',
+      QuizSessionStatus.inProgress => 'Quiz in progress',
+      _ => '',
+    };
+  }
+
+  /// Mirrors the live session into a "live activity": on Android a
+  /// foreground service keeps a promoted Live Update fresh even while
+  /// backgrounded; on iOS a standard notification (ActivityKit Live
+  /// Activity is scaffolded under ios/LiveActivity/).
   void _syncLiveActivity(GroupQuizState s) {
-    final session = s.session;
-    switch (session.status) {
-      case QuizSessionStatus.lobby:
-        NotificationService.showGroupQuizLive(
-          code: session.code,
-          line: '${s.participants.length}/${session.maxParticipants}'
-              ' joined · waiting to start',
-          progress: s.participants.length,
-          maxProgress: session.maxParticipants,
-        );
-      case QuizSessionStatus.inProgress:
-        NotificationService.showGroupQuizLive(
-          code: session.code,
-          line: s.participants.length == 1
-              ? 'Quiz in progress'
-              : 'Quiz in progress · ${s.participants.length} playing',
-        );
-      case QuizSessionStatus.completed:
-      case QuizSessionStatus.cancelled:
-        NotificationService.cancelGroupQuizLive();
+    final status = s.session.status;
+    if (status == QuizSessionStatus.completed ||
+        status == QuizSessionStatus.cancelled) {
+      if (_liveStarted) {
+        _liveStarted = false;
+        NotificationService.stopGroupQuizLive();
+      }
+      return;
     }
+    if (!_liveStarted) {
+      _liveStarted = true;
+      NotificationService.startGroupQuizLive(
+          sessionId: widget.sessionId, code: s.session.code);
+    }
+    NotificationService.updateGroupQuizLive(
+        code: s.session.code, line: _liveLine(s));
   }
 
   @override
