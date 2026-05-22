@@ -212,6 +212,39 @@ class FeedService {
   Future<void> reportComment(String commentId, {String? reason}) =>
       _report(commentId: commentId, reason: reason);
 
+  /// Reports the current user has filed, newest first. Readable via the
+  /// reporter's own-row SELECT policy on feed_reports.
+  Future<
+      List<
+          ({
+            String id,
+            String? reason,
+            String createdAt,
+            bool isPost,
+            String? label,
+          })>> fetchMyReports() async {
+    final uid = _c.auth.currentUser?.id;
+    if (uid == null) return const [];
+    final rows = await _c
+        .from('feed_reports')
+        .select('id, reason, created_at, post_id, comment_id, '
+            'post:feed_posts!feed_reports_post_id_fkey ( title ), '
+            'comment:feed_comments!feed_reports_comment_id_fkey ( body )')
+        .eq('reporter_id', uid)
+        .order('created_at', ascending: false);
+    return [
+      for (final r in rows)
+        (
+          id: r['id'] as String,
+          reason: r['reason'] as String?,
+          createdAt: r['created_at'] as String,
+          isPost: r['post_id'] != null,
+          label: (_embed(r['post'])?['title'] as String?) ??
+              (_embed(r['comment'])?['body'] as String?),
+        ),
+    ];
+  }
+
   Future<void> createComment(
       String postId, String body, String? parentId) async {
     final uid = _c.auth.currentUser?.id;

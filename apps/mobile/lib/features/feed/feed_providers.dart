@@ -54,6 +54,18 @@ final feedProfileProvider = FutureProvider.autoDispose.family<
     String>(
     (ref, id) => ref.watch(feedServiceProvider).fetchProfile(id));
 
+/// Reports the current user has filed — for "Reports you've filed".
+final myReportsProvider = FutureProvider.autoDispose<
+    List<
+        ({
+          String id,
+          String? reason,
+          String createdAt,
+          bool isPost,
+          String? label,
+        })>>(
+    (ref) => ref.watch(feedServiceProvider).fetchMyReports());
+
 /// How many profiles follow a given profile.
 final followerCountProvider = FutureProvider.autoDispose
     .family<int, String>(

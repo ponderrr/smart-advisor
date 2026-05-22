@@ -8,6 +8,7 @@ import '../../../ui/ui.dart';
 import '../../feed/feed_providers.dart';
 import '../../feed/models/feed_models.dart';
 import '../../feed/screens/blocked_people_screen.dart';
+import '../../feed/screens/filed_reports_screen.dart';
 import 'settings_helpers.dart';
 
 /// Feed settings — the relocated `_FeedSettingsCard`, plus a navigable
@@ -52,6 +53,15 @@ class FeedSettingsScreen extends ConsumerWidget {
                                     const BlockedPeopleScreen()),
                           ));
                 }),
+                settingsDivider(context),
+                settingsTile(context, Icons.flag_outlined,
+                    'Reports you’ve filed',
+                    subtitle: 'Posts and comments you’ve flagged',
+                    onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                              builder: (_) =>
+                                  const FiledReportsScreen()),
+                        )),
               ]),
             ),
             settingsSection(context, 'Privacy'),
