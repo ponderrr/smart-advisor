@@ -79,7 +79,9 @@ class _ComposerState extends ConsumerState<Composer> {
       _year.text = prefill.year?.toString() ?? '';
       _cover.text = prefill.posterUrl ?? '';
     }
-    for (final c in [_title, _cover, _creator]) {
+    // Every field rebuilds so the title counter, preview, and the
+    // unsaved-changes guard (_isDirty) all stay current.
+    for (final c in [_title, _body, _cover, _creator, _year]) {
       c.addListener(() => setState(() {}));
     }
   }
@@ -96,6 +98,54 @@ class _ComposerState extends ConsumerState<Composer> {
       contentAccent(_community.accent, Theme.of(context).brightness).dot;
 
   bool get _valid => _title.text.trim().isNotEmpty;
+
+  /// Whether the form has content worth warning about on close. For an
+  /// edit, "dirty" means it differs from the original post; for a new
+  /// post, any non-empty field.
+  bool get _isDirty {
+    final edit = widget.editPost;
+    if (edit != null) {
+      return _title.text.trim() != edit.title ||
+          _body.text.trim() != (edit.body ?? '') ||
+          _cover.text.trim() != (edit.posterUrl ?? '') ||
+          _creator.text.trim() != (edit.creator ?? '') ||
+          _year.text.trim() != (edit.year?.toString() ?? '') ||
+          _community != edit.community ||
+          _activity != edit.activity ||
+          (_activity == FeedActivity.rated && _rating != (edit.rating ?? 2));
+    }
+    return _title.text.trim().isNotEmpty ||
+        _body.text.trim().isNotEmpty ||
+        _cover.text.trim().isNotEmpty ||
+        _creator.text.trim().isNotEmpty ||
+        _year.text.trim().isNotEmpty;
+  }
+
+  /// Confirm before discarding an in-progress pick when the sheet is
+  /// dismissed (back gesture, drag-down, or barrier tap).
+  Future<void> _confirmDiscard() async {
+    var discard = false;
+    await AdaptiveAlertDialog.show(
+      context: context,
+      title: widget.editPost != null
+          ? 'Discard your changes?'
+          : 'Discard this pick?',
+      message: 'You have unsaved changes — closing now will lose them.',
+      icon: Icons.warning_amber_rounded,
+      actions: [
+        AlertAction(
+            title: 'Keep editing',
+            style: AlertActionStyle.cancel,
+            onPressed: () {}),
+        AlertAction(
+          title: 'Discard',
+          style: AlertActionStyle.destructive,
+          onPressed: () => discard = true,
+        ),
+      ],
+    );
+    if (discard && mounted) Navigator.of(context).pop();
+  }
 
   Future<void> _post() async {
     if (!_valid) return;
@@ -192,7 +242,12 @@ class _ComposerState extends ConsumerState<Composer> {
     final remaining = _maxTitle - _title.text.characters.length;
     final isPrivate =
         ref.watch(feedVisibilityProvider) == FeedVisibility.private;
-    return Padding(
+    return PopScope(
+      canPop: !_isDirty,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _confirmDiscard();
+      },
+      child: Padding(
       padding: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Container(
@@ -439,6 +494,7 @@ class _ComposerState extends ConsumerState<Composer> {
             ),
           ),
         ]),
+      ),
       ),
     );
   }
