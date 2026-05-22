@@ -45,9 +45,11 @@ String? resolveRedirect({
   if (isIntro) return onboardingComplete ? '/' : '/onboarding';
 
   // 3. Authenticated but onboarding not finished → /onboarding
-  //    (allow the onboarding screen and auth callback to proceed).
+  //    (allow the onboarding screen, the post-onboarding tutorial, and
+  //    the auth callback to proceed).
   if (!onboardingComplete &&
       location != '/onboarding' &&
+      location != '/tutorial' &&
       !startsWith('/auth')) {
     return '/onboarding';
   }

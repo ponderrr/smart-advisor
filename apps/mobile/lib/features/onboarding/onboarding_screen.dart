@@ -195,7 +195,9 @@ class _S extends ConsumerState<OnboardingScreen> {
         StorageKeys.prefContentTone, age > 0 && age < 18 ? 'family' : 'standard');
 
     ref.invalidate(currentProfileProvider);
-    if (mounted) context.go('/');
+    // Hand off to the one-time tutorial carousel, which then drops the
+    // user into the app.
+    if (mounted) context.go('/tutorial');
   }
 
   @override

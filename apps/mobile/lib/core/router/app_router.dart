@@ -36,6 +36,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/models/recommendation.dart';
 import '../../features/onboarding/get_started_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
+import '../../features/onboarding/tutorial_screen.dart';
 import '../../features/recommendations/screens/recommendation_detail_screen.dart';
 import '../../features/quiz/screens/quiz_screen.dart';
 import '../../features/wrapped/wrapped_screen.dart';
@@ -169,6 +170,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/intro', builder: (_, _) => const GetStartedScreen()),
       GoRoute(
           path: '/onboarding', builder: (_, _) => const OnboardingScreen()),
+      GoRoute(
+          path: '/tutorial', builder: (_, _) => const TutorialScreen()),
       GoRoute(
           path: '/maintenance',
           builder: (_, _) => const MaintenanceScreen()),
