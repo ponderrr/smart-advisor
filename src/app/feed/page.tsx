@@ -477,6 +477,39 @@ function Composer({
   // True while a TMDB cover-art lookup is in flight.
   const [findingCover, setFindingCover] = useState(false);
 
+  // Whether the form has unsaved content worth a confirm on close. For
+  // an edit, "dirty" means it differs from the original post.
+  const isDirty = editPost
+    ? community !== editPost.community ||
+      activity !== editPost.activity ||
+      title.trim() !== editPost.title ||
+      body.trim() !== (editPost.body ?? "") ||
+      posterUrl.trim() !== (editPost.posterUrl ?? "") ||
+      creator.trim() !== (editPost.creator ?? "") ||
+      year.trim() !== (editPost.year != null ? String(editPost.year) : "") ||
+      (activity === "rated" && rating !== (editPost.rating ?? 2))
+    : title.trim() !== "" ||
+      body.trim() !== "" ||
+      posterUrl.trim() !== "" ||
+      creator.trim() !== "" ||
+      year.trim() !== "";
+
+  // Guarded close — confirm before discarding unsaved changes. A
+  // successful post/save calls onClose directly and skips this.
+  function requestClose() {
+    if (
+      isDirty &&
+      !window.confirm(
+        editPost
+          ? "Discard your changes? They won't be saved."
+          : "Discard this pick? Your unsaved changes will be lost.",
+      )
+    ) {
+      return;
+    }
+    onClose();
+  }
+
   function submit() {
     if (!title.trim() || createPost.isPending || updatePost.isPending) {
       return;
@@ -556,7 +589,7 @@ function Composer({
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={requestClose}
       ariaLabel={editPost ? "Edit pick" : "Share a pick"}
       size="md"
     >
