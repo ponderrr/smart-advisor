@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:haptic_kit/haptic_kit.dart';
 
 import '../../../core/ui_messenger.dart';
 import '../../../ui/ui.dart';
@@ -122,6 +123,7 @@ class _SecuritySettingsScreenState
                     value: ref.watch(biometricLockProvider),
                     activeColor: Tw.indigo500,
                     onChanged: (v) async {
+                      Haptics.selection();
                       if (v && !await biometricAvailable()) {
                         if (!context.mounted) return;
                         setState(() => _msg =
@@ -145,6 +147,7 @@ class _SecuritySettingsScreenState
                     value: ref.watch(biometricLoginProvider),
                     activeColor: Tw.indigo500,
                     onChanged: (v) async {
+                    Haptics.selection();
                     if (v) {
                       final ok = await ref
                           .read(biometricLoginProvider.notifier)

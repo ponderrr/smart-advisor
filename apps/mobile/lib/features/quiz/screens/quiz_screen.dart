@@ -653,7 +653,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               min: 3,
               max: 15,
               divisions: 12,
-              onChanged: (v) => setState(() => _count = v.round()),
+              onChanged: (v) {
+                final r = v.round();
+                if (r != _count) Haptics.selection();
+                setState(() => _count = r);
+              },
             ),
             const SizedBox(height: 14),
             Wrap(

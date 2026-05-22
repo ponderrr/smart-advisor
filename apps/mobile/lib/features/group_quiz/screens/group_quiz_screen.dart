@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:haptic_kit/haptic_kit.dart';
 
 import '../../../ui/ui.dart';
 import '../../auth/auth_providers.dart';
@@ -226,7 +227,11 @@ class _S extends ConsumerState<GroupQuizScreen> {
             min: min,
             max: max,
             divisions: divisions,
-            onChanged: (v) => onChanged(v.round())),
+            onChanged: (v) {
+              final r = v.round();
+              if (r != value) Haptics.selection();
+              onChanged(r);
+            }),
         const SizedBox(height: 14),
         Wrap(
           spacing: 8,

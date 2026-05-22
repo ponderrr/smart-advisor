@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:haptic_kit/haptic_kit.dart';
 
 import '../../../ui/ui.dart';
 import '../../notifications/notification_service.dart';
@@ -34,6 +35,7 @@ class NotificationsSettingsScreen extends ConsumerWidget {
                     value: ref.watch(remindersProvider),
                     activeColor: Tw.indigo500,
                     onChanged: (v) async {
+                      Haptics.selection();
                       await ref
                           .read(remindersProvider.notifier)
                           .set(v);

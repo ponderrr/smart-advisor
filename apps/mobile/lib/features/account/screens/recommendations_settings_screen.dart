@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:haptic_kit/haptic_kit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/constants/app_constants.dart';
@@ -392,8 +393,11 @@ class _RecommendationFiltersCardState
               divisions: _runtimeStops.length - 1,
               activeColor: Tw.indigo500,
               label: active.runtimeIdx == 0 ? 'Off' : '$rt min',
-              onChanged: (v) =>
-                  setState(() => active.runtimeIdx = v.round()),
+              onChanged: (v) {
+                final r = v.round();
+                if (r != active.runtimeIdx) Haptics.selection();
+                setState(() => active.runtimeIdx = r);
+              },
             ),
           ],
           widget.divider(context),

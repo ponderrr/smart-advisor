@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:haptic_kit/haptic_kit.dart';
 
 import '../../../ui/ui.dart';
 import '../../settings/settings_service.dart';
@@ -65,8 +66,10 @@ class AppearanceSettingsScreen extends ConsumerWidget {
                 ),
                 AdaptiveSwitch(
                   value: amoled,
-                  onChanged: (v) =>
-                      ref.read(amoledProvider.notifier).set(v),
+                  onChanged: (v) {
+                    Haptics.selection();
+                    ref.read(amoledProvider.notifier).set(v);
+                  },
                 ),
               ]),
             ],
