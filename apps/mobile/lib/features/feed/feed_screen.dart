@@ -53,6 +53,14 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     return filtered;
   }
 
+  /// Pull-to-refresh — refetch the feed (and the follow graph it filters
+  /// against) and wait for the result so the spinner times out cleanly.
+  Future<void> _refresh() async {
+    ref.invalidate(feedProvider);
+    ref.invalidate(followingProvider);
+    await ref.read(feedProvider.future);
+  }
+
   @override
   Widget build(BuildContext context) {
     final prefs = ref.watch(feedPrefsProvider);
@@ -70,7 +78,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     return BrandScaffold(
       body: Stack(
         children: [
-          ListView(
+          RefreshIndicator(
+            onRefresh: _refresh,
+            child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
         children: [
           Row(
@@ -88,7 +98,6 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           const SizedBox(height: 14),
           const FinishedNudgeCard(),
           const AiNudgeCard(),
-          const SizedBox(height: 12),
           _communitySegmented(prefs),
           const SizedBox(height: 8),
           Row(children: [
@@ -138,6 +147,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
             },
           ),
         ],
+          ),
           ),
           Positioned(
             right: 16,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/models/answer.dart';
 import '../../../core/models/enums.dart';
@@ -9,6 +10,34 @@ import '../../../core/services/service_providers.dart';
 import '../../../core/supabase/supabase_providers.dart';
 import '../../../ui/ui.dart';
 import '../../auth/auth_providers.dart';
+
+/// `YYYY-MM-DD` for today — the AI nudge is dismissed a day at a time.
+String _today() {
+  final d = DateTime.now();
+  return '${d.year}-${d.month}-${d.day}';
+}
+
+/// The day the AI nudge was last dismissed, so it stays hidden for the
+/// rest of that day and quietly returns tomorrow.
+class _AiNudgeDismiss extends Notifier<String?> {
+  static const _key = 'sa.ai_nudge_dismissed';
+
+  @override
+  String? build() => ref
+      .watch(sharedPreferencesProvider)
+      .asData
+      ?.value
+      .getString(_key);
+
+  Future<void> dismissToday() async {
+    state = _today();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_key, state!);
+  }
+}
+
+final _aiNudgeDismissProvider =
+    NotifierProvider<_AiNudgeDismiss, String?>(_AiNudgeDismiss.new);
 
 /// A mood the user can tap to get an instant AI pick, without leaving the
 /// feed or running a full quiz. Each maps to a single open-ended answer.
@@ -109,21 +138,46 @@ class _AiNudgeCardState extends ConsumerState<AiNudgeCard> {
 
   @override
   Widget build(BuildContext context) {
+    // Dismissible — once dismissed it stays gone for the rest of the day
+    // (a result in progress is never yanked away).
+    final dismissed = ref.watch(_aiNudgeDismissProvider) == _today();
+    if (_phase == _Phase.idle && dismissed) {
+      return const SizedBox.shrink();
+    }
     final tone = contentAccent(
         ContentAccentName.violet, Theme.of(context).brightness);
-    return BrandCard(
-      accent: ContentAccentName.violet,
-      padding: const EdgeInsets.all(14),
-      child: switch (_phase) {
-        _Phase.idle => _idle(tone),
-        _Phase.loading => _loading(tone),
-        _Phase.result => _result(),
-        _Phase.error => _error(),
-      },
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: BrandCard(
+        accent: ContentAccentName.violet,
+        padding: const EdgeInsets.all(14),
+        child: switch (_phase) {
+          _Phase.idle => _idle(tone),
+          _Phase.loading => _loading(tone),
+          _Phase.result => _result(),
+          _Phase.error => _error(),
+        },
+      ),
     );
   }
 
-  Widget _header(ContentAccentTone tone, String title, String subtitle) =>
+  Widget _dismissButton() => Semantics(
+        button: true,
+        label: 'Dismiss',
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () =>
+              ref.read(_aiNudgeDismissProvider.notifier).dismissToday(),
+          child: Padding(
+            padding: const EdgeInsets.only(left: 8),
+            child: Icon(Icons.close,
+                size: 18, color: context.brandMuted),
+          ),
+        ),
+      );
+
+  Widget _header(ContentAccentTone tone, String title, String subtitle,
+          {Widget? trailing}) =>
       Row(children: [
         Container(
           width: 38,
@@ -149,13 +203,15 @@ class _AiNudgeCardState extends ConsumerState<AiNudgeCard> {
             ],
           ),
         ),
+        ?trailing,
       ]);
 
   Widget _idle(ContentAccentTone tone) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _header(tone, 'Not sure what to pick?',
-              'Tap a vibe — we\'ll drop a pick right here.'),
+              'Tap a vibe — we\'ll drop a pick right here.',
+              trailing: _dismissButton()),
           const SizedBox(height: 12),
           Wrap(
             spacing: 8,

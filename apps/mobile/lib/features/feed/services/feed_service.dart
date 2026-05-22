@@ -334,6 +334,32 @@ class FeedService {
     return out;
   }
 
+  /// Distinct people who've recently posted — for the "Add friends"
+  /// discover screen. Deliberately light: just the post authors, no
+  /// comments and no score aggregation (unlike [fetchFeed]).
+  Future<List<({String id, String name, String? avatarUrl})>>
+      fetchSuggestedPeople() async {
+    final rows = await _c
+        .from('feed_posts')
+        .select(
+            'author:profiles!feed_posts_user_id_fkey ( id, name, avatar_url )')
+        .order('created_at', ascending: false)
+        .limit(150);
+    final out = <String, ({String id, String name, String? avatarUrl})>{};
+    for (final r in rows) {
+      final p = _embed((r as Map)['author']);
+      final id = p?['id'] as String?;
+      if (id != null && !out.containsKey(id)) {
+        out[id] = (
+          id: id,
+          name: (p?['name'] as String?) ?? 'Someone',
+          avatarUrl: p?['avatar_url'] as String?,
+        );
+      }
+    }
+    return out.values.toList();
+  }
+
   Future<List<String>> fetchBlocked() async {
     final uid = _c.auth.currentUser?.id;
     if (uid == null) return [];

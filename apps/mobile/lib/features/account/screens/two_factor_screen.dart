@@ -106,21 +106,22 @@ class TwoFactorScreen extends ConsumerWidget {
                       : 'Add an authenticator app for a second layer of '
                           'security on your account.'),
                   const SizedBox(height: 14),
-                  AdaptiveButton(
-                    onPressed: () => context.push('/account/mfa-setup'),
-                    label: verified
-                        ? 'Manage authenticator'
-                        : 'Set up authenticator',
-                  ),
-                  if (verified) ...[
-                    const SizedBox(height: 8),
+                  // Set-up only when 2FA is off; when it's on this screen
+                  // *is* the management surface (status + turn-off), so it
+                  // no longer bounces back into the enrollment flow.
+                  if (!verified)
+                    AdaptiveButton(
+                      onPressed: () =>
+                          context.push('/account/mfa-setup'),
+                      label: 'Set up authenticator',
+                    ),
+                  if (verified)
                     AdaptiveButton(
                       style: AdaptiveButtonStyle.bordered,
                       label: 'Turn off two-factor',
                       onPressed: () =>
                           _removeFactors(context, ref, factors.value!),
                     ),
-                  ],
                 ],
               ),
             ),

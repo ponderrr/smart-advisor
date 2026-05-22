@@ -61,6 +61,11 @@ final followerProfilesProvider = FutureProvider.autoDispose.family<
     List<({String id, String name, String? avatarUrl})>, String>(
     (ref, id) => ref.watch(feedServiceProvider).fetchFollowerProfiles(id));
 
+/// Distinct recent posters — the lightweight source for "Add friends".
+final suggestedPeopleProvider = FutureProvider.autoDispose<
+    List<({String id, String name, String? avatarUrl})>>(
+    (ref) => ref.watch(feedServiceProvider).fetchSuggestedPeople());
+
 /// Whether a profile's library is publicly visible on their profile.
 final libraryPublicProvider =
     FutureProvider.autoDispose.family<bool, String>(

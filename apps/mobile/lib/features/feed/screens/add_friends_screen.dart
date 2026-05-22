@@ -6,12 +6,10 @@ import '../../../ui/ui.dart';
 import '../feed_providers.dart';
 import '../widgets/person_row.dart';
 
-/// A suggested person derived from the feed.
-typedef _Person = ({String id, String name, String? avatarUrl});
-
 /// Discover-people / add-friend page. "Suggested" people are the distinct
-/// authors who've posted in the feed, minus yourself and anyone you
-/// already follow. Search filters the list by display name.
+/// authors who've posted, minus yourself and anyone you already follow —
+/// loaded via a light authors-only query (not the whole feed). Search
+/// filters the list by display name.
 class AddFriendsScreen extends ConsumerStatefulWidget {
   const AddFriendsScreen({super.key});
 
@@ -35,7 +33,7 @@ class _AddFriendsScreenState extends ConsumerState<AddFriendsScreen> {
     final me = ref.watch(supabaseClientProvider).auth.currentUser?.id;
     final following =
         ref.watch(followingProvider).value?.toSet() ?? <String>{};
-    final feed = ref.watch(feedProvider);
+    final people = ref.watch(suggestedPeopleProvider);
 
     return BrandScaffold(
       title: 'Add friends',
@@ -54,7 +52,7 @@ class _AddFriendsScreenState extends ConsumerState<AddFriendsScreen> {
               alignment: Alignment.centerLeft,
               child: Eyebrow('Suggested')),
           const SizedBox(height: 10),
-          ...feed.when(
+          ...people.when(
             loading: () => [
               const Padding(
                 padding: EdgeInsets.all(24),
@@ -64,22 +62,13 @@ class _AddFriendsScreenState extends ConsumerState<AddFriendsScreen> {
             error: (_, _) => [
               const MessageBanner.error('Couldn’t load suggestions.'),
             ],
-            data: (posts) {
-              final seen = <String, _Person>{};
-              for (final p in posts) {
-                if (p.authorId.isNotEmpty &&
-                    p.authorId != me &&
-                    !following.contains(p.authorId) &&
-                    !seen.containsKey(p.authorId)) {
-                  seen[p.authorId] = (
-                    id: p.authorId,
-                    name: p.author,
-                    avatarUrl: p.authorAvatarUrl,
-                  );
-                }
-              }
+            data: (all) {
               final q = _query.trim().toLowerCase();
-              final suggested = seen.values
+              final suggested = all
+                  .where((p) =>
+                      p.id.isNotEmpty &&
+                      p.id != me &&
+                      !following.contains(p.id))
                   .where((p) =>
                       q.isEmpty || p.name.toLowerCase().contains(q))
                   .toList()
