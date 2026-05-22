@@ -14,6 +14,7 @@ _FeedComment _$FeedCommentFromJson(Map<String, dynamic> json) => _FeedComment(
   body: json['body'] as String,
   ageHours: (json['age_hours'] as num).toInt(),
   score: (json['score'] as num?)?.toInt() ?? 0,
+  edited: json['edited'] as bool? ?? false,
   parentId: json['parent_id'] as String?,
 );
 
@@ -26,6 +27,7 @@ Map<String, dynamic> _$FeedCommentToJson(_FeedComment instance) =>
       'body': instance.body,
       'age_hours': instance.ageHours,
       'score': instance.score,
+      'edited': instance.edited,
       'parent_id': instance.parentId,
     };
 
@@ -49,6 +51,7 @@ _FeedPost _$FeedPostFromJson(Map<String, dynamic> json) => _FeedPost(
   rating: (json['rating'] as num?)?.toInt(),
   square: json['square'] as bool? ?? false,
   baseScore: (json['base_score'] as num?)?.toInt() ?? 0,
+  score: (json['score'] as num?)?.toInt() ?? 0,
   vote: (json['vote'] as num?)?.toInt() ?? 0,
   comments:
       (json['comments'] as List<dynamic>?)
@@ -75,6 +78,7 @@ Map<String, dynamic> _$FeedPostToJson(_FeedPost instance) => <String, dynamic>{
   'rating': instance.rating,
   'square': instance.square,
   'base_score': instance.baseScore,
+  'score': instance.score,
   'vote': instance.vote,
   'comments': instance.comments,
 };

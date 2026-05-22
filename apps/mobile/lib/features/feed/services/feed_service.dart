@@ -17,7 +17,7 @@ class FeedService {
     rating, base_score, created_at,
     author:profiles!feed_posts_user_id_fkey ( id, name, avatar_url ),
     feed_comments (
-      id, body, parent_id, created_at,
+      id, body, parent_id, created_at, edited_at,
       author:profiles!feed_comments_user_id_fkey ( id, name, avatar_url )
     )
   ''';
@@ -54,17 +54,22 @@ class FeedService {
       body: (c['body'] as String?) ?? '',
       ageHours: _hoursSince(c['created_at'] as String),
       score: score,
+      edited: c['edited_at'] != null,
       parentId: c['parent_id'] as String?,
     );
   }
 
-  FeedPost _mapPost(Map<String, dynamic> p, Map<String, int> scores) {
+  FeedPost _mapPost(
+    Map<String, dynamic> p,
+    Map<String, int> commentScores,
+    int postScore,
+  ) {
     final author = _embed(p['author']);
     final community = feedCommunityFromWire(p['community'] as String);
     final comments = ((p['feed_comments'] as List?) ?? const [])
         .map((c) => _mapComment(
             Map<String, dynamic>.from(c as Map),
-            scores[(c)['id']] ?? 0))
+            commentScores[(c)['id']] ?? 0))
         .toList();
     return FeedPost(
       id: p['id'] as String,
@@ -82,6 +87,7 @@ class FeedService {
       rating: (p['rating'] as num?)?.toInt(),
       square: community == FeedCommunity.music,
       baseScore: (p['base_score'] as int?) ?? 0,
+      score: postScore,
       comments: comments,
     );
   }
@@ -101,6 +107,21 @@ class FeedService {
     return out;
   }
 
+  /// Sums feed_post_votes for the given post ids → { id: score }.
+  Future<Map<String, int>> _postScores(List<String> ids) async {
+    if (ids.isEmpty) return {};
+    final rows = await _c
+        .from('feed_post_votes')
+        .select('post_id, value')
+        .inFilter('post_id', ids);
+    final out = <String, int>{};
+    for (final r in rows) {
+      final id = r['post_id'] as String;
+      out[id] = (out[id] ?? 0) + (r['value'] as int);
+    }
+    return out;
+  }
+
   /// The whole feed, newest first, with comments + author display data.
   Future<List<FeedPost>> fetchFeed() async {
     final rows = await _c
@@ -112,9 +133,19 @@ class FeedService {
         for (final c in (p['feed_comments'] as List? ?? const []))
           (c as Map)['id'] as String,
     ];
-    final scores = await _commentScores(commentIds);
+    final postIds = [for (final p in rows) p['id'] as String];
+    final results = await Future.wait([
+      _commentScores(commentIds),
+      _postScores(postIds),
+    ]);
+    final commentScores = results[0];
+    final postScores = results[1];
     return rows
-        .map((p) => _mapPost(Map<String, dynamic>.from(p), scores))
+        .map((p) => _mapPost(
+              Map<String, dynamic>.from(p),
+              commentScores,
+              postScores[p['id'] as String] ?? 0,
+            ))
         .toList();
   }
 
@@ -130,9 +161,19 @@ class FeedService {
         for (final c in (p['feed_comments'] as List? ?? const []))
           (c as Map)['id'] as String,
     ];
-    final scores = await _commentScores(commentIds);
+    final postIds = [for (final p in rows) p['id'] as String];
+    final results = await Future.wait([
+      _commentScores(commentIds),
+      _postScores(postIds),
+    ]);
+    final commentScores = results[0];
+    final postScores = results[1];
     return rows
-        .map((p) => _mapPost(Map<String, dynamic>.from(p), scores))
+        .map((p) => _mapPost(
+              Map<String, dynamic>.from(p),
+              commentScores,
+              postScores[p['id'] as String] ?? 0,
+            ))
         .toList();
   }
 
@@ -262,6 +303,14 @@ class FeedService {
   Future<void> deleteComment(String commentId) =>
       _c.from('feed_comments').delete().eq('id', commentId);
 
+  /// Updates a comment's body. RLS only permits the author. Stamps
+  /// edited_at so the UI can show "(edited)" on the byline.
+  Future<void> updateComment(String commentId, String body) =>
+      _c.from('feed_comments').update({
+        'body': body.trim(),
+        'edited_at': DateTime.now().toUtc().toIso8601String(),
+      }).eq('id', commentId);
+
   /// Sets the current user's vote on a comment. dir 0 clears it.
   Future<void> setCommentVote(String commentId, int dir) async {
     final uid = _c.auth.currentUser?.id;
@@ -291,6 +340,39 @@ class FeedService {
     return {
       for (final r in rows)
         r['comment_id'] as String: r['value'] as int,
+    };
+  }
+
+  /// Sets the current user's vote on a post. dir 0 clears it. Mirrors
+  /// [setCommentVote] — same upsert/delete pattern against feed_post_votes.
+  Future<void> setPostVote(String postId, int dir) async {
+    final uid = _c.auth.currentUser?.id;
+    if (uid == null) throw Exception('Not signed in');
+    if (dir == 0) {
+      await _c
+          .from('feed_post_votes')
+          .delete()
+          .eq('user_id', uid)
+          .eq('post_id', postId);
+      return;
+    }
+    await _c.from('feed_post_votes').upsert(
+      {'user_id': uid, 'post_id': postId, 'value': dir},
+      onConflict: 'user_id,post_id',
+    );
+  }
+
+  /// The current user's own post votes → { postId: -1 | 1 }.
+  Future<Map<String, int>> fetchMyPostVotes() async {
+    final uid = _c.auth.currentUser?.id;
+    if (uid == null) return {};
+    final rows = await _c
+        .from('feed_post_votes')
+        .select('post_id, value')
+        .eq('user_id', uid);
+    return {
+      for (final r in rows)
+        r['post_id'] as String: r['value'] as int,
     };
   }
 

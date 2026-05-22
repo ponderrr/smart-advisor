@@ -154,9 +154,53 @@ class SaveRail extends ConsumerWidget {
     final tone =
         contentAccent(post.community.accent, Theme.of(context).brightness);
     final saveColor = saved ? tone.dot : context.brandMuted;
+    final myVote = ref.watch(postVotesProvider).value?[post.id] ?? 0;
+    Color voteColor(int dir) => myVote == dir
+        ? (dir > 0 ? Tw.violet500 : Tw.rose500)
+        : context.brandMuted;
+    Widget voteButton({
+      required IconData icon,
+      required int dir,
+      required String label,
+    }) =>
+        Semantics(
+          button: true,
+          selected: myVote == dir,
+          label: label,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              Haptics.selection();
+              ref
+                  .read(feedActionsProvider)
+                  .setPostVote(post.id, myVote == dir ? 0 : dir);
+            },
+            child: SizedBox(
+              width: 44,
+              height: 24,
+              child: Center(child: Icon(icon, size: 22, color: voteColor(dir))),
+            ),
+          ),
+        );
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        voteButton(
+          icon: Icons.keyboard_arrow_up_rounded,
+          dir: 1,
+          label: 'Upvote post',
+        ),
+        Text('${post.score}',
+            style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: myVote != 0 ? voteColor(myVote) : context.brandInk)),
+        voteButton(
+          icon: Icons.keyboard_arrow_down_rounded,
+          dir: -1,
+          label: 'Downvote post',
+        ),
+        const SizedBox(height: 8),
         Semantics(
           button: true,
           label: saved

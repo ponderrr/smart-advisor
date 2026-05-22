@@ -41,6 +41,10 @@ final savedProvider = FutureProvider.autoDispose<List<String>>(
 final commentVotesProvider = FutureProvider.autoDispose<Map<String, int>>(
     (ref) => ref.watch(feedServiceProvider).fetchMyCommentVotes());
 
+/// The current user's own post votes → { postId: -1 | 1 }.
+final postVotesProvider = FutureProvider.autoDispose<Map<String, int>>(
+    (ref) => ref.watch(feedServiceProvider).fetchMyPostVotes());
+
 /// One profile's public display data.
 final feedProfileProvider = FutureProvider.autoDispose.family<
     ({
@@ -206,10 +210,21 @@ class FeedActions {
     _ref.invalidate(feedProvider);
   }
 
+  Future<void> updateComment(String commentId, String body) async {
+    await _svc.updateComment(commentId, body);
+    _ref.invalidate(feedProvider);
+  }
+
   Future<void> setCommentVote(String commentId, int dir) async {
     await _svc.setCommentVote(commentId, dir);
     _ref.invalidate(feedProvider);
     _ref.invalidate(commentVotesProvider);
+  }
+
+  Future<void> setPostVote(String postId, int dir) async {
+    await _svc.setPostVote(postId, dir);
+    _ref.invalidate(feedProvider);
+    _ref.invalidate(postVotesProvider);
   }
 
   /// Returns the new following state (for undo banners).

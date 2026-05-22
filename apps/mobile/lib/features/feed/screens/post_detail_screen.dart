@@ -384,7 +384,10 @@ class _CommentNodeState extends ConsumerState<_CommentNode> {
                     ),
                   ),
                   const SizedBox(width: 7),
-                  Text(ago(node.ageHours),
+                  Text(
+                      node.comment.edited
+                          ? '${ago(node.ageHours)} · edited'
+                          : ago(node.ageHours),
                       style: TextStyle(
                           fontSize: 11, color: context.brandMuted)),
                   if (_collapsed && replyCount > 0)
@@ -427,7 +430,7 @@ class _CommentNodeState extends ConsumerState<_CommentNode> {
                         ),
                       ),
                     ),
-                    Text('${node.score + vote}',
+                    Text('${node.score}',
                         style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w800,

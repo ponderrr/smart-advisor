@@ -159,6 +159,10 @@ abstract class FeedComment with _$FeedComment {
     @JsonKey(name: 'age_hours') required int ageHours,
     @Default(0) int score,
 
+    /// True once the author has edited the comment — drives the "(edited)"
+    /// label in the byline. Derived from feed_comments.edited_at.
+    @Default(false) bool edited,
+
     /// Reddit/Lemmy-style threading. null = top-level comment.
     @JsonKey(name: 'parent_id') String? parentId,
   }) = _FeedComment;
@@ -217,15 +221,20 @@ abstract class FeedPost with _$FeedPost {
     @Default(false) bool square,
     @JsonKey(name: 'base_score') @Default(0) int baseScore,
 
-    /// -1, 0 or 1 — the current user's vote (in-memory only).
+    /// Sum of user up/down-votes from feed_post_votes — the canonical
+    /// vote score shown in the UI. Server-aggregated, includes every
+    /// vote (including the current user's).
+    @Default(0) int score,
+
+    /// -1, 0 or 1 — the current user's vote on this post. Drives the
+    /// arrow color/state; NOT added to [score] (the server score
+    /// already includes it — adding it would double-count).
     @Default(0) int vote,
     @Default(<FeedComment>[]) List<FeedComment> comments,
   }) = _FeedPost;
 
   factory FeedPost.fromJson(Map<String, dynamic> json) =>
       _$FeedPostFromJson(json);
-
-  int get score => baseScore + vote;
 
   /// Cheap "hot" rank: score decayed by age (Reddit-ish, not exact).
   double get hotRank => score / (1 + ageHours / 12.0);
