@@ -453,18 +453,30 @@ class FeedService {
   }
 
   /// A profile's public display data, or null if missing.
-  Future<({String id, String name, String? avatarUrl})?> fetchProfile(
-      String profileId) async {
+  Future<
+      ({
+        String id,
+        String name,
+        String? avatarUrl,
+        String? bio,
+        List<String> interests,
+        List<String> tags,
+      })?> fetchProfile(String profileId) async {
     final row = await _c
         .from('profiles')
-        .select('id, name, avatar_url')
+        .select('id, name, avatar_url, bio, interests, tags')
         .eq('id', profileId)
         .maybeSingle();
     if (row == null) return null;
+    List<String> strList(dynamic v) =>
+        (v as List?)?.map((e) => e.toString()).toList() ?? const [];
     return (
       id: row['id'] as String,
       name: row['name'] as String,
       avatarUrl: row['avatar_url'] as String?,
+      bio: row['bio'] as String?,
+      interests: strList(row['interests']),
+      tags: strList(row['tags']),
     );
   }
 

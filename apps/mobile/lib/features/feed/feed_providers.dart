@@ -42,9 +42,17 @@ final commentVotesProvider = FutureProvider.autoDispose<Map<String, int>>(
     (ref) => ref.watch(feedServiceProvider).fetchMyCommentVotes());
 
 /// One profile's public display data.
-final feedProfileProvider = FutureProvider.autoDispose
-    .family<({String id, String name, String? avatarUrl})?, String>(
-        (ref, id) => ref.watch(feedServiceProvider).fetchProfile(id));
+final feedProfileProvider = FutureProvider.autoDispose.family<
+    ({
+      String id,
+      String name,
+      String? avatarUrl,
+      String? bio,
+      List<String> interests,
+      List<String> tags,
+    })?,
+    String>(
+    (ref, id) => ref.watch(feedServiceProvider).fetchProfile(id));
 
 /// How many profiles follow a given profile.
 final followerCountProvider = FutureProvider.autoDispose

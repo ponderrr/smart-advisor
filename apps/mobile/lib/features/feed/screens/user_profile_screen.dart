@@ -145,6 +145,69 @@ class UserProfileScreen extends ConsumerWidget {
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
                                     color: tone.text)),
+                            if (profile?.bio != null &&
+                                profile!.bio!.isNotEmpty) ...[
+                              const SizedBox(height: 6),
+                              Text(profile.bio!,
+                                  style: TextStyle(
+                                      fontSize: 12.5,
+                                      height: 1.4,
+                                      color: context.brandInk)),
+                            ],
+                            if ((profile?.interests.isNotEmpty ??
+                                    false) ||
+                                (profile?.tags.isNotEmpty ?? false)) ...[
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 6,
+                                runSpacing: 6,
+                                children: [
+                                  for (final it
+                                      in profile!.interests)
+                                    Container(
+                                      padding: const EdgeInsets
+                                          .symmetric(
+                                          horizontal: 10,
+                                          vertical: 5),
+                                      decoration: BoxDecoration(
+                                        color: context.colors.muted,
+                                        borderRadius:
+                                            BorderRadius.circular(
+                                                999),
+                                        border: Border.all(
+                                            color:
+                                                tone.surfaceBorder),
+                                      ),
+                                      child: Text(it,
+                                          style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight:
+                                                  FontWeight.w800,
+                                              color: tone.text)),
+                                    ),
+                                  for (final tag in profile.tags)
+                                    Container(
+                                      padding: const EdgeInsets
+                                          .symmetric(
+                                          horizontal: 10,
+                                          vertical: 5),
+                                      decoration: BoxDecoration(
+                                        color: context.colors.muted,
+                                        borderRadius:
+                                            BorderRadius.circular(
+                                                999),
+                                      ),
+                                      child: Text('#$tag',
+                                          style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight:
+                                                  FontWeight.w600,
+                                              color: context
+                                                  .brandMuted)),
+                                    ),
+                                ],
+                              ),
+                            ],
                           ],
                         ),
                       ),

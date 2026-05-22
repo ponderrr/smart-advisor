@@ -22,6 +22,11 @@ _AppUser _$AppUserFromJson(Map<String, dynamic> json) => _AppUser(
   setupCompletedAt: json['setup_completed_at'] as String?,
   recommendationFilters:
       json['recommendation_filters'] as Map<String, dynamic>?,
+  bio: json['bio'] as String?,
+  interests: (json['interests'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  tags: (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList(),
 );
 
 Map<String, dynamic> _$AppUserToJson(_AppUser instance) => <String, dynamic>{
@@ -39,4 +44,7 @@ Map<String, dynamic> _$AppUserToJson(_AppUser instance) => <String, dynamic>{
   'locale': instance.locale,
   'setup_completed_at': instance.setupCompletedAt,
   'recommendation_filters': instance.recommendationFilters,
+  'bio': instance.bio,
+  'interests': instance.interests,
+  'tags': instance.tags,
 };

@@ -305,6 +305,28 @@ class AuthService {
     }
   }
 
+  /// Saves the "About me" customization — bio, curated interests, and
+  /// freeform tags. Low-sensitivity, so it isn't behind the re-auth gate.
+  Future<ServiceResult<void>> updateAbout({
+    required String? bio,
+    required List<String> interests,
+    required List<String> tags,
+  }) async {
+    final uid = _auth.currentUser?.id;
+    if (uid == null) return ServiceResult.fail('Not authenticated');
+    try {
+      await _c.from('profiles').update({
+        'bio': bio,
+        'interests': interests,
+        'tags': tags,
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+      }).eq('id', uid);
+      return ServiceResult.ok(null);
+    } on PostgrestException catch (e) {
+      return ServiceResult.fail(e.message);
+    }
+  }
+
   /// Onboarding completion — writes the columns that gate the
   /// onboarding-incomplete redirect (setup_completed_at) plus the
   /// age-derived content tone and locale.

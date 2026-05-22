@@ -9,6 +9,25 @@ import '../../auth/auth_providers.dart';
 import '../../auth/services/error_messages.dart';
 import 'settings_helpers.dart';
 
+/// Curated interest tags offered as chips in the "About me" editor.
+const _kInterests = <String>[
+  'Sci-Fi',
+  'Fantasy',
+  'Horror',
+  'Thrillers',
+  'Comedy',
+  'Drama',
+  'Romance',
+  'Mystery',
+  'Action',
+  'Documentary',
+  'Animation',
+  'Indie',
+  'Classics',
+  'Non-fiction',
+  'True crime',
+];
+
 /// Profile section — name / age / avatar. Relocated verbatim from the old
 /// single-scroll AccountScreen (the Profile BrandCard + its save logic).
 class ProfileSettingsScreen extends ConsumerStatefulWidget {
@@ -23,6 +42,10 @@ class _ProfileSettingsScreenState
     extends ConsumerState<ProfileSettingsScreen> {
   final _name = TextEditingController();
   final _age = TextEditingController();
+  final _bio = TextEditingController();
+  final _tagDraft = TextEditingController();
+  final _interests = <String>[];
+  final _tags = <String>[];
   bool _seeded = false;
   String? _msg;
 
@@ -30,8 +53,86 @@ class _ProfileSettingsScreenState
   void dispose() {
     _name.dispose();
     _age.dispose();
+    _bio.dispose();
+    _tagDraft.dispose();
     super.dispose();
   }
+
+  void _addTag() {
+    final v =
+        _tagDraft.text.trim().toLowerCase().replaceAll(RegExp(r'^#+'), '');
+    if (v.isNotEmpty && !_tags.contains(v) && _tags.length < 10) {
+      setState(() {
+        _tags.add(v);
+        _tagDraft.clear();
+      });
+    } else {
+      _tagDraft.clear();
+    }
+  }
+
+  Future<void> _saveAbout() async {
+    final r = await ref.read(authServiceProvider).updateAbout(
+          bio: _bio.text.trim().isEmpty ? null : _bio.text.trim(),
+          interests: _interests,
+          tags: _tags,
+        );
+    if (!mounted) return;
+    showBanner(r.isError
+        ? toUserFriendlyError(
+            r.error, 'Couldn’t save your About me. Please try again.')
+        : 'About me saved');
+    ref.invalidate(currentProfileProvider);
+  }
+
+  Widget _interestChip(String label) {
+    final on = _interests.contains(label);
+    return GestureDetector(
+      onTap: () => setState(
+          () => on ? _interests.remove(label) : _interests.add(label)),
+      child: Container(
+        padding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(
+          color: on
+              ? Tw.indigo500.withValues(alpha: 0.14)
+              : context.colors.muted,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+              color: on
+                  ? Tw.indigo500.withValues(alpha: 0.5)
+                  : Colors.transparent),
+        ),
+        child: Text(label,
+            style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: on ? Tw.indigo500 : context.brandMuted)),
+      ),
+    );
+  }
+
+  Widget _tagChip(String tag) => Container(
+        padding:
+            const EdgeInsets.only(left: 12, right: 6, top: 6, bottom: 6),
+        decoration: BoxDecoration(
+          color: context.colors.muted,
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Text('#$tag',
+              style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: context.brandInk)),
+          const SizedBox(width: 4),
+          GestureDetector(
+            onTap: () => setState(() => _tags.remove(tag)),
+            child: Icon(Icons.close,
+                size: 14, color: context.brandMuted),
+          ),
+        ]),
+      );
 
   Future<void> _pickAvatar() async {
     final picked = await ImagePicker()
@@ -78,6 +179,13 @@ class _ProfileSettingsScreenState
     if (!_seeded && profile != null) {
       _name.text = profile.name;
       _age.text = profile.age.toString();
+      _bio.text = profile.bio ?? '';
+      _interests
+        ..clear()
+        ..addAll(profile.interests ?? const []);
+      _tags
+        ..clear()
+        ..addAll(profile.tags ?? const []);
       _seeded = true;
     }
 
@@ -185,6 +293,64 @@ class _ProfileSettingsScreenState
               const SizedBox(height: 12),
               Center(child: Subtitle(_msg!)),
             ],
+            const SizedBox(height: 16),
+            BrandCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Eyebrow('About me'),
+                  const SizedBox(height: 4),
+                  Subtitle('A short bio and tags shown on your profile.'),
+                  const SizedBox(height: 12),
+                  settingsRowLabel(context, 'Bio'),
+                  const SizedBox(height: 6),
+                  AdaptiveTextField(
+                    controller: _bio,
+                    placeholder: 'Tell people what you’re into…',
+                    minLines: 3,
+                    maxLines: 5,
+                  ),
+                  const SizedBox(height: 12),
+                  settingsRowLabel(context, 'Interests'),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final it in _kInterests) _interestChip(it),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  settingsRowLabel(context, 'Your tags'),
+                  const SizedBox(height: 8),
+                  if (_tags.isNotEmpty) ...[
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [for (final t in _tags) _tagChip(t)],
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                  Row(children: [
+                    Expanded(
+                      child: AdaptiveTextField(
+                        controller: _tagDraft,
+                        placeholder: 'Add a tag…',
+                        onSubmitted: (_) => _addTag(),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    AdaptiveButton(
+                        onPressed: _addTag,
+                        label: 'Add',
+                        style: AdaptiveButtonStyle.bordered),
+                  ]),
+                  const SizedBox(height: 14),
+                  AdaptiveButton(
+                      onPressed: _saveAbout, label: 'Save About me'),
+                ],
+              ),
+            ),
             const SizedBox(height: 16),
             const LanguagePickerCard(),
             const SizedBox(height: 24),
