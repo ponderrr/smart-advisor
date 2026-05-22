@@ -10,6 +10,7 @@ import 'core/router/app_router.dart';
 import 'core/supabase/supabase_providers.dart';
 import 'l10n/app_localizations.dart';
 import 'core/ui_messenger.dart';
+import 'features/auth/auth_providers.dart';
 import 'features/notifications/notification_service.dart';
 import 'features/security/biometric.dart';
 import 'features/security/biometric_login.dart';
@@ -55,6 +56,11 @@ class SmartAdvisorApp extends ConsumerWidget {
       if (event == AuthChangeEvent.signedIn ||
           event == AuthChangeEvent.tokenRefreshed) {
         ref.read(biometricLoginProvider.notifier).saveSession();
+        // Mirror the web SessionManagementService: stamp this device's
+        // row in public.sessions so it shows up in "Two-factor & devices"
+        // on every client (otherwise the list only sees the web row and
+        // mobile gets falsely labelled "this device" with a phone icon).
+        ref.read(sessionRecordServiceProvider).recordCurrent();
       }
     });
     final amoled = ref.watch(amoledProvider);

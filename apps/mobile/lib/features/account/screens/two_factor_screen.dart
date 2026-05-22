@@ -26,6 +26,14 @@ typedef _Device = ({
   String id,
   String name,
   String? os,
+  /// Free-form device kind from the row (`mobile`, `tablet`, `desktop`, …).
+  /// Drives which icon we show — using `current` for that incorrectly
+  /// labelled every row as a phone, even desktop browser sessions.
+  String? deviceType,
+  /// True only when this row was written by the device viewing the list —
+  /// matched by session_id against the current Supabase access token.
+  /// The legacy `is_current_device` column is unreliable across devices
+  /// (it's set on every sign-in and never cleared), so we ignore it here.
   bool current,
 });
 
@@ -34,10 +42,13 @@ final _devicesProvider =
   final c = ref.watch(supabaseClientProvider);
   final uid = c.auth.currentUser?.id;
   if (uid == null) return const [];
+  // Match "current" by access-token: the only session_id this client can
+  // actually claim is the one in its live Supabase session.
+  final myToken = c.auth.currentSession?.accessToken;
   final rows = await c
       .from('sessions')
-      .select('id, device_name, device_type, os_name, '
-          'is_current_device, last_activity')
+      .select('id, session_id, device_name, device_type, os_name, '
+          'last_activity')
       .eq('user_id', uid)
       .isFilter('revoked_at', null)
       .order('last_activity', ascending: false);
@@ -49,10 +60,27 @@ final _devicesProvider =
             (r['device_type'] as String?) ??
             'Unknown device',
         os: r['os_name'] as String?,
-        current: (r['is_current_device'] as bool?) ?? false,
+        deviceType: r['device_type'] as String?,
+        current: myToken != null && r['session_id'] == myToken,
       ),
   ];
 });
+
+/// Icon for a device row — derived from `device_type` so a desktop
+/// browser session reads as a laptop, a phone as a phone, and anything
+/// else falls back to a generic devices glyph.
+IconData _deviceIcon(String? type) {
+  switch (type?.toLowerCase()) {
+    case 'mobile':
+      return Icons.smartphone;
+    case 'tablet':
+      return Icons.tablet_mac;
+    case 'desktop':
+      return Icons.laptop_mac;
+    default:
+      return Icons.devices_other;
+  }
+}
 
 /// Dedicated two-factor + devices section: manage the authenticator
 /// factor and review / sign out other signed-in devices.
@@ -151,9 +179,7 @@ class TwoFactorScreen extends ConsumerWidget {
                       children: [
                         for (final d in list)
                           AdaptiveListTile(
-                            leading: Icon(d.current
-                                ? Icons.smartphone
-                                : Icons.devices_other),
+                            leading: Icon(_deviceIcon(d.deviceType)),
                             title: Text(d.name),
                             subtitle: Text([
                               if (d.os != null) d.os!,
