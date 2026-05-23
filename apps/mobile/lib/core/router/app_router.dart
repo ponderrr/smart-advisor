@@ -7,6 +7,8 @@ import '../../features/account/mfa_setup_screen.dart';
 import '../../features/account/screens/appearance_settings_screen.dart';
 import '../../features/account/screens/change_credential_screen.dart';
 import '../../features/account/screens/feed_settings_screen.dart';
+import '../../features/account/screens/contact_screen.dart';
+import '../../features/account/screens/faq_screen.dart';
 import '../../features/account/screens/notifications_settings_screen.dart';
 import '../../features/account/screens/profile_settings_screen.dart';
 import '../../features/account/screens/recommendations_settings_screen.dart';
@@ -239,6 +241,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
           path: '/account/two-factor',
           builder: (_, _) => const TwoFactorScreen()),
+      GoRoute(
+          path: '/account/faq',
+          builder: (_, _) => const FaqScreen()),
+      GoRoute(
+          path: '/account/contact',
+          builder: (_, _) => const ContactScreen()),
       GoRoute(
           path: '/account/change-email',
           builder: (_, _) => const ChangeCredentialScreen(

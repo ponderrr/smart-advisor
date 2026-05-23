@@ -168,18 +168,12 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         settingsSection(context, 'Help'),
         BrandCard(
           child: Column(children: [
-            settingsTile(context, Icons.auto_awesome,
-                'Take a quiz',
-                subtitle: 'Get fresh recommendations in a couple of minutes',
-                onTap: () => context.push('/quiz')),
-            settingsTile(context, Icons.person_add_alt_1_outlined,
-                'Find friends',
-                subtitle: 'Discover people with similar taste',
-                onTap: () => context.push('/feed/add-friends')),
-            settingsTile(context, Icons.emoji_events_outlined,
-                'Your milestones',
-                subtitle: 'Track progress and unlock achievements',
-                onTap: () => context.push('/milestones')),
+            settingsTile(context, Icons.help_outline, 'FAQ',
+                subtitle: 'Answers tailored to the mobile app',
+                onTap: () => context.push('/account/faq')),
+            settingsTile(context, Icons.mail_outline, 'Contact us',
+                subtitle: 'Email support, report a bug, view the source',
+                onTap: () => context.push('/account/contact')),
             // Onboarding / welcome / tutorial replays — dev-build only.
             // These are useful for screenshots and QA but would clutter
             // a release build, so they're gated behind kDebugMode and
