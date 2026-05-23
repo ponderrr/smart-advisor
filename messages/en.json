@@ -448,6 +448,7 @@
       "categories": {
         "getting-started": "Getting started",
         "how-it-works": "How it works",
+        "feed": "Feed",
         "group-quiz": "Group quiz",
         "library": "Library",
         "account": "Account & privacy"
@@ -488,6 +489,30 @@
         "year-in-review": {
           "question": "What is Year in Review and when does it appear?",
           "answer": "Year in Review is a Spotify-Wrapped-style summary of your picks: top genre, longest streak, peak month, most-picked director or author, format mix, and your standout titles. It surfaces as a prominent banner on your feed during December (current year) and January (last year). Outside that window the page still works at /wrapped, just not advertised."
+        },
+        "feed-what": {
+          "question": "What is the feed?",
+          "answer": "A Reddit-style stream of picks people you follow have shared, plus broader Discover and Group session views. You can scope it (Friends / Discover / Group), filter by community (Movies / Books / Music) and sort by Trending, New, or Top — each setting persists across sessions."
+        },
+        "feed-share": {
+          "question": "How do I share a pick on the feed?",
+          "answer": "Open the composer with the 'Share a pick' button on /feed. Pick a community, an activity (Finished / Rated / Recommending), type the title — the cover art is looked up automatically as you type, hitting TMDB for movies, Open Library for books, and Deezer for music. Add an optional note and hit share."
+        },
+        "feed-edit": {
+          "question": "Can I edit my posts and comments after I share them?",
+          "answer": "Yes, both. On your own posts the overflow menu has Edit and Delete (edit-from-thread routes back through the feed composer in edit mode). On your own comments an Edit button sits next to Reply — a '· edited' tag appears on the byline once you've touched the body. Posts and comments you don't own only expose Report."
+        },
+        "feed-votes": {
+          "question": "How do up and down votes work on posts and comments?",
+          "answer": "Each post and comment has up / down arrows in its rail. Tap once to vote, tap again to clear. The number you see is the canonical server score across every voter; your own state lights the arrow violet (up) or rose (down). Trending sort weights this score by post age, Top sorts by raw score."
+        },
+        "feed-sort": {
+          "question": "Can I sort the feed differently?",
+          "answer": "Yes — a Trending / New / Top segmented control sits below the scope row. Trending blends score with recency (newer wins ties), New is age-ascending, Top is highest score first. The choice is per-device and remembered across sessions."
+        },
+        "feed-follow": {
+          "question": "How do I follow people, block someone, or report content?",
+          "answer": "Tap a name to open their profile and use Follow / Unfollow. The overflow on any post or comment lets you Report it or Block the author — blocked authors disappear from your feed entirely, and you can manage the list under Settings -> Feed -> Blocked people. Reports you've filed live under Settings -> Feed -> Filed reports."
         },
         "group-what": {
           "question": "What is Group Quiz?",

@@ -448,6 +448,7 @@
       "categories": {
         "getting-started": "Primeros pasos",
         "how-it-works": "Cómo funciona",
+        "feed": "Feed",
         "group-quiz": "Cuestionario en grupo",
         "library": "Biblioteca",
         "account": "Cuenta y privacidad"
@@ -488,6 +489,30 @@
         "year-in-review": {
           "question": "¿Qué es Año en Revisión y cuándo aparece?",
           "answer": "Año en Revisión es un resumen estilo Spotify Wrapped de tus recomendaciones: género principal, racha más larga, mes pico, director o autor más recomendado, mezcla de formatos y tus títulos destacados. Aparece como un banner prominente en tu Feed durante diciembre (año actual) y enero (año pasado). Fuera de esa ventana la página sigue funcionando en /wrapped, solo que no se promociona."
+        },
+        "feed-what": {
+          "question": "¿Qué es el feed?",
+          "answer": "Una corriente al estilo Reddit con las recomendaciones que comparte la gente que sigues, más vistas más amplias de Descubrir y de sesiones de Grupo. Puedes acotarlo (Amigos / Descubrir / Grupo), filtrar por comunidad (Películas / Libros / Música) y ordenar por Tendencia, Nuevo o Top — cada ajuste se mantiene entre sesiones."
+        },
+        "feed-share": {
+          "question": "¿Cómo comparto una recomendación en el feed?",
+          "answer": "Abre el compositor con el botón 'Compartir' en /feed. Elige una comunidad, una actividad (Visto / Calificado / Recomendando) y escribe el título — la portada se busca automáticamente mientras escribes, usando TMDB para películas, Open Library para libros y Deezer para música. Añade una nota opcional y compártelo."
+        },
+        "feed-edit": {
+          "question": "¿Puedo editar mis publicaciones y comentarios después de compartirlos?",
+          "answer": "Sí, ambos. En tus propias publicaciones el menú de tres puntos tiene Editar y Eliminar (editar desde el hilo te lleva de vuelta al compositor en modo edición). En tus comentarios aparece un botón Editar junto a Responder — una etiqueta '· editado' aparece en la firma cuando has cambiado el cuerpo. En publicaciones y comentarios ajenos solo aparece Reportar."
+        },
+        "feed-votes": {
+          "question": "¿Cómo funcionan los votos positivos y negativos en publicaciones y comentarios?",
+          "answer": "Cada publicación y comentario tiene flechas arriba / abajo en su barra. Toca una vez para votar, otra para quitar el voto. El número que ves es la puntuación canónica del servidor sumada entre todos los votantes; tu propio estado pinta la flecha violeta (arriba) o rosa (abajo). El orden Tendencia pondera esta puntuación por la edad de la publicación; Top ordena por puntuación bruta."
+        },
+        "feed-sort": {
+          "question": "¿Puedo ordenar el feed de otra forma?",
+          "answer": "Sí — debajo de la fila de alcance hay un control segmentado de Tendencia / Nuevo / Top. Tendencia combina puntuación con recencia (los nuevos empatan a favor), Nuevo ordena por antigüedad ascendente, Top por mayor puntuación primero. La elección es por dispositivo y se recuerda entre sesiones."
+        },
+        "feed-follow": {
+          "question": "¿Cómo sigo a personas, bloqueo a alguien o reporto contenido?",
+          "answer": "Toca un nombre para abrir su perfil y usa Seguir / Dejar de seguir. El menú de tres puntos en cualquier publicación o comentario te deja Reportarlo o Bloquear al autor — los autores bloqueados desaparecen por completo de tu feed, y puedes gestionar la lista en Ajustes -> Feed -> Personas bloqueadas. Tus reportes están en Ajustes -> Feed -> Reportes enviados."
         },
         "group-what": {
           "question": "¿Qué es el cuestionario en grupo?",
