@@ -27,6 +27,24 @@ class FeedScreen extends ConsumerStatefulWidget {
 }
 
 class _FeedScreenState extends ConsumerState<FeedScreen> {
+  /// Refetch when the app comes back to the foreground — covers the
+  /// cross-device case where the user changed something on web while
+  /// mobile was backgrounded (no Realtime channel needed).
+  late final AppLifecycleListener _lifecycle = AppLifecycleListener(
+    onResume: () {
+      ref.invalidate(feedProvider);
+      ref.invalidate(followingProvider);
+      ref.invalidate(postVotesProvider);
+      ref.invalidate(commentVotesProvider);
+    },
+  );
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    super.dispose();
+  }
+
   List<FeedPost> _visible(
       List<FeedPost> posts, Set<String> following, FeedPrefs prefs) {
     var filtered = prefs.community == null

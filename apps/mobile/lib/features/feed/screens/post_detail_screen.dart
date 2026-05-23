@@ -29,8 +29,20 @@ class PostDetailScreen extends ConsumerStatefulWidget {
 class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
   final _ctrl = TextEditingController();
 
+  /// Refetch when the app comes back to the foreground — catches new
+  /// comments / votes / edits made on the web while the thread was
+  /// open but the app was backgrounded.
+  late final AppLifecycleListener _lifecycle = AppLifecycleListener(
+    onResume: () {
+      ref.invalidate(feedProvider);
+      ref.invalidate(postVotesProvider);
+      ref.invalidate(commentVotesProvider);
+    },
+  );
+
   @override
   void dispose() {
+    _lifecycle.dispose();
     _ctrl.dispose();
     super.dispose();
   }
