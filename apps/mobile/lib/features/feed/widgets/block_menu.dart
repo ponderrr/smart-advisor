@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../core/supabase/supabase_providers.dart';
 import '../../../core/ui_messenger.dart';
+import '../../../ui/ui.dart';
 import '../models/feed_models.dart';
 import '../feed_providers.dart';
 import 'composer.dart';
@@ -43,6 +44,35 @@ class BlockMenuButton extends ConsumerWidget {
   final String? commentId;
   final Color? iconColor;
   final double iconSize;
+
+  /// Two-tap block: tapping "Block" from the overflow menu opens a
+  /// confirm dialog (Cancel / Block @author) before the mutation runs.
+  /// The motivation is symmetry with unblocking — unblock is one tap
+  /// from Settings, but blocking is a destructive change to what the
+  /// user sees, so we don't want it triggered by a misfired tap.
+  Future<void> _confirmBlock(BuildContext context, WidgetRef ref) async {
+    await AdaptiveAlertDialog.show(
+      context: context,
+      title: 'Block @$author?',
+      message: "You won't see their posts or comments anymore. You "
+          'can unblock them from Settings → Feed → Blocked people.',
+      icon: Icons.block,
+      actions: [
+        AlertAction(
+            title: 'Cancel',
+            style: AlertActionStyle.cancel,
+            onPressed: () {}),
+        AlertAction(
+          title: 'Block',
+          style: AlertActionStyle.destructive,
+          onPressed: () async {
+            await ref.read(feedActionsProvider).block(authorId);
+            showBanner('Blocked @$author.');
+          },
+        ),
+      ],
+    );
+  }
 
   /// Open the dedicated report screen — supersedes the old inline
   /// confirm dialog so the reporter can pick a reason category and
@@ -108,8 +138,7 @@ class BlockMenuButton extends ConsumerWidget {
             case 'report':
               if (context.mounted) _openReportScreen(context);
             case 'block':
-              await ref.read(feedActionsProvider).block(authorId);
-              showBanner('Blocked @$author.');
+              if (context.mounted) await _confirmBlock(context, ref);
           }
         },
         itemBuilder: (_) => [

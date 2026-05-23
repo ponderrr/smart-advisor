@@ -57,6 +57,7 @@ class BlockedPeopleScreen extends ConsumerWidget {
                 final person = sorted[i];
                 return _BlockedRow(
                   name: person.name,
+                  avatarUrl: person.avatarUrl,
                   onUnblock: () {
                     ref
                         .read(feedActionsProvider)
@@ -74,8 +75,13 @@ class BlockedPeopleScreen extends ConsumerWidget {
 }
 
 class _BlockedRow extends StatelessWidget {
-  const _BlockedRow({required this.name, required this.onUnblock});
+  const _BlockedRow({
+    required this.name,
+    required this.avatarUrl,
+    required this.onUnblock,
+  });
   final String name;
+  final String? avatarUrl;
   final VoidCallback onUnblock;
 
   @override
@@ -86,7 +92,7 @@ class _BlockedRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       child: Row(
         children: [
-          FeedAvatar(name: name, size: 36),
+          FeedAvatar(name: name, url: avatarUrl, size: 36),
           const SizedBox(width: 12),
           Expanded(
             child: Text(

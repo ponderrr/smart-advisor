@@ -594,19 +594,25 @@ class FeedService {
     return rows.map((r) => r['blocked_id'] as String).toList();
   }
 
-  /// Blocked profiles with display names — for the Settings list.
-  Future<List<({String id, String name})>> fetchBlockedProfiles() async {
+  /// Blocked profiles with display names + avatars — for the Settings list.
+  Future<List<({String id, String name, String? avatarUrl})>>
+      fetchBlockedProfiles() async {
     final uid = _c.auth.currentUser?.id;
     if (uid == null) return [];
     final rows = await _c
         .from('feed_blocks')
-        .select('blocked:profiles_public!feed_blocks_blocked_id_fkey ( id, name )')
+        .select('blocked:profiles_public!feed_blocks_blocked_id_fkey '
+            '( id, name, avatar_url )')
         .eq('blocker_id', uid);
-    final out = <({String id, String name})>[];
+    final out = <({String id, String name, String? avatarUrl})>[];
     for (final r in rows) {
       final b = _embed(r['blocked']);
       if (b != null) {
-        out.add((id: b['id'] as String, name: b['name'] as String));
+        out.add((
+          id: b['id'] as String,
+          name: b['name'] as String,
+          avatarUrl: b['avatar_url'] as String?,
+        ));
       }
     }
     return out;

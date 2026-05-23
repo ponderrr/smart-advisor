@@ -28,10 +28,10 @@ final followingProvider = FutureProvider.autoDispose<List<String>>(
 final blockedProvider = FutureProvider.autoDispose<List<String>>(
     (ref) => ref.watch(feedServiceProvider).fetchBlocked());
 
-/// Blocked profiles with display names — for the Settings list.
-final blockedProfilesProvider =
-    FutureProvider.autoDispose<List<({String id, String name})>>(
-        (ref) => ref.watch(feedServiceProvider).fetchBlockedProfiles());
+/// Blocked profiles with display names + avatars — for the Settings list.
+final blockedProfilesProvider = FutureProvider.autoDispose<
+        List<({String id, String name, String? avatarUrl})>>(
+    (ref) => ref.watch(feedServiceProvider).fetchBlockedProfiles());
 
 /// Post ids the current user has saved.
 final savedProvider = FutureProvider.autoDispose<List<String>>(
