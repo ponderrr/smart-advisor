@@ -14,8 +14,19 @@ import { Input } from "@/components/ui/input";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
 import { PageLoader } from "@/components/ui/loader";
 import { SegmentedControl } from "@/components/ui/segmented-control";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { AuthLayout, FormField } from "@/features/auth/components";
-import { isSupportedLocale, type Locale } from "@/i18n/config";
+import {
+  isSupportedLocale,
+  SUPPORTED_LOCALES,
+  type Locale,
+} from "@/i18n/config";
 import {
   PREF_CONTENT_KEY,
   PREF_CONTENT_TONE_KEY,
@@ -66,6 +77,7 @@ const OnboardingPage = () => {
   const previewMode = searchParams.get("preview") === "true";
   const t = useTranslations("Onboarding");
   const tc = useTranslations("Common");
+  const tLang = useTranslations("Language");
   const currentLocale = useLocale() as Locale;
 
   const [mounted, setMounted] = useState(false);
@@ -277,10 +289,10 @@ const OnboardingPage = () => {
                   title={t("steps.language.title")}
                   subtitle={t("steps.language.subtitle")}
                 >
-                  <SegmentedControl<Locale>
-                    layoutId="onboarding-language"
+                  <Select
                     value={locale}
-                    onChange={(next) => {
+                    onValueChange={(value) => {
+                      const next = value as Locale;
                       setLocale(next);
                       // Switch the app locale right away so the rest of
                       // onboarding renders in the chosen language — not
@@ -288,20 +300,21 @@ const OnboardingPage = () => {
                       void setLocaleAction(next);
                     }}
                     disabled={submitting}
-                    ariaLabel={t("fields.language.label")}
-                    options={[
-                      {
-                        value: "en",
-                        label: t("fields.language.en"),
-                        pillClassName: "bg-indigo-500",
-                      },
-                      {
-                        value: "es",
-                        label: t("fields.language.es"),
-                        pillClassName: "bg-indigo-500",
-                      },
-                    ]}
-                  />
+                  >
+                    <SelectTrigger
+                      className="w-full"
+                      aria-label={t("fields.language.label")}
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SUPPORTED_LOCALES.map((code) => (
+                        <SelectItem key={code} value={code}>
+                          {tLang(`options.${code}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </StepShell>
               )}
 
@@ -402,7 +415,7 @@ const OnboardingPage = () => {
                     />
                     <ReviewRow
                       label={t("steps.language.title")}
-                      value={t(`fields.language.${locale}` as const)}
+                      value={tLang(`options.${locale}`)}
                       onEdit={() => setStep(1)}
                       editLabel={t("steps.review.edit")}
                     />

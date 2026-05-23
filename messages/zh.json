@@ -1,0 +1,2323 @@
+{
+  "Settings": {
+    "eyebrow": "设置",
+    "title": "账户设置",
+    "subtitle": "管理你的个人资料、安全和偏好设置。",
+    "tabs": {
+      "profile": "个人资料",
+      "security": "安全",
+      "content": "内容",
+      "feed": "动态",
+      "integrations": "集成",
+      "help": "帮助"
+    },
+    "feed": {
+      "title": "动态",
+      "description": "控制你在推荐和评论的社交动态中的显示方式。",
+      "visibilityLabel": "个人资料可见性",
+      "public": "公开",
+      "private": "私密",
+      "publicHint": "你已完成、评分和分享的推荐会出现在其他人的动态中,人们可以直接关注你。",
+      "privateHint": "你仍然可以正常浏览和发布,但你的活动不会广播到其他动态,新关注者需要请求批准。",
+      "prefsTitle": "动态偏好",
+      "prefsDescription": "动态打开时的默认设置。浏览时你随时可以切换。",
+      "viewLabel": "默认视图",
+      "viewCards": "卡片",
+      "viewList": "列表",
+      "scopeLabel": "默认范围",
+      "scopeFriends": "好友",
+      "scopeDiscover": "发现",
+      "scopeGroup": "群组",
+      "communityLabel": "默认社区",
+      "communityAll": "全部",
+      "communityMovies": "电影",
+      "communityBooks": "书籍",
+      "communityMusic": "音乐",
+      "commentSortLabel": "评论排序",
+      "commentSortTop": "热门",
+      "commentSortNew": "最新",
+      "blocked": {
+        "title": "已屏蔽的人",
+        "description": "他们的帖子和评论不会出现在你的动态中。",
+        "empty": "你还没有屏蔽任何人。",
+        "unblock": "解除屏蔽",
+        "unblockedToast": "已解除屏蔽 @{handle}"
+      },
+      "reports": {
+        "title": "你已提交的举报",
+        "description": "你标记的帖子和评论。我们的团队会逐一审核。",
+        "empty": "你还没有提交任何举报。",
+        "onPost": "对一个帖子",
+        "onComment": "对一条评论",
+        "contentGone": "内容已删除",
+        "statusReview": "审核中"
+      }
+    },
+    "groups": {
+      "account": "账户",
+      "app": "应用"
+    },
+    "profile": {
+      "pictureTitle": "个人头像",
+      "pictureDescription": "上传一张在整个应用中显示的图片。JPG、PNG、GIF 或 WEBP,最大 5 MB。",
+      "uploading": "上传中…",
+      "changePicture": "更改头像",
+      "uploadPicture": "上传头像",
+      "remove": "移除",
+      "pictureUpdated": "个人头像已更新。",
+      "pictureRemoved": "个人头像已移除。",
+      "detailsTitle": "个人资料详情",
+      "detailsDescription": "更新你的公开账户详情。",
+      "currentUsername": "当前显示名",
+      "newUsername": "显示名",
+      "newUsernamePlaceholder": "我们该怎么称呼你",
+      "age": "年龄",
+      "agePlaceholder": "25",
+      "save": "保存更改",
+      "savedToast": "个人资料已更新。",
+      "aboutTitle": "关于我",
+      "aboutDescription": "显示在你公开资料上的简短简介和标签。",
+      "bioLabel": "简介",
+      "bioPlaceholder": "告诉大家你喜欢什么…",
+      "interestsLabel": "兴趣",
+      "tagsLabel": "你的标签",
+      "tagsPlaceholder": "添加标签…",
+      "tagsAdd": "添加",
+      "aboutSavedToast": "个人资料自定义已保存。",
+      "aboutSaveError": "无法保存 — 请重试。"
+    },
+    "email": {
+      "title": "邮箱",
+      "description": "你用来登录的地址。",
+      "current": "当前",
+      "newEmail": "新邮箱",
+      "newEmailPlaceholder": "new@example.com",
+      "update": "更新邮箱",
+      "differentRequired": "新邮箱必须不同。",
+      "checkInbox": "查看你的收件箱以确认。"
+    },
+    "password": {
+      "title": "密码",
+      "description": "选择一个新密码。",
+      "newPassword": "新密码",
+      "confirmPassword": "确认密码",
+      "passwordPlaceholder": "••••••••",
+      "requirementsTitle": "密码要求",
+      "confirmRulesTitle": "确认密码",
+      "matches": "与你的密码匹配",
+      "update": "更新密码",
+      "updatedToast": "密码已更新。"
+    },
+    "mfa": {
+      "title": "双重身份验证",
+      "description": "登录时的额外步骤,保护你的账户安全。",
+      "checking": "检查中…",
+      "on": "双重验证已开启",
+      "off": "双重验证已关闭",
+      "enabled": "已启用",
+      "disabled": "已禁用",
+      "manage": "管理双重验证",
+      "enable": "启用双重验证"
+    },
+    "backupEmail": {
+      "title": "备用邮箱",
+      "description": "在你的验证器不可用时使用的恢复地址。",
+      "labelChange": "更改为",
+      "labelDefault": "备用邮箱",
+      "placeholderChange": "new-backup@example.com",
+      "placeholderDefault": "backup@example.com",
+      "save": "保存备用",
+      "update": "更新备用",
+      "savedToast": "备用邮箱已保存。",
+      "removedToast": "备用邮箱已移除。",
+      "remove": "移除"
+    },
+    "theme": {
+      "title": "外观",
+      "description": "匹配你的系统或固定一个主题。",
+      "light": "浅色",
+      "dark": "深色",
+      "system": "跟随系统"
+    },
+    "content": {
+      "title": "内容偏好",
+      "description": "设置你的默认推荐行为。",
+      "typeLabel": "推荐类型",
+      "type": {
+        "movie": {
+          "eyebrow": "在屏幕上",
+          "label": "电影"
+        },
+        "book": {
+          "eyebrow": "在书架上",
+          "label": "书籍"
+        },
+        "music": {
+          "eyebrow": "在你耳边",
+          "label": "音乐"
+        },
+        "both": {
+          "eyebrow": "每种一个",
+          "label": "两者"
+        },
+        "mix": {
+          "eyebrow": "三种全部",
+          "label": "混合"
+        }
+      },
+      "toneLabel": "内容基调",
+      "ageLockedEyebrow": "按年龄锁定",
+      "ageLockedBody": "推荐根据你的年龄({age})保持适宜。成年人可以在标准和家庭友好基调之间选择。",
+      "ageLockedBodyMissing": "推荐根据你的年龄保持适宜。成年人可以在标准和家庭友好基调之间选择。",
+      "tone": {
+        "standard": "标准",
+        "family": "家庭友好"
+      },
+      "toneHint": {
+        "standard": "完整个性。当符合你时,AI 可能会建议黑暗、复杂或成熟的选择。",
+        "family": "选择保持轻松。没有成熟主题、黑暗内容或性内容。"
+      },
+      "questionCountLabel": "每次问答的问题数",
+      "questionWord": "{count, plural, one {问题} other {问题}}",
+      "depth": {
+        "quick": "快速且重点",
+        "focused": "精准且具体",
+        "balanced": "平衡的深度",
+        "thorough": "彻底探索",
+        "comprehensive": "全面细节"
+      },
+      "rangeAria": "每次问答的默认问题数",
+      "appliesNext": "在下次问答中应用",
+      "save": "保存偏好",
+      "savedToast": "内容偏好已保存。",
+      "saveError": "我们无法保存你的偏好。请重试。",
+      "filters": {
+        "title": "推荐过滤器",
+        "description": "AI 必须在每次推荐时遵守的硬性限制 — 单人问答和惊喜我。按格式设置,这样避免一种电影类型不会同时阻止一种书籍类型。群组问答不受影响。",
+        "formatLabel": "过滤对象",
+        "format": {
+          "movie": "电影",
+          "book": "书籍",
+          "music": "音乐"
+        },
+        "avoidGenresLabel": "避免的类型",
+        "runtimeLabel": "最长电影时长",
+        "runtimeNoCap": "无限制",
+        "runtimeMinutes": "{minutes}分钟",
+        "runtimeHintNone": "无时长限制 — 任何长度的电影都可以。",
+        "runtimeHint": "电影必须 {minutes} 分钟或更短。",
+        "languageLabel": "首选语言",
+        "languagePlaceholder": "例如:日语、西班牙语",
+        "avoidNoteLabel": "永不推荐",
+        "avoidNotePlaceholder": {
+          "movie": "完全避免的电影 — 系列、导演、主题…",
+          "book": "完全避免的书籍 — 系列、作者、主题…",
+          "music": "完全避免的音乐 — 艺术家、子类型、主题…"
+        },
+        "avoidNoteHint": "自由文本。想多具体就多具体。",
+        "appliesNext": "在下次问答中应用",
+        "save": "保存过滤器",
+        "saved": "推荐过滤器已保存。",
+        "saveFailed": "我们无法保存你的过滤器。请重试。",
+        "notAuthed": "你需要登录才能保存过滤器。"
+      }
+    },
+    "integrations": {
+      "title": "集成",
+      "description": "已连接的提供商和服务。",
+      "emptyTitle": "还没有可用的集成",
+      "emptyBody": "第三方连接将在上线后出现在这里。"
+    },
+    "help": {
+      "title": "帮助",
+      "description": "常见问题的答案,以及指向你可能错过的应用部分的快捷链接。",
+      "faq": {
+        "title": "FAQ",
+        "subtitle": "浏览常见问题"
+      },
+      "takeQuiz": {
+        "title": "做个问答",
+        "subtitle": "几分钟内获得新的推荐"
+      },
+      "findFriends": {
+        "title": "查找好友",
+        "subtitle": "发现品味相似的人"
+      },
+      "milestones": {
+        "title": "你的里程碑",
+        "subtitle": "跟踪进度并解锁成就"
+      },
+      "showOnboarding": {
+        "title": "显示引导",
+        "subtitle": "以预览模式重新查看个人资料设置屏幕"
+      }
+    },
+    "danger": {
+      "title": "危险区",
+      "description": "这些操作不可逆。请谨慎操作。",
+      "disable": "停用账户",
+      "delete": "删除账户",
+      "processing": "处理中…",
+      "disableConfirm": "停用你的账户?你将被登出,直到支持人员重新启用才能登录。",
+      "disableFinalConfirm": "最终确认。立即停用?",
+      "deleteConfirm": "永久删除你的账户?这无法撤销。",
+      "typeDeletePrompt": "输入「DELETE」以确认:",
+      "deletionCanceled": "删除已取消。"
+    },
+    "verifyAction": {
+      "save": "保存你的个人资料",
+      "email": "更新你的邮箱",
+      "password": "更改你的密码",
+      "content": "保存内容偏好",
+      "disable": "停用你的账户",
+      "delete": "永久删除你的账户",
+      "addAuthenticator": "添加另一个验证器",
+      "setBackupEmail": "设置你的备用邮箱",
+      "removeBackupEmail": "移除你的备用邮箱"
+    },
+    "verifyModal": {
+      "title": "验证身份",
+      "description": "输入你的 6 位验证码以{action}。",
+      "placeholder": "000000",
+      "enterCode": "输入 6 位数字代码",
+      "noFactor": "未找到已验证的 MFA 因素",
+      "cancel": "取消",
+      "verify": "验证",
+      "closeAria": "关闭验证对话框"
+    },
+    "verifyModalEnroll": {
+      "title": "先设置 2FA",
+      "description": "需要双重身份验证才能{action}。立即设置以继续。"
+    },
+    "mfaSetupModal": {
+      "closeAria": "关闭双重验证设置"
+    }
+  },
+  "Language": {
+    "title": "语言",
+    "description": "选择整个应用使用的语言。",
+    "options": {
+      "en": "英语",
+      "es": "西班牙语",
+      "fr": "法语",
+      "de": "德语",
+      "pt": "葡萄牙语",
+      "it": "意大利语",
+      "nl": "荷兰语",
+      "ja": "日语",
+      "zh": "中文",
+      "ko": "韩语"
+    },
+    "saving": "保存中…",
+    "saved": "语言已更新。"
+  },
+  "Navbar": {
+    "items": {
+      "howItWorks": "工作原理",
+      "whySmartAdvisor": "为什么选 Smart Advisor",
+      "poweredBy": "技术支持",
+      "ourTeam": "我们的团队",
+      "faq": "FAQ",
+      "dashboard": "仪表板",
+      "feed": "动态",
+      "library": "资料库",
+      "history": "历史记录",
+      "milestones": "里程碑",
+      "groupQuiz": "群组问答",
+      "settings": "设置"
+    },
+    "getStarted": "开始",
+    "signOut": "登出",
+    "accountMenu": "账户菜单",
+    "theme": {
+      "label": "主题",
+      "light": "浅色",
+      "dark": "深色",
+      "system": "跟随系统",
+      "systemHint": "匹配你的设备设置"
+    }
+  },
+  "Home": {
+    "hero": {
+      "titleLine1": "发现你下一个最爱的",
+      "titleLine2": "在每种",
+      "subtitle": "针对你独特品味的电影、书籍和专辑的 AI 驱动推荐。",
+      "ctaPrimaryLoggedOut": "开始",
+      "ctaPrimaryLoggedIn": "前往动态",
+      "ctaSecondaryLoggedOut": "试试演示",
+      "ctaSecondaryLoggedIn": "查看历史",
+      "scrollHint": "滚动以探索",
+      "flipWords": [
+        "电影",
+        "书籍",
+        "专辑",
+        "故事",
+        "冒险",
+        "经典",
+        "杰作",
+        "邪典之爱"
+      ]
+    },
+    "howItWorks": {
+      "eyebrow": "工作原理",
+      "title": "从犹豫到绝佳选择,四步搞定",
+      "subtitle": "更快地找到值得你时间的观看或阅读。",
+      "steps": {
+        "format": {
+          "title": "选择你的格式",
+          "description": "告诉我们你想要电影、书籍、专辑还是混合。我们将根据你的选择调整其余流程。"
+        },
+        "depth": {
+          "title": "设置你的深度",
+          "description": "选择你想回答多少问题 — 快速品味测试还是深度探索,由你决定。"
+        },
+        "quiz": {
+          "title": "回答个性化问答",
+          "description": "我们的 AI 根据你的年龄和内容类型生成新的问题。没有两次问答是相同的。"
+        },
+        "picks": {
+          "title": "获取你的选择",
+          "description": "真实的推荐,带有匹配分数和书面理由,说明每一项为何适合你。"
+        }
+      }
+    },
+    "features": {
+      "eyebrow": "为什么选 Smart Advisor",
+      "title": "为你能信任的选择而构建",
+      "subtitle": "设计上私密,默认快速,且开源,你可以看到它如何工作。",
+      "items": {
+        "private": {
+          "title": "私人资料",
+          "description": "你的偏好与你的账户绑定,仅用于改善你的选择。"
+        },
+        "fast": {
+          "title": "光速结果",
+          "description": "快速结果和流畅更新帮助你无需等待即可决定。"
+        },
+        "trust": {
+          "title": "易于信任的选择",
+          "description": "清晰的理由让每个建议更容易信任和选择,具有开源透明度。"
+        },
+        "both": {
+          "title": "跨格式选择",
+          "description": "在一个地方查看书籍、电影和专辑结果,选择感觉更快更容易。"
+        }
+      },
+      "trustReasons": [
+        "匹配你的年龄分级",
+        "你说过偏爱的节奏",
+        "你之前选择的基调"
+      ]
+    },
+    "groupQuizCta": {
+      "newFeature": "新功能",
+      "eyebrow": "群组问答",
+      "titleLead": "找到一个选择",
+      "titleHighlight": "一起",
+      "description": "举办问答,分享六字符代码,让群组回答。AI 将每个人的品味综合为一个适合房间的选择。加入是免费的 — 无需账户。",
+      "cta": "试试看"
+    },
+    "albumCta": {
+      "newFeature": "新",
+      "eyebrow": "专辑推荐",
+      "titleLead": "调到你的下一个",
+      "titleHighlight": "最爱专辑",
+      "description": "同样的问答,新的感官。告诉我们你的聆听 — 时代、氛围、乐器 — AI 选择一张带有 30 秒预览的专辑。由 Deezer 提供支持。",
+      "cta": "选择专辑"
+    },
+    "poweredBy": {
+      "eyebrow": "技术支持",
+      "title": "建立在可靠的基础设施上",
+      "subtitle": "可靠的服务帮助 Smart Advisor 保持快速、可靠和有用。"
+    },
+    "team": {
+      "eyebrow": "团队成员",
+      "title": "认识团队",
+      "subtitle": "Smart Advisor 背后的人。",
+      "members": {
+        "andrew": {
+          "designation": "创建者",
+          "quote": "构建 Smart Advisor 使推荐感觉个人化、快速且真正有用。"
+        },
+        "vlad": {
+          "designation": "网页设计师",
+          "quote": "专注于创建一个简洁的界面,使桌面体验流畅。"
+        }
+      }
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "title": "问题,已回答",
+      "subtitleLead": "开始前有问题?联系我们:",
+      "subtitleMid": "或报告错误到",
+      "subtitleTail": "。Smart Advisor 是开源的,你随时可以审查和贡献。",
+      "categoriesAria": "FAQ 类别",
+      "filterAll": "全部",
+      "categories": {
+        "getting-started": "开始使用",
+        "how-it-works": "工作原理",
+        "feed": "动态",
+        "group-quiz": "群组问答",
+        "library": "资料库",
+        "account": "账户和隐私"
+      },
+      "items": {
+        "create-account": {
+          "question": "如何创建账户?",
+          "answer": "在登录页面点击注册,输入你的姓名、邮箱和密码(至少 8 个字符)。你将收到一封验证邮件 — 点击链接以在登录前激活你的账户。"
+        },
+        "verify-email": {
+          "question": "为什么我需要验证我的邮箱?",
+          "answer": "邮箱验证确认你的身份并保护你的账户。在你点击发送到收件箱的验证链接之前,你将无法登录。如果没看到,请检查垃圾邮件文件夹。"
+        },
+        "personalize": {
+          "question": "Smart Advisor 如何个性化推荐?",
+          "answer": "Smart Advisor 使用你的问答答案来了解你的情绪、节奏偏好和类型兴趣。然后将其与 TMDB、Open Library 和 Deezer 的实时数据相结合,生成带有每个选择背后清晰推理的推荐。"
+        },
+        "quiz-flow": {
+          "question": "问答如何工作?",
+          "answer": "你选择内容类型(电影、书籍、专辑或混合),选择你想要多少问题(3 到 15),然后回答每一个。你的回答发送到我们的 AI,生成针对你回答的个性化推荐。"
+        },
+        "results-generated": {
+          "question": "结果是如何生成的?",
+          "answer": "你的答案由 AI 模型处理,该模型选择与你偏好匹配的标题。然后,每个推荐都用 TMDB(电影)、Open Library(书籍)和 Deezer(专辑,包括 30 秒预览)的真实海报、评级和描述进行丰富。"
+        },
+        "movies-and-books": {
+          "question": "我可以在一次会话中获得电影、书籍和音乐吗?",
+          "answer": "可以。在内容选择期间选择「混合」,在同一会话中接收一部电影、一本书和一张专辑。你的所有推荐历史都会保存以供将来参考。"
+        },
+        "off-results": {
+          "question": "如果我的推荐感觉不对怎么办?",
+          "answer": "你可以随时使用不同的答案重新进行问答,或调整问题数量以及你的情绪和节奏选择。改善未来选择的最快方法是在你的资料库中记录反应 — 将过去的选择标记为「不适合我」会教 AI 远离类似的标题,赞同则将其推向更多此类内容。"
+        },
+        "trailer-preview": {
+          "question": "在哪里可以看到预告片或预览?",
+          "answer": "从你的动态或历史记录中打开任何推荐卡片。电影会内联播放预告片(懒加载,所以只在点击时触发),书籍会出现「在 Open Library 上查看」链接,以便深入了解版本、封面和评论,专辑的第一首 30 秒曲目预览只需一击即可。电影使用 TMDB 的官方预告片(发布时);预览来自 Deezer。"
+        },
+        "year-in-review": {
+          "question": "Year in Review 是什么,什么时候出现?",
+          "answer": "Year in Review 是你选择的 Spotify Wrapped 风格摘要:顶级类型、最长连胜、巅峰月份、最常选择的导演或作者、格式组合和你的杰出标题。它在十二月(本年度)和一月(去年)期间作为显眼的横幅出现在你的动态中。在此窗口之外,该页面仍可在 /wrapped 工作,只是不会被宣传。"
+        },
+        "feed-what": {
+          "question": "动态是什么?",
+          "answer": "你关注的人分享的推荐的 Reddit 风格流,加上更广泛的发现和群组会话视图。你可以确定范围(好友/发现/群组),按社区过滤(电影/书籍/音乐),并按热门、最新或顶级排序 — 每个设置在会话之间保留。"
+        },
+        "feed-share": {
+          "question": "如何在动态中分享一个选择?",
+          "answer": "用 /feed 上的「分享选择」按钮打开撰写器。选择社区、活动(完成/评分/推荐),输入标题 — 封面在你输入时自动查找,使用 TMDB 用于电影、Open Library 用于书籍、Deezer 用于音乐。添加可选注释并分享。"
+        },
+        "feed-edit": {
+          "question": "我可以在分享后编辑我的帖子和评论吗?",
+          "answer": "可以,两者都可以。在你自己的帖子上,溢出菜单有编辑和删除(从主题编辑会路由回编辑模式的动态撰写器)。在你自己的评论上,编辑按钮位于回复旁边 — 一旦你触及正文,署名上就会出现「· 已编辑」标签。你不拥有的帖子和评论只会暴露举报。"
+        },
+        "feed-votes": {
+          "question": "帖子和评论的赞同和反对投票如何工作?",
+          "answer": "每个帖子和评论的栏目中都有上/下箭头。轻按一次投票,再次轻按清除。你看到的数字是所有投票者的规范服务器得分;你自己的状态点亮箭头为紫色(向上)或玫瑰色(向下)。热门排序按帖子年龄加权此得分,顶级按原始得分排序。"
+        },
+        "feed-sort": {
+          "question": "我可以以不同方式排序动态吗?",
+          "answer": "可以 — 范围行下方有一个热门/最新/顶级的分段控件。热门混合得分与新近度(新的赢得平局),最新按年龄升序,顶级按最高得分排在第一。选择是按设备的,在会话之间记住。"
+        },
+        "feed-follow": {
+          "question": "如何关注人、屏蔽某人或举报内容?",
+          "answer": "点击名称打开他们的资料并使用关注/取消关注。任何帖子或评论上的溢出菜单都允许你举报它或屏蔽作者 — 被屏蔽的作者会从你的动态中完全消失,你可以在设置 -> 动态 -> 已屏蔽的人下管理列表。你已提交的举报位于设置 -> 动态 -> 已提交的举报下。"
+        },
+        "group-what": {
+          "question": "群组问答是什么?",
+          "answer": "群组问答允许多人一起做同样的问答 — 在同一张桌子上、沙发上或远程。主持人创建一个会话,分享六字符代码,每个人都在自己的设备上回答同一组问题。然后 AI 将每个人的答案综合为一个适合房间的推荐。"
+        },
+        "group-account": {
+          "question": "我需要账户加入群组问答吗?",
+          "answer": "不需要。加入是免费的,不需要账户 — 只需输入主持人的代码和显示名。主持需要账户,这样我们可以将群组的选择保存到你的资料库,并将连胜/里程碑与你的资料关联。"
+        },
+        "group-host": {
+          "question": "如何主持群组问答?",
+          "answer": "已登录的用户可以从导航栏打开群组问答;其他人可以点击主页上的「一起找一个选择」卡片。在主持卡片上,设置你的显示名,选择内容类型(混合/电影/书籍/音乐),点击你想要的问题数量(3 到 15)的数字方块,然后创建会话。你将进入一个带有六字符代码和复制链接按钮的大厅 — 与群组分享其中之一。一旦至少两名玩家加入,你将看到开始问答;按下它会为整个房间生成新的 AI 问题。每个人都在自己的设备上回答,一旦所有提交进来,你将获得「揭示群组的选择」按钮以展示 AI 综合的推荐。"
+        },
+        "group-synthesis": {
+          "question": "AI 如何找到一个适合所有人的选择?",
+          "answer": "当所有参与者提交他们的答案时,主持人点击「揭示群组的选择」。每个参与者对每个问题的答案都用每个玩家的名字标记发送到推荐模型,AI 选择尊重重叠而不是取平均的东西。它最适合 2 到 4 个玩家;更大的群组仍然有效,但结果往往会偏向更广泛的吸引力。"
+        },
+        "group-expiry": {
+          "question": "群组问答会话保持活动多长时间?",
+          "answer": "会话从创建起 24 小时内活动。之后大厅和结果过期,代码无法再加入。主持人也可以随时从大厅提前结束会话。"
+        },
+        "library-vs-history": {
+          "question": "资料库是什么,它与历史记录有何不同?",
+          "answer": "历史记录是 AI 为你生成的每个推荐。你的资料库是你实际观看或阅读的内容的单独日志 — 带有状态(已完成、进行中、愿望清单)、拇指评级和可选的一行反应。你可以从任何结果卡片或历史模态中记录标题。"
+        },
+        "library-improves": {
+          "question": "资料库如何改善我的推荐?",
+          "answer": "你最近评级的条目作为品味信号与你的问答答案一起发送到 AI。赞同告诉它「更多这样的」;反对告诉它远离。你写的反应被逐字阅读,所以像「太慢」这样的一句话在下次选择中具有真正的分量。"
+        },
+        "mfa": {
+          "question": "什么是双重身份验证(MFA)?",
+          "answer": "MFA 通过在你登录时需要来自验证器应用(如 Google Authenticator 或 Authy)的代码,增加了一层额外的安全性。你可以在账户设置的安全选项卡下启用它。"
+        },
+        "sessions": {
+          "question": "如何管理我的设备和会话?",
+          "answer": "前往账户设置,打开安全选项卡,然后滚动到活动会话。你可以看到你已登录的所有设备,撤销单个设备的访问权限,或一次性从所有设备登出。"
+        },
+        "delete-account": {
+          "question": "我可以删除或停用我的账户吗?",
+          "answer": "可以。在账户设置的集成选项卡下,你将找到一个危险区部分。你可以停用账户(可由支持人员重新启用)或与所有相关数据一起永久删除。"
+        },
+        "data-handling": {
+          "question": "我的个人数据如何处理?",
+          "answer": "你的数据安全地存储在 Supabase 中,具有行级安全策略。我们仅使用你的偏好和问答答案来生成推荐。我们不会与第三方共享你的数据。"
+        },
+        "open-source": {
+          "question": "Smart Advisor 是开源的吗?",
+          "answer": "是的。Smart Advisor 完全开源。你可以在 GitHub 上审查代码库、报告问题并跟随开发进度。"
+        }
+      }
+    },
+    "footer": {
+      "navAria": "页脚导航",
+      "rights": "© {year} Smart Advisor。保留所有权利。",
+      "builtWith": "构建技术:",
+      "builtSuffix": "作为开源项目。",
+      "githubLabel": "GitHub"
+    }
+  },
+  "Common": {
+    "loading": "加载中…",
+    "save": "保存",
+    "cancel": "取消",
+    "back": "返回",
+    "next": "下一步",
+    "continue": "继续",
+    "submit": "提交",
+    "close": "关闭",
+    "retry": "重试",
+    "yes": "是",
+    "no": "否",
+    "surpriseMe": "给我惊喜"
+  },
+  "MobileNav": {
+    "ariaLabel": "主导航",
+    "feed": "动态",
+    "dashboard": "仪表板",
+    "library": "资料库",
+    "history": "历史记录",
+    "profile": "个人资料",
+    "quiz": "问答",
+    "quizMenu": {
+      "ariaLabel": "选择要开始的问答",
+      "title": "开始问答",
+      "subtitle": "选择你想要的会话类型。",
+      "solo": "单人问答",
+      "soloDesc": "简短的个性问答,只为你。",
+      "group": "群组问答",
+      "groupDesc": "在共享房间中与朋友一起进行。",
+      "surprise": "给我惊喜",
+      "surpriseDesc": "一击 — 随机选择,无需问题。",
+      "close": "取消"
+    }
+  },
+  "InstallPrompt": {
+    "title": "安装 Smart Advisor",
+    "iosBody": "点击分享按钮,然后选择「添加到主屏幕」以安装应用。",
+    "genericBody": "将 Smart Advisor 添加到主屏幕,获得更快的全屏体验。",
+    "install": "安装",
+    "dismiss": "现在不",
+    "close": "关闭"
+  },
+  "System": {
+    "error": {
+      "networkTitle": "无法连接到我们的服务器",
+      "networkBody": "检查你的连接并重试 — 我们将从你停下的地方继续。",
+      "genericTitle": "出了点问题",
+      "genericBody": "意外错误阻止了此页面加载。刷新通常可以解决。",
+      "ref": "Ref",
+      "goHome": "前往首页",
+      "tryAgain": "重试"
+    },
+    "notFound": {
+      "title": "这个场景没有进入最终剪辑。",
+      "body": "你寻找的页面在拍摄之间走失了。也许是 URL 中的拼写错误,也许它留在了剪辑室的地板上。无论如何,让我们带你回去。",
+      "goBack": "返回",
+      "goHome": "首页"
+    },
+    "maintenance": {
+      "title": "我们的 AI 去看电影了。",
+      "body": "Smart Advisor 出门刷一些经典并浏览一两本小说。我们很快会带着更新鲜的品味回来。"
+    }
+  },
+  "ShareTarget": {
+    "eyebrow": "已与 Smart Advisor 分享",
+    "title": "想要像这样的选择?",
+    "subtitle": "我们无法将那个确切的标题推荐给你,但回答几个快速问题,我们将为你找到具有相同能量的东西。",
+    "sharedLabel": "你分享了",
+    "startQuiz": "查找类似选择",
+    "goDashboard": "前往动态",
+    "emptyTitle": "什么都没收到",
+    "emptySubtitle": "我们没收到任何可以使用的东西 — 开始问答,我们将从那里接管。"
+  },
+  "AccountSecurity": {
+    "back": "返回",
+    "eyebrow": "账户 · 安全",
+    "title": "锁定一切",
+    "subtitle": "管理你设备上的双重身份验证、通行密钥和活动会话。",
+    "tipsEyebrow": "安全提示",
+    "tips": [
+      "启用 2FA 以增加抵御未经授权访问的保护层。",
+      "定期审查活动会话,登出你不认识的设备。",
+      "使用强大独特的密码,并定期更新。",
+      "对登录链接保持谨慎,仅从受信任的设备登录。"
+    ]
+  },
+  "Auth": {
+    "sessionExpired": "你的会话已过期。请重新登录。",
+    "eyebrow": {
+      "signin": "登录",
+      "signup": "创建账户",
+      "forgot": "重置密码"
+    },
+    "subtitle": {
+      "signin": "登录以继续你的推荐之旅。",
+      "signup": "设置你的账户以获得个性化选择。",
+      "forgot": "输入你的邮箱,我们将向你发送一个安全的重置链接。"
+    },
+    "headings": {
+      "signin": [
+        "欢迎回来",
+        "很高兴再次见到你",
+        "准备好你的下一个选择了吗?"
+      ],
+      "signup": [
+        "创建你的账户",
+        "加入 Smart Advisor",
+        "让我们设置你的资料"
+      ],
+      "forgot": [
+        "重置你的密码",
+        "恢复访问",
+        "回到你的账户"
+      ],
+      "verifyEmail": ["查看你的收件箱", "快到了", "最后一步"],
+      "mfaChallenge": [
+        "验证你的身份",
+        "再一步",
+        "安全检查"
+      ]
+    },
+    "labels": {
+      "emailOrUsername": "邮箱或用户名",
+      "email": "邮箱",
+      "password": "密码",
+      "username": "用户名",
+      "age": "年龄",
+      "confirmPassword": "确认密码"
+    },
+    "placeholders": {
+      "emailOrUsername": "you@example.com 或用户名",
+      "email": "you@example.com",
+      "password": "••••••••",
+      "username": "yourname",
+      "age": "18"
+    },
+    "actions": {
+      "signin": "登录",
+      "signup": "创建账户",
+      "forgot": "发送重置链接"
+    },
+    "rememberMe": "保持登录 30 天",
+    "forgotPassword": "忘记密码?",
+    "passkeyDivider": "或",
+    "passkeySignIn": "使用通行密钥登录",
+    "passkeyWaiting": "等待通行密钥…",
+    "resendVerification": "重新发送验证链接",
+    "resendingVerification": "重新发送中…",
+    "resendSuccess": "验证邮件已发送。查看你的收件箱。",
+    "resetSuccess": "如果该邮箱存在账户,密码重置链接已发送。",
+    "cooldown": "请稍等片刻再重试。",
+    "toggle": {
+      "signin": {
+        "prompt": "没有账户?",
+        "cta": "注册"
+      },
+      "signup": {
+        "prompt": "已有账户?",
+        "cta": "登录"
+      },
+      "forgot": {
+        "prompt": "想起密码了?",
+        "cta": "登录"
+      }
+    },
+    "modeToggle": {
+      "ariaLabel": "选择登录或注册",
+      "signin": "登录",
+      "signup": "注册"
+    },
+    "mfaChallenge": {
+      "successTitle": "已验证",
+      "successBody": "正在带你前往你的动态…",
+      "totpTitle": "输入验证码",
+      "totpBody": "打开你的验证器应用并输入 6 位代码。",
+      "backupTitle": "输入备用码",
+      "backupBody": "输入你预生成的备用码之一。",
+      "totpPlaceholder": "000000",
+      "backupPlaceholder": "XXXXX-XXXXX",
+      "verify": "验证",
+      "verifying": "验证中…",
+      "useBackup": "无法访问你的验证器?使用备用码",
+      "useTotp": "改用验证器应用",
+      "backToSignIn": "返回登录"
+    },
+    "verifyEmail": {
+      "title": "验证你的邮箱",
+      "bodyLead": "我们已将验证链接发送到",
+      "bodyTail": "。点击链接以激活你的账户。",
+      "mfaHintLead": "下一步:",
+      "mfaHintBody": "验证邮箱后,你将能够添加双重身份验证以获得额外的安全性。",
+      "resend": "重新发送验证邮件",
+      "resending": "重新发送中…",
+      "resendSuccess": "验证邮件已发送。查看你的收件箱。",
+      "backToSignIn": "返回登录"
+    },
+    "shared": {
+      "hidePassword": "隐藏密码",
+      "showPassword": "显示密码",
+      "requirements": "要求"
+    },
+    "passwordRules": {
+      "minLength": "至少 8 个字符",
+      "uppercase": "一个大写字母(A–Z)",
+      "lowercase": "一个小写字母(a–z)",
+      "digit": "一个数字(0–9)",
+      "special": "一个特殊字符(!@#$…)"
+    },
+    "resetPassword": {
+      "invalidTitle": "重置链接无效或已过期",
+      "invalidBody": "打开最近的重置邮件或请求新链接以继续。",
+      "backToSignIn": "返回登录",
+      "successTitle": "密码已更新",
+      "successBody": "你的密码已成功更改。正在重定向到登录…",
+      "title": "设置新密码",
+      "subtitle": "在下方输入你新的安全密码。",
+      "newPassword": "新密码",
+      "confirmPassword": "确认新密码",
+      "passwordRequirementsTitle": "密码要求",
+      "confirmRulesTitle": "确认密码",
+      "matchesRule": "与你的密码匹配",
+      "submit": "更新密码",
+      "submitting": "更新中…",
+      "fixHighlighted": "请修正高亮字段。"
+    },
+    "emailVerified": {
+      "message": "邮箱已验证!正在重定向…"
+    },
+    "mfaManagement": {
+      "heading": "双重身份验证",
+      "subtitle": "登录时的额外步骤,保护你的账户安全。",
+      "fallbackFactorName": "验证器应用",
+      "activeCount": "{count, plural, one {# 个验证器活动} other {# 个验证器活动}}",
+      "notEnabled": "尚未启用",
+      "statusEnabled": "已启用",
+      "statusInactive": "未活动",
+      "addedOn": "添加于 {date}",
+      "renameAria": "重命名 {name}",
+      "loadError": "无法加载你的安全设置 — 请刷新页面",
+      "disabledToast": "双重身份验证已关闭",
+      "regeneratedToast": "新的备用码已准备就绪 — 请保存到安全的地方",
+      "copiedToast": "备用码已复制到你的剪贴板",
+      "backupCodesHeading": "备用码",
+      "backupCodesRemaining": "{count, plural, one {剩余 # 个未使用的码} other {剩余 # 个未使用的码}}",
+      "loadingBackupCodes": "加载中…",
+      "togglePanelShow": "显示备用码面板",
+      "togglePanelHide": "隐藏备用码面板",
+      "regenerateWarning": "重新生成将使所有现有备用码无效。",
+      "generateButton": "生成新码",
+      "generating": "生成中…",
+      "saveCodesWarning": "保存这些码 — 它们不会再显示",
+      "copy": "复制",
+      "copied": "已复制",
+      "download": "下载",
+      "lowBackupCodes": "{count, plural, one {你还剩 # 个备用码。考虑重新生成新码。} other {你还剩 # 个备用码。考虑重新生成新码。}}",
+      "enableHint": "启用 2FA 以在登录时添加额外的安全层。你将使用验证器应用进行验证。",
+      "addAuthenticator": "添加验证器",
+      "loading": "加载中…",
+      "enable2fa": "启用 2FA",
+      "renameDialogTitle": "重命名验证器",
+      "renameDialogDescription": "选择一个能在你的列表中轻松识别设备的名称。",
+      "renameDialogFieldLabel": "验证器名称",
+      "renameDialogSuccess": "验证器已重命名",
+      "renameDialogPlaceholder": "例如:iPhone、工作手机",
+      "renameDialogNoTarget": "未选择验证器",
+      "verifyDialogAria": "确认禁用双重身份验证",
+      "verifyDialogTitle": "禁用双重身份验证",
+      "verifyDialogBody": "输入你验证器应用的 6 位代码以关闭此账户的 2FA。",
+      "verifyDialogPlaceholder": "000000",
+      "verifyDialogError": "输入 6 位代码",
+      "verifyDialogConfirm": "禁用 2FA",
+      "verifyDialogCancel": "取消"
+    },
+    "passkeyManagement": {
+      "heading": "通行密钥",
+      "subtitle": "使用你的指纹、面部或设备 PIN 登录 — 无需密码。",
+      "checking": "检查中…",
+      "activeCount": "{count, plural, one {# 个通行密钥活动} other {# 个通行密钥活动}}",
+      "noPasskeys": "还没有通行密钥",
+      "statusActive": "活动",
+      "statusInactive": "未活动",
+      "unsupported": "你当前的浏览器不支持通行密钥。请在最近的设备上尝试 Chrome、Safari、Edge 或 Firefox。",
+      "fallbackPasskeyName": "通行密钥",
+      "neverUsed": "从未使用",
+      "lastUsed": "上次使用 {timeAgo} 前",
+      "lastUsedRecently": "最近使用",
+      "addedOn": "添加于 {date}",
+      "renameAria": "重命名 {name}",
+      "removeAria": "移除 {name}",
+      "removedToast": "通行密钥已移除",
+      "fallbackLabel": "此通行密钥",
+      "removeConfirm": "移除 {label}?你将无法再用它登录。",
+      "addAnother": "添加另一个通行密钥",
+      "addFirst": "添加通行密钥",
+      "verifyDialogAria": "验证以移除通行密钥",
+      "verifyDialogTitle": "用你的验证器确认",
+      "verifyDialogBody": "这是你的最后一个通行密钥。输入你的 6 位验证器代码以移除它。",
+      "verifyDialogPlaceholder": "000000",
+      "verifyDialogError": "输入 6 位代码",
+      "verifyDialogConfirm": "验证并移除通行密钥",
+      "verifyDialogCancel": "取消",
+      "verifyNoFactor": "未找到已验证的验证器。",
+      "renameDialogTitle": "重命名通行密钥",
+      "renameDialogDescription": "选择一个你以后能识别的名称,如「MacBook」或「手机」。",
+      "renameDialogFieldLabel": "通行密钥名称",
+      "renameDialogSuccess": "通行密钥已重命名",
+      "renameDialogPlaceholder": "例如:MacBook、iPhone",
+      "renameDialogNoTarget": "未选择通行密钥",
+      "setupDialogAria": "添加通行密钥"
+    },
+    "sessions": {
+      "heading": "活动会话",
+      "subtitleLoading": "管理当前登录到你账户的设备。",
+      "subtitle": "管理当前登录到你账户的设备。登出以撤销访问。",
+      "signedInCount": "{count, plural, one {# 个设备已登录} other {# 个设备已登录}}",
+      "noActive": "无活动会话",
+      "signOutAll": "登出所有",
+      "signingOutAll": "登出中…",
+      "signOutAllConfirm": "你确定吗?你将从所有设备登出。",
+      "signOutCurrentConfirm": "从此设备登出?你将被返回到首页。",
+      "signOutOtherConfirm": "从 {device} 登出?该会话将立即失去访问权限。",
+      "signedOutToast": "你已从该设备登出",
+      "signedOutAllToast": "你已从所有设备登出",
+      "noSessionsFound": "未找到活动会话",
+      "currentBadge": "当前",
+      "ipLabel": "IP {ip}",
+      "lastActive": "上次活动 {time}",
+      "signOutAria": "从 {device} 登出",
+      "verifyAction": {
+        "signOut": "从 {device} 登出",
+        "signOutAll": "从所有设备登出"
+      }
+    },
+    "mfaSetup": {
+      "goBack": "返回",
+      "intro": {
+        "title": "保护你的账户",
+        "body": "用双重身份验证(2FA)增加额外的安全层。你需要在登录时输入手机上的代码。",
+        "cta": "设置 2FA",
+        "skip": "暂时跳过"
+      },
+      "method": {
+        "title": "选择你的方法",
+        "body": "你希望以后如何登录?",
+        "appName": "验证器应用",
+        "appBody": "使用 Google Authenticator、Authy 或 1Password 扫描二维码。",
+        "cancel": "取消"
+      },
+      "name": {
+        "title": "为此验证器命名",
+        "body": "使用将持有代码的设备 — 这样你以后可以区分验证器。",
+        "label": "设备名称",
+        "placeholder": "例如:iPhone、工作手机",
+        "hint": "留空使用通用标签。",
+        "settingUp": "设置中...",
+        "continue": "继续"
+      },
+      "qr": {
+        "title": "扫描二维码",
+        "body": "使用 Google Authenticator、Microsoft Authenticator 或 Authy 扫描此代码。",
+        "imageAlt": "MFA 二维码",
+        "manualHint": "无法扫描?手动输入此代码:",
+        "scanned": "我已扫描"
+      },
+      "verify": {
+        "title": "验证你的代码",
+        "body": "输入你验证器应用的 6 位代码。",
+        "placeholder": "000000",
+        "error": "请输入 6 位代码",
+        "verifying": "验证中...",
+        "submit": "验证并启用 2FA",
+        "back": "返回二维码"
+      },
+      "backupCodes": {
+        "title": "保存你的备用码",
+        "body": "如果你失去对验证器应用的访问权,可以使用这些代码之一登录。每个代码只能使用一次。",
+        "warning": "存储在安全的地方",
+        "copy": "复制",
+        "copied": "已复制",
+        "download": "下载",
+        "done": "我已保存我的代码"
+      },
+      "toasts": {
+        "authenticatorAdded": "验证器已添加",
+        "enabled": "双重身份验证现已激活!",
+        "backupWarning": "我们现在无法生成备用码。你可以随时从安全设置创建它们。",
+        "secretCopied": "密钥代码已复制 — 粘贴到你的验证器应用",
+        "backupCopied": "备用码已复制到你的剪贴板",
+        "backupDownloaded": "备用码已保存到你的下载"
+      }
+    },
+    "passkeySetup": {
+      "title": "添加通行密钥",
+      "body": "选择一个你以后能识别的名称。继续后,你的设备将要求用 Touch ID、Face ID、Windows Hello 或安全密钥确认。",
+      "label": "通行密钥名称",
+      "placeholder": "例如:MacBook、iPhone",
+      "hint": "留空,我们将使用带日期戳的标签。",
+      "waiting": "等待通行密钥...",
+      "continue": "继续",
+      "cancel": "取消",
+      "successToast": "通行密钥已添加"
+    },
+    "renameDialog": {
+      "emptyError": "名称不能为空",
+      "saving": "保存中...",
+      "save": "保存",
+      "cancel": "取消"
+    },
+    "validation": {
+      "emailOrUsernameRequired": "邮箱或用户名是必需的",
+      "emailRequired": "邮箱是必需的",
+      "emailInvalid": "输入有效的邮箱",
+      "passwordRequired": "密码是必需的",
+      "passwordRequirementsUnmet": "密码未满足所有要求",
+      "usernameRequired": "用户名是必需的",
+      "usernameTooShort": "至少使用 2 个字符",
+      "usernameTooLong": "使用 24 个字符或更少",
+      "usernameInvalid": "使用字母、数字、点、破折号或下划线",
+      "ageRequired": "年龄是必需的",
+      "ageNotInteger": "年龄必须是整数",
+      "ageOutOfRange": "输入 13 到 120 之间的年龄",
+      "confirmPasswordRequired": "确认你的密码",
+      "passwordsDoNotMatch": "密码不匹配",
+      "fixHighlightedFields": "请修正高亮字段。",
+      "correctHighlightedFields": "请更正高亮字段",
+      "passkeyIdentifierRequired": "输入你的邮箱或用户名以使用通行密钥。",
+      "enterSixDigitCode": "请输入 6 位代码",
+      "enterBackupCode": "请输入备用码",
+      "rules": {
+        "emailContainsAt": "包含 @",
+        "emailHasDomain": "有域名(example.com)",
+        "ageWholeNumber": "整数",
+        "ageInRange": "13 到 120 之间",
+        "usernameLength": "2–24 个字符",
+        "usernameAllowedChars": "字母、数字、点、破折号或下划线",
+        "confirmPasswordMatches": "与你的密码匹配"
+      },
+      "popoverTitles": {
+        "email": "邮箱要求",
+        "password": "密码要求",
+        "username": "用户名要求",
+        "age": "年龄要求",
+        "confirmPassword": "确认密码"
+      },
+      "mfaError": {
+        "totpExpired": "该代码已过期。等待验证器中的新代码并重试。",
+        "backupExpired": "该备用码不再有效。",
+        "totpMismatch": "该代码不匹配。再次检查你的验证器并重试。",
+        "backupMismatch": "该备用码不匹配。每个代码只工作一次。"
+      }
+    }
+  },
+  "Wrapped": {
+    "eyebrow": "Year in Review",
+    "subtitle": "回顾你今年发现的内容。",
+    "fallbackName": "你的",
+    "startQuiz": "开始问答",
+    "loading": "加载你的一年…",
+    "share": {
+      "action": "分享",
+      "dialogTitle": "分享你的 Year in Review",
+      "dialogSubtitle": "任何拥有此链接或二维码的人都可以查看你 {year} 年的选择。",
+      "copyLink": "复制链接",
+      "shareButton": "分享",
+      "close": "完成",
+      "signInRequired": "重新登录以分享你的一年。",
+      "failed": "无法生成分享链接",
+      "linkCopied": "链接已复制",
+      "copyFailed": "无法复制链接",
+      "shareFailed": "无法分享 — 重试"
+    },
+    "empty": {
+      "title": "{year} 年没有选择",
+      "titleMonth": "{period} 没有选择",
+      "current": "做个问答开始填充你的一年。",
+      "past": "在上面选择不同的年份,或开始新的问答。"
+    },
+    "hero": {
+      "eyebrow": "头条",
+      "picks": "{count, plural, one {# 个选择} other {# 个选择}}",
+      "moviesPart": "{count, plural, one {# 部电影} other {# 部电影}}",
+      "booksPart": "{count, plural, one {# 本书} other {# 本书}}",
+      "musicPart": "{count, plural, one {# 张专辑} other {# 张专辑}}",
+      "watchTime": "约 {hours} 小时屏幕时间",
+      "libraryLogged": "{count} 个记录在你的资料库中"
+    },
+    "tiles": {
+      "favorites": "收藏",
+      "favoritesHint": "选择的 {percent}%",
+      "longestStreak": "最长连胜",
+      "streakDay": "天连续",
+      "streakDays": "天连续",
+      "peakMonth": "巅峰月份",
+      "topGenre": "顶级类型",
+      "picksHint": "{count, plural, one {# 个选择} other {# 个选择}}",
+      "noData": "—"
+    },
+    "creator": {
+      "eyebrow": "最常选择",
+      "director": "导演",
+      "author": "作者",
+      "artist": "艺术家",
+      "noData": "数据还不够。"
+    },
+    "formatMix": {
+      "eyebrow": "格式组合",
+      "movies": "电影",
+      "books": "书籍",
+      "music": "音乐"
+    },
+    "monthly": {
+      "eyebrow": "按月选择"
+    },
+    "genres": {
+      "eyebrow": "类型综述"
+    },
+    "standouts": {
+      "eyebrow": "突出表现",
+      "fullHistory": "完整历史"
+    },
+    "story": {
+      "tapHint": "点击继续",
+      "exit": "退出",
+      "pickYear": "年份",
+      "intro": {
+        "eyebrow": "Year in Review",
+        "eyebrowMonth": "Month in Review",
+        "kicker": "你的 {year}",
+        "kickerMonth": "你的 {period}",
+        "subhead": "按播放键回顾过去的一年。",
+        "subheadMonth": "按播放键回顾过去的一个月。",
+        "cta": "查看你的一年",
+        "keyHint": "方向键导航"
+      },
+      "total": {
+        "eyebrow": "总计",
+        "headline": "{count, plural, one {# 个选择} other {# 个选择}}",
+        "subhead": "{movies} 在屏幕上 · {books} 在书架上 · {music} 在你耳边。"
+      },
+      "format": {
+        "eyebrow": "你的组合",
+        "movies": "电影",
+        "books": "书籍",
+        "music": "专辑",
+        "movieHeavy": "你处于你的电影时代。",
+        "bookHeavy": "你深入阅读。",
+        "musicHeavy": "专辑是你的选择。",
+        "balanced": "跨格式的均衡一年。"
+      },
+      "genres": {
+        "eyebrow": "顶级类型",
+        "headline": "你无法满足于 {top}。",
+        "fallback": "今年没有明确的最爱。"
+      },
+      "creator": {
+        "eyebrow": "最常选择",
+        "headlineDirector": "{name} 一直出现。",
+        "headlineAuthor": "{name} 在循环中。",
+        "headlineArtist": "{name} 主导了这一年。",
+        "subhead": "{count, plural, one {# 个选择} other {# 个选择}}",
+        "fallback": "今年没有突出的创作者。"
+      },
+      "standout": {
+        "eyebrow": "你的时刻",
+        "peakMonth": "巅峰月份",
+        "peakSubhead": "{month} 中 {count, plural, one {# 个选择} other {# 个选择}}",
+        "streak": "最长连胜",
+        "streakSubhead": "{count, plural, one {# 天连续} other {# 天连续}}",
+        "noStreak": "还没有连胜"
+      },
+      "picks": {
+        "eyebrow": "突出的选择",
+        "headline": "那些留下印记的。",
+        "subhead": "收藏在前,然后是其余的亮点。"
+      },
+      "outro": {
+        "eyebrow": "那是你的一年",
+        "headline": "为你策划了 {count, plural, one {# 个选择} other {# 个选择}}。",
+        "subhead": "分享你的亮点或做另一次问答以开始下一章。",
+        "share": "分享我的一年",
+        "restart": "再次观看",
+        "newQuiz": "做新的问答"
+      }
+    },
+    "months": [
+      "1月",
+      "2月",
+      "3月",
+      "4月",
+      "5月",
+      "6月",
+      "7月",
+      "8月",
+      "9月",
+      "10月",
+      "11月",
+      "12月"
+    ]
+  },
+  "GroupQuiz": {
+    "category": "群组问答",
+    "stepOf": "步骤 {current} / {total}",
+    "stepLabel": {
+      "path": "主持或加入",
+      "host": "设置",
+      "join": "加入",
+      "lobby": "大厅",
+      "result": "结果"
+    },
+    "back": {
+      "dashboard": "动态",
+      "home": "首页",
+      "step": "返回",
+      "leave": "离开",
+      "lobby": "大厅"
+    },
+    "path": {
+      "title": "主持或加入一轮?",
+      "subtitle": "主持设置格式并分享代码。加入用 6 字符代码让你进入别人的轮次。",
+      "cards": {
+        "host": {
+          "eyebrow": "主持",
+          "title": "主持一轮",
+          "description": "选择格式,设置多少问题,分享代码,看着选择滚滚而来。"
+        },
+        "join": {
+          "eyebrow": "加入",
+          "title": "加入一轮",
+          "description": "有朋友的 6 字符代码?跳进来 — 无需账户。"
+        }
+      }
+    },
+    "lobby": {
+      "eyebrow": "群组问答",
+      "title": "一起找一个选择",
+      "subtitle": "主持问答并分享代码。每个人都回答,AI 找到适合群组的一个选择。",
+      "intent": {
+        "eyebrow": "欢迎回来",
+        "headline": "从你停下的地方继续?",
+        "summary": "{count} 个问题 · {types} · 最多 {max} 名玩家",
+        "types": {
+          "both": "电影 + 书籍",
+          "mix": "电影 + 书籍 + 音乐",
+          "movie": "电影",
+          "book": "书籍",
+          "music": "音乐"
+        },
+        "continue": "继续",
+        "continuing": "创建中…",
+        "dismissAria": "忽略"
+      },
+      "host": {
+        "eyebrow": "主持",
+        "title": "开始新会话",
+        "nameLabel": "你的名字",
+        "namePlaceholder": "别人如何看到你",
+        "typeLabel": "选择类型",
+        "questionsLabel": "问题",
+        "questionsAria": "问题数量",
+        "maxPlayersLabel": "最大玩家",
+        "maxPlayersAria": "大厅中的最大玩家数",
+        "modeLabel": "什么时候?",
+        "modeLive": "现在一起",
+        "modeAsync": "在截止日期前",
+        "modeLiveHint": "每个人都加入大厅并同时回答。",
+        "modeAsyncHint": "每个成员在截止日期前按自己的时间回答。",
+        "deadlineLabel": "截止日期",
+        "plannedForLabel": "计划用于(可选)",
+        "plannedForHint": "仅供参考 — 你们什么时候计划一起观看/阅读/聆听。",
+        "create": "创建会话",
+        "creating": "创建中…",
+        "signInTitle": "登录以主持",
+        "signInBody": "主持将群组的选择保存到你的资料库,跟踪连胜并解锁 Year in Review。",
+        "signInCta": "登录或创建账户",
+        "signInHint": "只想玩?使用右边的代码。"
+      },
+      "join": {
+        "eyebrow": "加入",
+        "title": "有代码吗?",
+        "codeLabel": "会话代码",
+        "codePlaceholder": "ABC123",
+        "nameLabel": "你的名字",
+        "namePlaceholder": "显示名",
+        "join": "加入会话",
+        "joining": "加入中…",
+        "footer": "加入无需账户 — 只需名字和代码。"
+      },
+      "contentTypes": {
+        "both": "两者",
+        "mix": "混合",
+        "movie": "电影",
+        "book": "书籍",
+        "music": "音乐"
+      },
+      "errors": {
+        "signInRequired": "登录以主持群组问答。",
+        "createFailed": "创建会话失败",
+        "joinFailed": "无法加入会话",
+        "codeLength": "输入 6 字符代码。"
+      }
+    },
+    "session": {
+      "async": {
+        "eyebrow": "异步会话",
+        "deadlineInHours": "{hours, plural, one {还剩 # 小时} other {还剩 # 小时}}",
+        "deadlineInDays": "{days, plural, one {还剩 # 天} other {还剩 # 天}}",
+        "deadlinePassed": "截止日期已过 — 完成中",
+        "plannedFor": "计划用于 {date}",
+        "submitted": "{done}/{total} 已提交"
+      },
+      "loading": "加载会话…",
+      "notFoundTitle": "未找到会话",
+      "notFoundBody": "该代码与活动会话不匹配。",
+      "backToHome": "返回群组问答",
+      "shareCode": "分享此代码",
+      "copyLink": "复制链接",
+      "shareLink": "分享",
+      "shareTitle": "加入我的 Smart Advisor 群组问答",
+      "shareText": "用代码 {code} 加入我的群组问答",
+      "linkCopied": "链接已复制",
+      "linkCopyFailed": "无法复制链接",
+      "linkShareFailed": "无法分享 — 重试",
+      "qr": {
+        "show": "显示二维码",
+        "title": "扫描以加入",
+        "subtitle": "将手机的摄像头对准二维码,直接进入这一轮。",
+        "codeHint": "或输入代码",
+        "close": "完成"
+      },
+      "joined": "{name} 已加入",
+      "left": "{name} 已离开大厅",
+      "playerCount": "{count, plural, one {# 名玩家} other {# 名玩家}}",
+      "playerCountOf": "{count}/{max, plural, one {# 名玩家} other {# 名玩家}}",
+      "submittedCount": "{submitted}/{total} 已提交",
+      "leave": "离开",
+      "backToLobby": "返回大厅",
+      "end": "结束",
+      "leaveConfirm": "离开会话?你的答案将不计入群组选择,你需要代码才能重新加入。",
+      "leaveQuizConfirm": "离开群组问答?你到目前为止的答案将不会提交。",
+      "endConfirm": "为所有人结束此会话?",
+      "backToLobbyConfirmInProgress": "将所有人发回大厅?进行中的答案将被清除。",
+      "backToLobbyConfirmCompleted": "将所有人发回大厅?答案和当前选择将被清除,以便开始新的一轮。",
+      "host": {
+        "generatingQuestions": "生成问题…",
+        "startQuiz": "开始问答 · {count, plural, one {# 个问题} other {# 个问题}}",
+        "needTwoPlayers": "你需要至少 2 名玩家才能开始。",
+        "startFailed": "无法开始问答",
+        "restartFailed": "无法重启问答",
+        "synthesizeFailed": "无法生成推荐",
+        "overloaded": "我们的 AI 现在不堪重负。给它一分钟再试。"
+      },
+      "guest": {
+        "waitingHost": "等待主持人",
+        "waitingBody": "坚持住 — 他们随时会开始。",
+        "joinLobby": "加入大厅",
+        "joinPrompt": "输入名字以加入此群组问答。",
+        "joinPlaceholder": "显示名",
+        "join": "加入",
+        "joining": "加入中…",
+        "joinFailed": "无法加入会话",
+        "inProgress": "问答已经进行中。",
+        "completed": "此会话已结束。",
+        "askHost": "请主持人带回大厅,以便你可以加入。",
+        "lobbyFull": "大厅已满",
+        "lobbyFullBody": "主持人限制了此大厅,且已达上限。请他们提高上限或等待某人离开。"
+      },
+      "submitted": {
+        "lockedInAll": "每个人都已确认",
+        "lockedIn": "已确认",
+        "waitingOthers": "等待其他人完成…",
+        "reveal": "揭示群组的选择",
+        "revealing": "寻找选择…",
+        "guestWaiting": "主持人正在生成选择…"
+      },
+      "quiz": {
+        "category": "直播轮次",
+        "questionOf": "问题 {current} / {total}",
+        "back": "返回",
+        "next": "下一步",
+        "submit": "确认",
+        "submitting": "提交中…",
+        "submittedToast": "已确认!",
+        "answerAll": "先回答每个问题。"
+      },
+      "params": {
+        "contentMovie": "电影",
+        "contentBook": "书籍",
+        "contentMusic": "音乐",
+        "contentMix": "混合",
+        "questions": "{count, plural, one {# 个问题} other {# 个问题}}",
+        "timeEstimate": "约 {minutes, plural, one {# 分钟} other {# 分钟}}",
+        "maxPlayers": "{max, plural, one {# 个座位} other {# 个座位}}",
+        "emptySeat": "空座位",
+        "submittedProgress": "{total} 中 {done} 已确认"
+      },
+      "completed": {
+        "eyebrow": "群组的选择",
+        "subtitle": "根据每个人的发言,这里有些应该适合这个房间。",
+        "playAgain": "再玩一次",
+        "resetting": "重置中…",
+        "newGroup": "开始新群组",
+        "done": "完成",
+        "endSession": "结束会话"
+      },
+      "cancelled": {
+        "body": "此会话已结束。"
+      }
+    },
+    "result": {
+      "movie": "电影",
+      "book": "书籍",
+      "music": "专辑",
+      "byAuthor": "作者:{creator}",
+      "byDirector": "导演:{creator}",
+      "byArtist": "艺术家:{creator}",
+      "whyThisPick": "为什么是这个选择",
+      "viewOnOpenLibrary": "在 Open Library 上查看",
+      "watchTrailer": "观看预告片",
+      "playTrailerAria": "播放 {title} 的预告片"
+    }
+  },
+  "History": {
+    "eyebrow": "历史记录",
+    "title": "你的建议历史",
+    "subtitle": "AI 为你选择的一切。标记收藏以保持靠近,或将其记录到你的资料库以教 AI 你的感受。",
+    "clearAll": "清除所有",
+    "startQuiz": "开始问答",
+    "filtersAria": "历史过滤器",
+    "filtersGroup": "过滤器",
+    "filters": {
+      "all": "全部",
+      "movies": "电影",
+      "books": "书籍",
+      "music": "音乐",
+      "favorites": "收藏"
+    },
+    "stats": {
+      "total": "总计",
+      "favorites": "收藏",
+      "movies": "电影",
+      "books": "书籍",
+      "music": "音乐"
+    },
+    "sortLabel": "排序:",
+    "sortAria": "推荐排序",
+    "searchPlaceholder": "搜索过去的选择",
+    "sort": {
+      "newest": "最新",
+      "oldest": "最旧",
+      "favorites_first": "收藏在前"
+    },
+    "empty": {
+      "title": "未找到推荐",
+      "body": "尝试不同的过滤器或生成新的推荐集。"
+    },
+    "card": {
+      "movie": "电影",
+      "book": "书籍",
+      "music": "专辑",
+      "fallbackExplanation": "基于你最近的问答选择定制的{type}推荐。",
+      "openAria": "打开 {title} 的详情",
+      "favoriteAdd": "添加到收藏",
+      "favoriteRemove": "从收藏中移除",
+      "deleteAria": "删除"
+    },
+    "toasts": {
+      "favoriteFailed": "无法更新你的收藏 — 请重试",
+      "favoriteAdded": "已添加到收藏",
+      "favoriteRemoved": "已从收藏中移除",
+      "deleteFailed": "无法移除该推荐 — 请重试",
+      "deleted": "推荐已从你的历史中移除",
+      "clearFailed": "无法清除你的历史 — 请重试",
+      "cleared": "所有推荐已清除"
+    },
+    "confirm": {
+      "deleteOne": "删除此推荐?",
+      "clearAll": "你确定要删除所有推荐吗?这无法撤销。"
+    },
+    "modal": {
+      "ariaLabel": "{title} 的详情",
+      "byAuthor": "作者:{author}",
+      "byDirector": "导演:{director}",
+      "byArtist": "艺术家:{artist}",
+      "inLibrary": "在你的资料库中",
+      "close": "关闭",
+      "dislike": "不适合我",
+      "dislikedOn": "不会再推荐"
+    }
+  },
+  "Library": {
+    "import": {
+      "headerCta": "导入",
+      "back": "返回资料库",
+      "eyebrow": "导入",
+      "title": "导入你的观看列表",
+      "subtitle": "带来你的 Letterboxd 电影或 Goodreads 书籍。重新导入是安全的 — 匹配的标题会被更新,而不是复制。",
+      "sourceLabel": "来自哪里?",
+      "sources": {
+        "letterboxd": "Letterboxd",
+        "goodreads": "Goodreads"
+      },
+      "hint": {
+        "letterboxd": "从 letterboxd.com/settings/data 导出 — 使用 watchlist.csv 或完整导出。",
+        "goodreads": "从 goodreads.com/review/import 导出 — 「Goodreads Library Export」CSV。"
+      },
+      "choose": "选择 .csv 文件",
+      "chooseHint": "Letterboxd 或 Goodreads CSV 导出",
+      "preview": "{count, plural, one {# 个标题准备好导入} other {# 个标题准备好导入}}",
+      "mismatch": "这个文件看起来像 {detected} 导出,但你选择了 {chosen}。导入前请仔细检查。",
+      "chooseDifferent": "选择另一个文件",
+      "importCta": "导入 {count, plural, one {# 个标题} other {# 个标题}}",
+      "importing": "正在导入 {total} 个中的 {done} 个…",
+      "doneTitle": "导入完成",
+      "doneSummary": "{imported} 个已导入 · {skipped} 个已跳过 · {failed} 个失败",
+      "importAnother": "导入另一个",
+      "goToLibrary": "前往资料库",
+      "errors": {
+        "read": "无法读取该文件。重试。",
+        "empty": "该文件没有行可导入。",
+        "parse": "无法解析该文件。"
+      }
+    },
+    "finishReminder": {
+      "eyebrow": "从你停下的地方继续",
+      "title": "{count, plural, one {你还有 # 个标题在进行中} other {你还有 # 个标题在进行中}}",
+      "cta": "打开"
+    },
+    "eyebrow": "资料库",
+    "title": "你观看和阅读过的",
+    "subtitle": "你在这里保存的反应成为 AI 在你下次问答时使用的品味信号。",
+    "startQuiz": "开始问答",
+    "filtersAria": "资料库过滤器",
+    "typeGroup": "类型",
+    "type": {
+      "all": "全部",
+      "movie": "电影",
+      "book": "书籍",
+      "music": "音乐"
+    },
+    "stats": {
+      "total": "总计",
+      "finished": "已完成",
+      "movies": "电影",
+      "books": "书籍",
+      "music": "音乐"
+    },
+    "statusLabel": "状态",
+    "searchPlaceholder": "搜索你的资料库",
+    "filterAll": "全部",
+    "status": {
+      "finished": "已完成",
+      "in_progress": "进行中",
+      "wishlist": "愿望清单",
+      "dropped": "已放弃"
+    },
+    "rating": {
+      "1": "不适合我",
+      "2": "还行",
+      "3": "喜欢"
+    },
+    "byAuthor": "作者:{creator}",
+    "byDirector": "导演:{creator}",
+    "byArtist": "艺术家:{creator}",
+    "mediumMovie": "电影",
+    "mediumBook": "书籍",
+    "mediumMusic": "专辑",
+    "loggedOn": "{date} 记录",
+    "empty": {
+      "noItemsTitle": "你的资料库中还没有任何内容",
+      "noItemsBody": "下次问答后,在结果上点击「我看过/读过这个」,它将在这里出现。",
+      "noMatchesTitle": "没有匹配那些过滤器的内容",
+      "noMatchesBody": "尝试更改或清除上面的过滤器。"
+    },
+    "removeConfirm": "从你的资料库中移除「{title}」?",
+    "removed": "已从资料库中移除",
+    "updated": "资料库条目已更新",
+    "editAria": "编辑 {title}",
+    "removeAria": "移除 {title}",
+    "statusChangeAria": "更改 {title} 的状态",
+    "wishlistButton": {
+      "add": "愿望清单",
+      "onWishlist": "在愿望清单上",
+      "added": "已添加到你的愿望清单",
+      "ariaAdd": "将 {title} 添加到你的愿望清单",
+      "ariaOnWishlist": "{title} 在你的愿望清单上"
+    },
+    "editDialog": {
+      "ariaLabel": "编辑资料库条目",
+      "title": "编辑条目",
+      "statusHeader": "状态",
+      "ratingHeader": "评级",
+      "reactionHeader": "反应",
+      "reactionPlaceholder": "一行总结…",
+      "save": "保存更改",
+      "cancel": "取消"
+    }
+  },
+  "Onboarding": {
+    "eyebrow": "快完成了",
+    "title": "快速检查",
+    "subtitle": "在你跳进之前确保这是正确的。",
+    "readonly": {
+      "email": "邮箱",
+      "age": "年龄",
+      "editLater": "你可以稍后在设置中更改这些。"
+    },
+    "fields": {
+      "displayName": {
+        "label": "显示名",
+        "placeholder": "我们该怎么称呼你"
+      },
+      "language": {
+        "label": "语言",
+        "en": "English",
+        "es": "Español"
+      },
+      "focus": {
+        "movie": "电影",
+        "book": "书籍",
+        "music": "音乐",
+        "mix": "混合"
+      }
+    },
+    "steps": {
+      "name": {
+        "eyebrow": "步骤 1",
+        "title": "我们该怎么称呼你?",
+        "subtitle": "我们将在推荐和你的资料中使用它。"
+      },
+      "language": {
+        "eyebrow": "步骤 2",
+        "title": "选择你的语言",
+        "subtitle": "我们将翻译应用界面以匹配。"
+      },
+      "focus": {
+        "eyebrow": "步骤 3",
+        "title": "你想要什么的选择?",
+        "subtitle": "设置默认内容类型。你仍然可以在每个问答上切换。",
+        "hint": "提示:你始终可以选择在单独的问答上翻转这个。"
+      },
+      "avoid": {
+        "eyebrow": "步骤 4",
+        "title": "你宁愿跳过什么?",
+        "subtitle": "点击任何一个添加严格的「不推荐」规则。如果没想到,跳过此步骤。",
+        "emptyHint": "还没有过滤器 — 你可以随时在设置中添加一些。",
+        "selectedHint": "{count, plural, one {你宁愿避免的 # 个类型} other {你宁愿避免的 # 个类型}}。"
+      },
+      "review": {
+        "eyebrow": "最后一眼",
+        "title": "这看起来对吗?",
+        "subtitle": "在我们保存之前编辑你想更改的任何内容。",
+        "edit": "编辑",
+        "empty": "—",
+        "noGenres": "无"
+      }
+    },
+    "back": "返回",
+    "next": "下一步",
+    "finish": "完成设置",
+    "submit": "看起来不错",
+    "skip": "暂时跳过",
+    "previewClose": "关闭预览",
+    "errors": {
+      "displayNameRequired": "请输入显示名。",
+      "saveFailed": "我们无法保存你的设置。重试。"
+    },
+    "savedToast": "全部完成 — 欢迎加入。"
+  },
+  "Quiz": {
+    "category": "问答设置",
+    "stepOf": "步骤 {current} / {total}",
+    "back": {
+      "dashboard": "动态"
+    },
+    "contentSelection": {
+      "title": "你想要什么的推荐?",
+      "subtitle": "选择一个,以便我们可以定制你的推荐流程。",
+      "validation": "请选择一个选项后继续。",
+      "continue": "继续",
+      "continuing": "继续中…",
+      "cards": {
+        "movie": {
+          "eyebrow": "在屏幕上",
+          "title": "电影",
+          "description": "根据你当前的情绪和节奏定制的电影。"
+        },
+        "book": {
+          "eyebrow": "在书架上",
+          "title": "书籍",
+          "description": "根据你的风格和兴趣定制的阅读。"
+        },
+        "music": {
+          "eyebrow": "在你耳边",
+          "title": "专辑",
+          "description": "与你当前情绪匹配的唱片。"
+        },
+        "mix": {
+          "eyebrow": "三种全部",
+          "title": "混合一下",
+          "description": "一部电影、一本书和一张专辑一起选择。"
+        },
+        "both": {
+          "eyebrow": "两者",
+          "title": "每种一个",
+          "description": "一部电影和一本书一次性一起选择。"
+        }
+      }
+    },
+    "questionCount": {
+      "title": "我们该问多少问题?",
+      "subtitle": "选择你的 {contentType} 推荐流程的深度。",
+      "contentTypes": {
+        "movie": "电影",
+        "book": "书籍",
+        "music": "专辑",
+        "mix": "电影、书籍和专辑",
+        "both": "电影和书籍"
+      },
+      "questionsLabel": "{count, plural, one {问题} other {问题}}",
+      "tone": {
+        "quick": "快速且重点",
+        "focused": "精准且具体",
+        "balanced": "平衡的深度",
+        "thorough": "彻底探索",
+        "comprehensive": "全面细节"
+      },
+      "estimate": "{minutes, plural, one {# 分钟} other {# 分钟}}",
+      "ariaCount": "问题数量",
+      "back": "格式",
+      "continue": "继续",
+      "continuing": "继续中…"
+    },
+    "questionnaire": {
+      "category": "直播问答",
+      "loadingStep": "准备你的问答",
+      "questionOf": "问题 {current} / {total}",
+      "previous": "上一个",
+      "back": "返回",
+      "next": "下一步",
+      "submit": "获取推荐",
+      "submitting": "生成中…",
+      "subtitle": {
+        "fillInBlank": "用你自己的话分享你的想法。",
+        "selectAll": "选择你喜欢的任意多个。",
+        "singleSelect": "选择一个,以便我们调整你的推荐。"
+      },
+      "leaveConfirm": "离开问答?你到目前为止的答案将不会保存。",
+      "errors": {
+        "title": "无法加载问题",
+        "overloadedTitle": "我们的 AI 已达到容量",
+        "session": "你的会话已过期。请重新登录以继续。",
+        "generic": "我们无法生成你的问题。请重试。",
+        "overloaded": "我们的 AI 现在被狠狠地敲打。给它一分钟再试 — 我们已经为你重试了几次。",
+        "tryAgain": "重试",
+        "back": "返回"
+      },
+      "loadingMessages": {
+        "default": [
+          "思考好问题…",
+          "选择你的角度…",
+          "适配你的品味…",
+          "为你的氛围校准…",
+          "起草问答…",
+          "几乎为你准备好…"
+        ],
+        "movie": [
+          "调查你的屏幕品味…",
+          "询问什么让你按播放…",
+          "排列正确的场景…",
+          "抛光招牌…",
+          "调整镜头…",
+          "滚动开场字幕…"
+        ],
+        "book": [
+          "浏览你的书架…",
+          "倾听你的阅读声音…",
+          "询问你折角的最爱…",
+          "破开书脊…",
+          "放置书签…",
+          "翻到第一章…"
+        ],
+        "music": [
+          "加速你的品味…",
+          "倾听什么打动人…",
+          "排列正确的律动…",
+          "调整刻度盘…",
+          "排列针…",
+          "按下录音…"
+        ],
+        "mix": [
+          "跨格式阅读…",
+          "混合线索 — 屏幕、页面、声音…",
+          "找到你的贯穿线…",
+          "将三种品味编织在一起…",
+          "调整三重奏…",
+          "几乎为你准备好…"
+        ]
+      }
+    }
+  },
+  "Results": {
+    "loadingMessages": {
+      "default": [
+        "翻阅你的答案…",
+        "咨询算法…",
+        "交叉引用好品味…",
+        "寻找隐藏的宝石…",
+        "权衡候选名单…",
+        "抛光每个推荐…",
+        "添加最后的润色…"
+      ],
+      "movie": [
+        "筛选电影…",
+        "将你的品味与经典比较…",
+        "拉动放映机卷轴…",
+        "阅读字幕…",
+        "检查什么值得你的两个小时…",
+        "排列预告片…"
+      ],
+      "book": [
+        "在图书馆书架间漫步…",
+        "交叉引用你的书架…",
+        "追溯你的阅读地图…",
+        "掸去正确书脊上的灰尘…",
+        "检查开场白…",
+        "滑入书签…"
+      ],
+      "music": [
+        "为你的声音翻找箱子…",
+        "排序正确的专辑…",
+        "听超越单曲…",
+        "调到你的频率…",
+        "排列深度切片…",
+        "放下针…"
+      ],
+      "mix": [
+        "编织电影、书籍和音乐…",
+        "将三种品味与你的答案匹配…",
+        "混合你的三个选择…",
+        "跨格式交叉检查…",
+        "排列三重奏…",
+        "添加最后的润色…"
+      ]
+    },
+    "body": {
+      "matchSuffix": "{score}% 匹配",
+      "matchPercent": "{score}%",
+      "whyThisPick": "为什么是这个选择",
+      "about": "关于",
+      "showMore": "显示更多",
+      "showLess": "显示更少",
+      "byAuthor": "作者:{author}",
+      "byDirector": "导演:{director}",
+      "byArtist": "艺术家:{artist}",
+      "favoriteAdd": "将 {title} 添加到收藏",
+      "favoriteRemove": "从收藏中移除 {title}",
+      "movie": "电影",
+      "book": "书籍",
+      "music": "专辑",
+      "eyebrow": "你的选择",
+      "headline": "为你精挑细选",
+      "headlines": [
+        "为你精挑细选",
+        "为你的品味定制",
+        "刚出炉的新鲜货",
+        "为匹配你的氛围而打造",
+        "围绕你的答案构建",
+        "只为你策划",
+        "你的下一个最爱,也许",
+        "有意选择",
+        "个人专属",
+        "精心挑选"
+      ],
+      "subhead": "{count, plural, one {AI 的 # 个个性化选择,每个背后都有推理。在你的资料库中记录一个以影响未来选择。} other {AI 的 # 个个性化选择,每个背后都有推理。在你的资料库中记录一个以影响未来选择。}}",
+      "sections": {
+        "movie": {
+          "eyebrow": "电影",
+          "title": "在屏幕上"
+        },
+        "book": {
+          "eyebrow": "书籍",
+          "title": "在书架上"
+        },
+        "music": {
+          "eyebrow": "专辑",
+          "title": "在你耳边"
+        }
+      },
+      "actions": {
+        "retake": "重做问答",
+        "viewHistory": "查看历史",
+        "share": "分享结果",
+        "more": "更多",
+        "moreAriaLabel": "更多操作"
+      },
+      "shareMenu": {
+        "share": "分享…",
+        "copy": "复制到剪贴板",
+        "shareX": "在 X 上分享",
+        "shareEmail": "通过邮件分享"
+      },
+      "shareToasts": {
+        "shareFailed": "无法分享 — 重试",
+        "copySuccess": "已复制到剪贴板!",
+        "copyFailed": "无法复制 — 重试",
+        "favoriteFailed": "无法更新你的收藏 — 请重试",
+        "favoriteAdded": "已添加到收藏",
+        "favoriteRemoved": "已从收藏中移除"
+      },
+      "shareText": {
+        "title": "我的 Smart Advisor 选择",
+        "movies": "电影:",
+        "books": "书籍:",
+        "music": "专辑:",
+        "directorPrefix": "导演 {director}",
+        "byAuthorShort": "作者 {author}",
+        "byArtistShort": "艺术家 {artist}",
+        "genres": "类型:{list}",
+        "footer": "在 smartadvisor.app 获取你自己的选择"
+      },
+      "shareTwitter": "刚刚获得了我的 Smart Advisor 选择:{titles}\n\n在 smartadvisor.app 获取你自己的",
+      "shareEmailSubject": "我的 Smart Advisor 选择",
+      "beforeUnload": "你有未保存的推荐。你确定要离开吗?",
+      "generationStep": {
+        "analyzing": "分析你的答案...",
+        "generating": "生成个性化推荐...",
+        "enhancing": "用电影、书籍和专辑数据增强...",
+        "finalizing": "完成你的推荐..."
+      },
+      "generationError": "无法生成个性化推荐。请重试。",
+      "overloadedTitle": "我们的 AI 已达到容量",
+      "overloadedBody": "我们的 AI 现在被狠狠地敲打。给它一分钟再试 — 我们已经为你重试了几次。",
+      "confirmDialog": {
+        "title": "生成新推荐?",
+        "body": "你已经为这些答案生成了推荐。生成新集或返回你的动态。",
+        "cancel": "前往动态",
+        "confirm": "生成新的"
+      },
+      "errorState": {
+        "title": "无法生成推荐",
+        "retry": "重试",
+        "back": "重做问答"
+      },
+      "refine": {
+        "cta": "精炼",
+        "eyebrow": "精炼",
+        "title": "调整这些选择",
+        "subtitle": "告诉我们如何引导 — 我们将用你的原始答案加上这个重新运行。",
+        "placeholder": "例如:更像沙丘,更轻,不超过 2 小时",
+        "cancel": "取消",
+        "submit": "精炼"
+      }
+    }
+  },
+  "Dashboard": {
+    "eyebrow": "仪表板",
+    "startQuiz": "开始问答",
+    "viewsAria": "仪表板视图",
+    "viewsGroup": "视图",
+    "tabs": {
+      "overview": "概述",
+      "picks": "选择",
+      "recentPicks": "最近选择",
+      "genres": "类型",
+      "milestones": "里程碑"
+    },
+    "stats": {
+      "total": "总选择",
+      "movies": "电影",
+      "books": "书籍",
+      "music": "音乐",
+      "favorites": "收藏"
+    },
+    "filters": {
+      "all": "全部",
+      "favorites": "收藏"
+    },
+    "recentAria": "最近选择过滤器",
+    "body": {
+      "loadingChart": "加载图表...",
+      "greetings": [
+        "欢迎回来",
+        "嘿",
+        "很高兴见到你",
+        "你好",
+        "嗨",
+        "再次你好",
+        "很高兴你回来",
+        "看看谁回来了",
+        "传奇归来",
+        "好的好的好的",
+        "问候,凡人",
+        "很高兴见到你",
+        "情节加厚",
+        "续集时间",
+        "现正放映",
+        "滚动字幕",
+        "请鼓点",
+        "做好准备",
+        "准备就绪,滚动"
+      ],
+      "headerHook": {
+        "loading": "你的个性化推荐中心。",
+        "empty": "开始你的第一次问答。",
+        "quietWeek": "安静的一周 — 准备好新选择了吗?",
+        "up": "{n, plural, one {本周 # 个新选择 · 比上周高 {delta}。} other {本周 # 个新选择 · 比上周高 {delta}。}}",
+        "down": "{n, plural, one {本周 # 个新选择 · 比上周低 {delta}。} other {本周 # 个新选择 · 比上周低 {delta}。}}",
+        "flat": "{n, plural, one {本周 # 个新选择。} other {本周 # 个新选择。}}"
+      },
+      "modal": {
+        "ariaLabel": "{title} 的详情",
+        "byAuthor": "作者:{author}",
+        "byDirector": "导演:{director}",
+        "byArtist": "艺术家:{artist}",
+        "close": "关闭"
+      },
+      "favoriteAria": "已收藏",
+      "inLibraryAria": "在你的资料库中",
+      "wrapped": {
+        "eyebrow": "Year in Review",
+        "titleLead": "你的",
+        "titleTail": "选择",
+        "body": "顶级类型、最长连胜、最常选择的创作者 — 包装在一张卡片中。",
+        "cta": "打开 Wrapped"
+      },
+      "suggestion": {
+        "eyebrow": "下一个建议",
+        "firstQuiz": {
+          "title": "开始你的第一次问答",
+          "body": "回答几个问题,AI 将为你提供量身定制的选择。",
+          "cta": "开始问答"
+        },
+        "logReaction": {
+          "title": "记录反应",
+          "body": "告诉 AI 什么落地了什么没有 — 你的反应在每次未来问答中都成为品味信号。",
+          "cta": "打开结果"
+        },
+        "anotherPick": {
+          "title": "另一次选择的时间?",
+          "body": "你的最后一次问答是 {ago} 前。AI 现在知道 {count, plural, one {你的 # 个反应} other {你的 # 个反应}}。",
+          "cta": "做另一次问答"
+        }
+      },
+      "spotlight": {
+        "eyebrow": "最新选择",
+        "openDetailsAria": "打开 {title} 的详情",
+        "byAuthor": "作者:{author}",
+        "byDirector": "导演:{director}",
+        "viewAll": "查看全部"
+      },
+      "noPicks": {
+        "title": "还没有选择",
+        "body": "做你的第一次问答,你最新的选择将在这里,所以始终一击可达。"
+      },
+      "pulse": {
+        "eyebrow": "脉冲",
+        "thisWeek": "{count, plural, one {本周 # 个选择} other {本周 # 个选择}}",
+        "quietWeek": "安静的一周",
+        "up": "↑ 比上周多 {delta}",
+        "down": "↓ 比上周少 {delta}",
+        "lastFourteenDays": "过去 14 天",
+        "streakBadge": "{count} 天连胜",
+        "stat": {
+          "picks": "选择",
+          "library": "资料库",
+          "favorites": "收藏",
+          "topGenre": "顶级类型"
+        },
+        "picksHint": "{movies}电 · {books}书 · {music}专",
+        "ratedHint": "{count} 个已评级",
+        "favoritesPercent": "{percent}%",
+        "topGenrePicks": "{count, plural, one {# 个选择} other {# 个选择}}",
+        "noData": "—"
+      },
+      "milestones": {
+        "eyebrow": "里程碑",
+        "pageTitle": "你的里程碑",
+        "backToFeed": "返回动态",
+        "earnedSummary": "{total} 中已获得 {earned}",
+        "unlocked": "已解锁",
+        "progress": "{progress}/{target}",
+        "unlockedToast": "里程碑解锁:{label}",
+        "tierCompleteToast": "层级完成:{tier}!🏆",
+        "tapForDetails": "点击里程碑查看如何解锁",
+        "summaryCta": "打开里程碑",
+        "summaryHint": "查看每个里程碑,按层级分组。",
+        "tiers": {
+          "easy": "简单",
+          "medium": "中级",
+          "hard": "困难",
+          "master": "大师"
+        },
+        "items": {
+          "firstPick": "首次选择",
+          "tenPicks": "10 次选择",
+          "twentyFivePicks": "25 次选择",
+          "halfCentury": "半世纪",
+          "centurion": "百夫长",
+          "wideTaste": "广泛品味",
+          "genreExplorer": "类型探险家",
+          "genreMaster": "类型大师",
+          "cinephile": "电影爱好者",
+          "cinemaMaster": "电影大师",
+          "bookworm": "书虫",
+          "voracious": "贪婪读者",
+          "melomaniac": "音乐狂",
+          "audiophile": "发烧友",
+          "musicMogul": "音乐大亨",
+          "curator": "策展人",
+          "maven": "专家",
+          "reflective": "反思",
+          "critic": "批评家",
+          "librarian": "图书管理员",
+          "completionist": "完美主义者",
+          "weekStreak": "周连胜",
+          "marathon": "马拉松",
+          "legend": "传奇",
+          "movieMogul": "电影大亨",
+          "libraryRoyal": "资料库皇室",
+          "polymath": "博学者",
+          "patron": "赞助人",
+          "tastemaker": "品味制造者",
+          "yearLong": "全年"
+        },
+        "descriptions": {
+          "firstPick": "从问答中获取你的第一个推荐。",
+          "tenPicks": "从任何混合的问答中获取 10 个推荐。",
+          "twentyFivePicks": "积累 25 个推荐。",
+          "halfCentury": "达到 50 个推荐。",
+          "centurion": "100 个推荐不是开玩笑的。",
+          "wideTaste": "获得涵盖 5 种不同类型的推荐。",
+          "genreExplorer": "分支到 10 种不同类型。",
+          "genreMaster": "涵盖 20 种不同类型。",
+          "cinephile": "收集 10 个电影推荐。",
+          "cinemaMaster": "收集 50 个电影推荐。",
+          "bookworm": "收集 10 个书籍推荐。",
+          "voracious": "收集 50 个书籍推荐。",
+          "melomaniac": "收集 10 个专辑推荐。",
+          "audiophile": "收集 50 个专辑推荐。",
+          "musicMogul": "收集 100 个专辑推荐。",
+          "curator": "在你的历史中收藏 5 个推荐。",
+          "maven": "收藏 25 个推荐。",
+          "reflective": "在你的资料库中评级 5 个项目。",
+          "critic": "在你的资料库中评级 25 个项目。",
+          "librarian": "在你的资料库中记录 20 个项目。",
+          "completionist": "将 10 个资料库项目标记为已完成。",
+          "weekStreak": "连续 7 天使用 Smart Advisor。",
+          "marathon": "保持 30 天 Smart Advisor 连胜。",
+          "legend": "达到 250 个推荐 — 真正的传奇。",
+          "movieMogul": "收集 100 个电影推荐。",
+          "libraryRoyal": "收集 100 个书籍推荐。",
+          "polymath": "在 30 种不同类型中获得推荐。",
+          "patron": "收藏 50 个推荐。",
+          "tastemaker": "在你的资料库中评级 100 个项目。",
+          "yearLong": "保持 365 天 Smart Advisor 连胜。是的,真的。"
+        }
+      },
+      "library": {
+        "eyebrow": "品味信号",
+        "title": "你的资料库",
+        "viewAll": "查看全部",
+        "emptyLead": "还没有记录任何内容。在结果上点击",
+        "emptyAction": "我看过/读过",
+        "emptyTail": ",它将作为未来问答的品味信号出现在这里。"
+      },
+      "inProgress": {
+        "eyebrow": "目前",
+        "title": "从你停下的地方继续",
+        "markFinished": "标记为已完成",
+        "markedFinishedToast": "不错 — 打开你的资料库来评级「{title}」。",
+        "viewAll": "查看全部"
+      },
+      "picks": {
+        "filterAria": "最近选择过滤器",
+        "all": "全部",
+        "favorites": "收藏",
+        "seeAllInHistory": "在历史中查看全部",
+        "noPicksTitle": "还没有选择",
+        "noPicksBody": "做一次问答,你的选择将在这里收集。",
+        "startQuiz": "开始问答",
+        "noFavoritesTitle": "还没有收藏",
+        "noFavoritesBody": "在任何选择上点击心形以将其保存在这里。",
+        "movies": "电影",
+        "books": "书籍",
+        "music": "音乐"
+      },
+      "genres": {
+        "eyebrow": "类型细分",
+        "title": "你的品味倾向何处",
+        "topLabel": "顶级",
+        "topPercent": "{percent}%",
+        "mostlyMovies": "大多是电影",
+        "mostlyBooks": "大多是书籍",
+        "mostlyMusic": "大多是音乐",
+        "evenSplit": "均匀分配",
+        "empty": "做一次问答查看你的类型。",
+        "format": {
+          "movies": "电影",
+          "books": "书籍",
+          "music": "音乐",
+          "totalPicks": "{count, plural, one {# 个选择} other {# 个选择}}",
+          "empty": "还没有选择。"
+        }
+      }
+    }
+  },
+  "Demo": {
+    "quiz": {
+      "category": "演示问答",
+      "pickLabel": "选择格式",
+      "stepLabel": "问题 {current} / {total}",
+      "back": {
+        "home": "首页",
+        "previous": "上一个"
+      },
+      "cards": {
+        "movie": {
+          "eyebrow": "在屏幕上",
+          "title": "电影",
+          "description": "根据你当前的情绪和节奏定制的电影。"
+        },
+        "book": {
+          "eyebrow": "在书架上",
+          "title": "书籍",
+          "description": "根据你的风格和兴趣定制的阅读。"
+        },
+        "music": {
+          "eyebrow": "在你耳边",
+          "title": "专辑",
+          "description": "与你当前情绪匹配的唱片。"
+        },
+        "mix": {
+          "eyebrow": "三种全部",
+          "title": "混合一下",
+          "description": "一部电影、一本书和一张专辑一起选择。"
+        },
+        "both": {
+          "eyebrow": "两者",
+          "title": "每种一个",
+          "description": "一部电影和一本书一次性一起选择。"
+        }
+      },
+      "validation": {
+        "fillInBlank": "请在继续前输入答案。",
+        "selectAll": "请在继续前选择至少一个选项。",
+        "singleSelect": "请在继续前选择一个选项。"
+      },
+      "next": "下一步",
+      "continue": "继续",
+      "leaveConfirm": "离开演示?你到目前为止的答案将不会保存。"
+    },
+    "results": {
+      "loadingText": "找到你的完美选择...",
+      "matchSuffix": " 匹配",
+      "whyThisPick": "为什么是这个选择",
+      "about": "关于",
+      "showMore": "显示更多",
+      "showLess": "显示更少",
+      "viewDetails": "查看详情",
+      "errors": {
+        "limitTitle": "今天到此为止",
+        "genericTitle": "出了点问题",
+        "limitFallback": "你已经使用了今天所有 {limit} 个免费演示运行。创建免费账户以获得无限推荐 — 你的品味档案在每次问答中都会改善。",
+        "genericFallback": "我们无法生成你的演示推荐。请重试。",
+        "signUp": "创建你的免费账户",
+        "tryAgain": "重试"
+      },
+      "eyebrow": "演示 · 你的选择",
+      "headline": "为你精挑细选",
+      "subhead": "{count, plural, one {你的演示答案的 # 个个性化选择 — 注册以保存它们并随时间精炼。} other {你的演示答案的 # 个个性化选择 — 注册以保存它们并随时间精炼。}}",
+      "empty": "未找到结果。再次尝试演示以获得新集。",
+      "sections": {
+        "movie": {
+          "eyebrow": "电影",
+          "title": "在屏幕上"
+        },
+        "book": {
+          "eyebrow": "书籍",
+          "title": "在书架上"
+        },
+        "music": {
+          "eyebrow": "专辑",
+          "title": "在你耳边"
+        }
+      },
+      "cta": {
+        "title": "把这变成习惯",
+        "body": "注册以保存你的选择,从你的反应构建品味档案,并每次都获得 AI 定制的推荐。",
+        "signUp": "注册以继续",
+        "retake": "重做演示"
+      }
+    }
+  },
+  "WhereToWatch": {
+    "title": "在哪里观看",
+    "flatrate": "流媒体",
+    "rent": "租借",
+    "buy": "购买",
+    "attribution": "通过 JustWatch"
+  },
+  "Feed": {
+    "aiNudge": {
+      "eyebrow": "AI 提示",
+      "variants": {
+        "surprise": {
+          "title": "需要快速选择?一击我们就给你惊喜。",
+          "cta": "给我惊喜"
+        },
+        "refine": {
+          "title": "有几乎奏效的选择?用简单中文精炼它。",
+          "cta": "尝试精炼"
+        },
+        "group": {
+          "title": "今晚和朋友一起看?启动群组问答。",
+          "cta": "群组问答"
+        },
+        "tune": {
+          "title": "选择感觉不对?在 30 秒内调整你的品味过滤器。",
+          "cta": "调整品味"
+        },
+        "solo": {
+          "title": "快速问答,精准选择 — 你想要什么?",
+          "cta": "开始问答"
+        }
+      }
+    },
+    "dashboardMoved": {
+      "eyebrow": "注意",
+      "title": "这是你的新家。",
+      "body": "仪表板已移动 — 你的<milestones>里程碑</milestones>现在住在那里。",
+      "dismiss": "忽略"
+    },
+    "mobileApp": {
+      "eyebrow": "即将推出",
+      "title": "Smart Advisor for iOS & Android",
+      "body": "原生移动应用即将到来 — 它发布时用同一账户登录。",
+      "dismiss": "忽略"
+    }
+  }
+}

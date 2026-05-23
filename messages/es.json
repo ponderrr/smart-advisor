@@ -298,7 +298,15 @@
     "description": "Elige el idioma usado en toda la aplicación.",
     "options": {
       "en": "Inglés",
-      "es": "Español"
+      "es": "Español",
+      "fr": "Francés",
+      "de": "Alemán",
+      "pt": "Portugués",
+      "it": "Italiano",
+      "nl": "Neerlandés",
+      "ja": "Japonés",
+      "zh": "Chino",
+      "ko": "Coreano"
     },
     "saving": "Guardando…",
     "saved": "Idioma actualizado."

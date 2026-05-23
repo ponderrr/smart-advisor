@@ -298,7 +298,15 @@
     "description": "Choose the language used across the app.",
     "options": {
       "en": "English",
-      "es": "Spanish"
+      "es": "Spanish",
+      "fr": "French",
+      "de": "German",
+      "pt": "Portuguese",
+      "it": "Italian",
+      "nl": "Dutch",
+      "ja": "Japanese",
+      "zh": "Chinese",
+      "ko": "Korean"
     },
     "saving": "Saving…",
     "saved": "Language updated."

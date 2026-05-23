@@ -1,0 +1,2323 @@
+{
+  "Settings": {
+    "eyebrow": "Impostazioni",
+    "title": "Impostazioni account",
+    "subtitle": "Gestisci il tuo profilo, sicurezza e preferenze.",
+    "tabs": {
+      "profile": "Profilo",
+      "security": "Sicurezza",
+      "content": "Contenuto",
+      "feed": "Feed",
+      "integrations": "Integrazioni",
+      "help": "Aiuto"
+    },
+    "feed": {
+      "title": "Feed",
+      "description": "Controlla come appari nel feed sociale di consigli e opinioni.",
+      "visibilityLabel": "Visibilità del profilo",
+      "public": "Pubblico",
+      "private": "Privato",
+      "publicHint": "I tuoi consigli completati, valutati e condivisi appaiono nei feed di altri, e le persone possono seguirti direttamente.",
+      "privateHint": "Puoi ancora sfogliare e pubblicare normalmente, ma la tua attività non viene trasmessa ad altri feed e i nuovi follower sono solo su richiesta.",
+      "prefsTitle": "Preferenze del feed",
+      "prefsDescription": "Impostazioni predefinite all'apertura del feed. Puoi sempre cambiare mentre navighi.",
+      "viewLabel": "Visualizzazione predefinita",
+      "viewCards": "Schede",
+      "viewList": "Elenco",
+      "scopeLabel": "Ambito predefinito",
+      "scopeFriends": "Amici",
+      "scopeDiscover": "Scopri",
+      "scopeGroup": "Gruppo",
+      "communityLabel": "Comunità predefinita",
+      "communityAll": "Tutte",
+      "communityMovies": "Film",
+      "communityBooks": "Libri",
+      "communityMusic": "Musica",
+      "commentSortLabel": "Ordinamento commenti",
+      "commentSortTop": "Top",
+      "commentSortNew": "Nuovi",
+      "blocked": {
+        "title": "Persone bloccate",
+        "description": "I loro post e commenti non appariranno nel tuo feed.",
+        "empty": "Non hai bloccato nessuno.",
+        "unblock": "Sblocca",
+        "unblockedToast": "@{handle} sbloccato"
+      },
+      "reports": {
+        "title": "Segnalazioni inviate",
+        "description": "Post e commenti che hai segnalato. Il nostro team esamina ognuno.",
+        "empty": "Non hai inviato segnalazioni.",
+        "onPost": "Su un post",
+        "onComment": "Su un commento",
+        "contentGone": "Contenuto rimosso",
+        "statusReview": "In revisione"
+      }
+    },
+    "groups": {
+      "account": "Account",
+      "app": "App"
+    },
+    "profile": {
+      "pictureTitle": "Immagine del profilo",
+      "pictureDescription": "Carica un'immagine da mostrare in tutta l'app. JPG, PNG, GIF o WEBP fino a 5 MB.",
+      "uploading": "Caricamento…",
+      "changePicture": "Cambia immagine",
+      "uploadPicture": "Carica immagine",
+      "remove": "Rimuovi",
+      "pictureUpdated": "Immagine del profilo aggiornata.",
+      "pictureRemoved": "Immagine del profilo rimossa.",
+      "detailsTitle": "Dettagli del profilo",
+      "detailsDescription": "Aggiorna i dettagli pubblici del tuo account.",
+      "currentUsername": "Nome visualizzato attuale",
+      "newUsername": "Nome visualizzato",
+      "newUsernamePlaceholder": "Come dovremmo chiamarti",
+      "age": "Età",
+      "agePlaceholder": "25",
+      "save": "Salva modifiche",
+      "savedToast": "Profilo aggiornato.",
+      "aboutTitle": "Su di me",
+      "aboutDescription": "Una breve bio e tag mostrati sul tuo profilo pubblico.",
+      "bioLabel": "Bio",
+      "bioPlaceholder": "Dì alle persone cosa ti appassiona…",
+      "interestsLabel": "Interessi",
+      "tagsLabel": "I tuoi tag",
+      "tagsPlaceholder": "Aggiungi un tag…",
+      "tagsAdd": "Aggiungi",
+      "aboutSavedToast": "Personalizzazione del profilo salvata.",
+      "aboutSaveError": "Impossibile salvare — riprova."
+    },
+    "email": {
+      "title": "Email",
+      "description": "L'indirizzo che usi per accedere.",
+      "current": "Attuale",
+      "newEmail": "Nuova email",
+      "newEmailPlaceholder": "nuovo@esempio.com",
+      "update": "Aggiorna email",
+      "differentRequired": "La nuova email deve essere diversa.",
+      "checkInbox": "Controlla la tua casella di posta per confermare."
+    },
+    "password": {
+      "title": "Password",
+      "description": "Scegli una nuova password.",
+      "newPassword": "Nuova password",
+      "confirmPassword": "Conferma password",
+      "passwordPlaceholder": "••••••••",
+      "requirementsTitle": "Requisiti della password",
+      "confirmRulesTitle": "Conferma password",
+      "matches": "Corrisponde alla tua password",
+      "update": "Aggiorna password",
+      "updatedToast": "Password aggiornata."
+    },
+    "mfa": {
+      "title": "Autenticazione a due fattori",
+      "description": "Un passaggio aggiuntivo all'accesso per mantenere sicuro il tuo account.",
+      "checking": "Verifica…",
+      "on": "L'autenticazione a due fattori è attiva",
+      "off": "L'autenticazione a due fattori è disattivata",
+      "enabled": "Abilitata",
+      "disabled": "Disabilitata",
+      "manage": "Gestisci autenticazione a due fattori",
+      "enable": "Abilita autenticazione a due fattori"
+    },
+    "backupEmail": {
+      "title": "Email di backup",
+      "description": "Un indirizzo di recupero usato quando il tuo autenticatore non è disponibile.",
+      "labelChange": "Cambia in",
+      "labelDefault": "Email di backup",
+      "placeholderChange": "nuovo-backup@esempio.com",
+      "placeholderDefault": "backup@esempio.com",
+      "save": "Salva backup",
+      "update": "Aggiorna backup",
+      "savedToast": "Email di backup salvata.",
+      "removedToast": "Email di backup rimossa.",
+      "remove": "Rimuovi"
+    },
+    "theme": {
+      "title": "Aspetto",
+      "description": "Abbina al tuo sistema o fissa un tema.",
+      "light": "Chiaro",
+      "dark": "Scuro",
+      "system": "Sistema"
+    },
+    "content": {
+      "title": "Preferenze di contenuto",
+      "description": "Imposta il comportamento di raccomandazione predefinito.",
+      "typeLabel": "Tipo di raccomandazione",
+      "type": {
+        "movie": {
+          "eyebrow": "Sullo schermo",
+          "label": "Film"
+        },
+        "book": {
+          "eyebrow": "Sullo scaffale",
+          "label": "Libri"
+        },
+        "music": {
+          "eyebrow": "Nelle tue orecchie",
+          "label": "Musica"
+        },
+        "both": {
+          "eyebrow": "Uno di ciascuno",
+          "label": "Entrambi"
+        },
+        "mix": {
+          "eyebrow": "Tutti e tre",
+          "label": "Mix"
+        }
+      },
+      "toneLabel": "Tono del contenuto",
+      "ageLockedEyebrow": "Bloccato per età",
+      "ageLockedBody": "Le raccomandazioni sono mantenute appropriate alla tua età ({age}). Gli adulti possono scegliere tra toni standard e familiari.",
+      "ageLockedBodyMissing": "Le raccomandazioni sono mantenute appropriate alla tua età. Gli adulti possono scegliere tra toni standard e familiari.",
+      "tone": {
+        "standard": "Standard",
+        "family": "Per famiglie"
+      },
+      "toneHint": {
+        "standard": "Personalità completa. L'IA può suggerire scelte oscure, complesse o mature quando ti si addicono.",
+        "family": "Le scelte rimangono leggere. Nessun tema maturo, contenuto oscuro o contenuto sessuale."
+      },
+      "questionCountLabel": "Domande per quiz",
+      "questionWord": "{count, plural, one {Domanda} other {Domande}}",
+      "depth": {
+        "quick": "Rapido e focalizzato",
+        "focused": "Preciso e specifico",
+        "balanced": "Profondità equilibrata",
+        "thorough": "Esplorazione approfondita",
+        "comprehensive": "Dettaglio completo"
+      },
+      "rangeAria": "Domande predefinite per quiz",
+      "appliesNext": "Si applica al prossimo quiz",
+      "save": "Salva preferenze",
+      "savedToast": "Preferenze di contenuto salvate.",
+      "saveError": "Non siamo riusciti a salvare le tue preferenze. Riprova.",
+      "filters": {
+        "title": "Filtri di raccomandazione",
+        "description": "Limiti rigorosi che l'IA deve rispettare ad ogni raccomandazione — quiz solo e Sorprendimi. Impostali per formato in modo che evitare un genere di film non blocchi anche un genere di libro. Il Quiz di gruppo non è influenzato.",
+        "formatLabel": "Filtra per",
+        "format": {
+          "movie": "Film",
+          "book": "Libri",
+          "music": "Musica"
+        },
+        "avoidGenresLabel": "Evita generi",
+        "runtimeLabel": "Durata massima film",
+        "runtimeNoCap": "Senza limite",
+        "runtimeMinutes": "{minutes} min",
+        "runtimeHintNone": "Nessun limite di durata — i film di qualsiasi lunghezza sono accettabili.",
+        "runtimeHint": "I film devono durare {minutes} minuti o meno.",
+        "languageLabel": "Lingua preferita",
+        "languagePlaceholder": "es. giapponese, spagnolo",
+        "avoidNoteLabel": "Non raccomandare mai",
+        "avoidNotePlaceholder": {
+          "movie": "Film da evitare completamente — franchise, registi, temi…",
+          "book": "Libri da evitare completamente — serie, autori, temi…",
+          "music": "Musica da evitare completamente — artisti, sottogeneri, temi…"
+        },
+        "avoidNoteHint": "Testo libero. Sii specifico quanto vuoi.",
+        "appliesNext": "Si applica al prossimo quiz",
+        "save": "Salva filtri",
+        "saved": "Filtri di raccomandazione salvati.",
+        "saveFailed": "Non siamo riusciti a salvare i tuoi filtri. Riprova.",
+        "notAuthed": "Devi essere connesso per salvare i filtri."
+      }
+    },
+    "integrations": {
+      "title": "Integrazioni",
+      "description": "Provider e servizi connessi.",
+      "emptyTitle": "Nessuna integrazione disponibile ancora",
+      "emptyBody": "Le connessioni di terze parti appariranno qui una volta disponibili."
+    },
+    "help": {
+      "title": "Aiuto",
+      "description": "Risposte alle domande comuni, più link rapidi alle parti dell'app che potresti aver perso.",
+      "faq": {
+        "title": "FAQ",
+        "subtitle": "Sfoglia le domande frequenti"
+      },
+      "takeQuiz": {
+        "title": "Fai un quiz",
+        "subtitle": "Ottieni nuove raccomandazioni in un paio di minuti"
+      },
+      "findFriends": {
+        "title": "Trova amici",
+        "subtitle": "Scopri persone con gusti simili"
+      },
+      "milestones": {
+        "title": "I tuoi traguardi",
+        "subtitle": "Traccia i progressi e sblocca obiettivi"
+      },
+      "showOnboarding": {
+        "title": "Mostra introduzione",
+        "subtitle": "Rivedi la schermata di configurazione del profilo in modalità anteprima"
+      }
+    },
+    "danger": {
+      "title": "Zona di pericolo",
+      "description": "Queste azioni sono irreversibili. Procedi con cautela.",
+      "disable": "Disabilita account",
+      "delete": "Elimina account",
+      "processing": "Elaborazione…",
+      "disableConfirm": "Disabilitare il tuo account? Verrai disconnesso e non potrai accedere finché non sarà riattivato dal supporto.",
+      "disableFinalConfirm": "Conferma finale. Disabilitare ora?",
+      "deleteConfirm": "Eliminare permanentemente il tuo account? Non può essere annullato.",
+      "typeDeletePrompt": "Digita \"DELETE\" per confermare:",
+      "deletionCanceled": "Eliminazione annullata."
+    },
+    "verifyAction": {
+      "save": "salvare il tuo profilo",
+      "email": "aggiornare la tua email",
+      "password": "cambiare la tua password",
+      "content": "salvare le preferenze di contenuto",
+      "disable": "disabilitare il tuo account",
+      "delete": "eliminare permanentemente il tuo account",
+      "addAuthenticator": "aggiungere un altro autenticatore",
+      "setBackupEmail": "impostare la tua email di backup",
+      "removeBackupEmail": "rimuovere la tua email di backup"
+    },
+    "verifyModal": {
+      "title": "Verifica identità",
+      "description": "Inserisci il tuo codice di autenticazione a 6 cifre per {action}.",
+      "placeholder": "000000",
+      "enterCode": "Inserisci un codice a 6 cifre",
+      "noFactor": "Nessun fattore MFA verificato trovato",
+      "cancel": "Annulla",
+      "verify": "Verifica",
+      "closeAria": "Chiudi dialogo di verifica"
+    },
+    "verifyModalEnroll": {
+      "title": "Configura prima 2FA",
+      "description": "L'autenticazione a due fattori è richiesta per {action}. Configurala ora per continuare."
+    },
+    "mfaSetupModal": {
+      "closeAria": "Chiudi configurazione due fattori"
+    }
+  },
+  "Language": {
+    "title": "Lingua",
+    "description": "Scegli la lingua usata in tutta l'app.",
+    "options": {
+      "en": "Inglese",
+      "es": "Spagnolo",
+      "fr": "Francese",
+      "de": "Tedesco",
+      "pt": "Portoghese",
+      "it": "Italiano",
+      "nl": "Olandese",
+      "ja": "Giapponese",
+      "zh": "Cinese",
+      "ko": "Coreano"
+    },
+    "saving": "Salvataggio…",
+    "saved": "Lingua aggiornata."
+  },
+  "Navbar": {
+    "items": {
+      "howItWorks": "Come funziona",
+      "whySmartAdvisor": "Perché Smart Advisor",
+      "poweredBy": "Realizzato con",
+      "ourTeam": "Il nostro team",
+      "faq": "FAQ",
+      "dashboard": "Dashboard",
+      "feed": "Feed",
+      "library": "Libreria",
+      "history": "Cronologia",
+      "milestones": "Traguardi",
+      "groupQuiz": "Quiz di gruppo",
+      "settings": "Impostazioni"
+    },
+    "getStarted": "Inizia",
+    "signOut": "Esci",
+    "accountMenu": "Menu account",
+    "theme": {
+      "label": "Tema",
+      "light": "Chiaro",
+      "dark": "Scuro",
+      "system": "Sistema",
+      "systemHint": "Corrisponde all'impostazione del tuo dispositivo"
+    }
+  },
+  "Home": {
+    "hero": {
+      "titleLine1": "Scopri la tua prossima",
+      "titleLine2": "ossessione preferita in ogni",
+      "subtitle": "Raccomandazioni basate sull'IA per film, libri e album adattate al tuo gusto unico.",
+      "ctaPrimaryLoggedOut": "Inizia",
+      "ctaPrimaryLoggedIn": "Vai al feed",
+      "ctaSecondaryLoggedOut": "Prova la demo",
+      "ctaSecondaryLoggedIn": "Visualizza cronologia",
+      "scrollHint": "Scorri per esplorare",
+      "flipWords": [
+        "Film",
+        "Libro",
+        "Album",
+        "Storia",
+        "Avventura",
+        "Classico",
+        "Capolavoro",
+        "Cult"
+      ]
+    },
+    "howItWorks": {
+      "eyebrow": "Come funziona",
+      "title": "Dall'indecisione a una grande scelta in quattro passaggi",
+      "subtitle": "Un modo più veloce per arrivare a una visione o lettura che vale il tuo tempo.",
+      "steps": {
+        "format": {
+          "title": "Scegli il tuo formato",
+          "description": "Dicci se hai voglia di un film, un libro, un album o un mix. Adattiamo il resto del flusso alla tua scelta."
+        },
+        "depth": {
+          "title": "Imposta la tua profondità",
+          "description": "Scegli quante domande vuoi rispondere — un test veloce o un'analisi approfondita, decidi tu."
+        },
+        "quiz": {
+          "title": "Rispondi a un quiz personalizzato",
+          "description": "La nostra IA genera nuove domande adattate alla tua età e tipo di contenuto. Nessun quiz è uguale."
+        },
+        "picks": {
+          "title": "Ricevi le tue scelte",
+          "description": "Vere raccomandazioni con punteggio di corrispondenza e motivazione scritta del perché ognuna si adatta a te specificamente."
+        }
+      }
+    },
+    "features": {
+      "eyebrow": "Perché Smart Advisor",
+      "title": "Costruito per scelte di cui fidarti",
+      "subtitle": "Privato per design, veloce di default e open source così puoi vedere come funziona.",
+      "items": {
+        "private": {
+          "title": "Profilo privato",
+          "description": "Le tue preferenze restano legate al tuo account e sono usate solo per migliorare le tue scelte."
+        },
+        "fast": {
+          "title": "Risultati alla velocità della luce",
+          "description": "Risultati rapidi e aggiornamenti fluidi ti aiutano a decidere senza attendere."
+        },
+        "trust": {
+          "title": "Scelte facili da fidarsi",
+          "description": "Motivazioni chiare rendono ogni suggerimento più facile da fidarsi e scegliere, con trasparenza open source."
+        },
+        "both": {
+          "title": "Scegli tra formati",
+          "description": "Vedi risultati di libri, film e album in un unico posto così scegliere è più veloce e facile."
+        }
+      },
+      "trustReasons": [
+        "Corrisponde alla tua valutazione per età",
+        "Ritmo che hai detto di preferire",
+        "Tono che hai scelto prima"
+      ]
+    },
+    "groupQuizCta": {
+      "newFeature": "Nuova funzione",
+      "eyebrow": "Quiz di gruppo",
+      "titleLead": "Trova una scelta",
+      "titleHighlight": "insieme",
+      "description": "Ospita un quiz, condividi un codice a sei caratteri e lascia che il gruppo risponda. L'IA sintetizza il gusto di tutti in una scelta che funziona per la stanza. Unirsi è gratuito — nessun account necessario.",
+      "cta": "Provalo"
+    },
+    "albumCta": {
+      "newFeature": "Nuovo",
+      "eyebrow": "Raccomandazioni di album",
+      "titleLead": "Sintonizzati sul tuo prossimo",
+      "titleHighlight": "album preferito",
+      "description": "Stesso quiz, nuovo senso. Raccontaci del tuo ascolto — epoche, atmosfere, strumenti — e l'IA sceglie un album con un'anteprima di 30 secondi integrata. Realizzato con Deezer.",
+      "cta": "Scegli un album"
+    },
+    "poweredBy": {
+      "eyebrow": "Realizzato con",
+      "title": "Costruito su infrastruttura affidabile",
+      "subtitle": "Servizi affidabili che aiutano Smart Advisor a rimanere veloce, affidabile e utile."
+    },
+    "team": {
+      "eyebrow": "Le persone",
+      "title": "Conosci il team",
+      "subtitle": "Le persone dietro Smart Advisor.",
+      "members": {
+        "andrew": {
+          "designation": "Creatore",
+          "quote": "Ha costruito Smart Advisor per rendere le raccomandazioni personali, veloci e genuinamente utili."
+        },
+        "vlad": {
+          "designation": "Web Designer",
+          "quote": "Concentrato sulla creazione di un'interfaccia pulita che mantiene l'esperienza fluida su desktop."
+        }
+      }
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "title": "Domande, risposte",
+      "subtitleLead": "Domande prima di iniziare? Contattaci a",
+      "subtitleMid": "o segnala bug su",
+      "subtitleTail": ". Smart Advisor è open source, quindi puoi revisionare e contribuire in qualsiasi momento.",
+      "categoriesAria": "Categorie FAQ",
+      "filterAll": "Tutte",
+      "categories": {
+        "getting-started": "Per iniziare",
+        "how-it-works": "Come funziona",
+        "feed": "Feed",
+        "group-quiz": "Quiz di gruppo",
+        "library": "Libreria",
+        "account": "Account e privacy"
+      },
+      "items": {
+        "create-account": {
+          "question": "Come creo un account?",
+          "answer": "Clicca su Registrati sulla pagina di accesso, inserisci il tuo nome, email e una password (minimo 8 caratteri). Riceverai un'email di verifica — clicca sul link per attivare il tuo account prima di accedere."
+        },
+        "verify-email": {
+          "question": "Perché devo verificare la mia email?",
+          "answer": "La verifica dell'email conferma la tua identità e protegge il tuo account. Non potrai accedere finché non clicchi sul link di verifica inviato alla tua casella di posta. Controlla la cartella spam se non lo vedi."
+        },
+        "personalize": {
+          "question": "Come fa Smart Advisor a personalizzare le raccomandazioni?",
+          "answer": "Smart Advisor usa le tue risposte al quiz per capire il tuo umore, le preferenze di ritmo e gli interessi di genere. Poi combina questo con dati in tempo reale da TMDB, Open Library e Deezer per generare raccomandazioni con un ragionamento chiaro dietro ogni scelta."
+        },
+        "quiz-flow": {
+          "question": "Come funziona il quiz?",
+          "answer": "Scegli un tipo di contenuto (film, libro, album o un mix), seleziona quante domande vuoi (da 3 a 15), poi rispondi a ciascuna. Le tue risposte vengono inviate alla nostra IA che genera raccomandazioni personalizzate adatte alle tue risposte."
+        },
+        "results-generated": {
+          "question": "Come vengono generati i risultati?",
+          "answer": "Le tue risposte vengono elaborate da un modello IA che seleziona titoli corrispondenti alle tue preferenze. Ogni raccomandazione viene poi arricchita con vere copertine, valutazioni e descrizioni da TMDB (film), Open Library (libri) e Deezer (album, inclusa un'anteprima di 30 secondi)."
+        },
+        "movies-and-books": {
+          "question": "Posso ottenere film, libri e musica in una sola sessione?",
+          "answer": "Sì. Seleziona 'Mix' durante la selezione del contenuto per ricevere un film, un libro e un album nella stessa sessione. Tutta la tua cronologia di raccomandazioni viene salvata per riferimento futuro."
+        },
+        "off-results": {
+          "question": "E se le mie raccomandazioni sembrano fuori bersaglio?",
+          "answer": "Puoi rifare il quiz in qualsiasi momento con risposte diverse, o regolare il numero di domande e le tue scelte di umore e ritmo. Il modo più veloce per migliorare le scelte future è registrare reazioni nella tua libreria — segnare una scelta passata come 'Non per me' insegna all'IA a allontanarsi da titoli simili, e un pollice in su la spinge verso più di quel genere."
+        },
+        "trailer-preview": {
+          "question": "Dove posso vedere un trailer o un'anteprima?",
+          "answer": "Apri qualsiasi scheda di raccomandazione dal tuo feed o cronologia. Un trailer si riproduce in linea per i film (caricato in modo pigro, si attiva solo quando clicchi), un link 'Vedi su Open Library' appare per i libri per approfondire edizioni, copertine e recensioni, e l'anteprima di 30 secondi della prima traccia di un album è a un tocco di distanza. I film usano il trailer ufficiale di TMDB quando pubblicato; le anteprime arrivano da Deezer."
+        },
+        "year-in-review": {
+          "question": "Cos'è Anno in rassegna e quando appare?",
+          "answer": "Anno in rassegna è un riassunto in stile Spotify Wrapped delle tue scelte: genere principale, sequenza più lunga, mese di punta, regista o autore più scelto, mix di formati e i tuoi titoli di spicco. Appare come banner prominente sul tuo feed durante dicembre (anno corrente) e gennaio (anno scorso). Fuori da questa finestra la pagina funziona ancora su /wrapped, solo non pubblicizzata."
+        },
+        "feed-what": {
+          "question": "Cos'è il feed?",
+          "answer": "Un flusso in stile Reddit di scelte che le persone che segui hanno condiviso, più viste più ampie di Scopri e sessioni di Gruppo. Puoi delimitarlo (Amici / Scopri / Gruppo), filtrare per comunità (Film / Libri / Musica) e ordinare per Tendenza, Nuovi o Top — ogni impostazione persiste tra le sessioni."
+        },
+        "feed-share": {
+          "question": "Come condivido una scelta nel feed?",
+          "answer": "Apri il compositore con il pulsante 'Condividi una scelta' su /feed. Scegli una comunità, un'attività (Finito / Valutato / Raccomandando), digita il titolo — la copertina viene cercata automaticamente mentre digiti, usando TMDB per i film, Open Library per i libri e Deezer per la musica. Aggiungi una nota opzionale e condividi."
+        },
+        "feed-edit": {
+          "question": "Posso modificare i miei post e commenti dopo averli condivisi?",
+          "answer": "Sì, entrambi. Sui tuoi post il menu a tendina ha Modifica ed Elimina (modificare dal thread ti riporta al compositore del feed in modalità modifica). Sui tuoi commenti un pulsante Modifica si trova accanto a Rispondi — un tag '· modificato' appare nella firma una volta che hai toccato il corpo. Post e commenti che non possiedi espongono solo Segnala."
+        },
+        "feed-votes": {
+          "question": "Come funzionano i voti positivi e negativi su post e commenti?",
+          "answer": "Ogni post e commento ha frecce su / giù nella sua barra. Tocca una volta per votare, tocca di nuovo per cancellare. Il numero che vedi è il punteggio canonico del server attraverso ogni votante; il tuo stato personale illumina la freccia in viola (su) o rosa (giù). L'ordinamento Tendenza pondera questo punteggio per l'età del post, Top ordina per punteggio grezzo."
+        },
+        "feed-sort": {
+          "question": "Posso ordinare il feed in modo diverso?",
+          "answer": "Sì — un controllo segmentato Tendenza / Nuovi / Top si trova sotto la riga dell'ambito. Tendenza mescola punteggio con recency (i nuovi vincono i pareggi), Nuovi ordina per età crescente, Top per punteggio più alto prima. La scelta è per dispositivo e ricordata tra le sessioni."
+        },
+        "feed-follow": {
+          "question": "Come seguo persone, blocco qualcuno o segnalo contenuto?",
+          "answer": "Tocca un nome per aprire il suo profilo e usa Segui / Smetti di seguire. Il menu a tendina su qualsiasi post o commento ti permette di Segnalarlo o Bloccare l'autore — gli autori bloccati spariscono completamente dal tuo feed, e puoi gestire la lista in Impostazioni -> Feed -> Persone bloccate. Le segnalazioni inviate vivono in Impostazioni -> Feed -> Segnalazioni inviate."
+        },
+        "group-what": {
+          "question": "Cos'è il Quiz di gruppo?",
+          "answer": "Il Quiz di gruppo permette a più persone di fare lo stesso quiz insieme — allo stesso tavolo, su un divano o a distanza. L'host crea una sessione, condivide un codice a sei caratteri, e tutti rispondono allo stesso set di domande sul proprio dispositivo. L'IA poi sintetizza le risposte di tutti in una raccomandazione che si adatta alla stanza."
+        },
+        "group-account": {
+          "question": "Ho bisogno di un account per unirmi a un Quiz di gruppo?",
+          "answer": "No. Unirsi è gratuito e non richiede account — basta inserire il codice dell'host e un nome visualizzato. Ospitare richiede un account in modo che possiamo salvare la scelta del gruppo nella tua libreria e legare sequenze/traguardi al tuo profilo."
+        },
+        "group-host": {
+          "question": "Come ospito un Quiz di gruppo?",
+          "answer": "Gli utenti connessi possono aprire Quiz di gruppo dalla barra di navigazione; gli altri possono toccare la scheda 'Trova una scelta insieme' sulla homepage. Sulla scheda host, imposta il tuo nome visualizzato, scegli il tipo di contenuto (Mix / Film / Libri / Musica), tocca una piastrella numerica per quante domande vuoi (da 3 a 15), poi Crea sessione. Atterrerai in una lobby con un codice a sei caratteri e un pulsante Copia link — condividi entrambi con il gruppo. Una volta che almeno due giocatori si sono uniti, vedrai Avvia quiz; premendolo genera nuove domande IA per l'intera stanza. Tutti rispondono sul proprio dispositivo, e una volta che tutte le sottomissioni sono arrivate avrai un pulsante 'Rivela la scelta del gruppo' per far emergere la raccomandazione sintetizzata dall'IA."
+        },
+        "group-synthesis": {
+          "question": "Come trova l'IA una scelta che si adatta a tutti?",
+          "answer": "Quando tutti i partecipanti inviano le loro risposte, l'host tocca 'Rivela la scelta del gruppo.' Ogni risposta di ogni partecipante a ogni domanda viene inviata al modello di raccomandazione etichettata con il nome di ogni giocatore, e l'IA sceglie qualcosa che rispetta la sovrapposizione piuttosto che fare la media. Funziona meglio con 2-4 giocatori; gruppi più grandi funzionano ancora ma il risultato tende a deviare verso un appeal più ampio."
+        },
+        "group-expiry": {
+          "question": "Per quanto tempo una sessione di Quiz di gruppo rimane attiva?",
+          "answer": "Una sessione è attiva per 24 ore dalla creazione. Dopo di ciò la lobby e il risultato scadono e il codice non può più essere usato per unirsi. Gli host possono anche terminare una sessione in anticipo in qualsiasi momento dalla lobby."
+        },
+        "library-vs-history": {
+          "question": "Cos'è la libreria e in cosa differisce dalla cronologia?",
+          "answer": "La cronologia è ogni raccomandazione che l'IA ha generato per te. La tua libreria è un registro separato di ciò che hai effettivamente visto o letto — con uno stato (Finito, In corso, Lista dei desideri), una valutazione a pollice e una reazione opzionale di una riga. Puoi registrare un titolo da qualsiasi scheda di risultato o dal modal della cronologia."
+        },
+        "library-improves": {
+          "question": "Come migliora la libreria le mie raccomandazioni?",
+          "answer": "Le tue voci valutate più recenti vengono inviate all'IA insieme alle tue risposte al quiz come segnale di gusto. Un pollice in su le dice 'più così'; un pollice in giù le dice di evitarlo. Le reazioni che scrivi vengono lette letteralmente, quindi una riga come 'troppo lento' porta vero peso alla prossima scelta."
+        },
+        "mfa": {
+          "question": "Cos'è l'autenticazione a due fattori (MFA)?",
+          "answer": "MFA aggiunge un ulteriore livello di sicurezza richiedendo un codice da un'app autenticatrice (come Google Authenticator o Authy) quando accedi. Puoi abilitarla dalle Impostazioni account sotto la scheda Sicurezza."
+        },
+        "sessions": {
+          "question": "Come gestisco i miei dispositivi e le sessioni?",
+          "answer": "Vai alle Impostazioni account, apri la scheda Sicurezza e scorri fino a Sessioni attive. Puoi vedere tutti i dispositivi dove sei connesso, revocare l'accesso per singoli dispositivi o disconnetterti da tutti i dispositivi in una volta."
+        },
+        "delete-account": {
+          "question": "Posso eliminare o disabilitare il mio account?",
+          "answer": "Sì. Nelle Impostazioni account sotto la scheda Integrazioni, troverai una sezione Zona di pericolo. Puoi disabilitare il tuo account (che può essere riattivato dal supporto) o eliminarlo permanentemente insieme a tutti i dati associati."
+        },
+        "data-handling": {
+          "question": "Come vengono gestiti i miei dati personali?",
+          "answer": "I tuoi dati sono memorizzati in modo sicuro in Supabase con politiche di sicurezza a livello di riga. Usiamo solo le tue preferenze e risposte al quiz per generare raccomandazioni. Non condividiamo i tuoi dati con terze parti."
+        },
+        "open-source": {
+          "question": "Smart Advisor è open source?",
+          "answer": "Sì. Smart Advisor è completamente open source. Puoi rivedere il codice, segnalare problemi e seguire i progressi dello sviluppo su GitHub."
+        }
+      }
+    },
+    "footer": {
+      "navAria": "Navigazione del piè di pagina",
+      "rights": "© {year} Smart Advisor. Tutti i diritti riservati.",
+      "builtWith": "Costruito con",
+      "builtSuffix": "come progetto open source.",
+      "githubLabel": "GitHub"
+    }
+  },
+  "Common": {
+    "loading": "Caricamento…",
+    "save": "Salva",
+    "cancel": "Annulla",
+    "back": "Indietro",
+    "next": "Avanti",
+    "continue": "Continua",
+    "submit": "Invia",
+    "close": "Chiudi",
+    "retry": "Riprova",
+    "yes": "Sì",
+    "no": "No",
+    "surpriseMe": "Sorprendimi"
+  },
+  "MobileNav": {
+    "ariaLabel": "Navigazione principale",
+    "feed": "Feed",
+    "dashboard": "Dashboard",
+    "library": "Libreria",
+    "history": "Cronologia",
+    "profile": "Profilo",
+    "quiz": "Quiz",
+    "quizMenu": {
+      "ariaLabel": "Scegli un quiz da iniziare",
+      "title": "Avvia un quiz",
+      "subtitle": "Scegli il tipo di sessione che vuoi.",
+      "solo": "Quiz solo",
+      "soloDesc": "Un breve quiz di personalità, solo per te.",
+      "group": "Quiz di gruppo",
+      "groupDesc": "Fallo insieme agli amici in una stanza condivisa.",
+      "surprise": "Sorprendimi",
+      "surpriseDesc": "Un tocco — una scelta casuale, nessuna domanda.",
+      "close": "Annulla"
+    }
+  },
+  "InstallPrompt": {
+    "title": "Installa Smart Advisor",
+    "iosBody": "Tocca il pulsante Condividi, poi \"Aggiungi alla schermata Home\" per installare l'app.",
+    "genericBody": "Aggiungi Smart Advisor alla tua schermata Home per un'esperienza più veloce e a schermo intero.",
+    "install": "Installa",
+    "dismiss": "Non ora",
+    "close": "Chiudi"
+  },
+  "System": {
+    "error": {
+      "networkTitle": "Non riusciamo a raggiungere i nostri server",
+      "networkBody": "Controlla la tua connessione e riprova — riprenderemo esattamente da dove avevi lasciato.",
+      "genericTitle": "Qualcosa si è rotto",
+      "genericBody": "Un errore imprevisto ha impedito il caricamento di questa pagina. Un aggiornamento di solito lo risolve.",
+      "ref": "Rif",
+      "goHome": "Vai alla home",
+      "tryAgain": "Riprova"
+    },
+    "notFound": {
+      "title": "Questa scena non è arrivata al montaggio.",
+      "body": "La pagina che stai cercando si è smarrita tra le riprese. Forse un errore di battitura nell'URL, forse è rimasta sul pavimento della sala di montaggio. In ogni caso, riportiamoti indietro.",
+      "goBack": "Indietro",
+      "goHome": "Home"
+    },
+    "maintenance": {
+      "title": "La nostra IA è al cinema.",
+      "body": "Smart Advisor è uscita per guardare qualche classico e sfogliare un romanzo o due. Torneremo presto con gusti più freschi."
+    }
+  },
+  "ShareTarget": {
+    "eyebrow": "Condiviso con Smart Advisor",
+    "title": "Vuoi scelte come questa?",
+    "subtitle": "Non possiamo raccomandarti quel titolo esatto, ma rispondi a qualche domanda veloce e troveremo qualcosa con la stessa energia.",
+    "sharedLabel": "Hai condiviso",
+    "startQuiz": "Trova scelte simili",
+    "goDashboard": "Vai al feed",
+    "emptyTitle": "Niente è arrivato",
+    "emptySubtitle": "Non abbiamo ricevuto nulla con cui lavorare — avvia un quiz e prendiamo noi le redini."
+  },
+  "AccountSecurity": {
+    "back": "Indietro",
+    "eyebrow": "Account · Sicurezza",
+    "title": "Blocca le cose",
+    "subtitle": "Gestisci autenticazione a due fattori, passkey e sessioni attive sui tuoi dispositivi.",
+    "tipsEyebrow": "Consigli di sicurezza",
+    "tips": [
+      "Abilita 2FA per un ulteriore livello di protezione contro accessi non autorizzati.",
+      "Rivedi regolarmente le sessioni attive e disconnetti i dispositivi che non riconosci.",
+      "Usa una password forte e unica, e aggiornala regolarmente.",
+      "Sii cauto con i link di accesso e accedi solo da dispositivi fidati."
+    ]
+  },
+  "Auth": {
+    "sessionExpired": "La tua sessione è scaduta. Per favore accedi di nuovo.",
+    "eyebrow": {
+      "signin": "Accedi",
+      "signup": "Crea account",
+      "forgot": "Reimposta password"
+    },
+    "subtitle": {
+      "signin": "Accedi per continuare il tuo viaggio di raccomandazioni.",
+      "signup": "Configura il tuo account per ottenere scelte personalizzate.",
+      "forgot": "Inserisci la tua email e ti invieremo un link di reimpostazione sicuro."
+    },
+    "headings": {
+      "signin": [
+        "Bentornato",
+        "Bello rivederti",
+        "Pronto per la tua prossima scelta?"
+      ],
+      "signup": [
+        "Crea il tuo account",
+        "Unisciti a Smart Advisor",
+        "Configuriamo il tuo profilo"
+      ],
+      "forgot": [
+        "Reimposta la tua password",
+        "Recupera l'accesso",
+        "Torna nel tuo account"
+      ],
+      "verifyEmail": ["Controlla la tua casella di posta", "Quasi fatto", "Un ultimo passaggio"],
+      "mfaChallenge": [
+        "Verifica la tua identità",
+        "Un altro passaggio",
+        "Controllo di sicurezza"
+      ]
+    },
+    "labels": {
+      "emailOrUsername": "Email o nome utente",
+      "email": "Email",
+      "password": "Password",
+      "username": "Nome utente",
+      "age": "Età",
+      "confirmPassword": "Conferma password"
+    },
+    "placeholders": {
+      "emailOrUsername": "tu@esempio.com o nome utente",
+      "email": "tu@esempio.com",
+      "password": "••••••••",
+      "username": "tuonome",
+      "age": "18"
+    },
+    "actions": {
+      "signin": "Accedi",
+      "signup": "Crea account",
+      "forgot": "Invia link di reimpostazione"
+    },
+    "rememberMe": "Mantienimi connesso per 30 giorni",
+    "forgotPassword": "Password dimenticata?",
+    "passkeyDivider": "o",
+    "passkeySignIn": "Accedi con una passkey",
+    "passkeyWaiting": "In attesa della passkey…",
+    "resendVerification": "Reinvia link di verifica",
+    "resendingVerification": "Reinvio…",
+    "resendSuccess": "Email di verifica inviata. Controlla la tua casella di posta.",
+    "resetSuccess": "Se un account esiste per questa email, è stato inviato un link di reimpostazione password.",
+    "cooldown": "Per favore attendi un momento prima di riprovare.",
+    "toggle": {
+      "signin": {
+        "prompt": "Non hai un account?",
+        "cta": "Registrati"
+      },
+      "signup": {
+        "prompt": "Hai già un account?",
+        "cta": "Accedi"
+      },
+      "forgot": {
+        "prompt": "Ricordata la password?",
+        "cta": "Accedi"
+      }
+    },
+    "modeToggle": {
+      "ariaLabel": "Scegli accedi o registrati",
+      "signin": "Accedi",
+      "signup": "Registrati"
+    },
+    "mfaChallenge": {
+      "successTitle": "Verificato",
+      "successBody": "Ti porto al tuo feed…",
+      "totpTitle": "Inserisci il codice di verifica",
+      "totpBody": "Apri la tua app autenticatrice e inserisci il codice a 6 cifre.",
+      "backupTitle": "Inserisci il codice di backup",
+      "backupBody": "Inserisci uno dei tuoi codici di backup pre-generati.",
+      "totpPlaceholder": "000000",
+      "backupPlaceholder": "XXXXX-XXXXX",
+      "verify": "Verifica",
+      "verifying": "Verifica…",
+      "useBackup": "Non puoi accedere al tuo autenticatore? Usa un codice di backup",
+      "useTotp": "Usa l'app autenticatrice invece",
+      "backToSignIn": "Torna ad accedere"
+    },
+    "verifyEmail": {
+      "title": "Verifica la tua email",
+      "bodyLead": "Abbiamo inviato un link di verifica a",
+      "bodyTail": ". Clicca sul link per attivare il tuo account.",
+      "mfaHintLead": "Prossimo:",
+      "mfaHintBody": "Dopo aver verificato la tua email, potrai aggiungere l'autenticazione a due fattori per una sicurezza extra.",
+      "resend": "Reinvia email di verifica",
+      "resending": "Reinvio…",
+      "resendSuccess": "Email di verifica inviata. Controlla la tua casella di posta.",
+      "backToSignIn": "Torna ad accedere"
+    },
+    "shared": {
+      "hidePassword": "Nascondi password",
+      "showPassword": "Mostra password",
+      "requirements": "Requisiti"
+    },
+    "passwordRules": {
+      "minLength": "Almeno 8 caratteri",
+      "uppercase": "Una lettera maiuscola (A–Z)",
+      "lowercase": "Una lettera minuscola (a–z)",
+      "digit": "Un numero (0–9)",
+      "special": "Un carattere speciale (!@#$…)"
+    },
+    "resetPassword": {
+      "invalidTitle": "Link di reimpostazione non valido o scaduto",
+      "invalidBody": "Apri l'email di reimpostazione più recente o richiedi un nuovo link per continuare.",
+      "backToSignIn": "Torna ad accedere",
+      "successTitle": "Password aggiornata",
+      "successBody": "La tua password è stata cambiata con successo. Reindirizzamento all'accesso…",
+      "title": "Imposta nuova password",
+      "subtitle": "Inserisci la tua nuova password sicura sotto.",
+      "newPassword": "Nuova password",
+      "confirmPassword": "Conferma nuova password",
+      "passwordRequirementsTitle": "Requisiti della password",
+      "confirmRulesTitle": "Conferma password",
+      "matchesRule": "Corrisponde alla tua password",
+      "submit": "Aggiorna password",
+      "submitting": "Aggiornamento…",
+      "fixHighlighted": "Per favore correggi i campi evidenziati."
+    },
+    "emailVerified": {
+      "message": "Email verificata! Reindirizzamento…"
+    },
+    "mfaManagement": {
+      "heading": "Autenticazione a due fattori",
+      "subtitle": "Un passaggio aggiuntivo all'accesso per mantenere sicuro il tuo account.",
+      "fallbackFactorName": "App autenticatrice",
+      "activeCount": "{count, plural, one {# autenticatore attivo} other {# autenticatori attivi}}",
+      "notEnabled": "Non ancora abilitata",
+      "statusEnabled": "Abilitata",
+      "statusInactive": "Inattiva",
+      "addedOn": "Aggiunto {date}",
+      "renameAria": "Rinomina {name}",
+      "loadError": "Impossibile caricare le tue impostazioni di sicurezza — per favore aggiorna la pagina",
+      "disabledToast": "L'autenticazione a due fattori è stata disattivata",
+      "regeneratedToast": "Nuovi codici di backup sono pronti — salvali in un posto sicuro",
+      "copiedToast": "Codici di backup copiati negli appunti",
+      "backupCodesHeading": "Codici di backup",
+      "backupCodesRemaining": "{count, plural, one {# codice non usato rimanente} other {# codici non usati rimanenti}}",
+      "loadingBackupCodes": "Caricamento…",
+      "togglePanelShow": "Mostra pannello codici di backup",
+      "togglePanelHide": "Nascondi pannello codici di backup",
+      "regenerateWarning": "Rigenerare invaliderà tutti i codici di backup esistenti.",
+      "generateButton": "Genera nuovi codici",
+      "generating": "Generazione…",
+      "saveCodesWarning": "Salva questi codici — non saranno mostrati di nuovo",
+      "copy": "Copia",
+      "copied": "Copiato",
+      "download": "Scarica",
+      "lowBackupCodes": "{count, plural, one {Ti rimane # codice di backup. Considera di rigenerare nuovi codici.} other {Ti rimangono # codici di backup. Considera di rigenerare nuovi codici.}}",
+      "enableHint": "Abilita 2FA per aggiungere un ulteriore livello di sicurezza all'accesso. Verificherai con la tua app autenticatrice.",
+      "addAuthenticator": "Aggiungi autenticatore",
+      "loading": "Caricamento…",
+      "enable2fa": "Abilita 2FA",
+      "renameDialogTitle": "Rinomina autenticatore",
+      "renameDialogDescription": "Scegli un nome che renda il dispositivo facile da individuare nella tua lista.",
+      "renameDialogFieldLabel": "Nome autenticatore",
+      "renameDialogSuccess": "Autenticatore rinominato",
+      "renameDialogPlaceholder": "es. iPhone, Telefono lavoro",
+      "renameDialogNoTarget": "Nessun autenticatore selezionato",
+      "verifyDialogAria": "Conferma disattivazione dell'autenticazione a due fattori",
+      "verifyDialogTitle": "Disattiva autenticazione a due fattori",
+      "verifyDialogBody": "Inserisci il codice a 6 cifre dalla tua app autenticatrice per disattivare 2FA su questo account.",
+      "verifyDialogPlaceholder": "000000",
+      "verifyDialogError": "Inserisci un codice a 6 cifre",
+      "verifyDialogConfirm": "Disattiva 2FA",
+      "verifyDialogCancel": "Annulla"
+    },
+    "passkeyManagement": {
+      "heading": "Passkey",
+      "subtitle": "Accedi con la tua impronta digitale, viso o PIN del dispositivo — nessuna password necessaria.",
+      "checking": "Verifica…",
+      "activeCount": "{count, plural, one {# passkey attiva} other {# passkey attive}}",
+      "noPasskeys": "Nessuna passkey ancora",
+      "statusActive": "Attiva",
+      "statusInactive": "Inattiva",
+      "unsupported": "Il tuo browser attuale non supporta le passkey. Prova Chrome, Safari, Edge o Firefox su un dispositivo recente.",
+      "fallbackPasskeyName": "Passkey",
+      "neverUsed": "Mai usata",
+      "lastUsed": "Ultima volta {timeAgo} fa",
+      "lastUsedRecently": "Usata di recente",
+      "addedOn": "Aggiunta {date}",
+      "renameAria": "Rinomina {name}",
+      "removeAria": "Rimuovi {name}",
+      "removedToast": "Passkey rimossa",
+      "fallbackLabel": "questa passkey",
+      "removeConfirm": "Rimuovere {label}? Non potrai più accedere con essa.",
+      "addAnother": "Aggiungi un'altra passkey",
+      "addFirst": "Aggiungi una passkey",
+      "verifyDialogAria": "Verifica per rimuovere la passkey",
+      "verifyDialogTitle": "Conferma con il tuo autenticatore",
+      "verifyDialogBody": "Questa è la tua ultima passkey. Inserisci il tuo codice autenticatore a 6 cifre per rimuoverla.",
+      "verifyDialogPlaceholder": "000000",
+      "verifyDialogError": "Inserisci un codice a 6 cifre",
+      "verifyDialogConfirm": "Verifica e rimuovi passkey",
+      "verifyDialogCancel": "Annulla",
+      "verifyNoFactor": "Nessun autenticatore verificato trovato.",
+      "renameDialogTitle": "Rinomina passkey",
+      "renameDialogDescription": "Scegli un nome che riconoscerai più tardi, come \"MacBook\" o \"Telefono\".",
+      "renameDialogFieldLabel": "Nome passkey",
+      "renameDialogSuccess": "Passkey rinominata",
+      "renameDialogPlaceholder": "es. MacBook, iPhone",
+      "renameDialogNoTarget": "Nessuna passkey selezionata",
+      "setupDialogAria": "Aggiungi una passkey"
+    },
+    "sessions": {
+      "heading": "Sessioni attive",
+      "subtitleLoading": "Gestisci i dispositivi attualmente connessi al tuo account.",
+      "subtitle": "Gestisci i dispositivi attualmente connessi al tuo account. Disconnettiti per revocare l'accesso.",
+      "signedInCount": "{count, plural, one {# dispositivo connesso} other {# dispositivi connessi}}",
+      "noActive": "Nessuna sessione attiva",
+      "signOutAll": "Disconnetti tutti",
+      "signingOutAll": "Disconnessione…",
+      "signOutAllConfirm": "Sei sicuro? Verrai disconnesso da tutti i dispositivi.",
+      "signOutCurrentConfirm": "Disconnettersi da questo dispositivo? Verrai riportato alla home page.",
+      "signOutOtherConfirm": "Disconnettersi da {device}? Quella sessione perderà l'accesso immediatamente.",
+      "signedOutToast": "Sei stato disconnesso da quel dispositivo",
+      "signedOutAllToast": "Sei stato disconnesso da tutti i dispositivi",
+      "noSessionsFound": "Nessuna sessione attiva trovata",
+      "currentBadge": "Attuale",
+      "ipLabel": "IP {ip}",
+      "lastActive": "Ultima attività {time}",
+      "signOutAria": "Disconnettersi da {device}",
+      "verifyAction": {
+        "signOut": "disconnettersi da {device}",
+        "signOutAll": "disconnettersi da tutti i dispositivi"
+      }
+    },
+    "mfaSetup": {
+      "goBack": "Indietro",
+      "intro": {
+        "title": "Proteggi il tuo account",
+        "body": "Aggiungi un ulteriore livello di sicurezza con l'Autenticazione a due fattori (2FA). Dovrai inserire un codice dal tuo telefono durante l'accesso.",
+        "cta": "Configura 2FA",
+        "skip": "Salta per ora"
+      },
+      "method": {
+        "title": "Scegli il tuo metodo",
+        "body": "Come vuoi accedere d'ora in poi?",
+        "appName": "App autenticatrice",
+        "appBody": "Scansiona un codice QR con Google Authenticator, Authy o 1Password.",
+        "cancel": "Annulla"
+      },
+      "name": {
+        "title": "Nomina questo autenticatore",
+        "body": "Usa il dispositivo che conterrà il codice — così potrai distinguere gli autenticatori più tardi.",
+        "label": "Nome del dispositivo",
+        "placeholder": "es. iPhone, Telefono lavoro",
+        "hint": "Lascia vuoto per usare un'etichetta generica.",
+        "settingUp": "Configurazione...",
+        "continue": "Continua"
+      },
+      "qr": {
+        "title": "Scansiona codice QR",
+        "body": "Usa Google Authenticator, Microsoft Authenticator o Authy per scansionare questo codice.",
+        "imageAlt": "Codice QR MFA",
+        "manualHint": "Non puoi scansionare? Inserisci questo codice manualmente:",
+        "scanned": "L'ho scansionato"
+      },
+      "verify": {
+        "title": "Verifica il tuo codice",
+        "body": "Inserisci il codice a 6 cifre dalla tua app autenticatrice.",
+        "placeholder": "000000",
+        "error": "Per favore inserisci un codice a 6 cifre",
+        "verifying": "Verifica...",
+        "submit": "Verifica e abilita 2FA",
+        "back": "Torna al codice QR"
+      },
+      "backupCodes": {
+        "title": "Salva i tuoi codici di backup",
+        "body": "Se perdi l'accesso alla tua app autenticatrice, puoi usare uno di questi codici per accedere. Ogni codice può essere usato solo una volta.",
+        "warning": "Conservali in un posto sicuro",
+        "copy": "Copia",
+        "copied": "Copiato",
+        "download": "Scarica",
+        "done": "Ho salvato i miei codici"
+      },
+      "toasts": {
+        "authenticatorAdded": "Autenticatore aggiunto",
+        "enabled": "L'autenticazione a due fattori è ora attiva!",
+        "backupWarning": "Non siamo riusciti a generare codici di backup in questo momento. Puoi crearli in qualsiasi momento dalle tue impostazioni di Sicurezza.",
+        "secretCopied": "Codice segreto copiato — incollalo nella tua app autenticatrice",
+        "backupCopied": "Codici di backup copiati negli appunti",
+        "backupDownloaded": "Codici di backup salvati nei tuoi download"
+      }
+    },
+    "passkeySetup": {
+      "title": "Aggiungi una passkey",
+      "body": "Scegli un nome che riconoscerai più tardi. Dopo aver continuato, il tuo dispositivo chiederà di confermare con Touch ID, Face ID, Windows Hello o una chiave di sicurezza.",
+      "label": "Nome passkey",
+      "placeholder": "es. MacBook, iPhone",
+      "hint": "Lascia vuoto e useremo un'etichetta datata.",
+      "waiting": "In attesa della passkey...",
+      "continue": "Continua",
+      "cancel": "Annulla",
+      "successToast": "Passkey aggiunta"
+    },
+    "renameDialog": {
+      "emptyError": "Il nome non può essere vuoto",
+      "saving": "Salvataggio...",
+      "save": "Salva",
+      "cancel": "Annulla"
+    },
+    "validation": {
+      "emailOrUsernameRequired": "Email o nome utente è richiesto",
+      "emailRequired": "Email è richiesta",
+      "emailInvalid": "Inserisci una email valida",
+      "passwordRequired": "Password è richiesta",
+      "passwordRequirementsUnmet": "La password non soddisfa tutti i requisiti",
+      "usernameRequired": "Nome utente è richiesto",
+      "usernameTooShort": "Usa almeno 2 caratteri",
+      "usernameTooLong": "Usa 24 caratteri o meno",
+      "usernameInvalid": "Usa lettere, numeri, punti, trattini o underscore",
+      "ageRequired": "Età è richiesta",
+      "ageNotInteger": "L'età deve essere un numero intero",
+      "ageOutOfRange": "Inserisci un'età tra 13 e 120",
+      "confirmPasswordRequired": "Conferma la tua password",
+      "passwordsDoNotMatch": "Le password non corrispondono",
+      "fixHighlightedFields": "Per favore correggi i campi evidenziati.",
+      "correctHighlightedFields": "Per favore correggi i campi evidenziati",
+      "passkeyIdentifierRequired": "Inserisci la tua email o nome utente per usare una passkey.",
+      "enterSixDigitCode": "Per favore inserisci un codice a 6 cifre",
+      "enterBackupCode": "Per favore inserisci un codice di backup",
+      "rules": {
+        "emailContainsAt": "Contiene @",
+        "emailHasDomain": "Ha un dominio (esempio.com)",
+        "ageWholeNumber": "Numero intero",
+        "ageInRange": "Tra 13 e 120",
+        "usernameLength": "2–24 caratteri",
+        "usernameAllowedChars": "Lettere, numeri, punti, trattini o underscore",
+        "confirmPasswordMatches": "Corrisponde alla tua password"
+      },
+      "popoverTitles": {
+        "email": "Requisiti email",
+        "password": "Requisiti password",
+        "username": "Requisiti nome utente",
+        "age": "Requisiti età",
+        "confirmPassword": "Conferma password"
+      },
+      "mfaError": {
+        "totpExpired": "Quel codice è scaduto. Attendi uno nuovo nel tuo autenticatore e riprova.",
+        "backupExpired": "Quel codice di backup non è più valido.",
+        "totpMismatch": "Quel codice non corrispondeva. Ricontrolla il tuo autenticatore e riprova.",
+        "backupMismatch": "Quel codice di backup non corrispondeva. Ogni codice funziona solo una volta."
+      }
+    }
+  },
+  "Wrapped": {
+    "eyebrow": "Anno in rassegna",
+    "subtitle": "Uno sguardo indietro a ciò che hai scoperto quest'anno.",
+    "fallbackName": "Tuoi",
+    "startQuiz": "Inizia quiz",
+    "loading": "Caricamento del tuo anno…",
+    "share": {
+      "action": "Condividi",
+      "dialogTitle": "Condividi il tuo Anno in rassegna",
+      "dialogSubtitle": "Chiunque abbia questo link o QR può vedere le tue scelte di {year}.",
+      "copyLink": "Copia link",
+      "shareButton": "Condividi",
+      "close": "Fatto",
+      "signInRequired": "Accedi di nuovo per condividere il tuo anno.",
+      "failed": "Impossibile generare il link di condivisione",
+      "linkCopied": "Link copiato",
+      "copyFailed": "Impossibile copiare il link",
+      "shareFailed": "Impossibile condividere — riprova"
+    },
+    "empty": {
+      "title": "Nessuna scelta in {year}",
+      "titleMonth": "Nessuna scelta in {period}",
+      "current": "Fai un quiz e inizia a riempire il tuo anno.",
+      "past": "Scegli un anno diverso sopra, o avvia un nuovo quiz."
+    },
+    "hero": {
+      "eyebrow": "Titolo",
+      "picks": "{count, plural, one {# scelta} other {# scelte}}",
+      "moviesPart": "{count, plural, one {# film} other {# film}}",
+      "booksPart": "{count, plural, one {# libro} other {# libri}}",
+      "musicPart": "{count, plural, one {# album} other {# album}}",
+      "watchTime": "circa {hours} ore di tempo a schermo",
+      "libraryLogged": "{count} registrati nella tua libreria"
+    },
+    "tiles": {
+      "favorites": "Preferiti",
+      "favoritesHint": "{percent}% delle scelte",
+      "longestStreak": "Sequenza più lunga",
+      "streakDay": "giorno di fila",
+      "streakDays": "giorni di fila",
+      "peakMonth": "Mese di punta",
+      "topGenre": "Genere principale",
+      "picksHint": "{count, plural, one {# scelta} other {# scelte}}",
+      "noData": "—"
+    },
+    "creator": {
+      "eyebrow": "Più scelto",
+      "director": "Regista",
+      "author": "Autore",
+      "artist": "Artista",
+      "noData": "Non abbastanza dati ancora."
+    },
+    "formatMix": {
+      "eyebrow": "Mix di formati",
+      "movies": "Film",
+      "books": "Libri",
+      "music": "Musica"
+    },
+    "monthly": {
+      "eyebrow": "Scelte per mese"
+    },
+    "genres": {
+      "eyebrow": "Riassunto generi"
+    },
+    "standouts": {
+      "eyebrow": "Salienti",
+      "fullHistory": "Cronologia completa"
+    },
+    "story": {
+      "tapHint": "Tocca per continuare",
+      "exit": "Esci",
+      "pickYear": "Anno",
+      "intro": {
+        "eyebrow": "Anno in rassegna",
+        "eyebrowMonth": "Mese in rassegna",
+        "kicker": "Il tuo {year}",
+        "kickerMonth": "Il tuo {period}",
+        "subhead": "Premi play sull'anno che è stato.",
+        "subheadMonth": "Premi play sul mese che è stato.",
+        "cta": "Vedi il tuo anno",
+        "keyHint": "Tasti freccia per navigare"
+      },
+      "total": {
+        "eyebrow": "Tutto compreso",
+        "headline": "{count, plural, one {# scelta} other {# scelte}}",
+        "subhead": "{movies} sullo schermo · {books} sullo scaffale · {music} nelle tue orecchie."
+      },
+      "format": {
+        "eyebrow": "Il tuo mix",
+        "movies": "Film",
+        "books": "Libri",
+        "music": "Album",
+        "movieHeavy": "Eri nella tua era cinematografica.",
+        "bookHeavy": "Ti sei immerso nella lettura.",
+        "musicHeavy": "Gli album erano la mossa.",
+        "balanced": "Un anno equilibrato tra i formati."
+      },
+      "genres": {
+        "eyebrow": "Generi principali",
+        "headline": "Non ne avevi mai abbastanza di {top}.",
+        "fallback": "Nessun chiaro preferito quest'anno."
+      },
+      "creator": {
+        "eyebrow": "Più scelto",
+        "headlineDirector": "{name} continuava ad apparire.",
+        "headlineAuthor": "{name} era in ripetizione.",
+        "headlineArtist": "{name} ha dominato l'anno.",
+        "subhead": "{count, plural, one {# scelta} other {# scelte}}",
+        "fallback": "Nessun creatore di spicco quest'anno."
+      },
+      "standout": {
+        "eyebrow": "Il tuo momento",
+        "peakMonth": "Mese di punta",
+        "peakSubhead": "{count, plural, one {# scelta} other {# scelte}} in {month}",
+        "streak": "Sequenza più lunga",
+        "streakSubhead": "{count, plural, one {# giorno di fila} other {# giorni di fila}}",
+        "noStreak": "Nessuna sequenza ancora"
+      },
+      "picks": {
+        "eyebrow": "Scelte salienti",
+        "headline": "Quelle che sono rimaste.",
+        "subhead": "Preferiti per primi, poi il resto dei momenti salienti."
+      },
+      "outro": {
+        "eyebrow": "Quello era il tuo anno",
+        "headline": "{count, plural, one {# scelta} other {# scelte}} curate per te.",
+        "subhead": "Condividi i tuoi momenti salienti o fai un altro quiz per iniziare il prossimo capitolo.",
+        "share": "Condividi il mio anno",
+        "restart": "Guarda di nuovo",
+        "newQuiz": "Fai un nuovo quiz"
+      }
+    },
+    "months": [
+      "Gen",
+      "Feb",
+      "Mar",
+      "Apr",
+      "Mag",
+      "Giu",
+      "Lug",
+      "Ago",
+      "Set",
+      "Ott",
+      "Nov",
+      "Dic"
+    ]
+  },
+  "GroupQuiz": {
+    "category": "Quiz di gruppo",
+    "stepOf": "Passaggio {current} di {total}",
+    "stepLabel": {
+      "path": "Ospita o unisciti",
+      "host": "Configurazione",
+      "join": "Unisciti",
+      "lobby": "Lobby",
+      "result": "Risultato"
+    },
+    "back": {
+      "dashboard": "Feed",
+      "home": "Home",
+      "step": "Indietro",
+      "leave": "Esci",
+      "lobby": "Lobby"
+    },
+    "path": {
+      "title": "Ospitare o unirsi a un round?",
+      "subtitle": "Ospitare imposta il formato e condivide un codice. Unirsi ti porta nel round di qualcun altro con un codice di 6 caratteri.",
+      "cards": {
+        "host": {
+          "eyebrow": "Host",
+          "title": "Ospita un round",
+          "description": "Scegli il formato, imposta quante domande, condividi il codice e guarda le scelte arrivare."
+        },
+        "join": {
+          "eyebrow": "Unisciti",
+          "title": "Unisciti a un round",
+          "description": "Hai un codice di 6 caratteri da un amico? Entra — nessun account necessario."
+        }
+      }
+    },
+    "lobby": {
+      "eyebrow": "Quiz di gruppo",
+      "title": "Trova una scelta insieme",
+      "subtitle": "Ospita un quiz e condividi il codice. Tutti rispondono, l'IA trova una scelta che si adatta al gruppo.",
+      "intent": {
+        "eyebrow": "Bentornato",
+        "headline": "Riprendi da dove avevi lasciato?",
+        "summary": "{count} domande · {types} · fino a {max} giocatori",
+        "types": {
+          "both": "film + libri",
+          "mix": "film + libri + musica",
+          "movie": "film",
+          "book": "libri",
+          "music": "musica"
+        },
+        "continue": "Continua",
+        "continuing": "Creazione…",
+        "dismissAria": "Ignora"
+      },
+      "host": {
+        "eyebrow": "Host",
+        "title": "Avvia una nuova sessione",
+        "nameLabel": "Il tuo nome",
+        "namePlaceholder": "Come ti vedono gli altri",
+        "typeLabel": "Tipo di scelta",
+        "questionsLabel": "Domande",
+        "questionsAria": "Numero di domande",
+        "maxPlayersLabel": "Max giocatori",
+        "maxPlayersAria": "Numero massimo di giocatori nella lobby",
+        "modeLabel": "Quando?",
+        "modeLive": "Insieme ora",
+        "modeAsync": "Entro una scadenza",
+        "modeLiveHint": "Tutti si uniscono alla lobby e rispondono allo stesso tempo.",
+        "modeAsyncHint": "Ogni membro risponde nel proprio tempo prima della scadenza.",
+        "deadlineLabel": "Scadenza",
+        "plannedForLabel": "Pianificato per (opzionale)",
+        "plannedForHint": "Solo informativo — quando pianificate tutti di guardare / leggere / ascoltare insieme.",
+        "create": "Crea sessione",
+        "creating": "Creazione…",
+        "signInTitle": "Accedi per ospitare",
+        "signInBody": "Ospitare salva la scelta del gruppo nella tua libreria, traccia le sequenze e sblocca l'Anno in rassegna.",
+        "signInCta": "Accedi o crea account",
+        "signInHint": "Vuoi solo giocare? Usa il codice a destra."
+      },
+      "join": {
+        "eyebrow": "Unisciti",
+        "title": "Hai un codice?",
+        "codeLabel": "Codice sessione",
+        "codePlaceholder": "ABC123",
+        "nameLabel": "Il tuo nome",
+        "namePlaceholder": "Nome visualizzato",
+        "join": "Unisciti alla sessione",
+        "joining": "Unione…",
+        "footer": "Nessun account necessario per unirsi — solo un nome e un codice."
+      },
+      "contentTypes": {
+        "both": "Entrambi",
+        "mix": "Mix",
+        "movie": "Film",
+        "book": "Libri",
+        "music": "Musica"
+      },
+      "errors": {
+        "signInRequired": "Accedi per ospitare un quiz di gruppo.",
+        "createFailed": "Impossibile creare la sessione",
+        "joinFailed": "Impossibile unirsi alla sessione",
+        "codeLength": "Inserisci un codice di 6 caratteri."
+      }
+    },
+    "session": {
+      "async": {
+        "eyebrow": "Sessione asincrona",
+        "deadlineInHours": "{hours, plural, one {# ora rimanente} other {# ore rimanenti}}",
+        "deadlineInDays": "{days, plural, one {# giorno rimanente} other {# giorni rimanenti}}",
+        "deadlinePassed": "Scadenza superata — finalizzazione",
+        "plannedFor": "Pianificato per {date}",
+        "submitted": "{done}/{total} inviati"
+      },
+      "loading": "Caricamento sessione…",
+      "notFoundTitle": "Sessione non trovata",
+      "notFoundBody": "Quel codice non corrisponde a una sessione attiva.",
+      "backToHome": "Torna a Quiz di gruppo",
+      "shareCode": "Condividi questo codice",
+      "copyLink": "Copia link",
+      "shareLink": "Condividi",
+      "shareTitle": "Unisciti al mio quiz di gruppo Smart Advisor",
+      "shareText": "Unisciti al mio quiz di gruppo con il codice {code}",
+      "linkCopied": "Link copiato",
+      "linkCopyFailed": "Impossibile copiare il link",
+      "linkShareFailed": "Impossibile condividere — riprova",
+      "qr": {
+        "show": "Mostra QR",
+        "title": "Scansiona per unirti",
+        "subtitle": "Punta la fotocamera del tuo telefono sul codice QR per entrare direttamente in questo round.",
+        "codeHint": "O inserisci il codice",
+        "close": "Fatto"
+      },
+      "joined": "{name} si è unito",
+      "left": "{name} ha lasciato la lobby",
+      "playerCount": "{count, plural, one {# Giocatore} other {# Giocatori}}",
+      "playerCountOf": "{count}/{max, plural, one {# Giocatore} other {# Giocatori}}",
+      "submittedCount": "{submitted}/{total} inviati",
+      "leave": "Esci",
+      "backToLobby": "Torna alla lobby",
+      "end": "Termina",
+      "leaveConfirm": "Uscire dalla sessione? Le tue risposte non conteranno per la scelta del gruppo e avrai bisogno del codice per riunirti.",
+      "leaveQuizConfirm": "Uscire dal quiz di gruppo? Le tue risposte finora non saranno inviate.",
+      "endConfirm": "Terminare questa sessione per tutti?",
+      "backToLobbyConfirmInProgress": "Rimandare tutti nella lobby? Le risposte in corso saranno cancellate.",
+      "backToLobbyConfirmCompleted": "Rimandare tutti nella lobby? Risposte e scelta attuale saranno cancellate così un nuovo round può iniziare.",
+      "host": {
+        "generatingQuestions": "Generazione domande…",
+        "startQuiz": "Avvia quiz · {count, plural, one {# domanda} other {# domande}}",
+        "needTwoPlayers": "Hai bisogno di almeno 2 giocatori per iniziare.",
+        "startFailed": "Impossibile avviare il quiz",
+        "restartFailed": "Impossibile riavviare il quiz",
+        "synthesizeFailed": "Impossibile generare la raccomandazione",
+        "overloaded": "La nostra IA è sopraffatta in questo momento. Dalle un minuto e riprova."
+      },
+      "guest": {
+        "waitingHost": "In attesa dell'host",
+        "waitingBody": "Tieni duro — partiranno da un momento all'altro.",
+        "joinLobby": "Unisciti alla lobby",
+        "joinPrompt": "Inserisci un nome per unirti a questo quiz di gruppo.",
+        "joinPlaceholder": "Nome visualizzato",
+        "join": "Unisciti",
+        "joining": "Unione…",
+        "joinFailed": "Impossibile unirsi alla sessione",
+        "inProgress": "Il quiz è già in corso.",
+        "completed": "Questa sessione è conclusa.",
+        "askHost": "Chiedi all'host di riportare la lobby così puoi unirti.",
+        "lobbyFull": "Lobby piena",
+        "lobbyFullBody": "L'host ha limitato questa lobby ed è già al limite. Chiedi di aumentarla o aspetta che qualcuno esca."
+      },
+      "submitted": {
+        "lockedInAll": "Tutti hanno confermato",
+        "lockedIn": "Confermato",
+        "waitingOthers": "In attesa che tutti gli altri finiscano…",
+        "reveal": "Rivela la scelta del gruppo",
+        "revealing": "Ricerca della scelta…",
+        "guestWaiting": "L'host sta generando la scelta…"
+      },
+      "quiz": {
+        "category": "Round live",
+        "questionOf": "Domanda {current} di {total}",
+        "back": "Indietro",
+        "next": "Avanti",
+        "submit": "Conferma",
+        "submitting": "Invio…",
+        "submittedToast": "Confermato!",
+        "answerAll": "Rispondi prima a ogni domanda."
+      },
+      "params": {
+        "contentMovie": "Film",
+        "contentBook": "Libri",
+        "contentMusic": "Musica",
+        "contentMix": "Mix",
+        "questions": "{count, plural, one {# domanda} other {# domande}}",
+        "timeEstimate": "~{minutes, plural, one {# min} other {# min}}",
+        "maxPlayers": "{max, plural, one {# posto} other {# posti}}",
+        "emptySeat": "Posto libero",
+        "submittedProgress": "{done} di {total} confermati"
+      },
+      "completed": {
+        "eyebrow": "La scelta del gruppo",
+        "subtitle": "Basato su ciò che tutti hanno detto, ecco qualcosa che dovrebbe andare bene per la stanza.",
+        "playAgain": "Gioca di nuovo",
+        "resetting": "Reset…",
+        "newGroup": "Avvia un nuovo gruppo",
+        "done": "Fatto",
+        "endSession": "Termina sessione"
+      },
+      "cancelled": {
+        "body": "Questa sessione è stata terminata."
+      }
+    },
+    "result": {
+      "movie": "Film",
+      "book": "Libro",
+      "music": "Album",
+      "byAuthor": "Di {creator}",
+      "byDirector": "Diretto da {creator}",
+      "byArtist": "Di {creator}",
+      "whyThisPick": "Perché questa scelta",
+      "viewOnOpenLibrary": "Vedi su Open Library",
+      "watchTrailer": "Guarda trailer",
+      "playTrailerAria": "Riproduci trailer di {title}"
+    }
+  },
+  "History": {
+    "eyebrow": "Cronologia",
+    "title": "La tua cronologia di suggerimenti",
+    "subtitle": "Tutto ciò che l'IA ha scelto per te. Segna un preferito per tenerlo vicino, o registralo nella tua libreria per insegnare all'IA come ti sei sentito.",
+    "clearAll": "Cancella tutto",
+    "startQuiz": "Inizia quiz",
+    "filtersAria": "Filtri della cronologia",
+    "filtersGroup": "Filtri",
+    "filters": {
+      "all": "Tutti",
+      "movies": "Film",
+      "books": "Libri",
+      "music": "Musica",
+      "favorites": "Preferiti"
+    },
+    "stats": {
+      "total": "Totale",
+      "favorites": "Preferiti",
+      "movies": "Film",
+      "books": "Libri",
+      "music": "Musica"
+    },
+    "sortLabel": "Ordina:",
+    "sortAria": "Ordina raccomandazioni",
+    "searchPlaceholder": "Cerca scelte passate",
+    "sort": {
+      "newest": "Più recenti",
+      "oldest": "Più vecchie",
+      "favorites_first": "Preferiti per primi"
+    },
+    "empty": {
+      "title": "Nessuna raccomandazione trovata",
+      "body": "Prova un filtro diverso o genera un nuovo set di raccomandazioni."
+    },
+    "card": {
+      "movie": "Film",
+      "book": "Libro",
+      "music": "Album",
+      "fallbackExplanation": "Una raccomandazione {type} personalizzata basata sulle tue recenti scelte di quiz.",
+      "openAria": "Apri dettagli per {title}",
+      "favoriteAdd": "Aggiungi ai preferiti",
+      "favoriteRemove": "Rimuovi dai preferiti",
+      "deleteAria": "Elimina"
+    },
+    "toasts": {
+      "favoriteFailed": "Impossibile aggiornare il tuo preferito — per favore riprova",
+      "favoriteAdded": "Aggiunto ai preferiti",
+      "favoriteRemoved": "Rimosso dai preferiti",
+      "deleteFailed": "Impossibile rimuovere quella raccomandazione — per favore riprova",
+      "deleted": "Raccomandazione rimossa dalla tua cronologia",
+      "clearFailed": "Impossibile cancellare la tua cronologia — per favore riprova",
+      "cleared": "Tutte le raccomandazioni cancellate"
+    },
+    "confirm": {
+      "deleteOne": "Eliminare questa raccomandazione?",
+      "clearAll": "Sei sicuro di voler eliminare tutte le raccomandazioni? Non può essere annullato."
+    },
+    "modal": {
+      "ariaLabel": "Dettagli per {title}",
+      "byAuthor": "Di {author}",
+      "byDirector": "Diretto da {director}",
+      "byArtist": "Di {artist}",
+      "inLibrary": "Nella tua libreria",
+      "close": "Chiudi",
+      "dislike": "Non per me",
+      "dislikedOn": "Non raccomanderà di nuovo"
+    }
+  },
+  "Library": {
+    "import": {
+      "headerCta": "Importa",
+      "back": "Torna alla libreria",
+      "eyebrow": "Importa",
+      "title": "Importa la tua lista di visione",
+      "subtitle": "Porta qui i tuoi film Letterboxd o i libri Goodreads. Reimportare è sicuro — i titoli corrispondenti vengono aggiornati, non duplicati.",
+      "sourceLabel": "Da dove viene?",
+      "sources": {
+        "letterboxd": "Letterboxd",
+        "goodreads": "Goodreads"
+      },
+      "hint": {
+        "letterboxd": "Esporta da letterboxd.com/settings/data — usa watchlist.csv o la tua esportazione completa.",
+        "goodreads": "Esporta da goodreads.com/review/import — il CSV \"Goodreads Library Export\"."
+      },
+      "choose": "Scegli un file .csv",
+      "chooseHint": "Esportazione CSV Letterboxd o Goodreads",
+      "preview": "{count, plural, one {# titolo pronto per l'importazione} other {# titoli pronti per l'importazione}}",
+      "mismatch": "Questo file sembra un'esportazione {detected}, ma hai scelto {chosen}. Ricontrolla prima di importare.",
+      "chooseDifferent": "Scegli un altro file",
+      "importCta": "Importa {count, plural, one {# titolo} other {# titoli}}",
+      "importing": "Importazione {done} di {total}…",
+      "doneTitle": "Importazione completata",
+      "doneSummary": "{imported} importati · {skipped} saltati · {failed} falliti",
+      "importAnother": "Importa un altro",
+      "goToLibrary": "Vai alla libreria",
+      "errors": {
+        "read": "Impossibile leggere quel file. Riprova.",
+        "empty": "Quel file non ha righe da importare.",
+        "parse": "Impossibile analizzare quel file."
+      }
+    },
+    "finishReminder": {
+      "eyebrow": "Riprendi da dove avevi lasciato",
+      "title": "{count, plural, one {Hai # titolo ancora in corso} other {Hai # titoli ancora in corso}}",
+      "cta": "Apri"
+    },
+    "eyebrow": "Libreria",
+    "title": "Cosa hai visto e letto",
+    "subtitle": "Le reazioni che salvi qui diventano un segnale di gusto che l'IA usa al tuo prossimo quiz.",
+    "startQuiz": "Inizia quiz",
+    "filtersAria": "Filtri della libreria",
+    "typeGroup": "Tipo",
+    "type": {
+      "all": "Tutti",
+      "movie": "Film",
+      "book": "Libri",
+      "music": "Musica"
+    },
+    "stats": {
+      "total": "Totale",
+      "finished": "Finiti",
+      "movies": "Film",
+      "books": "Libri",
+      "music": "Musica"
+    },
+    "statusLabel": "Stato",
+    "searchPlaceholder": "Cerca nella tua libreria",
+    "filterAll": "Tutti",
+    "status": {
+      "finished": "Finito",
+      "in_progress": "In corso",
+      "wishlist": "Lista dei desideri",
+      "dropped": "Abbandonato"
+    },
+    "rating": {
+      "1": "Non per me",
+      "2": "Era ok",
+      "3": "Amato"
+    },
+    "byAuthor": "Di {creator}",
+    "byDirector": "Diretto da {creator}",
+    "byArtist": "Di {creator}",
+    "mediumMovie": "Film",
+    "mediumBook": "Libro",
+    "mediumMusic": "Album",
+    "loggedOn": "Registrato {date}",
+    "empty": {
+      "noItemsTitle": "Niente nella tua libreria ancora",
+      "noItemsBody": "Dopo il tuo prossimo quiz, premi \"Ho visto / letto questo\" su un risultato e apparirà qui.",
+      "noMatchesTitle": "Nessuna corrispondenza per quei filtri",
+      "noMatchesBody": "Prova a cambiare o cancellare i filtri sopra."
+    },
+    "removeConfirm": "Rimuovere \"{title}\" dalla tua libreria?",
+    "removed": "Rimosso dalla libreria",
+    "updated": "Voce della libreria aggiornata",
+    "editAria": "Modifica {title}",
+    "removeAria": "Rimuovi {title}",
+    "statusChangeAria": "Cambia stato di {title}",
+    "wishlistButton": {
+      "add": "Lista dei desideri",
+      "onWishlist": "Nella lista dei desideri",
+      "added": "Aggiunto alla tua lista dei desideri",
+      "ariaAdd": "Aggiungi {title} alla tua lista dei desideri",
+      "ariaOnWishlist": "{title} è nella tua lista dei desideri"
+    },
+    "editDialog": {
+      "ariaLabel": "Modifica voce della libreria",
+      "title": "Modifica voce",
+      "statusHeader": "Stato",
+      "ratingHeader": "Valutazione",
+      "reactionHeader": "Reazione",
+      "reactionPlaceholder": "Conclusione di una riga…",
+      "save": "Salva modifiche",
+      "cancel": "Annulla"
+    }
+  },
+  "Onboarding": {
+    "eyebrow": "Quasi fatto",
+    "title": "Controllo rapido",
+    "subtitle": "Assicuriamoci che tutto sia corretto prima che tu inizi.",
+    "readonly": {
+      "email": "Email",
+      "age": "Età",
+      "editLater": "Puoi cambiarli più tardi nelle impostazioni."
+    },
+    "fields": {
+      "displayName": {
+        "label": "Nome visualizzato",
+        "placeholder": "Come dovremmo chiamarti"
+      },
+      "language": {
+        "label": "Lingua",
+        "en": "English",
+        "es": "Español"
+      },
+      "focus": {
+        "movie": "Film",
+        "book": "Libri",
+        "music": "Musica",
+        "mix": "Mix"
+      }
+    },
+    "steps": {
+      "name": {
+        "eyebrow": "Passaggio 1",
+        "title": "Come dovremmo chiamarti?",
+        "subtitle": "Lo useremo nelle raccomandazioni e nel tuo profilo."
+      },
+      "language": {
+        "eyebrow": "Passaggio 2",
+        "title": "Scegli la tua lingua",
+        "subtitle": "Tradurremo l'interfaccia dell'app per corrispondere."
+      },
+      "focus": {
+        "eyebrow": "Passaggio 3",
+        "title": "Per cosa vuoi scelte?",
+        "subtitle": "Imposta il tipo di contenuto predefinito. Puoi ancora cambiare in ogni quiz.",
+        "hint": "Suggerimento: avrai sempre l'opzione di cambiarlo su quiz individuali."
+      },
+      "avoid": {
+        "eyebrow": "Passaggio 4",
+        "title": "Qualcosa che preferiresti saltare?",
+        "subtitle": "Tocca qualcuno per aggiungere una regola rigorosa \"non raccomandare\". Salta il passaggio se nulla viene in mente.",
+        "emptyHint": "Nessun filtro ancora — puoi aggiungerne in qualsiasi momento nelle Impostazioni.",
+        "selectedHint": "{count, plural, one {# genere} other {# generi}} che preferiresti evitare."
+      },
+      "review": {
+        "eyebrow": "Un'ultima occhiata",
+        "title": "Sembra giusto?",
+        "subtitle": "Modifica qualsiasi cosa tu voglia cambiare prima di salvarla.",
+        "edit": "Modifica",
+        "empty": "—",
+        "noGenres": "Nessuno"
+      }
+    },
+    "back": "Indietro",
+    "next": "Avanti",
+    "finish": "Termina configurazione",
+    "submit": "Sembra buono",
+    "skip": "Salta per ora",
+    "previewClose": "Chiudi anteprima",
+    "errors": {
+      "displayNameRequired": "Per favore inserisci un nome visualizzato.",
+      "saveFailed": "Non siamo riusciti a salvare la tua configurazione. Riprova."
+    },
+    "savedToast": "Tutto pronto — benvenuto a bordo."
+  },
+  "Quiz": {
+    "category": "Configurazione quiz",
+    "stepOf": "Passaggio {current} di {total}",
+    "back": {
+      "dashboard": "Feed"
+    },
+    "contentSelection": {
+      "title": "Per cosa vorresti una raccomandazione?",
+      "subtitle": "Scegline uno così possiamo adattare il tuo flusso di raccomandazione.",
+      "validation": "Per favore seleziona un'opzione prima di continuare.",
+      "continue": "Continua",
+      "continuing": "Continuazione…",
+      "cards": {
+        "movie": {
+          "eyebrow": "Sullo schermo",
+          "title": "Film",
+          "description": "Un film adattato al tuo umore e ritmo attuali."
+        },
+        "book": {
+          "eyebrow": "Sullo scaffale",
+          "title": "Libro",
+          "description": "Una lettura adattata al tuo stile e interessi."
+        },
+        "music": {
+          "eyebrow": "Nelle tue orecchie",
+          "title": "Album",
+          "description": "Un disco abbinato all'umore in cui ti trovi."
+        },
+        "mix": {
+          "eyebrow": "Tutti e tre",
+          "title": "Mescolalo",
+          "description": "Un film, un libro e un album scelti insieme."
+        },
+        "both": {
+          "eyebrow": "Entrambi",
+          "title": "Uno di ciascuno",
+          "description": "Un film e un libro scelti insieme in una volta."
+        }
+      }
+    },
+    "questionCount": {
+      "title": "Quante domande dovremmo fare?",
+      "subtitle": "Scegli la profondità per il tuo flusso di raccomandazione {contentType}.",
+      "contentTypes": {
+        "movie": "film",
+        "book": "libro",
+        "music": "album",
+        "mix": "film, libro e album",
+        "both": "film e libro"
+      },
+      "questionsLabel": "{count, plural, one {Domanda} other {Domande}}",
+      "tone": {
+        "quick": "Rapido e focalizzato",
+        "focused": "Preciso e specifico",
+        "balanced": "Profondità equilibrata",
+        "thorough": "Esplorazione approfondita",
+        "comprehensive": "Dettaglio completo"
+      },
+      "estimate": "{minutes, plural, one {# minuto} other {# minuti}}",
+      "ariaCount": "Numero di domande",
+      "back": "Formato",
+      "continue": "Continua",
+      "continuing": "Continuazione…"
+    },
+    "questionnaire": {
+      "category": "Quiz live",
+      "loadingStep": "Preparazione del tuo quiz",
+      "questionOf": "Domanda {current} di {total}",
+      "previous": "Precedente",
+      "back": "Indietro",
+      "next": "Avanti",
+      "submit": "Ottieni raccomandazioni",
+      "submitting": "Generazione…",
+      "subtitle": {
+        "fillInBlank": "Condividi i tuoi pensieri con le tue parole.",
+        "selectAll": "Scegline quante vuoi.",
+        "singleSelect": "Scegline uno così possiamo affinare le tue raccomandazioni."
+      },
+      "leaveConfirm": "Uscire dal quiz? Le tue risposte finora non saranno salvate.",
+      "errors": {
+        "title": "Impossibile caricare le domande",
+        "overloadedTitle": "La nostra IA è al massimo",
+        "session": "La tua sessione è scaduta. Per favore accedi di nuovo per continuare.",
+        "generic": "Non siamo riusciti a generare le tue domande. Per favore riprova.",
+        "overloaded": "La nostra IA è martellata in questo momento. Dalle un minuto e riprova — abbiamo già riprovato un paio di volte per te.",
+        "tryAgain": "Riprova",
+        "back": "Indietro"
+      },
+      "loadingMessages": {
+        "default": [
+          "Penso a buone domande…",
+          "Scelgo il tuo angolo…",
+          "Adatto al tuo gusto…",
+          "Calibro per la tua vibe…",
+          "Bozza del quiz…",
+          "Quasi pronto per te…"
+        ],
+        "movie": [
+          "Sondo il tuo gusto sullo schermo…",
+          "Chiedo cosa ti fa premere play…",
+          "Allineo le scene giuste…",
+          "Lucido l'insegna…",
+          "Sintonizzo l'obiettivo…",
+          "Faccio scorrere i titoli di apertura…"
+        ],
+        "book": [
+          "Sfoglio i tuoi scaffali…",
+          "Ascolto la tua voce di lettura…",
+          "Chiedo dei tuoi preferiti consumati…",
+          "Spezzo la copertina…",
+          "Imposto il segnalibro…",
+          "Apro il capitolo uno…"
+        ],
+        "music": [
+          "Acceleror il tuo gusto…",
+          "Ascolto cosa colpisce…",
+          "Imposto il groove giusto…",
+          "Sintonizzo il quadrante…",
+          "Allineo l'ago…",
+          "Premo registra…"
+        ],
+        "mix": [
+          "Leggo attraverso i formati…",
+          "Mescolo gli indizi — schermo, pagina, suono…",
+          "Trovo il tuo filo conduttore…",
+          "Intreccio tre gusti insieme…",
+          "Sintonizzo il trio…",
+          "Quasi pronto per te…"
+        ]
+      }
+    }
+  },
+  "Results": {
+    "loadingMessages": {
+      "default": [
+        "Sfoglio le tue risposte…",
+        "Consulto l'algoritmo…",
+        "Incrocio buon gusto…",
+        "Caccio gemme nascoste…",
+        "Peso la lista ristretta…",
+        "Lucido ogni raccomandazione…",
+        "Aggiungo i tocchi finali…"
+      ],
+      "movie": [
+        "Setaccio il cinema…",
+        "Confronto il tuo gusto con il canone…",
+        "Tiro la bobina del proiettore…",
+        "Leggo i titoli di coda…",
+        "Verifico cosa vale le tue due ore…",
+        "Metto in coda il trailer…"
+      ],
+      "book": [
+        "Cammino tra gli scaffali della biblioteca…",
+        "Incrocio i tuoi scaffali…",
+        "Traccio la tua mappa di lettura…",
+        "Spolvero la giusta copertina…",
+        "Verifico la riga di apertura…",
+        "Infilo il segnalibro…"
+      ],
+      "music": [
+        "Scavo nelle casse per il tuo suono…",
+        "Sequenzio l'album giusto…",
+        "Ascolto oltre i singoli…",
+        "Sintonizzo sulla tua frequenza…",
+        "Allineo i deep cut…",
+        "Lascio cadere l'ago…"
+      ],
+      "mix": [
+        "Intreccio film, libri e musica…",
+        "Abbino tre gusti alle tue risposte…",
+        "Mescolo le tue tre scelte…",
+        "Verifico attraverso i formati…",
+        "Allineo il trio…",
+        "Aggiungo i tocchi finali…"
+      ]
+    },
+    "body": {
+      "matchSuffix": "{score}% di corrispondenza",
+      "matchPercent": "{score}%",
+      "whyThisPick": "Perché questa scelta",
+      "about": "Informazioni",
+      "showMore": "Mostra di più",
+      "showLess": "Mostra meno",
+      "byAuthor": "Di {author}",
+      "byDirector": "Diretto da {director}",
+      "byArtist": "Di {artist}",
+      "favoriteAdd": "Aggiungi {title} ai preferiti",
+      "favoriteRemove": "Rimuovi {title} dai preferiti",
+      "movie": "Film",
+      "book": "Libro",
+      "music": "Album",
+      "eyebrow": "Le tue scelte",
+      "headline": "Scelti a mano per te",
+      "headlines": [
+        "Scelti a mano per te",
+        "Adattati al tuo gusto",
+        "Freschi di stampa",
+        "Fatti per corrispondere alla tua vibe",
+        "Costruiti intorno alle tue risposte",
+        "Curati solo per te",
+        "Il tuo prossimo preferito, forse",
+        "Scelti con intento",
+        "Personalmente tuoi",
+        "Selezionati con cura"
+      ],
+      "subhead": "{count, plural, one {# scelta personalizzata dall'IA, con il ragionamento dietro ciascuna. Registrane una nella tua libreria per influenzare le scelte future.} other {# scelte personalizzate dall'IA, con il ragionamento dietro ciascuna. Registrane una nella tua libreria per influenzare le scelte future.}}",
+      "sections": {
+        "movie": {
+          "eyebrow": "Film",
+          "title": "Sullo schermo"
+        },
+        "book": {
+          "eyebrow": "Libro",
+          "title": "Sullo scaffale"
+        },
+        "music": {
+          "eyebrow": "Album",
+          "title": "Nelle tue orecchie"
+        }
+      },
+      "actions": {
+        "retake": "Rifai quiz",
+        "viewHistory": "Visualizza cronologia",
+        "share": "Condividi risultati",
+        "more": "Altro",
+        "moreAriaLabel": "Altre azioni"
+      },
+      "shareMenu": {
+        "share": "Condividi…",
+        "copy": "Copia negli appunti",
+        "shareX": "Condividi su X",
+        "shareEmail": "Condividi via email"
+      },
+      "shareToasts": {
+        "shareFailed": "Impossibile condividere — riprova",
+        "copySuccess": "Copiato negli appunti!",
+        "copyFailed": "Impossibile copiare — riprova",
+        "favoriteFailed": "Impossibile aggiornare il tuo preferito — per favore riprova",
+        "favoriteAdded": "Aggiunto ai preferiti",
+        "favoriteRemoved": "Rimosso dai preferiti"
+      },
+      "shareText": {
+        "title": "Le mie scelte Smart Advisor",
+        "movies": "Film:",
+        "books": "Libri:",
+        "music": "Album:",
+        "directorPrefix": "reg. {director}",
+        "byAuthorShort": "di {author}",
+        "byArtistShort": "di {artist}",
+        "genres": "Generi: {list}",
+        "footer": "Ottieni le tue scelte su smartadvisor.app"
+      },
+      "shareTwitter": "Ho appena ricevuto le mie scelte Smart Advisor: {titles}\n\nOttieni le tue su smartadvisor.app",
+      "shareEmailSubject": "Le mie scelte Smart Advisor",
+      "beforeUnload": "Hai raccomandazioni non salvate. Sei sicuro di voler uscire?",
+      "generationStep": {
+        "analyzing": "Analisi delle tue risposte...",
+        "generating": "Generazione di raccomandazioni personalizzate...",
+        "enhancing": "Arricchimento con dati di film, libri e album...",
+        "finalizing": "Finalizzazione delle tue raccomandazioni..."
+      },
+      "generationError": "Impossibile generare raccomandazioni personalizzate. Per favore riprova.",
+      "overloadedTitle": "La nostra IA è al massimo",
+      "overloadedBody": "La nostra IA è martellata in questo momento. Dalle un minuto e riprova — abbiamo già riprovato un paio di volte per te.",
+      "confirmDialog": {
+        "title": "Generare nuove raccomandazioni?",
+        "body": "Hai già generato raccomandazioni per queste risposte. Genera un nuovo set o torna al tuo feed.",
+        "cancel": "Vai al feed",
+        "confirm": "Genera nuove"
+      },
+      "errorState": {
+        "title": "Impossibile generare raccomandazioni",
+        "retry": "Riprova",
+        "back": "Rifai quiz"
+      },
+      "refine": {
+        "cta": "Affina",
+        "eyebrow": "Affina",
+        "title": "Modifica queste scelte",
+        "subtitle": "Dicci come orientarci — rieseguiremo con le tue risposte originali più questo.",
+        "placeholder": "es. più come Dune, più leggero, niente oltre le 2 ore",
+        "cancel": "Annulla",
+        "submit": "Affina"
+      }
+    }
+  },
+  "Dashboard": {
+    "eyebrow": "Dashboard",
+    "startQuiz": "Inizia quiz",
+    "viewsAria": "Viste della dashboard",
+    "viewsGroup": "Viste",
+    "tabs": {
+      "overview": "Panoramica",
+      "picks": "Scelte",
+      "recentPicks": "Scelte recenti",
+      "genres": "Generi",
+      "milestones": "Traguardi"
+    },
+    "stats": {
+      "total": "Scelte totali",
+      "movies": "Film",
+      "books": "Libri",
+      "music": "Musica",
+      "favorites": "Preferiti"
+    },
+    "filters": {
+      "all": "Tutte",
+      "favorites": "Preferiti"
+    },
+    "recentAria": "Filtro scelte recenti",
+    "body": {
+      "loadingChart": "Caricamento grafico...",
+      "greetings": [
+        "Bentornato",
+        "Ehi",
+        "Bello vederti",
+        "Ciao",
+        "Salve",
+        "Ciao di nuovo",
+        "Felice che tu sia tornato",
+        "Guarda chi è tornato",
+        "La leggenda ritorna",
+        "Bene, bene, bene",
+        "Saluti, mortale",
+        "Che piacere vederti",
+        "La trama si infittisce",
+        "Tempo del sequel",
+        "In proiezione ora",
+        "Titoli di coda",
+        "Rullo di tamburi prego",
+        "Preparati",
+        "Pronti, scorri"
+      ],
+      "headerHook": {
+        "loading": "Il tuo hub di raccomandazioni personalizzate.",
+        "empty": "Fai il tuo primo quiz per iniziare.",
+        "quietWeek": "Settimana tranquilla — pronto per una nuova scelta?",
+        "up": "{n, plural, one {# nuova scelta questa settimana · su di {delta} rispetto alla scorsa settimana.} other {# nuove scelte questa settimana · su di {delta} rispetto alla scorsa settimana.}}",
+        "down": "{n, plural, one {# nuova scelta questa settimana · giù di {delta} rispetto alla scorsa settimana.} other {# nuove scelte questa settimana · giù di {delta} rispetto alla scorsa settimana.}}",
+        "flat": "{n, plural, one {# nuova scelta questa settimana.} other {# nuove scelte questa settimana.}}"
+      },
+      "modal": {
+        "ariaLabel": "Dettagli per {title}",
+        "byAuthor": "Di {author}",
+        "byDirector": "Diretto da {director}",
+        "byArtist": "Di {artist}",
+        "close": "Chiudi"
+      },
+      "favoriteAria": "Preferito",
+      "inLibraryAria": "Nella tua libreria",
+      "wrapped": {
+        "eyebrow": "Anno in rassegna",
+        "titleLead": "Il tuo",
+        "titleTail": "in scelte",
+        "body": "Generi principali, sequenza più lunga, creatore più scelto — racchiusi in una scheda.",
+        "cta": "Apri Wrapped"
+      },
+      "suggestion": {
+        "eyebrow": "Suggerito a seguire",
+        "firstQuiz": {
+          "title": "Fai il tuo primo quiz",
+          "body": "Rispondi a qualche domanda e l'IA ti darà una scelta adattata.",
+          "cta": "Inizia quiz"
+        },
+        "logReaction": {
+          "title": "Registra una reazione",
+          "body": "Dì all'IA cosa ha attecchito e cosa no — le tue reazioni diventano un segnale di gusto per ogni quiz futuro.",
+          "cta": "Apri risultati"
+        },
+        "anotherPick": {
+          "title": "Tempo per un'altra scelta?",
+          "body": "Il tuo ultimo quiz è stato {ago} fa. L'IA ora conosce {count, plural, one {# delle tue reazioni} other {# delle tue reazioni}}.",
+          "cta": "Fai un altro quiz"
+        }
+      },
+      "spotlight": {
+        "eyebrow": "Ultima scelta",
+        "openDetailsAria": "Apri dettagli per {title}",
+        "byAuthor": "Di {author}",
+        "byDirector": "Diretto da {director}",
+        "viewAll": "Visualizza tutto"
+      },
+      "noPicks": {
+        "title": "Nessuna scelta ancora",
+        "body": "Fai il tuo primo quiz e la tua ultima scelta vivrà qui così è sempre a un clic di distanza."
+      },
+      "pulse": {
+        "eyebrow": "Pulse",
+        "thisWeek": "{count, plural, one {# scelta questa settimana} other {# scelte questa settimana}}",
+        "quietWeek": "Settimana tranquilla",
+        "up": "↑ {delta} rispetto alla scorsa settimana",
+        "down": "↓ {delta} rispetto alla scorsa settimana",
+        "lastFourteenDays": "Ultimi 14 giorni",
+        "streakBadge": "Sequenza di {count} giorni",
+        "stat": {
+          "picks": "Scelte",
+          "library": "Libreria",
+          "favorites": "Preferiti",
+          "topGenre": "Genere principale"
+        },
+        "picksHint": "{movies}f · {books}l · {music}a",
+        "ratedHint": "{count} valutati",
+        "favoritesPercent": "{percent}%",
+        "topGenrePicks": "{count, plural, one {# scelta} other {# scelte}}",
+        "noData": "—"
+      },
+      "milestones": {
+        "eyebrow": "Traguardi",
+        "pageTitle": "I tuoi traguardi",
+        "backToFeed": "Torna al feed",
+        "earnedSummary": "{earned} di {total} ottenuti",
+        "unlocked": "Sbloccato",
+        "progress": "{progress}/{target}",
+        "unlockedToast": "Traguardo sbloccato: {label}",
+        "tierCompleteToast": "Livello completato: {tier}! 🏆",
+        "tapForDetails": "Tocca un traguardo per vedere come sbloccarlo",
+        "summaryCta": "Apri traguardi",
+        "summaryHint": "Vedi ogni traguardo, raggruppato per livello.",
+        "tiers": {
+          "easy": "Facile",
+          "medium": "Medio",
+          "hard": "Difficile",
+          "master": "Maestro"
+        },
+        "items": {
+          "firstPick": "Prima scelta",
+          "tenPicks": "10 scelte",
+          "twentyFivePicks": "25 scelte",
+          "halfCentury": "Mezzo secolo",
+          "centurion": "Centurione",
+          "wideTaste": "Gusto ampio",
+          "genreExplorer": "Esploratore di generi",
+          "genreMaster": "Maestro dei generi",
+          "cinephile": "Cinefilo",
+          "cinemaMaster": "Maestro del cinema",
+          "bookworm": "Topo di biblioteca",
+          "voracious": "Lettore vorace",
+          "melomaniac": "Melomane",
+          "audiophile": "Audiofilo",
+          "musicMogul": "Magnate della musica",
+          "curator": "Curatore",
+          "maven": "Esperto",
+          "reflective": "Riflessivo",
+          "critic": "Critico",
+          "librarian": "Bibliotecario",
+          "completionist": "Completista",
+          "weekStreak": "Sequenza settimanale",
+          "marathon": "Maratona",
+          "legend": "Leggenda",
+          "movieMogul": "Magnate del cinema",
+          "libraryRoyal": "Reale della biblioteca",
+          "polymath": "Polimata",
+          "patron": "Mecenate",
+          "tastemaker": "Creatore di gusto",
+          "yearLong": "Tutto l'anno"
+        },
+        "descriptions": {
+          "firstPick": "Ottieni la tua prima raccomandazione dal quiz.",
+          "tenPicks": "Ottieni 10 raccomandazioni in qualsiasi mix di quiz.",
+          "twentyFivePicks": "Accumula 25 raccomandazioni.",
+          "halfCentury": "Raggiungi 50 raccomandazioni.",
+          "centurion": "100 raccomandazioni non sono uno scherzo.",
+          "wideTaste": "Ottieni raccomandazioni coprendo 5 generi diversi.",
+          "genreExplorer": "Diramati verso 10 generi diversi.",
+          "genreMaster": "Copri 20 generi diversi.",
+          "cinephile": "Raccogli 10 raccomandazioni di film.",
+          "cinemaMaster": "Raccogli 50 raccomandazioni di film.",
+          "bookworm": "Raccogli 10 raccomandazioni di libri.",
+          "voracious": "Raccogli 50 raccomandazioni di libri.",
+          "melomaniac": "Raccogli 10 raccomandazioni di album.",
+          "audiophile": "Raccogli 50 raccomandazioni di album.",
+          "musicMogul": "Raccogli 100 raccomandazioni di album.",
+          "curator": "Aggiungi 5 raccomandazioni ai preferiti nella tua cronologia.",
+          "maven": "Aggiungi 25 raccomandazioni ai preferiti.",
+          "reflective": "Valuta 5 voci nella tua libreria.",
+          "critic": "Valuta 25 voci nella tua libreria.",
+          "librarian": "Registra 20 voci nella tua libreria.",
+          "completionist": "Segna 10 voci della libreria come finite.",
+          "weekStreak": "Usa Smart Advisor 7 giorni di fila.",
+          "marathon": "Mantieni una sequenza Smart Advisor di 30 giorni.",
+          "legend": "Raggiungi 250 raccomandazioni — una vera leggenda.",
+          "movieMogul": "Raccogli 100 raccomandazioni di film.",
+          "libraryRoyal": "Raccogli 100 raccomandazioni di libri.",
+          "polymath": "Ottieni raccomandazioni in 30 generi diversi.",
+          "patron": "Aggiungi 50 raccomandazioni ai preferiti.",
+          "tastemaker": "Valuta 100 voci nella tua libreria.",
+          "yearLong": "Mantieni una sequenza Smart Advisor di 365 giorni. Sì, davvero."
+        }
+      },
+      "library": {
+        "eyebrow": "Segnale di gusto",
+        "title": "La tua libreria",
+        "viewAll": "Visualizza tutto",
+        "emptyLead": "Niente registrato ancora. Premi",
+        "emptyAction": "Ho visto / letto questo",
+        "emptyTail": "su un risultato e apparirà qui come segnale di gusto per quiz futuri."
+      },
+      "inProgress": {
+        "eyebrow": "Attualmente",
+        "title": "Riprendi da dove avevi lasciato",
+        "markFinished": "Segna come finito",
+        "markedFinishedToast": "Bene — apri la tua libreria per valutare \"{title}\".",
+        "viewAll": "Visualizza tutto"
+      },
+      "picks": {
+        "filterAria": "Filtro scelte recenti",
+        "all": "Tutte",
+        "favorites": "Preferiti",
+        "seeAllInHistory": "Vedi tutto nella cronologia",
+        "noPicksTitle": "Nessuna scelta ancora",
+        "noPicksBody": "Fai un quiz e le tue scelte si raccoglieranno qui.",
+        "startQuiz": "Inizia quiz",
+        "noFavoritesTitle": "Nessun preferito ancora",
+        "noFavoritesBody": "Tocca il cuore su qualsiasi scelta per salvarla qui.",
+        "movies": "Film",
+        "books": "Libri",
+        "music": "Musica"
+      },
+      "genres": {
+        "eyebrow": "Suddivisione generi",
+        "title": "Dove pende il tuo gusto",
+        "topLabel": "Top",
+        "topPercent": "{percent}%",
+        "mostlyMovies": "principalmente film",
+        "mostlyBooks": "principalmente libri",
+        "mostlyMusic": "principalmente musica",
+        "evenSplit": "divisione equa",
+        "empty": "Fai un quiz per vedere i tuoi generi.",
+        "format": {
+          "movies": "Film",
+          "books": "Libri",
+          "music": "Musica",
+          "totalPicks": "{count, plural, one {# scelta} other {# scelte}}",
+          "empty": "Nessuna scelta ancora."
+        }
+      }
+    }
+  },
+  "Demo": {
+    "quiz": {
+      "category": "Demo quiz",
+      "pickLabel": "Scegli un formato",
+      "stepLabel": "Domanda {current} di {total}",
+      "back": {
+        "home": "Home",
+        "previous": "Precedente"
+      },
+      "cards": {
+        "movie": {
+          "eyebrow": "Sullo schermo",
+          "title": "Film",
+          "description": "Un film adattato al tuo umore e ritmo attuali."
+        },
+        "book": {
+          "eyebrow": "Sullo scaffale",
+          "title": "Libro",
+          "description": "Una lettura adattata al tuo stile e interessi."
+        },
+        "music": {
+          "eyebrow": "Nelle tue orecchie",
+          "title": "Album",
+          "description": "Un disco abbinato all'umore in cui ti trovi."
+        },
+        "mix": {
+          "eyebrow": "Tutti e tre",
+          "title": "Mescolalo",
+          "description": "Un film, un libro e un album scelti insieme."
+        },
+        "both": {
+          "eyebrow": "Entrambi",
+          "title": "Uno di ciascuno",
+          "description": "Un film e un libro scelti insieme in una volta."
+        }
+      },
+      "validation": {
+        "fillInBlank": "Per favore digita una risposta prima di continuare.",
+        "selectAll": "Per favore seleziona almeno un'opzione prima di continuare.",
+        "singleSelect": "Per favore seleziona un'opzione prima di continuare."
+      },
+      "next": "Avanti",
+      "continue": "Continua",
+      "leaveConfirm": "Uscire dalla demo? Le tue risposte finora non saranno salvate."
+    },
+    "results": {
+      "loadingText": "Trovo le tue scelte perfette...",
+      "matchSuffix": " corrispondenza",
+      "whyThisPick": "Perché questa scelta",
+      "about": "Informazioni",
+      "showMore": "Mostra di più",
+      "showLess": "Mostra meno",
+      "viewDetails": "Visualizza dettagli",
+      "errors": {
+        "limitTitle": "È tutto per oggi",
+        "genericTitle": "Qualcosa è andato storto",
+        "limitFallback": "Hai usato tutti i {limit} test demo gratuiti per oggi. Crea un account gratuito per raccomandazioni illimitate — il tuo profilo di gusto migliora ad ogni quiz.",
+        "genericFallback": "Non siamo riusciti a generare le tue raccomandazioni demo. Per favore riprova.",
+        "signUp": "Crea il tuo account gratuito",
+        "tryAgain": "Riprova"
+      },
+      "eyebrow": "Demo · Le tue scelte",
+      "headline": "Scelti a mano per te",
+      "subhead": "{count, plural, one {# scelta personalizzata dalle tue risposte demo — registrati per salvarle e affinarle nel tempo.} other {# scelte personalizzate dalle tue risposte demo — registrati per salvarle e affinarle nel tempo.}}",
+      "empty": "Nessun risultato trovato. Riprova la demo per un nuovo set.",
+      "sections": {
+        "movie": {
+          "eyebrow": "Film",
+          "title": "Sullo schermo"
+        },
+        "book": {
+          "eyebrow": "Libro",
+          "title": "Sullo scaffale"
+        },
+        "music": {
+          "eyebrow": "Album",
+          "title": "Nelle tue orecchie"
+        }
+      },
+      "cta": {
+        "title": "Fanne un'abitudine",
+        "body": "Registrati per salvare le tue scelte, costruire un profilo di gusto dalle tue reazioni e ottenere raccomandazioni adattate dall'IA ogni volta.",
+        "signUp": "Registrati per continuare",
+        "retake": "Rifai demo"
+      }
+    }
+  },
+  "WhereToWatch": {
+    "title": "Dove guardare",
+    "flatrate": "Streaming",
+    "rent": "Noleggia",
+    "buy": "Acquista",
+    "attribution": "via JustWatch"
+  },
+  "Feed": {
+    "aiNudge": {
+      "eyebrow": "Suggerimento IA",
+      "variants": {
+        "surprise": {
+          "title": "Hai bisogno di una scelta veloce? Un tocco e ti sorprenderemo.",
+          "cta": "Sorprendimi"
+        },
+        "refine": {
+          "title": "Hai una scelta che ha quasi funzionato? Affinala in italiano semplice.",
+          "cta": "Prova ad affinare"
+        },
+        "group": {
+          "title": "Guardi con amici stasera? Avvia un quiz di gruppo.",
+          "cta": "Quiz di gruppo"
+        },
+        "tune": {
+          "title": "Le scelte sembrano fuori? Sintonizza i tuoi filtri di gusto in 30 secondi.",
+          "cta": "Sintonizza gusto"
+        },
+        "solo": {
+          "title": "Quiz veloce, scelta precisa — di cosa hai voglia?",
+          "cta": "Inizia quiz"
+        }
+      }
+    },
+    "dashboardMoved": {
+      "eyebrow": "Avviso",
+      "title": "Questa è la tua nuova casa.",
+      "body": "La dashboard si è spostata — i tuoi <milestones>traguardi</milestones> vivono lì ora.",
+      "dismiss": "Ignora"
+    },
+    "mobileApp": {
+      "eyebrow": "Prossimamente",
+      "title": "Smart Advisor per iOS e Android",
+      "body": "Un'app mobile nativa è in arrivo — accedi con lo stesso account quando atterra.",
+      "dismiss": "Ignora"
+    }
+  }
+}

@@ -1,0 +1,2323 @@
+{
+  "Settings": {
+    "eyebrow": "設定",
+    "title": "アカウント設定",
+    "subtitle": "プロフィール、セキュリティ、各種設定を管理します。",
+    "tabs": {
+      "profile": "プロフィール",
+      "security": "セキュリティ",
+      "content": "コンテンツ",
+      "feed": "フィード",
+      "integrations": "連携",
+      "help": "ヘルプ"
+    },
+    "feed": {
+      "title": "フィード",
+      "description": "おすすめや感想のソーシャルフィードでの表示方法を管理します。",
+      "visibilityLabel": "プロフィールの公開設定",
+      "public": "公開",
+      "private": "非公開",
+      "publicHint": "視聴・評価・共有した作品が他のユーザーのフィードに表示され、直接フォローしてもらえます。",
+      "privateHint": "通常通り閲覧・投稿できますが、活動は他のフィードに配信されず、新しいフォロワーは承認制になります。",
+      "prefsTitle": "フィードの環境設定",
+      "prefsDescription": "フィードを開いた時の初期表示。閲覧中はいつでも切り替えられます。",
+      "viewLabel": "デフォルト表示",
+      "viewCards": "カード",
+      "viewList": "リスト",
+      "scopeLabel": "デフォルト範囲",
+      "scopeFriends": "フレンド",
+      "scopeDiscover": "発見",
+      "scopeGroup": "グループ",
+      "communityLabel": "デフォルトコミュニティ",
+      "communityAll": "すべて",
+      "communityMovies": "映画",
+      "communityBooks": "書籍",
+      "communityMusic": "音楽",
+      "commentSortLabel": "コメントの並び順",
+      "commentSortTop": "トップ",
+      "commentSortNew": "新着",
+      "blocked": {
+        "title": "ブロック中のユーザー",
+        "description": "彼らの投稿やコメントはあなたのフィードに表示されません。",
+        "empty": "誰もブロックしていません。",
+        "unblock": "ブロック解除",
+        "unblockedToast": "@{handle} のブロックを解除しました"
+      },
+      "reports": {
+        "title": "送信した報告",
+        "description": "あなたが報告した投稿やコメント。チームが個別に確認します。",
+        "empty": "報告を送信していません。",
+        "onPost": "投稿に対して",
+        "onComment": "コメントに対して",
+        "contentGone": "コンテンツは削除されました",
+        "statusReview": "確認中"
+      }
+    },
+    "groups": {
+      "account": "アカウント",
+      "app": "アプリ"
+    },
+    "profile": {
+      "pictureTitle": "プロフィール画像",
+      "pictureDescription": "アプリ全体に表示する画像をアップロード。JPG、PNG、GIF、WEBP、最大5MB。",
+      "uploading": "アップロード中…",
+      "changePicture": "画像を変更",
+      "uploadPicture": "画像をアップロード",
+      "remove": "削除",
+      "pictureUpdated": "プロフィール画像を更新しました。",
+      "pictureRemoved": "プロフィール画像を削除しました。",
+      "detailsTitle": "プロフィール詳細",
+      "detailsDescription": "公開アカウント情報を更新します。",
+      "currentUsername": "現在の表示名",
+      "newUsername": "表示名",
+      "newUsernamePlaceholder": "なんとお呼びすればよいですか",
+      "age": "年齢",
+      "agePlaceholder": "25",
+      "save": "変更を保存",
+      "savedToast": "プロフィールを更新しました。",
+      "aboutTitle": "自己紹介",
+      "aboutDescription": "公開プロフィールに表示される短い自己紹介とタグ。",
+      "bioLabel": "自己紹介",
+      "bioPlaceholder": "あなたの興味を伝えてください…",
+      "interestsLabel": "興味",
+      "tagsLabel": "あなたのタグ",
+      "tagsPlaceholder": "タグを追加…",
+      "tagsAdd": "追加",
+      "aboutSavedToast": "プロフィールのカスタマイズを保存しました。",
+      "aboutSaveError": "保存できませんでした — もう一度お試しください。"
+    },
+    "email": {
+      "title": "メール",
+      "description": "サインインに使用するアドレス。",
+      "current": "現在",
+      "newEmail": "新しいメール",
+      "newEmailPlaceholder": "new@example.com",
+      "update": "メールを更新",
+      "differentRequired": "新しいメールは別のものを指定してください。",
+      "checkInbox": "受信箱で確認してください。"
+    },
+    "password": {
+      "title": "パスワード",
+      "description": "新しいパスワードを選んでください。",
+      "newPassword": "新しいパスワード",
+      "confirmPassword": "パスワードを確認",
+      "passwordPlaceholder": "••••••••",
+      "requirementsTitle": "パスワード要件",
+      "confirmRulesTitle": "パスワード確認",
+      "matches": "パスワードと一致しています",
+      "update": "パスワードを更新",
+      "updatedToast": "パスワードを更新しました。"
+    },
+    "mfa": {
+      "title": "二段階認証",
+      "description": "サインイン時の追加ステップでアカウントを安全に保ちます。",
+      "checking": "確認中…",
+      "on": "二段階認証は有効です",
+      "off": "二段階認証は無効です",
+      "enabled": "有効",
+      "disabled": "無効",
+      "manage": "二段階認証を管理",
+      "enable": "二段階認証を有効化"
+    },
+    "backupEmail": {
+      "title": "バックアップメール",
+      "description": "認証アプリが使えない時に使う回復用アドレス。",
+      "labelChange": "変更先",
+      "labelDefault": "バックアップメール",
+      "placeholderChange": "new-backup@example.com",
+      "placeholderDefault": "backup@example.com",
+      "save": "バックアップを保存",
+      "update": "バックアップを更新",
+      "savedToast": "バックアップメールを保存しました。",
+      "removedToast": "バックアップメールを削除しました。",
+      "remove": "削除"
+    },
+    "theme": {
+      "title": "外観",
+      "description": "システムに合わせるか、テーマを固定します。",
+      "light": "ライト",
+      "dark": "ダーク",
+      "system": "システム"
+    },
+    "content": {
+      "title": "コンテンツ設定",
+      "description": "デフォルトのおすすめの挙動を設定します。",
+      "typeLabel": "おすすめの種類",
+      "type": {
+        "movie": {
+          "eyebrow": "画面で",
+          "label": "映画"
+        },
+        "book": {
+          "eyebrow": "本棚で",
+          "label": "書籍"
+        },
+        "music": {
+          "eyebrow": "耳元で",
+          "label": "音楽"
+        },
+        "both": {
+          "eyebrow": "それぞれ1つ",
+          "label": "両方"
+        },
+        "mix": {
+          "eyebrow": "3つすべて",
+          "label": "ミックス"
+        }
+      },
+      "toneLabel": "コンテンツのトーン",
+      "ageLockedEyebrow": "年齢制限あり",
+      "ageLockedBody": "おすすめは年齢({age})に応じて適切な内容に保たれます。大人はスタンダードとファミリー向けから選べます。",
+      "ageLockedBodyMissing": "おすすめは年齢に応じて適切な内容に保たれます。大人はスタンダードとファミリー向けから選べます。",
+      "tone": {
+        "standard": "スタンダード",
+        "family": "ファミリー向け"
+      },
+      "toneHint": {
+        "standard": "フルパーソナリティ。あなたに合っていれば、AIはダーク、複雑、または成熟した作品も提案します。",
+        "family": "おすすめは穏やかなものに保たれます。成熟したテーマ、暗いコンテンツ、性的な内容はありません。"
+      },
+      "questionCountLabel": "クイズあたりの質問数",
+      "questionWord": "{count, plural, one {質問} other {質問}}",
+      "depth": {
+        "quick": "素早く重点的に",
+        "focused": "鋭く具体的に",
+        "balanced": "バランスの取れた深さ",
+        "thorough": "徹底的な探求",
+        "comprehensive": "包括的な詳細"
+      },
+      "rangeAria": "クイズあたりのデフォルト質問数",
+      "appliesNext": "次のクイズから適用",
+      "save": "設定を保存",
+      "savedToast": "コンテンツ設定を保存しました。",
+      "saveError": "設定を保存できませんでした。もう一度お試しください。",
+      "filters": {
+        "title": "おすすめフィルター",
+        "description": "AIが毎回のおすすめで遵守する厳格な制限 — ソロクイズとサプライズ。フォーマット別に設定すると、映画ジャンルを避けても書籍ジャンルがブロックされません。グループクイズには影響しません。",
+        "formatLabel": "フィルター対象",
+        "format": {
+          "movie": "映画",
+          "book": "書籍",
+          "music": "音楽"
+        },
+        "avoidGenresLabel": "避けるジャンル",
+        "runtimeLabel": "映画の最大上映時間",
+        "runtimeNoCap": "制限なし",
+        "runtimeMinutes": "{minutes}分",
+        "runtimeHintNone": "上映時間の制限なし — どんな長さの映画もOK。",
+        "runtimeHint": "映画は{minutes}分以下である必要があります。",
+        "languageLabel": "優先言語",
+        "languagePlaceholder": "例:日本語、スペイン語",
+        "avoidNoteLabel": "決しておすすめしない",
+        "avoidNotePlaceholder": {
+          "movie": "完全に避ける映画 — シリーズ、監督、テーマ…",
+          "book": "完全に避ける書籍 — シリーズ、作家、テーマ…",
+          "music": "完全に避ける音楽 — アーティスト、サブジャンル、テーマ…"
+        },
+        "avoidNoteHint": "自由記述。お好きなだけ具体的に。",
+        "appliesNext": "次のクイズから適用",
+        "save": "フィルターを保存",
+        "saved": "おすすめフィルターを保存しました。",
+        "saveFailed": "フィルターを保存できませんでした。もう一度お試しください。",
+        "notAuthed": "フィルターを保存するにはサインインが必要です。"
+      }
+    },
+    "integrations": {
+      "title": "連携",
+      "description": "接続されているプロバイダーとサービス。",
+      "emptyTitle": "まだ利用できる連携はありません",
+      "emptyBody": "サードパーティ接続は利用可能になり次第ここに表示されます。"
+    },
+    "help": {
+      "title": "ヘルプ",
+      "description": "よくある質問への回答と、見落としているかもしれないアプリ機能へのクイックリンク。",
+      "faq": {
+        "title": "FAQ",
+        "subtitle": "よくある質問を閲覧"
+      },
+      "takeQuiz": {
+        "title": "クイズを受ける",
+        "subtitle": "数分で新しいおすすめを取得"
+      },
+      "findFriends": {
+        "title": "フレンドを探す",
+        "subtitle": "似た趣味の人を発見"
+      },
+      "milestones": {
+        "title": "あなたの実績",
+        "subtitle": "進捗を追跡し、実績を解除"
+      },
+      "showOnboarding": {
+        "title": "オンボーディングを表示",
+        "subtitle": "プロフィール設定画面をプレビューモードで再確認"
+      }
+    },
+    "danger": {
+      "title": "危険ゾーン",
+      "description": "これらの操作は元に戻せません。慎重に進めてください。",
+      "disable": "アカウントを無効化",
+      "delete": "アカウントを削除",
+      "processing": "処理中…",
+      "disableConfirm": "アカウントを無効化しますか?サインアウトされ、サポートによる再有効化までサインインできません。",
+      "disableFinalConfirm": "最終確認。今すぐ無効化しますか?",
+      "deleteConfirm": "アカウントを完全に削除しますか?元に戻すことはできません。",
+      "typeDeletePrompt": "確認のため「DELETE」と入力してください:",
+      "deletionCanceled": "削除をキャンセルしました。"
+    },
+    "verifyAction": {
+      "save": "プロフィールを保存",
+      "email": "メールを更新",
+      "password": "パスワードを変更",
+      "content": "コンテンツ設定を保存",
+      "disable": "アカウントを無効化",
+      "delete": "アカウントを完全に削除",
+      "addAuthenticator": "別の認証アプリを追加",
+      "setBackupEmail": "バックアップメールを設定",
+      "removeBackupEmail": "バックアップメールを削除"
+    },
+    "verifyModal": {
+      "title": "本人確認",
+      "description": "{action}するには6桁の認証コードを入力してください。",
+      "placeholder": "000000",
+      "enterCode": "6桁のコードを入力",
+      "noFactor": "確認済みのMFAファクターが見つかりません",
+      "cancel": "キャンセル",
+      "verify": "確認",
+      "closeAria": "確認ダイアログを閉じる"
+    },
+    "verifyModalEnroll": {
+      "title": "まず2FAを設定",
+      "description": "{action}するには二段階認証が必要です。続行するには今設定してください。"
+    },
+    "mfaSetupModal": {
+      "closeAria": "二段階認証設定を閉じる"
+    }
+  },
+  "Language": {
+    "title": "言語",
+    "description": "アプリ全体で使用する言語を選択します。",
+    "options": {
+      "en": "英語",
+      "es": "スペイン語",
+      "fr": "フランス語",
+      "de": "ドイツ語",
+      "pt": "ポルトガル語",
+      "it": "イタリア語",
+      "nl": "オランダ語",
+      "ja": "日本語",
+      "zh": "中国語",
+      "ko": "韓国語"
+    },
+    "saving": "保存中…",
+    "saved": "言語を更新しました。"
+  },
+  "Navbar": {
+    "items": {
+      "howItWorks": "使い方",
+      "whySmartAdvisor": "Smart Advisorを選ぶ理由",
+      "poweredBy": "提供技術",
+      "ourTeam": "チーム",
+      "faq": "FAQ",
+      "dashboard": "ダッシュボード",
+      "feed": "フィード",
+      "library": "ライブラリ",
+      "history": "履歴",
+      "milestones": "実績",
+      "groupQuiz": "グループクイズ",
+      "settings": "設定"
+    },
+    "getStarted": "はじめる",
+    "signOut": "サインアウト",
+    "accountMenu": "アカウントメニュー",
+    "theme": {
+      "label": "テーマ",
+      "light": "ライト",
+      "dark": "ダーク",
+      "system": "システム",
+      "systemHint": "デバイスの設定に合わせます"
+    }
+  },
+  "Home": {
+    "hero": {
+      "titleLine1": "次なるお気に入りを発見",
+      "titleLine2": "あらゆる",
+      "subtitle": "あなた独自の好みに合わせた、映画、書籍、アルバムのAI搭載おすすめ。",
+      "ctaPrimaryLoggedOut": "はじめる",
+      "ctaPrimaryLoggedIn": "フィードへ",
+      "ctaSecondaryLoggedOut": "デモを試す",
+      "ctaSecondaryLoggedIn": "履歴を見る",
+      "scrollHint": "スクロールして探索",
+      "flipWords": [
+        "映画",
+        "書籍",
+        "アルバム",
+        "物語",
+        "冒険",
+        "クラシック",
+        "傑作",
+        "カルトな名作"
+      ]
+    },
+    "howItWorks": {
+      "eyebrow": "使い方",
+      "title": "迷いから最高の選択へ、4ステップ",
+      "subtitle": "あなたの時間に値する視聴・読書にたどり着くための、より速い方法。",
+      "steps": {
+        "format": {
+          "title": "フォーマットを選ぶ",
+          "description": "映画、書籍、アルバム、ミックスのいずれかをお伝えください。あなたの選択に合わせて流れを調整します。"
+        },
+        "depth": {
+          "title": "深さを設定",
+          "description": "答えたい質問数を選択 — クイックな味見か深掘りか、あなた次第。"
+        },
+        "quiz": {
+          "title": "パーソナライズされたクイズに回答",
+          "description": "AIがあなたの年齢とコンテンツタイプに合わせて新しい質問を生成。同じクイズは2つとありません。"
+        },
+        "picks": {
+          "title": "おすすめを受け取る",
+          "description": "マッチスコアと、なぜあなたに合うのかという理由が書かれた本物のおすすめ。"
+        }
+      }
+    },
+    "features": {
+      "eyebrow": "Smart Advisorを選ぶ理由",
+      "title": "信頼できる選択のために構築",
+      "subtitle": "設計上プライベート、デフォルトで高速、そしてオープンソースなので仕組みを確認できます。",
+      "items": {
+        "private": {
+          "title": "プライベートプロフィール",
+          "description": "あなたの好みはアカウントに紐づき、選択の改善にのみ使用されます。"
+        },
+        "fast": {
+          "title": "ワープ速度の結果",
+          "description": "素早い結果とスムーズな更新で、待たずに決められます。"
+        },
+        "trust": {
+          "title": "信頼しやすい選択",
+          "description": "明確な理由により各提案が信頼・選択しやすくなり、オープンソースの透明性も備えています。"
+        },
+        "both": {
+          "title": "フォーマットを超えて選ぶ",
+          "description": "書籍、映画、アルバムの結果を1つの場所で見られ、選択がより速く簡単に。"
+        }
+      },
+      "trustReasons": [
+        "あなたの年齢制限に合致",
+        "ご希望のペース",
+        "以前選択したトーン"
+      ]
+    },
+    "groupQuizCta": {
+      "newFeature": "新機能",
+      "eyebrow": "グループクイズ",
+      "titleLead": "選択を見つける",
+      "titleHighlight": "みんなで",
+      "description": "クイズをホストし、6文字のコードを共有し、グループに回答してもらいます。AIが全員の好みを統合し、その場に合う1つの選択を導き出します。参加は無料 — アカウント不要。",
+      "cta": "試してみる"
+    },
+    "albumCta": {
+      "newFeature": "新着",
+      "eyebrow": "アルバムのおすすめ",
+      "titleLead": "次のお気に入りアルバムに",
+      "titleHighlight": "チューニング",
+      "description": "同じクイズ、新しい感覚。聴き方について教えてください — 時代、雰囲気、楽器 — するとAIが30秒のプレビュー付きで1つのアルバムを選びます。Deezer提供。",
+      "cta": "アルバムを選ぶ"
+    },
+    "poweredBy": {
+      "eyebrow": "提供技術",
+      "title": "信頼できるインフラ上に構築",
+      "subtitle": "Smart Advisorを速く、信頼でき、便利に保つ信頼できるサービス。"
+    },
+    "team": {
+      "eyebrow": "メンバー",
+      "title": "チーム紹介",
+      "subtitle": "Smart Advisorを支える人々。",
+      "members": {
+        "andrew": {
+          "designation": "クリエイター",
+          "quote": "おすすめを個人的、迅速、真に役立つものにするためにSmart Advisorを構築。"
+        },
+        "vlad": {
+          "designation": "ウェブデザイナー",
+          "quote": "デスクトップでの体験をスムーズに保つクリーンなインターフェース作りに注力。"
+        }
+      }
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "title": "質問への回答",
+      "subtitleLead": "始める前に質問は?お問い合わせは",
+      "subtitleMid": "またはバグ報告は",
+      "subtitleTail": "。Smart Advisorはオープンソースなので、いつでも確認・貢献できます。",
+      "categoriesAria": "FAQカテゴリー",
+      "filterAll": "すべて",
+      "categories": {
+        "getting-started": "はじめに",
+        "how-it-works": "使い方",
+        "feed": "フィード",
+        "group-quiz": "グループクイズ",
+        "library": "ライブラリ",
+        "account": "アカウントとプライバシー"
+      },
+      "items": {
+        "create-account": {
+          "question": "アカウントの作成方法は?",
+          "answer": "ログインページでサインアップをクリックし、名前、メール、パスワード(最低8文字)を入力します。確認メールが届きます — リンクをクリックしてサインインする前にアカウントを有効化してください。"
+        },
+        "verify-email": {
+          "question": "なぜメールを確認する必要があるのですか?",
+          "answer": "メール確認はあなたの身元を確認し、アカウントを保護します。受信箱に送信された確認リンクをクリックするまでサインインできません。見つからない場合は迷惑メールフォルダを確認してください。"
+        },
+        "personalize": {
+          "question": "Smart Advisorはどのようにおすすめをパーソナライズしますか?",
+          "answer": "Smart Advisorはクイズの回答を使ってあなたの気分、ペースの好み、ジャンルの興味を理解します。次にTMDB、Open Library、Deezerのリアルタイムデータと組み合わせ、各選択の明確な理由とともにおすすめを生成します。"
+        },
+        "quiz-flow": {
+          "question": "クイズはどのように動作しますか?",
+          "answer": "コンテンツタイプ(映画、書籍、アルバム、またはミックス)を選び、質問数(3〜15)を選択し、それぞれに回答します。回答はAIに送信され、あなたの回答に合わせたパーソナライズされたおすすめが生成されます。"
+        },
+        "results-generated": {
+          "question": "結果はどのように生成されますか?",
+          "answer": "回答はあなたの好みに合うタイトルを選択するAIモデルによって処理されます。各おすすめは、TMDB(映画)、Open Library(書籍)、Deezer(アルバム、30秒のプレビュー付き)からの本物のポスター、評価、説明で強化されます。"
+        },
+        "movies-and-books": {
+          "question": "映画、書籍、音楽を1つのセッションで受け取れますか?",
+          "answer": "はい。コンテンツ選択時に「ミックス」を選択すると、同じセッションで映画1本、書籍1冊、アルバム1枚を受け取れます。すべてのおすすめ履歴は今後の参照のために保存されます。"
+        },
+        "off-results": {
+          "question": "おすすめがしっくりこない場合は?",
+          "answer": "別の回答でいつでもクイズをやり直すか、質問数や気分・ペースの選択を調整できます。今後の選択を改善する最速の方法はライブラリに反応を記録することです — 過去の選択を「自分向けではない」とマークするとAIは似たタイトルを避けるよう学習し、いいねは同じようなものへ誘導します。"
+        },
+        "trailer-preview": {
+          "question": "トレーラーやプレビューはどこで見られますか?",
+          "answer": "フィードや履歴のおすすめカードを開いてください。映画にはインラインでトレーラーが再生(遅延読み込みなのでクリック時のみ起動)、書籍には「Open Libraryで見る」リンクが表示され、版、表紙、レビューを掘り下げられます。アルバムの最初の30秒トラックプレビューはワンタップ。映画はTMDBの公式トレーラーを使用(公開時)、プレビューはDeezerから。"
+        },
+        "year-in-review": {
+          "question": "Year in Reviewとは何で、いつ表示されますか?",
+          "answer": "Year in ReviewはSpotify Wrapped風のおすすめ要約:トップジャンル、最長連続日数、ピーク月、最も選ばれた監督や著者、フォーマットの構成、注目タイトル。12月(現在の年)と1月(前年)にフィードの目立つバナーとして表示されます。その期間外も /wrapped でページは機能しますが、宣伝はされません。"
+        },
+        "feed-what": {
+          "question": "フィードとは何ですか?",
+          "answer": "フォローしている人が共有したおすすめのReddit風ストリームと、より広いDiscoverやGroupセッションビュー。スコープ(フレンド/Discover/グループ)、コミュニティ別フィルター(映画/書籍/音楽)、トレンディング/新着/トップで並べ替えができ — 各設定はセッションを越えて保持されます。"
+        },
+        "feed-share": {
+          "question": "フィードでおすすめを共有するには?",
+          "answer": "/feed の「おすすめを共有」ボタンでコンポーザーを開きます。コミュニティとアクティビティ(視聴済み/評価済み/おすすめ中)を選び、タイトルを入力 — 入力中に表紙が自動的に検索され、映画はTMDB、書籍はOpen Library、音楽はDeezerを使用します。任意のメモを追加して共有します。"
+        },
+        "feed-edit": {
+          "question": "共有後に投稿やコメントを編集できますか?",
+          "answer": "はい、両方とも。自分の投稿のオーバーフローメニューには編集と削除があります(スレッドからの編集はフィードコンポーザーの編集モードに戻ります)。自分のコメントには返信の隣に編集ボタンがあり — 本文を変更すると署名に「・編集済み」タグが表示されます。所有していない投稿やコメントには報告のみが表示されます。"
+        },
+        "feed-votes": {
+          "question": "投稿やコメントの賛否投票はどう機能しますか?",
+          "answer": "各投稿とコメントにはバーに上下の矢印があります。1回タップで投票、もう1回でクリア。表示される数字はすべての投票者にわたる正規のサーバースコア;自分の状態は矢印を紫(上)またはピンク(下)にライトアップします。トレンディング順は投稿の経過時間でこのスコアを重み付けし、トップは生のスコアで並び替えます。"
+        },
+        "feed-sort": {
+          "question": "フィードを別の方法で並べ替えできますか?",
+          "answer": "はい — スコープ列の下にトレンディング/新着/トップのセグメント化された切り替えがあります。トレンディングはスコアと新しさを混合(新しいものが同点で勝利)、新着は経過時間昇順、トップは最高スコアを最初に並べます。選択はデバイスごとで、セッションを越えて記憶されます。"
+        },
+        "feed-follow": {
+          "question": "人をフォロー、誰かをブロック、またはコンテンツを報告するには?",
+          "answer": "名前をタップしてプロフィールを開き、フォロー/フォロー解除を使用します。任意の投稿やコメントのオーバーフローメニューで報告したり著者をブロックしたりできます — ブロックされた著者はフィードから完全に消え、設定 -> フィード -> ブロック中のユーザーでリストを管理できます。送信した報告は設定 -> フィード -> 送信した報告にあります。"
+        },
+        "group-what": {
+          "question": "グループクイズとは何ですか?",
+          "answer": "グループクイズは複数人で同じクイズを一緒に受けられます — 同じテーブル、ソファ、リモートで。ホストがセッションを作成し、6文字のコードを共有し、全員が自分のデバイスで同じ質問セットに回答します。AIが全員の回答を統合し、その場に合う1つのおすすめにまとめます。"
+        },
+        "group-account": {
+          "question": "グループクイズに参加するにはアカウントが必要ですか?",
+          "answer": "いいえ。参加は無料でアカウント不要 — ホストのコードと表示名を入力するだけ。ホストにはアカウントが必要で、グループの選択をライブラリに保存し、連続記録/実績をプロフィールに紐付けるためです。"
+        },
+        "group-host": {
+          "question": "グループクイズをホストするには?",
+          "answer": "サインインしたユーザーはナビゲーションバーからグループクイズを開けます;その他はホームページの「一緒に選択を見つける」カードをタップできます。ホストカードで表示名を設定し、コンテンツタイプ(ミックス/映画/書籍/音楽)を選び、希望の質問数(3〜15)の数字タイルをタップして、セッション作成を押します。6文字のコードとリンクをコピーボタンのあるロビーに到着 — どちらかをグループに共有します。最低2人のプレイヤーが参加するとクイズ開始が表示されます;押すと部屋全体のために新しいAI質問が生成されます。全員が自分のデバイスで回答し、すべての提出が完了するとAIが統合したおすすめを明らかにする「グループの選択を公開」ボタンが表示されます。"
+        },
+        "group-synthesis": {
+          "question": "AIはどうやって全員に合う1つの選択を見つけますか?",
+          "answer": "全参加者が回答を提出すると、ホストが「グループの選択を公開」をタップします。各参加者の各質問への回答が各プレイヤーの名前でラベル付けされておすすめモデルに送信され、AIは平均化するのではなく重なりを尊重するものを選びます。2〜4人のプレイヤーで最も効果的;より大きなグループでも機能しますが、結果はより広い魅力に向かって漂う傾向があります。"
+        },
+        "group-expiry": {
+          "question": "グループクイズセッションはどのくらいアクティブですか?",
+          "answer": "セッションは作成から24時間アクティブです。その後、ロビーと結果は期限切れになり、コードでの参加ができなくなります。ホストはロビーからいつでも早期にセッションを終了することもできます。"
+        },
+        "library-vs-history": {
+          "question": "ライブラリとは何で、履歴とどう違いますか?",
+          "answer": "履歴はAIがあなたのために生成したすべてのおすすめです。ライブラリは実際に視聴または読んだものの別ログ — ステータス(視聴済み、進行中、ウィッシュリスト)、サムズ評価、任意の1行感想付き。結果カードや履歴モーダルからタイトルを記録できます。"
+        },
+        "library-improves": {
+          "question": "ライブラリはどのようにおすすめを改善しますか?",
+          "answer": "最近評価したエントリーが好みのシグナルとしてクイズ回答と一緒にAIに送信されます。サムズアップは「もっとこんな感じ」と伝え、サムズダウンは避けるよう伝えます。書いた反応は文字通り読まれるので、「遅すぎる」のような一言が次の選択に本物の重みを持ちます。"
+        },
+        "mfa": {
+          "question": "二段階認証(MFA)とは何ですか?",
+          "answer": "MFAは、サインイン時に認証アプリ(Google AuthenticatorやAuthyなど)からのコードを必要とすることで、追加のセキュリティ層を追加します。アカウント設定のセキュリティタブから有効化できます。"
+        },
+        "sessions": {
+          "question": "デバイスとセッションを管理するには?",
+          "answer": "アカウント設定に移動し、セキュリティタブを開き、アクティブなセッションまでスクロールします。サインイン中のすべてのデバイスを確認し、個別のデバイスのアクセスを取り消したり、すべてのデバイスから一度にサインアウトしたりできます。"
+        },
+        "delete-account": {
+          "question": "アカウントを削除または無効化できますか?",
+          "answer": "はい。アカウント設定の連携タブに危険ゾーンセクションがあります。アカウントを無効化(サポートにより再有効化可能)、または関連するすべてのデータと一緒に完全に削除できます。"
+        },
+        "data-handling": {
+          "question": "個人データはどのように扱われますか?",
+          "answer": "データは行レベルのセキュリティポリシーを持つSupabaseに安全に保存されます。おすすめの生成には好みとクイズの回答のみを使用します。データを第三者と共有することはありません。"
+        },
+        "open-source": {
+          "question": "Smart Advisorはオープンソースですか?",
+          "answer": "はい。Smart Advisorは完全にオープンソースです。GitHubでコードベースを確認し、問題を報告し、開発の進捗をフォローできます。"
+        }
+      }
+    },
+    "footer": {
+      "navAria": "フッターナビゲーション",
+      "rights": "© {year} Smart Advisor. All rights reserved.",
+      "builtWith": "構築技術:",
+      "builtSuffix": "オープンソースプロジェクトとして。",
+      "githubLabel": "GitHub"
+    }
+  },
+  "Common": {
+    "loading": "読み込み中…",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "back": "戻る",
+    "next": "次へ",
+    "continue": "続ける",
+    "submit": "送信",
+    "close": "閉じる",
+    "retry": "再試行",
+    "yes": "はい",
+    "no": "いいえ",
+    "surpriseMe": "サプライズで"
+  },
+  "MobileNav": {
+    "ariaLabel": "メインナビゲーション",
+    "feed": "フィード",
+    "dashboard": "ダッシュボード",
+    "library": "ライブラリ",
+    "history": "履歴",
+    "profile": "プロフィール",
+    "quiz": "クイズ",
+    "quizMenu": {
+      "ariaLabel": "開始するクイズを選択",
+      "title": "クイズを開始",
+      "subtitle": "希望するセッションの種類を選びます。",
+      "solo": "ソロクイズ",
+      "soloDesc": "短いパーソナリティクイズ、あなただけのために。",
+      "group": "グループクイズ",
+      "groupDesc": "共有ルームで友達と一緒に。",
+      "surprise": "サプライズで",
+      "surpriseDesc": "ワンタップ — ランダム選択、質問なし。",
+      "close": "キャンセル"
+    }
+  },
+  "InstallPrompt": {
+    "title": "Smart Advisorをインストール",
+    "iosBody": "共有ボタンをタップし、「ホーム画面に追加」でアプリをインストールできます。",
+    "genericBody": "Smart Advisorをホーム画面に追加して、より速く、フルスクリーンの体験を。",
+    "install": "インストール",
+    "dismiss": "今はしない",
+    "close": "閉じる"
+  },
+  "System": {
+    "error": {
+      "networkTitle": "サーバーに接続できません",
+      "networkBody": "接続を確認してもう一度お試しください — 中断したところから再開します。",
+      "genericTitle": "問題が発生しました",
+      "genericBody": "予期しないエラーでこのページの読み込みが停止しました。リフレッシュで通常解決します。",
+      "ref": "Ref",
+      "goHome": "ホームへ",
+      "tryAgain": "再試行"
+    },
+    "notFound": {
+      "title": "このシーンは最終カットに残りませんでした。",
+      "body": "お探しのページは撮影の間に迷子になりました。URLのタイプミスかもしれませんし、編集室の床に残されたかもしれません。とにかく、戻りましょう。",
+      "goBack": "戻る",
+      "goHome": "ホームへ"
+    },
+    "maintenance": {
+      "title": "AIは映画館に行っています。",
+      "body": "Smart Advisorは古典を観たり小説をめくったりするために外出中。新鮮な感覚ですぐ戻ります。"
+    }
+  },
+  "ShareTarget": {
+    "eyebrow": "Smart Advisorと共有",
+    "title": "これに似たおすすめが欲しい?",
+    "subtitle": "そのまま同じタイトルはおすすめできませんが、いくつか簡単な質問に答えていただければ、同じエネルギーを持つものをお探しします。",
+    "sharedLabel": "あなたが共有したもの",
+    "startQuiz": "似たおすすめを探す",
+    "goDashboard": "フィードへ",
+    "emptyTitle": "何も届きませんでした",
+    "emptySubtitle": "作業する素材を受け取れませんでした — クイズを開始すれば、そこから引き継ぎます。"
+  },
+  "AccountSecurity": {
+    "back": "戻る",
+    "eyebrow": "アカウント・セキュリティ",
+    "title": "ロックダウン",
+    "subtitle": "二段階認証、パスキー、デバイス間のアクティブなセッションを管理します。",
+    "tipsEyebrow": "セキュリティのヒント",
+    "tips": [
+      "不正アクセスから守るための追加保護層として2FAを有効化。",
+      "アクティブなセッションを定期的に確認し、認識できないデバイスをサインアウト。",
+      "強くユニークなパスワードを使用し、定期的に更新。",
+      "ログインリンクには注意し、信頼できるデバイスからのみサインインしてください。"
+    ]
+  },
+  "Auth": {
+    "sessionExpired": "セッションが期限切れになりました。もう一度サインインしてください。",
+    "eyebrow": {
+      "signin": "サインイン",
+      "signup": "アカウント作成",
+      "forgot": "パスワードのリセット"
+    },
+    "subtitle": {
+      "signin": "おすすめの旅を続けるにはサインインしてください。",
+      "signup": "パーソナライズされた選択を受けるためにアカウントを設定。",
+      "forgot": "メールを入力すると、安全なリセットリンクをお送りします。"
+    },
+    "headings": {
+      "signin": [
+        "おかえりなさい",
+        "またお会いできて嬉しいです",
+        "次の選択の準備はできていますか?"
+      ],
+      "signup": [
+        "アカウントを作成",
+        "Smart Advisorに参加",
+        "プロフィールを設定しましょう"
+      ],
+      "forgot": [
+        "パスワードをリセット",
+        "アクセスを回復",
+        "アカウントに戻る"
+      ],
+      "verifyEmail": ["受信箱を確認", "もう少し", "最後のステップ"],
+      "mfaChallenge": [
+        "本人確認",
+        "もう一歩",
+        "セキュリティチェック"
+      ]
+    },
+    "labels": {
+      "emailOrUsername": "メールまたはユーザー名",
+      "email": "メール",
+      "password": "パスワード",
+      "username": "ユーザー名",
+      "age": "年齢",
+      "confirmPassword": "パスワードを確認"
+    },
+    "placeholders": {
+      "emailOrUsername": "you@example.com またはユーザー名",
+      "email": "you@example.com",
+      "password": "••••••••",
+      "username": "yourname",
+      "age": "18"
+    },
+    "actions": {
+      "signin": "サインイン",
+      "signup": "アカウント作成",
+      "forgot": "リセットリンクを送信"
+    },
+    "rememberMe": "30日間サインイン状態を維持",
+    "forgotPassword": "パスワードをお忘れですか?",
+    "passkeyDivider": "または",
+    "passkeySignIn": "パスキーでサインイン",
+    "passkeyWaiting": "パスキー待ち…",
+    "resendVerification": "確認リンクを再送",
+    "resendingVerification": "再送中…",
+    "resendSuccess": "確認メールを送信しました。受信箱を確認してください。",
+    "resetSuccess": "このメールのアカウントが存在する場合、パスワードリセットリンクを送信しました。",
+    "cooldown": "再試行する前に少しお待ちください。",
+    "toggle": {
+      "signin": {
+        "prompt": "アカウントをお持ちでないですか?",
+        "cta": "サインアップ"
+      },
+      "signup": {
+        "prompt": "すでにアカウントをお持ちですか?",
+        "cta": "サインイン"
+      },
+      "forgot": {
+        "prompt": "パスワードを思い出しましたか?",
+        "cta": "サインイン"
+      }
+    },
+    "modeToggle": {
+      "ariaLabel": "サインインまたはサインアップを選択",
+      "signin": "サインイン",
+      "signup": "サインアップ"
+    },
+    "mfaChallenge": {
+      "successTitle": "確認済み",
+      "successBody": "フィードへ移動中…",
+      "totpTitle": "確認コードを入力",
+      "totpBody": "認証アプリを開いて6桁のコードを入力してください。",
+      "backupTitle": "バックアップコードを入力",
+      "backupBody": "事前生成されたバックアップコードの1つを入力してください。",
+      "totpPlaceholder": "000000",
+      "backupPlaceholder": "XXXXX-XXXXX",
+      "verify": "確認",
+      "verifying": "確認中…",
+      "useBackup": "認証アプリにアクセスできないですか?バックアップコードを使用",
+      "useTotp": "代わりに認証アプリを使用",
+      "backToSignIn": "サインインに戻る"
+    },
+    "verifyEmail": {
+      "title": "メールを確認",
+      "bodyLead": "確認リンクを送信しました:",
+      "bodyTail": ". リンクをクリックしてアカウントを有効化してください。",
+      "mfaHintLead": "次は:",
+      "mfaHintBody": "メールを確認した後、追加のセキュリティのために二段階認証を追加できます。",
+      "resend": "確認メールを再送",
+      "resending": "再送中…",
+      "resendSuccess": "確認メールを送信しました。受信箱を確認してください。",
+      "backToSignIn": "サインインに戻る"
+    },
+    "shared": {
+      "hidePassword": "パスワードを非表示",
+      "showPassword": "パスワードを表示",
+      "requirements": "要件"
+    },
+    "passwordRules": {
+      "minLength": "最低8文字",
+      "uppercase": "大文字1文字(A–Z)",
+      "lowercase": "小文字1文字(a–z)",
+      "digit": "数字1文字(0–9)",
+      "special": "特殊文字1文字(!@#$…)"
+    },
+    "resetPassword": {
+      "invalidTitle": "リセットリンクが無効または期限切れ",
+      "invalidBody": "最新のリセットメールを開くか、新しいリンクをリクエストして続行してください。",
+      "backToSignIn": "サインインに戻る",
+      "successTitle": "パスワードを更新しました",
+      "successBody": "パスワードが正常に変更されました。サインインへリダイレクト中…",
+      "title": "新しいパスワードを設定",
+      "subtitle": "下に新しい安全なパスワードを入力してください。",
+      "newPassword": "新しいパスワード",
+      "confirmPassword": "新しいパスワードを確認",
+      "passwordRequirementsTitle": "パスワード要件",
+      "confirmRulesTitle": "パスワード確認",
+      "matchesRule": "パスワードと一致しています",
+      "submit": "パスワードを更新",
+      "submitting": "更新中…",
+      "fixHighlighted": "ハイライトされたフィールドを修正してください。"
+    },
+    "emailVerified": {
+      "message": "メールを確認しました!リダイレクト中…"
+    },
+    "mfaManagement": {
+      "heading": "二段階認証",
+      "subtitle": "サインイン時の追加ステップでアカウントを安全に保ちます。",
+      "fallbackFactorName": "認証アプリ",
+      "activeCount": "{count, plural, one {# 件の認証アプリがアクティブ} other {# 件の認証アプリがアクティブ}}",
+      "notEnabled": "まだ有効化されていません",
+      "statusEnabled": "有効",
+      "statusInactive": "非アクティブ",
+      "addedOn": "{date} に追加",
+      "renameAria": "{name} の名前を変更",
+      "loadError": "セキュリティ設定を読み込めませんでした — ページを更新してください",
+      "disabledToast": "二段階認証を無効化しました",
+      "regeneratedToast": "新しいバックアップコードができました — 安全な場所に保存してください",
+      "copiedToast": "バックアップコードをクリップボードにコピーしました",
+      "backupCodesHeading": "バックアップコード",
+      "backupCodesRemaining": "{count, plural, one {未使用コード # 件残り} other {未使用コード # 件残り}}",
+      "loadingBackupCodes": "読み込み中…",
+      "togglePanelShow": "バックアップコードパネルを表示",
+      "togglePanelHide": "バックアップコードパネルを非表示",
+      "regenerateWarning": "再生成すると既存のバックアップコードはすべて無効になります。",
+      "generateButton": "新しいコードを生成",
+      "generating": "生成中…",
+      "saveCodesWarning": "これらのコードを保存してください — 再度表示されません",
+      "copy": "コピー",
+      "copied": "コピーしました",
+      "download": "ダウンロード",
+      "lowBackupCodes": "{count, plural, one {バックアップコードが # 件残っています。新しいコードの生成を検討してください。} other {バックアップコードが # 件残っています。新しいコードの生成を検討してください。}}",
+      "enableHint": "サインイン時の追加セキュリティ層として2FAを有効化。認証アプリで確認します。",
+      "addAuthenticator": "認証アプリを追加",
+      "loading": "読み込み中…",
+      "enable2fa": "2FAを有効化",
+      "renameDialogTitle": "認証アプリの名前を変更",
+      "renameDialogDescription": "リストで簡単に見分けられる名前を選んでください。",
+      "renameDialogFieldLabel": "認証アプリ名",
+      "renameDialogSuccess": "認証アプリの名前を変更しました",
+      "renameDialogPlaceholder": "例:iPhone、仕事用電話",
+      "renameDialogNoTarget": "認証アプリが選択されていません",
+      "verifyDialogAria": "二段階認証の無効化を確認",
+      "verifyDialogTitle": "二段階認証を無効化",
+      "verifyDialogBody": "このアカウントの2FAをオフにするには、認証アプリの6桁のコードを入力してください。",
+      "verifyDialogPlaceholder": "000000",
+      "verifyDialogError": "6桁のコードを入力",
+      "verifyDialogConfirm": "2FAを無効化",
+      "verifyDialogCancel": "キャンセル"
+    },
+    "passkeyManagement": {
+      "heading": "パスキー",
+      "subtitle": "指紋、顔、デバイスPINでサインイン — パスワード不要。",
+      "checking": "確認中…",
+      "activeCount": "{count, plural, one {# 件のパスキーがアクティブ} other {# 件のパスキーがアクティブ}}",
+      "noPasskeys": "パスキーはまだありません",
+      "statusActive": "アクティブ",
+      "statusInactive": "非アクティブ",
+      "unsupported": "現在のブラウザはパスキーをサポートしていません。最近のデバイスでChrome、Safari、Edge、Firefoxをお試しください。",
+      "fallbackPasskeyName": "パスキー",
+      "neverUsed": "未使用",
+      "lastUsed": "最終使用 {timeAgo} 前",
+      "lastUsedRecently": "最近使用",
+      "addedOn": "{date} に追加",
+      "renameAria": "{name} の名前を変更",
+      "removeAria": "{name} を削除",
+      "removedToast": "パスキーを削除しました",
+      "fallbackLabel": "このパスキー",
+      "removeConfirm": "{label} を削除しますか?もうサインインできなくなります。",
+      "addAnother": "別のパスキーを追加",
+      "addFirst": "パスキーを追加",
+      "verifyDialogAria": "パスキーを削除するために確認",
+      "verifyDialogTitle": "認証アプリで確認",
+      "verifyDialogBody": "これが最後のパスキーです。削除するには6桁の認証コードを入力してください。",
+      "verifyDialogPlaceholder": "000000",
+      "verifyDialogError": "6桁のコードを入力",
+      "verifyDialogConfirm": "確認してパスキーを削除",
+      "verifyDialogCancel": "キャンセル",
+      "verifyNoFactor": "確認済みの認証アプリが見つかりません。",
+      "renameDialogTitle": "パスキーの名前を変更",
+      "renameDialogDescription": "後で認識できる「MacBook」や「電話」のような名前を選んでください。",
+      "renameDialogFieldLabel": "パスキー名",
+      "renameDialogSuccess": "パスキーの名前を変更しました",
+      "renameDialogPlaceholder": "例:MacBook、iPhone",
+      "renameDialogNoTarget": "パスキーが選択されていません",
+      "setupDialogAria": "パスキーを追加"
+    },
+    "sessions": {
+      "heading": "アクティブなセッション",
+      "subtitleLoading": "現在アカウントにサインイン中のデバイスを管理します。",
+      "subtitle": "現在アカウントにサインイン中のデバイスを管理します。サインアウトしてアクセスを取り消します。",
+      "signedInCount": "{count, plural, one {# 件のデバイスがサインイン中} other {# 件のデバイスがサインイン中}}",
+      "noActive": "アクティブなセッションはありません",
+      "signOutAll": "すべてからサインアウト",
+      "signingOutAll": "サインアウト中…",
+      "signOutAllConfirm": "本当ですか?すべてのデバイスからサインアウトされます。",
+      "signOutCurrentConfirm": "このデバイスからサインアウトしますか?ホームページに戻ります。",
+      "signOutOtherConfirm": "{device} からサインアウトしますか?そのセッションはすぐにアクセスを失います。",
+      "signedOutToast": "そのデバイスからサインアウトしました",
+      "signedOutAllToast": "すべてのデバイスからサインアウトしました",
+      "noSessionsFound": "アクティブなセッションが見つかりません",
+      "currentBadge": "現在",
+      "ipLabel": "IP {ip}",
+      "lastActive": "最終アクティブ {time}",
+      "signOutAria": "{device} からサインアウト",
+      "verifyAction": {
+        "signOut": "{device} からサインアウト",
+        "signOutAll": "すべてのデバイスからサインアウト"
+      }
+    },
+    "mfaSetup": {
+      "goBack": "戻る",
+      "intro": {
+        "title": "アカウントを保護",
+        "body": "二段階認証(2FA)で追加のセキュリティ層を追加します。サインイン時に電話からコードを入力する必要があります。",
+        "cta": "2FAを設定",
+        "skip": "今はスキップ"
+      },
+      "method": {
+        "title": "方法を選択",
+        "body": "今後どのようにサインインしますか?",
+        "appName": "認証アプリ",
+        "appBody": "Google Authenticator、Authy、または1PasswordでQRコードをスキャン。",
+        "cancel": "キャンセル"
+      },
+      "name": {
+        "title": "この認証アプリに名前を付ける",
+        "body": "コードを保持するデバイスを使用してください — そうすれば後で認証アプリを区別できます。",
+        "label": "デバイス名",
+        "placeholder": "例:iPhone、仕事用電話",
+        "hint": "空白のままで汎用ラベルを使用。",
+        "settingUp": "設定中...",
+        "continue": "続ける"
+      },
+      "qr": {
+        "title": "QRコードをスキャン",
+        "body": "Google Authenticator、Microsoft Authenticator、またはAuthyでこのコードをスキャンしてください。",
+        "imageAlt": "MFA QRコード",
+        "manualHint": "スキャンできないですか?手動でこのコードを入力:",
+        "scanned": "スキャンしました"
+      },
+      "verify": {
+        "title": "コードを確認",
+        "body": "認証アプリの6桁のコードを入力してください。",
+        "placeholder": "000000",
+        "error": "6桁のコードを入力してください",
+        "verifying": "確認中...",
+        "submit": "確認して2FAを有効化",
+        "back": "QRコードに戻る"
+      },
+      "backupCodes": {
+        "title": "バックアップコードを保存",
+        "body": "認証アプリへのアクセスを失った場合、これらのコードの1つを使ってサインインできます。各コードは1回のみ使用できます。",
+        "warning": "安全な場所に保管してください",
+        "copy": "コピー",
+        "copied": "コピーしました",
+        "download": "ダウンロード",
+        "done": "コードを保存しました"
+      },
+      "toasts": {
+        "authenticatorAdded": "認証アプリを追加しました",
+        "enabled": "二段階認証がアクティブになりました!",
+        "backupWarning": "現在バックアップコードを生成できませんでした。セキュリティ設定からいつでも作成できます。",
+        "secretCopied": "シークレットコードをコピーしました — 認証アプリに貼り付けてください",
+        "backupCopied": "バックアップコードをクリップボードにコピーしました",
+        "backupDownloaded": "バックアップコードをダウンロードに保存しました"
+      }
+    },
+    "passkeySetup": {
+      "title": "パスキーを追加",
+      "body": "後で認識できる名前を選んでください。続行後、デバイスがTouch ID、Face ID、Windows Hello、またはセキュリティキーで確認を求めます。",
+      "label": "パスキー名",
+      "placeholder": "例:MacBook、iPhone",
+      "hint": "空白のままで日付スタンプ付きラベルを使用。",
+      "waiting": "パスキー待ち...",
+      "continue": "続ける",
+      "cancel": "キャンセル",
+      "successToast": "パスキーを追加しました"
+    },
+    "renameDialog": {
+      "emptyError": "名前を空にすることはできません",
+      "saving": "保存中...",
+      "save": "保存",
+      "cancel": "キャンセル"
+    },
+    "validation": {
+      "emailOrUsernameRequired": "メールまたはユーザー名は必須",
+      "emailRequired": "メールは必須",
+      "emailInvalid": "有効なメールを入力してください",
+      "passwordRequired": "パスワードは必須",
+      "passwordRequirementsUnmet": "パスワードがすべての要件を満たしていません",
+      "usernameRequired": "ユーザー名は必須",
+      "usernameTooShort": "最低2文字使用してください",
+      "usernameTooLong": "24文字以下で使用してください",
+      "usernameInvalid": "文字、数字、ドット、ダッシュ、アンダースコアを使用してください",
+      "ageRequired": "年齢は必須",
+      "ageNotInteger": "年齢は整数である必要があります",
+      "ageOutOfRange": "13歳から120歳の年齢を入力してください",
+      "confirmPasswordRequired": "パスワードを確認してください",
+      "passwordsDoNotMatch": "パスワードが一致しません",
+      "fixHighlightedFields": "ハイライトされたフィールドを修正してください。",
+      "correctHighlightedFields": "ハイライトされたフィールドを訂正してください",
+      "passkeyIdentifierRequired": "パスキーを使用するにはメールまたはユーザー名を入力してください。",
+      "enterSixDigitCode": "6桁のコードを入力してください",
+      "enterBackupCode": "バックアップコードを入力してください",
+      "rules": {
+        "emailContainsAt": "@を含む",
+        "emailHasDomain": "ドメインがある(example.com)",
+        "ageWholeNumber": "整数",
+        "ageInRange": "13歳から120歳",
+        "usernameLength": "2〜24文字",
+        "usernameAllowedChars": "文字、数字、ドット、ダッシュ、アンダースコア",
+        "confirmPasswordMatches": "パスワードと一致"
+      },
+      "popoverTitles": {
+        "email": "メール要件",
+        "password": "パスワード要件",
+        "username": "ユーザー名要件",
+        "age": "年齢要件",
+        "confirmPassword": "パスワード確認"
+      },
+      "mfaError": {
+        "totpExpired": "そのコードは期限切れです。認証アプリで新しいコードを待って再試行してください。",
+        "backupExpired": "そのバックアップコードはもう有効ではありません。",
+        "totpMismatch": "そのコードは一致しませんでした。認証アプリを再確認して再試行してください。",
+        "backupMismatch": "そのバックアップコードは一致しませんでした。各コードは1回のみ機能します。"
+      }
+    }
+  },
+  "Wrapped": {
+    "eyebrow": "Year in Review",
+    "subtitle": "今年あなたが発見したものを振り返ります。",
+    "fallbackName": "あなたの",
+    "startQuiz": "クイズ開始",
+    "loading": "あなたの一年を読み込み中…",
+    "share": {
+      "action": "共有",
+      "dialogTitle": "Year in Reviewを共有",
+      "dialogSubtitle": "このリンクまたはQRを持つ人は誰でも、あなたの{year}年の選択を見られます。",
+      "copyLink": "リンクをコピー",
+      "shareButton": "共有",
+      "close": "完了",
+      "signInRequired": "一年を共有するためにもう一度サインインしてください。",
+      "failed": "共有リンクを生成できませんでした",
+      "linkCopied": "リンクをコピーしました",
+      "copyFailed": "リンクをコピーできませんでした",
+      "shareFailed": "共有できませんでした — 再試行してください"
+    },
+    "empty": {
+      "title": "{year}年の選択はありません",
+      "titleMonth": "{period}の選択はありません",
+      "current": "クイズをして、一年を埋め始めましょう。",
+      "past": "上で別の年を選ぶか、新しいクイズを開始してください。"
+    },
+    "hero": {
+      "eyebrow": "見出し",
+      "picks": "{count, plural, one {# 件の選択} other {# 件の選択}}",
+      "moviesPart": "{count, plural, one {# 本の映画} other {# 本の映画}}",
+      "booksPart": "{count, plural, one {# 冊の書籍} other {# 冊の書籍}}",
+      "musicPart": "{count, plural, one {# 枚のアルバム} other {# 枚のアルバム}}",
+      "watchTime": "約{hours}時間のスクリーンタイム",
+      "libraryLogged": "{count} 件があなたのライブラリに記録"
+    },
+    "tiles": {
+      "favorites": "お気に入り",
+      "favoritesHint": "選択の{percent}%",
+      "longestStreak": "最長連続",
+      "streakDay": "日連続",
+      "streakDays": "日連続",
+      "peakMonth": "ピーク月",
+      "topGenre": "トップジャンル",
+      "picksHint": "{count, plural, one {# 件の選択} other {# 件の選択}}",
+      "noData": "—"
+    },
+    "creator": {
+      "eyebrow": "最も選ばれた",
+      "director": "監督",
+      "author": "著者",
+      "artist": "アーティスト",
+      "noData": "まだデータが十分ではありません。"
+    },
+    "formatMix": {
+      "eyebrow": "フォーマットミックス",
+      "movies": "映画",
+      "books": "書籍",
+      "music": "音楽"
+    },
+    "monthly": {
+      "eyebrow": "月別選択"
+    },
+    "genres": {
+      "eyebrow": "ジャンルラウンドアップ"
+    },
+    "standouts": {
+      "eyebrow": "際立ったもの",
+      "fullHistory": "全履歴"
+    },
+    "story": {
+      "tapHint": "タップで続行",
+      "exit": "終了",
+      "pickYear": "年",
+      "intro": {
+        "eyebrow": "Year in Review",
+        "eyebrowMonth": "Month in Review",
+        "kicker": "あなたの{year}年",
+        "kickerMonth": "あなたの{period}",
+        "subhead": "終わった一年を再生します。",
+        "subheadMonth": "終わった一ヶ月を再生します。",
+        "cta": "一年を見る",
+        "keyHint": "矢印キーで移動"
+      },
+      "total": {
+        "eyebrow": "すべて含めて",
+        "headline": "{count, plural, one {# 件の選択} other {# 件の選択}}",
+        "subhead": "{movies}画面に · {books}本棚に · {music}耳元に。"
+      },
+      "format": {
+        "eyebrow": "あなたのミックス",
+        "movies": "映画",
+        "books": "書籍",
+        "music": "アルバム",
+        "movieHeavy": "あなたは映画の時代にいました。",
+        "bookHeavy": "読書に没頭しました。",
+        "musicHeavy": "アルバムが主役でした。",
+        "balanced": "フォーマット全体でバランスの取れた年。"
+      },
+      "genres": {
+        "eyebrow": "トップジャンル",
+        "headline": "{top}に夢中でした。",
+        "fallback": "今年は明確なお気に入りはありません。"
+      },
+      "creator": {
+        "eyebrow": "最も選ばれた",
+        "headlineDirector": "{name}が頻繁に登場しました。",
+        "headlineAuthor": "{name}を繰り返し読みました。",
+        "headlineArtist": "{name}が今年を支配しました。",
+        "subhead": "{count, plural, one {# 件の選択} other {# 件の選択}}",
+        "fallback": "今年は際立ったクリエイターはいません。"
+      },
+      "standout": {
+        "eyebrow": "あなたの瞬間",
+        "peakMonth": "ピーク月",
+        "peakSubhead": "{month}に{count, plural, one {# 件の選択} other {# 件の選択}}",
+        "streak": "最長連続",
+        "streakSubhead": "{count, plural, one {# 日連続} other {# 日連続}}",
+        "noStreak": "まだ連続記録なし"
+      },
+      "picks": {
+        "eyebrow": "際立った選択",
+        "headline": "心に残ったもの。",
+        "subhead": "お気に入りが最初、その後にハイライトの残り。"
+      },
+      "outro": {
+        "eyebrow": "それがあなたの一年でした",
+        "headline": "{count, plural, one {# 件の選択} other {# 件の選択}}があなたのためにキュレーションされました。",
+        "subhead": "ハイライトを共有するか、別のクイズを受けて次の章を始めましょう。",
+        "share": "私の一年を共有",
+        "restart": "もう一度見る",
+        "newQuiz": "新しいクイズを受ける"
+      }
+    },
+    "months": [
+      "1月",
+      "2月",
+      "3月",
+      "4月",
+      "5月",
+      "6月",
+      "7月",
+      "8月",
+      "9月",
+      "10月",
+      "11月",
+      "12月"
+    ]
+  },
+  "GroupQuiz": {
+    "category": "グループクイズ",
+    "stepOf": "ステップ {current} / {total}",
+    "stepLabel": {
+      "path": "ホストまたは参加",
+      "host": "セットアップ",
+      "join": "参加",
+      "lobby": "ロビー",
+      "result": "結果"
+    },
+    "back": {
+      "dashboard": "フィード",
+      "home": "ホーム",
+      "step": "戻る",
+      "leave": "退出",
+      "lobby": "ロビー"
+    },
+    "path": {
+      "title": "ラウンドをホストまたは参加?",
+      "subtitle": "ホストはフォーマットを設定してコードを共有。参加は6文字のコードで誰かのラウンドに入ります。",
+      "cards": {
+        "host": {
+          "eyebrow": "ホスト",
+          "title": "ラウンドをホスト",
+          "description": "フォーマットを選び、質問数を設定し、コードを共有して、選択が入ってくるのを見ます。"
+        },
+        "join": {
+          "eyebrow": "参加",
+          "title": "ラウンドに参加",
+          "description": "友達から6文字のコードをもらいましたか?飛び込んでください — アカウント不要。"
+        }
+      }
+    },
+    "lobby": {
+      "eyebrow": "グループクイズ",
+      "title": "一緒に選択を見つける",
+      "subtitle": "クイズをホストしてコードを共有。全員が回答し、AIがグループに合う1つの選択を見つけます。",
+      "intent": {
+        "eyebrow": "おかえりなさい",
+        "headline": "中断したところから再開?",
+        "summary": "{count}問 · {types} · 最大{max}人のプレイヤー",
+        "types": {
+          "both": "映画+書籍",
+          "mix": "映画+書籍+音楽",
+          "movie": "映画",
+          "book": "書籍",
+          "music": "音楽"
+        },
+        "continue": "続ける",
+        "continuing": "作成中…",
+        "dismissAria": "却下"
+      },
+      "host": {
+        "eyebrow": "ホスト",
+        "title": "新しいセッションを開始",
+        "nameLabel": "あなたの名前",
+        "namePlaceholder": "他の人があなたを見る方法",
+        "typeLabel": "選択タイプ",
+        "questionsLabel": "質問",
+        "questionsAria": "質問の数",
+        "maxPlayersLabel": "最大プレイヤー",
+        "maxPlayersAria": "ロビー内のプレイヤーの最大数",
+        "modeLabel": "いつ?",
+        "modeLive": "今一緒に",
+        "modeAsync": "締切までに",
+        "modeLiveHint": "全員がロビーに参加して同時に回答します。",
+        "modeAsyncHint": "各メンバーが締切前に自分の時間で回答します。",
+        "deadlineLabel": "締切",
+        "plannedForLabel": "予定日(オプション)",
+        "plannedForHint": "情報のみ — みんなで一緒に観る/読む/聴く予定の時。",
+        "create": "セッションを作成",
+        "creating": "作成中…",
+        "signInTitle": "ホストするにはサインイン",
+        "signInBody": "ホストするとグループの選択がライブラリに保存され、連続記録が追跡され、Year in Reviewが解除されます。",
+        "signInCta": "サインインまたはアカウント作成",
+        "signInHint": "プレイするだけ?右のコードを使用してください。"
+      },
+      "join": {
+        "eyebrow": "参加",
+        "title": "コードはありますか?",
+        "codeLabel": "セッションコード",
+        "codePlaceholder": "ABC123",
+        "nameLabel": "あなたの名前",
+        "namePlaceholder": "表示名",
+        "join": "セッションに参加",
+        "joining": "参加中…",
+        "footer": "参加にアカウント不要 — 名前とコードだけ。"
+      },
+      "contentTypes": {
+        "both": "両方",
+        "mix": "ミックス",
+        "movie": "映画",
+        "book": "書籍",
+        "music": "音楽"
+      },
+      "errors": {
+        "signInRequired": "グループクイズをホストするにはサインインしてください。",
+        "createFailed": "セッションの作成に失敗",
+        "joinFailed": "セッションに参加できませんでした",
+        "codeLength": "6文字のコードを入力してください。"
+      }
+    },
+    "session": {
+      "async": {
+        "eyebrow": "非同期セッション",
+        "deadlineInHours": "{hours, plural, one {# 時間残り} other {# 時間残り}}",
+        "deadlineInDays": "{days, plural, one {# 日残り} other {# 日残り}}",
+        "deadlinePassed": "締切経過 — 確定中",
+        "plannedFor": "{date}に予定",
+        "submitted": "{done}/{total}件提出済み"
+      },
+      "loading": "セッション読み込み中…",
+      "notFoundTitle": "セッションが見つかりません",
+      "notFoundBody": "そのコードはアクティブなセッションと一致しません。",
+      "backToHome": "グループクイズに戻る",
+      "shareCode": "このコードを共有",
+      "copyLink": "リンクをコピー",
+      "shareLink": "共有",
+      "shareTitle": "Smart Advisorのグループクイズに参加",
+      "shareText": "コード{code}で私のグループクイズに参加",
+      "linkCopied": "リンクをコピーしました",
+      "linkCopyFailed": "リンクをコピーできませんでした",
+      "linkShareFailed": "共有できませんでした — 再試行してください",
+      "qr": {
+        "show": "QRを表示",
+        "title": "スキャンして参加",
+        "subtitle": "電話のカメラをQRコードに向けてこのラウンドに直接参加してください。",
+        "codeHint": "またはコードを入力",
+        "close": "完了"
+      },
+      "joined": "{name}が参加しました",
+      "left": "{name}がロビーを退出しました",
+      "playerCount": "{count, plural, one {# 人のプレイヤー} other {# 人のプレイヤー}}",
+      "playerCountOf": "{count}/{max, plural, one {# 人のプレイヤー} other {# 人のプレイヤー}}",
+      "submittedCount": "{submitted}/{total}件提出済み",
+      "leave": "退出",
+      "backToLobby": "ロビーに戻る",
+      "end": "終了",
+      "leaveConfirm": "セッションを退出?あなたの回答はグループの選択に影響せず、再参加にはコードが必要です。",
+      "leaveQuizConfirm": "グループクイズを退出?これまでの回答は提出されません。",
+      "endConfirm": "全員のこのセッションを終了?",
+      "backToLobbyConfirmInProgress": "全員をロビーに戻す?進行中の回答はクリアされます。",
+      "backToLobbyConfirmCompleted": "全員をロビーに戻す?新しいラウンドが始められるよう、回答と現在の選択はクリアされます。",
+      "host": {
+        "generatingQuestions": "質問を生成中…",
+        "startQuiz": "クイズ開始 · {count, plural, one {# 問} other {# 問}}",
+        "needTwoPlayers": "開始するには最低2人のプレイヤーが必要です。",
+        "startFailed": "クイズを開始できませんでした",
+        "restartFailed": "クイズを再起動できませんでした",
+        "synthesizeFailed": "おすすめの生成に失敗",
+        "overloaded": "AIは現在過負荷です。少し待って再試行してください。"
+      },
+      "guest": {
+        "waitingHost": "ホストを待っています",
+        "waitingBody": "もう少し待ってください — すぐに始まります。",
+        "joinLobby": "ロビーに参加",
+        "joinPrompt": "このグループクイズに参加する名前を入力してください。",
+        "joinPlaceholder": "表示名",
+        "join": "参加",
+        "joining": "参加中…",
+        "joinFailed": "セッションに参加できませんでした",
+        "inProgress": "クイズは既に進行中です。",
+        "completed": "このセッションは終了しています。",
+        "askHost": "参加できるようホストにロビーを戻すよう依頼してください。",
+        "lobbyFull": "ロビーが満員",
+        "lobbyFullBody": "ホストがロビーを制限し、既に上限に達しています。増やすよう依頼するか、誰かが退出するまで待ってください。"
+      },
+      "submitted": {
+        "lockedInAll": "全員が完了",
+        "lockedIn": "完了",
+        "waitingOthers": "他の全員の終了を待っています…",
+        "reveal": "グループの選択を公開",
+        "revealing": "選択を見つけています…",
+        "guestWaiting": "ホストが選択を生成中…"
+      },
+      "quiz": {
+        "category": "ライブラウンド",
+        "questionOf": "質問 {current} / {total}",
+        "back": "戻る",
+        "next": "次へ",
+        "submit": "確定",
+        "submitting": "提出中…",
+        "submittedToast": "確定しました!",
+        "answerAll": "まずすべての質問に答えてください。"
+      },
+      "params": {
+        "contentMovie": "映画",
+        "contentBook": "書籍",
+        "contentMusic": "音楽",
+        "contentMix": "ミックス",
+        "questions": "{count, plural, one {# 問} other {# 問}}",
+        "timeEstimate": "約{minutes, plural, one {# 分} other {# 分}}",
+        "maxPlayers": "{max, plural, one {# 席} other {# 席}}",
+        "emptySeat": "空席",
+        "submittedProgress": "{total}件中{done}件確定"
+      },
+      "completed": {
+        "eyebrow": "グループの選択",
+        "subtitle": "全員の発言に基づき、その場に合うものをご紹介します。",
+        "playAgain": "もう一度",
+        "resetting": "リセット中…",
+        "newGroup": "新しいグループを開始",
+        "done": "完了",
+        "endSession": "セッションを終了"
+      },
+      "cancelled": {
+        "body": "このセッションは終了されました。"
+      }
+    },
+    "result": {
+      "movie": "映画",
+      "book": "書籍",
+      "music": "アルバム",
+      "byAuthor": "著:{creator}",
+      "byDirector": "監督:{creator}",
+      "byArtist": "アーティスト:{creator}",
+      "whyThisPick": "なぜこの選択",
+      "viewOnOpenLibrary": "Open Libraryで見る",
+      "watchTrailer": "予告編を見る",
+      "playTrailerAria": "{title}の予告編を再生"
+    }
+  },
+  "History": {
+    "eyebrow": "履歴",
+    "title": "提案履歴",
+    "subtitle": "AIがあなたのために選んだすべて。お気に入りをマークして近くに置くか、ライブラリに記録してAIに感想を教えましょう。",
+    "clearAll": "すべてクリア",
+    "startQuiz": "クイズ開始",
+    "filtersAria": "履歴フィルター",
+    "filtersGroup": "フィルター",
+    "filters": {
+      "all": "すべて",
+      "movies": "映画",
+      "books": "書籍",
+      "music": "音楽",
+      "favorites": "お気に入り"
+    },
+    "stats": {
+      "total": "合計",
+      "favorites": "お気に入り",
+      "movies": "映画",
+      "books": "書籍",
+      "music": "音楽"
+    },
+    "sortLabel": "並べ替え:",
+    "sortAria": "おすすめを並べ替え",
+    "searchPlaceholder": "過去の選択を検索",
+    "sort": {
+      "newest": "新しい順",
+      "oldest": "古い順",
+      "favorites_first": "お気に入りを最初"
+    },
+    "empty": {
+      "title": "おすすめが見つかりません",
+      "body": "別のフィルターを試すか、新しいおすすめセットを生成してください。"
+    },
+    "card": {
+      "movie": "映画",
+      "book": "書籍",
+      "music": "アルバム",
+      "fallbackExplanation": "最近のクイズの選択に基づいたカスタマイズされた{type}のおすすめ。",
+      "openAria": "{title}の詳細を開く",
+      "favoriteAdd": "お気に入りに追加",
+      "favoriteRemove": "お気に入りから削除",
+      "deleteAria": "削除"
+    },
+    "toasts": {
+      "favoriteFailed": "お気に入りを更新できませんでした — 再試行してください",
+      "favoriteAdded": "お気に入りに追加しました",
+      "favoriteRemoved": "お気に入りから削除しました",
+      "deleteFailed": "そのおすすめを削除できませんでした — 再試行してください",
+      "deleted": "履歴からおすすめを削除しました",
+      "clearFailed": "履歴をクリアできませんでした — 再試行してください",
+      "cleared": "すべてのおすすめをクリアしました"
+    },
+    "confirm": {
+      "deleteOne": "このおすすめを削除しますか?",
+      "clearAll": "本当にすべてのおすすめを削除しますか?元に戻せません。"
+    },
+    "modal": {
+      "ariaLabel": "{title}の詳細",
+      "byAuthor": "著:{author}",
+      "byDirector": "監督:{director}",
+      "byArtist": "アーティスト:{artist}",
+      "inLibrary": "あなたのライブラリ内",
+      "close": "閉じる",
+      "dislike": "自分向けではない",
+      "dislikedOn": "今後おすすめしない"
+    }
+  },
+  "Library": {
+    "import": {
+      "headerCta": "インポート",
+      "back": "ライブラリに戻る",
+      "eyebrow": "インポート",
+      "title": "ウォッチリストをインポート",
+      "subtitle": "Letterboxdの映画やGoodreadsの書籍を持ってきてください。再インポートは安全 — 一致するタイトルは複製されず更新されます。",
+      "sourceLabel": "どこからですか?",
+      "sources": {
+        "letterboxd": "Letterboxd",
+        "goodreads": "Goodreads"
+      },
+      "hint": {
+        "letterboxd": "letterboxd.com/settings/dataからエクスポート — watchlist.csvまたは完全エクスポートを使用。",
+        "goodreads": "goodreads.com/review/importからエクスポート — 「Goodreads Library Export」CSV。"
+      },
+      "choose": ".csvファイルを選択",
+      "chooseHint": "LetterboxdまたはGoodreadsのCSVエクスポート",
+      "preview": "{count, plural, one {# 件のタイトルがインポート準備完了} other {# 件のタイトルがインポート準備完了}}",
+      "mismatch": "このファイルは{detected}のエクスポートのように見えますが、{chosen}を選択しています。インポート前に確認してください。",
+      "chooseDifferent": "別のファイルを選択",
+      "importCta": "{count, plural, one {# 件のタイトル} other {# 件のタイトル}}をインポート",
+      "importing": "{total}件中{done}件をインポート中…",
+      "doneTitle": "インポート完了",
+      "doneSummary": "{imported}件インポート · {skipped}件スキップ · {failed}件失敗",
+      "importAnother": "別をインポート",
+      "goToLibrary": "ライブラリへ",
+      "errors": {
+        "read": "そのファイルを読み込めませんでした。再試行してください。",
+        "empty": "そのファイルにはインポートする行がありません。",
+        "parse": "そのファイルを解析できませんでした。"
+      }
+    },
+    "finishReminder": {
+      "eyebrow": "中断したところから再開",
+      "title": "{count, plural, one {まだ進行中のタイトルが # 件あります} other {まだ進行中のタイトルが # 件あります}}",
+      "cta": "開く"
+    },
+    "eyebrow": "ライブラリ",
+    "title": "視聴・読書したもの",
+    "subtitle": "ここに保存する反応は、次のクイズでAIが使用する好みのシグナルになります。",
+    "startQuiz": "クイズ開始",
+    "filtersAria": "ライブラリフィルター",
+    "typeGroup": "種類",
+    "type": {
+      "all": "すべて",
+      "movie": "映画",
+      "book": "書籍",
+      "music": "音楽"
+    },
+    "stats": {
+      "total": "合計",
+      "finished": "視聴済み",
+      "movies": "映画",
+      "books": "書籍",
+      "music": "音楽"
+    },
+    "statusLabel": "ステータス",
+    "searchPlaceholder": "ライブラリを検索",
+    "filterAll": "すべて",
+    "status": {
+      "finished": "視聴済み",
+      "in_progress": "進行中",
+      "wishlist": "ウィッシュリスト",
+      "dropped": "諦めた"
+    },
+    "rating": {
+      "1": "自分向けではない",
+      "2": "まあまあ",
+      "3": "大好き"
+    },
+    "byAuthor": "著:{creator}",
+    "byDirector": "監督:{creator}",
+    "byArtist": "アーティスト:{creator}",
+    "mediumMovie": "映画",
+    "mediumBook": "書籍",
+    "mediumMusic": "アルバム",
+    "loggedOn": "{date}に記録",
+    "empty": {
+      "noItemsTitle": "ライブラリにまだ何もありません",
+      "noItemsBody": "次のクイズの後、結果で「視聴・読書した」を押すとここに表示されます。",
+      "noMatchesTitle": "それらのフィルターに一致するものがありません",
+      "noMatchesBody": "上のフィルターを変更またはクリアしてみてください。"
+    },
+    "removeConfirm": "「{title}」をライブラリから削除しますか?",
+    "removed": "ライブラリから削除しました",
+    "updated": "ライブラリエントリを更新しました",
+    "editAria": "{title}を編集",
+    "removeAria": "{title}を削除",
+    "statusChangeAria": "{title}のステータスを変更",
+    "wishlistButton": {
+      "add": "ウィッシュリスト",
+      "onWishlist": "ウィッシュリストに登録済み",
+      "added": "ウィッシュリストに追加しました",
+      "ariaAdd": "{title}をウィッシュリストに追加",
+      "ariaOnWishlist": "{title}はウィッシュリストにあります"
+    },
+    "editDialog": {
+      "ariaLabel": "ライブラリエントリを編集",
+      "title": "エントリを編集",
+      "statusHeader": "ステータス",
+      "ratingHeader": "評価",
+      "reactionHeader": "反応",
+      "reactionPlaceholder": "1行の感想…",
+      "save": "変更を保存",
+      "cancel": "キャンセル"
+    }
+  },
+  "Onboarding": {
+    "eyebrow": "もう少し",
+    "title": "簡単なチェック",
+    "subtitle": "始める前にこれで正しいか確認しましょう。",
+    "readonly": {
+      "email": "メール",
+      "age": "年齢",
+      "editLater": "後で設定で変更できます。"
+    },
+    "fields": {
+      "displayName": {
+        "label": "表示名",
+        "placeholder": "なんとお呼びすればよいですか"
+      },
+      "language": {
+        "label": "言語",
+        "en": "English",
+        "es": "Español"
+      },
+      "focus": {
+        "movie": "映画",
+        "book": "書籍",
+        "music": "音楽",
+        "mix": "ミックス"
+      }
+    },
+    "steps": {
+      "name": {
+        "eyebrow": "ステップ1",
+        "title": "なんとお呼びしますか?",
+        "subtitle": "おすすめとプロフィールで使用します。"
+      },
+      "language": {
+        "eyebrow": "ステップ2",
+        "title": "言語を選択",
+        "subtitle": "それに合わせてアプリインターフェースを翻訳します。"
+      },
+      "focus": {
+        "eyebrow": "ステップ3",
+        "title": "何のおすすめが欲しいですか?",
+        "subtitle": "デフォルトのコンテンツタイプを設定。各クイズで切り替えできます。",
+        "hint": "ヒント:個別のクイズでこれを反転するオプションが常にあります。"
+      },
+      "avoid": {
+        "eyebrow": "ステップ4",
+        "title": "スキップしたいものは?",
+        "subtitle": "タップすると厳格な「おすすめしない」ルールが追加されます。何も思いつかなければスキップしてください。",
+        "emptyHint": "まだフィルターなし — 設定でいつでも追加できます。",
+        "selectedHint": "{count, plural, one {避けたい # ジャンル} other {避けたい # ジャンル}}。"
+      },
+      "review": {
+        "eyebrow": "最後の確認",
+        "title": "これで正しいですか?",
+        "subtitle": "保存する前に変更したいものを編集してください。",
+        "edit": "編集",
+        "empty": "—",
+        "noGenres": "なし"
+      }
+    },
+    "back": "戻る",
+    "next": "次へ",
+    "finish": "セットアップを完了",
+    "submit": "良いですね",
+    "skip": "今はスキップ",
+    "previewClose": "プレビューを閉じる",
+    "errors": {
+      "displayNameRequired": "表示名を入力してください。",
+      "saveFailed": "セットアップを保存できませんでした。再試行してください。"
+    },
+    "savedToast": "すべて完了 — ようこそ。"
+  },
+  "Quiz": {
+    "category": "クイズ設定",
+    "stepOf": "ステップ {current} / {total}",
+    "back": {
+      "dashboard": "フィード"
+    },
+    "contentSelection": {
+      "title": "何のおすすめが欲しいですか?",
+      "subtitle": "おすすめの流れを調整できるよう、1つ選んでください。",
+      "validation": "続行する前にオプションを選択してください。",
+      "continue": "続ける",
+      "continuing": "続行中…",
+      "cards": {
+        "movie": {
+          "eyebrow": "画面で",
+          "title": "映画",
+          "description": "あなたの現在の気分とペースに合わせた映画。"
+        },
+        "book": {
+          "eyebrow": "本棚で",
+          "title": "書籍",
+          "description": "あなたのスタイルと興味に合わせた読書。"
+        },
+        "music": {
+          "eyebrow": "耳元で",
+          "title": "アルバム",
+          "description": "あなたの今の気分に合うレコード。"
+        },
+        "mix": {
+          "eyebrow": "3つすべて",
+          "title": "ミックスする",
+          "description": "映画、書籍、アルバムを一緒に選択。"
+        },
+        "both": {
+          "eyebrow": "両方",
+          "title": "それぞれ1つ",
+          "description": "映画と書籍を一度に一緒に選択。"
+        }
+      }
+    },
+    "questionCount": {
+      "title": "質問数はどのくらい?",
+      "subtitle": "{contentType}のおすすめフローの深さを選んでください。",
+      "contentTypes": {
+        "movie": "映画",
+        "book": "書籍",
+        "music": "アルバム",
+        "mix": "映画、書籍、アルバム",
+        "both": "映画と書籍"
+      },
+      "questionsLabel": "{count, plural, one {質問} other {質問}}",
+      "tone": {
+        "quick": "素早く重点的に",
+        "focused": "鋭く具体的に",
+        "balanced": "バランスの取れた深さ",
+        "thorough": "徹底的な探求",
+        "comprehensive": "包括的な詳細"
+      },
+      "estimate": "{minutes, plural, one {# 分} other {# 分}}",
+      "ariaCount": "質問の数",
+      "back": "フォーマット",
+      "continue": "続ける",
+      "continuing": "続行中…"
+    },
+    "questionnaire": {
+      "category": "ライブクイズ",
+      "loadingStep": "クイズを準備中",
+      "questionOf": "質問 {current} / {total}",
+      "previous": "前へ",
+      "back": "戻る",
+      "next": "次へ",
+      "submit": "おすすめを取得",
+      "submitting": "生成中…",
+      "subtitle": {
+        "fillInBlank": "自分の言葉で考えを共有してください。",
+        "selectAll": "好きなだけ選んでください。",
+        "singleSelect": "おすすめを調整できるよう1つ選んでください。"
+      },
+      "leaveConfirm": "クイズを退出?これまでの回答は保存されません。",
+      "errors": {
+        "title": "質問を読み込めません",
+        "overloadedTitle": "AIが容量限界です",
+        "session": "セッションが期限切れです。続行するにはもう一度サインインしてください。",
+        "generic": "質問を生成できませんでした。再試行してください。",
+        "overloaded": "AIが現在処理に追われています。少し待って再試行してください — すでに数回再試行しています。",
+        "tryAgain": "再試行",
+        "back": "戻る"
+      },
+      "loadingMessages": {
+        "default": [
+          "良い質問を考えています…",
+          "あなたの角度を選んでいます…",
+          "あなたの好みに合わせています…",
+          "あなたの雰囲気にキャリブレーション中…",
+          "クイズを起草中…",
+          "もうすぐ準備完了…"
+        ],
+        "movie": [
+          "あなたの画面の好みを調査中…",
+          "何があなたを再生ボタンを押させるか質問中…",
+          "適切なシーンを並べています…",
+          "看板を磨いています…",
+          "レンズを調整中…",
+          "オープニングクレジットを回しています…"
+        ],
+        "book": [
+          "あなたの本棚を見ています…",
+          "あなたの読書の声に耳を傾けています…",
+          "ドッグイヤーのお気に入りについて尋ねています…",
+          "背を割っています…",
+          "しおりを設定中…",
+          "第1章を開いています…"
+        ],
+        "music": [
+          "あなたの好みを回転中…",
+          "何が響くか聴いています…",
+          "適切なグルーヴを並べています…",
+          "ダイヤルを調整中…",
+          "針を並べています…",
+          "録音ボタンを押しています…"
+        ],
+        "mix": [
+          "フォーマットを越えて読んでいます…",
+          "手がかりを混ぜています — 画面、ページ、音…",
+          "あなたの一貫した筋を見つけています…",
+          "3つの好みを織り合わせています…",
+          "トリオを調整中…",
+          "もうすぐ準備完了…"
+        ]
+      }
+    }
+  },
+  "Results": {
+    "loadingMessages": {
+      "default": [
+        "あなたの回答を見直しています…",
+        "アルゴリズムに相談中…",
+        "良い趣味をクロスリファレンスしています…",
+        "隠れた宝石を探しています…",
+        "候補リストを評価中…",
+        "各おすすめを磨いています…",
+        "仕上げを加えています…"
+      ],
+      "movie": [
+        "映画を選別中…",
+        "あなたの好みをカノンと比較中…",
+        "プロジェクターリールを引いています…",
+        "クレジットを読んでいます…",
+        "2時間の価値があるものをチェック中…",
+        "予告編を並べています…"
+      ],
+      "book": [
+        "図書館の棚を歩いています…",
+        "あなたの棚をクロスリファレンス中…",
+        "あなたの読書地図をたどっています…",
+        "適切な背の埃を払っています…",
+        "オープニングラインをチェック中…",
+        "しおりを挟んでいます…"
+      ],
+      "music": [
+        "あなたのサウンドのクレートを掘っています…",
+        "適切なアルバムをシーケンス中…",
+        "シングルを超えて聴いています…",
+        "あなたの周波数に同調中…",
+        "ディープカットを並べています…",
+        "針を落としています…"
+      ],
+      "mix": [
+        "映画、書籍、音楽を織り合わせています…",
+        "3つの好みをあなたの回答に合わせています…",
+        "あなたの3つの選択をミックス中…",
+        "フォーマットを越えてクロスチェック中…",
+        "トリオを並べています…",
+        "仕上げを加えています…"
+      ]
+    },
+    "body": {
+      "matchSuffix": "マッチ度{score}%",
+      "matchPercent": "{score}%",
+      "whyThisPick": "なぜこの選択",
+      "about": "概要",
+      "showMore": "もっと見る",
+      "showLess": "閉じる",
+      "byAuthor": "著:{author}",
+      "byDirector": "監督:{director}",
+      "byArtist": "アーティスト:{artist}",
+      "favoriteAdd": "{title}をお気に入りに追加",
+      "favoriteRemove": "{title}をお気に入りから削除",
+      "movie": "映画",
+      "book": "書籍",
+      "music": "アルバム",
+      "eyebrow": "あなたの選択",
+      "headline": "あなたのために手作業で選びました",
+      "headlines": [
+        "あなたのために手作業で選びました",
+        "あなたの好みに合わせて",
+        "出来たてホヤホヤ",
+        "あなたの雰囲気に合うように",
+        "あなたの回答を中心に構築",
+        "あなただけのためにキュレーション",
+        "次のお気に入り、かも",
+        "意図を持って選択",
+        "個人的にあなたのもの",
+        "丁寧に選択"
+      ],
+      "subhead": "{count, plural, one {AIからの#件のパーソナライズされた選択、各々の理由付き。ライブラリに記録して今後の選択に影響を与えてください。} other {AIからの#件のパーソナライズされた選択、各々の理由付き。ライブラリに記録して今後の選択に影響を与えてください。}}",
+      "sections": {
+        "movie": {
+          "eyebrow": "映画",
+          "title": "画面で"
+        },
+        "book": {
+          "eyebrow": "書籍",
+          "title": "本棚で"
+        },
+        "music": {
+          "eyebrow": "アルバム",
+          "title": "耳元で"
+        }
+      },
+      "actions": {
+        "retake": "クイズをやり直す",
+        "viewHistory": "履歴を見る",
+        "share": "結果を共有",
+        "more": "もっと",
+        "moreAriaLabel": "その他のアクション"
+      },
+      "shareMenu": {
+        "share": "共有…",
+        "copy": "クリップボードにコピー",
+        "shareX": "Xで共有",
+        "shareEmail": "メールで共有"
+      },
+      "shareToasts": {
+        "shareFailed": "共有できませんでした — 再試行してください",
+        "copySuccess": "クリップボードにコピーしました!",
+        "copyFailed": "コピーできませんでした — 再試行してください",
+        "favoriteFailed": "お気に入りを更新できませんでした — 再試行してください",
+        "favoriteAdded": "お気に入りに追加しました",
+        "favoriteRemoved": "お気に入りから削除しました"
+      },
+      "shareText": {
+        "title": "私のSmart Advisorの選択",
+        "movies": "映画:",
+        "books": "書籍:",
+        "music": "アルバム:",
+        "directorPrefix": "監督 {director}",
+        "byAuthorShort": "著:{author}",
+        "byArtistShort": "アーティスト:{artist}",
+        "genres": "ジャンル:{list}",
+        "footer": "あなたの選択はsmartadvisor.appで取得"
+      },
+      "shareTwitter": "Smart Advisorの選択を受け取りました:{titles}\n\nあなたのものはsmartadvisor.appで",
+      "shareEmailSubject": "私のSmart Advisorの選択",
+      "beforeUnload": "保存されていないおすすめがあります。本当に退出しますか?",
+      "generationStep": {
+        "analyzing": "回答を分析中...",
+        "generating": "パーソナライズされたおすすめを生成中...",
+        "enhancing": "映画、書籍、アルバムのデータで強化中...",
+        "finalizing": "おすすめを確定中..."
+      },
+      "generationError": "パーソナライズされたおすすめの生成に失敗。再試行してください。",
+      "overloadedTitle": "AIが容量限界です",
+      "overloadedBody": "AIが現在処理に追われています。少し待って再試行してください — すでに数回再試行しています。",
+      "confirmDialog": {
+        "title": "新しいおすすめを生成?",
+        "body": "これらの回答のおすすめは既に生成済みです。新しいセットを生成するか、フィードに戻ってください。",
+        "cancel": "フィードへ",
+        "confirm": "新しく生成"
+      },
+      "errorState": {
+        "title": "おすすめを生成できません",
+        "retry": "再試行",
+        "back": "クイズをやり直す"
+      },
+      "refine": {
+        "cta": "絞り込む",
+        "eyebrow": "絞り込む",
+        "title": "これらの選択を調整",
+        "subtitle": "方向を教えてください — 元の回答とこれで再実行します。",
+        "placeholder": "例:Duneっぽくもっと、もっと軽く、2時間以下のもの",
+        "cancel": "キャンセル",
+        "submit": "絞り込む"
+      }
+    }
+  },
+  "Dashboard": {
+    "eyebrow": "ダッシュボード",
+    "startQuiz": "クイズ開始",
+    "viewsAria": "ダッシュボード表示",
+    "viewsGroup": "表示",
+    "tabs": {
+      "overview": "概要",
+      "picks": "選択",
+      "recentPicks": "最近の選択",
+      "genres": "ジャンル",
+      "milestones": "実績"
+    },
+    "stats": {
+      "total": "選択合計",
+      "movies": "映画",
+      "books": "書籍",
+      "music": "音楽",
+      "favorites": "お気に入り"
+    },
+    "filters": {
+      "all": "すべて",
+      "favorites": "お気に入り"
+    },
+    "recentAria": "最近の選択フィルター",
+    "body": {
+      "loadingChart": "チャート読み込み中...",
+      "greetings": [
+        "おかえりなさい",
+        "やあ",
+        "お会いできて嬉しいです",
+        "こんにちは",
+        "やあ",
+        "またこんにちは",
+        "戻ってきてくれて嬉しいです",
+        "誰が戻ってきたか見て",
+        "伝説が戻ってきました",
+        "おやおや",
+        "ご挨拶、定命の方",
+        "お会いできて光栄です",
+        "プロットが濃くなってきました",
+        "続編の時間",
+        "ただいま上映中",
+        "クレジットを回す",
+        "ドラムロールをお願いします",
+        "備えてください",
+        "準備完了、スクロール"
+      ],
+      "headerHook": {
+        "loading": "パーソナライズされたおすすめハブ。",
+        "empty": "最初のクイズを受けて始めましょう。",
+        "quietWeek": "静かな週 — 新しい選択の準備は?",
+        "up": "{n, plural, one {今週# 件の新しい選択 · 先週より{delta}上昇。} other {今週# 件の新しい選択 · 先週より{delta}上昇。}}",
+        "down": "{n, plural, one {今週# 件の新しい選択 · 先週より{delta}下降。} other {今週# 件の新しい選択 · 先週より{delta}下降。}}",
+        "flat": "{n, plural, one {今週# 件の新しい選択。} other {今週# 件の新しい選択。}}"
+      },
+      "modal": {
+        "ariaLabel": "{title}の詳細",
+        "byAuthor": "著:{author}",
+        "byDirector": "監督:{director}",
+        "byArtist": "アーティスト:{artist}",
+        "close": "閉じる"
+      },
+      "favoriteAria": "お気に入り",
+      "inLibraryAria": "あなたのライブラリ内",
+      "wrapped": {
+        "eyebrow": "Year in Review",
+        "titleLead": "あなたの",
+        "titleTail": "選択",
+        "body": "トップジャンル、最長連続、最も選ばれたクリエイター — カードにまとめました。",
+        "cta": "Wrappedを開く"
+      },
+      "suggestion": {
+        "eyebrow": "次の提案",
+        "firstQuiz": {
+          "title": "最初のクイズを受ける",
+          "body": "いくつかの質問に答えると、AIがカスタマイズされた選択を提供します。",
+          "cta": "クイズ開始"
+        },
+        "logReaction": {
+          "title": "反応を記録",
+          "body": "何が当たって何が当たらなかったかAIに伝えてください — あなたの反応は今後のクイズで好みのシグナルになります。",
+          "cta": "結果を開く"
+        },
+        "anotherPick": {
+          "title": "別の選択の時間?",
+          "body": "最後のクイズは{ago}前でした。AIは現在{count, plural, one {あなたの反応 # 件} other {あなたの反応 # 件}}を知っています。",
+          "cta": "別のクイズを受ける"
+        }
+      },
+      "spotlight": {
+        "eyebrow": "最新の選択",
+        "openDetailsAria": "{title}の詳細を開く",
+        "byAuthor": "著:{author}",
+        "byDirector": "監督:{director}",
+        "viewAll": "すべて表示"
+      },
+      "noPicks": {
+        "title": "まだ選択がありません",
+        "body": "最初のクイズを受けると、最新の選択がここに常に1クリックで届きます。"
+      },
+      "pulse": {
+        "eyebrow": "脈拍",
+        "thisWeek": "{count, plural, one {今週 # 件の選択} other {今週 # 件の選択}}",
+        "quietWeek": "静かな週",
+        "up": "↑ 先週より{delta}",
+        "down": "↓ 先週より{delta}",
+        "lastFourteenDays": "過去14日",
+        "streakBadge": "{count}日連続",
+        "stat": {
+          "picks": "選択",
+          "library": "ライブラリ",
+          "favorites": "お気に入り",
+          "topGenre": "トップジャンル"
+        },
+        "picksHint": "映画{movies} · 書籍{books} · アルバム{music}",
+        "ratedHint": "{count}件評価",
+        "favoritesPercent": "{percent}%",
+        "topGenrePicks": "{count, plural, one {# 件の選択} other {# 件の選択}}",
+        "noData": "—"
+      },
+      "milestones": {
+        "eyebrow": "実績",
+        "pageTitle": "あなたの実績",
+        "backToFeed": "フィードに戻る",
+        "earnedSummary": "{total}件中{earned}件獲得",
+        "unlocked": "解除済み",
+        "progress": "{progress}/{target}",
+        "unlockedToast": "実績解除:{label}",
+        "tierCompleteToast": "ティア完了:{tier}!🏆",
+        "tapForDetails": "実績をタップして解除方法を確認",
+        "summaryCta": "実績を開く",
+        "summaryHint": "すべての実績をティア別にグループ化して表示。",
+        "tiers": {
+          "easy": "簡単",
+          "medium": "中級",
+          "hard": "難しい",
+          "master": "マスター"
+        },
+        "items": {
+          "firstPick": "最初の選択",
+          "tenPicks": "10件の選択",
+          "twentyFivePicks": "25件の選択",
+          "halfCentury": "半世紀",
+          "centurion": "百人隊長",
+          "wideTaste": "幅広い好み",
+          "genreExplorer": "ジャンル探検家",
+          "genreMaster": "ジャンルマスター",
+          "cinephile": "シネフィル",
+          "cinemaMaster": "シネママスター",
+          "bookworm": "本の虫",
+          "voracious": "貪欲な読者",
+          "melomaniac": "音楽狂",
+          "audiophile": "オーディオフィル",
+          "musicMogul": "音楽の大物",
+          "curator": "キュレーター",
+          "maven": "達人",
+          "reflective": "内省的",
+          "critic": "批評家",
+          "librarian": "司書",
+          "completionist": "完璧主義者",
+          "weekStreak": "週間連続",
+          "marathon": "マラソン",
+          "legend": "伝説",
+          "movieMogul": "映画の大物",
+          "libraryRoyal": "ライブラリ王族",
+          "polymath": "博学者",
+          "patron": "後援者",
+          "tastemaker": "趣味の作り手",
+          "yearLong": "1年間"
+        },
+        "descriptions": {
+          "firstPick": "クイズから最初のおすすめを取得。",
+          "tenPicks": "あらゆるミックスのクイズから10件のおすすめを取得。",
+          "twentyFivePicks": "25件のおすすめを蓄積。",
+          "halfCentury": "50件のおすすめに到達。",
+          "centurion": "100件のおすすめは冗談ではない。",
+          "wideTaste": "5つの異なるジャンルにわたるおすすめを取得。",
+          "genreExplorer": "10の異なるジャンルに分岐。",
+          "genreMaster": "20の異なるジャンルをカバー。",
+          "cinephile": "10件の映画おすすめを収集。",
+          "cinemaMaster": "50件の映画おすすめを収集。",
+          "bookworm": "10件の書籍おすすめを収集。",
+          "voracious": "50件の書籍おすすめを収集。",
+          "melomaniac": "10件のアルバムおすすめを収集。",
+          "audiophile": "50件のアルバムおすすめを収集。",
+          "musicMogul": "100件のアルバムおすすめを収集。",
+          "curator": "履歴で5件のおすすめをお気に入り登録。",
+          "maven": "25件のおすすめをお気に入り登録。",
+          "reflective": "ライブラリで5件の項目を評価。",
+          "critic": "ライブラリで25件の項目を評価。",
+          "librarian": "ライブラリに20件の項目を記録。",
+          "completionist": "10件のライブラリ項目を完了としてマーク。",
+          "weekStreak": "7日連続でSmart Advisorを使用。",
+          "marathon": "30日間Smart Advisorの連続記録を維持。",
+          "legend": "250件のおすすめに到達 — 真の伝説。",
+          "movieMogul": "100件の映画おすすめを収集。",
+          "libraryRoyal": "100件の書籍おすすめを収集。",
+          "polymath": "30の異なるジャンルにわたるおすすめを取得。",
+          "patron": "50件のおすすめをお気に入り登録。",
+          "tastemaker": "ライブラリで100件の項目を評価。",
+          "yearLong": "365日間Smart Advisorの連続記録を維持。本当に。"
+        }
+      },
+      "library": {
+        "eyebrow": "好みのシグナル",
+        "title": "あなたのライブラリ",
+        "viewAll": "すべて表示",
+        "emptyLead": "まだ何も記録されていません。結果で",
+        "emptyAction": "視聴・読書した",
+        "emptyTail": "を押すと、今後のクイズの好みのシグナルとしてここに表示されます。"
+      },
+      "inProgress": {
+        "eyebrow": "現在",
+        "title": "中断したところから再開",
+        "markFinished": "完了としてマーク",
+        "markedFinishedToast": "いいね — ライブラリを開いて「{title}」を評価してください。",
+        "viewAll": "すべて表示"
+      },
+      "picks": {
+        "filterAria": "最近の選択フィルター",
+        "all": "すべて",
+        "favorites": "お気に入り",
+        "seeAllInHistory": "履歴ですべて見る",
+        "noPicksTitle": "まだ選択がありません",
+        "noPicksBody": "クイズを受けると、選択がここに集まります。",
+        "startQuiz": "クイズ開始",
+        "noFavoritesTitle": "まだお気に入りがありません",
+        "noFavoritesBody": "選択のハートをタップしてここに保存してください。",
+        "movies": "映画",
+        "books": "書籍",
+        "music": "音楽"
+      },
+      "genres": {
+        "eyebrow": "ジャンル内訳",
+        "title": "あなたの好みの傾向",
+        "topLabel": "トップ",
+        "topPercent": "{percent}%",
+        "mostlyMovies": "ほとんど映画",
+        "mostlyBooks": "ほとんど書籍",
+        "mostlyMusic": "ほとんど音楽",
+        "evenSplit": "均等分割",
+        "empty": "クイズを受けてジャンルを見ましょう。",
+        "format": {
+          "movies": "映画",
+          "books": "書籍",
+          "music": "音楽",
+          "totalPicks": "{count, plural, one {# 件の選択} other {# 件の選択}}",
+          "empty": "まだ選択がありません。"
+        }
+      }
+    }
+  },
+  "Demo": {
+    "quiz": {
+      "category": "デモクイズ",
+      "pickLabel": "フォーマットを選択",
+      "stepLabel": "質問 {current} / {total}",
+      "back": {
+        "home": "ホーム",
+        "previous": "前へ"
+      },
+      "cards": {
+        "movie": {
+          "eyebrow": "画面で",
+          "title": "映画",
+          "description": "あなたの現在の気分とペースに合わせた映画。"
+        },
+        "book": {
+          "eyebrow": "本棚で",
+          "title": "書籍",
+          "description": "あなたのスタイルと興味に合わせた読書。"
+        },
+        "music": {
+          "eyebrow": "耳元で",
+          "title": "アルバム",
+          "description": "あなたの今の気分に合うレコード。"
+        },
+        "mix": {
+          "eyebrow": "3つすべて",
+          "title": "ミックスする",
+          "description": "映画、書籍、アルバムを一緒に選択。"
+        },
+        "both": {
+          "eyebrow": "両方",
+          "title": "それぞれ1つ",
+          "description": "映画と書籍を一度に一緒に選択。"
+        }
+      },
+      "validation": {
+        "fillInBlank": "続行する前に回答を入力してください。",
+        "selectAll": "続行する前に少なくとも1つのオプションを選択してください。",
+        "singleSelect": "続行する前にオプションを選択してください。"
+      },
+      "next": "次へ",
+      "continue": "続ける",
+      "leaveConfirm": "デモを退出?これまでの回答は保存されません。"
+    },
+    "results": {
+      "loadingText": "完璧な選択を見つけています...",
+      "matchSuffix": "マッチ",
+      "whyThisPick": "なぜこの選択",
+      "about": "概要",
+      "showMore": "もっと見る",
+      "showLess": "閉じる",
+      "viewDetails": "詳細を見る",
+      "errors": {
+        "limitTitle": "今日はここまで",
+        "genericTitle": "問題が発生しました",
+        "limitFallback": "今日の{limit}件の無料デモ実行をすべて使用しました。無制限のおすすめのために無料アカウントを作成してください — あなたの好みのプロフィールはクイズごとに改善されます。",
+        "genericFallback": "デモのおすすめを生成できませんでした。再試行してください。",
+        "signUp": "無料アカウントを作成",
+        "tryAgain": "再試行"
+      },
+      "eyebrow": "デモ・あなたの選択",
+      "headline": "あなたのために手作業で選びました",
+      "subhead": "{count, plural, one {デモの回答からの#件のパーソナライズされた選択 — サインアップして保存し時間をかけて絞り込んでください。} other {デモの回答からの#件のパーソナライズされた選択 — サインアップして保存し時間をかけて絞り込んでください。}}",
+      "empty": "結果が見つかりませんでした。新しいセットのためにデモをもう一度試してください。",
+      "sections": {
+        "movie": {
+          "eyebrow": "映画",
+          "title": "画面で"
+        },
+        "book": {
+          "eyebrow": "書籍",
+          "title": "本棚で"
+        },
+        "music": {
+          "eyebrow": "アルバム",
+          "title": "耳元で"
+        }
+      },
+      "cta": {
+        "title": "習慣にしてください",
+        "body": "サインアップして選択を保存し、反応から好みのプロフィールを構築し、毎回AIカスタマイズおすすめを取得してください。",
+        "signUp": "サインアップして続行",
+        "retake": "デモをやり直す"
+      }
+    }
+  },
+  "WhereToWatch": {
+    "title": "視聴場所",
+    "flatrate": "ストリーミング",
+    "rent": "レンタル",
+    "buy": "購入",
+    "attribution": "via JustWatch"
+  },
+  "Feed": {
+    "aiNudge": {
+      "eyebrow": "AIヒント",
+      "variants": {
+        "surprise": {
+          "title": "素早い選択が必要?ワンタップでサプライズします。",
+          "cta": "サプライズで"
+        },
+        "refine": {
+          "title": "ほぼ機能した選択がある?シンプルな日本語で絞り込んでください。",
+          "cta": "絞り込みを試す"
+        },
+        "group": {
+          "title": "今夜友達と観ますか?グループクイズを開始。",
+          "cta": "グループクイズ"
+        },
+        "tune": {
+          "title": "選択が合わない?30秒で好みフィルターを調整。",
+          "cta": "好みを調整"
+        },
+        "solo": {
+          "title": "素早いクイズ、鋭い選択 — どんな気分?",
+          "cta": "クイズ開始"
+        }
+      }
+    },
+    "dashboardMoved": {
+      "eyebrow": "お知らせ",
+      "title": "これがあなたの新しいホームです。",
+      "body": "ダッシュボードが移動しました — <milestones>実績</milestones>は今そこにあります。",
+      "dismiss": "却下"
+    },
+    "mobileApp": {
+      "eyebrow": "近日公開",
+      "title": "iOS と Android 版 Smart Advisor",
+      "body": "ネイティブモバイルアプリがやってきます — リリース時は同じアカウントでサインインしてください。",
+      "dismiss": "却下"
+    }
+  }
+}

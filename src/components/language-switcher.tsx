@@ -6,11 +6,25 @@ import { toast } from "sonner";
 
 import { setLocaleAction } from "@/app/actions/locale";
 import { SUPPORTED_LOCALES, type Locale } from "@/i18n/config";
-import { SegmentedControl } from "@/components/ui/segmented-control";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const FLAG: Record<Locale, string> = {
   en: "🇺🇸",
   es: "🇪🇸",
+  fr: "🇫🇷",
+  de: "🇩🇪",
+  pt: "🇵🇹",
+  it: "🇮🇹",
+  nl: "🇳🇱",
+  ja: "🇯🇵",
+  zh: "🇨🇳",
+  ko: "🇰🇷",
 };
 
 export const LanguageSwitcher = () => {
@@ -34,18 +48,23 @@ export const LanguageSwitcher = () => {
       <p className="mb-3 text-sm text-slate-500 dark:text-slate-400">
         {t("description")}
       </p>
-      <SegmentedControl<Locale>
-        layoutId="settings-language"
+      <Select
         value={optimistic}
-        onChange={select}
+        onValueChange={(value) => select(value as Locale)}
         disabled={pending}
-        ariaLabel={t("title")}
-        options={SUPPORTED_LOCALES.map((code) => ({
-          value: code,
-          label: `${FLAG[code]}  ${t(`options.${code}`)}`,
-          pillClassName: "bg-indigo-500",
-        }))}
-      />
+      >
+        <SelectTrigger className="w-full max-w-xs" aria-label={t("title")}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {SUPPORTED_LOCALES.map((code) => (
+            <SelectItem key={code} value={code}>
+              <span className="mr-2">{FLAG[code]}</span>
+              {t(`options.${code}`)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
       {pending && (
         <p className="mt-3 text-xs font-medium text-slate-500 dark:text-slate-400">
           {t("saving")}
