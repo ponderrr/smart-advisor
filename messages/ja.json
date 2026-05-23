@@ -50,7 +50,9 @@
         "onPost": "投稿に対して",
         "onComment": "コメントに対して",
         "contentGone": "コンテンツは削除されました",
-        "statusReview": "確認中"
+        "statusReview": "確認中",
+        "statusReviewed": "確認済み",
+        "statusDismissed": "却下"
       }
     },
     "groups": {

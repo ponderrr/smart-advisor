@@ -270,3 +270,81 @@ export function useUnblockUser() {
     onSuccess: () => qc.invalidateQueries({ queryKey: KEYS.blocked }),
   });
 }
+
+// ---------------------------------------------------------------------------
+// Reports moderation (admin)
+// ---------------------------------------------------------------------------
+
+/** Admin reports list — see [fetchAllReports]. Non-admins get an empty
+ *  array (RLS), so any non-admin landing on a moderation page just sees
+ *  the empty state. */
+export function useAllReports() {
+  return useQuery({
+    queryKey: ["feed", "all-reports"],
+    queryFn: svc.fetchAllReports,
+  });
+}
+
+export function useSetReportStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (v: { reportId: string; status: svc.ReportStatus }) =>
+      svc.setReportStatus(v.reportId, v.status),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["feed", "all-reports"] });
+      qc.invalidateQueries({ queryKey: ["feed", "my-reports"] });
+    },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Notifications (feed_notifications)
+// ---------------------------------------------------------------------------
+
+const NOTIF_KEY = ["feed", "notifications"] as const;
+
+export function useNotifications() {
+  return useQuery({
+    queryKey: NOTIF_KEY,
+    queryFn: svc.fetchNotifications,
+  });
+}
+
+/** Unread count summed across all kinds — the navbar bell reads this
+ *  instead of recomputing from the list. */
+export function useUnreadNotificationsCount(): number {
+  const { data } = useNotifications();
+  return (data ?? []).filter((n) => n.readAt === null).length;
+}
+
+export function useMarkNotificationRead() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: svc.markNotificationRead,
+    onSuccess: () => qc.invalidateQueries({ queryKey: NOTIF_KEY }),
+  });
+}
+
+export function useMarkAllNotificationsRead() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: svc.markAllNotificationsRead,
+    onSuccess: () => qc.invalidateQueries({ queryKey: NOTIF_KEY }),
+  });
+}
+
+export function useDeleteNotification() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: svc.deleteNotification,
+    onSuccess: () => qc.invalidateQueries({ queryKey: NOTIF_KEY }),
+  });
+}
+
+export function useClearAllNotifications() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: svc.clearAllNotifications,
+    onSuccess: () => qc.invalidateQueries({ queryKey: NOTIF_KEY }),
+  });
+}

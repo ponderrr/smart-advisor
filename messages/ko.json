@@ -50,7 +50,9 @@
         "onPost": "게시물에 대해",
         "onComment": "댓글에 대해",
         "contentGone": "콘텐츠가 삭제됨",
-        "statusReview": "검토 중"
+        "statusReview": "검토 중",
+        "statusReviewed": "검토됨",
+        "statusDismissed": "기각됨"
       }
     },
     "groups": {

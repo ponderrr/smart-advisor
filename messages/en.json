@@ -50,7 +50,9 @@
         "onPost": "On a post",
         "onComment": "On a comment",
         "contentGone": "Content removed",
-        "statusReview": "Under review"
+        "statusReview": "Under review",
+        "statusReviewed": "Reviewed",
+        "statusDismissed": "Dismissed"
       }
     },
     "groups": {

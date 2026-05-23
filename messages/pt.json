@@ -50,7 +50,9 @@
         "onPost": "Em uma publicação",
         "onComment": "Em um comentário",
         "contentGone": "Conteúdo removido",
-        "statusReview": "Em análise"
+        "statusReview": "Em análise",
+        "statusReviewed": "Analisado",
+        "statusDismissed": "Rejeitado"
       }
     },
     "groups": {

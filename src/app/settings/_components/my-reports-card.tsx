@@ -4,8 +4,44 @@ import { useTranslations } from "next-intl";
 import { Flag } from "lucide-react";
 
 import { useMyReports } from "@/features/feed/use-feed";
+import type { ReportStatus } from "@/features/feed/feed-service";
 
 import { SectionCard, SectionHeader } from "./settings-ui";
+
+/** Pill describing where a report sits in the moderation queue —
+ *  shared with the admin Reports surface so the same vocabulary is
+ *  used on both sides. */
+function ReportStatusBadge({
+  status,
+  reviewedLabel,
+  dismissedLabel,
+  reviewLabel,
+}: {
+  status: ReportStatus;
+  reviewedLabel: string;
+  dismissedLabel: string;
+  reviewLabel: string;
+}) {
+  if (status === "reviewed") {
+    return (
+      <span className="shrink-0 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-bold text-emerald-700 dark:bg-emerald-400/15 dark:text-emerald-300">
+        {reviewedLabel}
+      </span>
+    );
+  }
+  if (status === "dismissed") {
+    return (
+      <span className="shrink-0 rounded-full bg-slate-500/10 px-2.5 py-1 text-[11px] font-bold text-slate-600 dark:bg-slate-400/15 dark:text-slate-300">
+        {dismissedLabel}
+      </span>
+    );
+  }
+  return (
+    <span className="shrink-0 rounded-full bg-amber-500/10 px-2.5 py-1 text-[11px] font-bold text-amber-700 dark:bg-amber-400/15 dark:text-amber-300">
+      {reviewLabel}
+    </span>
+  );
+}
 
 /**
  * Settings → Feed "Reports you've filed" block. Lists the reports the
@@ -56,9 +92,12 @@ export const MyReportsCard = () => {
                   </p>
                 )}
               </div>
-              <span className="shrink-0 rounded-full bg-amber-500/10 px-2.5 py-1 text-[11px] font-bold text-amber-700 dark:bg-amber-400/15 dark:text-amber-300">
-                {t("statusReview")}
-              </span>
+              <ReportStatusBadge
+                status={report.status}
+                reviewLabel={t("statusReview")}
+                reviewedLabel={t("statusReviewed")}
+                dismissedLabel={t("statusDismissed")}
+              />
             </li>
           ))}
         </ul>

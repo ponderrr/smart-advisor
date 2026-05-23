@@ -50,7 +50,9 @@
         "onPost": "Bij een bericht",
         "onComment": "Bij een reactie",
         "contentGone": "Inhoud verwijderd",
-        "statusReview": "In behandeling"
+        "statusReview": "In behandeling",
+        "statusReviewed": "Beoordeeld",
+        "statusDismissed": "Afgewezen"
       }
     },
     "groups": {
