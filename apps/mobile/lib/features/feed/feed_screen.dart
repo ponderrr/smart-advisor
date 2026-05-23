@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,18 +33,106 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   /// cross-device case where the user changed something on web while
   /// mobile was backgrounded (no Realtime channel needed).
   late final AppLifecycleListener _lifecycle = AppLifecycleListener(
-    onResume: () {
-      ref.invalidate(feedProvider);
-      ref.invalidate(followingProvider);
-      ref.invalidate(postVotesProvider);
-      ref.invalidate(commentVotesProvider);
-    },
+    onResume: _doRefresh,
   );
+
+  /// Drives the floating refresh pill so the user can refetch + jump to
+  /// the top without scrolling back up first.
+  final ScrollController _scrollController = ScrollController();
+  bool _showRefreshPill = false;
+
+  /// New-post detection — Realtime is off the table on the free tier,
+  /// so we poll the feed every minute and compare the top post id
+  /// against [_topPostId] (set once the feed first loads). Anything
+  /// above it counts as "new".
+  Timer? _pollTimer;
+  String? _topPostId;
+  int _newCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+    _pollTimer = Timer.periodic(
+      const Duration(seconds: 60),
+      (_) => _pollNew(),
+    );
+    // Set the baseline once the first frame's feed is in memory.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _pollNew());
+  }
 
   @override
   void dispose() {
+    _pollTimer?.cancel();
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     _lifecycle.dispose();
     super.dispose();
+  }
+
+  /// Poll the feed and update [_newCount] / [_topPostId]. Cheap because
+  /// the feed fetch is already what the screen runs anyway; we just
+  /// don't push the result into the visible provider.
+  Future<void> _pollNew() async {
+    if (!mounted) return;
+    try {
+      final latest = await ref.read(feedServiceProvider).fetchFeed();
+      if (!mounted || latest.isEmpty) return;
+      if (_topPostId == null) {
+        setState(() => _topPostId = latest.first.id);
+        return;
+      }
+      var count = 0;
+      for (final p in latest) {
+        if (p.id == _topPostId) break;
+        count++;
+      }
+      if (count != _newCount) {
+        setState(() => _newCount = count);
+      }
+    } catch (_) {
+      // Polling is best-effort; a transient miss just defers the badge.
+    }
+  }
+
+  void _onScroll() {
+    // Threshold roughly = a screen of feed below the header. Below it
+    // the pill is hidden because pull-to-refresh is already in reach.
+    final show = _scrollController.hasClients &&
+        _scrollController.offset > 320;
+    if (show != _showRefreshPill) {
+      setState(() => _showRefreshPill = show);
+    }
+  }
+
+  void _doRefresh() {
+    ref.invalidate(feedProvider);
+    ref.invalidate(followingProvider);
+    ref.invalidate(postVotesProvider);
+    ref.invalidate(commentVotesProvider);
+  }
+
+  /// Floating-pill action: refresh, reset the new-post baseline, and
+  /// slide back to the top.
+  Future<void> _refreshFromPill() async {
+    Haptics.impact(HapticImpactStyle.medium);
+    _doRefresh();
+    try {
+      final latest = await ref.read(feedProvider.future);
+      if (mounted) {
+        setState(() {
+          _topPostId = latest.isNotEmpty ? latest.first.id : null;
+          _newCount = 0;
+        });
+      }
+    } catch (_) {/* swallow — UI invalidate is enough on failure */}
+    if (_scrollController.hasClients) {
+      await _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 450),
+        curve: Curves.easeOutCubic,
+      );
+    }
   }
 
   List<FeedPost> _visible(
@@ -109,6 +199,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           RefreshIndicator(
             onRefresh: _refresh,
             child: ListView(
+        controller: _scrollController,
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
         children: [
           Row(
@@ -190,6 +281,37 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               onTap: () => _openComposer(prefs.community),
             ),
           ),
+          // Floating pill — visible when there are new posts to load
+          // OR the user has scrolled past the pull-to-refresh range.
+          // 'N new posts' wins over the plain 'Refresh' label.
+          () {
+            final showNew = _newCount > 0;
+            final visible = showNew || _showRefreshPill;
+            return Positioned(
+              top: MediaQuery.paddingOf(context).top + 8,
+              left: 0,
+              right: 0,
+              child: IgnorePointer(
+                ignoring: !visible,
+                child: AnimatedOpacity(
+                  opacity: visible ? 1 : 0,
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeOut,
+                  child: Center(
+                    child: _RefreshPill(
+                      onTap: _refreshFromPill,
+                      label: showNew
+                          ? (_newCount == 1
+                              ? '1 new post'
+                              : '$_newCount new posts')
+                          : 'Refresh',
+                      highlight: showNew,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }(),
         ],
       ),
     );
@@ -554,3 +676,67 @@ class _VisibilityOption extends StatelessWidget {
   }
 }
 
+
+/// Small floating pill at the top of the feed that appears once the user
+/// has scrolled past the pull-to-refresh range. Tapping it refetches the
+/// feed and slides back to the top — wired up in [_FeedScreenState].
+class _RefreshPill extends StatelessWidget {
+  const _RefreshPill({
+    required this.onTap,
+    required this.label,
+    this.highlight = false,
+  });
+  final VoidCallback onTap;
+  final String label;
+  /// True for the 'N new posts' state — flips the pill to a tinted
+  /// violet background so it visibly nags the user.
+  final bool highlight;
+
+  @override
+  Widget build(BuildContext context) {
+    final tone = context.colors;
+    final bg = highlight ? Tw.violet500 : tone.card;
+    final fg = highlight ? Colors.white : tone.foreground;
+    final iconColor = highlight ? Colors.white : Tw.violet500;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(999),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+                color: highlight ? Tw.violet500 : tone.border),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.14),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                  highlight
+                      ? Icons.arrow_upward_rounded
+                      : Icons.refresh_rounded,
+                  size: 16,
+                  color: iconColor),
+              const SizedBox(width: 6),
+              Text(label,
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: fg)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
