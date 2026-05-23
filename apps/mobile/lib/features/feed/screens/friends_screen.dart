@@ -22,8 +22,29 @@ class FriendsScreen extends ConsumerStatefulWidget {
   ConsumerState<FriendsScreen> createState() => _FriendsScreenState();
 }
 
+/// Threshold above which the tab shows a live search field — parity
+/// with the blocked-people list. Below it, the chrome would outweigh
+/// the few rows to scan.
+const _searchThreshold = 6;
+
 class _FriendsScreenState extends ConsumerState<FriendsScreen> {
   late int _tab = widget.initialTab.clamp(0, 1);
+  final _search = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  void _setTab(int i) {
+    setState(() {
+      _tab = i;
+      _query = '';
+      _search.clear();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +88,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                   : 'Followers · $followerCount',
             ],
             selectedIndex: _tab,
-            onValueChanged: (i) => setState(() => _tab = i),
+            onValueChanged: _setTab,
           ),
           const SizedBox(height: 16),
           ...list.when(
@@ -84,17 +105,38 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
             ],
             data: (people) {
               if (people.isEmpty) return [_EmptyState(following: _tab == 0)];
+              final showSearch = people.length >= _searchThreshold;
+              final q = _query.trim().toLowerCase();
+              final filtered = q.isEmpty
+                  ? people
+                  : people
+                      .where((p) => p.name.toLowerCase().contains(q))
+                      .toList();
               return [
-                for (final p in people)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: PersonRow(
-                      id: p.id,
-                      name: p.name,
-                      avatarUrl: p.avatarUrl,
-                      tone: personTone(context, p.id),
-                    ),
+                if (showSearch) ...[
+                  AdaptiveTextField(
+                    controller: _search,
+                    placeholder: 'Search by name',
+                    onChanged: (v) => setState(() => _query = v),
                   ),
+                  const SizedBox(height: 14),
+                ],
+                if (filtered.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    child: Subtitle('No matches.', center: true),
+                  )
+                else
+                  for (final p in filtered)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: PersonRow(
+                        id: p.id,
+                        name: p.name,
+                        avatarUrl: p.avatarUrl,
+                        tone: personTone(context, p.id),
+                      ),
+                    ),
               ];
             },
           ),

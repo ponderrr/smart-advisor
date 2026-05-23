@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:haptic_kit/haptic_kit.dart';
 
 import '../../../core/supabase/supabase_providers.dart';
@@ -35,6 +36,38 @@ class FeedSettingsScreen extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(
                   horizontal: 20, vertical: 6),
               child: Column(children: [
+                Consumer(builder: (context, ref, _) {
+                  final me = ref
+                      .watch(supabaseClientProvider)
+                      .auth
+                      .currentUser
+                      ?.id;
+                  final followingCount = me == null
+                      ? null
+                      : ref
+                          .watch(followingProfilesProvider(me))
+                          .value
+                          ?.length;
+                  final followerCount = me == null
+                      ? null
+                      : ref
+                          .watch(followerProfilesProvider(me))
+                          .value
+                          ?.length;
+                  // Show counts when both sides have loaded so the line
+                  // doesn't flicker; otherwise fall back to a static
+                  // hint so the tile still looks intentional during the
+                  // first paint.
+                  final subtitle = (followingCount == null ||
+                          followerCount == null)
+                      ? 'People you follow and who follow you'
+                      : '$followingCount following · $followerCount followers';
+                  return settingsTile(
+                      context, Icons.people_alt_rounded, 'Friends',
+                      subtitle: subtitle,
+                      onTap: () => context.push('/feed/friends'));
+                }),
+                settingsDivider(context),
                 Consumer(builder: (context, ref, _) {
                   final blocked =
                       ref.watch(blockedProvider).value ?? const <String>[];

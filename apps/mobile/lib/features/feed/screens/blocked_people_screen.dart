@@ -7,15 +7,35 @@ import '../../../ui/ui.dart';
 import '../feed_providers.dart';
 import '../widgets/feed_avatar.dart';
 
+/// Threshold above which the list shows a live search field — for a
+/// handful of blocked profiles a search box is overkill, but a long
+/// list with no filter is the painful state.
+const _searchThreshold = 6;
+
 /// Blocked-people management. Lists the in-memory blocked-handles set
 /// from [blockedProvider] with an inline unblock action; reads as
 /// "Settings → Feed → Blocked people". The feed-side block action lives
 /// on each PostCard's three-dot menu and writes to the same provider.
-class BlockedPeopleScreen extends ConsumerWidget {
+class BlockedPeopleScreen extends ConsumerStatefulWidget {
   const BlockedPeopleScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<BlockedPeopleScreen> createState() =>
+      _BlockedPeopleScreenState();
+}
+
+class _BlockedPeopleScreenState extends ConsumerState<BlockedPeopleScreen> {
+  final _search = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final blocked = ref.watch(blockedProfilesProvider);
 
@@ -30,9 +50,7 @@ class BlockedPeopleScreen extends ConsumerWidget {
             child: MessageBanner.error(l.blockedLoadError),
           ),
           data: (people) {
-            final sorted = [...people]
-              ..sort((a, b) => a.name.compareTo(b.name));
-            if (sorted.isEmpty) {
+            if (people.isEmpty) {
               return Padding(
                 padding: const EdgeInsets.all(28),
                 child: Column(
@@ -49,23 +67,69 @@ class BlockedPeopleScreen extends ConsumerWidget {
                 ),
               );
             }
-            return ListView.separated(
+
+            final sorted = [...people]
+              ..sort((a, b) => a.name.toLowerCase()
+                  .compareTo(b.name.toLowerCase()));
+            final showSearch = sorted.length >= _searchThreshold;
+            final q = _query.trim().toLowerCase();
+            final filtered = q.isEmpty
+                ? sorted
+                : sorted
+                    .where((p) => p.name.toLowerCase().contains(q))
+                    .toList();
+
+            return ListView(
               padding: const EdgeInsets.all(20),
-              itemCount: sorted.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 10),
-              itemBuilder: (context, i) {
-                final person = sorted[i];
-                return _BlockedRow(
-                  name: person.name,
-                  avatarUrl: person.avatarUrl,
-                  onUnblock: () {
-                    ref
-                        .read(feedActionsProvider)
-                        .unblock(person.id);
-                    showBanner(l.blockedUnblockedToast(person.name));
-                  },
-                );
-              },
+              children: [
+                Row(children: [
+                  Expanded(
+                    child: Text(
+                      '${sorted.length} blocked',
+                      style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          color: context.brandMuted),
+                    ),
+                  ),
+                  if (showSearch && q.isNotEmpty)
+                    Text(
+                      '${filtered.length} match${filtered.length == 1 ? '' : 'es'}',
+                      style: TextStyle(
+                          fontSize: 12, color: context.brandMuted),
+                    ),
+                ]),
+                const SizedBox(height: 10),
+                if (showSearch) ...[
+                  AdaptiveTextField(
+                    controller: _search,
+                    placeholder: 'Search by name',
+                    onChanged: (v) => setState(() => _query = v),
+                  ),
+                  const SizedBox(height: 14),
+                ],
+                if (filtered.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    child: Subtitle('No matches.', center: true),
+                  )
+                else
+                  for (int i = 0; i < filtered.length; i++) ...[
+                    _BlockedRow(
+                      name: filtered[i].name,
+                      avatarUrl: filtered[i].avatarUrl,
+                      onUnblock: () {
+                        ref
+                            .read(feedActionsProvider)
+                            .unblock(filtered[i].id);
+                        showBanner(
+                            l.blockedUnblockedToast(filtered[i].name));
+                      },
+                    ),
+                    if (i < filtered.length - 1)
+                      const SizedBox(height: 10),
+                  ],
+              ],
             );
           },
         ),
