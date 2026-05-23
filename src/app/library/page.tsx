@@ -15,10 +15,11 @@ import {
   Loader,
   Music,
   Pencil,
-  Sparkles,
   ThumbsDown,
   ThumbsUp,
   Trash2,
+  Upload,
+  Search,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
@@ -43,7 +44,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { PillButton } from "@/components/ui/pill-button";
 import { SegmentedControl } from "@/components/ui/segmented-control";
-import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { Dialog } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -55,6 +55,7 @@ import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
 import { ViewToggle } from "@/components/view-toggle";
 import { usePersistedViewMode } from "@/hooks/use-persisted-view-mode";
+import { cacheRead, cacheWrite } from "@/lib/offline-cache";
 import { cn } from "@/lib/utils";
 
 const MEDIUM_TABS = ["all", "movie", "book", "music"] as const;
@@ -155,6 +156,7 @@ export default function LibraryPage() {
     parseAsStringLiteral(STATUS_FILTER_VALUES).withDefault("all"),
   );
   const [view, setView] = usePersistedViewMode("list");
+  const [query, setQuery] = useState("");
   const [editTarget, setEditTarget] = useState<LibraryItem | null>(null);
 
   // Snap to top instantly when the filters change so the user doesn't get
@@ -176,10 +178,18 @@ export default function LibraryPage() {
     const { data, error } = await libraryService.list();
     setLoading(false);
     if (error) {
-      toast.error(error);
+      // Fetch failed — fall back to the last good snapshot so an offline
+      // cold load still shows the library instead of an empty screen.
+      const cached = cacheRead<LibraryItem>("library");
+      if (cached.length > 0) {
+        setItems(cached);
+      } else {
+        toast.error(error);
+      }
       return;
     }
     setItems(data);
+    cacheWrite("library", data);
   };
 
   useEffect(() => {
@@ -187,12 +197,17 @@ export default function LibraryPage() {
   }, [ready]);
 
   const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
     return items.filter((item) => {
       if (mediumFilter !== "all" && item.medium !== mediumFilter) return false;
       if (statusFilter !== "all" && item.status !== statusFilter) return false;
+      if (q) {
+        const hay = `${item.title ?? ""} ${item.creator ?? ""}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
       return true;
     });
-  }, [items, mediumFilter, statusFilter]);
+  }, [items, mediumFilter, statusFilter, query]);
 
   const handleStatusChange = async (
     item: LibraryItem,
@@ -270,18 +285,13 @@ export default function LibraryPage() {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <HoverBorderGradient
-                onClick={() => router.push("/quiz")}
-                idleColor="17, 24, 39"
-                darkIdleColor="255, 255, 255"
-                highlightColor="99, 102, 241"
-                darkHighlightColor="129, 140, 248"
-                containerClassName="rounded-full w-fit"
-                className="flex items-center gap-2 whitespace-nowrap bg-white px-6 py-3 text-sm font-black leading-none tracking-tight text-black dark:bg-black dark:text-white"
+              <PillButton
+                onClick={() => router.push("/library/import")}
+                className="inline-flex items-center gap-2 whitespace-nowrap border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
               >
-                <Sparkles size={16} />
-                {t("startQuiz")}
-              </HoverBorderGradient>
+                <Upload size={15} />
+                {t("import.headerCta")}
+              </PillButton>
             </div>
           </div>
 
@@ -463,11 +473,27 @@ export default function LibraryPage() {
                       ]}
                     />
                   </div>
-                  <ViewToggle
-                    value={view}
-                    onChange={setView}
-                    className="shrink-0"
-                  />
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <Search
+                        size={15}
+                        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                      />
+                      <input
+                        type="search"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder={t("searchPlaceholder")}
+                        aria-label={t("searchPlaceholder")}
+                        className="w-40 rounded-xl border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:w-52 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
+                      />
+                    </div>
+                    <ViewToggle
+                      value={view}
+                      onChange={setView}
+                      className="shrink-0"
+                    />
+                  </div>
                 </div>
               </div>
 

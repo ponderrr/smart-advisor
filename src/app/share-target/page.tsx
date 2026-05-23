@@ -84,7 +84,7 @@ export default async function ShareTargetPage({
             <ArrowRight size={15} />
           </Link>
           <Link
-            href="/dashboard"
+            href="/feed"
             className="inline-flex w-full items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold tracking-tight text-slate-700 transition-colors hover:border-slate-300 sm:w-auto dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200"
           >
             {t("goDashboard")}

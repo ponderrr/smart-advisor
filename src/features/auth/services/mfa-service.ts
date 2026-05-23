@@ -19,11 +19,12 @@ class MfaService {
       }
 
       // Clean up any unverified factors left behind by aborted attempts so
-      // the next enroll call starts fresh.
+      // the next enroll call starts fresh. listFactors returns only
+      // verified ones in supabase-js v2, so re-pull `all` from getUser.
       try {
-        const { data: factors } = await supabase.auth.mfa.listFactors();
-        const totpFactors = (factors?.totp ?? []) as unknown as MFAFactor[];
-        for (const f of totpFactors) {
+        const { data: userResp } = await supabase.auth.getUser();
+        const allFactors = (userResp?.user?.factors ?? []) as MFAFactor[];
+        for (const f of allFactors) {
           if (f.status === "unverified") {
             await supabase.auth.mfa.unenroll({ factorId: f.id });
           }
@@ -34,16 +35,19 @@ class MfaService {
 
       // We can't auto-detect the *phone* the code lives on — navigator.userAgent
       // describes this browser. So the caller supplies a user-typed name
-      // (e.g. "iPhone"), and we append the time-of-day since Supabase rejects
-      // duplicate friendly_names per user.
+      // (e.g. "iPhone"), and we append minute + seconds + a short random
+      // tag since Supabase rejects duplicate friendly_names per user and
+      // two attempts within the same minute would otherwise collide.
       const trimmed = friendlyName?.trim();
       const datePart = new Date().toLocaleString("en-US", {
         month: "short",
         day: "numeric",
         hour: "numeric",
         minute: "2-digit",
+        second: "2-digit",
       });
-      const label = `${trimmed || "Authenticator"} · ${datePart}`;
+      const tag = Math.random().toString(36).slice(2, 6);
+      const label = `${trimmed || "Authenticator"} · ${datePart} · ${tag}`;
 
       const {
         data: { session },

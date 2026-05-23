@@ -318,125 +318,6 @@ async function enrichMusic(item: AiItem): Promise<DemoItem | null> {
   };
 }
 
-// ─── Dev mock fallback ───────────────────────────────────────────────────────
-// Used in development when Anthropic is unreachable (e.g. credits exhausted),
-// so screen recordings and offline UI work don't get blocked.
-
-const MOCK_MOVIES: AiItem[] = [
-  {
-    type: "movie",
-    title: "Eternal Sunshine of the Spotless Mind",
-    creator: "Michel Gondry",
-    year: 2004,
-    description:
-      "After a painful breakup, a man undergoes an experimental procedure to erase his ex from his memory — only to find himself fighting to hold on as the memories slip away.",
-    reason:
-      "Layered, emotionally honest, and visually inventive — a slow-burn romance that asks whether pain is worth keeping. Hits hardest if your answers leaned thoughtful and a little melancholy.",
-    match_score: 94,
-  },
-  {
-    type: "movie",
-    title: "Parasite",
-    creator: "Bong Joon-ho",
-    year: 2019,
-    description:
-      "A struggling family schemes their way into the household of a wealthy one, posing as unrelated, qualified workers. The arrangement spirals into something neither family expected.",
-    reason:
-      "Sharp, tense, and structurally daring. The kind of film that switches genres mid-scene without losing its grip on you. A near-perfect pick when you want something that rewards close attention.",
-    match_score: 88,
-  },
-  {
-    type: "movie",
-    title: "Spirited Away",
-    creator: "Hayao Miyazaki",
-    year: 2001,
-    description:
-      "A ten-year-old girl wanders into a hidden spirit world where her parents are transformed and she has to take a job at a bathhouse for the gods to win them back.",
-    reason:
-      "Wholesome, strange, and emotionally generous. Reads as comfort food but stays with you for years. A safe-but-not-boring pick for anyone who wants warmth without sentimentality.",
-    match_score: 81,
-  },
-];
-
-const MOCK_BOOKS: AiItem[] = [
-  {
-    type: "book",
-    title: "Project Hail Mary",
-    creator: "Andy Weir",
-    year: 2021,
-    description:
-      "An astronaut wakes up alone on a spaceship with no memory of who he is or why he's there, and slowly pieces together a desperate mission to save Earth from an extinction-level event.",
-    reason:
-      "Optimistic, problem-solving sci-fi with one of the warmest unlikely friendships in the genre. Picks up momentum fast and pays off every setup it plants. Hard to put down.",
-    match_score: 91,
-  },
-  {
-    type: "book",
-    title: "Piranesi",
-    creator: "Susanna Clarke",
-    year: 2020,
-    description:
-      "A man lives alone in a vast, labyrinthine house of endless halls and statues, keeping meticulous journals — until cracks appear in his understanding of where he is and how he got there.",
-    reason:
-      "Quiet, strange, and slowly unsettling. The prose itself is the experience. A great match if your answers pointed toward atmosphere over plot.",
-    match_score: 86,
-  },
-  {
-    type: "book",
-    title: "The Goldfinch",
-    creator: "Donna Tartt",
-    year: 2013,
-    description:
-      "A boy survives a terrorist bombing at a museum and walks away with a small Dutch painting that becomes the secret center of his life as he grows up across years and continents.",
-    reason:
-      "Long, ornate, and patient. A grief story dressed as an art-world thriller. Feels rewarding rather than exhausting if you have the appetite for it.",
-    match_score: 79,
-  },
-];
-
-const MOCK_MUSIC: AiItem[] = [
-  {
-    type: "music",
-    title: "In Rainbows",
-    creator: "Radiohead",
-    year: 2007,
-    description:
-      "A warm, intricate record that pulls the band back from electronic abstraction toward something more human — restless rhythms under some of their most direct songwriting.",
-    reason:
-      "Layered enough to reward repeat listens but immediate on the first pass. A strong fit if your answers leaned thoughtful, a little melancholy, and open to texture.",
-    match_score: 92,
-  },
-  {
-    type: "music",
-    title: "Channel Orange",
-    creator: "Frank Ocean",
-    year: 2012,
-    description:
-      "A loose, cinematic song cycle about wealth, longing, and memory, told in vignettes that drift between soul, funk, and ambient detours.",
-    reason:
-      "Emotionally generous and unhurried — best when you want something atmospheric that still has real songs at its center.",
-    match_score: 87,
-  },
-  {
-    type: "music",
-    title: "Rumours",
-    creator: "Fleetwood Mac",
-    year: 1977,
-    description:
-      "Five people turning their breakups into impossibly polished pop-rock — bright surfaces over genuine wreckage, with hooks that never miss.",
-    reason:
-      "Comfort-listening that holds up to scrutiny. A safe-but-not-boring pick when you want warmth without sentimentality.",
-    match_score: 80,
-  },
-];
-
-function getMockItems(contentType: DemoContentType): AiItem[] {
-  if (contentType === "movie") return MOCK_MOVIES;
-  if (contentType === "book") return MOCK_BOOKS;
-  if (contentType === "music") return MOCK_MUSIC;
-  return [...MOCK_MOVIES.slice(0, 2), ...MOCK_BOOKS.slice(0, 2), ...MOCK_MUSIC.slice(0, 2)];
-}
-
 async function enrichAll(items: AiItem[]): Promise<DemoItem[]> {
   const tmdbKey = process.env.TMDB_API_KEY;
   const enriched = await Promise.all(
@@ -531,24 +412,16 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // 3. Call Anthropic — fall back to mock data in dev so screen recordings
-  // and offline UI work don't get blocked when credits run out.
+  // 3. Call Anthropic for the recommendations.
   let aiItems: AiItem[];
   try {
     aiItems = await callAnthropic(buildPrompt(contentType, answers));
   } catch (error) {
     console.error("demo-recommendations: Anthropic call failed", error);
-    if (bypassRateLimit) {
-      console.warn(
-        "demo-recommendations: using dev mock items (Anthropic unavailable)",
-      );
-      aiItems = getMockItems(contentType);
-    } else {
-      return NextResponse.json(
-        { error: "Recommendation service unavailable" },
-        { status: 502 },
-      );
-    }
+    return NextResponse.json(
+      { error: "Recommendation service unavailable" },
+      { status: 502 },
+    );
   }
 
   if (aiItems.length === 0) {

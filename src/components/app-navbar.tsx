@@ -41,10 +41,15 @@ const DEMO_KEYS = [
 ] as const;
 
 const LOGGED_IN_KEYS = [
-  { key: "dashboard", link: "/dashboard" },
+  // Feed is the logged-in home. The old /dashboard route is retired —
+  // milestones moved to /milestones; analytics live in /wrapped; recent
+  // picks are in /history. Group quiz isn't a top-level destination — it's
+  // a mode of "start a quiz", reachable from the Feed header's quiz
+  // dropdown (Solo / Group / Surprise).
+  { key: "feed", link: "/feed" },
   { key: "library", link: "/library" },
   { key: "history", link: "/history" },
-  { key: "groupQuiz", link: "/group-quiz" },
+  { key: "milestones", link: "/milestones" },
   { key: "settings", link: "/settings" },
 ] as const;
 
@@ -78,17 +83,17 @@ export function AppNavbar() {
 
   const handlePrimary = () => {
     if (useMarketingVariant) {
-      router.push(user ? "/dashboard" : "/auth");
+      router.push(user ? "/feed" : "/auth");
     } else {
-      router.push("/dashboard");
+      router.push("/feed");
     }
   };
 
   const primaryLabel = useMarketingVariant
     ? user
-      ? t("items.dashboard")
+      ? t("items.feed")
       : t("getStarted")
-    : t("items.dashboard");
+    : t("items.feed");
 
   const handleSignOut = async () => {
     await signOut();

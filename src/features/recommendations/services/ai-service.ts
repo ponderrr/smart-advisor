@@ -6,6 +6,7 @@ import {
 import { Question } from "@/features/quiz/types/question";
 import { Answer } from "@/features/quiz/types/answer";
 import { supabase } from "@/integrations/supabase/client";
+import { loadDislikedTitles } from "./dislikes";
 
 /** Reads the user's saved content tone from localStorage. */
 const getContentTone = (): "standard" | "family" => {
@@ -13,6 +14,148 @@ const getContentTone = (): "standard" | "family" => {
   const value = window.localStorage.getItem("smart_advisor_pref_content_tone");
   return value === "family" ? "family" : "standard";
 };
+
+/** Per-device mirror of the taste-tuning / hard filters blob (parity with
+ *  the content-tone cache + the mobile app's prefs hot-cache). The profile
+ *  row is the source of truth; this is only a fast hydration fallback. */
+export const PREF_RECOMMENDATION_FILTERS_KEY =
+  "smart_advisor_pref_recommendation_filters";
+
+/** Per-format taste tuning. maxRuntimeMinutes only makes sense for movies
+ *  but the field is allowed on every slice so the EF can stay shape-agnostic. */
+export interface FormatFilters {
+  avoidGenres?: string[];
+  maxRuntimeMinutes?: number | null;
+  language?: string | null;
+  avoidNote?: string | null;
+}
+
+/** Taste tuning / hard filters threaded into the recommendation prompt.
+ *  Stored as a per-format blob on `profiles.recommendation_filters` so the
+ *  user can avoid e.g. romance movies without nuking romance novels. */
+export interface RecommendationFilters {
+  movie?: FormatFilters;
+  book?: FormatFilters;
+  music?: FormatFilters;
+}
+
+/** The legacy shape — one shared bucket applied to every format. Kept for
+ *  backwards compatibility with rows written before per-format split. */
+type LegacyRecommendationFilters = FormatFilters;
+
+const FORMAT_KEYS = ["movie", "book", "music"] as const;
+type FormatKey = (typeof FORMAT_KEYS)[number];
+
+function cleanFormatSlice(raw: unknown): FormatFilters | null {
+  if (!raw || typeof raw !== "object") return null;
+  const f = raw as Record<string, unknown>;
+  const genres = Array.isArray(f.avoidGenres)
+    ? f.avoidGenres.map((g) => String(g).trim()).filter((g) => g.length > 0)
+    : [];
+  const runtime =
+    typeof f.maxRuntimeMinutes === "number" ? f.maxRuntimeMinutes : 0;
+  const language = typeof f.language === "string" ? f.language.trim() : "";
+  const note = typeof f.avoidNote === "string" ? f.avoidNote.trim() : "";
+  const cleaned: FormatFilters = {
+    ...(genres.length > 0 ? { avoidGenres: genres } : {}),
+    ...(runtime > 0 ? { maxRuntimeMinutes: runtime } : {}),
+    ...(language.length > 0 ? { language } : {}),
+    ...(note.length > 0 ? { avoidNote: note } : {}),
+  };
+  return Object.keys(cleaned).length > 0 ? cleaned : null;
+}
+
+/** Migrates the legacy single-bucket blob to the per-format shape: the
+ *  whole legacy bucket is applied to every format (matches old behaviour
+ *  where one shared list filtered every rec). Returns null if the legacy
+ *  blob is empty. */
+function liftLegacyFilters(
+  legacy: LegacyRecommendationFilters | null,
+): RecommendationFilters | null {
+  if (!legacy) return null;
+  const slice = cleanFormatSlice(legacy);
+  if (!slice) return null;
+  // Runtime is movie-only — drop it from book/music slices so the prompt
+  // doesn't tell Claude to cap a novel at 90 minutes.
+  const { maxRuntimeMinutes: _runtime, ...common } = slice;
+  return {
+    movie: slice,
+    book: cleanFormatSlice(common) ?? undefined,
+    music: cleanFormatSlice(common) ?? undefined,
+  };
+}
+
+/** Strips empty slices so the Edge Function only ever sees meaningful
+ *  constraints; returns null when nothing meaningful is set across any
+ *  format. Accepts BOTH the legacy single-bucket shape and the new
+ *  per-format shape so old profile rows keep working. */
+export function cleanRecommendationFilters(
+  raw: unknown,
+): RecommendationFilters | null {
+  if (!raw || typeof raw !== "object") return null;
+  const f = raw as Record<string, unknown>;
+  const hasPerFormat = FORMAT_KEYS.some(
+    (k) => f[k] && typeof f[k] === "object",
+  );
+  if (!hasPerFormat) {
+    return liftLegacyFilters(raw as LegacyRecommendationFilters);
+  }
+  const cleaned: RecommendationFilters = {};
+  for (const key of FORMAT_KEYS) {
+    const slice = cleanFormatSlice(f[key]);
+    if (slice) cleaned[key] = slice;
+  }
+  return Object.keys(cleaned).length > 0 ? cleaned : null;
+}
+
+/**
+ * Pulls the signed-in user's saved taste-tuning / hard filters off their
+ * profile row. Best-effort: a fetch failure or missing column just means
+ * no filters are applied (existing behaviour). Mirrors the mobile
+ * recommendation_flow loader.
+ */
+async function loadRecommendationFilters(): Promise<RecommendationFilters | null> {
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return null;
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("recommendation_filters")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (error) return null;
+    return cleanRecommendationFilters(data?.recommendation_filters);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Conversational refinement: a follow-up generation pass that reuses the
+ * original quiz context but layers a free-text steer on top. Mirrors the
+ * mobile RefinementInput DTO; flattened into the Edge Function body.
+ */
+export interface RefinementInput {
+  /** The user's verbatim steer, e.g. "more like Dune, lighter, nothing
+   *  over 2 hours". Treated as the strongest signal server-side. */
+  feedbackText: string;
+  /** Titles already shown this session — excluded so a refine pass never
+   *  repeats picks, and so "more like <title>" has context. */
+  previousTitles?: string[];
+}
+
+/** Options shared by the recommendation generators. */
+export interface GenerateOptions {
+  /** When false, the user's personal hard filters are NOT applied — used by
+   *  Group Quiz so one member's "no Horror" doesn't silently constrain a
+   *  shared room. Defaults to true (solo quiz + Surprise). */
+  applyFilters?: boolean;
+  /** Conversational refinement steer. Absent / empty feedback → behaviour
+   *  byte-for-byte unchanged (a normal generation). */
+  refinement?: RefinementInput;
+}
 
 /** What kind of failure callers are dealing with. Lets the UI swap messaging
  *  (e.g. "AI is busy" vs. "Try again") and lets the retry policy back off
@@ -248,6 +391,7 @@ export async function generateRecommendations(
   contentType: "movie" | "book" | "music" | "both" | "mix",
   userAge: number,
   userName: string = "User",
+  options?: GenerateOptions,
 ): Promise<RecommendationData> {
   try {
     // Validate session exists
@@ -259,6 +403,27 @@ export async function generateRecommendations(
       throw new Error("User not authenticated");
     }
 
+    // Solo paths (quiz, Surprise) thread the user's saved hard filters into
+    // the prompt with no caller wiring; Group Quiz opts out.
+    const baseFilters =
+      options?.applyFilters === false
+        ? null
+        : await loadRecommendationFilters();
+
+    // Fold in "Not for me" pick feedback as a top-level dislikedTitles
+    // exclusion the Edge Function reads alongside the per-format filters.
+    const dislikedTitles =
+      options?.applyFilters === false ? [] : loadDislikedTitles();
+    const recommendationFilters =
+      dislikedTitles.length > 0
+        ? { ...(baseFilters ?? {}), dislikedTitles }
+        : baseFilters;
+
+    const refinement =
+      options?.refinement && options.refinement.feedbackText.trim().length > 0
+        ? options.refinement
+        : null;
+
     // supabase.functions.invoke automatically sends the session token
     const { data, error } = await supabase.functions.invoke(
       "anthropic-recommendations",
@@ -269,6 +434,8 @@ export async function generateRecommendations(
           name: userName,
           age: userAge,
           contentTone: getContentTone(),
+          ...(recommendationFilters ? { recommendationFilters } : {}),
+          ...(refinement ? { refinement } : {}),
         },
       },
     );
@@ -360,6 +527,7 @@ export async function generateRecommendationsWithRetry(
   userAge: number,
   userName: string = "User",
   maxRetries: number = 3,
+  options?: GenerateOptions,
 ): Promise<RecommendationData> {
   let lastError;
 
@@ -370,6 +538,7 @@ export async function generateRecommendationsWithRetry(
         contentType,
         userAge,
         userName,
+        options,
       );
     } catch (error) {
       lastError = error;

@@ -1,26 +1,26 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
-const {
-  getUserMock,
-  getAalMock,
-  authRestListFactorsMock,
-  authRestEnrollTotpMock,
-} = vi.hoisted(() => ({
-  getUserMock: vi.fn(),
-  getAalMock: vi.fn(),
-  authRestListFactorsMock: vi.fn(),
-  authRestEnrollTotpMock: vi.fn(),
-}));
+const { getUserMock, listFactorsMock, getAalMock, authRestEnrollTotpMock } =
+  vi.hoisted(() => ({
+    getUserMock: vi.fn(),
+    listFactorsMock: vi.fn(),
+    getAalMock: vi.fn(),
+    authRestEnrollTotpMock: vi.fn(),
+  }));
 
+// The route uses supabase-js (`anonClient.auth.mfa.listFactors()`) to read the
+// user's factors — it stopped going through raw Auth REST. The mock client
+// mirrors that surface: `auth.getUser` + `auth.mfa.listFactors`.
 vi.mock("@supabase/supabase-js", () => ({
-  createClient: () => ({ auth: { getUser: getUserMock } }),
+  createClient: () => ({
+    auth: { getUser: getUserMock, mfa: { listFactors: listFactorsMock } },
+  }),
 }));
 
 vi.mock("@/lib/auth/aal", () => ({ getAal: getAalMock }));
 
 vi.mock("@/lib/auth/supabase-rest", () => ({
-  authRestListFactors: authRestListFactorsMock,
   authRestEnrollTotp: authRestEnrollTotpMock,
 }));
 
@@ -39,8 +39,8 @@ function makeReq(authHeader?: string, body?: unknown): NextRequest {
 describe("POST /api/account/mfa/totp/enroll", () => {
   beforeEach(() => {
     getUserMock.mockReset();
+    listFactorsMock.mockReset();
     getAalMock.mockReset();
-    authRestListFactorsMock.mockReset();
     authRestEnrollTotpMock.mockReset();
   });
 
@@ -65,10 +65,9 @@ describe("POST /api/account/mfa/totp/enroll", () => {
       data: { user: { id: "u1" } },
       error: null,
     });
-    authRestListFactorsMock.mockResolvedValue({
-      ok: true,
-      data: [{ id: "f1", factor_type: "totp", status: "unverified" }],
-      status: 200,
+    listFactorsMock.mockResolvedValue({
+      data: { totp: [{ id: "f1", status: "unverified" }] },
+      error: null,
     });
     authRestEnrollTotpMock.mockResolvedValue({
       ok: true,
@@ -88,10 +87,9 @@ describe("POST /api/account/mfa/totp/enroll", () => {
       data: { user: { id: "u1" } },
       error: null,
     });
-    authRestListFactorsMock.mockResolvedValue({
-      ok: true,
-      data: [{ id: "f1", factor_type: "totp", status: "verified" }],
-      status: 200,
+    listFactorsMock.mockResolvedValue({
+      data: { totp: [{ id: "f1", status: "verified" }] },
+      error: null,
     });
     getAalMock.mockResolvedValue("aal1");
 
@@ -108,10 +106,9 @@ describe("POST /api/account/mfa/totp/enroll", () => {
       data: { user: { id: "u1" } },
       error: null,
     });
-    authRestListFactorsMock.mockResolvedValue({
-      ok: true,
-      data: [{ id: "f1", factor_type: "totp", status: "verified" }],
-      status: 200,
+    listFactorsMock.mockResolvedValue({
+      data: { totp: [{ id: "f1", status: "verified" }] },
+      error: null,
     });
     getAalMock.mockResolvedValue("aal2");
     authRestEnrollTotpMock.mockResolvedValue({
@@ -131,9 +128,8 @@ describe("POST /api/account/mfa/totp/enroll", () => {
       data: { user: { id: "u1" } },
       error: null,
     });
-    authRestListFactorsMock.mockResolvedValue({
-      ok: false,
-      status: 502,
+    listFactorsMock.mockResolvedValue({
+      data: null,
       error: { message: "upstream" },
     });
 
@@ -147,10 +143,9 @@ describe("POST /api/account/mfa/totp/enroll", () => {
       data: { user: { id: "u1" } },
       error: null,
     });
-    authRestListFactorsMock.mockResolvedValue({
-      ok: true,
-      data: [],
-      status: 200,
+    listFactorsMock.mockResolvedValue({
+      data: { totp: [] },
+      error: null,
     });
     authRestEnrollTotpMock.mockResolvedValue({
       ok: false,

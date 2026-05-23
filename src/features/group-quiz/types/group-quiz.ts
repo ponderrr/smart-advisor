@@ -53,7 +53,17 @@ export interface QuizSession {
   created_at: string;
   completed_at: string | null;
   expires_at: string;
+  /** Async mode — deadline by which members must submit. NULL means a
+   *  live/realtime session (existing behaviour, unchanged). */
+  deadline_at: string | null;
+  /** Optional "planned get-together" date. Purely informational — has no
+   *  behavioural effect, just shown in the async waiting / result views. */
+  planned_for: string | null;
 }
+
+/** True when the session is in async (answer-by-deadline) mode. */
+export const isAsyncSession = (s: Pick<QuizSession, "deadline_at">): boolean =>
+  s.deadline_at != null;
 
 export interface QuizParticipant {
   id: string;
@@ -80,6 +90,11 @@ export interface CreateSessionInput {
   question_count: number;
   max_participants: number;
   display_name: string;
+  /** ISO timestamp — when set, the session is async and members must
+   *  submit by this deadline. Omit for a live/realtime session. */
+  deadline_at?: string | null;
+  /** ISO timestamp — informational "we'll do this together on …" date. */
+  planned_for?: string | null;
 }
 
 export interface JoinSessionInput {

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
   CircleOff,
@@ -18,17 +18,20 @@ import {
   Lock,
   X,
   Check,
-  Film,
-  BookOpen,
-  Music,
-  Sparkles,
   Sun,
   Moon,
   Monitor,
+  Newspaper,
+  LifeBuoy,
+  Sparkles,
+  UserPlus,
+  Trophy,
+  UserCircle,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import {
   SidebarNavItem,
@@ -50,6 +53,9 @@ import {
   SectionHeader,
   SettingsInput,
 } from "./_components/settings-ui";
+import { RecommendationFiltersCard } from "./_components/recommendation-filters-card";
+import { BlockedPeopleCard } from "./_components/blocked-people-card";
+import { MyReportsCard } from "./_components/my-reports-card";
 import { usePasswordRules } from "./_hooks/use-password-rules";
 import {
   useContentPreferences,
@@ -61,6 +67,19 @@ import { useAvatarUpload } from "./_hooks/use-avatar-upload";
 import { useReauthVerification } from "./_hooks/use-reauth-verification";
 import { useAccountActions } from "./_hooks/use-account-actions";
 import { useSettingsSaveHandlers } from "./_hooks/use-settings-save-handlers";
+import {
+  useFeedVisibility,
+  type FeedVisibility,
+} from "@/features/feed/use-feed-visibility";
+import {
+  useFeedPrefs,
+  type FeedView,
+} from "@/features/feed/use-feed-prefs";
+import type {
+  CommentSort,
+  FeedCommunity,
+  FeedScope,
+} from "@/features/feed/types";
 import {
   profileSchema,
   emailSchema,
@@ -80,7 +99,26 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-type SettingsSection = "profile" | "security" | "content" | "integrations";
+type SettingsSection =
+  | "profile"
+  | "security"
+  | "content"
+  | "feed"
+  | "integrations"
+  | "help";
+
+const SETTINGS_SECTIONS: SettingsSection[] = [
+  "profile",
+  "security",
+  "content",
+  "feed",
+  "integrations",
+  "help",
+];
+
+function isSettingsSection(v: string | null): v is SettingsSection {
+  return !!v && (SETTINGS_SECTIONS as string[]).includes(v);
+}
 
 
 /* ------------------------------------------------------------------ */
@@ -89,21 +127,68 @@ type SettingsSection = "profile" | "security" | "content" | "integrations";
 
 type ThemeChoice = "light" | "dark" | "system";
 
+/** Curated interest tags offered as chips in the "About me" editor. */
+const CURATED_INTERESTS = [
+  "Sci-Fi",
+  "Fantasy",
+  "Horror",
+  "Thrillers",
+  "Comedy",
+  "Drama",
+  "Romance",
+  "Mystery",
+  "Action",
+  "Documentary",
+  "Animation",
+  "Indie",
+  "Classics",
+  "Non-fiction",
+  "True crime",
+] as const;
+
+/** Question-count depth tier — drives both the i18n depth label and the
+ *  hue of the slider/number, so the control colour shifts as it moves. */
+const questionTier = (
+  n: number,
+): "quick" | "focused" | "balanced" | "thorough" | "comprehensive" =>
+  n <= 4
+    ? "quick"
+    : n <= 7
+      ? "focused"
+      : n <= 10
+        ? "balanced"
+        : n <= 13
+          ? "thorough"
+          : "comprehensive";
+
+const QUESTION_TIER_STYLE: Record<
+  ReturnType<typeof questionTier>,
+  { text: string; accent: string }
+> = {
+  quick: { text: "text-emerald-500", accent: "accent-emerald-500" },
+  focused: { text: "text-sky-500", accent: "accent-sky-500" },
+  balanced: { text: "text-indigo-500", accent: "accent-indigo-500" },
+  thorough: { text: "text-amber-500", accent: "accent-amber-500" },
+  comprehensive: { text: "text-rose-500", accent: "accent-rose-500" },
+};
+
 const SettingsPage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const t = useTranslations("Settings");
   const { theme, setTheme } = useTheme();
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const { ready } = useRequireAuth();
+  const [feedVisibility, setFeedVisibility] = useFeedVisibility();
+  const [feedPrefs, setFeedPrefs] = useFeedPrefs();
 
-  const settingsTabs: SettingsSection[] = [
-    "profile",
-    "security",
-    "content",
-    "integrations",
-  ];
-  const [activeSection, setActiveSection] =
-    useState<SettingsSection>("profile");
+  const settingsTabs = SETTINGS_SECTIONS;
+  // Deep-link support: /settings?section=feed opens that tab directly
+  // (used by the /feed opt-in prompt). Falls back to profile.
+  const [activeSection, setActiveSection] = useState<SettingsSection>(() => {
+    const requested = searchParams?.get("section") ?? null;
+    return isSettingsSection(requested) ? requested : "profile";
+  });
   // Section transitions always slide rightward — entering content starts on
   // the left and moves to center — so the motion feels consistent regardless
   // of which tab the user came from.
@@ -187,6 +272,64 @@ const SettingsPage = () => {
     else toast.info(text);
   };
 
+  // "About me" — bio + interest/freeform tags. Saved on its own (no
+  // re-auth gate) since it's low-sensitivity profile flavour.
+  const [aboutBio, setAboutBio] = useState(user?.bio ?? "");
+  const [aboutInterests, setAboutInterests] = useState<string[]>(
+    user?.interests ?? [],
+  );
+  const [aboutTags, setAboutTags] = useState<string[]>(user?.tags ?? []);
+  const [tagDraft, setTagDraft] = useState("");
+  const [savingAbout, setSavingAbout] = useState(false);
+
+  // Re-seed once the profile loads (user is null on the first render).
+  useEffect(() => {
+    if (!user) return;
+    setAboutBio(user.bio ?? "");
+    setAboutInterests(user.interests ?? []);
+    setAboutTags(user.tags ?? []);
+  }, [user]);
+
+  const toggleInterest = (interest: string) =>
+    setAboutInterests((prev) =>
+      prev.includes(interest)
+        ? prev.filter((i) => i !== interest)
+        : [...prev, interest],
+    );
+
+  const addTag = () => {
+    const value = tagDraft.trim().toLowerCase().replace(/^#+/, "");
+    if (value && !aboutTags.includes(value) && aboutTags.length < 10) {
+      setAboutTags((prev) => [...prev, value]);
+    }
+    setTagDraft("");
+  };
+
+  // Hue for the question-count slider + number, by depth tier.
+  const questionStyle =
+    QUESTION_TIER_STYLE[questionTier(preferredQuestionCount)];
+
+  const handleSaveAbout = async () => {
+    if (!user || savingAbout) return;
+    setSavingAbout(true);
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        bio: aboutBio.trim() || null,
+        interests: aboutInterests,
+        tags: aboutTags,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", user.id);
+    setSavingAbout(false);
+    if (error) {
+      showMessage(t("profile.aboutSaveError"), "error");
+      return;
+    }
+    await refreshUser?.();
+    showMessage(t("profile.aboutSavedToast"), "success");
+  };
+
   const {
     avatarUploading,
     avatarInputRef,
@@ -218,11 +361,13 @@ const SettingsPage = () => {
       label: t("tabs.content"),
       icon: <SlidersHorizontal size={15} />,
     },
+    { id: "feed", label: t("tabs.feed"), icon: <Newspaper size={15} /> },
     {
       id: "integrations",
       label: t("tabs.integrations"),
       icon: <Link2 size={15} />,
     },
+    { id: "help", label: t("tabs.help"), icon: <LifeBuoy size={15} /> },
   ];
 
   const {
@@ -350,7 +495,11 @@ const SettingsPage = () => {
                 <SidebarNavGroup label={t("groups.app")} />
                 {sectionTabs
                   .filter(
-                    (tab) => tab.id === "content" || tab.id === "integrations",
+                    (tab) =>
+                      tab.id === "content" ||
+                      tab.id === "feed" ||
+                      tab.id === "integrations" ||
+                      tab.id === "help",
                   )
                   .map((tab) => (
                     <SidebarNavItem
@@ -506,6 +655,115 @@ const SettingsPage = () => {
                               ? "loading"
                               : "idle"
                           }
+                          className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
+                        >
+                          {t("profile.save")}
+                        </StatefulButton>
+                      </div>
+                    </SectionCard>
+
+                    {/* About me — bio + interest/freeform tags. */}
+                    <SectionCard>
+                      <SectionHeader
+                        title={t("profile.aboutTitle")}
+                        description={t("profile.aboutDescription")}
+                      />
+                      <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        {t("profile.bioLabel")}
+                      </label>
+                      <textarea
+                        value={aboutBio}
+                        onChange={(e) => setAboutBio(e.target.value)}
+                        rows={3}
+                        maxLength={300}
+                        placeholder={t("profile.bioPlaceholder")}
+                        className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-700 dark:bg-slate-800"
+                      />
+                      <p className="mt-1 text-right text-[11px] text-slate-400">
+                        {aboutBio.length}/300
+                      </p>
+
+                      <label className="mt-4 block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        {t("profile.interestsLabel")}
+                      </label>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {CURATED_INTERESTS.map((interest) => {
+                          const on = aboutInterests.includes(interest);
+                          return (
+                            <button
+                              key={interest}
+                              type="button"
+                              onClick={() => toggleInterest(interest)}
+                              className={cn(
+                                "rounded-full px-3 py-1 text-xs font-semibold transition-colors",
+                                on
+                                  ? "bg-indigo-100 text-indigo-700 ring-1 ring-inset ring-indigo-300 dark:bg-indigo-500/15 dark:text-indigo-300 dark:ring-indigo-500/40"
+                                  : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700",
+                              )}
+                            >
+                              {interest}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <label className="mt-4 block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        {t("profile.tagsLabel")}
+                      </label>
+                      {aboutTags.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {aboutTags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                            >
+                              #{tag}
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setAboutTags((prev) =>
+                                    prev.filter((x) => x !== tag),
+                                  )
+                                }
+                                aria-label={`Remove ${tag}`}
+                                className="text-slate-400 hover:text-rose-500"
+                              >
+                                <X size={12} />
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <div className="mt-2 flex gap-2">
+                        <input
+                          value={tagDraft}
+                          onChange={(e) => setTagDraft(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              addTag();
+                            }
+                          }}
+                          maxLength={24}
+                          placeholder={t("profile.tagsPlaceholder")}
+                          className="h-10 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-700 dark:bg-slate-800"
+                        />
+                        <button
+                          type="button"
+                          onClick={addTag}
+                          disabled={
+                            !tagDraft.trim() || aboutTags.length >= 10
+                          }
+                          className="h-10 shrink-0 rounded-full border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
+                        >
+                          {t("profile.tagsAdd")}
+                        </button>
+                      </div>
+
+                      <div className="mt-5 flex justify-end">
+                        <StatefulButton
+                          onClick={handleSaveAbout}
+                          state={savingAbout ? "loading" : "idle"}
                           className="h-10 w-auto rounded-full px-6 text-sm font-semibold"
                         >
                           {t("profile.save")}
@@ -892,25 +1150,21 @@ const SettingsPage = () => {
                               {
                                 value: "movie",
                                 label: t("content.type.movie.label"),
-                                icon: <Film size={14} />,
                                 pillClassName: "bg-amber-500",
                               },
                               {
                                 value: "book",
                                 label: t("content.type.book.label"),
-                                icon: <BookOpen size={14} />,
                                 pillClassName: "bg-emerald-500",
                               },
                               {
                                 value: "music",
                                 label: t("content.type.music.label"),
-                                icon: <Music size={14} />,
                                 pillClassName: "bg-rose-500",
                               },
                               {
                                 value: "mix",
                                 label: t("content.type.mix.label"),
-                                icon: <Sparkles size={14} />,
                                 pillClassName: "bg-violet-500",
                               },
                             ]}
@@ -988,7 +1242,10 @@ const SettingsPage = () => {
                                     duration: 0.18,
                                     ease: "easeOut",
                                   }}
-                                  className="bg-gradient-to-br from-indigo-500 to-violet-500 bg-clip-text text-5xl font-black tracking-tighter text-transparent leading-none"
+                                  className={cn(
+                                    "text-5xl font-black tracking-tighter leading-none transition-colors",
+                                    questionStyle.text,
+                                  )}
                                 >
                                   {preferredQuestionCount}
                                 </motion.p>
@@ -998,19 +1255,16 @@ const SettingsPage = () => {
                                   })}
                                 </p>
                               </div>
-                              <p className="text-sm font-bold tracking-tight text-slate-700 dark:text-slate-200">
+                              <p
+                                className={cn(
+                                  "text-sm font-bold tracking-tight transition-colors",
+                                  questionStyle.text,
+                                )}
+                              >
                                 {t(
-                                  `content.depth.${
-                                    preferredQuestionCount <= 4
-                                      ? "quick"
-                                      : preferredQuestionCount <= 7
-                                        ? "focused"
-                                        : preferredQuestionCount <= 10
-                                          ? "balanced"
-                                          : preferredQuestionCount <= 13
-                                            ? "thorough"
-                                            : "comprehensive"
-                                  }`,
+                                  `content.depth.${questionTier(
+                                    preferredQuestionCount,
+                                  )}`,
                                 )}
                               </p>
                             </div>
@@ -1025,7 +1279,10 @@ const SettingsPage = () => {
                                 )
                               }
                               aria-label={t("content.rangeAria")}
-                              className="w-full cursor-pointer accent-indigo-500"
+                              className={cn(
+                                "w-full cursor-pointer transition-colors",
+                                questionStyle.accent,
+                              )}
                             />
                             <div className="mt-1 flex justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                               <span>3</span>
@@ -1048,6 +1305,176 @@ const SettingsPage = () => {
                         </StatefulButton>
                       </div>
                     </SectionCard>
+
+                    <RecommendationFiltersCard />
+                  </motion.div>
+                )}
+
+                {activeSection === "feed" && (
+                  <motion.div
+                    key="feed"
+                    initial={{ opacity: 0, x: sectionSlideDir * 30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: sectionSlideDir * -30 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-4"
+                  >
+                    <SectionCard>
+                      <SectionHeader
+                        title={t("feed.title")}
+                        description={t("feed.description")}
+                      />
+                      <div className="space-y-3">
+                        <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+                          {t("feed.visibilityLabel")}
+                        </p>
+                        <SegmentedControl<FeedVisibility>
+                          layoutId="settings-feed-visibility"
+                          value={feedVisibility}
+                          onChange={setFeedVisibility}
+                          ariaLabel={t("feed.visibilityLabel")}
+                          options={[
+                            {
+                              value: "public",
+                              label: t("feed.public"),
+                              pillClassName: "bg-violet-500",
+                            },
+                            {
+                              value: "private",
+                              label: t("feed.private"),
+                              pillClassName: "bg-slate-500",
+                            },
+                          ]}
+                        />
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                          {feedVisibility === "private"
+                            ? t("feed.privateHint")
+                            : t("feed.publicHint")}
+                        </p>
+                      </div>
+                    </SectionCard>
+
+                    <SectionCard>
+                      <SectionHeader
+                        title={t("feed.prefsTitle")}
+                        description={t("feed.prefsDescription")}
+                      />
+                      <div className="space-y-5">
+                        <div className="space-y-2">
+                          <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+                            {t("feed.viewLabel")}
+                          </p>
+                          <SegmentedControl<FeedView>
+                            layoutId="settings-feed-view"
+                            value={feedPrefs.view}
+                            onChange={(v) => setFeedPrefs({ view: v })}
+                            ariaLabel={t("feed.viewLabel")}
+                            options={[
+                              {
+                                value: "cards",
+                                label: t("feed.viewCards"),
+                                pillClassName: "bg-violet-500",
+                              },
+                              {
+                                value: "list",
+                                label: t("feed.viewList"),
+                                pillClassName: "bg-slate-500",
+                              },
+                            ]}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+                            {t("feed.scopeLabel")}
+                          </p>
+                          <SegmentedControl<FeedScope>
+                            layoutId="settings-feed-scope"
+                            value={feedPrefs.scope}
+                            onChange={(v) => setFeedPrefs({ scope: v })}
+                            ariaLabel={t("feed.scopeLabel")}
+                            options={[
+                              {
+                                value: "friends",
+                                label: t("feed.scopeFriends"),
+                                pillClassName: "bg-indigo-500",
+                              },
+                              {
+                                value: "discover",
+                                label: t("feed.scopeDiscover"),
+                                pillClassName: "bg-violet-500",
+                              },
+                              {
+                                value: "group",
+                                label: t("feed.scopeGroup"),
+                                pillClassName: "bg-rose-500",
+                              },
+                            ]}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+                            {t("feed.communityLabel")}
+                          </p>
+                          <SegmentedControl<FeedCommunity | "all">
+                            layoutId="settings-feed-community"
+                            value={feedPrefs.community}
+                            onChange={(v) => setFeedPrefs({ community: v })}
+                            ariaLabel={t("feed.communityLabel")}
+                            options={[
+                              {
+                                value: "all",
+                                label: t("feed.communityAll"),
+                                pillClassName: "bg-violet-500",
+                              },
+                              {
+                                value: "movies",
+                                label: t("feed.communityMovies"),
+                                pillClassName: "bg-amber-500",
+                              },
+                              {
+                                value: "books",
+                                label: t("feed.communityBooks"),
+                                pillClassName: "bg-emerald-500",
+                              },
+                              {
+                                value: "music",
+                                label: t("feed.communityMusic"),
+                                pillClassName: "bg-rose-500",
+                              },
+                            ]}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+                            {t("feed.commentSortLabel")}
+                          </p>
+                          <SegmentedControl<CommentSort>
+                            layoutId="settings-feed-comment-sort"
+                            value={feedPrefs.commentSort}
+                            onChange={(v) => setFeedPrefs({ commentSort: v })}
+                            ariaLabel={t("feed.commentSortLabel")}
+                            options={[
+                              {
+                                value: "top",
+                                label: t("feed.commentSortTop"),
+                                pillClassName: "bg-violet-500",
+                              },
+                              {
+                                value: "new",
+                                label: t("feed.commentSortNew"),
+                                pillClassName: "bg-indigo-500",
+                              },
+                            ]}
+                          />
+                        </div>
+                      </div>
+                    </SectionCard>
+
+                    <BlockedPeopleCard />
+                    <MyReportsCard />
                   </motion.div>
                 )}
 
@@ -1112,6 +1539,117 @@ const SettingsPage = () => {
                             ? t("danger.processing")
                             : t("danger.delete")}
                         </PillButton>
+                      </div>
+                    </SectionCard>
+                  </motion.div>
+                )}
+
+                {activeSection === "help" && (
+                  <motion.div
+                    key="help"
+                    initial={{ opacity: 0, x: sectionSlideDir * 30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: sectionSlideDir * -30 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-4"
+                  >
+                    <SectionCard>
+                      <SectionHeader
+                        title={t("help.title")}
+                        description={t("help.description")}
+                      />
+                      <div className="space-y-3">
+                        <a
+                          href="/#faq"
+                          className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left transition-colors hover:border-indigo-300 hover:bg-indigo-50/40 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:border-indigo-500/60 dark:hover:bg-indigo-500/10"
+                        >
+                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">
+                            <LifeBuoy size={18} />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-sm font-semibold text-slate-800 dark:text-slate-100">
+                              {t("help.faq.title")}
+                            </span>
+                            <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">
+                              {t("help.faq.subtitle")}
+                            </span>
+                          </span>
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() => router.push("/quiz")}
+                          className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left transition-colors hover:border-violet-300 hover:bg-violet-50/40 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:border-violet-500/60 dark:hover:bg-violet-500/10"
+                        >
+                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-violet-600 dark:bg-violet-500/15 dark:text-violet-300">
+                            <Sparkles size={18} />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-sm font-semibold text-slate-800 dark:text-slate-100">
+                              {t("help.takeQuiz.title")}
+                            </span>
+                            <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">
+                              {t("help.takeQuiz.subtitle")}
+                            </span>
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => router.push("/feed/people")}
+                          className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left transition-colors hover:border-rose-300 hover:bg-rose-50/40 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:border-rose-500/60 dark:hover:bg-rose-500/10"
+                        >
+                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-500/15 dark:text-rose-300">
+                            <UserPlus size={18} />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-sm font-semibold text-slate-800 dark:text-slate-100">
+                              {t("help.findFriends.title")}
+                            </span>
+                            <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">
+                              {t("help.findFriends.subtitle")}
+                            </span>
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => router.push("/milestones")}
+                          className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left transition-colors hover:border-amber-300 hover:bg-amber-50/40 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:border-amber-500/60 dark:hover:bg-amber-500/10"
+                        >
+                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-500/15 dark:text-amber-300">
+                            <Trophy size={18} />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-sm font-semibold text-slate-800 dark:text-slate-100">
+                              {t("help.milestones.title")}
+                            </span>
+                            <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">
+                              {t("help.milestones.subtitle")}
+                            </span>
+                          </span>
+                        </button>
+                        {/* Onboarding replay — dev-build only. Useful
+                            for screenshots and QA; gated by
+                            NODE_ENV !== 'production' so it never ships. */}
+                        {process.env.NODE_ENV !== "production" && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              router.push("/onboarding?preview=true")
+                            }
+                            className="flex w-full items-center gap-3 rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-3 text-left transition-colors hover:border-indigo-300 hover:bg-indigo-50/40 dark:border-slate-600 dark:bg-slate-900/60 dark:hover:border-indigo-500/60 dark:hover:bg-indigo-500/10"
+                          >
+                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                              <UserCircle size={18} />
+                            </span>
+                            <span className="min-w-0 flex-1">
+                              <span className="block text-sm font-semibold text-slate-800 dark:text-slate-100">
+                                {t("help.showOnboarding.title")}
+                              </span>
+                              <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">
+                                {t("help.showOnboarding.subtitle")}
+                              </span>
+                            </span>
+                          </button>
+                        )}
                       </div>
                     </SectionCard>
                   </motion.div>

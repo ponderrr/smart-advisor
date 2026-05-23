@@ -62,11 +62,21 @@ const WrappedPage = () => {
     "y",
     parseAsInteger.withDefault(defaultYear),
   );
+  // Monthly Wrapped — when ?m=0..11 is present, narrow the recap to that
+  // month within `year`. Web port of the mobile WrappedPeriod {year,month}.
+  const [monthParam] = useQueryState("m", parseAsInteger);
+  const month =
+    monthParam != null && monthParam >= 0 && monthParam <= 11
+      ? monthParam
+      : null;
+  const isMonthly = month != null;
+  const periodLabel = isMonthly ? `${monthLabels[month]} ${year}` : `${year}`;
 
   const { loading, availableYears, stats } = useWrappedData({
     ready,
     year,
     currentYear,
+    month,
   });
 
   const {
@@ -128,7 +138,9 @@ const WrappedPage = () => {
           <div className="mx-auto max-w-md rounded-3xl border border-dashed border-slate-300/80 bg-white/60 p-12 text-center dark:border-slate-700/70 dark:bg-slate-900/40">
             <Sparkles className="mx-auto h-10 w-10 text-slate-300 dark:text-slate-600" />
             <h2 className="mt-4 text-2xl font-black tracking-tight">
-              {t("empty.title", { year })}
+              {isMonthly
+                ? t("empty.titleMonth", { period: periodLabel })
+                : t("empty.title", { year })}
             </h2>
             <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
               {year === currentYear ? t("empty.current") : t("empty.past")}
@@ -258,6 +270,7 @@ const WrappedPage = () => {
               <IntroCard
                 name={displayName}
                 year={year}
+                periodLabel={isMonthly ? periodLabel : null}
                 onAdvance={goNext}
                 tStory={t}
               />

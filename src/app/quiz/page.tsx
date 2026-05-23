@@ -28,11 +28,32 @@ import { getAccentTone } from "@/features/quiz/utils/content-accent";
 import { ResultsLoadingState } from "@/features/recommendations/components/results-loading-state";
 import { ResultsView } from "@/features/recommendations/components/results-view";
 import { enhancedRecommendationsService } from "@/features/recommendations/services/enhanced-recommendations-service";
-import { isOverloadedError } from "@/features/recommendations/services/ai-service";
+import {
+  isOverloadedError,
+  type RefinementInput,
+} from "@/features/recommendations/services/ai-service";
 import { cn } from "@/lib/utils";
 
 const STEPS = ["content", "count", "questions", "results"] as const;
 type Step = (typeof STEPS)[number];
+
+const SURPRISE_TYPES = ["movie", "book", "music"] as const;
+
+/** A single open-ended answer so the AI returns varied, unexpected picks
+ *  instead of walking the personality quiz. Not user-facing copy — this is
+ *  the prompt sent to the recommendation pipeline, kept in sync with the
+ *  mobile app's surprise answer. */
+const buildSurpriseAnswers = (): Answer[] => [
+  {
+    id: "a0",
+    question_id: "surprise",
+    question_text: "What are you in the mood for?",
+    answer_text:
+      "Surprise me — anything great, no constraints. Pick something I " +
+      "might not expect but would love.",
+    created_at: new Date().toISOString(),
+  },
+];
 
 /** Local, ephemeral mode beyond the URL-tracked step. "navigating" is the
  *  normal stepwise flow; "generating" is the post-submit AI loader shown
@@ -62,6 +83,10 @@ const QuizPage = () => {
   const [step, setStep] = useQueryState(
     "step",
     parseAsStringLiteral(STEPS).withDefault("content"),
+  );
+  const [mode] = useQueryState(
+    "mode",
+    parseAsStringLiteral(["surprise"] as const),
   );
 
   // Local mirrors of the store so the user can change their selection / count
@@ -143,8 +168,15 @@ const QuizPage = () => {
   };
 
   const runGeneration = useCallback(
-    async (formattedAnswers: Answer[]) => {
-      if (!user || !contentType) return;
+    async (
+      formattedAnswers: Answer[],
+      typeOverride?: ContentType,
+      refinement?: RefinementInput,
+    ) => {
+      // typeOverride lets surprise mode generate before the store-backed
+      // contentType has propagated through a render.
+      const activeType = typeOverride ?? contentType;
+      if (!user || !activeType) return;
 
       // Cancel any prior in-flight gen.
       genAbortRef.current?.abort();
@@ -155,9 +187,10 @@ const QuizPage = () => {
         const recs = await enhancedRecommendationsService.retryRecommendation(
           {
             answers: formattedAnswers,
-            contentType,
+            contentType: activeType,
             userAge: user.age,
             userName: user.name,
+            ...(refinement ? { refinement } : {}),
           },
           user.id,
         );
@@ -199,6 +232,38 @@ const QuizPage = () => {
     [setStoreAnswers, runGeneration],
   );
 
+  // One-tap "Surprise me": ?mode=surprise picks a random content type and
+  // generates immediately from a single open-ended answer, skipping the
+  // content / count / question steps. Reuses the normal generation pipeline.
+  const surpriseStartedRef = useRef(false);
+  useEffect(() => {
+    if (mode !== "surprise" || surpriseStartedRef.current) return;
+    if (!ready || !user) return;
+    surpriseStartedRef.current = true;
+
+    const picked =
+      SURPRISE_TYPES[Math.floor(Math.random() * SURPRISE_TYPES.length)];
+    const answers = buildSurpriseAnswers();
+
+    setContentType(picked);
+    setStoreRecommendations([]);
+    setStoreAnswers(answers);
+    lastAnswersRef.current = answers;
+    setSlideDirection(1);
+    setGenError(null);
+    setGenErrorIsOverloaded(false);
+    setFlowMode("generating");
+    void runGeneration(answers, picked);
+  }, [
+    mode,
+    ready,
+    user,
+    setContentType,
+    setStoreRecommendations,
+    setStoreAnswers,
+    runGeneration,
+  ]);
+
   const handleRetryGeneration = () => {
     const answers = lastAnswersRef.current;
     if (!answers) return;
@@ -223,16 +288,38 @@ const QuizPage = () => {
     goToStep("content", -1);
   }, [goToStep, resetStore]);
 
+  // "Refine these" from the results view — replay the ORIGINAL quiz
+  // context (buffered answers) with a free-text steer layered on top, so
+  // the user can adjust without re-walking the quiz. Works for normal and
+  // surprise modes alike (both buffer their answers in lastAnswersRef).
+  // Reuses the existing generating / error / results state machine.
+  const handleRefine = useCallback(
+    (feedbackText: string) => {
+      const answers = lastAnswersRef.current;
+      if (!answers || feedbackText.trim().length === 0) return;
+      const refinement: RefinementInput = {
+        feedbackText: feedbackText.trim(),
+        previousTitles: storeRecommendations.map((r) => r.title),
+      };
+      setSlideDirection(1);
+      setGenError(null);
+      setGenErrorIsOverloaded(false);
+      setFlowMode("generating");
+      void runGeneration(answers, undefined, refinement);
+    },
+    [storeRecommendations, runGeneration],
+  );
+
   const handleBack = () => {
     // Back button is inert while we're generating — the answers are submitted
     // and the user is moments away from results.
     if (flowMode === "generating") return;
     if (flowMode === "gen-error") {
-      router.push("/dashboard");
+      router.push("/feed");
       return;
     }
     if (step === "content") {
-      router.push("/dashboard");
+      router.push("/feed");
       return;
     }
     if (step === "count") {
@@ -241,8 +328,8 @@ const QuizPage = () => {
     }
     if (step === "results") {
       // From results, back acts like the explicit "Get another" CTA — go
-      // home to the dashboard rather than re-entering the quiz mid-flow.
-      router.push("/dashboard");
+      // home to the feed rather than re-entering the quiz mid-flow.
+      router.push("/feed");
       return;
     }
     // step === "questions" — delegate so the step can handle intra-question
@@ -449,6 +536,7 @@ const QuizPage = () => {
                     <ResultsView
                       recommendations={storeRecommendations}
                       onRestart={handleRestart}
+                      onRefine={handleRefine}
                     />
                   ) : null}
                 </motion.div>

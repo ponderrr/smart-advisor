@@ -2,18 +2,23 @@
 
 import { useEffect, useState } from "react";
 import { ExternalLink, PlayCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 
+type WatchProvider = {
+  id: number;
+  name: string;
+  logo: string | null;
+  link: string | null;
+};
+
 type WatchProviders = {
   region: string;
-  link: string | null;
-  flatrate: {
-    id: number;
-    name: string;
-    logo: string | null;
-    link: string | null;
-  }[];
+  link: string | null; // JustWatch page for the title (attribution target)
+  flatrate: WatchProvider[];
+  rent: WatchProvider[];
+  buy: WatchProvider[];
 };
 
 type TrailerData =
@@ -43,54 +48,94 @@ interface TrailerEmbedProps {
   className?: string;
 }
 
+const ProviderChips = ({ list }: { list: WatchProvider[] }) => (
+  <div className="flex flex-wrap items-center gap-1.5">
+    {list.map((p) => {
+      const inner = (
+        <>
+          {p.logo && (
+            <img
+              src={p.logo}
+              alt=""
+              className="h-5 w-5 rounded-full object-cover"
+              loading="lazy"
+            />
+          )}
+          {p.name}
+        </>
+      );
+      const baseClass =
+        "inline-flex h-7 items-center gap-1.5 overflow-hidden rounded-full border border-slate-200/80 bg-white px-1 pr-2.5 text-[11px] font-semibold text-slate-700 shadow-sm dark:border-slate-700/70 dark:bg-slate-900/65 dark:text-slate-200";
+      if (p.link) {
+        return (
+          <a
+            key={p.id}
+            href={p.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={`Search ${p.name} for this title`}
+            className={cn(
+              baseClass,
+              "transition-all hover:-translate-y-0.5 hover:border-indigo-300 hover:text-indigo-700 dark:hover:border-indigo-500/60 dark:hover:text-indigo-300",
+            )}
+          >
+            {inner}
+          </a>
+        );
+      }
+      return (
+        <span key={p.id} title={p.name} className={baseClass}>
+          {inner}
+        </span>
+      );
+    })}
+  </div>
+);
+
+/**
+ * "Where to watch" — subscription / rent / buy availability for a movie,
+ * sourced from TMDB → JustWatch. The "via JustWatch" attribution (linking
+ * to the JustWatch page when available) is required by TMDB terms wherever
+ * this data is displayed.
+ */
 const WatchProvidersRow = ({ providers }: { providers: WatchProviders }) => {
-  if (providers.flatrate.length === 0) return null;
+  const t = useTranslations("WhereToWatch");
+  const tiers = (
+    [
+      { key: "flatrate", list: providers.flatrate },
+      { key: "rent", list: providers.rent },
+      { key: "buy", list: providers.buy },
+    ] as const
+  ).filter((tier) => tier.list.length > 0);
+  if (tiers.length === 0) return null;
   return (
-    <div className="flex items-center gap-2">
+    <div className="space-y-2">
       <span className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
-        Where to watch
+        {t("title")}
       </span>
-      <div className="flex flex-wrap items-center gap-1.5">
-        {providers.flatrate.map((p) => {
-          const inner = (
-            <>
-              {p.logo && (
-                <img
-                  src={p.logo}
-                  alt=""
-                  className="h-5 w-5 rounded-full object-cover"
-                  loading="lazy"
-                />
-              )}
-              {p.name}
-            </>
-          );
-          const baseClass =
-            "inline-flex h-7 items-center gap-1.5 overflow-hidden rounded-full border border-slate-200/80 bg-white px-1 pr-2.5 text-[11px] font-semibold text-slate-700 shadow-sm dark:border-slate-700/70 dark:bg-slate-900/65 dark:text-slate-200";
-          if (p.link) {
-            return (
-              <a
-                key={p.id}
-                href={p.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={`Search ${p.name} for this title`}
-                className={cn(
-                  baseClass,
-                  "transition-all hover:-translate-y-0.5 hover:border-indigo-300 hover:text-indigo-700 dark:hover:border-indigo-500/60 dark:hover:text-indigo-300",
-                )}
-              >
-                {inner}
-              </a>
-            );
-          }
-          return (
-            <span key={p.id} title={p.name} className={baseClass}>
-              {inner}
-            </span>
-          );
-        })}
-      </div>
+      {tiers.map(({ key, list }) => (
+        <div key={key} className="flex flex-wrap items-center gap-2">
+          <span className="w-12 shrink-0 text-[11px] font-bold text-slate-500 dark:text-slate-400">
+            {t(key)}
+          </span>
+          <ProviderChips list={list} />
+        </div>
+      ))}
+      <p className="text-[10px] text-slate-400 dark:text-slate-500">
+        {providers.link ? (
+          <a
+            href={providers.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 hover:text-slate-600 hover:underline dark:hover:text-slate-300"
+          >
+            {t("attribution")}
+            <ExternalLink size={9} />
+          </a>
+        ) : (
+          t("attribution")
+        )}
+      </p>
     </div>
   );
 };
@@ -146,7 +191,11 @@ export const TrailerEmbed = ({
 
   if (data.provider === "youtube") {
     const providers = data.watchProviders;
-    const hasProviders = providers && providers.flatrate.length > 0;
+    const hasProviders =
+      !!providers &&
+      (providers.flatrate.length > 0 ||
+        providers.rent.length > 0 ||
+        providers.buy.length > 0);
 
     if (!data.youtubeKey && !hasProviders) return null;
 

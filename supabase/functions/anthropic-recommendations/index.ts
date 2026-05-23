@@ -33,7 +33,15 @@ serve(async (req) => {
       });
     }
 
-    const { name, age, answers, contentType, contentTone } = await req.json();
+    const {
+      name,
+      age,
+      answers,
+      contentType,
+      contentTone,
+      recommendationFilters,
+      refinement,
+    } = await req.json();
 
     if (!name || !age || !answers) {
       return new Response(
@@ -68,6 +76,18 @@ serve(async (req) => {
     // AND they haven't opted into family-friendly tone.
     const allowMature = !familyFriendly;
 
+    // Optional taste tuning / hard filters. Absent or empty → no change to
+    // existing behaviour. Built per-format so e.g. "avoid horror" on Movies
+    // doesn't bleed into Books picks.
+    const movieConstraints = buildHardConstraints(recommendationFilters, "movie");
+    const bookConstraints = buildHardConstraints(recommendationFilters, "book");
+    const musicConstraints = buildHardConstraints(recommendationFilters, "music");
+
+    // Optional conversational refinement. Absent → behaviour unchanged.
+    // When present, a clearly-delimited block is appended after the hard
+    // constraints so the user's steer overrides earlier quiz answers.
+    const refinementBlock = buildRefinementBlock(refinement);
+
     if (wantsMovies) {
       const movieRec = await getRecommendation({
         type: "movie",
@@ -76,6 +96,8 @@ serve(async (req) => {
         answers,
         isAdult: allowMature,
         systemPrompt,
+        hardConstraints: movieConstraints,
+        refinementBlock,
       });
       recommendations.push({ type: "movie", ...movieRec });
     }
@@ -88,6 +110,8 @@ serve(async (req) => {
         answers,
         isAdult: allowMature,
         systemPrompt,
+        hardConstraints: bookConstraints,
+        refinementBlock,
       });
       recommendations.push({ type: "book", ...bookRec });
     }
@@ -100,6 +124,8 @@ serve(async (req) => {
         answers,
         isAdult: allowMature,
         systemPrompt,
+        hardConstraints: musicConstraints,
+        refinementBlock,
       });
       recommendations.push({ type: "music", ...musicRec });
     }
@@ -109,12 +135,140 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error("anthropic-recommendations error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    const message = error instanceof Error ? error.message : String(error);
+    return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
+
+/**
+ * Turns the optional recommendationFilters blob into a strongly-worded
+ * HARD CONSTRAINTS block appended to the format-specific user prompt.
+ * Returns "" when no meaningful values are set for the requested format,
+ * so existing behaviour is byte-for-byte unchanged for callers that don't
+ * send filters.
+ *
+ * Accepts both the per-format shape `{ movie: {...}, book: {...}, music:
+ * {...} }` and the legacy single-bucket shape `{ avoidGenres, language,
+ * avoidNote, maxRuntimeMinutes }` — the latter is applied to every format
+ * (the runtime line is suppressed for non-movie types).
+ */
+function buildHardConstraints(
+  filters: unknown,
+  type: "movie" | "book" | "music",
+): string {
+  if (!filters || typeof filters !== "object") return "";
+  const root = filters as Record<string, unknown>;
+  const hasPerFormat = root.movie || root.book || root.music;
+  const slice = hasPerFormat
+    ? (root[type] as Record<string, unknown> | undefined) ?? null
+    : (root as Record<string, unknown>);
+  const f = (slice ?? {}) as {
+    avoidGenres?: unknown;
+    maxRuntimeMinutes?: unknown;
+    language?: unknown;
+    avoidNote?: unknown;
+  };
+
+  const lines: string[] = [];
+
+  // Pick feedback — titles the user marked "Not for me". Top-level on the
+  // filters blob (not per-format) and applied to every type's prompt.
+  const disliked = Array.isArray(root.dislikedTitles)
+    ? root.dislikedTitles
+      .map((t) => String(t).trim())
+      .filter((t) => t.length > 0)
+    : [];
+  if (disliked.length > 0) {
+    lines.push(
+      `- The user disliked these — never recommend them again: ${
+        disliked.join("; ")
+      }.`,
+    );
+  }
+
+  const genres = Array.isArray(f.avoidGenres)
+    ? f.avoidGenres
+      .map((g) => String(g).trim())
+      .filter((g) => g.length > 0)
+    : [];
+  if (genres.length > 0) {
+    lines.push(`- Do NOT recommend anything in these genres: ${genres.join(", ")}.`);
+  }
+
+  if (
+    type === "movie" &&
+    typeof f.maxRuntimeMinutes === "number" &&
+    f.maxRuntimeMinutes > 0
+  ) {
+    lines.push(
+      `- The runtime MUST be ${f.maxRuntimeMinutes} minutes or less. Never exceed this.`,
+    );
+  }
+
+  const language = typeof f.language === "string" ? f.language.trim() : "";
+  if (language.length > 0) {
+    lines.push(`- Strongly prefer works in this language: ${language}.`);
+  }
+
+  const note = typeof f.avoidNote === "string" ? f.avoidNote.trim() : "";
+  if (note.length > 0) {
+    lines.push(`- Never recommend the following (avoid entirely): ${note}.`);
+  }
+
+  if (lines.length === 0) return "";
+
+  return `\n\nHARD CONSTRAINTS — the recommendation MUST obey every rule below. If your first idea violates any of these, discard it and pick something else that fits the profile AND these rules. Do not apologise or mention these constraints in the response.\n${
+    lines.join("\n")
+  }`;
+}
+
+/**
+ * Turns the optional refinement blob into a clearly-delimited REFINEMENT
+ * block. The user's free-text feedback is the strongest signal and may
+ * override earlier quiz answers; already-seen titles are excluded so a
+ * refinement pass never repeats picks. Returns "" when absent / empty so
+ * a normal (non-refined) generation is byte-for-byte unchanged.
+ */
+function buildRefinementBlock(refinement: unknown): string {
+  if (!refinement || typeof refinement !== "object") return "";
+  const r = refinement as {
+    feedbackText?: unknown;
+    previousTitles?: unknown;
+  };
+
+  const feedback = typeof r.feedbackText === "string"
+    ? r.feedbackText.trim()
+    : "";
+  if (feedback.length === 0) return "";
+
+  const seen = Array.isArray(r.previousTitles)
+    ? r.previousTitles
+      .map((t) => String(t).trim())
+      .filter((t) => t.length > 0)
+    : [];
+
+  const lines: string[] = [
+    `The user has already seen recommendations and is now refining them. Their feedback (this is the STRONGEST signal — it overrides the quiz answers above wherever they conflict):`,
+    `"${feedback}"`,
+  ];
+  if (seen.length > 0) {
+    lines.push(
+      `Do NOT recommend any of these already-seen titles: ${
+        seen.join(", ")
+      }.`,
+    );
+  }
+  lines.push(
+    `Honour the feedback precisely while still respecting the HARD CONSTRAINTS above. Do not apologise or mention this refinement step in the response.`,
+  );
+
+  return `\n\nREFINEMENT — apply this on top of everything above.\n${
+    lines.join("\n")
+  }`;
+}
 
 async function getRecommendation({
   type,
@@ -123,6 +277,8 @@ async function getRecommendation({
   answers,
   isAdult,
   systemPrompt,
+  hardConstraints,
+  refinementBlock,
 }: {
   type: "movie" | "book" | "music";
   name: string;
@@ -130,6 +286,8 @@ async function getRecommendation({
   answers: unknown;
   isAdult: boolean;
   systemPrompt: string;
+  hardConstraints?: string;
+  refinementBlock?: string;
 }) {
   // Handle both Answer[] format (from frontend) and Record<string, string> (legacy)
   let answersText: string;
@@ -177,7 +335,7 @@ HARD RULES for the response:
   • 75-84: solid. Aligns with the broad strokes (genre/mood/pace) but compromises on at least one preference.
   • 65-74: soft. Plausible but reaches; you're betting on something they didn't directly ask for.
   • Below 65: only when it's the best of a weak set — never default here.
-  Do NOT cluster scores around 90-92. If you'd score every pick the same, you're not being honest. Vary based on actual fit.
+  Do NOT cluster scores around 90-92. If you'd score every pick the same, you're not being honest. Vary based on actual fit.${hardConstraints ?? ""}${refinementBlock ?? ""}
 
 Return ONLY a JSON object — no markdown fences, no commentary, no preamble. Exact shape:
 {

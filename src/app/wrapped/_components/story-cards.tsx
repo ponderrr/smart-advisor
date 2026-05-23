@@ -231,23 +231,34 @@ const cardBodyClass = "pointer-events-auto";
 export const IntroCard = ({
   name,
   year,
+  periodLabel,
   onAdvance,
   tStory,
 }: {
   name: string;
   year: number;
+  /** When set (e.g. "May 2026"), the kicker shows this instead of the year
+   *  and the eyebrow/subhead shift to monthly-recap copy. */
+  periodLabel?: string | null;
   onAdvance: () => void;
   tStory: TStory;
 }) => (
   <div className={cardBodyClass}>
     <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/70 sm:text-xs">
-      {tStory("story.intro.eyebrow")}
+      {periodLabel
+        ? tStory("story.intro.eyebrowMonth")
+        : tStory("story.intro.eyebrow")}
     </p>
     <h1 className="mt-3 text-5xl font-black leading-[0.95] tracking-tighter sm:text-7xl md:text-8xl">
-      {tStory("story.intro.kicker", { year })}
+      {periodLabel
+        ? tStory("story.intro.kickerMonth", { period: periodLabel })
+        : tStory("story.intro.kicker", { year })}
     </h1>
     <p className="mx-auto mt-4 max-w-md text-base font-medium text-white/80 sm:text-lg">
-      {name}, {tStory("story.intro.subhead")}
+      {name},{" "}
+      {periodLabel
+        ? tStory("story.intro.subheadMonth")
+        : tStory("story.intro.subhead")}
     </p>
     <button
       type="button"

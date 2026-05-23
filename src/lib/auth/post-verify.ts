@@ -13,7 +13,7 @@ export function getPostVerifyTarget(
   fallback: string,
 ): string {
   if (type === "signup") return "/account/mfa-setup?from=signup";
-  if (type === "magiclink" || type === "email") return "/dashboard";
+  if (type === "magiclink" || type === "email") return "/feed";
   return fallback;
 }
 
@@ -34,5 +34,5 @@ export function getMfaSetupCompleteTarget(from: string | null): string {
  * still runs for signups; the skip applies to MFA, not the whole signup tail.
  */
 export function getMfaSetupSkipTarget(from: string | null = null): string {
-  return from === "signup" ? "/onboarding?from=signup" : "/dashboard";
+  return from === "signup" ? "/onboarding?from=signup" : "/feed";
 }

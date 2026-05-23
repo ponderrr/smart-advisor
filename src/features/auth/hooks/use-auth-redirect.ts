@@ -68,7 +68,7 @@ export function useAuthRedirect() {
     }
   }, [oauthMfaRequired, session]);
 
-  // Only auto-redirect to dashboard if the MFA challenge is NOT active.
+  // Only auto-redirect to the feed if the MFA challenge is NOT active.
   useEffect(() => {
     // mfaPending comes from the auth context — set synchronously inside
     // signIn() when MFA is required, so it's batched with setLoading(false)
@@ -81,12 +81,12 @@ export function useAuthRedirect() {
       !mfaPending
     ) {
       // After auth, honor a ?next=/some/path return URL if it points within
-      // the app (relative path) — otherwise fall back to dashboard.
+      // the app (relative path) — otherwise fall back to the feed.
       const rawNext = searchParams?.get("next") ?? null;
       const nextPath =
         rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//")
           ? rawNext
-          : "/dashboard";
+          : "/feed";
 
       // Passkey just signed in — skip the AAL elevation that would
       // otherwise flash the MFA challenge before our redirect lands.

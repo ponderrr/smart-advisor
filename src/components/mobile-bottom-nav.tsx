@@ -6,7 +6,8 @@ import { AnimatePresence, motion } from "motion/react";
 import {
   BookCheck,
   Clock,
-  LayoutDashboard,
+  Newspaper,
+  Shuffle,
   Sparkles,
   User,
   Users,
@@ -127,11 +128,11 @@ export const MobileBottomNav = () => {
       >
         <div className="relative mx-auto flex max-w-md items-stretch px-2">
           <Tile
-            href="/dashboard"
-            label={t("dashboard")}
-            icon={<LayoutDashboard size={18} />}
-            active={matches("/dashboard")}
-            onClick={go("/dashboard")}
+            href="/feed"
+            label={t("feed")}
+            icon={<Newspaper size={18} />}
+            active={matches("/feed")}
+            onClick={go("/feed")}
           />
           <Tile
             href="/library"
@@ -274,6 +275,24 @@ const QuizMiniMenu = ({ open, onClose, onPick }: QuizMiniMenuProps) => {
                   </p>
                   <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">
                     {t("groupDesc")}
+                  </p>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onPick("/quiz?mode=surprise")}
+                className="group flex w-full items-center gap-3 rounded-2xl border border-slate-200/70 bg-gradient-to-br from-sky-50 via-white to-cyan-50 p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-700/60 dark:from-sky-500/10 dark:via-slate-900/40 dark:to-cyan-500/10"
+              >
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-cyan-500 text-white shadow-md">
+                  <Shuffle size={20} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-black tracking-tight text-slate-900 dark:text-slate-100">
+                    {t("surprise")}
+                  </p>
+                  <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">
+                    {t("surpriseDesc")}
                   </p>
                 </div>
               </button>

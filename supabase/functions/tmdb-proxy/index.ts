@@ -79,13 +79,15 @@ serve(async (req) => {
 
     const movie = searchData.results[0];
 
-    // Get detailed movie info for description
-    const detailsUrl = `https://api.themoviedb.org/3/movie/${movie.id}?api_key=${tmdbApiKey}&language=en-US`;
+    // Get detailed movie info — description, genres, and the director
+    // (credits.crew) in a single request via append_to_response.
+    const detailsUrl = `https://api.themoviedb.org/3/movie/${movie.id}?api_key=${tmdbApiKey}&language=en-US&append_to_response=credits`;
     const detailsResponse = await fetch(detailsUrl);
 
     let description =
       "A captivating story that will keep you entertained from start to finish.";
     let genres: string[] = [];
+    let director = "";
 
     if (detailsResponse.ok) {
       const detailsData = await detailsResponse.json();
@@ -93,7 +95,7 @@ serve(async (req) => {
         // Truncate to 2-3 sentences
         const sentences = detailsData.overview
           .split(/[.!?]+/)
-          .filter((s) => s.trim().length > 0);
+          .filter((s: string) => s.trim().length > 0);
         description =
           sentences.slice(0, 3).join(". ") + (sentences.length > 3 ? "." : "");
         if (description.length > 200) {
@@ -103,6 +105,76 @@ serve(async (req) => {
       if (Array.isArray(detailsData.genres)) {
         genres = detailsData.genres.map((g: { name: string }) => g.name);
       }
+      const crew = detailsData.credits?.crew;
+      if (Array.isArray(crew)) {
+        const dir = crew.find(
+          (c: { job: string; name: string }) => c.job === "Director",
+        );
+        if (dir?.name) director = dir.name;
+      }
+    }
+
+    // Best-effort YouTube trailer.
+    let trailer: string | null = null;
+    try {
+      const vidRes = await fetch(
+        `https://api.themoviedb.org/3/movie/${movie.id}/videos?api_key=${tmdbApiKey}&language=en-US`,
+      );
+      if (vidRes.ok) {
+        const vids = (await vidRes.json()).results ?? [];
+        const pick = vids.find(
+          (v: { site: string; type: string; key: string }) =>
+            v.site === "YouTube" && v.type === "Trailer",
+        ) ??
+          vids.find(
+            (v: { site: string; key: string }) => v.site === "YouTube",
+          );
+        if (pick?.key) {
+          trailer = `https://www.youtube.com/watch?v=${pick.key}`;
+        }
+      }
+    } catch (_) {
+      // no trailer — fine
+    }
+
+    // Best-effort streaming / rent / buy availability. TMDB sources this
+    // from JustWatch — "via JustWatch" attribution is required wherever
+    // it's displayed.
+    const region = (url.searchParams.get("region") || "US")
+      .toUpperCase()
+      .slice(0, 2);
+    let watchProviders:
+      | {
+          link: string | null;
+          flatrate: string[];
+          rent: string[];
+          buy: string[];
+        }
+      | null = null;
+    try {
+      const wpRes = await fetch(
+        `https://api.themoviedb.org/3/movie/${movie.id}/watch/providers?api_key=${tmdbApiKey}`,
+      );
+      if (wpRes.ok) {
+        const byRegion = (await wpRes.json()).results ?? {};
+        const r = byRegion[region] ?? byRegion["US"];
+        if (r) {
+          const names = (
+            list: { provider_name: string }[] | undefined,
+          ): string[] =>
+            Array.isArray(list)
+              ? [...new Set(list.map((p) => p.provider_name))]
+              : [];
+          const flatrate = names(r.flatrate);
+          const rent = names(r.rent);
+          const buy = names(r.buy);
+          if (flatrate.length || rent.length || buy.length) {
+            watchProviders = { link: r.link ?? null, flatrate, rent, buy };
+          }
+        }
+      }
+    } catch (_) {
+      // no availability — fine
     }
 
     const result = {
@@ -117,6 +189,9 @@ serve(async (req) => {
         : 7.5,
       description: description,
       genres: genres,
+      director: director,
+      trailer: trailer,
+      watchProviders: watchProviders,
     };
 
     console.log("Returning movie data:", result);

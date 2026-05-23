@@ -154,3 +154,23 @@ coverage/
 
 # Supabase temporary files
 supabase/.temp/
+
+# Flutter / Dart (apps/mobile) — generated artifacts, never commit
+# (Source on feat/flutter-app stays tracked: tracked files override .gitignore.)
+apps/mobile/.dart_tool/
+apps/mobile/.flutter-plugins
+apps/mobile/.flutter-plugins-dependencies
+apps/mobile/.pub-cache/
+apps/mobile/.pub/
+apps/mobile/**/.gradle/
+apps/mobile/**/.kotlin/
+apps/mobile/android/local.properties
+apps/mobile/android/key.properties
+apps/mobile/**/GeneratedPluginRegistrant.*
+*.iml
+# Platform scaffolding — committed on feat/flutter-app, noise on other branches
+apps/mobile/android/gradle/
+apps/mobile/android/gradlew
+apps/mobile/android/gradlew.bat
+apps/mobile/ios/Flutter/
+apps/mobile/linux/flutter/

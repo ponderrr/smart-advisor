@@ -7,7 +7,51 @@
       "profile": "Profile",
       "security": "Security",
       "content": "Content",
-      "integrations": "Integrations"
+      "feed": "Feed",
+      "integrations": "Integrations",
+      "help": "Help"
+    },
+    "feed": {
+      "title": "Feed",
+      "description": "Control how you show up in the social feed of picks and takes.",
+      "visibilityLabel": "Profile visibility",
+      "public": "Public",
+      "private": "Private",
+      "publicHint": "Your finished, rated and shared picks appear in other people's feeds, and people can follow you directly.",
+      "privateHint": "You can still browse and post normally, but your activity isn't broadcast to other feeds and new followers are request-only.",
+      "prefsTitle": "Feed preferences",
+      "prefsDescription": "Defaults the feed opens with. You can still switch at any time while browsing.",
+      "viewLabel": "Default view",
+      "viewCards": "Cards",
+      "viewList": "List",
+      "scopeLabel": "Default scope",
+      "scopeFriends": "Friends",
+      "scopeDiscover": "Discover",
+      "scopeGroup": "Group",
+      "communityLabel": "Default community",
+      "communityAll": "All",
+      "communityMovies": "Movies",
+      "communityBooks": "Books",
+      "communityMusic": "Music",
+      "commentSortLabel": "Comment sort",
+      "commentSortTop": "Top",
+      "commentSortNew": "New",
+      "blocked": {
+        "title": "Blocked people",
+        "description": "Their posts and comments won't show up in your feed.",
+        "empty": "You haven't blocked anyone.",
+        "unblock": "Unblock",
+        "unblockedToast": "Unblocked @{handle}"
+      },
+      "reports": {
+        "title": "Reports you've filed",
+        "description": "Posts and comments you've flagged. Our team reviews each one.",
+        "empty": "You haven't filed any reports.",
+        "onPost": "On a post",
+        "onComment": "On a comment",
+        "contentGone": "Content removed",
+        "statusReview": "Under review"
+      }
     },
     "groups": {
       "account": "Account",
@@ -24,13 +68,23 @@
       "pictureRemoved": "Profile picture removed.",
       "detailsTitle": "Profile Details",
       "detailsDescription": "Update your public account details.",
-      "currentUsername": "Current username",
-      "newUsername": "New username",
-      "newUsernamePlaceholder": "Enter new username",
+      "currentUsername": "Current display name",
+      "newUsername": "Display name",
+      "newUsernamePlaceholder": "How we should call you",
       "age": "Age",
       "agePlaceholder": "25",
       "save": "Save changes",
-      "savedToast": "Profile updated."
+      "savedToast": "Profile updated.",
+      "aboutTitle": "About me",
+      "aboutDescription": "A short bio and tags shown on your public profile.",
+      "bioLabel": "Bio",
+      "bioPlaceholder": "Tell people what you're into…",
+      "interestsLabel": "Interests",
+      "tagsLabel": "Your tags",
+      "tagsPlaceholder": "Add a tag…",
+      "tagsAdd": "Add",
+      "aboutSavedToast": "Profile customization saved.",
+      "aboutSaveError": "Couldn't save — please try again."
     },
     "email": {
       "title": "Email",
@@ -136,13 +190,67 @@
       "appliesNext": "Applies on next quiz",
       "save": "Save Preferences",
       "savedToast": "Content preferences saved.",
-      "saveError": "We couldn't save your preferences. Please try again."
+      "saveError": "We couldn't save your preferences. Please try again.",
+      "filters": {
+        "title": "Recommendation filters",
+        "description": "Hard limits the AI must obey on every pick — solo quiz and Surprise Me. Set them per format so avoiding a movie genre doesn't also block a book genre. Group Quiz isn't affected.",
+        "formatLabel": "Filter for",
+        "format": {
+          "movie": "Movies",
+          "book": "Books",
+          "music": "Music"
+        },
+        "avoidGenresLabel": "Avoid genres",
+        "runtimeLabel": "Max movie runtime",
+        "runtimeNoCap": "No cap",
+        "runtimeMinutes": "{minutes}m",
+        "runtimeHintNone": "No runtime cap — movies of any length are fair game.",
+        "runtimeHint": "Movies must run {minutes} minutes or less.",
+        "languageLabel": "Preferred language",
+        "languagePlaceholder": "e.g. Japanese, Spanish",
+        "avoidNoteLabel": "Never recommend",
+        "avoidNotePlaceholder": {
+          "movie": "Movies to avoid entirely — franchises, directors, themes…",
+          "book": "Books to avoid entirely — series, authors, themes…",
+          "music": "Music to avoid entirely — artists, sub-genres, themes…"
+        },
+        "avoidNoteHint": "Free text. Be as specific as you like.",
+        "appliesNext": "Applies on next quiz",
+        "save": "Save filters",
+        "saved": "Recommendation filters saved.",
+        "saveFailed": "We couldn't save your filters. Please try again.",
+        "notAuthed": "You need to be signed in to save filters."
+      }
     },
     "integrations": {
       "title": "Integrations",
       "description": "Connected providers and services.",
       "emptyTitle": "No integrations available yet",
       "emptyBody": "Third-party connections will show up here once they go live."
+    },
+    "help": {
+      "title": "Help",
+      "description": "Answers to common questions, plus quick links to the parts of the app you might be missing.",
+      "faq": {
+        "title": "FAQ",
+        "subtitle": "Browse frequently asked questions"
+      },
+      "takeQuiz": {
+        "title": "Take a quiz",
+        "subtitle": "Get fresh recommendations in a couple of minutes"
+      },
+      "findFriends": {
+        "title": "Find friends",
+        "subtitle": "Discover people with similar taste"
+      },
+      "milestones": {
+        "title": "Your milestones",
+        "subtitle": "Track progress and unlock achievements"
+      },
+      "showOnboarding": {
+        "title": "Show onboarding",
+        "subtitle": "Re-see the profile-setup screen in preview mode"
+      }
     },
     "danger": {
       "title": "Danger Zone",
@@ -190,7 +298,15 @@
     "description": "Choose the language used across the app.",
     "options": {
       "en": "English",
-      "es": "Spanish"
+      "es": "Spanish",
+      "fr": "French",
+      "de": "German",
+      "pt": "Portuguese",
+      "it": "Italian",
+      "nl": "Dutch",
+      "ja": "Japanese",
+      "zh": "Chinese",
+      "ko": "Korean"
     },
     "saving": "Saving…",
     "saved": "Language updated."
@@ -203,8 +319,10 @@
       "ourTeam": "Our Team",
       "faq": "FAQ",
       "dashboard": "Dashboard",
+      "feed": "Feed",
       "library": "Library",
       "history": "History",
+      "milestones": "Milestones",
       "groupQuiz": "Group Quiz",
       "settings": "Settings"
     },
@@ -225,7 +343,7 @@
       "titleLine2": "Obsession Across Every",
       "subtitle": "AI-powered recommendations for movies, books, and albums tailored to your unique taste.",
       "ctaPrimaryLoggedOut": "Get Started",
-      "ctaPrimaryLoggedIn": "Go to Dashboard",
+      "ctaPrimaryLoggedIn": "Go to Feed",
       "ctaSecondaryLoggedOut": "Try a Demo",
       "ctaSecondaryLoggedIn": "View History",
       "scrollHint": "Scroll to Explore",
@@ -338,6 +456,7 @@
       "categories": {
         "getting-started": "Getting started",
         "how-it-works": "How it works",
+        "feed": "Feed",
         "group-quiz": "Group quiz",
         "library": "Library",
         "account": "Account & privacy"
@@ -373,11 +492,35 @@
         },
         "trailer-preview": {
           "question": "Where can I see a trailer or preview?",
-          "answer": "Open any recommendation card from your dashboard or history. A trailer plays inline for movies (lazy-loaded so it only fires when you click), a 'View on Open Library' link appears for books so you can dig into editions, covers, and reviews, and an album's first 30-second track preview is one tap away. Movies use TMDB's official trailer when published; previews come from Deezer."
+          "answer": "Open any recommendation card from your feed or history. A trailer plays inline for movies (lazy-loaded so it only fires when you click), a 'View on Open Library' link appears for books so you can dig into editions, covers, and reviews, and an album's first 30-second track preview is one tap away. Movies use TMDB's official trailer when published; previews come from Deezer."
         },
         "year-in-review": {
           "question": "What is Year in Review and when does it appear?",
-          "answer": "Year in Review is a Spotify-Wrapped-style summary of your picks: top genre, longest streak, peak month, most-picked director or author, format mix, and your standout titles. It surfaces as a prominent banner on your dashboard during December (current year) and January (last year). Outside that window the page still works at /wrapped, just not advertised."
+          "answer": "Year in Review is a Spotify-Wrapped-style summary of your picks: top genre, longest streak, peak month, most-picked director or author, format mix, and your standout titles. It surfaces as a prominent banner on your feed during December (current year) and January (last year). Outside that window the page still works at /wrapped, just not advertised."
+        },
+        "feed-what": {
+          "question": "What is the feed?",
+          "answer": "A Reddit-style stream of picks people you follow have shared, plus broader Discover and Group session views. You can scope it (Friends / Discover / Group), filter by community (Movies / Books / Music) and sort by Trending, New, or Top — each setting persists across sessions."
+        },
+        "feed-share": {
+          "question": "How do I share a pick on the feed?",
+          "answer": "Open the composer with the 'Share a pick' button on /feed. Pick a community, an activity (Finished / Rated / Recommending), type the title — the cover art is looked up automatically as you type, hitting TMDB for movies, Open Library for books, and Deezer for music. Add an optional note and hit share."
+        },
+        "feed-edit": {
+          "question": "Can I edit my posts and comments after I share them?",
+          "answer": "Yes, both. On your own posts the overflow menu has Edit and Delete (edit-from-thread routes back through the feed composer in edit mode). On your own comments an Edit button sits next to Reply — a '· edited' tag appears on the byline once you've touched the body. Posts and comments you don't own only expose Report."
+        },
+        "feed-votes": {
+          "question": "How do up and down votes work on posts and comments?",
+          "answer": "Each post and comment has up / down arrows in its rail. Tap once to vote, tap again to clear. The number you see is the canonical server score across every voter; your own state lights the arrow violet (up) or rose (down). Trending sort weights this score by post age, Top sorts by raw score."
+        },
+        "feed-sort": {
+          "question": "Can I sort the feed differently?",
+          "answer": "Yes — a Trending / New / Top segmented control sits below the scope row. Trending blends score with recency (newer wins ties), New is age-ascending, Top is highest score first. The choice is per-device and remembered across sessions."
+        },
+        "feed-follow": {
+          "question": "How do I follow people, block someone, or report content?",
+          "answer": "Tap a name to open their profile and use Follow / Unfollow. The overflow on any post or comment lets you Report it or Block the author — blocked authors disappear from your feed entirely, and you can manage the list under Settings -> Feed -> Blocked people. Reports you've filed live under Settings -> Feed -> Filed reports."
         },
         "group-what": {
           "question": "What is Group Quiz?",
@@ -448,10 +591,12 @@
     "close": "Close",
     "retry": "Retry",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "surpriseMe": "Surprise me"
   },
   "MobileNav": {
     "ariaLabel": "Primary navigation",
+    "feed": "Feed",
     "dashboard": "Dashboard",
     "library": "Library",
     "history": "History",
@@ -465,6 +610,8 @@
       "soloDesc": "A short personality quiz, just for you.",
       "group": "Group Quiz",
       "groupDesc": "Take it together with friends in a shared room.",
+      "surprise": "Surprise Me",
+      "surpriseDesc": "One tap — a random pick, no questions asked.",
       "close": "Cancel"
     }
   },
@@ -503,7 +650,7 @@
     "subtitle": "We can't recommend that exact title back to you, but answer a few quick questions and we'll find you something with the same energy.",
     "sharedLabel": "You shared",
     "startQuiz": "Find similar picks",
-    "goDashboard": "Go to dashboard",
+    "goDashboard": "Go to Feed",
     "emptyTitle": "Nothing came through",
     "emptySubtitle": "We didn't receive anything to work with — start a quiz and we'll take it from there."
   },
@@ -606,7 +753,7 @@
     },
     "mfaChallenge": {
       "successTitle": "Verified",
-      "successBody": "Taking you to your dashboard…",
+      "successBody": "Taking you to your feed…",
       "totpTitle": "Enter verification code",
       "totpBody": "Open your authenticator app and enter the 6-digit code.",
       "backupTitle": "Enter backup code",
@@ -907,6 +1054,7 @@
     },
     "empty": {
       "title": "No Picks in {year}",
+      "titleMonth": "No Picks in {period}",
       "current": "Take a quiz and start filling out your year.",
       "past": "Pick a different year above, or start a new quiz."
     },
@@ -959,8 +1107,11 @@
       "pickYear": "Year",
       "intro": {
         "eyebrow": "Year in Review",
+        "eyebrowMonth": "Month in Review",
         "kicker": "Your {year}",
+        "kickerMonth": "Your {period}",
         "subhead": "Press play on the year that was.",
+        "subheadMonth": "Press play on the month that was.",
         "cta": "See your year",
         "keyHint": "Arrow keys to navigate"
       },
@@ -1040,7 +1191,7 @@
       "result": "Result"
     },
     "back": {
-      "dashboard": "Dashboard",
+      "dashboard": "Feed",
       "home": "Home",
       "step": "Back",
       "leave": "Leave",
@@ -1091,6 +1242,14 @@
         "questionsAria": "Number of questions",
         "maxPlayersLabel": "Max Players",
         "maxPlayersAria": "Maximum number of players in the lobby",
+        "modeLabel": "When?",
+        "modeLive": "Together now",
+        "modeAsync": "By a deadline",
+        "modeLiveHint": "Everyone joins the lobby and answers at the same time.",
+        "modeAsyncHint": "Each member answers on their own time before the deadline.",
+        "deadlineLabel": "Deadline",
+        "plannedForLabel": "Planned for (optional)",
+        "plannedForHint": "Informational only — when you all plan to watch / read / listen together.",
         "create": "Create Session",
         "creating": "Creating…",
         "signInTitle": "Sign In to Host",
@@ -1124,6 +1283,14 @@
       }
     },
     "session": {
+      "async": {
+        "eyebrow": "Async session",
+        "deadlineInHours": "{hours, plural, one {# hour left} other {# hours left}}",
+        "deadlineInDays": "{days, plural, one {# day left} other {# days left}}",
+        "deadlinePassed": "Deadline passed — finalizing",
+        "plannedFor": "Planned for {date}",
+        "submitted": "{done}/{total} submitted"
+      },
       "loading": "Loading session…",
       "notFoundTitle": "Session Not Found",
       "notFoundBody": "That code doesn't match an active session.",
@@ -1151,7 +1318,7 @@
       "leave": "Leave",
       "backToLobby": "Back to Lobby",
       "end": "End",
-      "leaveConfirm": "Leave this group quiz?",
+      "leaveConfirm": "Leave the session? Your answers won't count toward the group pick and you'll need the code to rejoin.",
       "leaveQuizConfirm": "Leave the group quiz? Your answers so far won't be submitted.",
       "endConfirm": "End this session for everyone?",
       "backToLobbyConfirmInProgress": "Send everyone back to the lobby? In-progress answers will be cleared.",
@@ -1259,6 +1426,7 @@
     },
     "sortLabel": "Sort:",
     "sortAria": "Sort recommendations",
+    "searchPlaceholder": "Search past picks",
     "sort": {
       "newest": "Newest",
       "oldest": "Oldest",
@@ -1297,10 +1465,49 @@
       "byDirector": "Directed by {director}",
       "byArtist": "By {artist}",
       "inLibrary": "In your library",
-      "close": "Close"
+      "close": "Close",
+      "dislike": "Not for me",
+      "dislikedOn": "Won't recommend again"
     }
   },
   "Library": {
+    "import": {
+      "headerCta": "Import",
+      "back": "Back to library",
+      "eyebrow": "Import",
+      "title": "Import your watchlist",
+      "subtitle": "Bring over your Letterboxd films or Goodreads books. Re-importing is safe — matching titles are updated, not duplicated.",
+      "sourceLabel": "Where's it from?",
+      "sources": {
+        "letterboxd": "Letterboxd",
+        "goodreads": "Goodreads"
+      },
+      "hint": {
+        "letterboxd": "Export from letterboxd.com/settings/data — use watchlist.csv or your full export.",
+        "goodreads": "Export from goodreads.com/review/import — the “Goodreads Library Export” CSV."
+      },
+      "choose": "Choose a .csv file",
+      "chooseHint": "Letterboxd or Goodreads CSV export",
+      "preview": "{count, plural, one {# title ready to import} other {# titles ready to import}}",
+      "mismatch": "This file looks like a {detected} export, but you picked {chosen}. Double-check before importing.",
+      "chooseDifferent": "Choose another file",
+      "importCta": "Import {count, plural, one {# title} other {# titles}}",
+      "importing": "Importing {done} of {total}…",
+      "doneTitle": "Import complete",
+      "doneSummary": "{imported} imported · {skipped} skipped · {failed} failed",
+      "importAnother": "Import another",
+      "goToLibrary": "Go to library",
+      "errors": {
+        "read": "Couldn't read that file. Try again.",
+        "empty": "That file has no rows to import.",
+        "parse": "Couldn't parse that file."
+      }
+    },
+    "finishReminder": {
+      "eyebrow": "Pick up where you left off",
+      "title": "{count, plural, one {You've got # title still in progress} other {You've got # titles still in progress}}",
+      "cta": "Open"
+    },
     "eyebrow": "Library",
     "title": "What You've Watched and Read",
     "subtitle": "Reactions you save here become a taste signal the AI uses on your next quiz.",
@@ -1321,6 +1528,7 @@
       "music": "Music"
     },
     "statusLabel": "Status",
+    "searchPlaceholder": "Search your library",
     "filterAll": "All",
     "status": {
       "finished": "Finished",
@@ -1388,10 +1596,53 @@
         "label": "Language",
         "en": "English",
         "es": "Español"
+      },
+      "focus": {
+        "movie": "Movies",
+        "book": "Books",
+        "music": "Music",
+        "mix": "Mix"
       }
     },
+    "steps": {
+      "name": {
+        "eyebrow": "Step 1",
+        "title": "What should we call you?",
+        "subtitle": "We'll use this across recommendations and your profile."
+      },
+      "language": {
+        "eyebrow": "Step 2",
+        "title": "Pick your language",
+        "subtitle": "We'll translate the app interface to match."
+      },
+      "focus": {
+        "eyebrow": "Step 3",
+        "title": "What do you want picks for?",
+        "subtitle": "Sets the default content type. You can still switch on every quiz.",
+        "hint": "Tip: you'll always have the option to flip this on individual quizzes."
+      },
+      "avoid": {
+        "eyebrow": "Step 4",
+        "title": "Anything you'd rather skip?",
+        "subtitle": "Tap any to add a hard \"don't recommend\" rule. Skip the step if nothing comes to mind.",
+        "emptyHint": "No filters yet — you can add some anytime in Settings.",
+        "selectedHint": "{count, plural, one {# genre} other {# genres}} you'd rather avoid."
+      },
+      "review": {
+        "eyebrow": "One last look",
+        "title": "Does this look right?",
+        "subtitle": "Edit anything you'd like to change before we save it.",
+        "edit": "Edit",
+        "empty": "—",
+        "noGenres": "None"
+      }
+    },
+    "back": "Back",
+    "next": "Next",
+    "finish": "Finish setup",
     "submit": "Looks good",
     "skip": "Skip for now",
+    "previewClose": "Close preview",
     "errors": {
       "displayNameRequired": "Please enter a display name.",
       "saveFailed": "We couldn't save your setup. Please try again."
@@ -1402,7 +1653,7 @@
     "category": "Quiz setup",
     "stepOf": "Step {current} of {total}",
     "back": {
-      "dashboard": "Dashboard"
+      "dashboard": "Feed"
     },
     "contentSelection": {
       "title": "What would you like a recommendation for?",
@@ -1664,14 +1915,23 @@
       "overloadedBody": "Our AI is getting hammered right now. Give it a minute and try again — we already retried a couple times for you.",
       "confirmDialog": {
         "title": "Generate new recommendations?",
-        "body": "You already generated recommendations for these answers. Generate a fresh set or head back to your dashboard.",
-        "cancel": "Go to Dashboard",
+        "body": "You already generated recommendations for these answers. Generate a fresh set or head back to your feed.",
+        "cancel": "Go to Feed",
         "confirm": "Generate New"
       },
       "errorState": {
         "title": "Unable to generate recommendations",
         "retry": "Try Again",
         "back": "Retake Quiz"
+      },
+      "refine": {
+        "cta": "Refine these",
+        "eyebrow": "Refine",
+        "title": "Tweak these picks",
+        "subtitle": "Tell us how to steer it — we'll re-run with your original answers plus this.",
+        "placeholder": "e.g. more like Dune, lighter, nothing over 2 hours",
+        "cancel": "Cancel",
+        "submit": "Refine"
       }
     }
   },
@@ -1797,6 +2057,8 @@
       },
       "milestones": {
         "eyebrow": "Milestones",
+        "pageTitle": "Your milestones",
+        "backToFeed": "Back to feed",
         "earnedSummary": "{earned} of {total} earned",
         "unlocked": "Unlocked",
         "progress": "{progress}/{target}",
@@ -2010,6 +2272,52 @@
         "signUp": "Sign up to continue",
         "retake": "Retake demo"
       }
+    }
+  },
+  "WhereToWatch": {
+    "title": "Where to watch",
+    "flatrate": "Stream",
+    "rent": "Rent",
+    "buy": "Buy",
+    "attribution": "via JustWatch"
+  },
+  "Feed": {
+    "aiNudge": {
+      "eyebrow": "AI nudge",
+      "variants": {
+        "surprise": {
+          "title": "Need a pick fast? One tap and we'll surprise you.",
+          "cta": "Surprise Me"
+        },
+        "refine": {
+          "title": "Got a pick that almost worked? Refine it in plain English.",
+          "cta": "Try refining"
+        },
+        "group": {
+          "title": "Watching with friends tonight? Spin up a group quiz.",
+          "cta": "Group Quiz"
+        },
+        "tune": {
+          "title": "Picks feel off? Tune your taste filters in 30 seconds.",
+          "cta": "Tune taste"
+        },
+        "solo": {
+          "title": "Quick quiz, sharp pick — what are you in the mood for?",
+          "cta": "Start quiz"
+        }
+      }
+    },
+    "dashboardMoved": {
+      "eyebrow": "Heads up",
+      "title": "This is your new home.",
+      "body": "The dashboard moved — your <milestones>milestones</milestones> live there now.",
+      "dismiss": "Dismiss"
+    },
+    "mobileApp": {
+      "eyebrow": "Coming soon",
+      "title": "Smart Advisor for iOS & Android",
+      "body": "A native mobile app is on the way — sign in with the same account when it lands.",
+      "dismiss": "Dismiss"
     }
   }
 }

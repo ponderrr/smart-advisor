@@ -11,10 +11,12 @@ import {
   Film,
   Heart,
   Music,
-  Sparkles,
   Trash2,
   LayoutGrid,
   Star,
+  Sparkles,
+  ThumbsDown,
+  Search,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useTranslations } from "next-intl";
@@ -38,9 +40,9 @@ import {
 } from "@/features/library/types/library";
 import { getRecTypeAccent } from "@/features/recommendations/utils/type-accent";
 import { LogToLibraryButton } from "@/features/library/components/log-to-library-button";
+import { useDislikedTitle } from "@/features/recommendations/services/dislikes";
 import { PillButton } from "@/components/ui/pill-button";
 import { SegmentedControl } from "@/components/ui/segmented-control";
-import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { Dialog } from "@/components/ui/dialog";
 import { TrailerEmbed } from "@/components/trailer-embed";
 import { MusicPreview } from "@/components/music-preview";
@@ -49,6 +51,7 @@ import { PageLoader } from "@/components/ui/loader";
 import { AppNavbar } from "@/components/app-navbar";
 import { ViewToggle } from "@/components/view-toggle";
 import { usePersistedViewMode } from "@/hooks/use-persisted-view-mode";
+import { cacheRead, cacheWrite } from "@/lib/offline-cache";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -68,6 +71,7 @@ const RecommendationModal = ({
 }) => {
   const t = useTranslations("History.modal");
   const tLib = useTranslations("Library");
+  const [disliked, toggleDisliked] = useDislikedTitle(rec.title);
   return (
     <Dialog
       open={true}
@@ -198,6 +202,23 @@ const RecommendationModal = ({
             {t("close")}
           </button>
         </div>
+
+        {/* Pick feedback — adding a title makes the recommendation EF
+            exclude it from every future generation. */}
+        <button
+          type="button"
+          onClick={toggleDisliked}
+          aria-pressed={disliked}
+          className={cn(
+            "mt-2 flex w-full items-center justify-center gap-1.5 rounded-2xl py-2.5 text-sm font-bold transition-colors",
+            disliked
+              ? "bg-rose-500/15 text-rose-600 dark:text-rose-300"
+              : "bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700",
+          )}
+        >
+          <ThumbsDown size={14} />
+          {disliked ? t("dislikedOn") : t("dislike")}
+        </button>
       </div>
     </Dialog>
   );
@@ -249,6 +270,7 @@ const AccountHistoryPage = () => {
   }, [filter]);
   const [view, setView] = usePersistedViewMode("grid");
   const [sortBy, setSortBy] = useState<SortMode>("newest");
+  const [query, setQuery] = useState("");
   const [selectedRec, setSelectedRec] = useState<Recommendation | null>(null);
   const [libraryItems, setLibraryItems] = useState<LibraryItem[]>([]);
 
@@ -310,15 +332,27 @@ const AccountHistoryPage = () => {
     // The current `recommendations` belong to a previous filter — wait for
     // the reload to land instead of dedup-juddering the stale rows.
     if (loadedFilter !== filter) return [];
-    if (filter !== "favorites") return recommendations;
-    const seen = new Set<string>();
-    return recommendations.filter((rec) => {
-      const key = `${rec.type}::${(rec.title ?? "").trim().toLowerCase()}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-  }, [filter, loadedFilter, recommendations]);
+    let list = recommendations;
+    if (filter === "favorites") {
+      const seen = new Set<string>();
+      list = list.filter((rec) => {
+        const key = `${rec.type}::${(rec.title ?? "").trim().toLowerCase()}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+    const q = query.trim().toLowerCase();
+    if (q) {
+      list = list.filter((rec) => {
+        const hay = `${rec.title ?? ""} ${
+          rec.artist ?? rec.author ?? rec.director ?? ""
+        }`.toLowerCase();
+        return hay.includes(q);
+      });
+    }
+    return list;
+  }, [filter, loadedFilter, recommendations, query]);
 
   const rowCount = Math.ceil(displayed.length / colCount);
 
@@ -350,16 +384,21 @@ const AccountHistoryPage = () => {
         const { data, error } =
           await databaseService.getUserRecommendations(filterConfig);
 
+        const cacheKey = `history:${filter}:${sortBy}`;
         if (error) {
           console.error("Error loading recommendations:", error);
-          setRecommendations([]);
+          // Fetch failed — fall back to the last good snapshot for this
+          // filter so an offline cold load still shows content.
+          setRecommendations(cacheRead<Recommendation>(cacheKey));
         } else {
           setRecommendations(data);
+          cacheWrite(cacheKey, data);
         }
         setLoadedFilter(filter);
       } catch (error) {
         console.error("Error loading recommendations:", error);
-        setRecommendations([]);
+        setRecommendations(cacheRead<Recommendation>(`history:${filter}:${sortBy}`));
+        setLoadedFilter(filter);
       } finally {
         setLoading(false);
       }
@@ -468,18 +507,6 @@ const AccountHistoryPage = () => {
                   {t("clearAll")}
                 </PillButton>
               )}
-              <HoverBorderGradient
-                onClick={() => router.push("/quiz")}
-                idleColor="17, 24, 39"
-                darkIdleColor="255, 255, 255"
-                highlightColor="99, 102, 241"
-                darkHighlightColor="129, 140, 248"
-                containerClassName="rounded-full w-fit"
-                className="flex items-center gap-2 whitespace-nowrap bg-white px-6 py-3 text-sm font-black leading-none tracking-tight text-black dark:bg-black dark:text-white"
-              >
-                <Sparkles size={16} />
-                {t("startQuiz")}
-              </HoverBorderGradient>
             </div>
           </div>
 
@@ -661,7 +688,23 @@ const AccountHistoryPage = () => {
                   ))}
                 </select>
               </div>
-              <ViewToggle value={view} onChange={setView} />
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <Search
+                    size={15}
+                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+                  <input
+                    type="search"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder={t("searchPlaceholder")}
+                    aria-label={t("searchPlaceholder")}
+                    className="w-44 rounded-xl border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:w-56 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
+                  />
+                </div>
+                <ViewToggle value={view} onChange={setView} />
+              </div>
             </div>
           </div>
 
@@ -677,7 +720,11 @@ const AccountHistoryPage = () => {
           >
           {displayed.length === 0 && loadedFilter === filter ? (
             <div className="rounded-3xl border border-slate-200/80 bg-white/80 p-10 text-center shadow-sm backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/65">
-              <h2 className="text-2xl font-black tracking-tight">
+              <Sparkles
+                className="mx-auto h-10 w-10 text-slate-300 dark:text-slate-600"
+                aria-hidden="true"
+              />
+              <h2 className="mt-4 text-2xl font-black tracking-tight">
                 {t("empty.title")}
               </h2>
               <p className="mx-auto mt-2 max-w-xl text-sm text-slate-600 dark:text-slate-400">

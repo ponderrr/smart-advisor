@@ -1,0 +1,2323 @@
+{
+  "Settings": {
+    "eyebrow": "Instellingen",
+    "title": "Accountinstellingen",
+    "subtitle": "Beheer je profiel, beveiliging en voorkeuren.",
+    "tabs": {
+      "profile": "Profiel",
+      "security": "Beveiliging",
+      "content": "Inhoud",
+      "feed": "Feed",
+      "integrations": "Integraties",
+      "help": "Help"
+    },
+    "feed": {
+      "title": "Feed",
+      "description": "Bepaal hoe je verschijnt in de sociale feed van aanbevelingen en meningen.",
+      "visibilityLabel": "Profielzichtbaarheid",
+      "public": "Openbaar",
+      "private": "Privé",
+      "publicHint": "Je voltooide, beoordeelde en gedeelde aanbevelingen verschijnen in de feeds van anderen, en mensen kunnen je direct volgen.",
+      "privateHint": "Je kunt nog steeds normaal bladeren en posten, maar je activiteit wordt niet uitgezonden naar andere feeds en nieuwe volgers zijn alleen op verzoek.",
+      "prefsTitle": "Feed-voorkeuren",
+      "prefsDescription": "Standaardinstellingen waarmee de feed opent. Je kunt nog steeds wisselen tijdens het bladeren.",
+      "viewLabel": "Standaardweergave",
+      "viewCards": "Kaarten",
+      "viewList": "Lijst",
+      "scopeLabel": "Standaardbereik",
+      "scopeFriends": "Vrienden",
+      "scopeDiscover": "Ontdekken",
+      "scopeGroup": "Groep",
+      "communityLabel": "Standaardgemeenschap",
+      "communityAll": "Alle",
+      "communityMovies": "Films",
+      "communityBooks": "Boeken",
+      "communityMusic": "Muziek",
+      "commentSortLabel": "Reactiesortering",
+      "commentSortTop": "Top",
+      "commentSortNew": "Nieuw",
+      "blocked": {
+        "title": "Geblokkeerde personen",
+        "description": "Hun berichten en reacties verschijnen niet in je feed.",
+        "empty": "Je hebt niemand geblokkeerd.",
+        "unblock": "Deblokkeren",
+        "unblockedToast": "@{handle} gedeblokkeerd"
+      },
+      "reports": {
+        "title": "Ingediende meldingen",
+        "description": "Berichten en reacties die je hebt gemeld. Ons team beoordeelt elke melding.",
+        "empty": "Je hebt geen meldingen ingediend.",
+        "onPost": "Bij een bericht",
+        "onComment": "Bij een reactie",
+        "contentGone": "Inhoud verwijderd",
+        "statusReview": "In behandeling"
+      }
+    },
+    "groups": {
+      "account": "Account",
+      "app": "App"
+    },
+    "profile": {
+      "pictureTitle": "Profielfoto",
+      "pictureDescription": "Upload een afbeelding om door de hele app te tonen. JPG, PNG, GIF of WEBP tot 5 MB.",
+      "uploading": "Uploaden…",
+      "changePicture": "Foto wijzigen",
+      "uploadPicture": "Foto uploaden",
+      "remove": "Verwijderen",
+      "pictureUpdated": "Profielfoto bijgewerkt.",
+      "pictureRemoved": "Profielfoto verwijderd.",
+      "detailsTitle": "Profielgegevens",
+      "detailsDescription": "Werk je openbare accountgegevens bij.",
+      "currentUsername": "Huidige weergavenaam",
+      "newUsername": "Weergavenaam",
+      "newUsernamePlaceholder": "Hoe we je moeten noemen",
+      "age": "Leeftijd",
+      "agePlaceholder": "25",
+      "save": "Wijzigingen opslaan",
+      "savedToast": "Profiel bijgewerkt.",
+      "aboutTitle": "Over mij",
+      "aboutDescription": "Een korte bio en tags die op je openbare profiel worden getoond.",
+      "bioLabel": "Bio",
+      "bioPlaceholder": "Vertel mensen waar je van houdt…",
+      "interestsLabel": "Interesses",
+      "tagsLabel": "Jouw tags",
+      "tagsPlaceholder": "Een tag toevoegen…",
+      "tagsAdd": "Toevoegen",
+      "aboutSavedToast": "Profielaanpassing opgeslagen.",
+      "aboutSaveError": "Kon niet opslaan — probeer opnieuw."
+    },
+    "email": {
+      "title": "E-mail",
+      "description": "Het adres dat je gebruikt om in te loggen.",
+      "current": "Huidig",
+      "newEmail": "Nieuwe e-mail",
+      "newEmailPlaceholder": "nieuw@voorbeeld.com",
+      "update": "E-mail bijwerken",
+      "differentRequired": "Nieuwe e-mail moet anders zijn.",
+      "checkInbox": "Controleer je inbox om te bevestigen."
+    },
+    "password": {
+      "title": "Wachtwoord",
+      "description": "Kies een nieuw wachtwoord.",
+      "newPassword": "Nieuw wachtwoord",
+      "confirmPassword": "Wachtwoord bevestigen",
+      "passwordPlaceholder": "••••••••",
+      "requirementsTitle": "Wachtwoordvereisten",
+      "confirmRulesTitle": "Wachtwoord bevestigen",
+      "matches": "Komt overeen met je wachtwoord",
+      "update": "Wachtwoord bijwerken",
+      "updatedToast": "Wachtwoord bijgewerkt."
+    },
+    "mfa": {
+      "title": "Tweefactorauthenticatie",
+      "description": "Een extra stap bij inloggen om je account veilig te houden.",
+      "checking": "Controleren…",
+      "on": "Tweefactor staat aan",
+      "off": "Tweefactor staat uit",
+      "enabled": "Ingeschakeld",
+      "disabled": "Uitgeschakeld",
+      "manage": "Tweefactor beheren",
+      "enable": "Tweefactor inschakelen"
+    },
+    "backupEmail": {
+      "title": "Back-up-e-mail",
+      "description": "Een herstelsadres dat gebruikt wordt wanneer je authenticator niet beschikbaar is.",
+      "labelChange": "Wijzigen naar",
+      "labelDefault": "Back-up-e-mail",
+      "placeholderChange": "nieuw-backup@voorbeeld.com",
+      "placeholderDefault": "backup@voorbeeld.com",
+      "save": "Back-up opslaan",
+      "update": "Back-up bijwerken",
+      "savedToast": "Back-up-e-mail opgeslagen.",
+      "removedToast": "Back-up-e-mail verwijderd.",
+      "remove": "Verwijderen"
+    },
+    "theme": {
+      "title": "Uiterlijk",
+      "description": "Pas aan je systeem aan of stel een vast thema in.",
+      "light": "Licht",
+      "dark": "Donker",
+      "system": "Systeem"
+    },
+    "content": {
+      "title": "Inhoudsvoorkeuren",
+      "description": "Stel je standaard aanbevelingsgedrag in.",
+      "typeLabel": "Aanbevelingstype",
+      "type": {
+        "movie": {
+          "eyebrow": "Op het scherm",
+          "label": "Films"
+        },
+        "book": {
+          "eyebrow": "In de kast",
+          "label": "Boeken"
+        },
+        "music": {
+          "eyebrow": "In je oren",
+          "label": "Muziek"
+        },
+        "both": {
+          "eyebrow": "Een van elk",
+          "label": "Beide"
+        },
+        "mix": {
+          "eyebrow": "Alle drie",
+          "label": "Mix"
+        }
+      },
+      "toneLabel": "Inhoudstoon",
+      "ageLockedEyebrow": "Leeftijdsgebonden",
+      "ageLockedBody": "Aanbevelingen worden geschikt gehouden voor je leeftijd ({age}). Volwassenen kunnen kiezen tussen standaard en familievriendelijke tonen.",
+      "ageLockedBodyMissing": "Aanbevelingen worden geschikt gehouden voor je leeftijd. Volwassenen kunnen kiezen tussen standaard en familievriendelijke tonen.",
+      "tone": {
+        "standard": "Standaard",
+        "family": "Familievriendelijk"
+      },
+      "toneHint": {
+        "standard": "Volledige persoonlijkheid. De AI kan duistere, complexe of volwassen keuzes voorstellen wanneer ze bij je passen.",
+        "family": "Keuzes blijven licht. Geen volwassen thema's, duistere inhoud of seksuele inhoud."
+      },
+      "questionCountLabel": "Vragen per quiz",
+      "questionWord": "{count, plural, one {Vraag} other {Vragen}}",
+      "depth": {
+        "quick": "Snel en gericht",
+        "focused": "Scherp en specifiek",
+        "balanced": "Evenwichtige diepte",
+        "thorough": "Grondige verkenning",
+        "comprehensive": "Uitgebreid detail"
+      },
+      "rangeAria": "Standaard vragen per quiz",
+      "appliesNext": "Geldt voor volgende quiz",
+      "save": "Voorkeuren opslaan",
+      "savedToast": "Inhoudsvoorkeuren opgeslagen.",
+      "saveError": "We konden je voorkeuren niet opslaan. Probeer opnieuw.",
+      "filters": {
+        "title": "Aanbevelingsfilters",
+        "description": "Harde grenzen die de AI bij elke aanbeveling moet respecteren — solo-quiz en Verras me. Stel ze per formaat in zodat het vermijden van een filmgenre niet ook een boekgenre blokkeert. Groepsquiz is niet getroffen.",
+        "formatLabel": "Filter voor",
+        "format": {
+          "movie": "Films",
+          "book": "Boeken",
+          "music": "Muziek"
+        },
+        "avoidGenresLabel": "Genres vermijden",
+        "runtimeLabel": "Max. filmduur",
+        "runtimeNoCap": "Geen limiet",
+        "runtimeMinutes": "{minutes} min",
+        "runtimeHintNone": "Geen duurlimiet — films van elke lengte zijn toegestaan.",
+        "runtimeHint": "Films moeten {minutes} minuten of korter duren.",
+        "languageLabel": "Voorkeurstaal",
+        "languagePlaceholder": "bijv. Japans, Spaans",
+        "avoidNoteLabel": "Nooit aanbevelen",
+        "avoidNotePlaceholder": {
+          "movie": "Films om volledig te vermijden — franchises, regisseurs, thema's…",
+          "book": "Boeken om volledig te vermijden — series, auteurs, thema's…",
+          "music": "Muziek om volledig te vermijden — artiesten, subgenres, thema's…"
+        },
+        "avoidNoteHint": "Vrije tekst. Wees zo specifiek als je wilt.",
+        "appliesNext": "Geldt voor volgende quiz",
+        "save": "Filters opslaan",
+        "saved": "Aanbevelingsfilters opgeslagen.",
+        "saveFailed": "We konden je filters niet opslaan. Probeer opnieuw.",
+        "notAuthed": "Je moet ingelogd zijn om filters op te slaan."
+      }
+    },
+    "integrations": {
+      "title": "Integraties",
+      "description": "Verbonden providers en diensten.",
+      "emptyTitle": "Nog geen integraties beschikbaar",
+      "emptyBody": "Externe verbindingen verschijnen hier zodra ze beschikbaar zijn."
+    },
+    "help": {
+      "title": "Help",
+      "description": "Antwoorden op veelgestelde vragen, plus snelle links naar delen van de app die je misschien mist.",
+      "faq": {
+        "title": "FAQ",
+        "subtitle": "Blader door veelgestelde vragen"
+      },
+      "takeQuiz": {
+        "title": "Doe een quiz",
+        "subtitle": "Krijg nieuwe aanbevelingen in een paar minuten"
+      },
+      "findFriends": {
+        "title": "Vrienden vinden",
+        "subtitle": "Ontdek mensen met vergelijkbare smaak"
+      },
+      "milestones": {
+        "title": "Je mijlpalen",
+        "subtitle": "Volg voortgang en ontgrendel prestaties"
+      },
+      "showOnboarding": {
+        "title": "Onboarding tonen",
+        "subtitle": "Bekijk het profielinstellingsscherm opnieuw in voorbeeldmodus"
+      }
+    },
+    "danger": {
+      "title": "Gevarenzone",
+      "description": "Deze acties zijn onomkeerbaar. Ga voorzichtig te werk.",
+      "disable": "Account deactiveren",
+      "delete": "Account verwijderen",
+      "processing": "Verwerken…",
+      "disableConfirm": "Je account deactiveren? Je wordt uitgelogd en kunt niet inloggen tot reactivering door support.",
+      "disableFinalConfirm": "Definitieve bevestiging. Nu deactiveren?",
+      "deleteConfirm": "Je account permanent verwijderen? Dit kan niet ongedaan worden gemaakt.",
+      "typeDeletePrompt": "Typ \"DELETE\" om te bevestigen:",
+      "deletionCanceled": "Verwijdering geannuleerd."
+    },
+    "verifyAction": {
+      "save": "je profiel op te slaan",
+      "email": "je e-mail bij te werken",
+      "password": "je wachtwoord te wijzigen",
+      "content": "inhoudsvoorkeuren op te slaan",
+      "disable": "je account te deactiveren",
+      "delete": "je account permanent te verwijderen",
+      "addAuthenticator": "een andere authenticator toe te voegen",
+      "setBackupEmail": "je back-up-e-mail in te stellen",
+      "removeBackupEmail": "je back-up-e-mail te verwijderen"
+    },
+    "verifyModal": {
+      "title": "Identiteit verifiëren",
+      "description": "Voer je 6-cijferige authenticatorcode in om {action}.",
+      "placeholder": "000000",
+      "enterCode": "Voer een 6-cijferige code in",
+      "noFactor": "Geen geverifieerde MFA-factor gevonden",
+      "cancel": "Annuleren",
+      "verify": "Verifiëren",
+      "closeAria": "Verificatiedialoog sluiten"
+    },
+    "verifyModalEnroll": {
+      "title": "Stel eerst 2FA in",
+      "description": "Tweefactorauthenticatie is vereist om {action}. Stel het nu in om door te gaan."
+    },
+    "mfaSetupModal": {
+      "closeAria": "Tweefactor-setup sluiten"
+    }
+  },
+  "Language": {
+    "title": "Taal",
+    "description": "Kies de taal die door de hele app wordt gebruikt.",
+    "options": {
+      "en": "Engels",
+      "es": "Spaans",
+      "fr": "Frans",
+      "de": "Duits",
+      "pt": "Portugees",
+      "it": "Italiaans",
+      "nl": "Nederlands",
+      "ja": "Japans",
+      "zh": "Chinees",
+      "ko": "Koreaans"
+    },
+    "saving": "Opslaan…",
+    "saved": "Taal bijgewerkt."
+  },
+  "Navbar": {
+    "items": {
+      "howItWorks": "Hoe het werkt",
+      "whySmartAdvisor": "Waarom Smart Advisor",
+      "poweredBy": "Aangedreven door",
+      "ourTeam": "Ons team",
+      "faq": "FAQ",
+      "dashboard": "Dashboard",
+      "feed": "Feed",
+      "library": "Bibliotheek",
+      "history": "Geschiedenis",
+      "milestones": "Mijlpalen",
+      "groupQuiz": "Groepsquiz",
+      "settings": "Instellingen"
+    },
+    "getStarted": "Aan de slag",
+    "signOut": "Uitloggen",
+    "accountMenu": "Accountmenu",
+    "theme": {
+      "label": "Thema",
+      "light": "Licht",
+      "dark": "Donker",
+      "system": "Systeem",
+      "systemHint": "Past zich aan je apparaatinstelling aan"
+    }
+  },
+  "Home": {
+    "hero": {
+      "titleLine1": "Ontdek je volgende favoriete",
+      "titleLine2": "obsessie in elk",
+      "subtitle": "AI-aangedreven aanbevelingen voor films, boeken en albums afgestemd op jouw unieke smaak.",
+      "ctaPrimaryLoggedOut": "Aan de slag",
+      "ctaPrimaryLoggedIn": "Naar feed",
+      "ctaSecondaryLoggedOut": "Probeer een demo",
+      "ctaSecondaryLoggedIn": "Geschiedenis bekijken",
+      "scrollHint": "Scroll om te verkennen",
+      "flipWords": [
+        "Film",
+        "Boek",
+        "Album",
+        "Verhaal",
+        "Avontuur",
+        "Klassieker",
+        "Meesterwerk",
+        "Cultfavoriet"
+      ]
+    },
+    "howItWorks": {
+      "eyebrow": "Hoe het werkt",
+      "title": "Van besluiteloosheid naar een geweldige keuze in vier stappen",
+      "subtitle": "Een snellere manier om bij een kijk- of leesmoment te komen dat je tijd waard is.",
+      "steps": {
+        "format": {
+          "title": "Kies je formaat",
+          "description": "Vertel ons of je zin hebt in een film, boek, album of mix. We passen de rest van de flow aan op jouw keuze."
+        },
+        "depth": {
+          "title": "Bepaal je diepte",
+          "description": "Kies hoeveel vragen je wilt beantwoorden — een snelle smaaktest of een diepe duik, jij beslist."
+        },
+        "quiz": {
+          "title": "Beantwoord een gepersonaliseerde quiz",
+          "description": "Onze AI genereert nieuwe vragen afgestemd op je leeftijd en inhoudstype. Geen twee quizzen zijn hetzelfde."
+        },
+        "picks": {
+          "title": "Krijg je keuzes",
+          "description": "Echte aanbevelingen met een matchscore en een geschreven reden waarom elk specifiek bij jou past."
+        }
+      }
+    },
+    "features": {
+      "eyebrow": "Waarom Smart Advisor",
+      "title": "Gebouwd voor keuzes die je kunt vertrouwen",
+      "subtitle": "Privé door ontwerp, snel standaard en open source zodat je kunt zien hoe het werkt.",
+      "items": {
+        "private": {
+          "title": "Privéprofiel",
+          "description": "Je voorkeuren blijven verbonden aan je account en worden alleen gebruikt om je keuzes te verbeteren."
+        },
+        "fast": {
+          "title": "Resultaten op topsnelheid",
+          "description": "Snelle resultaten en soepele updates helpen je beslissen zonder te wachten."
+        },
+        "trust": {
+          "title": "Gemakkelijk te vertrouwen keuzes",
+          "description": "Duidelijke redenen maken elke suggestie makkelijker te vertrouwen en kiezen, met open-source transparantie."
+        },
+        "both": {
+          "title": "Kies over formaten heen",
+          "description": "Zie boek-, film- en albumresultaten op één plek zodat kiezen sneller en gemakkelijker voelt."
+        }
+      },
+      "trustReasons": [
+        "Past bij je leeftijdsclassificatie",
+        "Tempo dat je hebt gezegd te verkiezen",
+        "Toon die je eerder hebt gekozen"
+      ]
+    },
+    "groupQuizCta": {
+      "newFeature": "Nieuwe functie",
+      "eyebrow": "Groepsquiz",
+      "titleLead": "Vind een keuze",
+      "titleHighlight": "samen",
+      "description": "Host een quiz, deel een zescijferige code en laat de groep antwoorden. De AI synthetiseert ieders smaak in één keuze die werkt voor de kamer. Meedoen is gratis — geen account nodig.",
+      "cta": "Probeer het"
+    },
+    "albumCta": {
+      "newFeature": "Nieuw",
+      "eyebrow": "Albumaanbevelingen",
+      "titleLead": "Stem af op je volgende",
+      "titleHighlight": "favoriete album",
+      "description": "Zelfde quiz, nieuwe zin. Vertel ons over je luisteren — tijdperken, sferen, instrumenten — en de AI kiest één album met een ingebouwd voorbeeld van 30 seconden. Aangedreven door Deezer.",
+      "cta": "Kies een album"
+    },
+    "poweredBy": {
+      "eyebrow": "Aangedreven door",
+      "title": "Gebouwd op betrouwbare infrastructuur",
+      "subtitle": "Betrouwbare diensten die Smart Advisor helpen snel, betrouwbaar en behulpzaam te blijven."
+    },
+    "team": {
+      "eyebrow": "De mensen",
+      "title": "Ontmoet het team",
+      "subtitle": "De mensen achter Smart Advisor.",
+      "members": {
+        "andrew": {
+          "designation": "Maker",
+          "quote": "Bouwde Smart Advisor om aanbevelingen persoonlijk, snel en echt nuttig te maken."
+        },
+        "vlad": {
+          "designation": "Webdesigner",
+          "quote": "Gefocust op het creëren van een schone interface die de ervaring soepel houdt op desktop."
+        }
+      }
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "title": "Vragen, beantwoord",
+      "subtitleLead": "Vragen voor je begint? Neem contact op via",
+      "subtitleMid": "of meld bugs op",
+      "subtitleTail": ". Smart Advisor is open source, dus je kunt op elk moment beoordelen en bijdragen.",
+      "categoriesAria": "FAQ-categorieën",
+      "filterAll": "Alle",
+      "categories": {
+        "getting-started": "Aan de slag",
+        "how-it-works": "Hoe het werkt",
+        "feed": "Feed",
+        "group-quiz": "Groepsquiz",
+        "library": "Bibliotheek",
+        "account": "Account & privacy"
+      },
+      "items": {
+        "create-account": {
+          "question": "Hoe maak ik een account?",
+          "answer": "Klik op Aanmelden op de inlogpagina, voer je naam, e-mail en een wachtwoord in (minimaal 8 tekens). Je ontvangt een verificatie-e-mail — klik op de link om je account te activeren voordat je inlogt."
+        },
+        "verify-email": {
+          "question": "Waarom moet ik mijn e-mail verifiëren?",
+          "answer": "E-mailverificatie bevestigt je identiteit en beschermt je account. Je kunt niet inloggen totdat je op de verificatielink in je inbox klikt. Controleer je spam-map als je deze niet ziet."
+        },
+        "personalize": {
+          "question": "Hoe personaliseert Smart Advisor aanbevelingen?",
+          "answer": "Smart Advisor gebruikt je quizantwoorden om je stemming, tempovoorkeuren en genreinteresses te begrijpen. Het combineert dit vervolgens met realtime gegevens van TMDB, Open Library en Deezer om aanbevelingen te genereren met duidelijke onderbouwing achter elke keuze."
+        },
+        "quiz-flow": {
+          "question": "Hoe werkt de quiz?",
+          "answer": "Je kiest een inhoudstype (film, boek, album of een mix), selecteert hoeveel vragen je wilt (3 tot 15), en beantwoordt vervolgens elke vraag. Je antwoorden worden naar onze AI gestuurd die gepersonaliseerde aanbevelingen genereert."
+        },
+        "results-generated": {
+          "question": "Hoe worden de resultaten gegenereerd?",
+          "answer": "Je antwoorden worden verwerkt door een AI-model dat titels selecteert die overeenkomen met je voorkeuren. Elke aanbeveling wordt vervolgens verrijkt met echte posterkunst, beoordelingen en beschrijvingen van TMDB (films), Open Library (boeken) en Deezer (albums, inclusief een voorbeeld van 30 seconden)."
+        },
+        "movies-and-books": {
+          "question": "Kan ik films, boeken en muziek in één sessie krijgen?",
+          "answer": "Ja. Selecteer 'Mix' tijdens de inhoudsselectie om één film, één boek en één album in dezelfde sessie te ontvangen. Je volledige aanbevelingsgeschiedenis wordt opgeslagen voor toekomstige referentie."
+        },
+        "off-results": {
+          "question": "Wat als mijn aanbevelingen niet kloppen?",
+          "answer": "Je kunt de quiz op elk moment opnieuw doen met andere antwoorden, of het aantal vragen en je stemmings- en tempokeuzes aanpassen. De snelste manier om toekomstige keuzes te verbeteren is reacties loggen in je bibliotheek — een eerdere keuze markeren als 'Niets voor mij' leert de AI weg te sturen van vergelijkbare titels, en een duim omhoog duwt het naar meer van dat."
+        },
+        "trailer-preview": {
+          "question": "Waar kan ik een trailer of voorbeeld zien?",
+          "answer": "Open een aanbevelingskaart vanuit je feed of geschiedenis. Een trailer speelt inline voor films (lazy-loaded, dus alleen wanneer je klikt), een 'Bekijk op Open Library'-link verschijnt voor boeken om in edities, omslagen en recensies te duiken, en het voorbeeld van 30 seconden van het eerste nummer van een album is één tik weg. Films gebruiken de officiële trailer van TMDB indien gepubliceerd; voorbeelden komen van Deezer."
+        },
+        "year-in-review": {
+          "question": "Wat is Jaaroverzicht en wanneer verschijnt het?",
+          "answer": "Jaaroverzicht is een Spotify-Wrapped-achtige samenvatting van je keuzes: topgenre, langste reeks, piekmaand, meest gekozen regisseur of auteur, formaatmix en je uitschietende titels. Het verschijnt als een prominente banner op je feed tijdens december (huidig jaar) en januari (vorig jaar). Buiten dat venster werkt de pagina nog steeds op /wrapped, gewoon niet geadverteerd."
+        },
+        "feed-what": {
+          "question": "Wat is de feed?",
+          "answer": "Een Reddit-achtige stream van keuzes die mensen die je volgt hebben gedeeld, plus bredere Ontdekken- en Groep-sessieweergaven. Je kunt het beperken (Vrienden / Ontdekken / Groep), filteren op gemeenschap (Films / Boeken / Muziek) en sorteren op Trending, Nieuw of Top — elke instelling blijft behouden tussen sessies."
+        },
+        "feed-share": {
+          "question": "Hoe deel ik een keuze in de feed?",
+          "answer": "Open de composer met de knop 'Een keuze delen' op /feed. Kies een gemeenschap, een activiteit (Voltooid / Beoordeeld / Aanbevelend), typ de titel — de omslag wordt automatisch opgezocht terwijl je typt, met TMDB voor films, Open Library voor boeken en Deezer voor muziek. Voeg een optionele notitie toe en deel."
+        },
+        "feed-edit": {
+          "question": "Kan ik mijn berichten en reacties bewerken nadat ik ze deel?",
+          "answer": "Ja, beide. Op je eigen berichten heeft het overloopmenu Bewerken en Verwijderen (bewerken vanuit de thread leidt terug naar de feed-composer in bewerkmodus). Op je eigen reacties zit een Bewerk-knop naast Beantwoorden — een '· bewerkt'-tag verschijnt op de byline zodra je de body hebt aangeraakt. Berichten en reacties die niet van jou zijn tonen alleen Melden."
+        },
+        "feed-votes": {
+          "question": "Hoe werken duim omhoog en omlaag op berichten en reacties?",
+          "answer": "Elk bericht en elke reactie heeft pijlen omhoog / omlaag in zijn balk. Tik één keer om te stemmen, tik nog eens om te wissen. Het getal dat je ziet is de canonieke serverscore over elke stemmer; je eigen status verlicht de pijl in violet (omhoog) of roze (omlaag). Trending-sortering weegt deze score op basis van leeftijd van het bericht, Top sorteert op ruwe score."
+        },
+        "feed-sort": {
+          "question": "Kan ik de feed anders sorteren?",
+          "answer": "Ja — een Trending / Nieuw / Top gesegmenteerde besturing zit onder de bereikregel. Trending mengt score met versheid (nieuwere winnen gelijke spelen), Nieuw sorteert oplopend op leeftijd, Top op hoogste score eerst. De keuze is per apparaat en wordt onthouden tussen sessies."
+        },
+        "feed-follow": {
+          "question": "Hoe volg ik mensen, blokkeer ik iemand of meld ik inhoud?",
+          "answer": "Tik op een naam om hun profiel te openen en gebruik Volgen / Ontvolgen. Het overloopmenu op een bericht of reactie laat je Melden of de auteur Blokkeren — geblokkeerde auteurs verdwijnen volledig uit je feed, en je kunt de lijst beheren onder Instellingen -> Feed -> Geblokkeerde personen. Ingediende meldingen wonen onder Instellingen -> Feed -> Ingediende meldingen."
+        },
+        "group-what": {
+          "question": "Wat is Groepsquiz?",
+          "answer": "Groepsquiz laat meerdere mensen dezelfde quiz samen doen — aan dezelfde tafel, op een bank of op afstand. De host creëert een sessie, deelt een zescijferige code en iedereen beantwoordt dezelfde reeks vragen op hun eigen apparaat. De AI synthetiseert vervolgens ieders antwoorden in één aanbeveling die past bij de groep."
+        },
+        "group-account": {
+          "question": "Heb ik een account nodig om aan een Groepsquiz mee te doen?",
+          "answer": "Nee. Meedoen is gratis en vereist geen account — voer gewoon de code van de host en een weergavenaam in. Hosten vereist een account zodat we de groepskeuze in je bibliotheek kunnen opslaan en reeksen/mijlpalen kunnen koppelen aan je profiel."
+        },
+        "group-host": {
+          "question": "Hoe host ik een Groepsquiz?",
+          "answer": "Ingelogde gebruikers kunnen Groepsquiz openen vanuit de navigatiebalk; anderen kunnen op de kaart 'Vind een keuze samen' op de homepage tikken. Op de hostkaart stel je je weergavenaam in, kies je het inhoudstype (Mix / Films / Boeken / Muziek), tik je op een nummertegel voor hoeveel vragen je wilt (3 tot 15), en dan Sessie aanmaken. Je belandt in een lobby met een zescijferige code en een Link kopiëren-knop — deel beide met de groep. Zodra er minstens twee spelers zijn toegetreden, zie je Quiz starten; door erop te drukken worden verse AI-vragen voor de hele kamer gegenereerd. Iedereen beantwoordt op zijn eigen apparaat, en zodra alle inzendingen binnen zijn krijg je een 'De keuze van de groep onthullen'-knop om de door AI gesynthetiseerde aanbeveling te tonen."
+        },
+        "group-synthesis": {
+          "question": "Hoe vindt de AI één keuze die bij iedereen past?",
+          "answer": "Wanneer alle deelnemers hun antwoorden indienen, tikt de host op 'De keuze van de groep onthullen'. Elk antwoord van elke deelnemer op elke vraag wordt naar het aanbevelingsmodel gestuurd met de naam van elke speler erbij, en de AI kiest iets dat de overlap respecteert in plaats van het gemiddelde te nemen. Het werkt het beste met 2 tot 4 spelers; grotere groepen werken nog steeds maar het resultaat heeft de neiging te drijven naar bredere aantrekkingskracht."
+        },
+        "group-expiry": {
+          "question": "Hoe lang blijft een Groepsquiz-sessie actief?",
+          "answer": "Een sessie is 24 uur actief vanaf creatie. Daarna verloopt de lobby en het resultaat en kan de code niet meer worden gebruikt om mee te doen. Hosts kunnen een sessie ook op elk moment vroeger beëindigen vanuit de lobby."
+        },
+        "library-vs-history": {
+          "question": "Wat is de bibliotheek en hoe verschilt het van de geschiedenis?",
+          "answer": "De geschiedenis is elke aanbeveling die de AI voor je heeft gegenereerd. Je bibliotheek is een aparte log van wat je daadwerkelijk hebt gekeken of gelezen — met een status (Voltooid, Bezig, Verlanglijst), een duimbeoordeling en een optionele eenregelige reactie. Je kunt een titel loggen vanuit elke resultaatkaart of vanuit de geschiedenismodal."
+        },
+        "library-improves": {
+          "question": "Hoe verbetert de bibliotheek mijn aanbevelingen?",
+          "answer": "Je meest recent beoordeelde vermeldingen worden naar de AI gestuurd samen met je quizantwoorden als smaaksignaal. Een duim omhoog vertelt het 'meer zoals dit'; een duim omlaag vertelt het weg te blijven. Reacties die je schrijft worden letterlijk gelezen, dus een eenregel als 'te langzaam' draagt echt gewicht bij de volgende keuze."
+        },
+        "mfa": {
+          "question": "Wat is tweefactorauthenticatie (MFA)?",
+          "answer": "MFA voegt een extra beveiligingslaag toe door een code uit een authenticator-app (zoals Google Authenticator of Authy) te vereisen wanneer je inlogt. Je kunt het inschakelen vanuit Accountinstellingen onder het tabblad Beveiliging."
+        },
+        "sessions": {
+          "question": "Hoe beheer ik mijn apparaten en sessies?",
+          "answer": "Ga naar Accountinstellingen, open het tabblad Beveiliging en scroll naar Actieve sessies. Je kunt alle apparaten zien waar je bent ingelogd, toegang voor individuele apparaten intrekken of in één keer uitloggen van alle apparaten."
+        },
+        "delete-account": {
+          "question": "Kan ik mijn account verwijderen of deactiveren?",
+          "answer": "Ja. In Accountinstellingen onder het tabblad Integraties vind je een Gevarenzone-sectie. Je kunt je account deactiveren (kan worden geheractiveerd door support) of permanent verwijderen samen met alle bijbehorende gegevens."
+        },
+        "data-handling": {
+          "question": "Hoe worden mijn persoonlijke gegevens behandeld?",
+          "answer": "Je gegevens worden veilig opgeslagen in Supabase met beveiligingsbeleid op rijniveau. We gebruiken alleen je voorkeuren en quizantwoorden om aanbevelingen te genereren. We delen je gegevens niet met derden."
+        },
+        "open-source": {
+          "question": "Is Smart Advisor open source?",
+          "answer": "Ja. Smart Advisor is volledig open source. Je kunt de codebase bekijken, problemen melden en de ontwikkelvoortgang volgen op GitHub."
+        }
+      }
+    },
+    "footer": {
+      "navAria": "Voettekstnavigatie",
+      "rights": "© {year} Smart Advisor. Alle rechten voorbehouden.",
+      "builtWith": "Gebouwd met",
+      "builtSuffix": "als een open-source project.",
+      "githubLabel": "GitHub"
+    }
+  },
+  "Common": {
+    "loading": "Laden…",
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "back": "Terug",
+    "next": "Volgende",
+    "continue": "Doorgaan",
+    "submit": "Indienen",
+    "close": "Sluiten",
+    "retry": "Opnieuw proberen",
+    "yes": "Ja",
+    "no": "Nee",
+    "surpriseMe": "Verras me"
+  },
+  "MobileNav": {
+    "ariaLabel": "Hoofdnavigatie",
+    "feed": "Feed",
+    "dashboard": "Dashboard",
+    "library": "Bibliotheek",
+    "history": "Geschiedenis",
+    "profile": "Profiel",
+    "quiz": "Quiz",
+    "quizMenu": {
+      "ariaLabel": "Kies een quiz om te starten",
+      "title": "Start een quiz",
+      "subtitle": "Kies het soort sessie dat je wilt.",
+      "solo": "Solo quiz",
+      "soloDesc": "Een korte persoonlijkheidsquiz, alleen voor jou.",
+      "group": "Groepsquiz",
+      "groupDesc": "Doe het samen met vrienden in een gedeelde kamer.",
+      "surprise": "Verras me",
+      "surpriseDesc": "Eén tik — een willekeurige keuze, geen vragen.",
+      "close": "Annuleren"
+    }
+  },
+  "InstallPrompt": {
+    "title": "Smart Advisor installeren",
+    "iosBody": "Tik op de Deel-knop, dan 'Voeg toe aan beginscherm' om de app te installeren.",
+    "genericBody": "Voeg Smart Advisor toe aan je beginscherm voor een snellere, volledig-scherm ervaring.",
+    "install": "Installeren",
+    "dismiss": "Niet nu",
+    "close": "Sluiten"
+  },
+  "System": {
+    "error": {
+      "networkTitle": "Kan onze servers niet bereiken",
+      "networkBody": "Controleer je verbinding en probeer opnieuw — we pakken het op waar je was gebleven.",
+      "genericTitle": "Er ging iets stuk",
+      "genericBody": "Een onverwachte fout zorgde ervoor dat deze pagina niet werd geladen. Een vernieuwing doet het meestal.",
+      "ref": "Ref",
+      "goHome": "Naar de homepagina",
+      "tryAgain": "Probeer opnieuw"
+    },
+    "notFound": {
+      "title": "Deze scène haalde de eindmontage niet.",
+      "body": "De pagina die je zoekt is verdwaald tussen de opnames. Misschien een typfout in de URL, misschien is hij op de vloer van de montagekamer blijven liggen. Hoe dan ook, laten we je terugbrengen.",
+      "goBack": "Terug",
+      "goHome": "Naar de home"
+    },
+    "maintenance": {
+      "title": "Onze AI is naar de film.",
+      "body": "Smart Advisor is even weg om wat klassiekers te bingen en een roman of twee door te bladeren. We zijn snel terug met frissere smaak."
+    }
+  },
+  "ShareTarget": {
+    "eyebrow": "Gedeeld met Smart Advisor",
+    "title": "Wil je keuzes zoals deze?",
+    "subtitle": "We kunnen die exacte titel niet terug aan jou aanbevelen, maar beantwoord een paar snelle vragen en we vinden iets met dezelfde energie.",
+    "sharedLabel": "Je deelde",
+    "startQuiz": "Vergelijkbare keuzes vinden",
+    "goDashboard": "Naar feed",
+    "emptyTitle": "Niets binnengekomen",
+    "emptySubtitle": "We hebben niets ontvangen om mee te werken — start een quiz en wij nemen het over."
+  },
+  "AccountSecurity": {
+    "back": "Terug",
+    "eyebrow": "Account · Beveiliging",
+    "title": "Vergrendel dingen",
+    "subtitle": "Beheer tweefactorauthenticatie, passkeys en actieve sessies op je apparaten.",
+    "tipsEyebrow": "Beveiligingstips",
+    "tips": [
+      "Schakel 2FA in voor een extra beschermingslaag tegen ongeautoriseerde toegang.",
+      "Controleer regelmatig actieve sessies en log uit van apparaten die je niet herkent.",
+      "Gebruik een sterk, uniek wachtwoord en werk het regelmatig bij.",
+      "Wees voorzichtig met inloglinks en log alleen in vanaf vertrouwde apparaten."
+    ]
+  },
+  "Auth": {
+    "sessionExpired": "Je sessie is verlopen. Log opnieuw in.",
+    "eyebrow": {
+      "signin": "Inloggen",
+      "signup": "Account aanmaken",
+      "forgot": "Wachtwoord resetten"
+    },
+    "subtitle": {
+      "signin": "Log in om je aanbevelingsreis voort te zetten.",
+      "signup": "Stel je account in om gepersonaliseerde keuzes te krijgen.",
+      "forgot": "Voer je e-mail in en we sturen je een veilige resetlink."
+    },
+    "headings": {
+      "signin": [
+        "Welkom terug",
+        "Leuk je weer te zien",
+        "Klaar voor je volgende keuze?"
+      ],
+      "signup": [
+        "Maak je account aan",
+        "Word lid van Smart Advisor",
+        "Laten we je profiel instellen"
+      ],
+      "forgot": [
+        "Reset je wachtwoord",
+        "Toegang herstellen",
+        "Terug in je account"
+      ],
+      "verifyEmail": ["Controleer je inbox", "Bijna er", "Een laatste stap"],
+      "mfaChallenge": [
+        "Verifieer je identiteit",
+        "Nog één stap",
+        "Beveiligingscontrole"
+      ]
+    },
+    "labels": {
+      "emailOrUsername": "E-mail of gebruikersnaam",
+      "email": "E-mail",
+      "password": "Wachtwoord",
+      "username": "Gebruikersnaam",
+      "age": "Leeftijd",
+      "confirmPassword": "Wachtwoord bevestigen"
+    },
+    "placeholders": {
+      "emailOrUsername": "jij@voorbeeld.com of gebruikersnaam",
+      "email": "jij@voorbeeld.com",
+      "password": "••••••••",
+      "username": "jouwnaam",
+      "age": "18"
+    },
+    "actions": {
+      "signin": "Inloggen",
+      "signup": "Account aanmaken",
+      "forgot": "Resetlink sturen"
+    },
+    "rememberMe": "Houd me 30 dagen ingelogd",
+    "forgotPassword": "Wachtwoord vergeten?",
+    "passkeyDivider": "of",
+    "passkeySignIn": "Inloggen met een passkey",
+    "passkeyWaiting": "Wachten op passkey…",
+    "resendVerification": "Verificatielink opnieuw verzenden",
+    "resendingVerification": "Opnieuw verzenden…",
+    "resendSuccess": "Verificatie-e-mail verzonden. Controleer je inbox.",
+    "resetSuccess": "Als een account bestaat voor deze e-mail, is een wachtwoordresetlink verzonden.",
+    "cooldown": "Wacht een moment voordat je het opnieuw probeert.",
+    "toggle": {
+      "signin": {
+        "prompt": "Heb je geen account?",
+        "cta": "Aanmelden"
+      },
+      "signup": {
+        "prompt": "Heb je al een account?",
+        "cta": "Inloggen"
+      },
+      "forgot": {
+        "prompt": "Wachtwoord onthouden?",
+        "cta": "Inloggen"
+      }
+    },
+    "modeToggle": {
+      "ariaLabel": "Kies inloggen of aanmelden",
+      "signin": "Inloggen",
+      "signup": "Aanmelden"
+    },
+    "mfaChallenge": {
+      "successTitle": "Geverifieerd",
+      "successBody": "Je wordt naar je feed gebracht…",
+      "totpTitle": "Voer verificatiecode in",
+      "totpBody": "Open je authenticator-app en voer de 6-cijferige code in.",
+      "backupTitle": "Voer back-upcode in",
+      "backupBody": "Voer een van je vooraf gegenereerde back-upcodes in.",
+      "totpPlaceholder": "000000",
+      "backupPlaceholder": "XXXXX-XXXXX",
+      "verify": "Verifiëren",
+      "verifying": "Verifiëren…",
+      "useBackup": "Heb je geen toegang tot je authenticator? Gebruik een back-upcode",
+      "useTotp": "Gebruik authenticator-app in plaats daarvan",
+      "backToSignIn": "Terug naar inloggen"
+    },
+    "verifyEmail": {
+      "title": "Verifieer je e-mail",
+      "bodyLead": "We hebben een verificatielink verzonden naar",
+      "bodyTail": ". Klik op de link om je account te activeren.",
+      "mfaHintLead": "Volgende:",
+      "mfaHintBody": "Nadat je je e-mail hebt geverifieerd, kun je tweefactorauthenticatie toevoegen voor extra beveiliging.",
+      "resend": "Verificatie-e-mail opnieuw verzenden",
+      "resending": "Opnieuw verzenden…",
+      "resendSuccess": "Verificatie-e-mail verzonden. Controleer je inbox.",
+      "backToSignIn": "Terug naar inloggen"
+    },
+    "shared": {
+      "hidePassword": "Wachtwoord verbergen",
+      "showPassword": "Wachtwoord tonen",
+      "requirements": "Vereisten"
+    },
+    "passwordRules": {
+      "minLength": "Minstens 8 tekens",
+      "uppercase": "Een hoofdletter (A–Z)",
+      "lowercase": "Een kleine letter (a–z)",
+      "digit": "Een cijfer (0–9)",
+      "special": "Een speciaal teken (!@#$…)"
+    },
+    "resetPassword": {
+      "invalidTitle": "Resetlink ongeldig of verlopen",
+      "invalidBody": "Open de meest recente reset-e-mail of vraag een nieuwe link aan om door te gaan.",
+      "backToSignIn": "Terug naar inloggen",
+      "successTitle": "Wachtwoord bijgewerkt",
+      "successBody": "Je wachtwoord is succesvol gewijzigd. Doorverwijzen naar inloggen…",
+      "title": "Nieuw wachtwoord instellen",
+      "subtitle": "Voer je nieuwe veilige wachtwoord hieronder in.",
+      "newPassword": "Nieuw wachtwoord",
+      "confirmPassword": "Nieuw wachtwoord bevestigen",
+      "passwordRequirementsTitle": "Wachtwoordvereisten",
+      "confirmRulesTitle": "Wachtwoord bevestigen",
+      "matchesRule": "Komt overeen met je wachtwoord",
+      "submit": "Wachtwoord bijwerken",
+      "submitting": "Bijwerken…",
+      "fixHighlighted": "Corrigeer de gemarkeerde velden."
+    },
+    "emailVerified": {
+      "message": "E-mail geverifieerd! Doorverwijzen…"
+    },
+    "mfaManagement": {
+      "heading": "Tweefactorauthenticatie",
+      "subtitle": "Een extra stap bij inloggen om je account veilig te houden.",
+      "fallbackFactorName": "Authenticator-app",
+      "activeCount": "{count, plural, one {# authenticator actief} other {# authenticators actief}}",
+      "notEnabled": "Nog niet ingeschakeld",
+      "statusEnabled": "Ingeschakeld",
+      "statusInactive": "Inactief",
+      "addedOn": "Toegevoegd {date}",
+      "renameAria": "Naam {name} wijzigen",
+      "loadError": "Kon je beveiligingsinstellingen niet laden — ververs de pagina",
+      "disabledToast": "Tweefactorauthenticatie is uitgeschakeld",
+      "regeneratedToast": "Verse back-upcodes zijn klaar — sla ze op een veilige plek op",
+      "copiedToast": "Back-upcodes naar je klembord gekopieerd",
+      "backupCodesHeading": "Back-upcodes",
+      "backupCodesRemaining": "{count, plural, one {# ongebruikte code resterend} other {# ongebruikte codes resterend}}",
+      "loadingBackupCodes": "Laden…",
+      "togglePanelShow": "Back-upcodepaneel tonen",
+      "togglePanelHide": "Back-upcodepaneel verbergen",
+      "regenerateWarning": "Hergenereren maakt alle bestaande back-upcodes ongeldig.",
+      "generateButton": "Nieuwe codes genereren",
+      "generating": "Genereren…",
+      "saveCodesWarning": "Bewaar deze codes — ze worden niet opnieuw getoond",
+      "copy": "Kopiëren",
+      "copied": "Gekopieerd",
+      "download": "Downloaden",
+      "lowBackupCodes": "{count, plural, one {Je hebt nog # back-upcode over. Overweeg nieuwe codes te genereren.} other {Je hebt nog # back-upcodes over. Overweeg nieuwe codes te genereren.}}",
+      "enableHint": "Schakel 2FA in om een extra beveiligingslaag toe te voegen bij inloggen. Je verifieert met je authenticator-app.",
+      "addAuthenticator": "Authenticator toevoegen",
+      "loading": "Laden…",
+      "enable2fa": "2FA inschakelen",
+      "renameDialogTitle": "Authenticator hernoemen",
+      "renameDialogDescription": "Kies een naam die het apparaat gemakkelijk herkenbaar maakt in je lijst.",
+      "renameDialogFieldLabel": "Authenticatornaam",
+      "renameDialogSuccess": "Authenticator hernoemd",
+      "renameDialogPlaceholder": "bijv. iPhone, Werktelefoon",
+      "renameDialogNoTarget": "Geen authenticator geselecteerd",
+      "verifyDialogAria": "Bevestig uitschakelen van tweefactorauthenticatie",
+      "verifyDialogTitle": "Tweefactorauthenticatie uitschakelen",
+      "verifyDialogBody": "Voer de 6-cijferige code uit je authenticator-app in om 2FA voor dit account uit te schakelen.",
+      "verifyDialogPlaceholder": "000000",
+      "verifyDialogError": "Voer een 6-cijferige code in",
+      "verifyDialogConfirm": "2FA uitschakelen",
+      "verifyDialogCancel": "Annuleren"
+    },
+    "passkeyManagement": {
+      "heading": "Passkeys",
+      "subtitle": "Log in met je vingerafdruk, gezicht of apparaat-pincode — geen wachtwoord nodig.",
+      "checking": "Controleren…",
+      "activeCount": "{count, plural, one {# passkey actief} other {# passkeys actief}}",
+      "noPasskeys": "Nog geen passkeys",
+      "statusActive": "Actief",
+      "statusInactive": "Inactief",
+      "unsupported": "Je huidige browser ondersteunt geen passkeys. Probeer Chrome, Safari, Edge of Firefox op een recent apparaat.",
+      "fallbackPasskeyName": "Passkey",
+      "neverUsed": "Nooit gebruikt",
+      "lastUsed": "Laatst gebruikt {timeAgo} geleden",
+      "lastUsedRecently": "Onlangs gebruikt",
+      "addedOn": "Toegevoegd {date}",
+      "renameAria": "Naam {name} wijzigen",
+      "removeAria": "{name} verwijderen",
+      "removedToast": "Passkey verwijderd",
+      "fallbackLabel": "deze passkey",
+      "removeConfirm": "{label} verwijderen? Je kunt er niet meer mee inloggen.",
+      "addAnother": "Nog een passkey toevoegen",
+      "addFirst": "Een passkey toevoegen",
+      "verifyDialogAria": "Verifiëren om passkey te verwijderen",
+      "verifyDialogTitle": "Bevestig met je authenticator",
+      "verifyDialogBody": "Dit is je laatste passkey. Voer je 6-cijferige authenticatorcode in om hem te verwijderen.",
+      "verifyDialogPlaceholder": "000000",
+      "verifyDialogError": "Voer een 6-cijferige code in",
+      "verifyDialogConfirm": "Verifiëren en passkey verwijderen",
+      "verifyDialogCancel": "Annuleren",
+      "verifyNoFactor": "Geen geverifieerde authenticator gevonden.",
+      "renameDialogTitle": "Passkey hernoemen",
+      "renameDialogDescription": "Kies een naam die je later herkent, zoals \"MacBook\" of \"Telefoon\".",
+      "renameDialogFieldLabel": "Passkey-naam",
+      "renameDialogSuccess": "Passkey hernoemd",
+      "renameDialogPlaceholder": "bijv. MacBook, iPhone",
+      "renameDialogNoTarget": "Geen passkey geselecteerd",
+      "setupDialogAria": "Een passkey toevoegen"
+    },
+    "sessions": {
+      "heading": "Actieve sessies",
+      "subtitleLoading": "Beheer apparaten die momenteel zijn ingelogd op je account.",
+      "subtitle": "Beheer apparaten die momenteel zijn ingelogd op je account. Log uit om toegang in te trekken.",
+      "signedInCount": "{count, plural, one {# apparaat ingelogd} other {# apparaten ingelogd}}",
+      "noActive": "Geen actieve sessies",
+      "signOutAll": "Uitloggen van alle",
+      "signingOutAll": "Uitloggen…",
+      "signOutAllConfirm": "Weet je het zeker? Je wordt uitgelogd van alle apparaten.",
+      "signOutCurrentConfirm": "Uitloggen van dit apparaat? Je wordt teruggebracht naar de homepagina.",
+      "signOutOtherConfirm": "Uitloggen van {device}? Die sessie verliest onmiddellijk toegang.",
+      "signedOutToast": "Je bent uitgelogd van dat apparaat",
+      "signedOutAllToast": "Je bent uitgelogd van alle apparaten",
+      "noSessionsFound": "Geen actieve sessies gevonden",
+      "currentBadge": "Huidig",
+      "ipLabel": "IP {ip}",
+      "lastActive": "Laatst actief {time}",
+      "signOutAria": "Uitloggen van {device}",
+      "verifyAction": {
+        "signOut": "uit te loggen van {device}",
+        "signOutAll": "uit te loggen van alle apparaten"
+      }
+    },
+    "mfaSetup": {
+      "goBack": "Terug",
+      "intro": {
+        "title": "Beveilig je account",
+        "body": "Voeg een extra beveiligingslaag toe met Tweefactorauthenticatie (2FA). Je moet een code van je telefoon invoeren tijdens het inloggen.",
+        "cta": "2FA instellen",
+        "skip": "Nu overslaan"
+      },
+      "method": {
+        "title": "Kies je methode",
+        "body": "Hoe wil je voortaan inloggen?",
+        "appName": "Authenticator-app",
+        "appBody": "Scan een QR-code met Google Authenticator, Authy of 1Password.",
+        "cancel": "Annuleren"
+      },
+      "name": {
+        "title": "Geef deze authenticator een naam",
+        "body": "Gebruik het apparaat dat de code zal bevatten — zo kun je authenticators later uit elkaar houden.",
+        "label": "Apparaatnaam",
+        "placeholder": "bijv. iPhone, Werktelefoon",
+        "hint": "Laat leeg om een algemeen label te gebruiken.",
+        "settingUp": "Instellen...",
+        "continue": "Doorgaan"
+      },
+      "qr": {
+        "title": "QR-code scannen",
+        "body": "Gebruik Google Authenticator, Microsoft Authenticator of Authy om deze code te scannen.",
+        "imageAlt": "MFA QR-code",
+        "manualHint": "Kun je niet scannen? Voer deze code handmatig in:",
+        "scanned": "Ik heb het gescand"
+      },
+      "verify": {
+        "title": "Verifieer je code",
+        "body": "Voer de 6-cijferige code uit je authenticator-app in.",
+        "placeholder": "000000",
+        "error": "Voer een 6-cijferige code in",
+        "verifying": "Verifiëren...",
+        "submit": "Verifiëren en 2FA inschakelen",
+        "back": "Terug naar QR-code"
+      },
+      "backupCodes": {
+        "title": "Bewaar je back-upcodes",
+        "body": "Als je toegang tot je authenticator-app verliest, kun je een van deze codes gebruiken om in te loggen. Elke code kan maar één keer worden gebruikt.",
+        "warning": "Bewaar ze op een veilige plek",
+        "copy": "Kopiëren",
+        "copied": "Gekopieerd",
+        "download": "Downloaden",
+        "done": "Ik heb mijn codes opgeslagen"
+      },
+      "toasts": {
+        "authenticatorAdded": "Authenticator toegevoegd",
+        "enabled": "Tweefactorauthenticatie is nu actief!",
+        "backupWarning": "We konden nu geen back-upcodes genereren. Je kunt ze op elk moment maken vanuit je Beveiligingsinstellingen.",
+        "secretCopied": "Geheime code gekopieerd — plak hem in je authenticator-app",
+        "backupCopied": "Back-upcodes naar je klembord gekopieerd",
+        "backupDownloaded": "Back-upcodes opgeslagen in je downloads"
+      }
+    },
+    "passkeySetup": {
+      "title": "Een passkey toevoegen",
+      "body": "Kies een naam die je later herkent. Nadat je doorgaat, zal je apparaat vragen om te bevestigen met Touch ID, Face ID, Windows Hello of een beveiligingssleutel.",
+      "label": "Passkey-naam",
+      "placeholder": "bijv. MacBook, iPhone",
+      "hint": "Laat leeg en we gebruiken een label met datumstempel.",
+      "waiting": "Wachten op passkey...",
+      "continue": "Doorgaan",
+      "cancel": "Annuleren",
+      "successToast": "Passkey toegevoegd"
+    },
+    "renameDialog": {
+      "emptyError": "Naam mag niet leeg zijn",
+      "saving": "Opslaan...",
+      "save": "Opslaan",
+      "cancel": "Annuleren"
+    },
+    "validation": {
+      "emailOrUsernameRequired": "E-mail of gebruikersnaam is vereist",
+      "emailRequired": "E-mail is vereist",
+      "emailInvalid": "Voer een geldige e-mail in",
+      "passwordRequired": "Wachtwoord is vereist",
+      "passwordRequirementsUnmet": "Wachtwoord voldoet niet aan alle vereisten",
+      "usernameRequired": "Gebruikersnaam is vereist",
+      "usernameTooShort": "Gebruik minstens 2 tekens",
+      "usernameTooLong": "Gebruik 24 tekens of minder",
+      "usernameInvalid": "Gebruik letters, cijfers, punten, streepjes of underscores",
+      "ageRequired": "Leeftijd is vereist",
+      "ageNotInteger": "Leeftijd moet een geheel getal zijn",
+      "ageOutOfRange": "Voer een leeftijd tussen 13 en 120 in",
+      "confirmPasswordRequired": "Bevestig je wachtwoord",
+      "passwordsDoNotMatch": "Wachtwoorden komen niet overeen",
+      "fixHighlightedFields": "Corrigeer de gemarkeerde velden.",
+      "correctHighlightedFields": "Corrigeer de gemarkeerde velden",
+      "passkeyIdentifierRequired": "Voer je e-mail of gebruikersnaam in om een passkey te gebruiken.",
+      "enterSixDigitCode": "Voer een 6-cijferige code in",
+      "enterBackupCode": "Voer een back-upcode in",
+      "rules": {
+        "emailContainsAt": "Bevat @",
+        "emailHasDomain": "Heeft een domein (voorbeeld.com)",
+        "ageWholeNumber": "Geheel getal",
+        "ageInRange": "Tussen 13 en 120",
+        "usernameLength": "2–24 tekens",
+        "usernameAllowedChars": "Letters, cijfers, punten, streepjes of underscores",
+        "confirmPasswordMatches": "Komt overeen met je wachtwoord"
+      },
+      "popoverTitles": {
+        "email": "E-mailvereisten",
+        "password": "Wachtwoordvereisten",
+        "username": "Gebruikersnaamvereisten",
+        "age": "Leeftijdsvereisten",
+        "confirmPassword": "Wachtwoord bevestigen"
+      },
+      "mfaError": {
+        "totpExpired": "Die code is verlopen. Wacht op een nieuwe in je authenticator en probeer opnieuw.",
+        "backupExpired": "Die back-upcode is niet meer geldig.",
+        "totpMismatch": "Die code kwam niet overeen. Controleer je authenticator en probeer opnieuw.",
+        "backupMismatch": "Die back-upcode kwam niet overeen. Elke code werkt maar één keer."
+      }
+    }
+  },
+  "Wrapped": {
+    "eyebrow": "Jaaroverzicht",
+    "subtitle": "Een terugblik op wat je dit jaar hebt ontdekt.",
+    "fallbackName": "Jouw",
+    "startQuiz": "Quiz starten",
+    "loading": "Je jaar laden…",
+    "share": {
+      "action": "Delen",
+      "dialogTitle": "Deel je Jaaroverzicht",
+      "dialogSubtitle": "Iedereen met deze link of QR kan je keuzes van {year} zien.",
+      "copyLink": "Link kopiëren",
+      "shareButton": "Delen",
+      "close": "Klaar",
+      "signInRequired": "Log opnieuw in om je jaar te delen.",
+      "failed": "Kon deellink niet genereren",
+      "linkCopied": "Link gekopieerd",
+      "copyFailed": "Kon link niet kopiëren",
+      "shareFailed": "Kon niet delen — probeer opnieuw"
+    },
+    "empty": {
+      "title": "Geen keuzes in {year}",
+      "titleMonth": "Geen keuzes in {period}",
+      "current": "Doe een quiz en begin je jaar te vullen.",
+      "past": "Kies hierboven een ander jaar of start een nieuwe quiz."
+    },
+    "hero": {
+      "eyebrow": "Kop",
+      "picks": "{count, plural, one {# keuze} other {# keuzes}}",
+      "moviesPart": "{count, plural, one {# film} other {# films}}",
+      "booksPart": "{count, plural, one {# boek} other {# boeken}}",
+      "musicPart": "{count, plural, one {# album} other {# albums}}",
+      "watchTime": "ongeveer {hours} uur schermtijd",
+      "libraryLogged": "{count} gelogd in je bibliotheek"
+    },
+    "tiles": {
+      "favorites": "Favorieten",
+      "favoritesHint": "{percent}% van de keuzes",
+      "longestStreak": "Langste reeks",
+      "streakDay": "dag op rij",
+      "streakDays": "dagen op rij",
+      "peakMonth": "Piekmaand",
+      "topGenre": "Topgenre",
+      "picksHint": "{count, plural, one {# keuze} other {# keuzes}}",
+      "noData": "—"
+    },
+    "creator": {
+      "eyebrow": "Meest gekozen",
+      "director": "Regisseur",
+      "author": "Auteur",
+      "artist": "Artiest",
+      "noData": "Nog niet genoeg data."
+    },
+    "formatMix": {
+      "eyebrow": "Formaatmix",
+      "movies": "Films",
+      "books": "Boeken",
+      "music": "Muziek"
+    },
+    "monthly": {
+      "eyebrow": "Keuzes per maand"
+    },
+    "genres": {
+      "eyebrow": "Genre-overzicht"
+    },
+    "standouts": {
+      "eyebrow": "Uitschieters",
+      "fullHistory": "Volledige geschiedenis"
+    },
+    "story": {
+      "tapHint": "Tik om door te gaan",
+      "exit": "Verlaten",
+      "pickYear": "Jaar",
+      "intro": {
+        "eyebrow": "Jaaroverzicht",
+        "eyebrowMonth": "Maandoverzicht",
+        "kicker": "Jouw {year}",
+        "kickerMonth": "Jouw {period}",
+        "subhead": "Druk op play op het jaar dat was.",
+        "subheadMonth": "Druk op play op de maand die was.",
+        "cta": "Bekijk je jaar",
+        "keyHint": "Pijltoetsen om te navigeren"
+      },
+      "total": {
+        "eyebrow": "Alles inbegrepen",
+        "headline": "{count, plural, one {# keuze} other {# keuzes}}",
+        "subhead": "{movies} op het scherm · {books} in de kast · {music} in je oren."
+      },
+      "format": {
+        "eyebrow": "Jouw mix",
+        "movies": "Films",
+        "books": "Boeken",
+        "music": "Albums",
+        "movieHeavy": "Je was in je filmtijdperk.",
+        "bookHeavy": "Je dompelde je onder in lezen.",
+        "musicHeavy": "Albums waren de move.",
+        "balanced": "Een evenwichtig jaar over formaten."
+      },
+      "genres": {
+        "eyebrow": "Topgenres",
+        "headline": "Je kon niet genoeg krijgen van {top}.",
+        "fallback": "Geen duidelijke favoriet dit jaar."
+      },
+      "creator": {
+        "eyebrow": "Meest gekozen",
+        "headlineDirector": "{name} bleef opduiken.",
+        "headlineAuthor": "{name} was op repeat.",
+        "headlineArtist": "{name} heerste over het jaar.",
+        "subhead": "{count, plural, one {# keuze} other {# keuzes}}",
+        "fallback": "Geen uitschietende maker dit jaar."
+      },
+      "standout": {
+        "eyebrow": "Jouw moment",
+        "peakMonth": "Piekmaand",
+        "peakSubhead": "{count, plural, one {# keuze} other {# keuzes}} in {month}",
+        "streak": "Langste reeks",
+        "streakSubhead": "{count, plural, one {# dag op rij} other {# dagen op rij}}",
+        "noStreak": "Nog geen reeks"
+      },
+      "picks": {
+        "eyebrow": "Uitschietende keuzes",
+        "headline": "Die die zijn blijven hangen.",
+        "subhead": "Favorieten eerst, dan de rest van de hoogtepunten."
+      },
+      "outro": {
+        "eyebrow": "Dat was jouw jaar",
+        "headline": "{count, plural, one {# keuze} other {# keuzes}} voor jou samengesteld.",
+        "subhead": "Deel je hoogtepunten of doe nog een quiz om het volgende hoofdstuk te starten.",
+        "share": "Mijn jaar delen",
+        "restart": "Opnieuw bekijken",
+        "newQuiz": "Nieuwe quiz doen"
+      }
+    },
+    "months": [
+      "Jan",
+      "Feb",
+      "Mrt",
+      "Apr",
+      "Mei",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Okt",
+      "Nov",
+      "Dec"
+    ]
+  },
+  "GroupQuiz": {
+    "category": "Groepsquiz",
+    "stepOf": "Stap {current} van {total}",
+    "stepLabel": {
+      "path": "Hosten of meedoen",
+      "host": "Instellingen",
+      "join": "Meedoen",
+      "lobby": "Lobby",
+      "result": "Resultaat"
+    },
+    "back": {
+      "dashboard": "Feed",
+      "home": "Home",
+      "step": "Terug",
+      "leave": "Verlaten",
+      "lobby": "Lobby"
+    },
+    "path": {
+      "title": "Een ronde hosten of meedoen?",
+      "subtitle": "Hosten bepaalt het formaat en deelt een code. Meedoen brengt je in de ronde van iemand anders met een 6-cijferige code.",
+      "cards": {
+        "host": {
+          "eyebrow": "Host",
+          "title": "Een ronde hosten",
+          "description": "Kies het formaat, stel in hoeveel vragen, deel de code en kijk hoe de keuzes binnenkomen."
+        },
+        "join": {
+          "eyebrow": "Meedoen",
+          "title": "Aan een ronde meedoen",
+          "description": "Heb je een 6-cijferige code van een vriend? Spring in — geen account nodig."
+        }
+      }
+    },
+    "lobby": {
+      "eyebrow": "Groepsquiz",
+      "title": "Vind een keuze samen",
+      "subtitle": "Host een quiz en deel de code. Iedereen antwoordt, de AI vindt één keuze die past bij de groep.",
+      "intent": {
+        "eyebrow": "Welkom terug",
+        "headline": "Doorgaan waar je was gebleven?",
+        "summary": "{count} vragen · {types} · tot {max} spelers",
+        "types": {
+          "both": "films + boeken",
+          "mix": "films + boeken + muziek",
+          "movie": "films",
+          "book": "boeken",
+          "music": "muziek"
+        },
+        "continue": "Doorgaan",
+        "continuing": "Aanmaken…",
+        "dismissAria": "Negeren"
+      },
+      "host": {
+        "eyebrow": "Host",
+        "title": "Nieuwe sessie starten",
+        "nameLabel": "Je naam",
+        "namePlaceholder": "Hoe anderen je zien",
+        "typeLabel": "Keuzetype",
+        "questionsLabel": "Vragen",
+        "questionsAria": "Aantal vragen",
+        "maxPlayersLabel": "Max spelers",
+        "maxPlayersAria": "Maximum aantal spelers in de lobby",
+        "modeLabel": "Wanneer?",
+        "modeLive": "Nu samen",
+        "modeAsync": "Tegen een deadline",
+        "modeLiveHint": "Iedereen doet mee aan de lobby en antwoordt tegelijkertijd.",
+        "modeAsyncHint": "Elk lid antwoordt op zijn eigen tijd vóór de deadline.",
+        "deadlineLabel": "Deadline",
+        "plannedForLabel": "Gepland voor (optioneel)",
+        "plannedForHint": "Alleen informatief — wanneer jullie allemaal van plan zijn samen te kijken / lezen / luisteren.",
+        "create": "Sessie aanmaken",
+        "creating": "Aanmaken…",
+        "signInTitle": "Inloggen om te hosten",
+        "signInBody": "Hosten slaat de groepskeuze op in je bibliotheek, volgt reeksen en ontgrendelt Jaaroverzicht.",
+        "signInCta": "Inloggen of account aanmaken",
+        "signInHint": "Wil je gewoon spelen? Gebruik de code rechts."
+      },
+      "join": {
+        "eyebrow": "Meedoen",
+        "title": "Heb je een code?",
+        "codeLabel": "Sessiecode",
+        "codePlaceholder": "ABC123",
+        "nameLabel": "Je naam",
+        "namePlaceholder": "Weergavenaam",
+        "join": "Sessie meedoen",
+        "joining": "Meedoen…",
+        "footer": "Geen account nodig om mee te doen — alleen een naam en een code."
+      },
+      "contentTypes": {
+        "both": "Beide",
+        "mix": "Mix",
+        "movie": "Films",
+        "book": "Boeken",
+        "music": "Muziek"
+      },
+      "errors": {
+        "signInRequired": "Log in om een groepsquiz te hosten.",
+        "createFailed": "Kon sessie niet aanmaken",
+        "joinFailed": "Kon niet meedoen aan sessie",
+        "codeLength": "Voer een 6-cijferige code in."
+      }
+    },
+    "session": {
+      "async": {
+        "eyebrow": "Async sessie",
+        "deadlineInHours": "{hours, plural, one {# uur over} other {# uur over}}",
+        "deadlineInDays": "{days, plural, one {# dag over} other {# dagen over}}",
+        "deadlinePassed": "Deadline verstreken — finaliseren",
+        "plannedFor": "Gepland voor {date}",
+        "submitted": "{done}/{total} ingediend"
+      },
+      "loading": "Sessie laden…",
+      "notFoundTitle": "Sessie niet gevonden",
+      "notFoundBody": "Die code komt niet overeen met een actieve sessie.",
+      "backToHome": "Terug naar Groepsquiz",
+      "shareCode": "Deel deze code",
+      "copyLink": "Link kopiëren",
+      "shareLink": "Delen",
+      "shareTitle": "Doe mee aan mijn Smart Advisor groepsquiz",
+      "shareText": "Doe mee aan mijn groepsquiz met code {code}",
+      "linkCopied": "Link gekopieerd",
+      "linkCopyFailed": "Kon link niet kopiëren",
+      "linkShareFailed": "Kon niet delen — probeer opnieuw",
+      "qr": {
+        "show": "QR tonen",
+        "title": "Scan om mee te doen",
+        "subtitle": "Richt de camera van je telefoon op de QR-code om direct in deze ronde te springen.",
+        "codeHint": "Of voer code in",
+        "close": "Klaar"
+      },
+      "joined": "{name} is meegedaan",
+      "left": "{name} heeft de lobby verlaten",
+      "playerCount": "{count, plural, one {# speler} other {# spelers}}",
+      "playerCountOf": "{count}/{max, plural, one {# speler} other {# spelers}}",
+      "submittedCount": "{submitted}/{total} ingediend",
+      "leave": "Verlaten",
+      "backToLobby": "Terug naar lobby",
+      "end": "Beëindigen",
+      "leaveConfirm": "Sessie verlaten? Je antwoorden tellen niet mee voor de groepskeuze en je hebt de code nodig om opnieuw mee te doen.",
+      "leaveQuizConfirm": "Groepsquiz verlaten? Je antwoorden tot nu toe worden niet ingediend.",
+      "endConfirm": "Deze sessie voor iedereen beëindigen?",
+      "backToLobbyConfirmInProgress": "Iedereen terug naar de lobby sturen? Lopende antwoorden worden gewist.",
+      "backToLobbyConfirmCompleted": "Iedereen terug naar de lobby sturen? Antwoorden en de huidige keuze worden gewist zodat een nieuwe ronde kan beginnen.",
+      "host": {
+        "generatingQuestions": "Vragen genereren…",
+        "startQuiz": "Quiz starten · {count, plural, one {# vraag} other {# vragen}}",
+        "needTwoPlayers": "Je hebt minstens 2 spelers nodig om te beginnen.",
+        "startFailed": "Kon quiz niet starten",
+        "restartFailed": "Kon quiz niet opnieuw starten",
+        "synthesizeFailed": "Kon aanbeveling niet genereren",
+        "overloaded": "Onze AI is op dit moment overbelast. Geef het een minuut en probeer opnieuw."
+      },
+      "guest": {
+        "waitingHost": "Wachten op de host",
+        "waitingBody": "Hou vol — ze beginnen elk moment.",
+        "joinLobby": "Doe mee aan de lobby",
+        "joinPrompt": "Voer een naam in om mee te doen aan deze groepsquiz.",
+        "joinPlaceholder": "Weergavenaam",
+        "join": "Meedoen",
+        "joining": "Meedoen…",
+        "joinFailed": "Kon niet meedoen aan sessie",
+        "inProgress": "De quiz is al bezig.",
+        "completed": "Deze sessie is afgerond.",
+        "askHost": "Vraag de host om de lobby terug te brengen zodat je kunt meedoen.",
+        "lobbyFull": "Lobby is vol",
+        "lobbyFullBody": "De host heeft deze lobby beperkt en hij zit al aan de limiet. Vraag ze om hem te verhogen of wacht tot iemand vertrekt."
+      },
+      "submitted": {
+        "lockedInAll": "Iedereen is klaar",
+        "lockedIn": "Klaar",
+        "waitingOthers": "Wachten tot iedereen anders klaar is…",
+        "reveal": "De keuze van de groep onthullen",
+        "revealing": "Keuze vinden…",
+        "guestWaiting": "Host genereert de keuze…"
+      },
+      "quiz": {
+        "category": "Live ronde",
+        "questionOf": "Vraag {current} van {total}",
+        "back": "Terug",
+        "next": "Volgende",
+        "submit": "Bevestigen",
+        "submitting": "Indienen…",
+        "submittedToast": "Bevestigd!",
+        "answerAll": "Beantwoord eerst elke vraag."
+      },
+      "params": {
+        "contentMovie": "Films",
+        "contentBook": "Boeken",
+        "contentMusic": "Muziek",
+        "contentMix": "Mix",
+        "questions": "{count, plural, one {# vraag} other {# vragen}}",
+        "timeEstimate": "~{minutes, plural, one {# min} other {# min}}",
+        "maxPlayers": "{max, plural, one {# plek} other {# plekken}}",
+        "emptySeat": "Lege plek",
+        "submittedProgress": "{done} van {total} bevestigd"
+      },
+      "completed": {
+        "eyebrow": "De keuze van de groep",
+        "subtitle": "Op basis van wat iedereen zei, hier is iets dat zou moeten passen voor de kamer.",
+        "playAgain": "Opnieuw spelen",
+        "resetting": "Resetten…",
+        "newGroup": "Nieuwe groep starten",
+        "done": "Klaar",
+        "endSession": "Sessie beëindigen"
+      },
+      "cancelled": {
+        "body": "Deze sessie is beëindigd."
+      }
+    },
+    "result": {
+      "movie": "Film",
+      "book": "Boek",
+      "music": "Album",
+      "byAuthor": "Door {creator}",
+      "byDirector": "Geregisseerd door {creator}",
+      "byArtist": "Door {creator}",
+      "whyThisPick": "Waarom deze keuze",
+      "viewOnOpenLibrary": "Bekijk op Open Library",
+      "watchTrailer": "Trailer bekijken",
+      "playTrailerAria": "Speel trailer voor {title}"
+    }
+  },
+  "History": {
+    "eyebrow": "Geschiedenis",
+    "title": "Je suggestiegeschiedenis",
+    "subtitle": "Alles wat de AI voor je heeft gekozen. Markeer een favoriet om hem dichtbij te houden, of log er een in je bibliotheek om de AI te leren hoe je je voelde.",
+    "clearAll": "Alles wissen",
+    "startQuiz": "Quiz starten",
+    "filtersAria": "Geschiedenisfilters",
+    "filtersGroup": "Filters",
+    "filters": {
+      "all": "Alle",
+      "movies": "Films",
+      "books": "Boeken",
+      "music": "Muziek",
+      "favorites": "Favorieten"
+    },
+    "stats": {
+      "total": "Totaal",
+      "favorites": "Favorieten",
+      "movies": "Films",
+      "books": "Boeken",
+      "music": "Muziek"
+    },
+    "sortLabel": "Sorteren:",
+    "sortAria": "Aanbevelingen sorteren",
+    "searchPlaceholder": "Zoek vorige keuzes",
+    "sort": {
+      "newest": "Nieuwste",
+      "oldest": "Oudste",
+      "favorites_first": "Favorieten eerst"
+    },
+    "empty": {
+      "title": "Geen aanbevelingen gevonden",
+      "body": "Probeer een ander filter of genereer een nieuwe set aanbevelingen."
+    },
+    "card": {
+      "movie": "Film",
+      "book": "Boek",
+      "music": "Album",
+      "fallbackExplanation": "Een op maat gemaakte {type}-aanbeveling gebaseerd op je recente quizkeuzes.",
+      "openAria": "Open details voor {title}",
+      "favoriteAdd": "Toevoegen aan favorieten",
+      "favoriteRemove": "Verwijderen uit favorieten",
+      "deleteAria": "Verwijderen"
+    },
+    "toasts": {
+      "favoriteFailed": "Kon je favoriet niet bijwerken — probeer opnieuw",
+      "favoriteAdded": "Toegevoegd aan favorieten",
+      "favoriteRemoved": "Verwijderd uit favorieten",
+      "deleteFailed": "Kon die aanbeveling niet verwijderen — probeer opnieuw",
+      "deleted": "Aanbeveling verwijderd uit je geschiedenis",
+      "clearFailed": "Kon je geschiedenis niet wissen — probeer opnieuw",
+      "cleared": "Alle aanbevelingen gewist"
+    },
+    "confirm": {
+      "deleteOne": "Deze aanbeveling verwijderen?",
+      "clearAll": "Weet je zeker dat je alle aanbevelingen wilt verwijderen? Dit kan niet ongedaan worden gemaakt."
+    },
+    "modal": {
+      "ariaLabel": "Details voor {title}",
+      "byAuthor": "Door {author}",
+      "byDirector": "Geregisseerd door {director}",
+      "byArtist": "Door {artist}",
+      "inLibrary": "In je bibliotheek",
+      "close": "Sluiten",
+      "dislike": "Niets voor mij",
+      "dislikedOn": "Wordt niet meer aanbevolen"
+    }
+  },
+  "Library": {
+    "import": {
+      "headerCta": "Importeren",
+      "back": "Terug naar bibliotheek",
+      "eyebrow": "Importeren",
+      "title": "Importeer je kijklijst",
+      "subtitle": "Breng je Letterboxd-films of Goodreads-boeken over. Opnieuw importeren is veilig — overeenkomende titels worden bijgewerkt, niet gedupliceerd.",
+      "sourceLabel": "Waar komt het vandaan?",
+      "sources": {
+        "letterboxd": "Letterboxd",
+        "goodreads": "Goodreads"
+      },
+      "hint": {
+        "letterboxd": "Exporteer van letterboxd.com/settings/data — gebruik watchlist.csv of je volledige export.",
+        "goodreads": "Exporteer van goodreads.com/review/import — de \"Goodreads Library Export\" CSV."
+      },
+      "choose": "Kies een .csv-bestand",
+      "chooseHint": "Letterboxd of Goodreads CSV-export",
+      "preview": "{count, plural, one {# titel klaar om te importeren} other {# titels klaar om te importeren}}",
+      "mismatch": "Dit bestand lijkt op een {detected}-export, maar je koos {chosen}. Controleer voor het importeren.",
+      "chooseDifferent": "Kies een ander bestand",
+      "importCta": "{count, plural, one {# titel} other {# titels}} importeren",
+      "importing": "Importeren {done} van {total}…",
+      "doneTitle": "Importeren voltooid",
+      "doneSummary": "{imported} geïmporteerd · {skipped} overgeslagen · {failed} mislukt",
+      "importAnother": "Nog een importeren",
+      "goToLibrary": "Naar bibliotheek",
+      "errors": {
+        "read": "Kon dat bestand niet lezen. Probeer opnieuw.",
+        "empty": "Dat bestand heeft geen rijen om te importeren.",
+        "parse": "Kon dat bestand niet parsen."
+      }
+    },
+    "finishReminder": {
+      "eyebrow": "Pak op waar je was gebleven",
+      "title": "{count, plural, one {Je hebt nog # titel bezig} other {Je hebt nog # titels bezig}}",
+      "cta": "Open"
+    },
+    "eyebrow": "Bibliotheek",
+    "title": "Wat je hebt gekeken en gelezen",
+    "subtitle": "Reacties die je hier opslaat worden een smaaksignaal dat de AI gebruikt bij je volgende quiz.",
+    "startQuiz": "Quiz starten",
+    "filtersAria": "Bibliotheekfilters",
+    "typeGroup": "Type",
+    "type": {
+      "all": "Alle",
+      "movie": "Films",
+      "book": "Boeken",
+      "music": "Muziek"
+    },
+    "stats": {
+      "total": "Totaal",
+      "finished": "Voltooid",
+      "movies": "Films",
+      "books": "Boeken",
+      "music": "Muziek"
+    },
+    "statusLabel": "Status",
+    "searchPlaceholder": "Zoek in je bibliotheek",
+    "filterAll": "Alle",
+    "status": {
+      "finished": "Voltooid",
+      "in_progress": "Bezig",
+      "wishlist": "Verlanglijst",
+      "dropped": "Opgegeven"
+    },
+    "rating": {
+      "1": "Niets voor mij",
+      "2": "Het was oké",
+      "3": "Geweldig"
+    },
+    "byAuthor": "Door {creator}",
+    "byDirector": "Geregisseerd door {creator}",
+    "byArtist": "Door {creator}",
+    "mediumMovie": "Film",
+    "mediumBook": "Boek",
+    "mediumMusic": "Album",
+    "loggedOn": "Gelogd {date}",
+    "empty": {
+      "noItemsTitle": "Nog niets in je bibliotheek",
+      "noItemsBody": "Druk na je volgende quiz op \"Ik heb dit gekeken / gelezen\" bij een resultaat en het verschijnt hier.",
+      "noMatchesTitle": "Geen overeenkomsten voor die filters",
+      "noMatchesBody": "Probeer de filters hierboven te wijzigen of te wissen."
+    },
+    "removeConfirm": "\"{title}\" uit je bibliotheek verwijderen?",
+    "removed": "Verwijderd uit bibliotheek",
+    "updated": "Bibliotheekvermelding bijgewerkt",
+    "editAria": "{title} bewerken",
+    "removeAria": "{title} verwijderen",
+    "statusChangeAria": "Status van {title} wijzigen",
+    "wishlistButton": {
+      "add": "Verlanglijst",
+      "onWishlist": "Op verlanglijst",
+      "added": "Toegevoegd aan je verlanglijst",
+      "ariaAdd": "{title} toevoegen aan je verlanglijst",
+      "ariaOnWishlist": "{title} staat op je verlanglijst"
+    },
+    "editDialog": {
+      "ariaLabel": "Bibliotheekvermelding bewerken",
+      "title": "Vermelding bewerken",
+      "statusHeader": "Status",
+      "ratingHeader": "Beoordeling",
+      "reactionHeader": "Reactie",
+      "reactionPlaceholder": "Eenregelige conclusie…",
+      "save": "Wijzigingen opslaan",
+      "cancel": "Annuleren"
+    }
+  },
+  "Onboarding": {
+    "eyebrow": "Bijna klaar",
+    "title": "Snelle check",
+    "subtitle": "Laten we ervoor zorgen dat alles klopt voordat je instapt.",
+    "readonly": {
+      "email": "E-mail",
+      "age": "Leeftijd",
+      "editLater": "Je kunt deze later wijzigen in instellingen."
+    },
+    "fields": {
+      "displayName": {
+        "label": "Weergavenaam",
+        "placeholder": "Hoe we je moeten noemen"
+      },
+      "language": {
+        "label": "Taal",
+        "en": "English",
+        "es": "Español"
+      },
+      "focus": {
+        "movie": "Films",
+        "book": "Boeken",
+        "music": "Muziek",
+        "mix": "Mix"
+      }
+    },
+    "steps": {
+      "name": {
+        "eyebrow": "Stap 1",
+        "title": "Hoe moeten we je noemen?",
+        "subtitle": "We gebruiken dit in aanbevelingen en je profiel."
+      },
+      "language": {
+        "eyebrow": "Stap 2",
+        "title": "Kies je taal",
+        "subtitle": "We vertalen de app-interface om overeen te komen."
+      },
+      "focus": {
+        "eyebrow": "Stap 3",
+        "title": "Waarvoor wil je keuzes?",
+        "subtitle": "Stelt het standaard inhoudstype in. Je kunt nog steeds wisselen bij elke quiz.",
+        "hint": "Tip: je hebt altijd de optie om dit bij individuele quizzen om te draaien."
+      },
+      "avoid": {
+        "eyebrow": "Stap 4",
+        "title": "Iets dat je liever overslaat?",
+        "subtitle": "Tik op een om een harde \"niet aanbevelen\"-regel toe te voegen. Sla de stap over als niets te binnen schiet.",
+        "emptyHint": "Nog geen filters — je kunt er op elk moment toevoegen in Instellingen.",
+        "selectedHint": "{count, plural, one {# genre} other {# genres}} die je liever vermijdt."
+      },
+      "review": {
+        "eyebrow": "Een laatste blik",
+        "title": "Ziet dit er goed uit?",
+        "subtitle": "Bewerk alles wat je wilt veranderen voordat we het opslaan.",
+        "edit": "Bewerken",
+        "empty": "—",
+        "noGenres": "Geen"
+      }
+    },
+    "back": "Terug",
+    "next": "Volgende",
+    "finish": "Installatie voltooien",
+    "submit": "Ziet er goed uit",
+    "skip": "Nu overslaan",
+    "previewClose": "Voorbeeld sluiten",
+    "errors": {
+      "displayNameRequired": "Voer een weergavenaam in.",
+      "saveFailed": "We konden je instellingen niet opslaan. Probeer opnieuw."
+    },
+    "savedToast": "Alles klaar — welkom aan boord."
+  },
+  "Quiz": {
+    "category": "Quiz instellingen",
+    "stepOf": "Stap {current} van {total}",
+    "back": {
+      "dashboard": "Feed"
+    },
+    "contentSelection": {
+      "title": "Waarvoor wil je een aanbeveling?",
+      "subtitle": "Kies er een zodat we je aanbevelingsflow kunnen aanpassen.",
+      "validation": "Selecteer een optie voordat je doorgaat.",
+      "continue": "Doorgaan",
+      "continuing": "Doorgaan…",
+      "cards": {
+        "movie": {
+          "eyebrow": "Op het scherm",
+          "title": "Film",
+          "description": "Een film afgestemd op je huidige stemming en tempo."
+        },
+        "book": {
+          "eyebrow": "In de kast",
+          "title": "Boek",
+          "description": "Een lezing afgestemd op je stijl en interesses."
+        },
+        "music": {
+          "eyebrow": "In je oren",
+          "title": "Album",
+          "description": "Een plaat die past bij de stemming waarin je bent."
+        },
+        "mix": {
+          "eyebrow": "Alle drie",
+          "title": "Mix het",
+          "description": "Een film, een boek en een album samen gekozen."
+        },
+        "both": {
+          "eyebrow": "Beide",
+          "title": "Een van elk",
+          "description": "Een film en een boek samen gekozen in één keer."
+        }
+      }
+    },
+    "questionCount": {
+      "title": "Hoeveel vragen moeten we stellen?",
+      "subtitle": "Kies de diepte voor je {contentType}-aanbevelingsflow.",
+      "contentTypes": {
+        "movie": "film",
+        "book": "boek",
+        "music": "album",
+        "mix": "film, boek en album",
+        "both": "film en boek"
+      },
+      "questionsLabel": "{count, plural, one {Vraag} other {Vragen}}",
+      "tone": {
+        "quick": "Snel en gericht",
+        "focused": "Scherp en specifiek",
+        "balanced": "Evenwichtige diepte",
+        "thorough": "Grondige verkenning",
+        "comprehensive": "Uitgebreid detail"
+      },
+      "estimate": "{minutes, plural, one {# minuut} other {# minuten}}",
+      "ariaCount": "Aantal vragen",
+      "back": "Formaat",
+      "continue": "Doorgaan",
+      "continuing": "Doorgaan…"
+    },
+    "questionnaire": {
+      "category": "Live quiz",
+      "loadingStep": "Je quiz voorbereiden",
+      "questionOf": "Vraag {current} van {total}",
+      "previous": "Vorige",
+      "back": "Terug",
+      "next": "Volgende",
+      "submit": "Aanbevelingen krijgen",
+      "submitting": "Genereren…",
+      "subtitle": {
+        "fillInBlank": "Deel je gedachten in je eigen woorden.",
+        "selectAll": "Kies er zoveel als je wilt.",
+        "singleSelect": "Kies er een zodat we je aanbevelingen kunnen afstemmen."
+      },
+      "leaveConfirm": "Quiz verlaten? Je antwoorden tot nu toe worden niet opgeslagen.",
+      "errors": {
+        "title": "Kan vragen niet laden",
+        "overloadedTitle": "Onze AI zit op capaciteit",
+        "session": "Je sessie is verlopen. Log opnieuw in om door te gaan.",
+        "generic": "We konden je vragen niet genereren. Probeer opnieuw.",
+        "overloaded": "Onze AI wordt op dit moment gebombardeerd. Geef het een minuut en probeer opnieuw — we hebben al een paar keer voor je opnieuw geprobeerd.",
+        "tryAgain": "Opnieuw proberen",
+        "back": "Terug"
+      },
+      "loadingMessages": {
+        "default": [
+          "Goede vragen bedenken…",
+          "Je hoek kiezen…",
+          "Op jouw smaak afstemmen…",
+          "Kalibreren op je vibe…",
+          "De quiz opstellen…",
+          "Bijna klaar voor jou…"
+        ],
+        "movie": [
+          "Je schermsmaak verkennen…",
+          "Vragen wat je op play laat drukken…",
+          "De juiste scènes opstellen…",
+          "Het uithangbord polijsten…",
+          "De lens afstemmen…",
+          "De openingscredits rollen…"
+        ],
+        "book": [
+          "Door je planken bladeren…",
+          "Luisteren naar je leesstem…",
+          "Vragen naar je beduimelde favorieten…",
+          "De rug kraken…",
+          "De bladwijzer plaatsen…",
+          "Naar hoofdstuk een bladeren…"
+        ],
+        "music": [
+          "Je smaak versnellen…",
+          "Luisteren naar wat raakt…",
+          "De juiste groove opstellen…",
+          "De wijzer afstemmen…",
+          "De naald opstellen…",
+          "Op opnemen drukken…"
+        ],
+        "mix": [
+          "Door formaten lezen…",
+          "De aanwijzingen mixen — scherm, pagina, geluid…",
+          "Je rode draad vinden…",
+          "Drie smaken samenweven…",
+          "Het trio afstemmen…",
+          "Bijna klaar voor jou…"
+        ]
+      }
+    }
+  },
+  "Results": {
+    "loadingMessages": {
+      "default": [
+        "Door je antwoorden bladeren…",
+        "Het algoritme raadplegen…",
+        "Goede smaak kruisverwijzen…",
+        "Op zoek naar verborgen juweeltjes…",
+        "De shortlist wegen…",
+        "Elke aanbeveling polijsten…",
+        "De laatste hand toevoegen…"
+      ],
+      "movie": [
+        "Door cinema zeven…",
+        "Je smaak vergelijken met het canon…",
+        "De projectorrol trekken…",
+        "De credits lezen…",
+        "Controleren wat je twee uur waard is…",
+        "De trailer opstellen…"
+      ],
+      "book": [
+        "Door de bibliotheekplanken lopen…",
+        "Je planken kruisverwijzen…",
+        "Je leeskaart traceren…",
+        "De juiste rug afstoffen…",
+        "De openingszin controleren…",
+        "De bladwijzer erin schuiven…"
+      ],
+      "music": [
+        "Door kratten graven voor je geluid…",
+        "Het juiste album sequencen…",
+        "Voorbij de singles luisteren…",
+        "Afstemmen op je frequentie…",
+        "De deep cuts opstellen…",
+        "De naald laten zakken…"
+      ],
+      "mix": [
+        "Films, boeken en muziek samenweven…",
+        "Drie smaken matchen met je antwoorden…",
+        "Je drie keuzes mixen…",
+        "Door formaten kruisverwijzen…",
+        "Het trio opstellen…",
+        "De laatste hand toevoegen…"
+      ]
+    },
+    "body": {
+      "matchSuffix": "{score}% match",
+      "matchPercent": "{score}%",
+      "whyThisPick": "Waarom deze keuze",
+      "about": "Over",
+      "showMore": "Meer tonen",
+      "showLess": "Minder tonen",
+      "byAuthor": "Door {author}",
+      "byDirector": "Geregisseerd door {director}",
+      "byArtist": "Door {artist}",
+      "favoriteAdd": "{title} toevoegen aan favorieten",
+      "favoriteRemove": "{title} verwijderen uit favorieten",
+      "movie": "Film",
+      "book": "Boek",
+      "music": "Album",
+      "eyebrow": "Jouw keuzes",
+      "headline": "Met de hand gekozen voor jou",
+      "headlines": [
+        "Met de hand gekozen voor jou",
+        "Afgestemd op je smaak",
+        "Vers van de pers",
+        "Gemaakt om bij je vibe te passen",
+        "Gebouwd rond je antwoorden",
+        "Speciaal voor jou samengesteld",
+        "Je volgende favoriet, misschien",
+        "Gekozen met intentie",
+        "Persoonlijk de jouwe",
+        "Zorgvuldig geselecteerd"
+      ],
+      "subhead": "{count, plural, one {# gepersonaliseerde keuze van de AI, met de redenering erachter. Log er een in je bibliotheek om toekomstige keuzes te beïnvloeden.} other {# gepersonaliseerde keuzes van de AI, met de redenering achter elk. Log er een in je bibliotheek om toekomstige keuzes te beïnvloeden.}}",
+      "sections": {
+        "movie": {
+          "eyebrow": "Film",
+          "title": "Op het scherm"
+        },
+        "book": {
+          "eyebrow": "Boek",
+          "title": "In de kast"
+        },
+        "music": {
+          "eyebrow": "Album",
+          "title": "In je oren"
+        }
+      },
+      "actions": {
+        "retake": "Quiz opnieuw doen",
+        "viewHistory": "Geschiedenis bekijken",
+        "share": "Resultaten delen",
+        "more": "Meer",
+        "moreAriaLabel": "Meer acties"
+      },
+      "shareMenu": {
+        "share": "Delen…",
+        "copy": "Kopiëren naar klembord",
+        "shareX": "Delen op X",
+        "shareEmail": "Delen via e-mail"
+      },
+      "shareToasts": {
+        "shareFailed": "Kon niet delen — probeer opnieuw",
+        "copySuccess": "Gekopieerd naar klembord!",
+        "copyFailed": "Kon niet kopiëren — probeer opnieuw",
+        "favoriteFailed": "Kon je favoriet niet bijwerken — probeer opnieuw",
+        "favoriteAdded": "Toegevoegd aan favorieten",
+        "favoriteRemoved": "Verwijderd uit favorieten"
+      },
+      "shareText": {
+        "title": "Mijn Smart Advisor keuzes",
+        "movies": "Films:",
+        "books": "Boeken:",
+        "music": "Albums:",
+        "directorPrefix": "reg. {director}",
+        "byAuthorShort": "door {author}",
+        "byArtistShort": "door {artist}",
+        "genres": "Genres: {list}",
+        "footer": "Krijg je eigen keuzes op smartadvisor.app"
+      },
+      "shareTwitter": "Net mijn Smart Advisor keuzes gekregen: {titles}\n\nKrijg je eigen op smartadvisor.app",
+      "shareEmailSubject": "Mijn Smart Advisor keuzes",
+      "beforeUnload": "Je hebt niet-opgeslagen aanbevelingen. Weet je zeker dat je wilt vertrekken?",
+      "generationStep": {
+        "analyzing": "Je antwoorden analyseren...",
+        "generating": "Gepersonaliseerde aanbevelingen genereren...",
+        "enhancing": "Verrijken met film-, boek- en albumgegevens...",
+        "finalizing": "Je aanbevelingen finaliseren..."
+      },
+      "generationError": "Kon gepersonaliseerde aanbevelingen niet genereren. Probeer opnieuw.",
+      "overloadedTitle": "Onze AI zit op capaciteit",
+      "overloadedBody": "Onze AI wordt op dit moment gebombardeerd. Geef het een minuut en probeer opnieuw — we hebben al een paar keer voor je opnieuw geprobeerd.",
+      "confirmDialog": {
+        "title": "Nieuwe aanbevelingen genereren?",
+        "body": "Je hebt al aanbevelingen gegenereerd voor deze antwoorden. Genereer een nieuwe set of ga terug naar je feed.",
+        "cancel": "Naar feed",
+        "confirm": "Nieuwe genereren"
+      },
+      "errorState": {
+        "title": "Kan aanbevelingen niet genereren",
+        "retry": "Opnieuw proberen",
+        "back": "Quiz opnieuw doen"
+      },
+      "refine": {
+        "cta": "Verfijnen",
+        "eyebrow": "Verfijnen",
+        "title": "Pas deze keuzes aan",
+        "subtitle": "Vertel ons hoe te sturen — we draaien opnieuw met je oorspronkelijke antwoorden plus dit.",
+        "placeholder": "bijv. meer zoals Dune, lichter, niets boven 2 uur",
+        "cancel": "Annuleren",
+        "submit": "Verfijnen"
+      }
+    }
+  },
+  "Dashboard": {
+    "eyebrow": "Dashboard",
+    "startQuiz": "Quiz starten",
+    "viewsAria": "Dashboardweergaven",
+    "viewsGroup": "Weergaven",
+    "tabs": {
+      "overview": "Overzicht",
+      "picks": "Keuzes",
+      "recentPicks": "Recente keuzes",
+      "genres": "Genres",
+      "milestones": "Mijlpalen"
+    },
+    "stats": {
+      "total": "Totaal keuzes",
+      "movies": "Films",
+      "books": "Boeken",
+      "music": "Muziek",
+      "favorites": "Favorieten"
+    },
+    "filters": {
+      "all": "Alle",
+      "favorites": "Favorieten"
+    },
+    "recentAria": "Filter recente keuzes",
+    "body": {
+      "loadingChart": "Grafiek laden...",
+      "greetings": [
+        "Welkom terug",
+        "Hé",
+        "Leuk je te zien",
+        "Hallo",
+        "Hoi",
+        "Hallo opnieuw",
+        "Blij dat je terug bent",
+        "Kijk wie er terug is",
+        "De legende keert terug",
+        "Wel, wel, wel",
+        "Groeten, sterveling",
+        "Wat een verrassing je te zien",
+        "Het plot wordt dikker",
+        "Tijd voor het vervolg",
+        "Nu te zien",
+        "Rol credits",
+        "Trommelroffel alstublieft",
+        "Schrap je schrap",
+        "Klaar, scroll"
+      ],
+      "headerHook": {
+        "loading": "Je gepersonaliseerde aanbevelingenhub.",
+        "empty": "Doe je eerste quiz om te beginnen.",
+        "quietWeek": "Rustige week — klaar voor een nieuwe keuze?",
+        "up": "{n, plural, one {# nieuwe keuze deze week · {delta} hoger dan vorige week.} other {# nieuwe keuzes deze week · {delta} hoger dan vorige week.}}",
+        "down": "{n, plural, one {# nieuwe keuze deze week · {delta} lager dan vorige week.} other {# nieuwe keuzes deze week · {delta} lager dan vorige week.}}",
+        "flat": "{n, plural, one {# nieuwe keuze deze week.} other {# nieuwe keuzes deze week.}}"
+      },
+      "modal": {
+        "ariaLabel": "Details voor {title}",
+        "byAuthor": "Door {author}",
+        "byDirector": "Geregisseerd door {director}",
+        "byArtist": "Door {artist}",
+        "close": "Sluiten"
+      },
+      "favoriteAria": "Favoriet",
+      "inLibraryAria": "In je bibliotheek",
+      "wrapped": {
+        "eyebrow": "Jaaroverzicht",
+        "titleLead": "Jouw",
+        "titleTail": "in keuzes",
+        "body": "Topgenres, langste reeks, meest gekozen maker — verpakt in een kaart.",
+        "cta": "Wrapped openen"
+      },
+      "suggestion": {
+        "eyebrow": "Suggestie hierna",
+        "firstQuiz": {
+          "title": "Doe je eerste quiz",
+          "body": "Beantwoord een paar vragen en de AI geeft je een op maat gemaakte keuze.",
+          "cta": "Quiz starten"
+        },
+        "logReaction": {
+          "title": "Log een reactie",
+          "body": "Vertel de AI wat aansloeg en wat niet — je reacties worden een smaaksignaal bij elke toekomstige quiz.",
+          "cta": "Resultaten openen"
+        },
+        "anotherPick": {
+          "title": "Tijd voor een andere keuze?",
+          "body": "Je laatste quiz was {ago} geleden. De AI kent nu {count, plural, one {# van je reacties} other {# van je reacties}}.",
+          "cta": "Nog een quiz doen"
+        }
+      },
+      "spotlight": {
+        "eyebrow": "Laatste keuze",
+        "openDetailsAria": "Details voor {title} openen",
+        "byAuthor": "Door {author}",
+        "byDirector": "Geregisseerd door {director}",
+        "viewAll": "Alles bekijken"
+      },
+      "noPicks": {
+        "title": "Nog geen keuzes",
+        "body": "Doe je eerste quiz en je laatste keuze leeft hier zodat hij altijd één klik weg is."
+      },
+      "pulse": {
+        "eyebrow": "Pols",
+        "thisWeek": "{count, plural, one {# keuze deze week} other {# keuzes deze week}}",
+        "quietWeek": "Rustige week",
+        "up": "↑ {delta} hoger dan vorige week",
+        "down": "↓ {delta} lager dan vorige week",
+        "lastFourteenDays": "Laatste 14 dagen",
+        "streakBadge": "Reeks van {count} dagen",
+        "stat": {
+          "picks": "Keuzes",
+          "library": "Bibliotheek",
+          "favorites": "Favorieten",
+          "topGenre": "Topgenre"
+        },
+        "picksHint": "{movies}f · {books}b · {music}a",
+        "ratedHint": "{count} beoordeeld",
+        "favoritesPercent": "{percent}%",
+        "topGenrePicks": "{count, plural, one {# keuze} other {# keuzes}}",
+        "noData": "—"
+      },
+      "milestones": {
+        "eyebrow": "Mijlpalen",
+        "pageTitle": "Je mijlpalen",
+        "backToFeed": "Terug naar feed",
+        "earnedSummary": "{earned} van {total} verdiend",
+        "unlocked": "Ontgrendeld",
+        "progress": "{progress}/{target}",
+        "unlockedToast": "Mijlpaal ontgrendeld: {label}",
+        "tierCompleteToast": "Niveau voltooid: {tier}! 🏆",
+        "tapForDetails": "Tik op een mijlpaal om te zien hoe je hem ontgrendelt",
+        "summaryCta": "Mijlpalen openen",
+        "summaryHint": "Bekijk elke mijlpaal, gegroepeerd per niveau.",
+        "tiers": {
+          "easy": "Makkelijk",
+          "medium": "Gemiddeld",
+          "hard": "Moeilijk",
+          "master": "Meester"
+        },
+        "items": {
+          "firstPick": "Eerste keuze",
+          "tenPicks": "10 keuzes",
+          "twentyFivePicks": "25 keuzes",
+          "halfCentury": "Halve eeuw",
+          "centurion": "Centurion",
+          "wideTaste": "Brede smaak",
+          "genreExplorer": "Genre-ontdekker",
+          "genreMaster": "Genremeester",
+          "cinephile": "Cinefiel",
+          "cinemaMaster": "Bioscoopmeester",
+          "bookworm": "Boekenwurm",
+          "voracious": "Vraatzuchtige lezer",
+          "melomaniac": "Melomaan",
+          "audiophile": "Audiofiel",
+          "musicMogul": "Muziekmagnaat",
+          "curator": "Curator",
+          "maven": "Expert",
+          "reflective": "Reflectief",
+          "critic": "Criticus",
+          "librarian": "Bibliothecaris",
+          "completionist": "Completist",
+          "weekStreak": "Weekreeks",
+          "marathon": "Marathon",
+          "legend": "Legende",
+          "movieMogul": "Filmmagnaat",
+          "libraryRoyal": "Bibliotheekkoninklijke",
+          "polymath": "Polymath",
+          "patron": "Beschermheer",
+          "tastemaker": "Smaakmaker",
+          "yearLong": "Het hele jaar"
+        },
+        "descriptions": {
+          "firstPick": "Krijg je eerste aanbeveling uit de quiz.",
+          "tenPicks": "Krijg 10 aanbevelingen over elke mix van quizzen.",
+          "twentyFivePicks": "Stapel 25 aanbevelingen op.",
+          "halfCentury": "Bereik 50 aanbevelingen.",
+          "centurion": "100 aanbevelingen is geen grapje.",
+          "wideTaste": "Krijg aanbevelingen die 5 verschillende genres dekken.",
+          "genreExplorer": "Vertak naar 10 verschillende genres.",
+          "genreMaster": "Dek 20 verschillende genres.",
+          "cinephile": "Verzamel 10 filmaanbevelingen.",
+          "cinemaMaster": "Verzamel 50 filmaanbevelingen.",
+          "bookworm": "Verzamel 10 boekaanbevelingen.",
+          "voracious": "Verzamel 50 boekaanbevelingen.",
+          "melomaniac": "Verzamel 10 albumaanbevelingen.",
+          "audiophile": "Verzamel 50 albumaanbevelingen.",
+          "musicMogul": "Verzamel 100 albumaanbevelingen.",
+          "curator": "Favoriete 5 aanbevelingen in je geschiedenis.",
+          "maven": "Favoriete 25 aanbevelingen.",
+          "reflective": "Beoordeel 5 items in je bibliotheek.",
+          "critic": "Beoordeel 25 items in je bibliotheek.",
+          "librarian": "Log 20 items in je bibliotheek.",
+          "completionist": "Markeer 10 bibliotheekitems als voltooid.",
+          "weekStreak": "Gebruik Smart Advisor 7 dagen op rij.",
+          "marathon": "Houd een 30-dagen Smart Advisor-reeks.",
+          "legend": "Bereik 250 aanbevelingen — een ware legende.",
+          "movieMogul": "Verzamel 100 filmaanbevelingen.",
+          "libraryRoyal": "Verzamel 100 boekaanbevelingen.",
+          "polymath": "Krijg aanbevelingen in 30 verschillende genres.",
+          "patron": "Favoriete 50 aanbevelingen.",
+          "tastemaker": "Beoordeel 100 items in je bibliotheek.",
+          "yearLong": "Houd een 365-dagen Smart Advisor-reeks. Ja, echt."
+        }
+      },
+      "library": {
+        "eyebrow": "Smaaksignaal",
+        "title": "Je bibliotheek",
+        "viewAll": "Alles bekijken",
+        "emptyLead": "Nog niets gelogd. Druk op",
+        "emptyAction": "Ik heb dit gekeken / gelezen",
+        "emptyTail": "bij een resultaat en het verschijnt hier als smaaksignaal voor toekomstige quizzen."
+      },
+      "inProgress": {
+        "eyebrow": "Momenteel",
+        "title": "Pak op waar je was gebleven",
+        "markFinished": "Markeren als voltooid",
+        "markedFinishedToast": "Mooi — open je bibliotheek om \"{title}\" te beoordelen.",
+        "viewAll": "Alles bekijken"
+      },
+      "picks": {
+        "filterAria": "Filter recente keuzes",
+        "all": "Alle",
+        "favorites": "Favorieten",
+        "seeAllInHistory": "Alles in geschiedenis bekijken",
+        "noPicksTitle": "Nog geen keuzes",
+        "noPicksBody": "Doe een quiz en je keuzes verzamelen zich hier.",
+        "startQuiz": "Quiz starten",
+        "noFavoritesTitle": "Nog geen favorieten",
+        "noFavoritesBody": "Tik op het hart bij een keuze om hem hier op te slaan.",
+        "movies": "Films",
+        "books": "Boeken",
+        "music": "Muziek"
+      },
+      "genres": {
+        "eyebrow": "Genre-uitsplitsing",
+        "title": "Waar je smaak naar overhelt",
+        "topLabel": "Top",
+        "topPercent": "{percent}%",
+        "mostlyMovies": "meestal films",
+        "mostlyBooks": "meestal boeken",
+        "mostlyMusic": "meestal muziek",
+        "evenSplit": "gelijke verdeling",
+        "empty": "Doe een quiz om je genres te zien.",
+        "format": {
+          "movies": "Films",
+          "books": "Boeken",
+          "music": "Muziek",
+          "totalPicks": "{count, plural, one {# keuze} other {# keuzes}}",
+          "empty": "Nog geen keuzes."
+        }
+      }
+    }
+  },
+  "Demo": {
+    "quiz": {
+      "category": "Demo quiz",
+      "pickLabel": "Kies een formaat",
+      "stepLabel": "Vraag {current} van {total}",
+      "back": {
+        "home": "Home",
+        "previous": "Vorige"
+      },
+      "cards": {
+        "movie": {
+          "eyebrow": "Op het scherm",
+          "title": "Film",
+          "description": "Een film afgestemd op je huidige stemming en tempo."
+        },
+        "book": {
+          "eyebrow": "In de kast",
+          "title": "Boek",
+          "description": "Een lezing afgestemd op je stijl en interesses."
+        },
+        "music": {
+          "eyebrow": "In je oren",
+          "title": "Album",
+          "description": "Een plaat die past bij de stemming waarin je bent."
+        },
+        "mix": {
+          "eyebrow": "Alle drie",
+          "title": "Mix het",
+          "description": "Een film, een boek en een album samen gekozen."
+        },
+        "both": {
+          "eyebrow": "Beide",
+          "title": "Een van elk",
+          "description": "Een film en een boek samen gekozen in één keer."
+        }
+      },
+      "validation": {
+        "fillInBlank": "Typ een antwoord voordat je doorgaat.",
+        "selectAll": "Selecteer minstens één optie voordat je doorgaat.",
+        "singleSelect": "Selecteer een optie voordat je doorgaat."
+      },
+      "next": "Volgende",
+      "continue": "Doorgaan",
+      "leaveConfirm": "Demo verlaten? Je antwoorden tot nu toe worden niet opgeslagen."
+    },
+    "results": {
+      "loadingText": "Je perfecte keuzes vinden...",
+      "matchSuffix": " match",
+      "whyThisPick": "Waarom deze keuze",
+      "about": "Over",
+      "showMore": "Meer tonen",
+      "showLess": "Minder tonen",
+      "viewDetails": "Details bekijken",
+      "errors": {
+        "limitTitle": "Dat is alles voor vandaag",
+        "genericTitle": "Er ging iets mis",
+        "limitFallback": "Je hebt alle {limit} gratis demo-runs voor vandaag gebruikt. Maak een gratis account aan voor onbeperkte aanbevelingen — je smaakprofiel verbetert bij elke quiz.",
+        "genericFallback": "We konden je demo-aanbevelingen niet genereren. Probeer opnieuw.",
+        "signUp": "Maak je gratis account aan",
+        "tryAgain": "Opnieuw proberen"
+      },
+      "eyebrow": "Demo · Jouw keuzes",
+      "headline": "Met de hand gekozen voor jou",
+      "subhead": "{count, plural, one {# gepersonaliseerde keuze uit je demo-antwoorden — meld je aan om ze op te slaan en in de loop van de tijd te verfijnen.} other {# gepersonaliseerde keuzes uit je demo-antwoorden — meld je aan om ze op te slaan en in de loop van de tijd te verfijnen.}}",
+      "empty": "Geen resultaten gevonden. Probeer de demo opnieuw voor een nieuwe set.",
+      "sections": {
+        "movie": {
+          "eyebrow": "Film",
+          "title": "Op het scherm"
+        },
+        "book": {
+          "eyebrow": "Boek",
+          "title": "In de kast"
+        },
+        "music": {
+          "eyebrow": "Album",
+          "title": "In je oren"
+        }
+      },
+      "cta": {
+        "title": "Maak er een gewoonte van",
+        "body": "Meld je aan om je keuzes op te slaan, een smaakprofiel uit je reacties op te bouwen, en elke keer AI-op-maat gemaakte aanbevelingen te krijgen.",
+        "signUp": "Aanmelden om door te gaan",
+        "retake": "Demo opnieuw doen"
+      }
+    }
+  },
+  "WhereToWatch": {
+    "title": "Waar te kijken",
+    "flatrate": "Streamen",
+    "rent": "Huren",
+    "buy": "Kopen",
+    "attribution": "via JustWatch"
+  },
+  "Feed": {
+    "aiNudge": {
+      "eyebrow": "AI-hint",
+      "variants": {
+        "surprise": {
+          "title": "Snelle keuze nodig? Eén tik en we verrassen je.",
+          "cta": "Verras me"
+        },
+        "refine": {
+          "title": "Heb je een keuze die bijna werkte? Verfijn hem in gewoon Nederlands.",
+          "cta": "Probeer te verfijnen"
+        },
+        "group": {
+          "title": "Kijk je vanavond met vrienden? Start een groepsquiz.",
+          "cta": "Groepsquiz"
+        },
+        "tune": {
+          "title": "Keuzes voelen niet juist? Stem je smaakfilters af in 30 seconden.",
+          "cta": "Smaak afstemmen"
+        },
+        "solo": {
+          "title": "Snelle quiz, scherpe keuze — waar heb je zin in?",
+          "cta": "Quiz starten"
+        }
+      }
+    },
+    "dashboardMoved": {
+      "eyebrow": "Let op",
+      "title": "Dit is je nieuwe thuis.",
+      "body": "Het dashboard is verhuisd — je <milestones>mijlpalen</milestones> wonen daar nu.",
+      "dismiss": "Negeren"
+    },
+    "mobileApp": {
+      "eyebrow": "Binnenkort beschikbaar",
+      "title": "Smart Advisor voor iOS en Android",
+      "body": "Een native mobiele app is onderweg — log in met hetzelfde account wanneer hij landt.",
+      "dismiss": "Negeren"
+    }
+  }
+}

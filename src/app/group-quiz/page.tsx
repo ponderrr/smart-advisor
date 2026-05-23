@@ -61,7 +61,21 @@ interface HostIntent {
   content_type: QuizContentType;
   question_count: number;
   max_participants: number;
+  mode?: HostMode;
+  deadline_preset_idx?: number;
+  planned_for?: string | null;
 }
+
+/** Quiz mode: "live" = the existing realtime lobby (default, unchanged);
+ *  "async" = answer-by-deadline mode. */
+type HostMode = "live" | "async";
+
+/** Mobile-parity deadline presets (label, hours). Default = 3 days. */
+const DEADLINE_PRESETS: { label: string; hours: number }[] = [
+  { label: "24 hours", hours: 24 },
+  { label: "3 days", hours: 72 },
+  { label: "1 week", hours: 168 },
+];
 
 const GroupQuizLandingPage = () => {
   const router = useRouter();
@@ -80,6 +94,12 @@ const GroupQuizLandingPage = () => {
   const [hostContentType, setHostContentType] = useState<QuizContentType>("mix");
   const [questionCount, setQuestionCount] = useState(5);
   const [maxParticipants, setMaxParticipants] = useState(8);
+  // Async mode (additive). "live" = the existing realtime lobby, byte-for
+  // -byte unchanged; "async" = answer-by-deadline. Mobile parity of the
+  // _mode 0/1 toggle in group_quiz_screen.dart.
+  const [mode, setMode] = useState<HostMode>("live");
+  const [deadlinePresetIdx, setDeadlinePresetIdx] = useState(1); // 3 days
+  const [plannedFor, setPlannedFor] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [pendingIntent, setPendingIntent] = useState<HostIntent | null>(null);
 
@@ -112,6 +132,15 @@ const GroupQuizLandingPage = () => {
       setHostContentType(parsed.content_type ?? "mix");
       setQuestionCount(parsed.question_count ?? 5);
       setMaxParticipants(parsed.max_participants ?? 8);
+      if (parsed.mode === "async" || parsed.mode === "live")
+        setMode(parsed.mode);
+      if (
+        typeof parsed.deadline_preset_idx === "number" &&
+        parsed.deadline_preset_idx >= 0 &&
+        parsed.deadline_preset_idx < DEADLINE_PRESETS.length
+      )
+        setDeadlinePresetIdx(parsed.deadline_preset_idx);
+      setPlannedFor(parsed.planned_for ?? null);
       setPendingIntent(parsed);
       // Skip the picker step — the user already chose "Host" earlier.
       setSlideDirection(1);
@@ -142,9 +171,9 @@ const GroupQuizLandingPage = () => {
   const handleBack = () => {
     if (step === "path") {
       // Group quiz is reachable while signed out (join needs no account),
-      // so a guest's only "up" is the marketing home — /dashboard would
+      // so a guest's only "up" is the marketing home — /feed would
       // just bounce them to /auth.
-      router.push(user ? "/dashboard" : "/");
+      router.push(user ? "/feed" : "/");
       return;
     }
     goToStep("path", -1);
@@ -157,6 +186,9 @@ const GroupQuizLandingPage = () => {
         content_type: hostContentType,
         question_count: questionCount,
         max_participants: maxParticipants,
+        mode,
+        deadline_preset_idx: deadlinePresetIdx,
+        planned_for: plannedFor,
       };
       window.localStorage.setItem(HOST_INTENT_KEY, JSON.stringify(intent));
     }
@@ -170,16 +202,35 @@ const GroupQuizLandingPage = () => {
     }
     const name = hostName.trim() || user.username || user.name?.split(/\s+/)[0] || "Host";
     setCreating(true);
+    // For async mode, materialise the deadline ISO from the preset now,
+    // so what's persisted is a concrete UTC timestamp (not "now+72h" stale).
+    const deadlineAt =
+      mode === "async"
+        ? new Date(
+            Date.now() + DEADLINE_PRESETS[deadlinePresetIdx].hours * 3600 * 1000,
+          ).toISOString()
+        : null;
+    const plannedForIso =
+      mode === "async" && plannedFor ? new Date(plannedFor).toISOString() : null;
     const { session, error } = await groupQuizService.createSession({
       content_type: hostContentType,
       question_count: questionCount,
       max_participants: maxParticipants,
       display_name: name,
+      deadline_at: deadlineAt,
+      planned_for: plannedForIso,
     });
     setCreating(false);
     if (error || !session) {
       toast.error(error ?? t("errors.createFailed"));
       return;
+    }
+    // Async sessions skip the live lobby entirely: generate questions
+    // right after creation so members landing on the URL see the quiz
+    // ready to answer. Best-effort — if it fails, the page will still
+    // render and the host can retry from the in-progress flow.
+    if (mode === "async") {
+      void groupQuizService.startAsyncQuiz(session, user.age ?? 18, name);
     }
     clearIntent();
     router.push(`/group-quiz/${session.code}`);
@@ -231,7 +282,7 @@ const GroupQuizLandingPage = () => {
 
       <main className="px-4 pb-20 pt-28 sm:px-6 md:pt-36">
         <QuizStepShell
-          category={tShell("category")}
+          category={tShell(`stepLabel.${stepLabelKey}`)}
           stepLabel={tShell("stepOf", {
             current: stepIndex,
             total: TOTAL_STEPS,
@@ -303,6 +354,12 @@ const GroupQuizLandingPage = () => {
                     setQuestionCount={setQuestionCount}
                     maxParticipants={maxParticipants}
                     setMaxParticipants={setMaxParticipants}
+                    mode={mode}
+                    setMode={setMode}
+                    deadlinePresetIdx={deadlinePresetIdx}
+                    setDeadlinePresetIdx={setDeadlinePresetIdx}
+                    plannedFor={plannedFor}
+                    setPlannedFor={setPlannedFor}
                     user={user}
                     creating={creating}
                     onCreate={handleCreate}
@@ -546,6 +603,12 @@ interface HostStepProps {
   setQuestionCount: (v: number) => void;
   maxParticipants: number;
   setMaxParticipants: (v: number) => void;
+  mode: HostMode;
+  setMode: (v: HostMode) => void;
+  deadlinePresetIdx: number;
+  setDeadlinePresetIdx: (v: number) => void;
+  plannedFor: string | null;
+  setPlannedFor: (v: string | null) => void;
   user: ReturnType<typeof useAuth>["user"];
   creating: boolean;
   onCreate: () => void;
@@ -564,6 +627,12 @@ const HostStep = ({
   setQuestionCount,
   maxParticipants,
   setMaxParticipants,
+  mode,
+  setMode,
+  deadlinePresetIdx,
+  setDeadlinePresetIdx,
+  plannedFor,
+  setPlannedFor,
   user,
   creating,
   onCreate,
@@ -741,6 +810,79 @@ const HostStep = ({
           </div>
         </div>
       </div>
+
+      {/* Async mode — "Together now" is the default and renders the
+          existing live flow unchanged. "By a deadline" lets each member
+          answer on their own time before deadline_at; the session resolves
+          when everyone's in OR the deadline passes. */}
+      <div className="mb-5">
+        <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+          {t("host.modeLabel")}
+        </span>
+        <SegmentedControl<HostMode>
+          layoutId="group-quiz-mode"
+          value={mode}
+          onChange={setMode}
+          size="sm"
+          ariaLabel={t("host.modeLabel")}
+          options={[
+            {
+              value: "live",
+              label: t("host.modeLive"),
+              pillClassName: "bg-indigo-500",
+            },
+            {
+              value: "async",
+              label: t("host.modeAsync"),
+              pillClassName: "bg-amber-500",
+            },
+          ]}
+        />
+        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+          {mode === "async" ? t("host.modeAsyncHint") : t("host.modeLiveHint")}
+        </p>
+      </div>
+
+      {mode === "async" && (
+        <>
+          <div className="mb-4">
+            <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+              {t("host.deadlineLabel")}
+            </span>
+            <SegmentedControl<string>
+              layoutId="group-quiz-deadline"
+              value={String(deadlinePresetIdx)}
+              onChange={(v) => setDeadlinePresetIdx(Number(v))}
+              size="sm"
+              ariaLabel={t("host.deadlineLabel")}
+              options={DEADLINE_PRESETS.map((p, i) => ({
+                value: String(i),
+                label: p.label,
+                pillClassName: "bg-amber-500",
+              }))}
+            />
+          </div>
+
+          <label className="mb-5 block">
+            <span className="mb-1 block text-[11px] font-black uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+              {t("host.plannedForLabel")}
+            </span>
+            <input
+              type="date"
+              value={plannedFor ?? ""}
+              onChange={(e) => setPlannedFor(e.target.value || null)}
+              min={new Date().toISOString().slice(0, 10)}
+              className={cn(
+                "w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-900/70",
+                tone.focusRing,
+              )}
+            />
+            <span className="mt-1 block text-[10px] text-slate-500 dark:text-slate-400">
+              {t("host.plannedForHint")}
+            </span>
+          </label>
+        </>
+      )}
 
       {user ? (
         <button

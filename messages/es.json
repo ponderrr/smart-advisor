@@ -7,7 +7,51 @@
       "profile": "Perfil",
       "security": "Seguridad",
       "content": "Contenido",
-      "integrations": "Integraciones"
+      "feed": "Feed",
+      "integrations": "Integraciones",
+      "help": "Ayuda"
+    },
+    "feed": {
+      "title": "Feed",
+      "description": "Controla cómo apareces en el feed social de elecciones y opiniones.",
+      "visibilityLabel": "Visibilidad del perfil",
+      "public": "Público",
+      "private": "Privado",
+      "publicHint": "Tus elecciones terminadas, valoradas y compartidas aparecen en los feeds de otras personas, y pueden seguirte directamente.",
+      "privateHint": "Puedes seguir navegando y publicando con normalidad, pero tu actividad no se difunde a otros feeds y los nuevos seguidores son solo por solicitud.",
+      "prefsTitle": "Preferencias del feed",
+      "prefsDescription": "Valores con los que se abre el feed. Puedes cambiarlos en cualquier momento mientras navegas.",
+      "viewLabel": "Vista predeterminada",
+      "viewCards": "Tarjetas",
+      "viewList": "Lista",
+      "scopeLabel": "Ámbito predeterminado",
+      "scopeFriends": "Amigos",
+      "scopeDiscover": "Descubrir",
+      "scopeGroup": "Grupo",
+      "communityLabel": "Comunidad predeterminada",
+      "communityAll": "Todo",
+      "communityMovies": "Películas",
+      "communityBooks": "Libros",
+      "communityMusic": "Música",
+      "commentSortLabel": "Orden de comentarios",
+      "commentSortTop": "Top",
+      "commentSortNew": "Nuevos",
+      "blocked": {
+        "title": "Personas bloqueadas",
+        "description": "Sus publicaciones y comentarios no aparecerán en tu feed.",
+        "empty": "No has bloqueado a nadie.",
+        "unblock": "Desbloquear",
+        "unblockedToast": "Has desbloqueado a @{handle}"
+      },
+      "reports": {
+        "title": "Reportes que has enviado",
+        "description": "Publicaciones y comentarios que has marcado. Nuestro equipo revisa cada uno.",
+        "empty": "No has enviado ningún reporte.",
+        "onPost": "En una publicación",
+        "onComment": "En un comentario",
+        "contentGone": "Contenido eliminado",
+        "statusReview": "En revisión"
+      }
     },
     "groups": {
       "account": "Cuenta",
@@ -24,13 +68,23 @@
       "pictureRemoved": "Foto de perfil eliminada.",
       "detailsTitle": "Detalles del perfil",
       "detailsDescription": "Actualiza los datos públicos de tu cuenta.",
-      "currentUsername": "Nombre de usuario actual",
-      "newUsername": "Nuevo nombre de usuario",
-      "newUsernamePlaceholder": "Ingresa un nuevo nombre de usuario",
+      "currentUsername": "Nombre para mostrar actual",
+      "newUsername": "Nombre para mostrar",
+      "newUsernamePlaceholder": "Cómo deberíamos llamarte",
       "age": "Edad",
       "agePlaceholder": "25",
       "save": "Guardar cambios",
-      "savedToast": "Perfil actualizado."
+      "savedToast": "Perfil actualizado.",
+      "aboutTitle": "Sobre mí",
+      "aboutDescription": "Una breve biografía y etiquetas que se muestran en tu perfil público.",
+      "bioLabel": "Biografía",
+      "bioPlaceholder": "Cuéntale a la gente qué te gusta…",
+      "interestsLabel": "Intereses",
+      "tagsLabel": "Tus etiquetas",
+      "tagsPlaceholder": "Añadir una etiqueta…",
+      "tagsAdd": "Añadir",
+      "aboutSavedToast": "Personalización del perfil guardada.",
+      "aboutSaveError": "No se pudo guardar — inténtalo de nuevo."
     },
     "email": {
       "title": "Correo electrónico",
@@ -136,13 +190,67 @@
       "appliesNext": "Se aplica en el próximo cuestionario",
       "save": "Guardar preferencias",
       "savedToast": "Preferencias de contenido guardadas.",
-      "saveError": "No pudimos guardar tus preferencias. Inténtalo de nuevo."
+      "saveError": "No pudimos guardar tus preferencias. Inténtalo de nuevo.",
+      "filters": {
+        "title": "Filtros de recomendación",
+        "description": "Límites estrictos que la IA debe respetar en cada elección — cuestionario individual y Sorpréndeme. Configúralos por formato para que evitar un género de película no bloquee también ese género en libros. No afecta al cuestionario en grupo.",
+        "formatLabel": "Filtrar para",
+        "format": {
+          "movie": "Películas",
+          "book": "Libros",
+          "music": "Música"
+        },
+        "avoidGenresLabel": "Evitar géneros",
+        "runtimeLabel": "Duración máxima de película",
+        "runtimeNoCap": "Sin límite",
+        "runtimeMinutes": "{minutes} min",
+        "runtimeHintNone": "Sin límite de duración: películas de cualquier duración son válidas.",
+        "runtimeHint": "Las películas deben durar {minutes} minutos o menos.",
+        "languageLabel": "Idioma preferido",
+        "languagePlaceholder": "p. ej. japonés, español",
+        "avoidNoteLabel": "Nunca recomendar",
+        "avoidNotePlaceholder": {
+          "movie": "Películas a evitar por completo: franquicias, directores, temas…",
+          "book": "Libros a evitar por completo: series, autores, temas…",
+          "music": "Música a evitar por completo: artistas, subgéneros, temas…"
+        },
+        "avoidNoteHint": "Texto libre. Sé tan específico como quieras.",
+        "appliesNext": "Se aplica en el próximo cuestionario",
+        "save": "Guardar filtros",
+        "saved": "Filtros de recomendación guardados.",
+        "saveFailed": "No pudimos guardar tus filtros. Inténtalo de nuevo.",
+        "notAuthed": "Debes iniciar sesión para guardar filtros."
+      }
     },
     "integrations": {
       "title": "Integraciones",
       "description": "Proveedores y servicios conectados.",
       "emptyTitle": "Aún no hay integraciones disponibles",
       "emptyBody": "Las conexiones con terceros aparecerán aquí cuando estén disponibles."
+    },
+    "help": {
+      "title": "Ayuda",
+      "description": "Respuestas a preguntas frecuentes y accesos rápidos a partes de la app que quizá te falten.",
+      "faq": {
+        "title": "Preguntas frecuentes",
+        "subtitle": "Consulta las preguntas más frecuentes"
+      },
+      "takeQuiz": {
+        "title": "Hacer un cuestionario",
+        "subtitle": "Recibe recomendaciones nuevas en un par de minutos"
+      },
+      "findFriends": {
+        "title": "Buscar amigos",
+        "subtitle": "Descubre personas con gustos similares"
+      },
+      "milestones": {
+        "title": "Tus logros",
+        "subtitle": "Sigue tu progreso y desbloquea logros"
+      },
+      "showOnboarding": {
+        "title": "Mostrar configuración",
+        "subtitle": "Vuelve a ver la pantalla de configuración del perfil en modo previa"
+      }
     },
     "danger": {
       "title": "Zona de peligro",
@@ -190,7 +298,15 @@
     "description": "Elige el idioma usado en toda la aplicación.",
     "options": {
       "en": "Inglés",
-      "es": "Español"
+      "es": "Español",
+      "fr": "Francés",
+      "de": "Alemán",
+      "pt": "Portugués",
+      "it": "Italiano",
+      "nl": "Neerlandés",
+      "ja": "Japonés",
+      "zh": "Chino",
+      "ko": "Coreano"
     },
     "saving": "Guardando…",
     "saved": "Idioma actualizado."
@@ -203,8 +319,10 @@
       "ourTeam": "Nuestro equipo",
       "faq": "Preguntas frecuentes",
       "dashboard": "Panel",
+      "feed": "Feed",
       "library": "Biblioteca",
       "history": "Historial",
+      "milestones": "Logros",
       "groupQuiz": "Cuestionario en grupo",
       "settings": "Ajustes"
     },
@@ -225,7 +343,7 @@
       "titleLine2": "obsesión favorita en cada",
       "subtitle": "Recomendaciones de películas, libros y álbumes con IA adaptadas a tu gusto único.",
       "ctaPrimaryLoggedOut": "Comenzar",
-      "ctaPrimaryLoggedIn": "Ir al panel",
+      "ctaPrimaryLoggedIn": "Ir al Feed",
       "ctaSecondaryLoggedOut": "Probar la demo",
       "ctaSecondaryLoggedIn": "Ver historial",
       "scrollHint": "Desplázate para explorar",
@@ -338,6 +456,7 @@
       "categories": {
         "getting-started": "Primeros pasos",
         "how-it-works": "Cómo funciona",
+        "feed": "Feed",
         "group-quiz": "Cuestionario en grupo",
         "library": "Biblioteca",
         "account": "Cuenta y privacidad"
@@ -373,11 +492,35 @@
         },
         "trailer-preview": {
           "question": "¿Dónde puedo ver un tráiler o vista previa?",
-          "answer": "Abre cualquier tarjeta de recomendación desde tu panel o historial. Para películas se reproduce un tráiler en línea (carga diferida, solo se activa al hacer clic), para libros aparece un enlace 'Ver en Open Library' para que explores ediciones, portadas y reseñas, y para álbumes una vista previa de 30 segundos de la primera pista está a un toque. Las películas usan el tráiler oficial de TMDB cuando está publicado; las vistas previas vienen de Deezer."
+          "answer": "Abre cualquier tarjeta de recomendación desde tu Feed o historial. Para películas se reproduce un tráiler en línea (carga diferida, solo se activa al hacer clic), para libros aparece un enlace 'Ver en Open Library' para que explores ediciones, portadas y reseñas, y para álbumes una vista previa de 30 segundos de la primera pista está a un toque. Las películas usan el tráiler oficial de TMDB cuando está publicado; las vistas previas vienen de Deezer."
         },
         "year-in-review": {
           "question": "¿Qué es Año en Revisión y cuándo aparece?",
-          "answer": "Año en Revisión es un resumen estilo Spotify Wrapped de tus recomendaciones: género principal, racha más larga, mes pico, director o autor más recomendado, mezcla de formatos y tus títulos destacados. Aparece como un banner prominente en tu panel durante diciembre (año actual) y enero (año pasado). Fuera de esa ventana la página sigue funcionando en /wrapped, solo que no se promociona."
+          "answer": "Año en Revisión es un resumen estilo Spotify Wrapped de tus recomendaciones: género principal, racha más larga, mes pico, director o autor más recomendado, mezcla de formatos y tus títulos destacados. Aparece como un banner prominente en tu Feed durante diciembre (año actual) y enero (año pasado). Fuera de esa ventana la página sigue funcionando en /wrapped, solo que no se promociona."
+        },
+        "feed-what": {
+          "question": "¿Qué es el feed?",
+          "answer": "Una corriente al estilo Reddit con las recomendaciones que comparte la gente que sigues, más vistas más amplias de Descubrir y de sesiones de Grupo. Puedes acotarlo (Amigos / Descubrir / Grupo), filtrar por comunidad (Películas / Libros / Música) y ordenar por Tendencia, Nuevo o Top — cada ajuste se mantiene entre sesiones."
+        },
+        "feed-share": {
+          "question": "¿Cómo comparto una recomendación en el feed?",
+          "answer": "Abre el compositor con el botón 'Compartir' en /feed. Elige una comunidad, una actividad (Visto / Calificado / Recomendando) y escribe el título — la portada se busca automáticamente mientras escribes, usando TMDB para películas, Open Library para libros y Deezer para música. Añade una nota opcional y compártelo."
+        },
+        "feed-edit": {
+          "question": "¿Puedo editar mis publicaciones y comentarios después de compartirlos?",
+          "answer": "Sí, ambos. En tus propias publicaciones el menú de tres puntos tiene Editar y Eliminar (editar desde el hilo te lleva de vuelta al compositor en modo edición). En tus comentarios aparece un botón Editar junto a Responder — una etiqueta '· editado' aparece en la firma cuando has cambiado el cuerpo. En publicaciones y comentarios ajenos solo aparece Reportar."
+        },
+        "feed-votes": {
+          "question": "¿Cómo funcionan los votos positivos y negativos en publicaciones y comentarios?",
+          "answer": "Cada publicación y comentario tiene flechas arriba / abajo en su barra. Toca una vez para votar, otra para quitar el voto. El número que ves es la puntuación canónica del servidor sumada entre todos los votantes; tu propio estado pinta la flecha violeta (arriba) o rosa (abajo). El orden Tendencia pondera esta puntuación por la edad de la publicación; Top ordena por puntuación bruta."
+        },
+        "feed-sort": {
+          "question": "¿Puedo ordenar el feed de otra forma?",
+          "answer": "Sí — debajo de la fila de alcance hay un control segmentado de Tendencia / Nuevo / Top. Tendencia combina puntuación con recencia (los nuevos empatan a favor), Nuevo ordena por antigüedad ascendente, Top por mayor puntuación primero. La elección es por dispositivo y se recuerda entre sesiones."
+        },
+        "feed-follow": {
+          "question": "¿Cómo sigo a personas, bloqueo a alguien o reporto contenido?",
+          "answer": "Toca un nombre para abrir su perfil y usa Seguir / Dejar de seguir. El menú de tres puntos en cualquier publicación o comentario te deja Reportarlo o Bloquear al autor — los autores bloqueados desaparecen por completo de tu feed, y puedes gestionar la lista en Ajustes -> Feed -> Personas bloqueadas. Tus reportes están en Ajustes -> Feed -> Reportes enviados."
         },
         "group-what": {
           "question": "¿Qué es el cuestionario en grupo?",
@@ -448,10 +591,12 @@
     "close": "Cerrar",
     "retry": "Reintentar",
     "yes": "Sí",
-    "no": "No"
+    "no": "No",
+    "surpriseMe": "Sorpréndeme"
   },
   "MobileNav": {
     "ariaLabel": "Navegación principal",
+    "feed": "Feed",
     "dashboard": "Panel",
     "library": "Biblioteca",
     "history": "Historial",
@@ -465,6 +610,8 @@
       "soloDesc": "Un cuestionario de personalidad corto, solo para ti.",
       "group": "Cuestionario en grupo",
       "groupDesc": "Hazlo junto a tus amigos en una sala compartida.",
+      "surprise": "Sorpréndeme",
+      "surpriseDesc": "Un toque: una elección al azar, sin preguntas.",
       "close": "Cancelar"
     }
   },
@@ -503,7 +650,7 @@
     "subtitle": "No podemos recomendarte ese título exacto, pero responde unas preguntas rápidas y te buscaremos algo con la misma energía.",
     "sharedLabel": "Compartiste",
     "startQuiz": "Buscar recomendaciones similares",
-    "goDashboard": "Ir al panel",
+    "goDashboard": "Ir al Feed",
     "emptyTitle": "No llegó nada",
     "emptySubtitle": "No recibimos nada con que trabajar — inicia un quiz y nos encargamos del resto."
   },
@@ -606,7 +753,7 @@
     },
     "mfaChallenge": {
       "successTitle": "Verificado",
-      "successBody": "Llevándote a tu panel…",
+      "successBody": "Llevándote a tu Feed…",
       "totpTitle": "Ingresa el código de verificación",
       "totpBody": "Abre tu app autenticadora e ingresa el código de 6 dígitos.",
       "backupTitle": "Ingresa el código de respaldo",
@@ -907,6 +1054,7 @@
     },
     "empty": {
       "title": "Sin recomendaciones en {year}",
+      "titleMonth": "Sin recomendaciones en {period}",
       "current": "Haz un cuestionario y empieza a llenar tu año.",
       "past": "Elige otro año arriba, o inicia un nuevo cuestionario."
     },
@@ -959,8 +1107,11 @@
       "pickYear": "Año",
       "intro": {
         "eyebrow": "Año en revisión",
+        "eyebrowMonth": "Mes en revisión",
         "kicker": "Tu {year}",
+        "kickerMonth": "Tu {period}",
         "subhead": "Dale play al año que pasó.",
+        "subheadMonth": "Dale play al mes que pasó.",
         "cta": "Ver tu año",
         "keyHint": "Usa las flechas para navegar"
       },
@@ -1040,7 +1191,7 @@
       "result": "Resultado"
     },
     "back": {
-      "dashboard": "Panel",
+      "dashboard": "Feed",
       "home": "Inicio",
       "step": "Atrás",
       "leave": "Salir",
@@ -1091,6 +1242,14 @@
         "questionsAria": "Número de preguntas",
         "maxPlayersLabel": "Jugadores máximos",
         "maxPlayersAria": "Número máximo de jugadores en la sala",
+        "modeLabel": "¿Cuándo?",
+        "modeLive": "Juntos ahora",
+        "modeAsync": "Antes de una fecha",
+        "modeLiveHint": "Todos entran a la sala y responden al mismo tiempo.",
+        "modeAsyncHint": "Cada miembro responde a su ritmo antes de la fecha límite.",
+        "deadlineLabel": "Fecha límite",
+        "plannedForLabel": "Planeado para (opcional)",
+        "plannedForHint": "Solo informativo — cuándo planean verlo / leerlo / escucharlo juntos.",
         "create": "Crear sesión",
         "creating": "Creando…",
         "signInTitle": "Inicia sesión para hospedar",
@@ -1124,6 +1283,14 @@
       }
     },
     "session": {
+      "async": {
+        "eyebrow": "Sesión asíncrona",
+        "deadlineInHours": "{hours, plural, one {Queda # hora} other {Quedan # horas}}",
+        "deadlineInDays": "{days, plural, one {Queda # día} other {Quedan # días}}",
+        "deadlinePassed": "Fecha límite alcanzada — finalizando",
+        "plannedFor": "Planeado para {date}",
+        "submitted": "{done}/{total} enviados"
+      },
       "loading": "Cargando sesión…",
       "notFoundTitle": "Sesión no encontrada",
       "notFoundBody": "Ese código no corresponde a una sesión activa.",
@@ -1151,7 +1318,7 @@
       "leave": "Salir",
       "backToLobby": "Volver a la sala",
       "end": "Terminar",
-      "leaveConfirm": "¿Salir de este cuestionario en grupo?",
+      "leaveConfirm": "¿Salir de la sesión? Tus respuestas no contarán para la elección del grupo y necesitarás el código para volver a entrar.",
       "leaveQuizConfirm": "¿Salir del cuestionario en grupo? Tus respuestas no se enviarán.",
       "endConfirm": "¿Terminar esta sesión para todos?",
       "backToLobbyConfirmInProgress": "¿Enviar a todos de vuelta a la sala? Las respuestas en progreso se borrarán.",
@@ -1259,6 +1426,7 @@
     },
     "sortLabel": "Ordenar:",
     "sortAria": "Ordenar recomendaciones",
+    "searchPlaceholder": "Buscar elecciones anteriores",
     "sort": {
       "newest": "Más nuevas",
       "oldest": "Más antiguas",
@@ -1297,10 +1465,49 @@
       "byDirector": "Dirigida por {director}",
       "byArtist": "De {artist}",
       "inLibrary": "En tu biblioteca",
-      "close": "Cerrar"
+      "close": "Cerrar",
+      "dislike": "No es para mí",
+      "dislikedOn": "No se recomendará de nuevo"
     }
   },
   "Library": {
+    "import": {
+      "headerCta": "Importar",
+      "back": "Volver a la biblioteca",
+      "eyebrow": "Importar",
+      "title": "Importa tu lista",
+      "subtitle": "Trae tus películas de Letterboxd o tus libros de Goodreads. Reimportar es seguro: los títulos que coinciden se actualizan, no se duplican.",
+      "sourceLabel": "¿De dónde viene?",
+      "sources": {
+        "letterboxd": "Letterboxd",
+        "goodreads": "Goodreads"
+      },
+      "hint": {
+        "letterboxd": "Expórtalo desde letterboxd.com/settings/data — usa watchlist.csv o tu exportación completa.",
+        "goodreads": "Expórtalo desde goodreads.com/review/import — el CSV “Goodreads Library Export”."
+      },
+      "choose": "Elige un archivo .csv",
+      "chooseHint": "Exportación CSV de Letterboxd o Goodreads",
+      "preview": "{count, plural, one {# título listo para importar} other {# títulos listos para importar}}",
+      "mismatch": "Este archivo parece una exportación de {detected}, pero elegiste {chosen}. Verifícalo antes de importar.",
+      "chooseDifferent": "Elegir otro archivo",
+      "importCta": "Importar {count, plural, one {# título} other {# títulos}}",
+      "importing": "Importando {done} de {total}…",
+      "doneTitle": "Importación completa",
+      "doneSummary": "{imported} importados · {skipped} omitidos · {failed} fallidos",
+      "importAnother": "Importar otro",
+      "goToLibrary": "Ir a la biblioteca",
+      "errors": {
+        "read": "No se pudo leer ese archivo. Inténtalo de nuevo.",
+        "empty": "Ese archivo no tiene filas para importar.",
+        "parse": "No se pudo procesar ese archivo."
+      }
+    },
+    "finishReminder": {
+      "eyebrow": "Retoma donde lo dejaste",
+      "title": "{count, plural, one {Tienes # título aún en curso} other {Tienes # títulos aún en curso}}",
+      "cta": "Abrir"
+    },
     "eyebrow": "Biblioteca",
     "title": "Lo que has visto y leído",
     "subtitle": "Las reacciones que guardas aquí se convierten en una señal de gusto que la IA usa en tu próximo cuestionario.",
@@ -1321,6 +1528,7 @@
       "music": "Música"
     },
     "statusLabel": "Estado",
+    "searchPlaceholder": "Busca en tu biblioteca",
     "filterAll": "Todos",
     "status": {
       "finished": "Terminado",
@@ -1388,10 +1596,53 @@
         "label": "Idioma",
         "en": "English",
         "es": "Español"
+      },
+      "focus": {
+        "movie": "Películas",
+        "book": "Libros",
+        "music": "Música",
+        "mix": "Mixto"
       }
     },
+    "steps": {
+      "name": {
+        "eyebrow": "Paso 1",
+        "title": "¿Cómo deberíamos llamarte?",
+        "subtitle": "Lo usaremos en las recomendaciones y en tu perfil."
+      },
+      "language": {
+        "eyebrow": "Paso 2",
+        "title": "Elige tu idioma",
+        "subtitle": "Traduciremos la interfaz para que coincida."
+      },
+      "focus": {
+        "eyebrow": "Paso 3",
+        "title": "¿Para qué quieres recomendaciones?",
+        "subtitle": "Define el tipo de contenido por defecto. Aún podrás cambiarlo en cada cuestionario.",
+        "hint": "Consejo: siempre podrás cambiarlo en cuestionarios individuales."
+      },
+      "avoid": {
+        "eyebrow": "Paso 4",
+        "title": "¿Algo que prefieras evitar?",
+        "subtitle": "Toca cualquiera para añadir una regla \"nunca recomendar\". Omite el paso si nada se te ocurre.",
+        "emptyHint": "Sin filtros aún — puedes añadirlos cuando quieras en Ajustes.",
+        "selectedHint": "{count, plural, one {# género} other {# géneros}} que prefieres evitar."
+      },
+      "review": {
+        "eyebrow": "Una última mirada",
+        "title": "¿Se ve bien?",
+        "subtitle": "Edita cualquier cosa que quieras cambiar antes de guardar.",
+        "edit": "Editar",
+        "empty": "—",
+        "noGenres": "Ninguno"
+      }
+    },
+    "back": "Atrás",
+    "next": "Siguiente",
+    "finish": "Terminar",
     "submit": "Todo bien",
     "skip": "Omitir por ahora",
+    "previewClose": "Cerrar vista previa",
     "errors": {
       "displayNameRequired": "Por favor, introduce un nombre para mostrar.",
       "saveFailed": "No pudimos guardar tu configuración. Inténtalo de nuevo."
@@ -1402,7 +1653,7 @@
     "category": "Configuración del cuestionario",
     "stepOf": "Paso {current} de {total}",
     "back": {
-      "dashboard": "Panel"
+      "dashboard": "Feed"
     },
     "contentSelection": {
       "title": "¿Para qué quieres una recomendación?",
@@ -1664,14 +1915,23 @@
       "overloadedBody": "Nuestra IA está saturada en este momento. Espera un minuto y vuelve a intentarlo; ya reintentamos un par de veces por ti.",
       "confirmDialog": {
         "title": "¿Generar nuevas recomendaciones?",
-        "body": "Ya generaste recomendaciones para estas respuestas. Genera un conjunto nuevo o vuelve a tu panel.",
-        "cancel": "Ir al panel",
+        "body": "Ya generaste recomendaciones para estas respuestas. Genera un conjunto nuevo o vuelve a tu Feed.",
+        "cancel": "Ir al Feed",
         "confirm": "Generar nuevas"
       },
       "errorState": {
         "title": "No se pueden generar las recomendaciones",
         "retry": "Reintentar",
         "back": "Repetir cuestionario"
+      },
+      "refine": {
+        "cta": "Afinar estas",
+        "eyebrow": "Afinar",
+        "title": "Ajusta estas elecciones",
+        "subtitle": "Dinos cómo orientarlo: volveremos a generar con tus respuestas originales más esto.",
+        "placeholder": "p. ej. más como Dune, más ligera, nada de más de 2 horas",
+        "cancel": "Cancelar",
+        "submit": "Afinar"
       }
     }
   },
@@ -1797,6 +2057,8 @@
       },
       "milestones": {
         "eyebrow": "Logros",
+        "pageTitle": "Tus logros",
+        "backToFeed": "Volver al feed",
         "earnedSummary": "{earned} de {total} obtenidos",
         "unlocked": "Desbloqueado",
         "progress": "{progress}/{target}",
@@ -2010,6 +2272,52 @@
         "signUp": "Regístrate para continuar",
         "retake": "Repetir la demo"
       }
+    }
+  },
+  "WhereToWatch": {
+    "title": "Dónde ver",
+    "flatrate": "Streaming",
+    "rent": "Alquilar",
+    "buy": "Comprar",
+    "attribution": "vía JustWatch"
+  },
+  "Feed": {
+    "aiNudge": {
+      "eyebrow": "Sugerencia IA",
+      "variants": {
+        "surprise": {
+          "title": "¿Necesitas una pick rápida? Un toque y te sorprendemos.",
+          "cta": "Sorpréndeme"
+        },
+        "refine": {
+          "title": "¿Una pick casi acertó? Refínala en lenguaje natural.",
+          "cta": "Refinar"
+        },
+        "group": {
+          "title": "¿Ves algo con amigos esta noche? Crea un cuestionario en grupo.",
+          "cta": "Quiz en grupo"
+        },
+        "tune": {
+          "title": "¿Las picks no terminan de encajar? Ajusta tus filtros en 30 segundos.",
+          "cta": "Ajustar gusto"
+        },
+        "solo": {
+          "title": "Cuestionario rápido, pick certera — ¿qué te apetece?",
+          "cta": "Empezar"
+        }
+      }
+    },
+    "dashboardMoved": {
+      "eyebrow": "Aviso",
+      "title": "Esta es tu nueva pantalla principal.",
+      "body": "El panel se movió — tus <milestones>logros</milestones> ahora están allí.",
+      "dismiss": "Cerrar"
+    },
+    "mobileApp": {
+      "eyebrow": "Próximamente",
+      "title": "Smart Advisor para iOS y Android",
+      "body": "La app móvil nativa está en camino — inicia sesión con la misma cuenta cuando esté disponible.",
+      "dismiss": "Cerrar"
     }
   }
 }

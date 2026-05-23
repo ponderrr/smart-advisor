@@ -459,6 +459,9 @@ class AuthService {
             (profile.content_tone as "family" | "standard" | null) ?? null,
           locale: profile.locale ?? null,
           setup_completed_at: profile.setup_completed_at ?? null,
+          bio: profile.bio ?? null,
+          interests: profile.interests ?? [],
+          tags: profile.tags ?? [],
         },
         error: null,
       };
