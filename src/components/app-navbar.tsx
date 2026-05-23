@@ -6,6 +6,7 @@ import { LogOut } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { useAuth } from "@/features/auth/hooks/use-auth";
+import { NotificationsBell } from "@/features/feed/components/notifications-bell";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
@@ -132,7 +133,12 @@ export function AppNavbar() {
               {primaryLabel}
             </HoverBorderGradient>
           ) : (
-            user && <UserAvatarMenu />
+            user && (
+              <>
+                <NotificationsBell />
+                <UserAvatarMenu />
+              </>
+            )
           )}
         </div>
       </NavBody>
@@ -152,7 +158,10 @@ export function AppNavbar() {
             // Authed mobile users get the same avatar dropdown as desktop —
             // mirrors the right-side anchor users expect and pulls theme +
             // sign out into a tidy menu instead of leaving the bar bare.
-            <UserAvatarMenu />
+            <div className="flex items-center gap-1">
+              <NotificationsBell />
+              <UserAvatarMenu />
+            </div>
           )}
         </MobileNavHeader>
 
