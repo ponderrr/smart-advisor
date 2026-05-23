@@ -12,13 +12,16 @@ class FeedService {
   FeedService(this._c);
   final SupabaseClient _c;
 
+  // Joins go through profiles_public (public-safe projection)
+  // because the base `profiles` table has owner-only RLS. See
+  // 20260522040000_profiles_public_view.sql.
   static const _postSelect = '''
     id, community, activity, title, body, poster_url, creator, year,
     rating, base_score, created_at,
-    author:profiles!feed_posts_user_id_fkey ( id, name, avatar_url ),
+    author:profiles_public!feed_posts_user_id_fkey ( id, name, avatar_url ),
     feed_comments (
       id, body, parent_id, created_at, edited_at,
-      author:profiles!feed_comments_user_id_fkey ( id, name, avatar_url )
+      author:profiles_public!feed_comments_user_id_fkey ( id, name, avatar_url )
     )
   ''';
 
@@ -417,7 +420,7 @@ class FeedService {
     final rows = await _c
         .from('feed_follows')
         .select('created_at, '
-            'followee:profiles!feed_follows_followee_id_fkey '
+            'followee:profiles_public!feed_follows_followee_id_fkey '
             '( id, name, avatar_url )')
         .eq('follower_id', profileId)
         .order('created_at', ascending: false);
@@ -431,7 +434,7 @@ class FeedService {
     final rows = await _c
         .from('feed_follows')
         .select('created_at, '
-            'follower:profiles!feed_follows_follower_id_fkey '
+            'follower:profiles_public!feed_follows_follower_id_fkey '
             '( id, name, avatar_url )')
         .eq('followee_id', profileId)
         .order('created_at', ascending: false);
@@ -464,7 +467,7 @@ class FeedService {
     final rows = await _c
         .from('feed_posts')
         .select(
-            'author:profiles!feed_posts_user_id_fkey ( id, name, avatar_url )')
+            'author:profiles_public!feed_posts_user_id_fkey ( id, name, avatar_url )')
         .order('created_at', ascending: false)
         .limit(150);
     final out = <String, ({String id, String name, String? avatarUrl})>{};
@@ -498,7 +501,7 @@ class FeedService {
     if (uid == null) return [];
     final rows = await _c
         .from('feed_blocks')
-        .select('blocked:profiles!feed_blocks_blocked_id_fkey ( id, name )')
+        .select('blocked:profiles_public!feed_blocks_blocked_id_fkey ( id, name )')
         .eq('blocker_id', uid);
     final out = <({String id, String name})>[];
     for (final r in rows) {
@@ -578,7 +581,7 @@ class FeedService {
         List<String> tags,
       })?> fetchProfile(String profileId) async {
     final row = await _c
-        .from('profiles')
+        .from('profiles_public')
         .select('id, name, avatar_url, bio, interests, tags')
         .eq('id', profileId)
         .maybeSingle();
@@ -609,7 +612,7 @@ class FeedService {
   Future<bool> fetchLibraryPublic(String profileId) async {
     try {
       final row = await _c
-          .from('profiles')
+          .from('profiles_public')
           .select('library_public')
           .eq('id', profileId)
           .maybeSingle();

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/ui_messenger.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../ui/ui.dart';
 import '../feed_providers.dart';
 import '../widgets/feed_avatar.dart';
@@ -15,19 +16,18 @@ class BlockedPeopleScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final blocked = ref.watch(blockedProfilesProvider);
 
     return BrandScaffold(
-      title: 'Blocked people',
+      title: l.blockedPeopleTitle,
       body: ResponsiveCenter(
         maxWidth: 560,
         child: blocked.when(
-          loading: () =>
-              const Center(child: LoaderFive('Loading')),
-          error: (_, _) => const Padding(
-            padding: EdgeInsets.all(20),
-            child: MessageBanner.error(
-                'Couldn’t load your blocked list.'),
+          loading: () => Center(child: LoaderFive(l.loading)),
+          error: (_, _) => Padding(
+            padding: const EdgeInsets.all(20),
+            child: MessageBanner.error(l.blockedLoadError),
           ),
           data: (people) {
             final sorted = [...people]
@@ -42,13 +42,9 @@ class BlockedPeopleScreen extends ConsumerWidget {
                         size: 48,
                         color: context.colors.mutedForeground),
                     const SizedBox(height: 12),
-                    const BrandHeading('Nobody blocked', size: 22),
+                    BrandHeading(l.blockedEmptyTitle, size: 22),
                     const SizedBox(height: 6),
-                    const Subtitle(
-                      'When you block someone from the feed, they\'ll '
-                      'show up here so you can undo it.',
-                      center: true,
-                    ),
+                    Subtitle(l.blockedEmptyBody, center: true),
                   ],
                 ),
               );
@@ -65,7 +61,7 @@ class BlockedPeopleScreen extends ConsumerWidget {
                     ref
                         .read(feedActionsProvider)
                         .unblock(person.id);
-                    showBanner('@${person.name} unblocked.');
+                    showBanner(l.blockedUnblockedToast(person.name));
                   },
                 );
               },
@@ -84,6 +80,7 @@ class _BlockedRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final c = context.colors;
     return BrandCard(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -102,7 +99,7 @@ class _BlockedRow extends StatelessWidget {
           ),
           AdaptiveButton(
             onPressed: onUnblock,
-            label: 'Unblock',
+            label: l.blockedUnblock,
             style: AdaptiveButtonStyle.bordered,
           ),
         ],

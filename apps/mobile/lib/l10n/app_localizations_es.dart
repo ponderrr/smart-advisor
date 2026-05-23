@@ -149,4 +149,196 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get reviewNone => 'Ninguno';
+
+  @override
+  String get loading => 'Cargando';
+
+  @override
+  String get contactTitle => 'Contáctanos';
+
+  @override
+  String get contactSectionGetInTouch => 'Ponte en contacto';
+
+  @override
+  String get contactEmailSupport => 'Soporte por correo';
+
+  @override
+  String get contactReportBug => 'Reportar un error';
+
+  @override
+  String get contactReportBugSubtitle => 'Abrir un issue en GitHub';
+
+  @override
+  String get contactViewSource => 'Ver el código';
+
+  @override
+  String get contactViewSourceSubtitle => 'Smart Advisor es código abierto';
+
+  @override
+  String get contactFooterNote =>
+      'Leemos cada mensaje — por favor menciona qué versión usas y qué hacías cuando algo salió mal.';
+
+  @override
+  String get contactEmailSubject => 'Smart Advisor — soporte';
+
+  @override
+  String get appearanceTitle => 'Apariencia';
+
+  @override
+  String get themeLabel => 'Tema';
+
+  @override
+  String get themeSystem => 'Sistema';
+
+  @override
+  String get themeLight => 'Claro';
+
+  @override
+  String get themeDark => 'Oscuro';
+
+  @override
+  String get amoledDarkTitle => 'Negro AMOLED';
+
+  @override
+  String get amoledDarkSubtitle => 'Superficies negras puras en modo oscuro.';
+
+  @override
+  String get notificationsTitle => 'Notificaciones';
+
+  @override
+  String get notificationsWeeklyReminder => 'Recordatorio semanal del quiz';
+
+  @override
+  String get notificationsWeeklyOnHeading => 'Recordatorio semanal activado';
+
+  @override
+  String get notificationsWeeklyOnBody =>
+      'Te avisaremos cada semana para descubrir algo nuevo.';
+
+  @override
+  String get notificationsYourDataSection => 'Tus datos';
+
+  @override
+  String get notificationsYearInReview => 'Tu año en resumen';
+
+  @override
+  String get notificationsMonthInReview => 'Este mes en resumen';
+
+  @override
+  String get blockedPeopleTitle => 'Personas bloqueadas';
+
+  @override
+  String get blockedLoadError => 'No se pudo cargar tu lista de bloqueos.';
+
+  @override
+  String get blockedEmptyTitle => 'No hay nadie bloqueado';
+
+  @override
+  String get blockedEmptyBody =>
+      'Cuando bloquees a alguien desde el feed, aparecerá aquí para que puedas deshacerlo.';
+
+  @override
+  String get blockedUnblock => 'Desbloquear';
+
+  @override
+  String blockedUnblockedToast(String handle) {
+    return '@$handle desbloqueado.';
+  }
+
+  @override
+  String get filedReportsTitle => 'Reportes que has enviado';
+
+  @override
+  String get filedReportsLoadError => 'No se pudieron cargar tus reportes.';
+
+  @override
+  String get filedReportsEmptyTitle => 'Sin reportes enviados';
+
+  @override
+  String get filedReportsEmptyBody =>
+      'Las publicaciones y comentarios que marques para revisión aparecerán aquí.';
+
+  @override
+  String get filedReportsOnPost => 'En una publicación';
+
+  @override
+  String get filedReportsOnComment => 'En un comentario';
+
+  @override
+  String get filedReportsContentRemoved => 'Contenido eliminado';
+
+  @override
+  String get filedReportsUnderReview => 'En revisión';
+
+  @override
+  String get profileUnavailableTitle => 'Perfil no disponible';
+
+  @override
+  String get profileUnavailableBody =>
+      'Puede que se haya eliminado o el enlace sea incorrecto.';
+
+  @override
+  String get profileUnavailableBack => 'Volver al feed';
+
+  @override
+  String get reportPostTitle => 'Reportar esta publicación';
+
+  @override
+  String get reportCommentTitle => 'Reportar este comentario';
+
+  @override
+  String get reportSubheading =>
+      'Dinos por qué para que nuestro equipo pueda revisarlo.';
+
+  @override
+  String get reportReasonSpam => 'Spam';
+
+  @override
+  String get reportReasonHarassment => 'Acoso o intimidación';
+
+  @override
+  String get reportReasonHate => 'Discurso o símbolos de odio';
+
+  @override
+  String get reportReasonViolence => 'Violencia o amenazas';
+
+  @override
+  String get reportReasonSexual => 'Contenido sexual o explícito';
+
+  @override
+  String get reportReasonMisinformation => 'Información falsa';
+
+  @override
+  String get reportReasonOther => 'Otra cosa';
+
+  @override
+  String get reportDetailsLabel => 'Añadir detalles (opcional)';
+
+  @override
+  String get reportDetailsHint => 'Una nota corta nos ayuda a priorizar.';
+
+  @override
+  String get reportSubmit => 'Enviar reporte';
+
+  @override
+  String get reportThanks => 'Gracias — lo revisaremos.';
+
+  @override
+  String get reportError =>
+      'No se pudo enviar ese reporte. Inténtalo de nuevo.';
+
+  @override
+  String get notificationsGroupQuizExpiringTitle =>
+      'Respuesta del quiz por expirar';
+
+  @override
+  String get notificationsGroupQuizExpiringSub =>
+      'Recibe un aviso antes de la fecha límite para responder.';
+
+  @override
+  String get notificationsInProgressTitle => 'Termina lo que empezaste';
+
+  @override
+  String get notificationsInProgressSub =>
+      'Aviso semanal sobre selecciones aún en curso.';
 }

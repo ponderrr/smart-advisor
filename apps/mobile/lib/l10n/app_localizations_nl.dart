@@ -149,4 +149,198 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get reviewNone => 'Geen';
+
+  @override
+  String get loading => 'Laden';
+
+  @override
+  String get contactTitle => 'Neem contact op';
+
+  @override
+  String get contactSectionGetInTouch => 'Contact opnemen';
+
+  @override
+  String get contactEmailSupport => 'Ondersteuning per e-mail';
+
+  @override
+  String get contactReportBug => 'Bug melden';
+
+  @override
+  String get contactReportBugSubtitle => 'Open een GitHub-issue';
+
+  @override
+  String get contactViewSource => 'Bekijk de broncode';
+
+  @override
+  String get contactViewSourceSubtitle => 'Smart Advisor is open source';
+
+  @override
+  String get contactFooterNote =>
+      'We lezen elk bericht — vermeld welke versie je gebruikt en wat je deed toen iets misging.';
+
+  @override
+  String get contactEmailSubject => 'Smart Advisor — ondersteuning';
+
+  @override
+  String get appearanceTitle => 'Weergave';
+
+  @override
+  String get themeLabel => 'Thema';
+
+  @override
+  String get themeSystem => 'Systeem';
+
+  @override
+  String get themeLight => 'Licht';
+
+  @override
+  String get themeDark => 'Donker';
+
+  @override
+  String get amoledDarkTitle => 'AMOLED-donker';
+
+  @override
+  String get amoledDarkSubtitle =>
+      'Volledig zwarte oppervlakken in donkere modus.';
+
+  @override
+  String get notificationsTitle => 'Meldingen';
+
+  @override
+  String get notificationsWeeklyReminder => 'Wekelijkse quiz-herinnering';
+
+  @override
+  String get notificationsWeeklyOnHeading => 'Wekelijkse herinnering aan';
+
+  @override
+  String get notificationsWeeklyOnBody =>
+      'We herinneren je wekelijks om iets te ontdekken.';
+
+  @override
+  String get notificationsYourDataSection => 'Jouw gegevens';
+
+  @override
+  String get notificationsYearInReview => 'Jouw jaar in beeld';
+
+  @override
+  String get notificationsMonthInReview => 'Deze maand in beeld';
+
+  @override
+  String get blockedPeopleTitle => 'Geblokkeerde personen';
+
+  @override
+  String get blockedLoadError => 'Kon je geblokkeerde lijst niet laden.';
+
+  @override
+  String get blockedEmptyTitle => 'Niemand geblokkeerd';
+
+  @override
+  String get blockedEmptyBody =>
+      'Wanneer je iemand vanuit de feed blokkeert, verschijnt die hier zodat je het kunt terugdraaien.';
+
+  @override
+  String get blockedUnblock => 'Deblokkeer';
+
+  @override
+  String blockedUnblockedToast(String handle) {
+    return '@$handle gedeblokkeerd.';
+  }
+
+  @override
+  String get filedReportsTitle => 'Gemelde rapporten';
+
+  @override
+  String get filedReportsLoadError => 'Kon je rapporten niet laden.';
+
+  @override
+  String get filedReportsEmptyTitle => 'Geen rapporten';
+
+  @override
+  String get filedReportsEmptyBody =>
+      'Berichten en reacties die je markeert voor beoordeling verschijnen hier.';
+
+  @override
+  String get filedReportsOnPost => 'Op een bericht';
+
+  @override
+  String get filedReportsOnComment => 'Op een reactie';
+
+  @override
+  String get filedReportsContentRemoved => 'Inhoud verwijderd';
+
+  @override
+  String get filedReportsUnderReview => 'In behandeling';
+
+  @override
+  String get profileUnavailableTitle => 'Profiel niet beschikbaar';
+
+  @override
+  String get profileUnavailableBody =>
+      'Mogelijk verwijderd, of de link klopt niet.';
+
+  @override
+  String get profileUnavailableBack => 'Terug naar feed';
+
+  @override
+  String get reportPostTitle => 'Dit bericht melden';
+
+  @override
+  String get reportCommentTitle => 'Deze reactie melden';
+
+  @override
+  String get reportSubheading =>
+      'Vertel ons waarom, dan kijkt ons team ernaar.';
+
+  @override
+  String get reportReasonSpam => 'Spam';
+
+  @override
+  String get reportReasonHarassment => 'Intimidatie of pesten';
+
+  @override
+  String get reportReasonHate => 'Haatzaaiende uitingen of symbolen';
+
+  @override
+  String get reportReasonViolence => 'Geweld of bedreigingen';
+
+  @override
+  String get reportReasonSexual => 'Seksuele of expliciete inhoud';
+
+  @override
+  String get reportReasonMisinformation => 'Onjuiste informatie';
+
+  @override
+  String get reportReasonOther => 'Iets anders';
+
+  @override
+  String get reportDetailsLabel => 'Details toevoegen (optioneel)';
+
+  @override
+  String get reportDetailsHint =>
+      'Een korte toelichting helpt ons prioriteren.';
+
+  @override
+  String get reportSubmit => 'Melding versturen';
+
+  @override
+  String get reportThanks => 'Bedankt — we kijken ernaar.';
+
+  @override
+  String get reportError =>
+      'Melding kon niet worden verstuurd. Probeer opnieuw.';
+
+  @override
+  String get notificationsGroupQuizExpiringTitle =>
+      'Groepsquiz-antwoord verloopt';
+
+  @override
+  String get notificationsGroupQuizExpiringSub =>
+      'Krijg een seintje voor je antwoorddeadline.';
+
+  @override
+  String get notificationsInProgressTitle => 'Maak af wat je bent begonnen';
+
+  @override
+  String get notificationsInProgressSub =>
+      'Wekelijkse herinnering voor lopende picks.';
 }

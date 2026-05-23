@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:haptic_kit/haptic_kit.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../ui/ui.dart';
 import '../../settings/settings_service.dart';
 
@@ -13,11 +14,12 @@ class AppearanceSettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final themeMode = ref.watch(themeModeProvider);
     final amoled = ref.watch(amoledProvider);
 
     return BrandScaffold(
-      title: 'Appearance',
+      title: l.appearanceTitle,
       body: ResponsiveCenter(
         maxWidth: 760,
         child: SingleChildScrollView(
@@ -26,7 +28,7 @@ class AppearanceSettingsScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Theme',
+              Text(l.themeLabel,
                   style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
@@ -34,7 +36,7 @@ class AppearanceSettingsScreen extends ConsumerWidget {
               const SizedBox(height: 8),
               BrandSegmented(
                 color: Tw.indigo500,
-                labels: const ['System', 'Light', 'Dark'],
+                labels: [l.themeSystem, l.themeLight, l.themeDark],
                 selectedIndex: switch (themeMode) {
                   ThemeMode.system => 0,
                   ThemeMode.light => 1,
@@ -54,13 +56,13 @@ class AppearanceSettingsScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('AMOLED dark',
+                      Text(l.amoledDarkTitle,
                           style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
                               color: context.colors.foreground)),
                       const SizedBox(height: 2),
-                      Subtitle('True-black surfaces in dark mode.'),
+                      Subtitle(l.amoledDarkSubtitle),
                     ],
                   ),
                 ),

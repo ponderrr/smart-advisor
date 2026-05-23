@@ -139,4 +139,186 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get reviewNone => '无';
+
+  @override
+  String get loading => '加载中';
+
+  @override
+  String get contactTitle => '联系我们';
+
+  @override
+  String get contactSectionGetInTouch => '取得联系';
+
+  @override
+  String get contactEmailSupport => '邮件支持';
+
+  @override
+  String get contactReportBug => '报告错误';
+
+  @override
+  String get contactReportBugSubtitle => '在 GitHub 上提交 issue';
+
+  @override
+  String get contactViewSource => '查看源代码';
+
+  @override
+  String get contactViewSourceSubtitle => 'Smart Advisor 是开源的';
+
+  @override
+  String get contactFooterNote => '我们会阅读每一条消息 — 请说明你使用的版本以及出现问题时正在做什么。';
+
+  @override
+  String get contactEmailSubject => 'Smart Advisor — 支持';
+
+  @override
+  String get appearanceTitle => '外观';
+
+  @override
+  String get themeLabel => '主题';
+
+  @override
+  String get themeSystem => '系统';
+
+  @override
+  String get themeLight => '浅色';
+
+  @override
+  String get themeDark => '深色';
+
+  @override
+  String get amoledDarkTitle => 'AMOLED 深色';
+
+  @override
+  String get amoledDarkSubtitle => '深色模式下使用纯黑色表面。';
+
+  @override
+  String get notificationsTitle => '通知';
+
+  @override
+  String get notificationsWeeklyReminder => '每周测验提醒';
+
+  @override
+  String get notificationsWeeklyOnHeading => '每周提醒已开启';
+
+  @override
+  String get notificationsWeeklyOnBody => '我们会每周提醒你发现新内容。';
+
+  @override
+  String get notificationsYourDataSection => '你的数据';
+
+  @override
+  String get notificationsYearInReview => '你的年度回顾';
+
+  @override
+  String get notificationsMonthInReview => '本月回顾';
+
+  @override
+  String get blockedPeopleTitle => '已屏蔽的人';
+
+  @override
+  String get blockedLoadError => '无法加载你的屏蔽列表。';
+
+  @override
+  String get blockedEmptyTitle => '没有屏蔽任何人';
+
+  @override
+  String get blockedEmptyBody => '当你从动态中屏蔽某人时，他们会出现在这里，方便你撤销。';
+
+  @override
+  String get blockedUnblock => '取消屏蔽';
+
+  @override
+  String blockedUnblockedToast(String handle) {
+    return '已取消屏蔽 @$handle。';
+  }
+
+  @override
+  String get filedReportsTitle => '已提交的举报';
+
+  @override
+  String get filedReportsLoadError => '无法加载你的举报。';
+
+  @override
+  String get filedReportsEmptyTitle => '没有举报';
+
+  @override
+  String get filedReportsEmptyBody => '你标记为审核的帖子和评论会显示在这里。';
+
+  @override
+  String get filedReportsOnPost => '关于一个帖子';
+
+  @override
+  String get filedReportsOnComment => '关于一条评论';
+
+  @override
+  String get filedReportsContentRemoved => '内容已删除';
+
+  @override
+  String get filedReportsUnderReview => '审核中';
+
+  @override
+  String get profileUnavailableTitle => '无法访问该资料';
+
+  @override
+  String get profileUnavailableBody => '可能已被删除，或链接错误。';
+
+  @override
+  String get profileUnavailableBack => '返回信息流';
+
+  @override
+  String get reportPostTitle => '举报此帖子';
+
+  @override
+  String get reportCommentTitle => '举报此评论';
+
+  @override
+  String get reportSubheading => '告诉我们原因，团队会进行审核。';
+
+  @override
+  String get reportReasonSpam => '垃圾内容';
+
+  @override
+  String get reportReasonHarassment => '骚扰或欺凌';
+
+  @override
+  String get reportReasonHate => '仇恨言论或符号';
+
+  @override
+  String get reportReasonViolence => '暴力或威胁';
+
+  @override
+  String get reportReasonSexual => '性或色情内容';
+
+  @override
+  String get reportReasonMisinformation => '虚假信息';
+
+  @override
+  String get reportReasonOther => '其他';
+
+  @override
+  String get reportDetailsLabel => '添加详情（可选）';
+
+  @override
+  String get reportDetailsHint => '简短说明有助于我们优先处理。';
+
+  @override
+  String get reportSubmit => '提交举报';
+
+  @override
+  String get reportThanks => '谢谢 — 我们会查看的。';
+
+  @override
+  String get reportError => '无法发送举报，请重试。';
+
+  @override
+  String get notificationsGroupQuizExpiringTitle => '群答题即将截止';
+
+  @override
+  String get notificationsGroupQuizExpiringSub => '在答题截止前收到提醒。';
+
+  @override
+  String get notificationsInProgressTitle => '完成你开始的事';
+
+  @override
+  String get notificationsInProgressSub => '为进行中的内容提供每周提醒。';
 }

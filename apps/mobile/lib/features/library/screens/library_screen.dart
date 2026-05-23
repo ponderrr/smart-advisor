@@ -53,8 +53,9 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     // Keep the "finish what you started" reminder accurate whenever the
     // library (re)loads — including after a status edit invalidates it.
     ref.listen(_libraryProvider, (_, next) {
-      next.whenData((items) =>
-          ref.read(remindersProvider.notifier).syncInProgress(items));
+      next.whenData((items) => ref
+          .read(inProgressRemindersProvider.notifier)
+          .syncInProgress(items));
     });
     final lib = ref.watch(_libraryProvider);
     return RefreshIndicator(

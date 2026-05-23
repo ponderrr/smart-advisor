@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../core/supabase/supabase_providers.dart';
 import '../../../core/ui_messenger.dart';
-import '../../../ui/ui.dart';
 import '../models/feed_models.dart';
 import '../feed_providers.dart';
 import 'composer.dart';
@@ -44,40 +44,16 @@ class BlockMenuButton extends ConsumerWidget {
   final Color? iconColor;
   final double iconSize;
 
-  Future<void> _confirmReport(
-      BuildContext context, WidgetRef ref) async {
-    await AdaptiveAlertDialog.show(
-      context: context,
-      title: 'Report this ${post != null ? 'post' : 'comment'}?',
-      message: 'Our team will take a look. Thanks for helping keep '
-          'the feed friendly.',
-      icon: Icons.flag_outlined,
-      actions: [
-        AlertAction(
-            title: 'Cancel',
-            style: AlertActionStyle.cancel,
-            onPressed: () {}),
-        AlertAction(
-          title: 'Report',
-          style: AlertActionStyle.destructive,
-          onPressed: () async {
-            final actions = ref.read(feedActionsProvider);
-            try {
-              if (post != null) {
-                await actions.reportPost(post!.id);
-              } else if (commentId != null) {
-                await actions.reportComment(commentId!);
-              }
-              showBanner('Thanks — we’ll take a look.',
-                  type: AdaptiveSnackBarType.success);
-            } catch (_) {
-              showBanner('Couldn’t send that report. Please try again.',
-                  type: AdaptiveSnackBarType.error);
-            }
-          },
-        ),
-      ],
-    );
+  /// Open the dedicated report screen — supersedes the old inline
+  /// confirm dialog so the reporter can pick a reason category and
+  /// add an optional note.
+  void _openReportScreen(BuildContext context) {
+    if (post != null) {
+      context.push('/feed/report?postId=${Uri.encodeQueryComponent(post!.id)}');
+    } else if (commentId != null) {
+      context.push(
+          '/feed/report?commentId=${Uri.encodeQueryComponent(commentId!)}');
+    }
   }
 
   @override
@@ -123,7 +99,7 @@ class BlockMenuButton extends ConsumerWidget {
                 showBanner('Comment deleted');
               }
             case 'report':
-              if (context.mounted) await _confirmReport(context, ref);
+              if (context.mounted) _openReportScreen(context);
             case 'block':
               await ref.read(feedActionsProvider).block(authorId);
               showBanner('Blocked @$author.');

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../ui/ui.dart';
 import 'settings_helpers.dart';
 
@@ -19,39 +20,37 @@ class ContactScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return BrandScaffold(
-      title: 'Contact us',
+      title: l.contactTitle,
       body: ResponsiveCenter(
         maxWidth: 760,
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
-            settingsSection(context, 'Get in touch'),
+            settingsSection(context, l.contactSectionGetInTouch),
             BrandCard(
               child: Column(children: [
-                settingsTile(context, Icons.mail_outline, 'Email support',
+                settingsTile(context, Icons.mail_outline, l.contactEmailSupport,
                     subtitle: _supportEmail,
                     onTap: () => _open(Uri(
                           scheme: 'mailto',
                           path: _supportEmail,
-                          query: 'subject=Smart Advisor — support',
+                          query: 'subject=${l.contactEmailSubject}',
                         ))),
                 settingsTile(context, Icons.bug_report_outlined,
-                    'Report a bug',
-                    subtitle: 'Open a GitHub issue',
+                    l.contactReportBug,
+                    subtitle: l.contactReportBugSubtitle,
                     onTap: () => _open(Uri.parse(_issuesUrl))),
-                settingsTile(context, Icons.code_outlined, 'View the source',
-                    subtitle: 'Smart Advisor is open source',
+                settingsTile(context, Icons.code_outlined, l.contactViewSource,
+                    subtitle: l.contactViewSourceSubtitle,
                     onTap: () => _open(Uri.parse(_repoUrl))),
               ]),
             ),
             const SizedBox(height: 14),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Subtitle(
-                  'We read every message — please mention which version '
-                  'you\'re running and what you were doing when something '
-                  'went wrong.'),
+              child: Subtitle(l.contactFooterNote),
             ),
           ],
         ),

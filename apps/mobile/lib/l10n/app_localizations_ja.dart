@@ -140,4 +140,187 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get reviewNone => 'なし';
+
+  @override
+  String get loading => '読み込み中';
+
+  @override
+  String get contactTitle => 'お問い合わせ';
+
+  @override
+  String get contactSectionGetInTouch => '連絡する';
+
+  @override
+  String get contactEmailSupport => 'メールサポート';
+
+  @override
+  String get contactReportBug => 'バグを報告';
+
+  @override
+  String get contactReportBugSubtitle => 'GitHubでissueを開く';
+
+  @override
+  String get contactViewSource => 'ソースコードを見る';
+
+  @override
+  String get contactViewSourceSubtitle => 'Smart Advisorはオープンソースです';
+
+  @override
+  String get contactFooterNote =>
+      'すべてのメッセージを読んでいます — 使用中のバージョンと、問題が発生したときに何をしていたかを教えてください。';
+
+  @override
+  String get contactEmailSubject => 'Smart Advisor — サポート';
+
+  @override
+  String get appearanceTitle => '外観';
+
+  @override
+  String get themeLabel => 'テーマ';
+
+  @override
+  String get themeSystem => 'システム';
+
+  @override
+  String get themeLight => 'ライト';
+
+  @override
+  String get themeDark => 'ダーク';
+
+  @override
+  String get amoledDarkTitle => 'AMOLEDダーク';
+
+  @override
+  String get amoledDarkSubtitle => 'ダークモードで完全な黒を表示します。';
+
+  @override
+  String get notificationsTitle => '通知';
+
+  @override
+  String get notificationsWeeklyReminder => '週次クイズリマインダー';
+
+  @override
+  String get notificationsWeeklyOnHeading => '週次リマインダーをオンにしました';
+
+  @override
+  String get notificationsWeeklyOnBody => '毎週、新しい発見をお知らせします。';
+
+  @override
+  String get notificationsYourDataSection => 'あなたのデータ';
+
+  @override
+  String get notificationsYearInReview => '今年の振り返り';
+
+  @override
+  String get notificationsMonthInReview => '今月の振り返り';
+
+  @override
+  String get blockedPeopleTitle => 'ブロックした人';
+
+  @override
+  String get blockedLoadError => 'ブロックリストを読み込めませんでした。';
+
+  @override
+  String get blockedEmptyTitle => 'ブロックした人はいません';
+
+  @override
+  String get blockedEmptyBody => 'フィードから誰かをブロックすると、ここに表示されて解除できます。';
+
+  @override
+  String get blockedUnblock => 'ブロック解除';
+
+  @override
+  String blockedUnblockedToast(String handle) {
+    return '@$handleのブロックを解除しました。';
+  }
+
+  @override
+  String get filedReportsTitle => '送信した報告';
+
+  @override
+  String get filedReportsLoadError => '報告を読み込めませんでした。';
+
+  @override
+  String get filedReportsEmptyTitle => '報告はありません';
+
+  @override
+  String get filedReportsEmptyBody => 'レビューのためにフラグを立てた投稿やコメントがここに表示されます。';
+
+  @override
+  String get filedReportsOnPost => '投稿について';
+
+  @override
+  String get filedReportsOnComment => 'コメントについて';
+
+  @override
+  String get filedReportsContentRemoved => 'コンテンツは削除されました';
+
+  @override
+  String get filedReportsUnderReview => '確認中';
+
+  @override
+  String get profileUnavailableTitle => 'プロフィールを利用できません';
+
+  @override
+  String get profileUnavailableBody => '削除されたか、リンクが間違っている可能性があります。';
+
+  @override
+  String get profileUnavailableBack => 'フィードに戻る';
+
+  @override
+  String get reportPostTitle => 'この投稿を報告';
+
+  @override
+  String get reportCommentTitle => 'このコメントを報告';
+
+  @override
+  String get reportSubheading => '理由を教えてください。チームが確認します。';
+
+  @override
+  String get reportReasonSpam => 'スパム';
+
+  @override
+  String get reportReasonHarassment => '嫌がらせまたはいじめ';
+
+  @override
+  String get reportReasonHate => 'ヘイトスピーチまたは差別的シンボル';
+
+  @override
+  String get reportReasonViolence => '暴力または脅迫';
+
+  @override
+  String get reportReasonSexual => '性的または露骨な内容';
+
+  @override
+  String get reportReasonMisinformation => '誤った情報';
+
+  @override
+  String get reportReasonOther => 'その他';
+
+  @override
+  String get reportDetailsLabel => '詳細を追加（任意）';
+
+  @override
+  String get reportDetailsHint => '短いメモがあると優先度を判断しやすくなります。';
+
+  @override
+  String get reportSubmit => '報告を送信';
+
+  @override
+  String get reportThanks => 'ありがとうございます — 確認します。';
+
+  @override
+  String get reportError => '報告を送信できませんでした。もう一度お試しください。';
+
+  @override
+  String get notificationsGroupQuizExpiringTitle => 'グループクイズの回答期限が近づいています';
+
+  @override
+  String get notificationsGroupQuizExpiringSub => '回答期限の前にお知らせします。';
+
+  @override
+  String get notificationsInProgressTitle => '始めたことを終わらせよう';
+
+  @override
+  String get notificationsInProgressSub => '進行中のピックを週ごとにお知らせします。';
 }

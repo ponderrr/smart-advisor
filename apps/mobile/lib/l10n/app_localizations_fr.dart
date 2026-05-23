@@ -152,4 +152,197 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get reviewNone => 'Aucun';
+
+  @override
+  String get loading => 'Chargement';
+
+  @override
+  String get contactTitle => 'Nous contacter';
+
+  @override
+  String get contactSectionGetInTouch => 'Prendre contact';
+
+  @override
+  String get contactEmailSupport => 'Support par e-mail';
+
+  @override
+  String get contactReportBug => 'Signaler un bug';
+
+  @override
+  String get contactReportBugSubtitle => 'Ouvrir un ticket GitHub';
+
+  @override
+  String get contactViewSource => 'Voir le code source';
+
+  @override
+  String get contactViewSourceSubtitle => 'Smart Advisor est open source';
+
+  @override
+  String get contactFooterNote =>
+      'Nous lisons chaque message — merci de préciser la version utilisée et ce que vous faisiez quand le problème est survenu.';
+
+  @override
+  String get contactEmailSubject => 'Smart Advisor — support';
+
+  @override
+  String get appearanceTitle => 'Apparence';
+
+  @override
+  String get themeLabel => 'Thème';
+
+  @override
+  String get themeSystem => 'Système';
+
+  @override
+  String get themeLight => 'Clair';
+
+  @override
+  String get themeDark => 'Sombre';
+
+  @override
+  String get amoledDarkTitle => 'Noir AMOLED';
+
+  @override
+  String get amoledDarkSubtitle => 'Surfaces noires pures en mode sombre.';
+
+  @override
+  String get notificationsTitle => 'Notifications';
+
+  @override
+  String get notificationsWeeklyReminder => 'Rappel hebdomadaire du quiz';
+
+  @override
+  String get notificationsWeeklyOnHeading => 'Rappel hebdomadaire activé';
+
+  @override
+  String get notificationsWeeklyOnBody =>
+      'Nous vous enverrons une notification chaque semaine pour découvrir quelque chose.';
+
+  @override
+  String get notificationsYourDataSection => 'Vos données';
+
+  @override
+  String get notificationsYearInReview => 'Votre année en revue';
+
+  @override
+  String get notificationsMonthInReview => 'Ce mois en revue';
+
+  @override
+  String get blockedPeopleTitle => 'Personnes bloquées';
+
+  @override
+  String get blockedLoadError =>
+      'Impossible de charger votre liste de blocages.';
+
+  @override
+  String get blockedEmptyTitle => 'Personne de bloqué';
+
+  @override
+  String get blockedEmptyBody =>
+      'Quand vous bloquez quelqu\'un depuis le fil, il apparaîtra ici pour pouvoir annuler.';
+
+  @override
+  String get blockedUnblock => 'Débloquer';
+
+  @override
+  String blockedUnblockedToast(String handle) {
+    return '@$handle débloqué.';
+  }
+
+  @override
+  String get filedReportsTitle => 'Signalements envoyés';
+
+  @override
+  String get filedReportsLoadError => 'Impossible de charger vos signalements.';
+
+  @override
+  String get filedReportsEmptyTitle => 'Aucun signalement';
+
+  @override
+  String get filedReportsEmptyBody =>
+      'Les publications et commentaires que vous signalez apparaîtront ici.';
+
+  @override
+  String get filedReportsOnPost => 'Sur une publication';
+
+  @override
+  String get filedReportsOnComment => 'Sur un commentaire';
+
+  @override
+  String get filedReportsContentRemoved => 'Contenu supprimé';
+
+  @override
+  String get filedReportsUnderReview => 'En cours d\'examen';
+
+  @override
+  String get profileUnavailableTitle => 'Profil indisponible';
+
+  @override
+  String get profileUnavailableBody =>
+      'Il a peut-être été supprimé, ou le lien est incorrect.';
+
+  @override
+  String get profileUnavailableBack => 'Retour au flux';
+
+  @override
+  String get reportPostTitle => 'Signaler cette publication';
+
+  @override
+  String get reportCommentTitle => 'Signaler ce commentaire';
+
+  @override
+  String get reportSubheading =>
+      'Dites-nous pourquoi pour que notre équipe puisse vérifier.';
+
+  @override
+  String get reportReasonSpam => 'Spam';
+
+  @override
+  String get reportReasonHarassment => 'Harcèlement ou intimidation';
+
+  @override
+  String get reportReasonHate => 'Discours ou symboles haineux';
+
+  @override
+  String get reportReasonViolence => 'Violence ou menaces';
+
+  @override
+  String get reportReasonSexual => 'Contenu sexuel ou explicite';
+
+  @override
+  String get reportReasonMisinformation => 'Informations fausses';
+
+  @override
+  String get reportReasonOther => 'Autre chose';
+
+  @override
+  String get reportDetailsLabel => 'Ajouter des détails (facultatif)';
+
+  @override
+  String get reportDetailsHint => 'Une courte note nous aide à prioriser.';
+
+  @override
+  String get reportSubmit => 'Envoyer le signalement';
+
+  @override
+  String get reportThanks => 'Merci — nous allons vérifier.';
+
+  @override
+  String get reportError =>
+      'Impossible d\'envoyer ce signalement. Veuillez réessayer.';
+
+  @override
+  String get notificationsGroupQuizExpiringTitle =>
+      'Réponse du quiz qui expire';
+
+  @override
+  String get notificationsGroupQuizExpiringSub =>
+      'Reçois un rappel avant la date limite de réponse.';
+
+  @override
+  String get notificationsInProgressTitle => 'Termine ce que tu as commencé';
+
+  @override
+  String get notificationsInProgressSub =>
+      'Rappel hebdomadaire pour les choix encore en cours.';
 }

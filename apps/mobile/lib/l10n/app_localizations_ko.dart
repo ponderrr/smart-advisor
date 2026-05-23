@@ -142,4 +142,187 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get reviewNone => '없음';
+
+  @override
+  String get loading => '로딩 중';
+
+  @override
+  String get contactTitle => '문의하기';
+
+  @override
+  String get contactSectionGetInTouch => '연락하기';
+
+  @override
+  String get contactEmailSupport => '이메일 지원';
+
+  @override
+  String get contactReportBug => '버그 신고';
+
+  @override
+  String get contactReportBugSubtitle => 'GitHub에 이슈 열기';
+
+  @override
+  String get contactViewSource => '소스 코드 보기';
+
+  @override
+  String get contactViewSourceSubtitle => 'Smart Advisor는 오픈 소스입니다';
+
+  @override
+  String get contactFooterNote =>
+      '모든 메시지를 읽고 있습니다 — 사용 중인 버전과 문제가 발생했을 때 무엇을 하고 있었는지 알려주세요.';
+
+  @override
+  String get contactEmailSubject => 'Smart Advisor — 지원';
+
+  @override
+  String get appearanceTitle => '모양';
+
+  @override
+  String get themeLabel => '테마';
+
+  @override
+  String get themeSystem => '시스템';
+
+  @override
+  String get themeLight => '라이트';
+
+  @override
+  String get themeDark => '다크';
+
+  @override
+  String get amoledDarkTitle => 'AMOLED 다크';
+
+  @override
+  String get amoledDarkSubtitle => '다크 모드에서 완전한 검정색 표면.';
+
+  @override
+  String get notificationsTitle => '알림';
+
+  @override
+  String get notificationsWeeklyReminder => '주간 퀴즈 리마인더';
+
+  @override
+  String get notificationsWeeklyOnHeading => '주간 리마인더 켜짐';
+
+  @override
+  String get notificationsWeeklyOnBody => '매주 새로운 것을 발견하도록 알려드립니다.';
+
+  @override
+  String get notificationsYourDataSection => '내 데이터';
+
+  @override
+  String get notificationsYearInReview => '올해의 회고';
+
+  @override
+  String get notificationsMonthInReview => '이번 달의 회고';
+
+  @override
+  String get blockedPeopleTitle => '차단한 사람';
+
+  @override
+  String get blockedLoadError => '차단 목록을 불러올 수 없습니다.';
+
+  @override
+  String get blockedEmptyTitle => '차단한 사람이 없습니다';
+
+  @override
+  String get blockedEmptyBody => '피드에서 누군가를 차단하면 여기에 표시되어 취소할 수 있습니다.';
+
+  @override
+  String get blockedUnblock => '차단 해제';
+
+  @override
+  String blockedUnblockedToast(String handle) {
+    return '@$handle 차단을 해제했습니다.';
+  }
+
+  @override
+  String get filedReportsTitle => '제출한 신고';
+
+  @override
+  String get filedReportsLoadError => '신고를 불러올 수 없습니다.';
+
+  @override
+  String get filedReportsEmptyTitle => '신고 없음';
+
+  @override
+  String get filedReportsEmptyBody => '검토를 위해 신고한 게시물과 댓글이 여기에 표시됩니다.';
+
+  @override
+  String get filedReportsOnPost => '게시물에 대해';
+
+  @override
+  String get filedReportsOnComment => '댓글에 대해';
+
+  @override
+  String get filedReportsContentRemoved => '콘텐츠가 삭제됨';
+
+  @override
+  String get filedReportsUnderReview => '검토 중';
+
+  @override
+  String get profileUnavailableTitle => '프로필을 사용할 수 없습니다';
+
+  @override
+  String get profileUnavailableBody => '삭제되었거나 링크가 잘못되었을 수 있습니다.';
+
+  @override
+  String get profileUnavailableBack => '피드로 돌아가기';
+
+  @override
+  String get reportPostTitle => '이 게시물 신고';
+
+  @override
+  String get reportCommentTitle => '이 댓글 신고';
+
+  @override
+  String get reportSubheading => '이유를 알려주시면 팀이 확인하겠습니다.';
+
+  @override
+  String get reportReasonSpam => '스팸';
+
+  @override
+  String get reportReasonHarassment => '괴롭힘 또는 따돌림';
+
+  @override
+  String get reportReasonHate => '혐오 발언 또는 상징';
+
+  @override
+  String get reportReasonViolence => '폭력 또는 위협';
+
+  @override
+  String get reportReasonSexual => '성적이거나 노골적인 콘텐츠';
+
+  @override
+  String get reportReasonMisinformation => '허위 정보';
+
+  @override
+  String get reportReasonOther => '기타';
+
+  @override
+  String get reportDetailsLabel => '세부 정보 추가 (선택)';
+
+  @override
+  String get reportDetailsHint => '짧은 메모가 우선순위 결정에 도움이 됩니다.';
+
+  @override
+  String get reportSubmit => '신고 보내기';
+
+  @override
+  String get reportThanks => '감사합니다 — 확인하겠습니다.';
+
+  @override
+  String get reportError => '신고를 보낼 수 없습니다. 다시 시도해 주세요.';
+
+  @override
+  String get notificationsGroupQuizExpiringTitle => '그룹 퀴즈 답변 마감 임박';
+
+  @override
+  String get notificationsGroupQuizExpiringSub => '답변 마감 전에 알려드립니다.';
+
+  @override
+  String get notificationsInProgressTitle => '시작한 일을 끝내세요';
+
+  @override
+  String get notificationsInProgressSub => '진행 중인 항목에 대한 주간 알림.';
 }

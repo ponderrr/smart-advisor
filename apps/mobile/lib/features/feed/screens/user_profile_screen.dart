@@ -7,6 +7,7 @@ import '../../../core/models/library_item.dart';
 import '../../../core/services/service_providers.dart';
 import '../../../core/supabase/supabase_providers.dart';
 import '../../../core/ui_messenger.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../ui/ui.dart';
 import '../feed_providers.dart';
 import '../models/feed_models.dart';
@@ -44,6 +45,12 @@ class UserProfileScreen extends ConsumerWidget {
     final tone = contentAccent(_accent, Theme.of(context).brightness);
 
     final profileAsync = ref.watch(feedProfileProvider(profileId));
+    // Loaded with no row → the profile is gone (deleted account / bad
+    // link). Show a dedicated unavailable screen, analogous to the
+    // post-detail "isn't available" state.
+    if (!profileAsync.isLoading && profileAsync.value == null) {
+      return _profileUnavailable(context);
+    }
     final postsAsync = ref.watch(userPostsProvider(profileId));
     final isFollowing =
         ref.watch(followingProvider).value?.contains(profileId) ?? false;
@@ -54,7 +61,7 @@ class UserProfileScreen extends ConsumerWidget {
         ref.watch(followingProfilesProvider(profileId)).value?.length ?? 0;
 
     final profile = profileAsync.value;
-    final name = profile?.name ?? 'Someone';
+    final name = profile?.name ?? '';
     final posts = postsAsync.value ?? const <FeedPost>[];
 
     // Library + plan-to-watch — gated by the profile's library privacy.
@@ -324,6 +331,35 @@ class UserProfileScreen extends ConsumerWidget {
                 ],
               ],
             ),
+    );
+  }
+
+  Widget _profileUnavailable(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return BrandScaffold(
+      title: l.profileUnavailableTitle,
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.person_off_outlined,
+                  size: 44, color: context.brandMuted),
+              const SizedBox(height: 14),
+              BrandHeading(l.profileUnavailableTitle, size: 22),
+              const SizedBox(height: 8),
+              Subtitle(l.profileUnavailableBody, center: true),
+              const SizedBox(height: 20),
+              AdaptiveButton(
+                onPressed: () => context.go('/'),
+                label: l.profileUnavailableBack,
+                color: Tw.violet500,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

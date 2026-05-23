@@ -26,6 +26,7 @@ import '../../features/feed/screens/add_friends_screen.dart';
 import '../../features/feed/screens/community_screen.dart';
 import '../../features/feed/screens/friends_screen.dart';
 import '../../features/feed/screens/post_detail_screen.dart';
+import '../../features/feed/screens/report_screen.dart';
 import '../../features/feed/screens/user_profile_screen.dart';
 import '../../features/group_quiz/screens/group_quiz_screen.dart';
 import '../../features/group_quiz/screens/group_quiz_session_screen.dart';
@@ -306,6 +307,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                             s.uri.queryParameters['tab'] == 'followers'
                                 ? 1
                                 : 0)),
+                GoRoute(
+                    path: 'feed/report',
+                    builder: (_, s) => ReportScreen(
+                          postId: s.uri.queryParameters['postId'],
+                          commentId: s.uri.queryParameters['commentId'],
+                        )),
                 GoRoute(
                     path: 'feed/:id',
                     builder: (_, s) => PostDetailScreen(

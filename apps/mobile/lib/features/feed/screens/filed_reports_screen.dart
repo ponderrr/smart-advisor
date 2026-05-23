@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../ui/ui.dart';
 import '../feed_providers.dart';
 
@@ -12,17 +13,18 @@ class FiledReportsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final reports = ref.watch(myReportsProvider);
 
     return BrandScaffold(
-      title: 'Reports you’ve filed',
+      title: l.filedReportsTitle,
       body: ResponsiveCenter(
         maxWidth: 560,
         child: reports.when(
-          loading: () => const Center(child: LoaderFive('Loading')),
-          error: (_, _) => const Padding(
-            padding: EdgeInsets.all(20),
-            child: MessageBanner.error('Couldn’t load your reports.'),
+          loading: () => Center(child: LoaderFive(l.loading)),
+          error: (_, _) => Padding(
+            padding: const EdgeInsets.all(20),
+            child: MessageBanner.error(l.filedReportsLoadError),
           ),
           data: (list) {
             if (list.isEmpty) {
@@ -35,13 +37,9 @@ class FiledReportsScreen extends ConsumerWidget {
                         size: 48,
                         color: context.colors.mutedForeground),
                     const SizedBox(height: 12),
-                    const BrandHeading('No reports filed', size: 22),
+                    BrandHeading(l.filedReportsEmptyTitle, size: 22),
                     const SizedBox(height: 6),
-                    const Subtitle(
-                      'Posts and comments you flag for review will '
-                      'show up here.',
-                      center: true,
-                    ),
+                    Subtitle(l.filedReportsEmptyBody, center: true),
                   ],
                 ),
               );
@@ -71,6 +69,7 @@ class _ReportRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final c = context.colors;
     final date = DateTime.tryParse(report.createdAt);
     return BrandCard(
@@ -87,7 +86,7 @@ class _ReportRow extends StatelessWidget {
                       size: 12, color: context.brandMuted),
                   const SizedBox(width: 4),
                   Text(
-                    '${report.isPost ? 'On a post' : 'On a comment'}'
+                    '${report.isPost ? l.filedReportsOnPost : l.filedReportsOnComment}'
                     '${date != null ? ' · ${date.month}/${date.day}/${date.year}' : ''}',
                     style: TextStyle(
                         fontSize: 11,
@@ -97,7 +96,7 @@ class _ReportRow extends StatelessWidget {
                 ]),
                 const SizedBox(height: 2),
                 Text(
-                  report.label ?? 'Content removed',
+                  report.label ?? l.filedReportsContentRemoved,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -125,7 +124,7 @@ class _ReportRow extends StatelessWidget {
               color: Tw.amber500.withValues(alpha: 0.14),
               borderRadius: BorderRadius.circular(999),
             ),
-            child: Text('Under review',
+            child: Text(l.filedReportsUnderReview,
                 style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w900,

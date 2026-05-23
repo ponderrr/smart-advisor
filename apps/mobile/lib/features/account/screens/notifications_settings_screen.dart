@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:haptic_kit/haptic_kit.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../ui/ui.dart';
 import '../../notifications/notification_service.dart';
 import '../../notifications/notifications_center.dart';
@@ -16,8 +17,9 @@ class NotificationsSettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     return BrandScaffold(
-      title: 'Notifications',
+      title: l.notificationsTitle,
       body: ResponsiveCenter(
         maxWidth: 760,
         child: SingleChildScrollView(
@@ -30,7 +32,7 @@ class NotificationsSettingsScreen extends ConsumerWidget {
                 AdaptiveListTile(
                   padding: EdgeInsets.zero,
                   leading: const Icon(Icons.notifications_none),
-                  title: const Text('Weekly quiz reminder'),
+                  title: Text(l.notificationsWeeklyReminder),
                   trailing: AdaptiveSwitch(
                     value: ref.watch(remindersProvider),
                     activeColor: Tw.indigo500,
@@ -42,16 +44,50 @@ class NotificationsSettingsScreen extends ConsumerWidget {
                       if (v) {
                         await ref
                             .read(notificationsCenterProvider.notifier)
-                            .add('Weekly reminder on',
-                                'We\'ll nudge you weekly to discover something.',
+                            .add(l.notificationsWeeklyOnHeading,
+                                l.notificationsWeeklyOnBody,
                                 type: AppNotificationType.reminder);
                       }
                     },
                   ),
                 ),
+                settingsDivider(context),
+                AdaptiveListTile(
+                  padding: EdgeInsets.zero,
+                  leading: const Icon(Icons.hourglass_bottom_outlined),
+                  title: Text(l.notificationsGroupQuizExpiringTitle),
+                  subtitle: Text(l.notificationsGroupQuizExpiringSub),
+                  trailing: AdaptiveSwitch(
+                    value: ref.watch(groupQuizRemindersProvider),
+                    activeColor: Tw.indigo500,
+                    onChanged: (v) async {
+                      Haptics.selection();
+                      await ref
+                          .read(groupQuizRemindersProvider.notifier)
+                          .set(v);
+                    },
+                  ),
+                ),
+                settingsDivider(context),
+                AdaptiveListTile(
+                  padding: EdgeInsets.zero,
+                  leading: const Icon(Icons.menu_book_outlined),
+                  title: Text(l.notificationsInProgressTitle),
+                  subtitle: Text(l.notificationsInProgressSub),
+                  trailing: AdaptiveSwitch(
+                    value: ref.watch(inProgressRemindersProvider),
+                    activeColor: Tw.indigo500,
+                    onChanged: (v) async {
+                      Haptics.selection();
+                      await ref
+                          .read(inProgressRemindersProvider.notifier)
+                          .set(v);
+                    },
+                  ),
+                ),
               ]),
             ),
-            settingsSection(context, 'Your data'),
+            settingsSection(context, l.notificationsYourDataSection),
             BrandCard(
               child: Column(children: [
                 AdaptiveListTile(
@@ -62,17 +98,17 @@ class NotificationsSettingsScreen extends ConsumerWidget {
                     child: Icon(Icons.notifications_none,
                         color: context.colors.foreground),
                   ),
-                  title: const Text('Notifications'),
+                  title: Text(l.notificationsTitle),
                   trailing: Icon(Icons.chevron_right,
                       color: context.colors.mutedForeground),
                   onTap: () => context.push('/notifications'),
                 ),
                 settingsTile(
-                    context, Icons.auto_awesome, 'Your year in review',
+                    context, Icons.auto_awesome, l.notificationsYearInReview,
                     onTap: () => context.push('/wrapped')),
                 settingsDivider(context),
                 settingsTile(
-                    context, Icons.calendar_month, 'This month in review',
+                    context, Icons.calendar_month, l.notificationsMonthInReview,
                     onTap: () => context.push('/wrapped/month')),
               ]),
             ),

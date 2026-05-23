@@ -13,7 +13,11 @@ import '../../core/services/service_providers.dart';
 import '../../core/supabase/supabase_providers.dart';
 import 'live_update.dart';
 
+// Weekly toggle key kept for backward-compat — existing installs that
+// flipped this on stay on for the weekly reminder.
 const _key = 'sa.reminders_enabled';
+const _inProgressKey = 'sa.reminders_in_progress_enabled';
+const _groupQuizKey = 'sa.reminders_group_quiz_enabled';
 
 // Notification ids: 42 = weekly fresh-picks, 43 = finish-what-you-started,
 // 71 = the group-quiz live activity (ongoing), 72 = group-quiz deadline.
@@ -130,10 +134,22 @@ class NotificationService {
     } catch (_) {/* unsupported platform — ignore */}
   }
 
+  static Future<void> cancelWeeklyReminder() async {
+    await init();
+    if (!_ready) return;
+    await _plugin.cancel(id: _weeklyId);
+  }
+
   static Future<void> cancelInProgressReminder() async {
     await init();
     if (!_ready) return;
     await _plugin.cancel(id: _inProgressId);
+  }
+
+  static Future<void> cancelGroupQuizDeadline() async {
+    await init();
+    if (!_ready) return;
+    await _plugin.cancel(id: _groupQuizDeadlineId);
   }
 
   static Future<void> cancelAll() async {
@@ -232,7 +248,7 @@ class NotificationService {
   }
 }
 
-/// Persisted reminder toggle.
+/// Persisted weekly-quiz reminder toggle.
 class Reminders extends Notifier<bool> {
   @override
   bool build() =>
@@ -246,18 +262,46 @@ class Reminders extends Notifier<bool> {
     if (v) {
       await NotificationService.requestPermission();
       await NotificationService.scheduleWeeklyReminder();
-      // Seed the "finish what you started" reminder from the library.
+    } else {
+      await NotificationService.cancelWeeklyReminder();
+    }
+  }
+}
+
+final remindersProvider =
+    NotifierProvider<Reminders, bool>(Reminders.new);
+
+/// Persisted "finish what you started" reminder toggle. Migrates from
+/// the legacy bundled [_key] so existing installs that had reminders on
+/// keep the in-progress nudge until they explicitly turn it off.
+class InProgressReminders extends Notifier<bool> {
+  @override
+  bool build() {
+    final prefs = ref.watch(sharedPreferencesProvider).asData?.value;
+    if (prefs == null) return false;
+    final explicit = prefs.getBool(_inProgressKey);
+    if (explicit != null) return explicit;
+    // Legacy bundled toggle controlled both. Inherit weekly state.
+    return prefs.getBool(_key) ?? false;
+  }
+
+  Future<void> set(bool v) async {
+    state = v;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_inProgressKey, v);
+    if (v) {
+      await NotificationService.requestPermission();
       final res = await ref
           .read(libraryServiceProvider)
           .list(status: LibraryStatus.inProgress);
       await _apply(res.data ?? const []);
     } else {
-      await NotificationService.cancelAll();
+      await NotificationService.cancelInProgressReminder();
     }
   }
 
   /// Re-evaluate the in-progress reminder against [items] (any status).
-  /// No-op while reminders are off. Cheap to call whenever the library
+  /// No-op while the toggle is off. Cheap to call whenever the library
   /// is (re)loaded so the nudge stays accurate after status changes.
   Future<void> syncInProgress(List<LibraryItem> items) async {
     if (!state) return;
@@ -273,5 +317,34 @@ class Reminders extends Notifier<bool> {
   }
 }
 
-final remindersProvider =
-    NotifierProvider<Reminders, bool>(Reminders.new);
+final inProgressRemindersProvider =
+    NotifierProvider<InProgressReminders, bool>(InProgressReminders.new);
+
+/// Persisted "group quiz answer expiring" reminder toggle. Default on —
+/// the deadline nudge is what makes async group quizzes work, so we opt
+/// users in unless they turn it off explicitly. Gates the scheduling
+/// call in group_quiz_session_screen.
+class GroupQuizReminders extends Notifier<bool> {
+  @override
+  bool build() =>
+      ref
+          .watch(sharedPreferencesProvider)
+          .asData
+          ?.value
+          .getBool(_groupQuizKey) ??
+      true;
+
+  Future<void> set(bool v) async {
+    state = v;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_groupQuizKey, v);
+    if (v) {
+      await NotificationService.requestPermission();
+    } else {
+      await NotificationService.cancelGroupQuizDeadline();
+    }
+  }
+}
+
+final groupQuizRemindersProvider =
+    NotifierProvider<GroupQuizReminders, bool>(GroupQuizReminders.new);

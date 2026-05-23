@@ -137,9 +137,13 @@ class _BodyState extends ConsumerState<_Body> {
       return;
     }
     // Async group quiz with a deadline → schedule a "responses about to
-    // expire" reminder a few hours out.
+    // expire" reminder a few hours out. Gated by the user's group-quiz
+    // reminder preference (Settings → Notifications).
     final deadline = s.session.deadlineAtUtc;
-    if (s.session.isAsync && deadline != null && !_deadlineScheduled) {
+    if (s.session.isAsync &&
+        deadline != null &&
+        !_deadlineScheduled &&
+        ref.read(groupQuizRemindersProvider)) {
       _deadlineScheduled = true;
       NotificationService.scheduleGroupQuizDeadline(
           deadline: deadline, code: s.session.code);

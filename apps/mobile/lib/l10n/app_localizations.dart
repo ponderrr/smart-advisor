@@ -377,6 +377,366 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'None'**
   String get reviewNone;
+
+  /// Generic loading label
+  ///
+  /// In en, this message translates to:
+  /// **'Loading'**
+  String get loading;
+
+  /// Contact screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Contact us'**
+  String get contactTitle;
+
+  /// Contact screen — section header above the email/bug/source tiles
+  ///
+  /// In en, this message translates to:
+  /// **'Get in touch'**
+  String get contactSectionGetInTouch;
+
+  /// Contact screen — email tile title
+  ///
+  /// In en, this message translates to:
+  /// **'Email support'**
+  String get contactEmailSupport;
+
+  /// Contact screen — GitHub issues tile title
+  ///
+  /// In en, this message translates to:
+  /// **'Report a bug'**
+  String get contactReportBug;
+
+  /// Contact screen — GitHub issues tile subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Open a GitHub issue'**
+  String get contactReportBugSubtitle;
+
+  /// Contact screen — repo tile title
+  ///
+  /// In en, this message translates to:
+  /// **'View the source'**
+  String get contactViewSource;
+
+  /// Contact screen — repo tile subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Smart Advisor is open source'**
+  String get contactViewSourceSubtitle;
+
+  /// Contact screen — footer guidance text
+  ///
+  /// In en, this message translates to:
+  /// **'We read every message — please mention which version you\'re running and what you were doing when something went wrong.'**
+  String get contactFooterNote;
+
+  /// Default subject line for the mailto: support link
+  ///
+  /// In en, this message translates to:
+  /// **'Smart Advisor — support'**
+  String get contactEmailSubject;
+
+  /// Appearance settings screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearanceTitle;
+
+  /// Appearance — label above the theme segmented control
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get themeLabel;
+
+  /// Theme option: follow the system setting
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get themeSystem;
+
+  /// Theme option: light mode
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get themeLight;
+
+  /// Theme option: dark mode
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get themeDark;
+
+  /// Appearance — AMOLED toggle title
+  ///
+  /// In en, this message translates to:
+  /// **'AMOLED dark'**
+  String get amoledDarkTitle;
+
+  /// Appearance — AMOLED toggle subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'True-black surfaces in dark mode.'**
+  String get amoledDarkSubtitle;
+
+  /// Notifications settings screen title (also the list tile label)
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notificationsTitle;
+
+  /// Notifications screen — weekly reminder row label
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly quiz reminder'**
+  String get notificationsWeeklyReminder;
+
+  /// Notification banner title when the user turns on the weekly reminder
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly reminder on'**
+  String get notificationsWeeklyOnHeading;
+
+  /// Notification banner body when the user turns on the weekly reminder
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll nudge you weekly to discover something.'**
+  String get notificationsWeeklyOnBody;
+
+  /// Notifications screen — section header above the Wrapped links
+  ///
+  /// In en, this message translates to:
+  /// **'Your data'**
+  String get notificationsYourDataSection;
+
+  /// Notifications screen — link to /wrapped
+  ///
+  /// In en, this message translates to:
+  /// **'Your year in review'**
+  String get notificationsYearInReview;
+
+  /// Notifications screen — link to /wrapped/month
+  ///
+  /// In en, this message translates to:
+  /// **'This month in review'**
+  String get notificationsMonthInReview;
+
+  /// Blocked-people screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked people'**
+  String get blockedPeopleTitle;
+
+  /// Blocked-people screen — error banner when the list fails to load
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load your blocked list.'**
+  String get blockedLoadError;
+
+  /// Blocked-people screen — empty-state heading
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody blocked'**
+  String get blockedEmptyTitle;
+
+  /// Blocked-people screen — empty-state body
+  ///
+  /// In en, this message translates to:
+  /// **'When you block someone from the feed, they\'ll show up here so you can undo it.'**
+  String get blockedEmptyBody;
+
+  /// Blocked-people screen — per-row unblock action label
+  ///
+  /// In en, this message translates to:
+  /// **'Unblock'**
+  String get blockedUnblock;
+
+  /// Toast shown after a user is unblocked
+  ///
+  /// In en, this message translates to:
+  /// **'@{handle} unblocked.'**
+  String blockedUnblockedToast(String handle);
+
+  /// Filed-reports screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Reports you\'ve filed'**
+  String get filedReportsTitle;
+
+  /// Filed-reports — error banner when the list fails to load
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load your reports.'**
+  String get filedReportsLoadError;
+
+  /// Filed-reports — empty-state heading
+  ///
+  /// In en, this message translates to:
+  /// **'No reports filed'**
+  String get filedReportsEmptyTitle;
+
+  /// Filed-reports — empty-state body
+  ///
+  /// In en, this message translates to:
+  /// **'Posts and comments you flag for review will show up here.'**
+  String get filedReportsEmptyBody;
+
+  /// Filed-reports — row label when the report targets a post
+  ///
+  /// In en, this message translates to:
+  /// **'On a post'**
+  String get filedReportsOnPost;
+
+  /// Filed-reports — row label when the report targets a comment
+  ///
+  /// In en, this message translates to:
+  /// **'On a comment'**
+  String get filedReportsOnComment;
+
+  /// Filed-reports — fallback label when the reported content has been deleted
+  ///
+  /// In en, this message translates to:
+  /// **'Content removed'**
+  String get filedReportsContentRemoved;
+
+  /// Filed-reports — status pill while a report is being reviewed
+  ///
+  /// In en, this message translates to:
+  /// **'Under review'**
+  String get filedReportsUnderReview;
+
+  /// Shown when the requested profile can't be loaded (deleted account / bad link)
+  ///
+  /// In en, this message translates to:
+  /// **'Profile isn\'t available'**
+  String get profileUnavailableTitle;
+
+  /// Body text under the profile-unavailable heading
+  ///
+  /// In en, this message translates to:
+  /// **'It may have been removed, or the link is wrong.'**
+  String get profileUnavailableBody;
+
+  /// Back button on the profile-unavailable screen
+  ///
+  /// In en, this message translates to:
+  /// **'Back to feed'**
+  String get profileUnavailableBack;
+
+  /// Title on the dedicated post-report screen
+  ///
+  /// In en, this message translates to:
+  /// **'Report this post'**
+  String get reportPostTitle;
+
+  /// Title on the dedicated comment-report screen
+  ///
+  /// In en, this message translates to:
+  /// **'Report this comment'**
+  String get reportCommentTitle;
+
+  /// Helper text under the report-screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us why so our team can take a look.'**
+  String get reportSubheading;
+
+  /// Report reason option: spam
+  ///
+  /// In en, this message translates to:
+  /// **'Spam'**
+  String get reportReasonSpam;
+
+  /// Report reason option: harassment / bullying
+  ///
+  /// In en, this message translates to:
+  /// **'Harassment or bullying'**
+  String get reportReasonHarassment;
+
+  /// Report reason option: hate speech
+  ///
+  /// In en, this message translates to:
+  /// **'Hate speech or symbols'**
+  String get reportReasonHate;
+
+  /// Report reason option: violence / threats
+  ///
+  /// In en, this message translates to:
+  /// **'Violence or threats'**
+  String get reportReasonViolence;
+
+  /// Report reason option: sexual content
+  ///
+  /// In en, this message translates to:
+  /// **'Sexual or explicit content'**
+  String get reportReasonSexual;
+
+  /// Report reason option: misinformation
+  ///
+  /// In en, this message translates to:
+  /// **'False information'**
+  String get reportReasonMisinformation;
+
+  /// Report reason option: catch-all
+  ///
+  /// In en, this message translates to:
+  /// **'Something else'**
+  String get reportReasonOther;
+
+  /// Label above the optional reason text field
+  ///
+  /// In en, this message translates to:
+  /// **'Add details (optional)'**
+  String get reportDetailsLabel;
+
+  /// Placeholder hint inside the optional reason text field
+  ///
+  /// In en, this message translates to:
+  /// **'A short note helps us prioritize.'**
+  String get reportDetailsHint;
+
+  /// Primary CTA on the report screen
+  ///
+  /// In en, this message translates to:
+  /// **'Submit report'**
+  String get reportSubmit;
+
+  /// Confirmation toast after a report is submitted
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks — we\'ll take a look.'**
+  String get reportThanks;
+
+  /// Toast shown when submitting a report fails
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t send that report. Please try again.'**
+  String get reportError;
+
+  /// Notifications screen — toggle for the reminder before a group-quiz answer deadline
+  ///
+  /// In en, this message translates to:
+  /// **'Group quiz answer expiring'**
+  String get notificationsGroupQuizExpiringTitle;
+
+  /// Subtitle for the group-quiz-expiring toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Get a nudge before your answer-by deadline.'**
+  String get notificationsGroupQuizExpiringSub;
+
+  /// Notifications screen — toggle for the weekly in-progress reminder
+  ///
+  /// In en, this message translates to:
+  /// **'Finish what you started'**
+  String get notificationsInProgressTitle;
+
+  /// Subtitle for the in-progress reminder toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly nudge for picks still in progress.'**
+  String get notificationsInProgressSub;
 }
 
 class _AppLocalizationsDelegate
