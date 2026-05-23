@@ -58,8 +58,14 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       const Duration(seconds: 60),
       (_) => _pollNew(),
     );
-    // Set the baseline once the first frame's feed is in memory.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _pollNew());
+    // Set the baseline once the first frame's feed is in memory. Also
+    // gives the throttled "Finish setting up" prompt a chance to fire —
+    // it's a no-op unless the profile looks bare and enough time has
+    // passed since the last show (see [maybeShowFinishSetupSheet]).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _pollNew();
+      if (mounted) maybeShowFinishSetupSheet(context, ref);
+    });
   }
 
   @override
@@ -216,7 +222,6 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           const SizedBox(height: 4),
           Subtitle('What your people are into right now.'),
           const SizedBox(height: 14),
-          const FinishSetupCard(),
           const FinishedNudgeCard(),
           _communitySegmented(prefs),
           const SizedBox(height: 8),
