@@ -289,6 +289,60 @@ class FeedService {
     ];
   }
 
+  /// Every report in the system, newest first. Visible only to rows that
+  /// satisfy the `feed_reports_select_admin` RLS policy — i.e. the caller
+  /// has profiles.is_admin = true. Non-admins get back an empty list (or
+  /// only their own reports via the additive select_own policy).
+  Future<
+      List<
+          ({
+            String id,
+            String? reason,
+            String createdAt,
+            String? reporter,
+            bool isPost,
+            String? targetLabel,
+            String? targetAuthor,
+            String? postId,
+            String? commentId,
+            String? commentPostId,
+          })>> fetchAllReports() async {
+    final rows = await _c
+        .from('feed_reports')
+        .select(
+            'id, reason, created_at, post_id, comment_id, '
+            'reporter:profiles_public!feed_reports_reporter_id_fkey '
+            '( name, username ), '
+            'post:feed_posts!feed_reports_post_id_fkey '
+            '( title, author:profiles_public!feed_posts_user_id_fkey ( name, username ) ), '
+            'comment:feed_comments!feed_reports_comment_id_fkey '
+            '( body, post_id, author:profiles_public!feed_comments_user_id_fkey ( name, username ) )')
+        .order('created_at', ascending: false);
+    return [
+      for (final r in rows)
+        () {
+          final reporter = _embed(r['reporter']);
+          final post = _embed(r['post']);
+          final comment = _embed(r['comment']);
+          final target = post ?? comment;
+          final author = target == null ? null : _embed(target['author']);
+          return (
+            id: r['id'] as String,
+            reason: r['reason'] as String?,
+            createdAt: r['created_at'] as String,
+            reporter: (reporter?['username'] ?? reporter?['name']) as String?,
+            isPost: r['post_id'] != null,
+            targetLabel: (post?['title'] ?? comment?['body']) as String?,
+            targetAuthor:
+                (author?['username'] ?? author?['name']) as String?,
+            postId: r['post_id'] as String?,
+            commentId: r['comment_id'] as String?,
+            commentPostId: comment?['post_id'] as String?,
+          );
+        }(),
+    ];
+  }
+
   Future<void> createComment(
       String postId, String body, String? parentId) async {
     final uid = _c.auth.currentUser?.id;

@@ -15,6 +15,7 @@ abstract class AppUser with _$AppUser {
     @JsonKey(name: 'created_at') required String createdAt,
     String? username,
     @JsonKey(name: 'mfa_enabled') bool? mfaEnabled,
+    @JsonKey(name: 'is_admin') bool? isAdmin,
     @JsonKey(name: 'last_login') String? lastLogin,
     @JsonKey(name: 'backup_email') String? backupEmail,
     @JsonKey(name: 'avatar_url') String? avatarUrl,

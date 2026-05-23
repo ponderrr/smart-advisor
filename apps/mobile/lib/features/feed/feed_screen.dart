@@ -216,7 +216,6 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           Subtitle('What your people are into right now.'),
           const SizedBox(height: 14),
           const FinishedNudgeCard(),
-          const AiNudgeCard(),
           _communitySegmented(prefs),
           const SizedBox(height: 8),
           Row(children: [
@@ -244,6 +243,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
             ],
             data: (all) {
               final posts = _visible(all, following, prefs);
+              // Smart AI nudge: only surfaces when the user has run out of
+              // things to look at — empty feed, or after the last post. So
+              // it's there when actually useful, not as a permanent banner.
               if (posts.isEmpty) {
                 return [
                   BrandCard(
@@ -256,6 +258,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                           center: true),
                     ]),
                   ),
+                  const SizedBox(height: 12),
+                  const AiNudgeCard(),
                 ];
               }
               return [
@@ -264,6 +268,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                       .animate()
                       .fadeIn(delay: (i * 60).ms, duration: 280.ms)
                       .slideY(begin: 0.05, curve: Curves.easeOut),
+                const SizedBox(height: 12),
+                const AiNudgeCard(),
               ];
             },
           ),

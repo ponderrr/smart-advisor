@@ -12,6 +12,7 @@ import '../../features/account/screens/faq_screen.dart';
 import '../../features/account/screens/notifications_settings_screen.dart';
 import '../../features/account/screens/profile_settings_screen.dart';
 import '../../features/account/screens/recommendations_settings_screen.dart';
+import '../../features/account/screens/reports_screen.dart';
 import '../../features/account/screens/security_settings_screen.dart';
 import '../../features/account/screens/two_factor_screen.dart';
 import '../../features/auth/auth_providers.dart';
@@ -248,6 +249,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
           path: '/account/contact',
           builder: (_, _) => const ContactScreen()),
+      GoRoute(
+          path: '/account/reports',
+          builder: (_, _) => const ReportsScreen()),
       GoRoute(
           path: '/account/change-email',
           builder: (_, _) => const ChangeCredentialScreen(

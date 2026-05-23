@@ -104,9 +104,24 @@ class AuthService {
         }
       }
       final aal = _auth.mfa.getAuthenticatorAssuranceLevel();
-      final mfaRequired =
+      var mfaRequired =
           aal.currentLevel == AuthenticatorAssuranceLevels.aal1 &&
               aal.nextLevel == AuthenticatorAssuranceLevels.aal2;
+      // Safety net (mirrors the web): even when the AAL check says no
+      // step-up is required, if the user has a verified TOTP factor enrolled
+      // we still challenge — otherwise an SDK/JWT lag can silently bypass
+      // 2FA right after signInWithPassword and drop the user on the feed.
+      if (!mfaRequired) {
+        try {
+          final factors = await _auth.mfa.listFactors();
+          if (factors.totp.any((f) => f.status == FactorStatus.verified)) {
+            mfaRequired = true;
+          }
+        } on AuthException {
+          // listFactors failing is non-fatal here — fall through with the
+          // AAL-derived value rather than blocking sign-in entirely.
+        }
+      }
       return ServiceResult.ok(mfaRequired);
     } on AuthException catch (e) {
       return ServiceResult.fail(

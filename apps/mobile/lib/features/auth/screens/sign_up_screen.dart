@@ -155,7 +155,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     children: [
                       AdaptiveButton.child(
                         style: AdaptiveButtonStyle.plain,
-                        onPressed: () => context.go('/auth'),
+                        onPressed: () => context.go('/intro'),
                         child: Icon(
                           Icons.arrow_back_ios_new,
                           size: 16,

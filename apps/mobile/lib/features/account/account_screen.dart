@@ -165,6 +165,19 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           ]),
         ),
 
+        // Staff-only triage surface. Rendered only when profiles.is_admin
+        // is true; the RLS policy on feed_reports already returns an
+        // empty list to anyone else, but hiding the tile keeps the
+        // setting list clean for everyone else.
+        if (profile?.isAdmin == true) ...[
+          settingsSection(context, 'Moderation'),
+          BrandCard(
+            child: settingsTile(context, Icons.flag_outlined, 'Reports',
+                subtitle: 'Review user-filed reports',
+                onTap: () => context.push('/account/reports')),
+          ),
+        ],
+
         settingsSection(context, 'Help'),
         BrandCard(
           child: Column(children: [
