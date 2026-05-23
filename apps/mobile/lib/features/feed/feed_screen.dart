@@ -32,24 +32,32 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     var filtered = prefs.community == null
         ? [...posts]
         : posts.where((p) => p.community == prefs.community).toList();
+    // Scope = which posts make the cut.
     switch (prefs.scope) {
       case FeedScope.friends:
         filtered = filtered
             .where((p) => p.activity != FeedActivity.group)
             .where((p) =>
                 following.isEmpty || following.contains(p.authorId))
-            .toList()
-          ..sort((a, b) => a.ageHours.compareTo(b.ageHours));
+            .toList();
       case FeedScope.discover:
         filtered = filtered
             .where((p) => p.activity != FeedActivity.group)
-            .toList()
-          ..sort((a, b) => b.baseScore.compareTo(a.baseScore));
+            .toList();
       case FeedScope.group:
         filtered = filtered
             .where((p) => p.activity == FeedActivity.group)
-            .toList()
-          ..sort((a, b) => a.ageHours.compareTo(b.ageHours));
+            .toList();
+    }
+    // Sort = how they're ordered (separate axis from scope).
+    switch (prefs.sort) {
+      case FeedSort.newest:
+        filtered.sort((a, b) => a.ageHours.compareTo(b.ageHours));
+      case FeedSort.top:
+        filtered.sort((a, b) => b.score.compareTo(a.score));
+      case FeedSort.hot:
+        // Score / time-decay (FeedPost.hotRank).
+        filtered.sort((a, b) => b.hotRank.compareTo(a.hotRank));
     }
     return filtered;
   }
@@ -111,6 +119,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                   ref.read(feedPrefsProvider.notifier).setView(v),
             ),
           ]),
+          const SizedBox(height: 8),
+          _sortSegmented(prefs),
           const SizedBox(height: 14),
           ...feedAsync.when(
             loading: () => [
@@ -182,6 +192,21 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           .read(feedPrefsProvider.notifier)
           .setCommunity(
               i == 0 ? null : FeedCommunity.values[i - 1]),
+    );
+  }
+
+  /// Sort axis (Reddit-style Trending / New / Top). Applied on top of
+  /// the scope filter; color-coded to match the chosen sort.
+  Widget _sortSegmented(FeedPrefs prefs) {
+    const sorts = [FeedSort.hot, FeedSort.newest, FeedSort.top];
+    const colors = [Tw.orange500, Tw.emerald500, Tw.violet500];
+    final idx = sorts.indexOf(prefs.sort);
+    return BrandSegmented(
+      color: colors[idx],
+      labels: const ['Trending', 'New', 'Top'],
+      selectedIndex: idx,
+      onValueChanged: (i) =>
+          ref.read(feedPrefsProvider.notifier).setSort(sorts[i]),
     );
   }
 

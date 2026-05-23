@@ -328,18 +328,22 @@ class FeedPrefs {
     this.view = FeedView.card,
     this.scope = FeedScope.friends,
     this.community, // null = "all"
+    this.sort = FeedSort.hot,
     this.commentSort = CommentSort.top,
   });
 
   final FeedView view;
   final FeedScope scope;
   final FeedCommunity? community;
+  /// Reddit-style sort axis across the visible feed (web "trending/new/top").
+  final FeedSort sort;
   final CommentSort commentSort;
 
   FeedPrefs copyWith({
     FeedView? view,
     FeedScope? scope,
     Object? community = _unset,
+    FeedSort? sort,
     CommentSort? commentSort,
   }) =>
       FeedPrefs(
@@ -348,6 +352,7 @@ class FeedPrefs {
         community: community == _unset
             ? this.community
             : community as FeedCommunity?,
+        sort: sort ?? this.sort,
         commentSort: commentSort ?? this.commentSort,
       );
 
@@ -383,6 +388,20 @@ class FeedPrefs {
   static CommentSort _sortFrom(Object? v) =>
       v == 'new' ? CommentSort.newest : CommentSort.top;
 
+  /// Web wires sort as `trending|new|top`; mobile mirrors with
+  /// hot|newest|top under the hood.
+  static FeedSort _feedSortFrom(Object? v) => switch (v) {
+        'new' => FeedSort.newest,
+        'top' => FeedSort.top,
+        _ => FeedSort.hot,
+      };
+
+  static String _feedSortWire(FeedSort s) => switch (s) {
+        FeedSort.hot => 'trending',
+        FeedSort.newest => 'new',
+        FeedSort.top => 'top',
+      };
+
   Map<String, dynamic> toJson() => {
         'view': _viewWire(view),
         'scope': switch (scope) {
@@ -391,6 +410,7 @@ class FeedPrefs {
           FeedScope.group => 'group',
         },
         'community': community?.wire ?? 'all',
+        'sort': _feedSortWire(sort),
         'commentSort':
             commentSort == CommentSort.newest ? 'new' : 'top',
       };
@@ -399,6 +419,7 @@ class FeedPrefs {
         view: _viewFrom(j['view']),
         scope: _scopeFrom(j['scope']),
         community: _communityFrom(j['community']),
+        sort: _feedSortFrom(j['sort'] ?? 'trending'),
         commentSort: _sortFrom(j['commentSort']),
       );
 }
@@ -430,6 +451,7 @@ class FeedPrefsNotifier extends Notifier<FeedPrefs> {
       _persist(state.copyWith(community: c));
   Future<void> setCommentSort(CommentSort s) =>
       _persist(state.copyWith(commentSort: s));
+  Future<void> setSort(FeedSort s) => _persist(state.copyWith(sort: s));
 }
 
 final feedPrefsProvider =
