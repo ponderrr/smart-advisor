@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -167,35 +168,53 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         settingsSection(context, 'Help'),
         BrandCard(
           child: Column(children: [
-            settingsTile(context, Icons.celebration_outlined,
-                'Replay welcome',
-                subtitle: 'Re-see the Get Started screen',
-                // Push via Navigator (not GoRouter) so we bypass the
-                // /intro authed-user gate — preview mode pops back here.
-                onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                          builder: (_) =>
-                              const GetStartedScreen(previewMode: true)),
-                    )),
-            settingsTile(context, Icons.account_circle_outlined,
-                'Show onboarding',
-                subtitle: 'Re-see the profile-setup screen',
-                // Same Navigator.push pattern — preview mode disables
-                // the save buttons so a replay can't clobber the real
-                // profile name / locale.
-                onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                          builder: (_) =>
-                              const OnboardingScreen(previewMode: true)),
-                    )),
-            settingsTile(context, Icons.auto_awesome_outlined,
-                'Replay tutorial',
-                subtitle: 'Re-see the how-it-works walkthrough',
-                onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                          builder: (_) =>
-                              const TutorialScreen(replay: true)),
-                    )),
+            settingsTile(context, Icons.auto_awesome,
+                'Take a quiz',
+                subtitle: 'Get fresh recommendations in a couple of minutes',
+                onTap: () => context.push('/quiz')),
+            settingsTile(context, Icons.person_add_alt_1_outlined,
+                'Find friends',
+                subtitle: 'Discover people with similar taste',
+                onTap: () => context.push('/feed/add-friends')),
+            settingsTile(context, Icons.emoji_events_outlined,
+                'Your milestones',
+                subtitle: 'Track progress and unlock achievements',
+                onTap: () => context.push('/milestones')),
+            // Onboarding / welcome / tutorial replays — dev-build only.
+            // These are useful for screenshots and QA but would clutter
+            // a release build, so they're gated behind kDebugMode and
+            // never ship in the prerelease APK.
+            if (kDebugMode) ...[
+              settingsTile(context, Icons.celebration_outlined,
+                  'Replay welcome',
+                  subtitle: 'Re-see the Get Started screen',
+                  // Push via Navigator (not GoRouter) so we bypass the
+                  // /intro authed-user gate — preview mode pops back here.
+                  onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (_) =>
+                                const GetStartedScreen(previewMode: true)),
+                      )),
+              settingsTile(context, Icons.account_circle_outlined,
+                  'Show onboarding',
+                  subtitle: 'Re-see the profile-setup screen',
+                  // Same Navigator.push pattern — preview mode disables
+                  // the save buttons so a replay can't clobber the real
+                  // profile name / locale.
+                  onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (_) =>
+                                const OnboardingScreen(previewMode: true)),
+                      )),
+              settingsTile(context, Icons.auto_awesome_outlined,
+                  'Replay tutorial',
+                  subtitle: 'Re-see the how-it-works walkthrough',
+                  onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (_) =>
+                                const TutorialScreen(replay: true)),
+                      )),
+            ],
           ]),
         ),
 
