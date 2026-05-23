@@ -269,6 +269,12 @@ class FeedActions {
     _ref.invalidate(blockedProfilesProvider);
     _ref.invalidate(followingProvider);
     _ref.invalidate(singlePostProvider);
+    // Suggested people, friends lists, and the post-author profile
+    // tile all need to refetch — the blocked user must drop off
+    // these surfaces immediately.
+    _ref.invalidate(suggestedPeopleProvider);
+    _ref.invalidate(followingProfilesProvider);
+    _ref.invalidate(followerProfilesProvider);
   }
 
   /// Admin: change a report's moderation status (open / reviewed /

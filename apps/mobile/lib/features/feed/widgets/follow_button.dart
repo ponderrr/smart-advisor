@@ -41,19 +41,28 @@ class FollowButton extends ConsumerWidget {
     return GestureDetector(
       onTap: () async {
         Haptics.impact(HapticImpactStyle.medium);
-        final nowFollowing =
-            await ref.read(feedActionsProvider).toggleFollow(authorId);
-        showBanner(
-          nowFollowing
-              ? 'Following $authorName'
-              : 'Unfollowed $authorName',
-          type: nowFollowing
-              ? AdaptiveSnackBarType.success
-              : AdaptiveSnackBarType.info,
-          action: 'Undo',
-          onAction: () =>
-              ref.read(feedActionsProvider).toggleFollow(authorId),
-        );
+        try {
+          final nowFollowing =
+              await ref.read(feedActionsProvider).toggleFollow(authorId);
+          showBanner(
+            nowFollowing
+                ? 'Following $authorName'
+                : 'Unfollowed $authorName',
+            type: nowFollowing
+                ? AdaptiveSnackBarType.success
+                : AdaptiveSnackBarType.info,
+            action: 'Undo',
+            onAction: () =>
+                ref.read(feedActionsProvider).toggleFollow(authorId),
+          );
+        } catch (_) {
+          // toggleFollow throws when either side has blocked the
+          // other; surface a friendly message instead of swallowing.
+          showBanner(
+              'You blocked @$authorName. Unblock them from Settings → '
+              'Feed → Blocked people to follow them again.',
+              type: AdaptiveSnackBarType.error);
+        }
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 240),

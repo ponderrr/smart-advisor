@@ -488,7 +488,11 @@ class FeedService {
     return rows.map((r) => r['followee_id'] as String).toList();
   }
 
-  /// Follows/unfollows; returns the new following state.
+  /// Follows/unfollows; returns the new following state. Refuses to
+  /// create a follow tie either side has blocked — server-side it'd be
+  /// possible to insert one (the RLS policies don't cross-reference
+  /// feed_blocks), so this is the only guard preventing a silent
+  /// "I blocked them but follow still works" state.
   Future<bool> toggleFollow(String followeeId) async {
     final uid = _c.auth.currentUser?.id;
     if (uid == null) throw Exception('Not signed in');
@@ -505,6 +509,16 @@ class FeedService {
           .eq('follower_id', uid)
           .eq('followee_id', followeeId);
       return false;
+    }
+    // Both directions: either we blocked them, or they blocked us.
+    final block = await _c
+        .from('feed_blocks')
+        .select('blocker_id')
+        .or('and(blocker_id.eq.$uid,blocked_id.eq.$followeeId),'
+            'and(blocker_id.eq.$followeeId,blocked_id.eq.$uid)')
+        .maybeSingle();
+    if (block != null) {
+      throw Exception('Unblock this person before following them.');
     }
     await _c
         .from('feed_follows')
@@ -560,26 +574,35 @@ class FeedService {
 
   /// Distinct people who've recently posted — for the "Add friends"
   /// discover screen. Deliberately light: just the post authors, no
-  /// comments and no score aggregation (unlike [fetchFeed]).
+  /// comments and no score aggregation (unlike [fetchFeed]). Anyone
+  /// either side has blocked is filtered out so suggestions never
+  /// surface someone you've explicitly cut contact with — and so a
+  /// user who blocked you doesn't keep getting offered to you as a
+  /// follow target.
   Future<List<({String id, String name, String? avatarUrl})>>
       fetchSuggestedPeople() async {
-    final rows = await _c
+    final rowsF = _c
         .from('feed_posts')
         .select(
             'author:profiles_public!feed_posts_user_id_fkey ( id, name, avatar_url )')
         .order('created_at', ascending: false)
         .limit(150);
+    final blockedF = fetchBlocked();
+    final blockedByF = fetchBlockedBy();
+    final rows = await rowsF;
+    final hidden = {...await blockedF, ...await blockedByF};
     final out = <String, ({String id, String name, String? avatarUrl})>{};
     for (final r in rows) {
       final p = _embed((r as Map)['author']);
       final id = p?['id'] as String?;
-      if (id != null && !out.containsKey(id)) {
-        out[id] = (
-          id: id,
-          name: (p?['name'] as String?) ?? 'Someone',
-          avatarUrl: p?['avatar_url'] as String?,
-        );
+      if (id == null || hidden.contains(id) || out.containsKey(id)) {
+        continue;
       }
+      out[id] = (
+        id: id,
+        name: (p?['name'] as String?) ?? 'Someone',
+        avatarUrl: p?['avatar_url'] as String?,
+      );
     }
     return out.values.toList();
   }
@@ -618,7 +641,22 @@ class FeedService {
     return out;
   }
 
-  /// Blocks a profile — also drops any follow so the tie is fully cut.
+  /// Profile ids of users who blocked the current user — needed to
+  /// filter them out of suggestions / follower lists so the blocker's
+  /// account isn't surfaced to someone they don't want contact with.
+  Future<List<String>> fetchBlockedBy() async {
+    final uid = _c.auth.currentUser?.id;
+    if (uid == null) return [];
+    final rows = await _c
+        .from('feed_blocks')
+        .select('blocker_id')
+        .eq('blocked_id', uid);
+    return rows.map((r) => r['blocker_id'] as String).toList();
+  }
+
+  /// Blocks a profile — also drops any follow tie so neither side keeps
+  /// a stale connection (their follow on you is just as wrong as yours
+  /// on them after a block).
   Future<void> blockUser(String blockedId) async {
     final uid = _c.auth.currentUser?.id;
     if (uid == null || uid == blockedId) return;
@@ -626,11 +664,15 @@ class FeedService {
       {'blocker_id': uid, 'blocked_id': blockedId},
       onConflict: 'blocker_id,blocked_id',
     );
+    // Drop the follow in BOTH directions — RLS only lets us delete the
+    // rows we own (blocker → blocked) and the rows where we're the
+    // followee (blocked → us, since we own that follower edge as the
+    // followee). The OR filter expresses both at once.
     await _c
         .from('feed_follows')
         .delete()
-        .eq('follower_id', uid)
-        .eq('followee_id', blockedId);
+        .or('and(follower_id.eq.$uid,followee_id.eq.$blockedId),'
+            'and(follower_id.eq.$blockedId,followee_id.eq.$uid)');
   }
 
   Future<void> unblockUser(String blockedId) async {
