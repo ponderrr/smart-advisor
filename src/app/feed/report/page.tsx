@@ -8,8 +8,10 @@ import { toast } from "sonner";
 import { AppNavbar } from "@/components/app-navbar";
 import { Button } from "@/components/ui/button";
 import { PageLoader } from "@/components/ui/loader";
+import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import {
+  useBlockUser,
   useReportComment,
   useReportPost,
 } from "@/features/feed/use-feed";
@@ -38,17 +40,27 @@ function ReportPageInner() {
   const router = useRouter();
   const params = useSearchParams();
   const { ready } = useRequireAuth();
+  const { user } = useAuth();
 
   const postId = params.get("postId");
   const commentId = params.get("commentId");
+  // Passed by post-menu / comment-menu so the form can offer a one-tap
+  // block alongside the report. Optional — if missing we just hide the
+  // toggle (and the toggle is also hidden when the target is yourself).
+  const authorId = params.get("authorId");
+  const author = params.get("author");
   const isPost = Boolean(postId);
   const isComment = Boolean(commentId);
 
   const [selected, setSelected] = useState<ReasonId | null>(null);
   const [details, setDetails] = useState("");
+  const [alsoBlock, setAlsoBlock] = useState(false);
 
   const reportPost = useReportPost();
   const reportComment = useReportComment();
+  const blockUser = useBlockUser();
+  const showBlockToggle =
+    !!authorId && authorId.length > 0 && authorId !== user?.id;
 
   if (!ready) {
     return <PageLoader text="Loading…" />;
@@ -86,8 +98,23 @@ function ReportPageInner() {
     const trimmed = details.trim();
     const reason = trimmed.length === 0 ? selected : `${selected}: ${trimmed}`;
     const onSuccess = () => {
-      toast.success("Thanks — we'll take a look.");
-      router.back();
+      // Block AFTER the report lands so a block failure (or a checked-but-self
+      // edge case) doesn't swallow the report's success path.
+      if (alsoBlock && authorId && authorId !== user?.id) {
+        blockUser.mutate(authorId, {
+          onSettled: () => {
+            toast.success(
+              author
+                ? `Thanks — we'll take a look. Blocked @${author}.`
+                : "Thanks — we'll take a look.",
+            );
+            router.back();
+          },
+        });
+      } else {
+        toast.success("Thanks — we'll take a look.");
+        router.back();
+      }
     };
     const onError = () =>
       toast.error("Couldn't send that report. Please try again.");
@@ -163,6 +190,25 @@ function ReportPageInner() {
             placeholder="A short note helps us prioritize."
             className="mt-2 w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-200 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-rose-900/40"
           />
+
+          {showBlockToggle && (
+            <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800/60">
+              <input
+                type="checkbox"
+                checked={alsoBlock}
+                onChange={(e) => setAlsoBlock(e.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-rose-500"
+              />
+              <span className="flex-1">
+                <span className="block text-sm font-bold text-slate-800 dark:text-slate-100">
+                  {author ? `Also block @${author}` : "Also block this person"}
+                </span>
+                <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">
+                  You won&rsquo;t see their posts or comments anymore.
+                </span>
+              </span>
+            </label>
+          )}
 
           <Button
             type="button"

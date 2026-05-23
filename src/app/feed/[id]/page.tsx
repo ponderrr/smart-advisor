@@ -279,11 +279,17 @@ function CommentNode({
             ) : (
               <button
                 type="button"
-                onClick={() =>
-                  router.push(
-                    `/feed/report?commentId=${encodeURIComponent(node.id)}`,
-                  )
-                }
+                onClick={() => {
+                  // Carry the comment author through so the report page
+                  // can offer an "Also block @author" toggle without
+                  // re-fetching.
+                  const qs = new URLSearchParams({
+                    commentId: node.id,
+                    ...(node.authorId ? { authorId: node.authorId } : {}),
+                    ...(node.author ? { author: node.author } : {}),
+                  }).toString();
+                  router.push(`/feed/report?${qs}`);
+                }}
                 className="ml-3 mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-slate-400 hover:text-amber-600 dark:hover:text-amber-300"
               >
                 <Flag size={12} /> Report

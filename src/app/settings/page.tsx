@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
+  Bell,
   CircleOff,
   Shield,
   SlidersHorizontal,
@@ -54,6 +55,7 @@ import {
   SettingsInput,
 } from "./_components/settings-ui";
 import { RecommendationFiltersCard } from "./_components/recommendation-filters-card";
+import { ActivityNotificationsCard } from "./_components/activity-notifications-card";
 import { BlockedPeopleCard } from "./_components/blocked-people-card";
 import { MyReportsCard } from "./_components/my-reports-card";
 import { usePasswordRules } from "./_hooks/use-password-rules";
@@ -104,6 +106,7 @@ type SettingsSection =
   | "security"
   | "content"
   | "feed"
+  | "notifications"
   | "integrations"
   | "help";
 
@@ -112,6 +115,7 @@ const SETTINGS_SECTIONS: SettingsSection[] = [
   "security",
   "content",
   "feed",
+  "notifications",
   "integrations",
   "help",
 ];
@@ -363,6 +367,11 @@ const SettingsPage = () => {
     },
     { id: "feed", label: t("tabs.feed"), icon: <Newspaper size={15} /> },
     {
+      id: "notifications",
+      label: t("tabs.notifications"),
+      icon: <Bell size={15} />,
+    },
+    {
       id: "integrations",
       label: t("tabs.integrations"),
       icon: <Link2 size={15} />,
@@ -498,6 +507,7 @@ const SettingsPage = () => {
                     (tab) =>
                       tab.id === "content" ||
                       tab.id === "feed" ||
+                      tab.id === "notifications" ||
                       tab.id === "integrations" ||
                       tab.id === "help",
                   )
@@ -1475,6 +1485,19 @@ const SettingsPage = () => {
 
                     <BlockedPeopleCard />
                     <MyReportsCard />
+                  </motion.div>
+                )}
+
+                {activeSection === "notifications" && (
+                  <motion.div
+                    key="notifications"
+                    initial={{ opacity: 0, x: sectionSlideDir * 30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: sectionSlideDir * -30 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-4"
+                  >
+                    <ActivityNotificationsCard />
                   </motion.div>
                 )}
 

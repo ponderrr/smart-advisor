@@ -151,11 +151,14 @@ export function PostMenuButton({
         ) : (
           <>
             <DropdownMenuItem
-              onSelect={() =>
-                router.push(
-                  `/feed/report?postId=${encodeURIComponent(postId)}`,
-                )
-              }
+              onSelect={() => {
+                const qs = new URLSearchParams({
+                  postId,
+                  ...(authorId ? { authorId } : {}),
+                  ...(author ? { author } : {}),
+                }).toString();
+                router.push(`/feed/report?${qs}`);
+              }}
               className="gap-2"
             >
               <Flag size={14} />

@@ -9,6 +9,7 @@ import {
 
 import * as svc from "./feed-service";
 import type { FeedPost } from "./types";
+import { useMutedKinds } from "@/features/notifications/use-muted-kinds";
 
 /** Query keys for the feed data set — all invalidated together by id. */
 const KEYS = {
@@ -303,18 +304,33 @@ export function useSetReportStatus() {
 
 const NOTIF_KEY = ["feed", "notifications"] as const;
 
-export function useNotifications() {
+/** Raw query — every row from feed_notifications, unfiltered. Other
+ *  hooks layer the muted-kinds filter on top so the bell badge + the
+ *  inbox + the settings counter all share one source of truth. */
+function useNotificationsRaw() {
   return useQuery({
     queryKey: NOTIF_KEY,
     queryFn: svc.fetchNotifications,
   });
 }
 
-/** Unread count summed across all kinds — the navbar bell reads this
- *  instead of recomputing from the list. */
+export function useNotifications() {
+  const raw = useNotificationsRaw();
+  const { muted } = useMutedKinds();
+  const data = useMemo(() => {
+    const all = raw.data ?? [];
+    if (muted.size === 0) return all;
+    return all.filter((n) => !muted.has(n.kind));
+  }, [raw.data, muted]);
+  return { ...raw, data };
+}
+
+/** Unread count summed across all kinds the user hasn't muted — the
+ *  navbar bell reads this so muting a kind clears its contribution to
+ *  the badge immediately. */
 export function useUnreadNotificationsCount(): number {
   const { data } = useNotifications();
-  return (data ?? []).filter((n) => n.readAt === null).length;
+  return data.filter((n) => n.readAt === null).length;
 }
 
 export function useMarkNotificationRead() {
