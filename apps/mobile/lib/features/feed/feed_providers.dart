@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/supabase/supabase_providers.dart';
+import '../notifications/notification_prefs.dart';
 import 'models/feed_models.dart';
 import 'services/feed_service.dart';
 
@@ -108,11 +109,17 @@ final singlePostProvider =
     FutureProvider.autoDispose.family<FeedPost?, String>(
         (ref, id) => ref.watch(feedServiceProvider).fetchPostById(id));
 
-/// Server notifications (feed_notifications). Polled on app resume +
-/// when the inbox screen mounts; no Realtime subscription.
+/// Server notifications (feed_notifications), with muted kinds
+/// filtered out so the bell badge and inbox match the toggles in
+/// Settings → Notifications. Polled on app resume + when the inbox
+/// screen mounts; no Realtime subscription.
 final feedNotificationsProvider =
-    FutureProvider.autoDispose<List<FeedNotification>>(
-        (ref) => ref.watch(feedServiceProvider).fetchNotifications());
+    FutureProvider.autoDispose<List<FeedNotification>>((ref) async {
+  final list = await ref.watch(feedServiceProvider).fetchNotifications();
+  final muted = ref.watch(mutedNotificationKindsProvider);
+  if (muted.isEmpty) return list;
+  return [for (final n in list) if (!muted.contains(n.kind)) n];
+});
 
 /// Unread server-notification count — used by the feed-header bell
 /// alongside the local-only count. Reads through
