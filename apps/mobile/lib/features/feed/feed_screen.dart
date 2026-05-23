@@ -117,6 +117,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     ref.invalidate(followingProvider);
     ref.invalidate(postVotesProvider);
     ref.invalidate(commentVotesProvider);
+    // No Realtime → the inbox bell is part of the same poll story as
+    // the feed itself; refresh it together so the badge can clear on
+    // app-resume without the user opening the inbox screen first.
+    ref.invalidate(feedNotificationsProvider);
   }
 
   /// Floating-pill action: refresh, reset the new-post baseline, and
@@ -409,7 +413,8 @@ class _NotificationsBell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final unread = ref.watch(unreadCountProvider);
+    final unread = ref.watch(unreadCountProvider) +
+        ref.watch(feedNotificationsUnreadCountProvider);
     final tone = contentAccent(
         ContentAccentName.violet, Theme.of(context).brightness);
     return Semantics(

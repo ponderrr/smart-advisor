@@ -108,6 +108,21 @@ final singlePostProvider =
     FutureProvider.autoDispose.family<FeedPost?, String>(
         (ref, id) => ref.watch(feedServiceProvider).fetchPostById(id));
 
+/// Server notifications (feed_notifications). Polled on app resume +
+/// when the inbox screen mounts; no Realtime subscription.
+final feedNotificationsProvider =
+    FutureProvider.autoDispose<List<FeedNotification>>(
+        (ref) => ref.watch(feedServiceProvider).fetchNotifications());
+
+/// Unread server-notification count — used by the feed-header bell
+/// alongside the local-only count. Reads through
+/// [feedNotificationsProvider] so a single fetch backs both surfaces.
+final feedNotificationsUnreadCountProvider = Provider.autoDispose<int>((ref) {
+  final list = ref.watch(feedNotificationsProvider).value ??
+      const <FeedNotification>[];
+  return list.where((n) => !n.isRead).length;
+});
+
 /// The feed with blocked authors filtered out — posts AND comments authored
 /// by a blocked profile are dropped. Use this everywhere a user-facing feed
 /// list is rendered.
@@ -282,6 +297,26 @@ class FeedActions {
   /// rejects everyone else.
   Future<void> setReportStatus(String reportId, String status) async {
     await _svc.setReportStatus(reportId, status);
+  }
+
+  Future<void> markNotificationRead(String id) async {
+    await _svc.markNotificationRead(id);
+    _ref.invalidate(feedNotificationsProvider);
+  }
+
+  Future<void> markAllNotificationsRead() async {
+    await _svc.markAllNotificationsRead();
+    _ref.invalidate(feedNotificationsProvider);
+  }
+
+  Future<void> deleteNotification(String id) async {
+    await _svc.deleteNotification(id);
+    _ref.invalidate(feedNotificationsProvider);
+  }
+
+  Future<void> clearAllNotifications() async {
+    await _svc.clearAllNotifications();
+    _ref.invalidate(feedNotificationsProvider);
   }
 
   Future<void> unblock(String blockedId) async {

@@ -641,6 +641,81 @@ class FeedService {
     return out;
   }
 
+  /// The current user's notification feed — newest first, capped to
+  /// the most recent 100. Hits `feed_notifications` directly (per-row
+  /// `select_own` RLS); joins the actor profile + the target post or
+  /// comment so the inbox cards can render without extra round-trips.
+  Future<List<FeedNotification>> fetchNotifications() async {
+    final uid = _c.auth.currentUser?.id;
+    if (uid == null) return const [];
+    final rows = await _c
+        .from('feed_notifications')
+        .select('id, kind, created_at, read_at, post_id, comment_id, '
+            'actor:profiles_public!feed_notifications_actor_id_fkey '
+            '( id, name, avatar_url ), '
+            'post:feed_posts!feed_notifications_post_id_fkey ( title ), '
+            'comment:feed_comments!feed_notifications_comment_id_fkey ( body )')
+        .eq('user_id', uid)
+        .order('created_at', ascending: false)
+        .limit(100);
+    return [
+      for (final r in rows)
+        () {
+          final a = _embed(r['actor']);
+          final p = _embed(r['post']);
+          final c = _embed(r['comment']);
+          return FeedNotification(
+            id: r['id'] as String,
+            kind: r['kind'] as String,
+            createdAt: r['created_at'] as String,
+            readAt: r['read_at'] as String?,
+            actorId: a?['id'] as String?,
+            actorName: (a?['name'] as String?) ?? 'Someone',
+            actorAvatarUrl: a?['avatar_url'] as String?,
+            postId: r['post_id'] as String?,
+            commentId: r['comment_id'] as String?,
+            postTitle: p?['title'] as String?,
+            commentBody: c?['body'] as String?,
+          );
+        }(),
+    ];
+  }
+
+  /// Marks one notification as read (sets `read_at = now()`).
+  Future<void> markNotificationRead(String id) async {
+    final uid = _c.auth.currentUser?.id;
+    if (uid == null) return;
+    await _c.from('feed_notifications').update({
+      'read_at': DateTime.now().toUtc().toIso8601String(),
+    }).eq('id', id).eq('user_id', uid);
+  }
+
+  /// Marks every unread notification as read in a single round-trip —
+  /// called when the inbox screen mounts so the bell badge clears.
+  Future<void> markAllNotificationsRead() async {
+    final uid = _c.auth.currentUser?.id;
+    if (uid == null) return;
+    await _c
+        .from('feed_notifications')
+        .update({
+          'read_at': DateTime.now().toUtc().toIso8601String(),
+        })
+        .eq('user_id', uid)
+        .isFilter('read_at', null);
+  }
+
+  Future<void> deleteNotification(String id) async {
+    final uid = _c.auth.currentUser?.id;
+    if (uid == null) return;
+    await _c.from('feed_notifications').delete().eq('id', id).eq('user_id', uid);
+  }
+
+  Future<void> clearAllNotifications() async {
+    final uid = _c.auth.currentUser?.id;
+    if (uid == null) return;
+    await _c.from('feed_notifications').delete().eq('user_id', uid);
+  }
+
   /// Profile ids of users who blocked the current user — needed to
   /// filter them out of suggestions / follower lists so the blocker's
   /// account isn't surfaced to someone they don't want contact with.

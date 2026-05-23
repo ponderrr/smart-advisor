@@ -306,3 +306,44 @@ int mockFollowerCount(String author) {
   }
   return 40 + (h % 960);
 }
+
+// ---------------------------------------------------------------------------
+// Server notifications (feed_notifications)
+// ---------------------------------------------------------------------------
+
+/// One row of the per-user notification feed. The `kind` string matches
+/// the Postgres `feed_notification_kind` enum exactly so a new server
+/// value the client doesn't render yet just falls through to a generic
+/// card rather than crashing.
+class FeedNotification {
+  const FeedNotification({
+    required this.id,
+    required this.kind,
+    required this.createdAt,
+    required this.readAt,
+    required this.actorId,
+    required this.actorName,
+    required this.actorAvatarUrl,
+    required this.postId,
+    required this.commentId,
+    required this.postTitle,
+    required this.commentBody,
+  });
+
+  final String id;
+
+  /// One of: `follow`, `comment_on_post`, `reply_to_comment`,
+  /// `friend_post`, `post_upvote`, `comment_upvote`.
+  final String kind;
+  final String createdAt;
+  final String? readAt;
+  final String? actorId;
+  final String actorName;
+  final String? actorAvatarUrl;
+  final String? postId;
+  final String? commentId;
+  final String? postTitle;
+  final String? commentBody;
+
+  bool get isRead => readAt != null;
+}
