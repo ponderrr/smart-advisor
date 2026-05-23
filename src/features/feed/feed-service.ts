@@ -53,13 +53,16 @@ interface PostRow {
   feed_comments: CommentRow[];
 }
 
+// Joins go through profiles_public (public-safe projection) because
+// the base `profiles` table has owner-only RLS. See
+// supabase/migrations/20260522040000_profiles_public_view.sql.
 const POST_SELECT = `
   id, community, activity, title, body, poster_url, creator, year,
   rating, base_score, created_at,
-  author:profiles!feed_posts_user_id_fkey ( id, name, avatar_url ),
+  author:profiles_public!feed_posts_user_id_fkey ( id, name, avatar_url ),
   feed_comments (
     id, body, parent_id, created_at, edited_at,
-    author:profiles!feed_comments_user_id_fkey ( id, name, avatar_url )
+    author:profiles_public!feed_comments_user_id_fkey ( id, name, avatar_url )
   )
 `;
 
@@ -490,7 +493,9 @@ export async function fetchBlockedProfiles(): Promise<
   if (!user) return [];
   const { data } = await supabase
     .from("feed_blocks")
-    .select("blocked:profiles!feed_blocks_blocked_id_fkey ( id, name )")
+    .select(
+      "blocked:profiles_public!feed_blocks_blocked_id_fkey ( id, name )",
+    )
     .eq("blocker_id", user.id);
   const rows = (data ?? []) as unknown as {
     blocked: ProfileEmbed | ProfileEmbed[] | null;
@@ -581,7 +586,7 @@ export async function fetchProfile(profileId: string): Promise<{
   tags: string[];
 } | null> {
   const { data } = await supabase
-    .from("profiles")
+    .from("profiles_public")
     .select("id, name, avatar_url, bio, interests, tags")
     .eq("id", profileId)
     .maybeSingle();

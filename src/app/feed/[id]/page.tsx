@@ -29,7 +29,6 @@ import {
   useDeleteComment,
   useMyCommentVotes,
   useMyPostVotes,
-  useReportComment,
   useSaved,
   useSetCommentVote,
   useSetPostVote,
@@ -62,12 +61,12 @@ function CommentNode({
   postId: string;
   depth: number;
 }) {
+  const router = useRouter();
   const setCommentVote = useSetCommentVote();
   const { data: myVotes } = useMyCommentVotes();
   const createComment = useCreateComment();
   const deleteComment = useDeleteComment();
   const updateComment = useUpdateComment();
-  const reportComment = useReportComment();
   const { user } = useAuth();
   const isOwnComment =
     node.authorId != null && node.authorId === user?.id;
@@ -280,25 +279,11 @@ function CommentNode({
             ) : (
               <button
                 type="button"
-                onClick={() => {
-                  const reason = window.prompt(
-                    "Report this comment? Optionally tell us what's wrong:",
-                  );
-                  if (reason === null) return;
-                  reportComment.mutate(
-                    { commentId: node.id, reason: reason || undefined },
-                    {
-                      onSuccess: () =>
-                        toast.success(
-                          "Report submitted — thanks for flagging it.",
-                        ),
-                      onError: () =>
-                        toast.error(
-                          "Couldn't submit the report — try again.",
-                        ),
-                    },
-                  );
-                }}
+                onClick={() =>
+                  router.push(
+                    `/feed/report?commentId=${encodeURIComponent(node.id)}`,
+                  )
+                }
                 className="ml-3 mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-slate-400 hover:text-amber-600 dark:hover:text-amber-300"
               >
                 <Flag size={12} /> Report

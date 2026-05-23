@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import {
   MoreHorizontal,
   Pencil,
@@ -20,7 +21,6 @@ import { useAuth } from "@/features/auth/hooks/use-auth";
 import {
   useBlockUser,
   useDeletePost,
-  useReportPost,
 } from "@/features/feed/use-feed";
 import { cn } from "@/lib/utils";
 
@@ -75,10 +75,10 @@ export function PostMenuButton({
   size = 16,
   className,
 }: PostMenuButtonProps) {
+  const router = useRouter();
   const { user } = useAuth();
   const blockUser = useBlockUser();
   const deletePost = useDeletePost();
-  const reportPost = useReportPost();
 
   if (!authorId) return null;
   const isOwn = authorId === user?.id;
@@ -151,23 +151,11 @@ export function PostMenuButton({
         ) : (
           <>
             <DropdownMenuItem
-              onSelect={() => {
-                const reason = window.prompt(
-                  "Report this post? Optionally tell us what's wrong:",
-                );
-                if (reason === null) return;
-                reportPost.mutate(
-                  { postId, reason: reason || undefined },
-                  {
-                    onSuccess: () =>
-                      toast.success(
-                        "Report submitted — thanks for flagging it.",
-                      ),
-                    onError: () =>
-                      toast.error("Couldn't submit the report — try again."),
-                  },
-                );
-              }}
+              onSelect={() =>
+                router.push(
+                  `/feed/report?postId=${encodeURIComponent(postId)}`,
+                )
+              }
               className="gap-2"
             >
               <Flag size={14} />
