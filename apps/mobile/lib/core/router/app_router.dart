@@ -9,6 +9,8 @@ import '../../features/account/screens/change_credential_screen.dart';
 import '../../features/account/screens/feed_settings_screen.dart';
 import '../../features/account/screens/contact_screen.dart';
 import '../../features/account/screens/faq_screen.dart';
+import '../../features/account/screens/notifications_activity_screen.dart';
+import '../../features/account/screens/notifications_reminders_screen.dart';
 import '../../features/account/screens/notifications_settings_screen.dart';
 import '../../features/account/screens/profile_settings_screen.dart';
 import '../../features/account/screens/recommendations_settings_screen.dart';
@@ -244,6 +246,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
           path: '/account/notifications',
           builder: (_, _) => const NotificationsSettingsScreen()),
+      GoRoute(
+          path: '/account/notifications/activity',
+          builder: (_, _) => const NotificationsActivityScreen()),
+      GoRoute(
+          path: '/account/notifications/reminders',
+          builder: (_, _) => const NotificationsRemindersScreen()),
       GoRoute(
           path: '/account/security',
           builder: (_, _) => const SecuritySettingsScreen()),
