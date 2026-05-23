@@ -82,6 +82,8 @@
   "filedReportsOnComment": "Op een reactie",
   "filedReportsContentRemoved": "Inhoud verwijderd",
   "filedReportsUnderReview": "In behandeling",
+  "filedReportsReviewed": "Beoordeeld",
+  "filedReportsDismissed": "Afgewezen",
   "profileUnavailableTitle": "Profiel niet beschikbaar",
   "profileUnavailableBody": "Mogelijk verwijderd, of de link klopt niet.",
   "profileUnavailableBack": "Terug naar feed",

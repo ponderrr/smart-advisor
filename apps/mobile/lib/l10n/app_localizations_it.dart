@@ -273,6 +273,12 @@ class AppLocalizationsIt extends AppLocalizations {
   String get filedReportsUnderReview => 'In revisione';
 
   @override
+  String get filedReportsReviewed => 'Revisionato';
+
+  @override
+  String get filedReportsDismissed => 'Respinto';
+
+  @override
   String get profileUnavailableTitle => 'Profilo non disponibile';
 
   @override

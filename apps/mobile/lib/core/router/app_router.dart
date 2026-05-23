@@ -220,6 +220,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
           path: '/account/mfa-setup',
           builder: (_, _) => const MfaSetupScreen()),
+      // Re-runs the onboarding flow for users who skipped it the first
+      // time. OnboardingScreen.redoMode persists their picks (like the
+      // real flow) but skips the post-onboarding tutorial detour.
+      GoRoute(
+          path: '/account/finish-setup',
+          builder: (_, _) =>
+              const OnboardingScreen(redoMode: true)),
       // Settings hub sub-screens: full-page pushes outside the shell
       // (same registration pattern as /account/mfa-setup above).
       GoRoute(
@@ -316,6 +323,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     builder: (_, s) => ReportScreen(
                           postId: s.uri.queryParameters['postId'],
                           commentId: s.uri.queryParameters['commentId'],
+                          authorId: s.uri.queryParameters['authorId'],
+                          author: s.uri.queryParameters['author'],
                         )),
                 GoRoute(
                     path: 'feed/:id',

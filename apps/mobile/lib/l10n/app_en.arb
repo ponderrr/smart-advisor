@@ -260,6 +260,10 @@
   "@filedReportsContentRemoved": { "description": "Filed-reports — fallback label when the reported content has been deleted" },
   "filedReportsUnderReview": "Under review",
   "@filedReportsUnderReview": { "description": "Filed-reports — status pill while a report is being reviewed" },
+  "filedReportsReviewed": "Reviewed",
+  "@filedReportsReviewed": { "description": "Filed-reports — status pill after staff reviewed the report and acted on it" },
+  "filedReportsDismissed": "Dismissed",
+  "@filedReportsDismissed": { "description": "Filed-reports — status pill after staff reviewed the report and decided no action was needed" },
 
   "profileUnavailableTitle": "Profile isn't available",
   "@profileUnavailableTitle": { "description": "Shown when the requested profile can't be loaded (deleted account / bad link)" },

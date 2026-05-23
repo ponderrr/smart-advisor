@@ -261,6 +261,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get filedReportsUnderReview => '검토 중';
 
   @override
+  String get filedReportsReviewed => '검토됨';
+
+  @override
+  String get filedReportsDismissed => '기각됨';
+
+  @override
   String get profileUnavailableTitle => '프로필을 사용할 수 없습니다';
 
   @override

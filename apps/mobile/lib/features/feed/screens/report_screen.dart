@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/supabase/supabase_providers.dart';
 import '../../../core/ui_messenger.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../ui/ui.dart';
@@ -15,9 +16,21 @@ import '../feed_providers.dart';
 /// One of [postId] / [commentId] must be set. Route:
 ///   /feed/report?postId=…    or    /feed/report?commentId=…
 class ReportScreen extends ConsumerStatefulWidget {
-  const ReportScreen({super.key, this.postId, this.commentId});
+  const ReportScreen({
+    super.key,
+    this.postId,
+    this.commentId,
+    this.authorId,
+    this.author,
+  });
   final String? postId;
   final String? commentId;
+
+  /// The author of the reported content. When set (and not the current
+  /// user), the form offers an "Also block @author" toggle that blocks
+  /// them in one go — same backing call as the overflow-menu Block.
+  final String? authorId;
+  final String? author;
 
   @override
   ConsumerState<ReportScreen> createState() => _ReportScreenState();
@@ -37,6 +50,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
   _ReportReason? _selected;
   final _details = TextEditingController();
   bool _submitting = false;
+  bool _alsoBlock = false;
 
   @override
   void dispose() {
@@ -71,8 +85,15 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
       } else if (widget.commentId != null) {
         await actions.reportComment(widget.commentId!, reason: reason);
       }
+      if (_alsoBlock && widget.authorId != null) {
+        await actions.block(widget.authorId!);
+      }
       if (!mounted) return;
-      showBanner(l.reportThanks, type: AdaptiveSnackBarType.success);
+      showBanner(
+          _alsoBlock && widget.author != null
+              ? '${l.reportThanks} · Blocked @${widget.author}'
+              : l.reportThanks,
+          type: AdaptiveSnackBarType.success);
       context.pop();
     } catch (_) {
       if (!mounted) return;
@@ -86,6 +107,10 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
     final l = AppLocalizations.of(context);
     final isPost = widget.postId != null;
     final title = isPost ? l.reportPostTitle : l.reportCommentTitle;
+    final me = ref.watch(supabaseClientProvider).auth.currentUser?.id;
+    final showBlockToggle = widget.authorId != null &&
+        widget.authorId!.isNotEmpty &&
+        widget.authorId != me;
 
     return BrandScaffold(
       title: title,
@@ -124,6 +149,14 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
               minLines: 3,
               maxLines: 6,
             ),
+            if (showBlockToggle) ...[
+              const SizedBox(height: 16),
+              _AlsoBlockTile(
+                author: widget.author ?? '',
+                value: _alsoBlock,
+                onChanged: (v) => setState(() => _alsoBlock = v),
+              ),
+            ],
             const SizedBox(height: 22),
             AdaptiveButton(
               onPressed: _selected == null || _submitting
@@ -132,6 +165,68 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
               label: l.reportSubmit,
               color: Tw.rose500,
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Optional "Also block @author" row shown under the details field
+/// when the report screen knows who authored the target. Submitting
+/// the report with this on calls `feedActions.block` so the user
+/// stops seeing their posts/comments without having to also pick the
+/// Block menu item.
+class _AlsoBlockTile extends StatelessWidget {
+  const _AlsoBlockTile({
+    required this.author,
+    required this.value,
+    required this.onChanged,
+  });
+  final String author;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return InkWell(
+      onTap: () => onChanged(!value),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        decoration: BoxDecoration(
+          color: c.muted,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: c.border),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.block,
+                size: 18,
+                color: value ? Tw.rose500 : c.mutedForeground),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Also block @$author',
+                    style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: c.foreground),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    "You won't see their posts or comments anymore.",
+                    style: TextStyle(
+                        fontSize: 12, color: context.brandMuted),
+                  ),
+                ],
+              ),
+            ),
+            Switch.adaptive(value: value, onChanged: onChanged),
           ],
         ),
       ),

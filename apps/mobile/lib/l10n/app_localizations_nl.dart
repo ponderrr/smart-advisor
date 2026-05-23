@@ -272,6 +272,12 @@ class AppLocalizationsNl extends AppLocalizations {
   String get filedReportsUnderReview => 'In behandeling';
 
   @override
+  String get filedReportsReviewed => 'Beoordeeld';
+
+  @override
+  String get filedReportsDismissed => 'Afgewezen';
+
+  @override
   String get profileUnavailableTitle => 'Profiel niet beschikbaar';
 
   @override

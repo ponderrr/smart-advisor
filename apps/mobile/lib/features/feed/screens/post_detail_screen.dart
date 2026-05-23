@@ -34,6 +34,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
   /// open but the app was backgrounded.
   late final AppLifecycleListener _lifecycle = AppLifecycleListener(
     onResume: () {
+      ref.invalidate(singlePostProvider);
       ref.invalidate(feedProvider);
       ref.invalidate(postVotesProvider);
       ref.invalidate(commentVotesProvider);
@@ -45,6 +46,23 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
     _lifecycle.dispose();
     _ctrl.dispose();
     super.dispose();
+  }
+
+  /// Drop comments authored by people the current user has blocked —
+  /// `singlePostProvider` doesn't apply that filter (unlike
+  /// `visibleFeedProvider`), so we re-apply it here. The post itself
+  /// stays visible even when its author is blocked: the user (or admin)
+  /// navigated here deliberately, hiding it would be jarring.
+  FeedPost? _applyBlocked(FeedPost? post) {
+    if (post == null) return null;
+    final blocked =
+        ref.watch(blockedProvider).value ?? const <String>[];
+    if (blocked.isEmpty) return post;
+    final set = blocked.toSet();
+    return post.copyWith(comments: [
+      for (final c in post.comments)
+        if (!set.contains(c.authorId)) c,
+    ]);
   }
 
   Future<void> _submitTopLevel() async {
@@ -63,22 +81,36 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final feedAsync = ref.watch(visibleFeedProvider);
-    if (feedAsync.isLoading) {
-      return const BrandScaffold(
-        title: 'Post',
-        body: Center(child: LoaderFive('Loading')),
-      );
+    // Prefer the already-loaded feed (so navigating from /feed is
+    // instant), but otherwise fetch this one post directly — deep
+    // links from notifications and the admin "Open post" jump from
+    // /account/reports used to wait for the entire feed query.
+    final feedHit = ref
+        .watch(visibleFeedProvider)
+        .value
+        ?.where((p) => p.id == widget.postId);
+    final singleAsync = ref.watch(singlePostProvider(widget.postId));
+    final FeedPost? post = (feedHit != null && feedHit.isNotEmpty)
+        ? feedHit.first
+        : _applyBlocked(singleAsync.value);
+
+    if (post == null) {
+      // Show the spinner only on the cold load. During a refetch
+      // triggered by a vote / comment edit, `singleAsync.value`
+      // still holds the previous post — keep rendering it so the
+      // screen doesn't blink to a loader on every interaction.
+      if (singleAsync.isLoading) {
+        return const BrandScaffold(
+          title: 'Post',
+          body: Center(child: LoaderFive('Loading')),
+        );
+      }
+      return _unavailable(context);
     }
-    final matches = (feedAsync.value ?? const <FeedPost>[])
-        .where((p) => p.id == widget.postId);
-
-    if (matches.isEmpty) return _unavailable(context);
-
-    final post = matches.first;
     final tone =
         contentAccent(post.community.accent, Theme.of(context).brightness);
-    final tree = ref.watch(commentTreeProvider(post.id));
+    final tree = buildCommentTree(
+        post.comments, ref.watch(feedPrefsProvider).commentSort);
     final meta = [
       if (post.creator != null) post.creator!,
       if (post.year != null) '${post.year}',

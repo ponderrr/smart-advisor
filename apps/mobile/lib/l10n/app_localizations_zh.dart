@@ -257,6 +257,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get filedReportsUnderReview => '审核中';
 
   @override
+  String get filedReportsReviewed => '已审核';
+
+  @override
+  String get filedReportsDismissed => '已驳回';
+
+  @override
   String get profileUnavailableTitle => '无法访问该资料';
 
   @override

@@ -65,6 +65,7 @@ class _ReportRow extends StatelessWidget {
     String createdAt,
     bool isPost,
     String? label,
+    String status,
   }) report;
 
   @override
@@ -117,21 +118,39 @@ class _ReportRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          Container(
-            padding: const EdgeInsets.symmetric(
-                horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: Tw.amber500.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Text(l.filedReportsUnderReview,
-                style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w900,
-                    color: Tw.amber500)),
-          ),
+          ReportStatusBadge(status: report.status),
         ],
       ),
+    );
+  }
+}
+
+/// Pill summarising a report's moderation state — shared by the user's
+/// "Reports you've filed" list and the admin Reports screen so the same
+/// vocabulary is used on both sides.
+class ReportStatusBadge extends StatelessWidget {
+  const ReportStatusBadge({super.key, required this.status});
+  final String status;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final (label, color) = switch (status) {
+      'reviewed' => (l.filedReportsReviewed, Tw.emerald500),
+      'dismissed' => (l.filedReportsDismissed, context.brandMuted),
+      _ => (l.filedReportsUnderReview, Tw.amber500),
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(label,
+          style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+              color: color)),
     );
   }
 }

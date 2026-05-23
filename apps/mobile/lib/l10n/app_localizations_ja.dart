@@ -259,6 +259,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get filedReportsUnderReview => '確認中';
 
   @override
+  String get filedReportsReviewed => '確認済み';
+
+  @override
+  String get filedReportsDismissed => '却下';
+
+  @override
   String get profileUnavailableTitle => 'プロフィールを利用できません';
 
   @override

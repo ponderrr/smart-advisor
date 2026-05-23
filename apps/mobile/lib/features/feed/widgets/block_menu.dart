@@ -46,14 +46,21 @@ class BlockMenuButton extends ConsumerWidget {
 
   /// Open the dedicated report screen — supersedes the old inline
   /// confirm dialog so the reporter can pick a reason category and
-  /// add an optional note.
+  /// add an optional note. Carries the target author through so the
+  /// report screen can offer an "Also block @author" toggle without
+  /// having to re-fetch it.
   void _openReportScreen(BuildContext context) {
-    if (post != null) {
-      context.push('/feed/report?postId=${Uri.encodeQueryComponent(post!.id)}');
-    } else if (commentId != null) {
-      context.push(
-          '/feed/report?commentId=${Uri.encodeQueryComponent(commentId!)}');
-    }
+    final qp = <String, String>{
+      'postId': ?post?.id,
+      'commentId': ?commentId,
+      'authorId': authorId,
+      'author': author,
+    };
+    final qs = qp.entries
+        .map((e) =>
+            '${e.key}=${Uri.encodeQueryComponent(e.value)}')
+        .join('&');
+    context.push('/feed/report?$qs');
   }
 
   @override

@@ -82,6 +82,8 @@
   "filedReportsOnComment": "コメントについて",
   "filedReportsContentRemoved": "コンテンツは削除されました",
   "filedReportsUnderReview": "確認中",
+  "filedReportsReviewed": "確認済み",
+  "filedReportsDismissed": "却下",
   "profileUnavailableTitle": "プロフィールを利用できません",
   "profileUnavailableBody": "削除されたか、リンクが間違っている可能性があります。",
   "profileUnavailableBack": "フィードに戻る",

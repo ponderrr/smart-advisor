@@ -29,9 +29,19 @@ import '../settings/settings_service.dart';
 /// filters / toggling reminders (any of which would clobber the real
 /// configuration they've already tuned).
 class OnboardingScreen extends ConsumerStatefulWidget {
-  const OnboardingScreen({super.key, this.previewMode = false});
+  const OnboardingScreen({
+    super.key,
+    this.previewMode = false,
+    this.redoMode = false,
+  });
 
   final bool previewMode;
+
+  /// Re-running onboarding after the user already finished it — typically
+  /// from the "Finish setting up" nudge on the feed. Behaves like the
+  /// real flow (persists their picks) but skips the post-finish tutorial
+  /// detour and pops back to wherever they came from.
+  final bool redoMode;
 
   @override
   ConsumerState<OnboardingScreen> createState() => _S();
@@ -195,9 +205,11 @@ class _S extends ConsumerState<OnboardingScreen> {
         StorageKeys.prefContentTone, age > 0 && age < 18 ? 'family' : 'standard');
 
     ref.invalidate(currentProfileProvider);
-    // Hand off to the one-time tutorial carousel, which then drops the
-    // user into the app.
-    if (mounted) context.go('/tutorial');
+    if (!mounted) return;
+    // First-time onboarding hands off to the post-onboarding tutorial.
+    // Re-runs (from the "Finish setting up" nudge) skip the tutorial —
+    // the user has already seen it — and drop them back home.
+    context.go(widget.redoMode ? '/' : '/tutorial');
   }
 
   @override

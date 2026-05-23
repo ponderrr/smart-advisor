@@ -152,6 +152,32 @@ class FeedService {
         .toList();
   }
 
+  /// A single post + its comments + vote scores. Used by the post detail
+  /// screen so deep-links and admin "Open post" jumps don't have to wait
+  /// for the entire feed to load — `fetchFeed` is O(all posts) and pulls
+  /// two extra vote-aggregate queries; this version is O(1).
+  Future<FeedPost?> fetchPostById(String postId) async {
+    final row = await _c
+        .from('feed_posts')
+        .select(_postSelect)
+        .eq('id', postId)
+        .maybeSingle();
+    if (row == null) return null;
+    final commentIds = [
+      for (final c in (row['feed_comments'] as List? ?? const []))
+        (c as Map)['id'] as String,
+    ];
+    final results = await Future.wait([
+      _commentScores(commentIds),
+      _postScores([postId]),
+    ]);
+    return _mapPost(
+      Map<String, dynamic>.from(row),
+      results[0],
+      results[1][postId] ?? 0,
+    );
+  }
+
   /// Posts authored by [profileId], newest first.
   Future<List<FeedPost>> fetchUserPosts(String profileId) async {
     final rows = await _c
@@ -266,12 +292,13 @@ class FeedService {
             String createdAt,
             bool isPost,
             String? label,
+            String status,
           })>> fetchMyReports() async {
     final uid = _c.auth.currentUser?.id;
     if (uid == null) return const [];
     final rows = await _c
         .from('feed_reports')
-        .select('id, reason, created_at, post_id, comment_id, '
+        .select('id, reason, created_at, post_id, comment_id, status, '
             'post:feed_posts!feed_reports_post_id_fkey ( title ), '
             'comment:feed_comments!feed_reports_comment_id_fkey ( body )')
         .eq('reporter_id', uid)
@@ -285,6 +312,7 @@ class FeedService {
           isPost: r['post_id'] != null,
           label: (_embed(r['post'])?['title'] as String?) ??
               (_embed(r['comment'])?['body'] as String?),
+          status: (r['status'] as String?) ?? 'open',
         ),
     ];
   }
@@ -306,11 +334,12 @@ class FeedService {
             String? postId,
             String? commentId,
             String? commentPostId,
+            String status,
           })>> fetchAllReports() async {
     final rows = await _c
         .from('feed_reports')
         .select(
-            'id, reason, created_at, post_id, comment_id, '
+            'id, reason, created_at, post_id, comment_id, status, '
             'reporter:profiles_public!feed_reports_reporter_id_fkey '
             '( name, username ), '
             'post:feed_posts!feed_reports_post_id_fkey '
@@ -338,9 +367,25 @@ class FeedService {
             postId: r['post_id'] as String?,
             commentId: r['comment_id'] as String?,
             commentPostId: comment?['post_id'] as String?,
+            status: (r['status'] as String?) ?? 'open',
           );
         }(),
     ];
+  }
+
+  /// Admin: flip a report between open / reviewed / dismissed. Gated by
+  /// the `feed_reports_update_admin` RLS policy — non-admins get a 403.
+  /// `reviewed_at` and `reviewed_by` are stamped when resolving; clearing
+  /// back to 'open' wipes them.
+  Future<void> setReportStatus(String reportId, String status) async {
+    assert(status == 'open' || status == 'reviewed' || status == 'dismissed');
+    final uid = _c.auth.currentUser?.id;
+    final resolving = status != 'open';
+    await _c.from('feed_reports').update({
+      'status': status,
+      'reviewed_at': resolving ? DateTime.now().toUtc().toIso8601String() : null,
+      'reviewed_by': resolving ? uid : null,
+    }).eq('id', reportId);
   }
 
   Future<void> createComment(

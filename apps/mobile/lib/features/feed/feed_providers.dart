@@ -67,6 +67,7 @@ final myReportsProvider = FutureProvider.autoDispose<
           String createdAt,
           bool isPost,
           String? label,
+          String status,
         })>>(
     (ref) => ref.watch(feedServiceProvider).fetchMyReports());
 
@@ -99,6 +100,13 @@ final libraryPublicProvider =
 final userPostsProvider = FutureProvider.autoDispose
     .family<List<FeedPost>, String>(
         (ref, id) => ref.watch(feedServiceProvider).fetchUserPosts(id));
+
+/// A single post by id — fast path for the post-detail screen so deep
+/// links and admin "Open post" jumps don't have to wait for the entire
+/// feed to load. `null` if the post no longer exists.
+final singlePostProvider =
+    FutureProvider.autoDispose.family<FeedPost?, String>(
+        (ref, id) => ref.watch(feedServiceProvider).fetchPostById(id));
 
 /// The feed with blocked authors filtered out — posts AND comments authored
 /// by a blocked profile are dropped. Use this everywhere a user-facing feed
@@ -165,6 +173,7 @@ class FeedActions {
     await _svc.deletePost(postId);
     _ref.invalidate(feedProvider);
     _ref.invalidate(userPostsProvider);
+    _ref.invalidate(singlePostProvider);
   }
 
   Future<void> updatePost({
@@ -191,40 +200,50 @@ class FeedActions {
     );
     _ref.invalidate(feedProvider);
     _ref.invalidate(userPostsProvider);
+    _ref.invalidate(singlePostProvider);
   }
 
-  Future<void> reportPost(String postId, {String? reason}) =>
-      _svc.reportPost(postId, reason: reason);
+  Future<void> reportPost(String postId, {String? reason}) async {
+    await _svc.reportPost(postId, reason: reason);
+    _ref.invalidate(myReportsProvider);
+  }
 
-  Future<void> reportComment(String commentId, {String? reason}) =>
-      _svc.reportComment(commentId, reason: reason);
+  Future<void> reportComment(String commentId, {String? reason}) async {
+    await _svc.reportComment(commentId, reason: reason);
+    _ref.invalidate(myReportsProvider);
+  }
 
   Future<void> addComment(String postId, String body,
       {String? parentId}) async {
     await _svc.createComment(postId, body, parentId);
     _ref.invalidate(feedProvider);
+    _ref.invalidate(singlePostProvider);
   }
 
   Future<void> deleteComment(String commentId) async {
     await _svc.deleteComment(commentId);
     _ref.invalidate(feedProvider);
+    _ref.invalidate(singlePostProvider);
   }
 
   Future<void> updateComment(String commentId, String body) async {
     await _svc.updateComment(commentId, body);
     _ref.invalidate(feedProvider);
+    _ref.invalidate(singlePostProvider);
   }
 
   Future<void> setCommentVote(String commentId, int dir) async {
     await _svc.setCommentVote(commentId, dir);
     _ref.invalidate(feedProvider);
     _ref.invalidate(commentVotesProvider);
+    _ref.invalidate(singlePostProvider);
   }
 
   Future<void> setPostVote(String postId, int dir) async {
     await _svc.setPostVote(postId, dir);
     _ref.invalidate(feedProvider);
     _ref.invalidate(postVotesProvider);
+    _ref.invalidate(singlePostProvider);
   }
 
   /// Returns the new following state (for undo banners).
@@ -249,6 +268,14 @@ class FeedActions {
     _ref.invalidate(blockedProvider);
     _ref.invalidate(blockedProfilesProvider);
     _ref.invalidate(followingProvider);
+    _ref.invalidate(singlePostProvider);
+  }
+
+  /// Admin: change a report's moderation status (open / reviewed /
+  /// dismissed). Requires `profiles.is_admin = TRUE` — server-side RLS
+  /// rejects everyone else.
+  Future<void> setReportStatus(String reportId, String status) async {
+    await _svc.setReportStatus(reportId, status);
   }
 
   Future<void> unblock(String blockedId) async {

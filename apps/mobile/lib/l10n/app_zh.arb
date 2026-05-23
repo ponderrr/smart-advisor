@@ -82,6 +82,8 @@
   "filedReportsOnComment": "关于一条评论",
   "filedReportsContentRemoved": "内容已删除",
   "filedReportsUnderReview": "审核中",
+  "filedReportsReviewed": "已审核",
+  "filedReportsDismissed": "已驳回",
   "profileUnavailableTitle": "无法访问该资料",
   "profileUnavailableBody": "可能已被删除，或链接错误。",
   "profileUnavailableBack": "返回信息流",

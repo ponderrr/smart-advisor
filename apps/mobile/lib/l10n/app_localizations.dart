@@ -606,6 +606,18 @@ abstract class AppLocalizations {
   /// **'Under review'**
   String get filedReportsUnderReview;
 
+  /// Filed-reports — status pill after staff reviewed the report and acted on it
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewed'**
+  String get filedReportsReviewed;
+
+  /// Filed-reports — status pill after staff reviewed the report and decided no action was needed
+  ///
+  /// In en, this message translates to:
+  /// **'Dismissed'**
+  String get filedReportsDismissed;
+
   /// Shown when the requested profile can't be loaded (deleted account / bad link)
   ///
   /// In en, this message translates to:

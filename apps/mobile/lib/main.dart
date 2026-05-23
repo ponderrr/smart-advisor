@@ -53,9 +53,17 @@ class SmartAdvisorApp extends ConsumerWidget {
       }
       // Supabase rotates the refresh token on sign-in and every refresh;
       // keep the biometric-login copy current (no-op if not enabled).
+      // On `signedIn` we go through `applyCurrentAccount` so an alt
+      // account on a device that already had biometric enrolled gets
+      // it disabled — without that gate the next biometric prompt
+      // would silently sign back in as the original owner.
+      if (event == AuthChangeEvent.signedIn) {
+        ref.read(biometricLoginProvider.notifier).applyCurrentAccount();
+      } else if (event == AuthChangeEvent.tokenRefreshed) {
+        ref.read(biometricLoginProvider.notifier).saveSession();
+      }
       if (event == AuthChangeEvent.signedIn ||
           event == AuthChangeEvent.tokenRefreshed) {
-        ref.read(biometricLoginProvider.notifier).saveSession();
         // Mirror the web SessionManagementService: stamp this device's
         // row in public.sessions so it shows up in "Two-factor & devices"
         // on every client (otherwise the list only sees the web row and

@@ -82,6 +82,8 @@
   "filedReportsOnComment": "Em um comentário",
   "filedReportsContentRemoved": "Conteúdo removido",
   "filedReportsUnderReview": "Em análise",
+  "filedReportsReviewed": "Analisado",
+  "filedReportsDismissed": "Rejeitado",
   "profileUnavailableTitle": "Perfil indisponível",
   "profileUnavailableBody": "Pode ter sido removido, ou o link está errado.",
   "profileUnavailableBack": "Voltar ao feed",

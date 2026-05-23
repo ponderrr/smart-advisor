@@ -21,6 +21,13 @@ import 'biometric.dart';
 class BiometricLogin extends Notifier<bool> {
   static const _enabledKey = 'sa.biometric_login_enabled';
   static const _sessionKey = 'sa.biometric_session';
+  // The user_id biometric was enrolled under. Used so that if a second
+  // account signs in on the same device, biometric auto-disables for
+  // them — otherwise the enrolled account's session in secure storage
+  // would silently take over on the next biometric tap, and pre-fix
+  // installs would also let `saveSession` overwrite the original owner's
+  // session with the alt account's tokens.
+  static const _userKey = 'sa.biometric_user_id';
 
   // v10 uses secure ciphers by default on Android (Keychain on iOS).
   final _store = const FlutterSecureStorage();
@@ -36,17 +43,27 @@ class BiometricLogin extends Notifier<bool> {
     return s == null ? null : jsonEncode(s.toJson());
   }
 
+  String? get _currentUserId =>
+      ref.read(supabaseClientProvider).auth.currentUser?.id;
+
+  /// The user_id biometric is enrolled under, if any.
+  Future<String?> enrolledUserId() => _store.read(key: _userKey);
+
   /// Enable from a signed-in context (Settings). Requires hardware + a
-  /// live session, and a biometric confirmation.
+  /// live session, and a biometric confirmation. Binds biometric to the
+  /// currently-signed-in user_id so a different account on the same
+  /// device can't piggy-back on the saved session.
   Future<bool> enable() async {
     if (!await biometricAvailable()) return false;
     final session = _currentSessionJson;
-    if (session == null) return false;
+    final uid = _currentUserId;
+    if (session == null || uid == null) return false;
     if (!await biometricAuthenticate(
         reason: 'Enable biometric sign-in')) {
       return false;
     }
     await _store.write(key: _sessionKey, value: session);
+    await _store.write(key: _userKey, value: uid);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_enabledKey, true);
     state = true;
@@ -55,6 +72,7 @@ class BiometricLogin extends Notifier<bool> {
 
   Future<void> disable() async {
     await _store.delete(key: _sessionKey);
+    await _store.delete(key: _userKey);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_enabledKey, false);
     state = false;
@@ -62,12 +80,51 @@ class BiometricLogin extends Notifier<bool> {
 
   /// Persist the current session — call on sign-in / token refresh so the
   /// stored copy never goes stale (no-op when disabled or signed out).
+  /// Refuses to overwrite the stored session when the signed-in user
+  /// differs from the enrolled owner — that path is handled by
+  /// [applyCurrentAccount] which disables biometric for the alt user.
   Future<void> saveSession() async {
     if (!state) return;
     final session = _currentSessionJson;
-    if (session != null) {
-      await _store.write(key: _sessionKey, value: session);
+    final uid = _currentUserId;
+    if (session == null || uid == null) return;
+    final owner = await enrolledUserId();
+    // Pre-fix installs may have a stored session without a user_id —
+    // adopt the current uid as the owner so subsequent sign-ins by
+    // other accounts will be rejected by the mismatch branch.
+    if (owner == null) {
+      await _store.write(key: _userKey, value: uid);
+    } else if (owner != uid) {
+      return;
     }
+    await _store.write(key: _sessionKey, value: session);
+  }
+
+  /// Called from the auth-state listener on every `signedIn` event so
+  /// biometric stays scoped to its enrolled account. If a different
+  /// user signs in, disable biometric on this device — they can opt in
+  /// fresh from Settings, which re-binds the storage to their uid.
+  Future<void> applyCurrentAccount() async {
+    if (!state) return;
+    final uid = _currentUserId;
+    if (uid == null) return;
+    final owner = await enrolledUserId();
+    if (owner == null) {
+      // Pre-fix install — adopt the current uid (see saveSession).
+      await _store.write(key: _userKey, value: uid);
+      await saveSession();
+      return;
+    }
+    if (owner != uid) {
+      // Alt account signed in on a device that had biometric enrolled
+      // for someone else. Disable biometric for them — protects both
+      // accounts: the alt user can no longer biometric-unlock the
+      // owner's session, and `saveSession` won't be called from
+      // tokenRefreshed events either.
+      await disable();
+      return;
+    }
+    await saveSession();
   }
 
   /// Biometric prompt → restore the Supabase session from the stored
