@@ -246,6 +246,10 @@
       "milestones": {
         "title": "Tus logros",
         "subtitle": "Sigue tu progreso y desbloquea logros"
+      },
+      "showOnboarding": {
+        "title": "Mostrar configuración",
+        "subtitle": "Vuelve a ver la pantalla de configuración del perfil en modo previa"
       }
     },
     "danger": {
@@ -1605,6 +1609,7 @@
     "finish": "Terminar",
     "submit": "Todo bien",
     "skip": "Omitir por ahora",
+    "previewClose": "Cerrar vista previa",
     "errors": {
       "displayNameRequired": "Por favor, introduce un nombre para mostrar.",
       "saveFailed": "No pudimos guardar tu configuración. Inténtalo de nuevo."

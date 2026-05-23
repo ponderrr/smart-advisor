@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
@@ -57,7 +57,13 @@ const FOCUS_HUE: Record<ContentFocus, string> = {
 
 const OnboardingPage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, session, loading, refreshUser } = useAuth();
+  // Preview mode = a re-visit from Settings → Help → "Show onboarding".
+  // The Help tile only renders in development, but we read the query
+  // param at runtime so anyone with the link gets the read-only replay
+  // (Finish becomes "Close preview" — no profile/filter writes).
+  const previewMode = searchParams.get("preview") === "true";
   const t = useTranslations("Onboarding");
   const tc = useTranslations("Common");
   const currentLocale = useLocale() as Locale;
@@ -163,6 +169,10 @@ const OnboardingPage = () => {
   };
 
   const finish = async (skip: boolean) => {
+    if (previewMode) {
+      router.push("/settings?section=help");
+      return;
+    }
     setError(null);
     setSubmitting(true);
     const ok = await persist(skip);
@@ -432,7 +442,7 @@ const OnboardingPage = () => {
           </AnimatePresence>
         </div>
 
-        {error && (
+        {error && !previewMode && (
           <p role="alert" className="mt-2 text-center text-sm text-red-500">
             {error}
           </p>
@@ -449,14 +459,16 @@ const OnboardingPage = () => {
               <ArrowLeft size={14} />
               {t("back")}
             </button>
-            <button
-              type="button"
-              onClick={() => void finish(true)}
-              disabled={submitting}
-              className="rounded-full px-3 py-1.5 text-xs font-bold text-slate-500 transition-colors hover:text-slate-700 disabled:opacity-60 dark:text-slate-400 dark:hover:text-slate-200"
-            >
-              {t("skip")}
-            </button>
+            {!previewMode && (
+              <button
+                type="button"
+                onClick={() => void finish(true)}
+                disabled={submitting}
+                className="rounded-full px-3 py-1.5 text-xs font-bold text-slate-500 transition-colors hover:text-slate-700 disabled:opacity-60 dark:text-slate-400 dark:hover:text-slate-200"
+              >
+                {t("skip")}
+              </button>
+            )}
           </div>
           <StatefulButton
             type="button"
@@ -472,7 +484,11 @@ const OnboardingPage = () => {
             )}
           >
             {isLast ? (
-              t("finish")
+              previewMode ? (
+                t("previewClose")
+              ) : (
+                t("finish")
+              )
             ) : (
               <span className="inline-flex items-center gap-1.5">
                 {t("next")}

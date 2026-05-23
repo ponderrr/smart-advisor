@@ -26,6 +26,7 @@ import {
   Sparkles,
   UserPlus,
   Trophy,
+  UserCircle,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "motion/react";
@@ -1625,6 +1626,30 @@ const SettingsPage = () => {
                             </span>
                           </span>
                         </button>
+                        {/* Onboarding replay — dev-build only. Useful
+                            for screenshots and QA; gated by
+                            NODE_ENV !== 'production' so it never ships. */}
+                        {process.env.NODE_ENV !== "production" && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              router.push("/onboarding?preview=true")
+                            }
+                            className="flex w-full items-center gap-3 rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-3 text-left transition-colors hover:border-indigo-300 hover:bg-indigo-50/40 dark:border-slate-600 dark:bg-slate-900/60 dark:hover:border-indigo-500/60 dark:hover:bg-indigo-500/10"
+                          >
+                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                              <UserCircle size={18} />
+                            </span>
+                            <span className="min-w-0 flex-1">
+                              <span className="block text-sm font-semibold text-slate-800 dark:text-slate-100">
+                                {t("help.showOnboarding.title")}
+                              </span>
+                              <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">
+                                {t("help.showOnboarding.subtitle")}
+                              </span>
+                            </span>
+                          </button>
+                        )}
                       </div>
                     </SectionCard>
                   </motion.div>

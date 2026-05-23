@@ -246,6 +246,10 @@
       "milestones": {
         "title": "Your milestones",
         "subtitle": "Track progress and unlock achievements"
+      },
+      "showOnboarding": {
+        "title": "Show onboarding",
+        "subtitle": "Re-see the profile-setup screen in preview mode"
       }
     },
     "danger": {
@@ -1605,6 +1609,7 @@
     "finish": "Finish setup",
     "submit": "Looks good",
     "skip": "Skip for now",
+    "previewClose": "Close preview",
     "errors": {
       "displayNameRequired": "Please enter a display name.",
       "saveFailed": "We couldn't save your setup. Please try again."
