@@ -152,8 +152,19 @@ class _FilterBar extends StatelessWidget {
     );
   }
 
+  /// Open=amber (matches the Open status badge), Resolved=emerald
+  /// (matches the Reviewed badge), All=slate (neutral) — so the
+  /// filter row carries the same status semantic as the badges
+  /// below instead of treating every option as a generic option.
+  Color _toneFor(_Filter v) => switch (v) {
+        _Filter.open => Tw.amber500,
+        _Filter.resolved => Tw.emerald500,
+        _Filter.all => Tw.slate500,
+      };
+
   Widget _chip(BuildContext context, _Filter value, String label) {
     final active = selected == value;
+    final tone = _toneFor(value);
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () => onSelected(value),
@@ -161,18 +172,17 @@ class _FilterBar extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
         decoration: BoxDecoration(
           color: active
-              ? Tw.violet500.withValues(alpha: 0.14)
+              ? tone.withValues(alpha: 0.14)
               : context.colors.muted,
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
-              color:
-                  active ? Tw.violet500 : context.colors.border),
+              color: active ? tone : context.colors.border),
         ),
         child: Text(label,
             style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w800,
-                color: active ? Tw.violet500 : context.brandInk)),
+                color: active ? tone : context.brandInk)),
       ),
     );
   }

@@ -113,7 +113,12 @@ class AppShell extends ConsumerWidget {
                 child: Center(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 760),
-                    child: child,
+                    child: Column(
+                      children: [
+                        const OfflineBanner(),
+                        Expanded(child: child),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -126,7 +131,15 @@ class AppShell extends ConsumerWidget {
     return AdaptiveScaffold(
       body: ColoredBox(
         color: bg,
-        child: SafeArea(bottom: false, child: child),
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              const OfflineBanner(),
+              Expanded(child: child),
+            ],
+          ),
+        ),
       ),
       bottomNavigationBar: AdaptiveBottomNavigationBar(
         selectedIndex: navIndexFromLocation(),

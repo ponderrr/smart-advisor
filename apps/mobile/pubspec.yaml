@@ -68,6 +68,7 @@ dependencies:
   receive_sharing_intent: ^1.8.1
   home_widget: ^0.9.1
   mobile_scanner: ^7.2.0
+  connectivity_plus: ^7.0.0
 
 dev_dependencies:
   flutter_test:

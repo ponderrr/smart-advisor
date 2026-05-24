@@ -5,6 +5,7 @@ import 'package:haptic_kit/haptic_kit.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/config/env.dart';
+import 'core/connectivity.dart';
 import 'core/l10n/locale_provider.dart';
 import 'core/quick_actions_init.dart';
 import 'core/router/app_router.dart';
@@ -13,6 +14,7 @@ import 'core/supabase/supabase_providers.dart';
 import 'l10n/app_localizations.dart';
 import 'core/ui_messenger.dart';
 import 'features/auth/auth_providers.dart';
+import 'features/feed/feed_providers.dart';
 import 'features/notifications/notification_service.dart';
 import 'features/security/biometric.dart';
 import 'features/security/biometric_login.dart';
@@ -67,6 +69,20 @@ class _SmartAdvisorAppState extends ConsumerState<SmartAdvisorApp> {
     // supabase_flutter auto-exchanges the auth deep link and emits an
     // event. For password-reset links, send the user to the reset screen
     // (the recovery session is already established by then).
+    // Auto-refresh on connectivity restored. The list providers throw
+    // on failed fetches now (no more last-good-snapshot cache), so a
+    // user who was offline lands on an error state — invalidating the
+    // feed on the offline→online edge brings it back without a manual
+    // pull-to-refresh. Library/history are autoDispose family
+    // providers and reload on their own when re-watched.
+    ref.listen<AsyncValue<bool>>(connectivityProvider, (prev, next) {
+      final wasOffline = prev?.asData?.value == false;
+      final nowOnline = next.asData?.value == true;
+      if (wasOffline && nowOnline) {
+        ref.invalidate(feedProvider);
+      }
+    });
+
     ref.listen<AsyncValue<AuthState>>(authStateProvider, (_, next) {
       final event = next.asData?.value.event;
       if (event == AuthChangeEvent.passwordRecovery) {

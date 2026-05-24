@@ -5,7 +5,6 @@ import 'package:haptic_kit/haptic_kit.dart';
 
 import '../../../core/models/enums.dart';
 import '../../../core/models/library_item.dart';
-import '../../../core/offline_cache.dart';
 import '../../../core/services/service_providers.dart';
 import '../../../core/ui_messenger.dart';
 import '../../../ui/ui.dart';
@@ -14,16 +13,12 @@ import '../../notifications/notification_service.dart';
 final _libraryProvider =
     FutureProvider.autoDispose<List<LibraryItem>>((ref) async {
   final res = await ref.watch(libraryServiceProvider).list();
-  if (!res.isError && res.data != null) {
-    // Successful fetch — refresh the offline snapshot.
-    await OfflineCache.writeList(
-        'library', res.data!.map((e) => e.toJson()).toList());
-    return res.data!;
-  }
-  // Fetch failed — serve the last good snapshot so a cold offline
-  // launch still shows the library instead of an empty screen.
-  final cached = await OfflineCache.readList('library');
-  return cached.map(LibraryItem.fromJson).toList();
+  // Fetch failures surface as an error state + the global "you're
+  // offline" banner — the previous last-good-snapshot cache was
+  // confusing because users couldn't tell which rows were live vs.
+  // frozen at the moment of the last successful fetch.
+  if (res.isError) throw Exception(res.error ?? 'list failed');
+  return res.data ?? const [];
 });
 
 /// Port of web /library: medium + status filters, per-item status change,

@@ -16,6 +16,7 @@ export 'widgets/brand.dart';
 export 'widgets/clear_all_button.dart';
 export 'widgets/message_banner.dart';
 export 'widgets/modal_sheet.dart';
+export 'widgets/offline_banner.dart';
 export 'widgets/stateful_button.dart';
 export 'widgets/view_mode_toggle.dart';
 export 'widgets/responsive_center.dart';

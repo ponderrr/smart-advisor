@@ -719,8 +719,10 @@ class _S extends ConsumerState<GroupQuizScreen> {
           '$_count questions',
           'up to $_maxP players',
           _mode == 1
-              ? 'async · ${_deadlineOptions[_deadlinePreset].$1}'
-              : 'live · together now',
+              // Make the format obvious — the previous "async · 24 hours"
+              // read as a duration rather than a deadline window.
+              ? 'Async · respond within ${_deadlineOptions[_deadlinePreset].$1}'
+              : 'Live · together now',
         ];
         return Column(
           key: const ValueKey('host_confirm'),

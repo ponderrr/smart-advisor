@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/constants/app_constants.dart';
-import '../../core/offline_cache.dart';
 import '../../core/supabase/supabase_providers.dart';
 import '../notifications/notification_prefs.dart';
 import 'models/feed_models.dart';
@@ -19,22 +18,12 @@ final feedServiceProvider = Provider<FeedService>(
 // ---------------------------------------------------------------------------
 
 /// The whole feed, newest first. Re-fetched on invalidation after a write.
-/// Wrapped in the offline cache: a successful fetch refreshes the snapshot,
-/// and a failure (cold launch offline / flaky network) serves the last
-/// good list so the feed never lands on a hard error state.
-final feedProvider =
-    FutureProvider.autoDispose<List<FeedPost>>((ref) async {
-  try {
-    final posts = await ref.watch(feedServiceProvider).fetchFeed();
-    await OfflineCache.writeList(
-        'feed', posts.map((p) => p.toJson()).toList());
-    return posts;
-  } catch (_) {
-    final cached = await OfflineCache.readList('feed');
-    if (cached.isEmpty) rethrow;
-    return cached.map(FeedPost.fromJson).toList();
-  }
-});
+/// On a fetch failure the provider surfaces the error and the screen shows
+/// the standard "you're offline" banner — the previous last-good-snapshot
+/// cache was confusing because users couldn't tell which posts were live
+/// vs. frozen.
+final feedProvider = FutureProvider.autoDispose<List<FeedPost>>(
+    (ref) => ref.watch(feedServiceProvider).fetchFeed());
 
 /// Profile ids the current user follows.
 final followingProvider = FutureProvider.autoDispose<List<String>>(
