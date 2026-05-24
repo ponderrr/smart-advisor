@@ -21,9 +21,11 @@ import {
   List,
   Globe2,
   Lock,
+  RefreshCw,
 } from "lucide-react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
@@ -57,6 +59,7 @@ import {
   useUpdatePost,
   useFollowing,
   useMyPostVotes,
+  useReactions,
   useSaved,
   useSetPostVote,
   useToggleSave,
@@ -64,7 +67,11 @@ import {
 } from "@/features/feed/use-feed";
 import { FollowButton } from "@/features/feed/components/follow-button";
 import { FeedAvatar } from "@/features/feed/components/feed-avatar";
+import { MentionText } from "@/features/feed/mention-text";
 import { PostMenuButton } from "@/features/feed/components/post-menu";
+import { OfflineBanner } from "@/components/offline-banner";
+import { ReactionBar } from "@/features/feed/reaction-bar";
+import type { ReactionEmoji } from "@/features/feed/feed-service";
 import { FinishWhatYouStartedBanner } from "@/features/library/components/finish-what-you-started-banner";
 import { AiNudgeBanner } from "@/features/feed/components/ai-nudge-banner";
 import { DashboardMovedBanner } from "@/features/feed/components/dashboard-moved-banner";
@@ -175,6 +182,62 @@ function entrance(index: number) {
   } as const;
 }
 
+/* ─── Refresh button ──────────────────────────────────────────────────── */
+
+/** Manual feed refresh — refetches the ["feed", "posts"] query and
+ *  spins the icon while the request is in flight. Lives in the
+ *  header next to Find friends / Quiz so users don't have to wait
+ *  on the 60s background poll when they want to force a sync.
+ *
+ *  The success toast only fires for clicks made through this button —
+ *  background refetches (e.g. the reconnect-edge invalidation in
+ *  OfflineBanner) still spin the icon but don't toast, so the user
+ *  doesn't see a stream of "Feed refreshed" notifications they
+ *  didn't ask for. */
+function FeedRefreshButton() {
+  const qc = useQueryClient();
+  const [refreshing, setRefreshing] = useState(false);
+  const onClick = async () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    // Floor the spin at ~700ms so a fast refetch (cached / instant
+    // network) doesn't half-spin and feel broken. A full rotation at
+    // tailwind's animate-spin default is ~1s, so 700ms gives roughly
+    // 3/4 of a turn — enough to read as a refresh gesture without
+    // dragging out on a slow connection.
+    const minSpin = new Promise((resolve) => setTimeout(resolve, 700));
+    try {
+      await Promise.all([
+        qc.refetchQueries({
+          queryKey: ["feed", "posts"],
+          type: "active",
+        }),
+        minSpin,
+      ]);
+      toast.success("Feed refreshed");
+    } catch {
+      toast.error("Couldn't refresh — try again.");
+    } finally {
+      setRefreshing(false);
+    }
+  };
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={refreshing}
+      title="Refresh feed"
+      aria-label="Refresh feed"
+      className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200/80 bg-white text-slate-600 transition-colors hover:border-indigo-300 hover:text-indigo-600 disabled:opacity-60 dark:border-slate-700/70 dark:bg-slate-900/65 dark:text-slate-300 dark:hover:border-indigo-500/60 dark:hover:text-indigo-300"
+    >
+      <RefreshCw
+        size={15}
+        className={cn(refreshing && "animate-spin")}
+      />
+    </button>
+  );
+}
+
 /* ─── Post card ─────────────────────────────────────────────────────── */
 
 function PostCard({
@@ -184,6 +247,8 @@ function PostCard({
   onCommunity,
   view,
   index,
+  reactionCounts,
+  reactionMine,
 }: {
   post: FeedPost;
   onOpen: () => void;
@@ -193,6 +258,10 @@ function PostCard({
   onCommunity: (c: FeedCommunity) => void;
   view: FeedView;
   index: number;
+  /** Emoji counts for this post (subset of the page-level batch). */
+  reactionCounts: Partial<Record<ReactionEmoji, number>>;
+  /** Current user's pick for this post, or null. */
+  reactionMine: ReactionEmoji | null;
 }) {
   const t = tone(post.community);
   const ribbon = getRecTypeAccent(COMMUNITY_CONTENT[post.community]).stripe;
@@ -508,9 +577,15 @@ function PostCard({
 
           {post.body && (
             <p className="mt-2 line-clamp-3 text-[13px] italic leading-relaxed text-slate-500 dark:text-slate-400">
-              {post.body}
+              <MentionText body={post.body} />
             </p>
           )}
+          <ReactionBar
+            targetKind="post"
+            targetId={post.id}
+            counts={reactionCounts}
+            mine={reactionMine}
+          />
         </div>
       </div>
     </motion.div>
@@ -1007,6 +1082,13 @@ export default function FeedPage() {
     return list;
   }, [posts, community, scope, sort, following]);
 
+  // Single batched reactions query for every visible card — one
+  // round-trip per kind no matter how many posts render.
+  const visibleIds = useMemo(() => visible.map((p) => p.id), [visible]);
+  const { data: reactions } = useReactions({ postIds: visibleIds });
+  const reactionCounts = reactions?.counts ?? {};
+  const reactionMine = reactions?.mine ?? {};
+
   if (!ready) return <PageLoader text="Loading" />;
 
   return (
@@ -1014,6 +1096,9 @@ export default function FeedPage() {
       <AppNavbar />
       <main className="px-4 pb-20 pt-28 sm:px-6 md:pt-36">
         <div className="mx-auto max-w-6xl">
+          <div className="mb-4">
+            <OfflineBanner />
+          </div>
           <div className="mb-6 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
@@ -1043,6 +1128,7 @@ export default function FeedPage() {
                 )}
               </Link>
               <div className="flex items-center gap-2 self-start md:self-auto">
+                <FeedRefreshButton />
                 <button
                   type="button"
                   onClick={() => router.push("/feed/people")}
@@ -1205,6 +1291,8 @@ export default function FeedPage() {
                       onOpen={() => router.push(`/feed/${p.id}`)}
                       onEdit={() => setEditingPost(p)}
                       onCommunity={(c) => setCommunity(c)}
+                      reactionCounts={reactionCounts[p.id] ?? {}}
+                      reactionMine={reactionMine[p.id] ?? null}
                     />
                   ))
                 )}

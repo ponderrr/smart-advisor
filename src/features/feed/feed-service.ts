@@ -542,6 +542,394 @@ export async function fetchMyPostVotes(): Promise<Record<string, number>> {
   return out;
 }
 
+/** Set of emoji users can react with — mirrors the CHECK constraint
+ *  in 20260524000000_feed_reactions.sql. Order is the picker order. */
+export const REACTION_EMOJI = [
+  "❤️",
+  "🔥",
+  "😂",
+  "😢",
+  "🤔",
+  "👏",
+] as const;
+export type ReactionEmoji = (typeof REACTION_EMOJI)[number];
+
+export type ReactionTargetKind = "post" | "comment";
+
+export interface ReactionAggregates {
+  /** counts[targetId][emoji] = N */
+  counts: Record<string, Partial<Record<ReactionEmoji, number>>>;
+  /** mine[targetId] = the single emoji the current user picked. */
+  mine: Record<string, ReactionEmoji>;
+}
+
+/** Aggregated reactions for the given post + comment ids — one
+ *  query per kind because target_kind is part of the index. Returns
+ *  empty maps when neither id list is provided. */
+export async function fetchReactions(args: {
+  postIds?: string[];
+  commentIds?: string[];
+}): Promise<ReactionAggregates> {
+  const { postIds = [], commentIds = [] } = args;
+  if (postIds.length === 0 && commentIds.length === 0) {
+    return { counts: {}, mine: {} };
+  }
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const uid = user?.id ?? null;
+  type ReactionRow = {
+    user_id: string;
+    target_id: string;
+    emoji: string;
+  };
+  const queries: Promise<ReactionRow[]>[] = [];
+  if (postIds.length > 0) {
+    queries.push(
+      (async () => {
+        const { data } = await supabase
+          .from("feed_reactions")
+          .select("user_id, target_id, emoji")
+          .eq("target_kind", "post")
+          .in("target_id", postIds);
+        return (data ?? []) as ReactionRow[];
+      })(),
+    );
+  }
+  if (commentIds.length > 0) {
+    queries.push(
+      (async () => {
+        const { data } = await supabase
+          .from("feed_reactions")
+          .select("user_id, target_id, emoji")
+          .eq("target_kind", "comment")
+          .in("target_id", commentIds);
+        return (data ?? []) as ReactionRow[];
+      })(),
+    );
+  }
+  const batches = await Promise.all(queries);
+  const counts: ReactionAggregates["counts"] = {};
+  const mine: ReactionAggregates["mine"] = {};
+  for (const rows of batches) {
+    for (const r of rows) {
+      const e = r.emoji as ReactionEmoji;
+      const bucket = (counts[r.target_id] ??= {});
+      bucket[e] = (bucket[e] ?? 0) + 1;
+      if (uid && r.user_id === uid) mine[r.target_id] = e;
+    }
+  }
+  return { counts, mine };
+}
+
+/** Sets the current user's reaction on a post or comment. A null
+ *  `emoji` clears it (delete). One reaction per (user, target) is
+ *  enforced by the PK — upsert replaces a previous pick. */
+export async function setReaction(args: {
+  targetKind: ReactionTargetKind;
+  targetId: string;
+  emoji: ReactionEmoji | null;
+}): Promise<void> {
+  const { targetKind, targetId, emoji } = args;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not signed in");
+  if (emoji === null) {
+    await supabase
+      .from("feed_reactions")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("target_kind", targetKind)
+      .eq("target_id", targetId);
+    return;
+  }
+  await supabase.from("feed_reactions").upsert(
+    {
+      user_id: user.id,
+      target_kind: targetKind,
+      target_id: targetId,
+      emoji,
+    },
+    { onConflict: "user_id,target_kind,target_id" },
+  );
+}
+
+/** Whether the current user has the staff/admin bit set on their
+ *  profile. profiles_public doesn't expose is_admin (the view would
+ *  leak staff status to everyone), so this reads from the owner-only
+ *  `profiles` row. Returns false for signed-out callers. */
+export async function fetchIsAdmin(): Promise<boolean> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return false;
+  const { data } = await supabase
+    .from("profiles")
+    .select("is_admin")
+    .eq("id", user.id)
+    .maybeSingle();
+  return ((data as { is_admin: boolean | null } | null)?.is_admin ?? false) ===
+    true;
+}
+
+export interface FollowingProfile {
+  id: string;
+  name: string;
+  avatarUrl: string | null;
+}
+
+/** Profiles the current user follows, newest follow first — drives
+ *  the "Send to a friend" picker. Auth-gated by the caller; returns
+ *  [] when not signed in. */
+export async function fetchMyFollowingProfiles(): Promise<FollowingProfile[]> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+  type Row = {
+    created_at: string;
+    followee: { id: string; name: string | null; avatar_url: string | null } | null;
+  };
+  const { data } = await supabase
+    .from("feed_follows")
+    .select(
+      "created_at, " +
+        "followee:profiles_public!feed_follows_followee_id_fkey ( id, name, avatar_url )",
+    )
+    .eq("follower_id", user.id)
+    .order("created_at", { ascending: false });
+  const out: FollowingProfile[] = [];
+  for (const r of (data ?? []) as unknown as Row[]) {
+    const p = r.followee;
+    if (!p?.id) continue;
+    out.push({
+      id: p.id,
+      name: p.name ?? "Someone",
+      avatarUrl: p.avatar_url,
+    });
+  }
+  return out;
+}
+
+/** Sends `postId` to `recipientId` as a "have you read this" pick.
+ *  Inserts into feed_pick_sends — the AFTER-INSERT trigger fires
+ *  the 'pick_sent' notification on the recipient's inbox; RLS
+ *  guards the sender_id check. `message` is the optional one-liner
+ *  shown to the recipient. */
+export async function sendPickToFriend(args: {
+  postId: string;
+  recipientId: string;
+  message?: string;
+}): Promise<void> {
+  const { postId, recipientId, message } = args;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not signed in");
+  if (user.id === recipientId) {
+    throw new Error("Can't send a pick to yourself");
+  }
+  const trimmed = message?.trim() ?? "";
+  const { error } = await supabase.from("feed_pick_sends").insert({
+    sender_id: user.id,
+    recipient_id: recipientId,
+    post_id: postId,
+    message: trimmed.length > 0 ? trimmed : null,
+  });
+  if (error) throw error;
+}
+
+export interface SearchProfileResult {
+  id: string;
+  name: string;
+  username: string | null;
+  avatarUrl: string | null;
+}
+
+export interface SearchPostResult {
+  id: string;
+  title: string;
+  body: string | null;
+  posterUrl: string | null;
+  community: FeedCommunity;
+  authorId: string;
+  author: string;
+}
+
+/** Escapes `%` and `_` so a literal "50%" search doesn't act as a
+ *  wildcard. Used by both search functions below. */
+function escapeIlike(s: string): string {
+  return s.replace(/[%_]/g, (m) => `\\${m}`);
+}
+
+/** Debounced caller is in the search page; the service itself returns
+ *  whatever ilike finds. Blocked users (either direction) are filtered
+ *  out so search never surfaces someone you've cut contact with. */
+export async function searchProfiles(
+  query: string,
+): Promise<SearchProfileResult[]> {
+  const q = query.trim();
+  if (q.length < 2) return [];
+  const like = `%${escapeIlike(q)}%`;
+  const [{ data: rows }, blocked, blockedBy] = await Promise.all([
+    supabase
+      .from("profiles_public")
+      .select("id, name, username, avatar_url")
+      .or(`name.ilike.${like},username.ilike.${like}`)
+      .limit(30),
+    fetchBlocked(),
+    fetchBlockedBy(),
+  ]);
+  const hidden = new Set<string>([...blocked, ...blockedBy]);
+  const out: SearchProfileResult[] = [];
+  for (const r of (rows ?? []) as Array<{
+    id: string | null;
+    name: string | null;
+    username: string | null;
+    avatar_url: string | null;
+  }>) {
+    if (!r.id || hidden.has(r.id)) continue;
+    out.push({
+      id: r.id,
+      name: r.name ?? "Someone",
+      username: r.username,
+      avatarUrl: r.avatar_url,
+    });
+  }
+  return out;
+}
+
+export async function searchPosts(
+  query: string,
+): Promise<SearchPostResult[]> {
+  const q = query.trim();
+  if (q.length < 2) return [];
+  const like = `%${escapeIlike(q)}%`;
+  type Row = {
+    id: string;
+    title: string | null;
+    body: string | null;
+    poster_url: string | null;
+    community: FeedCommunity;
+    author: { id: string; name: string | null } | null;
+  };
+  const [{ data: rows }, blocked, blockedBy] = await Promise.all([
+    supabase
+      .from("feed_posts")
+      .select(
+        "id, title, body, poster_url, community, " +
+          "author:profiles_public!feed_posts_user_id_fkey ( id, name )",
+      )
+      .or(`title.ilike.${like},body.ilike.${like}`)
+      .order("created_at", { ascending: false })
+      .limit(30),
+    fetchBlocked(),
+    fetchBlockedBy(),
+  ]);
+  const hidden = new Set<string>([...blocked, ...blockedBy]);
+  const out: SearchPostResult[] = [];
+  for (const r of (rows ?? []) as unknown as Row[]) {
+    const authorId = r.author?.id ?? "";
+    if (!authorId || hidden.has(authorId)) continue;
+    out.push({
+      id: r.id,
+      title: r.title ?? "",
+      body: r.body,
+      posterUrl: r.poster_url,
+      community: r.community,
+      authorId,
+      author: r.author?.name ?? "Someone",
+    });
+  }
+  return out;
+}
+
+export interface FollowSuggestion {
+  id: string;
+  name: string;
+  avatarUrl: string | null;
+  /** How many of the current user's follows also follow this person. */
+  mutual: number;
+}
+
+/** Friends-of-friends ranked by mutual-overlap count. Returns empty
+ *  when the current user follows no-one (caller pairs this with
+ *  [fetchSuggestedPeople] for the cold-start surface). Hidden:
+ *  yourself, anyone you already follow, anyone either side has
+ *  blocked. */
+export async function fetchFollowSuggestions(
+  limit = 30,
+): Promise<FollowSuggestion[]> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+  const mine = await fetchFollowing();
+  if (mine.length === 0) return [];
+  type Row = {
+    follower_id: string;
+    followee: { id: string; name: string; avatar_url: string | null } | null;
+  };
+  const [{ data: rows }, blocked, blockedBy] = await Promise.all([
+    supabase
+      .from("feed_follows")
+      .select(
+        "follower_id, " +
+          "followee:profiles_public!feed_follows_followee_id_fkey ( id, name, avatar_url )",
+      )
+      .in("follower_id", mine),
+    fetchBlocked(),
+    fetchBlockedBy(),
+  ]);
+  const hidden = new Set<string>([
+    user.id,
+    ...mine,
+    ...blocked,
+    ...blockedBy,
+  ]);
+  const scored = new Map<
+    string,
+    { name: string; avatarUrl: string | null; mutual: number }
+  >();
+  for (const r of (rows ?? []) as unknown as Row[]) {
+    const p = r.followee;
+    if (!p?.id || hidden.has(p.id)) continue;
+    const prev = scored.get(p.id);
+    scored.set(p.id, {
+      name: p.name ?? "Someone",
+      avatarUrl: p.avatar_url,
+      mutual: (prev?.mutual ?? 0) + 1,
+    });
+  }
+  const entries = [...scored.entries()].sort(
+    (a, b) => b[1].mutual - a[1].mutual,
+  );
+  return entries.slice(0, limit).map(([id, v]) => ({
+    id,
+    name: v.name,
+    avatarUrl: v.avatarUrl,
+    mutual: v.mutual,
+  }));
+}
+
+/** Looks up a profile id from a `@handle` (case-insensitive).
+ *  Backs the @mention tap-handler in [MentionText]; returns `null`
+ *  when the handle doesn't exist (don't throw — the UI shows a
+ *  toast in that case). */
+export async function resolveUsernameToId(
+  username: string,
+): Promise<string | null> {
+  const handle = username.replace(/^@/, "").trim();
+  if (!handle) return null;
+  const { data } = await supabase
+    .from("profiles_public")
+    .select("id")
+    .ilike("username", handle)
+    .maybeSingle();
+  return (data as { id: string } | null)?.id ?? null;
+}
+
 /** Profile ids the current user follows. */
 export async function fetchFollowing(): Promise<string[]> {
   const {

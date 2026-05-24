@@ -9,6 +9,7 @@ import {
 
 import * as svc from "./feed-service";
 import type { FeedPost } from "./types";
+import { useMutedKinds } from "@/features/notifications/use-muted-kinds";
 
 /** Query keys for the feed data set — all invalidated together by id. */
 const KEYS = {
@@ -122,6 +123,87 @@ export function useVisibleFeed() {
     isError: feed.isError,
     error: feed.error,
   };
+}
+
+/** Batched reaction aggregates for a list of post + comment ids.
+ *  One query per kind, so passing both is cheaper than two hooks.
+ *  Keyed by sorted ids so two render passes with the same set of
+ *  ids share the same cache entry. */
+export function useReactions(args: {
+  postIds: string[];
+  commentIds?: string[];
+}) {
+  const { postIds, commentIds } = args;
+  const sortedPosts = useMemo(() => [...postIds].sort(), [postIds]);
+  const sortedComments = useMemo(
+    () => [...(commentIds ?? [])].sort(),
+    [commentIds],
+  );
+  return useQuery({
+    queryKey: ["feed", "reactions", sortedPosts, sortedComments] as const,
+    queryFn: () =>
+      svc.fetchReactions({ postIds: sortedPosts, commentIds: sortedComments }),
+    enabled: sortedPosts.length > 0 || sortedComments.length > 0,
+  });
+}
+
+/** Live profile-search results for the given query. Caller should
+ *  debounce upstream (or accept the staleness — react-query keeps the
+ *  previous query's data while a new one loads). */
+export function useSearchProfiles(query: string) {
+  return useQuery({
+    queryKey: ["feed", "search", "profiles", query] as const,
+    queryFn: () => svc.searchProfiles(query),
+    enabled: query.trim().length >= 2,
+  });
+}
+
+export function useSearchPosts(query: string) {
+  return useQuery({
+    queryKey: ["feed", "search", "posts", query] as const,
+    queryFn: () => svc.searchPosts(query),
+    enabled: query.trim().length >= 2,
+  });
+}
+
+export function useIsAdmin() {
+  return useQuery({
+    queryKey: ["feed", "is-admin"] as const,
+    queryFn: svc.fetchIsAdmin,
+    // is_admin rarely changes; keep the result warm for the session.
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useMyFollowingProfiles() {
+  return useQuery({
+    queryKey: ["feed", "my-following-profiles"] as const,
+    queryFn: svc.fetchMyFollowingProfiles,
+  });
+}
+
+export function useSendPick() {
+  return useMutation({
+    mutationFn: svc.sendPickToFriend,
+  });
+}
+
+export function useFollowSuggestions() {
+  return useQuery({
+    queryKey: ["feed", "follow-suggestions"] as const,
+    queryFn: () => svc.fetchFollowSuggestions(),
+  });
+}
+
+export function useSetReaction() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: svc.setReaction,
+    // Reactions don't carry a per-query cache key fine enough to
+    // surgically invalidate, so invalidate the whole reactions family.
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: ["feed", "reactions"] }),
+  });
 }
 
 /* ── mutations ────────────────────────────────────────────────────── */
@@ -303,18 +385,33 @@ export function useSetReportStatus() {
 
 const NOTIF_KEY = ["feed", "notifications"] as const;
 
-export function useNotifications() {
+/** Raw query — every row from feed_notifications, unfiltered. Other
+ *  hooks layer the muted-kinds filter on top so the bell badge + the
+ *  inbox + the settings counter all share one source of truth. */
+function useNotificationsRaw() {
   return useQuery({
     queryKey: NOTIF_KEY,
     queryFn: svc.fetchNotifications,
   });
 }
 
-/** Unread count summed across all kinds — the navbar bell reads this
- *  instead of recomputing from the list. */
+export function useNotifications() {
+  const raw = useNotificationsRaw();
+  const { muted } = useMutedKinds();
+  const data = useMemo(() => {
+    const all = raw.data ?? [];
+    if (muted.size === 0) return all;
+    return all.filter((n) => !muted.has(n.kind));
+  }, [raw.data, muted]);
+  return { ...raw, data };
+}
+
+/** Unread count summed across all kinds the user hasn't muted — the
+ *  navbar bell reads this so muting a kind clears its contribution to
+ *  the badge immediately. */
 export function useUnreadNotificationsCount(): number {
   const { data } = useNotifications();
-  return (data ?? []).filter((n) => n.readAt === null).length;
+  return data.filter((n) => n.readAt === null).length;
 }
 
 export function useMarkNotificationRead() {

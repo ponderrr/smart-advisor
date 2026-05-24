@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { LogOut, Search as SearchIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { useAuth } from "@/features/auth/hooks/use-auth";
@@ -135,6 +135,14 @@ export function AppNavbar() {
           ) : (
             user && (
               <>
+                <button
+                  type="button"
+                  onClick={() => router.push("/feed/search")}
+                  aria-label="Search"
+                  className="relative inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+                >
+                  <SearchIcon size={18} />
+                </button>
                 <NotificationsBell />
                 <UserAvatarMenu />
               </>
