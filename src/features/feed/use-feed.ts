@@ -147,6 +147,25 @@ export function useReactions(args: {
   });
 }
 
+/** Live profile-search results for the given query. Caller should
+ *  debounce upstream (or accept the staleness — react-query keeps the
+ *  previous query's data while a new one loads). */
+export function useSearchProfiles(query: string) {
+  return useQuery({
+    queryKey: ["feed", "search", "profiles", query] as const,
+    queryFn: () => svc.searchProfiles(query),
+    enabled: query.trim().length >= 2,
+  });
+}
+
+export function useSearchPosts(query: string) {
+  return useQuery({
+    queryKey: ["feed", "search", "posts", query] as const,
+    queryFn: () => svc.searchPosts(query),
+    enabled: query.trim().length >= 2,
+  });
+}
+
 export function useFollowSuggestions() {
   return useQuery({
     queryKey: ["feed", "follow-suggestions"] as const,

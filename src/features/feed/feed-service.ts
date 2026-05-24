@@ -655,6 +655,111 @@ export async function setReaction(args: {
   );
 }
 
+export interface SearchProfileResult {
+  id: string;
+  name: string;
+  username: string | null;
+  avatarUrl: string | null;
+}
+
+export interface SearchPostResult {
+  id: string;
+  title: string;
+  body: string | null;
+  posterUrl: string | null;
+  community: FeedCommunity;
+  authorId: string;
+  author: string;
+}
+
+/** Escapes `%` and `_` so a literal "50%" search doesn't act as a
+ *  wildcard. Used by both search functions below. */
+function escapeIlike(s: string): string {
+  return s.replace(/[%_]/g, (m) => `\\${m}`);
+}
+
+/** Debounced caller is in the search page; the service itself returns
+ *  whatever ilike finds. Blocked users (either direction) are filtered
+ *  out so search never surfaces someone you've cut contact with. */
+export async function searchProfiles(
+  query: string,
+): Promise<SearchProfileResult[]> {
+  const q = query.trim();
+  if (q.length < 2) return [];
+  const like = `%${escapeIlike(q)}%`;
+  const [{ data: rows }, blocked, blockedBy] = await Promise.all([
+    supabase
+      .from("profiles_public")
+      .select("id, name, username, avatar_url")
+      .or(`name.ilike.${like},username.ilike.${like}`)
+      .limit(30),
+    fetchBlocked(),
+    fetchBlockedBy(),
+  ]);
+  const hidden = new Set<string>([...blocked, ...blockedBy]);
+  const out: SearchProfileResult[] = [];
+  for (const r of (rows ?? []) as Array<{
+    id: string | null;
+    name: string | null;
+    username: string | null;
+    avatar_url: string | null;
+  }>) {
+    if (!r.id || hidden.has(r.id)) continue;
+    out.push({
+      id: r.id,
+      name: r.name ?? "Someone",
+      username: r.username,
+      avatarUrl: r.avatar_url,
+    });
+  }
+  return out;
+}
+
+export async function searchPosts(
+  query: string,
+): Promise<SearchPostResult[]> {
+  const q = query.trim();
+  if (q.length < 2) return [];
+  const like = `%${escapeIlike(q)}%`;
+  type Row = {
+    id: string;
+    title: string | null;
+    body: string | null;
+    poster_url: string | null;
+    community: FeedCommunity;
+    author: { id: string; name: string | null } | null;
+  };
+  const [{ data: rows }, blocked, blockedBy] = await Promise.all([
+    supabase
+      .from("feed_posts")
+      .select(
+        "id, title, body, poster_url, community, " +
+          "author:profiles_public!feed_posts_user_id_fkey ( id, name )",
+      )
+      .or(`title.ilike.${like},body.ilike.${like}`)
+      .order("created_at", { ascending: false })
+      .limit(30),
+    fetchBlocked(),
+    fetchBlockedBy(),
+  ]);
+  const hidden = new Set<string>([...blocked, ...blockedBy]);
+  const out: SearchPostResult[] = [];
+  for (const r of (rows ?? []) as unknown as Row[]) {
+    const authorId = r.author?.id ?? "";
+    if (!authorId || hidden.has(authorId)) continue;
+    out.push({
+      id: r.id,
+      title: r.title ?? "",
+      body: r.body,
+      posterUrl: r.poster_url,
+      community: r.community,
+      authorId,
+      author: r.author?.name ?? "Someone",
+    });
+  }
+  return out;
+}
+
 export interface FollowSuggestion {
   id: string;
   name: string;
