@@ -184,18 +184,38 @@ function entrance(index: number) {
 
 /* ─── Refresh button ──────────────────────────────────────────────────── */
 
-/** Manual feed refresh — invalidates the ["feed", "posts"] query and
- *  spins the icon while the refetch is in flight. Lives in the
- *  header next to Find friends / Quiz so users don't have to wait on
- *  the 60s background poll when they want to force a sync. */
+/** Manual feed refresh — refetches the ["feed", "posts"] query and
+ *  spins the icon while the request is in flight. Lives in the
+ *  header next to Find friends / Quiz so users don't have to wait
+ *  on the 60s background poll when they want to force a sync.
+ *
+ *  The success toast only fires for clicks made through this button —
+ *  background refetches (e.g. the reconnect-edge invalidation in
+ *  OfflineBanner) still spin the icon but don't toast, so the user
+ *  doesn't see a stream of "Feed refreshed" notifications they
+ *  didn't ask for. */
 function FeedRefreshButton() {
   const qc = useQueryClient();
-  const state = qc.getQueryState(["feed", "posts"]);
-  const refreshing = state?.fetchStatus === "fetching";
+  const [refreshing, setRefreshing] = useState(false);
+  const onClick = async () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    try {
+      await qc.refetchQueries({
+        queryKey: ["feed", "posts"],
+        type: "active",
+      });
+      toast.success("Feed refreshed");
+    } catch {
+      toast.error("Couldn't refresh — try again.");
+    } finally {
+      setRefreshing(false);
+    }
+  };
   return (
     <button
       type="button"
-      onClick={() => qc.invalidateQueries({ queryKey: ["feed", "posts"] })}
+      onClick={onClick}
       disabled={refreshing}
       title="Refresh feed"
       aria-label="Refresh feed"
