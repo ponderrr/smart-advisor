@@ -21,9 +21,11 @@ import {
   List,
   Globe2,
   Lock,
+  RefreshCw,
 } from "lucide-react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
@@ -67,6 +69,7 @@ import { FollowButton } from "@/features/feed/components/follow-button";
 import { FeedAvatar } from "@/features/feed/components/feed-avatar";
 import { MentionText } from "@/features/feed/mention-text";
 import { PostMenuButton } from "@/features/feed/components/post-menu";
+import { OfflineBanner } from "@/components/offline-banner";
 import { ReactionBar } from "@/features/feed/reaction-bar";
 import type { ReactionEmoji } from "@/features/feed/feed-service";
 import { FinishWhatYouStartedBanner } from "@/features/library/components/finish-what-you-started-banner";
@@ -177,6 +180,33 @@ function entrance(index: number) {
     animate: { opacity: 1, x: 0 },
     transition: { duration: 0.32, delay: Math.min(index, 10) * 0.05 },
   } as const;
+}
+
+/* ─── Refresh button ──────────────────────────────────────────────────── */
+
+/** Manual feed refresh — invalidates the ["feed", "posts"] query and
+ *  spins the icon while the refetch is in flight. Lives in the
+ *  header next to Find friends / Quiz so users don't have to wait on
+ *  the 60s background poll when they want to force a sync. */
+function FeedRefreshButton() {
+  const qc = useQueryClient();
+  const state = qc.getQueryState(["feed", "posts"]);
+  const refreshing = state?.fetchStatus === "fetching";
+  return (
+    <button
+      type="button"
+      onClick={() => qc.invalidateQueries({ queryKey: ["feed", "posts"] })}
+      disabled={refreshing}
+      title="Refresh feed"
+      aria-label="Refresh feed"
+      className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200/80 bg-white text-slate-600 transition-colors hover:border-indigo-300 hover:text-indigo-600 disabled:opacity-60 dark:border-slate-700/70 dark:bg-slate-900/65 dark:text-slate-300 dark:hover:border-indigo-500/60 dark:hover:text-indigo-300"
+    >
+      <RefreshCw
+        size={15}
+        className={cn(refreshing && "animate-spin")}
+      />
+    </button>
+  );
 }
 
 /* ─── Post card ─────────────────────────────────────────────────────── */
@@ -1037,6 +1067,9 @@ export default function FeedPage() {
       <AppNavbar />
       <main className="px-4 pb-20 pt-28 sm:px-6 md:pt-36">
         <div className="mx-auto max-w-6xl">
+          <div className="mb-4">
+            <OfflineBanner />
+          </div>
           <div className="mb-6 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">
@@ -1066,6 +1099,7 @@ export default function FeedPage() {
                 )}
               </Link>
               <div className="flex items-center gap-2 self-start md:self-auto">
+                <FeedRefreshButton />
                 <button
                   type="button"
                   onClick={() => router.push("/feed/people")}
