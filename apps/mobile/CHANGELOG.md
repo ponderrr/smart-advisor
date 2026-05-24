@@ -8,6 +8,70 @@ bullet version of these notes; this file is the long-form developer
 record (write here first when shipping a new prerelease, then condense
 into `changelog_screen.dart`).
 
+## test.22 — 2026-05-24 (versionCode 3022 / 4022)
+
+Six features sitting on top of test.21. The cohesive thread is
+**closing loops around things the feed already does**: pushing a
+recent friend pick out to the home screen, surfacing what changed
+in-app so testers don't have to read the GitHub release, sending a
+single pick to a single friend, surviving a cold launch on a flaky
+network, and rails for real push when FCM lands.
+
+- **Send a pick to a friend (lightweight DM).** A new "Send to a
+  friend" entry sits in the post overflow menu (above "Copy link").
+  Tap it to open a draggable bottom sheet listing everyone you
+  follow, with an optional one-liner above. Tap a row to send — the
+  sheet auto-closes with a confirm banner. Recipient sees it in the
+  notifications inbox (new `pick_sent` kind, with a per-kind muted
+  toggle under Settings → Notifications → Activity) and as a
+  foreground local-notification if the app is open. Multi-select is
+  intentionally NOT supported in v1 — a pick blasted to 50 people
+  isn't a recommendation, it's spam.
+- **Offline feed cache.** The feed now wraps `fetchFeed` in the same
+  `OfflineCache` that already backs Library + History: a successful
+  fetch refreshes the `feed` snapshot, and a failure (cold launch on
+  the subway, flaky network) serves the last good list back instead
+  of dropping you on a hard error state. Caveat: `ageHours` is
+  frozen at snapshot time, so a re-served list shows slightly-stale
+  relative timestamps until the next successful fetch.
+- **Scan a book barcode to add it to your library.** New "Scan" pill
+  in the Library header (next to "Import") opens a full-screen
+  camera that watches for ISBN-13 barcodes via `mobile_scanner` —
+  only 978/979 prefixes are accepted so you can't accidentally add a
+  cereal box. On detection: Open Library lookup (title, author,
+  year, cover) → confirm sheet → inserts to your library with
+  `wishlist` status. Camera permission declared on both platforms;
+  iOS works through `mobile_scanner`'s AVFoundation backend with no
+  extra Xcode target.
+- **Android home-screen widget.** A 2×1 cell with a violet/indigo
+  brand gradient showing the title + "r/<community> · <author>" of
+  the most recent post not authored by you (falling back to the very
+  latest post on the cold-start edge where every post is yours). Tap
+  launches the app. Refreshes are driven by the existing 60s feed
+  poll — no separate background job. iOS deferred: needs a separate
+  Xcode Widget Extension target (Swift), tracked as a follow-up.
+- **In-app changelog screen.** Account → Help → What's new now
+  renders an abridged bullet version of this very file. The
+  most-recent build expands by default so the latest changes are
+  visible without a tap. Not auto-popped on upgrade — the
+  prerelease cadence is fast enough that an upgrade modal every
+  couple of hours would get noisy.
+- **device_tokens registry + foreground push hybrid.** New
+  `device_tokens` table (transport-agnostic — FCM today, APNs / Web
+  Push tomorrow) with owner-only RLS. New `core/push_service.dart`
+  exposes register/unregister methods that upsert tokens; the token
+  source is pluggable so wiring `firebase_messaging` later is
+  mechanical. Until then, the existing 60s feed poller in
+  `feed_screen.dart` now also pulls `feed_notifications` and surfaces
+  newly-arrived ones via a local notification — a stopgap for "I
+  see the notification while the app is alive", not real
+  wake-from-closed.
+
+Migrations: `20260524010000_device_tokens.sql`,
+`20260524020000_feed_pick_sends.sql`. Run `supabase db push`
+against the live project before installing test.22 so the new
+tables + `pick_sent` enum value exist.
+
 ## test.21 — 2026-05-23 (versionCode 3021 / 4021)
 
 Six tier-1 social features that lean on data the feed already has,

@@ -35,6 +35,26 @@ class _Release {
 
 const _kReleases = <_Release>[
   _Release(
+    label: 'test.22',
+    date: 'May 24, 2026',
+    headline:
+        'Send a pick to a friend, offline feed cache, book-barcode '
+        'scan, Android home-screen widget, in-app changelog, push '
+        'rails.',
+    bullets: [
+      'Send to a friend — share any pick as a lightweight DM from '
+          'the post menu.',
+      'Offline feed cache — flaky network now serves the last good '
+          'feed instead of an error.',
+      'Scan a book barcode to add it to your library (Library → '
+          'Scan).',
+      'Android home-screen widget shows the latest friend pick.',
+      "Account → Help → What's new — per-build highlights in-app.",
+      'device_tokens registry + foreground push hybrid (FCM/APNs '
+          'rails for later).',
+    ],
+  ),
+  _Release(
     label: 'test.21',
     date: 'May 23, 2026',
     headline:
