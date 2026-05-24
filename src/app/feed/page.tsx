@@ -200,11 +200,20 @@ function FeedRefreshButton() {
   const onClick = async () => {
     if (refreshing) return;
     setRefreshing(true);
+    // Floor the spin at ~700ms so a fast refetch (cached / instant
+    // network) doesn't half-spin and feel broken. A full rotation at
+    // tailwind's animate-spin default is ~1s, so 700ms gives roughly
+    // 3/4 of a turn — enough to read as a refresh gesture without
+    // dragging out on a slow connection.
+    const minSpin = new Promise((resolve) => setTimeout(resolve, 700));
     try {
-      await qc.refetchQueries({
-        queryKey: ["feed", "posts"],
-        type: "active",
-      });
+      await Promise.all([
+        qc.refetchQueries({
+          queryKey: ["feed", "posts"],
+          type: "active",
+        }),
+        minSpin,
+      ]);
       toast.success("Feed refreshed");
     } catch {
       toast.error("Couldn't refresh — try again.");
