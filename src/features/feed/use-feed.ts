@@ -147,6 +147,13 @@ export function useReactions(args: {
   });
 }
 
+export function useFollowSuggestions() {
+  return useQuery({
+    queryKey: ["feed", "follow-suggestions"] as const,
+    queryFn: () => svc.fetchFollowSuggestions(),
+  });
+}
+
 export function useSetReaction() {
   const qc = useQueryClient();
   return useMutation({

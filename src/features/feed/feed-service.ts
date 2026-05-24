@@ -655,6 +655,74 @@ export async function setReaction(args: {
   );
 }
 
+export interface FollowSuggestion {
+  id: string;
+  name: string;
+  avatarUrl: string | null;
+  /** How many of the current user's follows also follow this person. */
+  mutual: number;
+}
+
+/** Friends-of-friends ranked by mutual-overlap count. Returns empty
+ *  when the current user follows no-one (caller pairs this with
+ *  [fetchSuggestedPeople] for the cold-start surface). Hidden:
+ *  yourself, anyone you already follow, anyone either side has
+ *  blocked. */
+export async function fetchFollowSuggestions(
+  limit = 30,
+): Promise<FollowSuggestion[]> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+  const mine = await fetchFollowing();
+  if (mine.length === 0) return [];
+  type Row = {
+    follower_id: string;
+    followee: { id: string; name: string; avatar_url: string | null } | null;
+  };
+  const [{ data: rows }, blocked, blockedBy] = await Promise.all([
+    supabase
+      .from("feed_follows")
+      .select(
+        "follower_id, " +
+          "followee:profiles_public!feed_follows_followee_id_fkey ( id, name, avatar_url )",
+      )
+      .in("follower_id", mine),
+    fetchBlocked(),
+    fetchBlockedBy(),
+  ]);
+  const hidden = new Set<string>([
+    user.id,
+    ...mine,
+    ...blocked,
+    ...blockedBy,
+  ]);
+  const scored = new Map<
+    string,
+    { name: string; avatarUrl: string | null; mutual: number }
+  >();
+  for (const r of (rows ?? []) as unknown as Row[]) {
+    const p = r.followee;
+    if (!p?.id || hidden.has(p.id)) continue;
+    const prev = scored.get(p.id);
+    scored.set(p.id, {
+      name: p.name ?? "Someone",
+      avatarUrl: p.avatar_url,
+      mutual: (prev?.mutual ?? 0) + 1,
+    });
+  }
+  const entries = [...scored.entries()].sort(
+    (a, b) => b[1].mutual - a[1].mutual,
+  );
+  return entries.slice(0, limit).map(([id, v]) => ({
+    id,
+    name: v.name,
+    avatarUrl: v.avatarUrl,
+    mutual: v.mutual,
+  }));
+}
+
 /** Looks up a profile id from a `@handle` (case-insensitive).
  *  Backs the @mention tap-handler in [MentionText]; returns `null`
  *  when the handle doesn't exist (don't throw — the UI shows a
