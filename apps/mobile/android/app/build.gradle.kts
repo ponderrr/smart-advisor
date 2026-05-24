@@ -51,3 +51,14 @@ dependencies {
     // .setRequestPromotedOngoing / setShortCriticalText).
     implementation("androidx.core:core-ktx:1.16.0")
 }
+
+// home_widget declares `androidx.glance:glance-appwidget:1.+` which now
+// resolves to 1.3.0-alpha01 — that alpha requires Android Gradle plugin
+// 9.1.0 (we're on 8.11.1) and compileSdk 37. Pin glance to the last
+// stable 1.1.x so the open range can't drift onto an alpha.
+configurations.all {
+    resolutionStrategy {
+        force("androidx.glance:glance:1.1.1")
+        force("androidx.glance:glance-appwidget:1.1.1")
+    }
+}
