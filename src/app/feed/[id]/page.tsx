@@ -29,6 +29,7 @@ import {
   useDeleteComment,
   useMyCommentVotes,
   useMyPostVotes,
+  useReactions,
   useSaved,
   useSetCommentVote,
   useSetPostVote,
@@ -41,6 +42,8 @@ import { FeedAvatar } from "@/features/feed/components/feed-avatar";
 import { BlockMenuButton } from "@/features/feed/components/block-menu";
 import { MentionText } from "@/features/feed/mention-text";
 import { PostMenuButton } from "@/features/feed/components/post-menu";
+import { ReactionBar } from "@/features/feed/reaction-bar";
+import type { ReactionAggregates } from "@/features/feed/feed-service";
 import { useFeedPrefs } from "@/features/feed/use-feed-prefs";
 import {
   activityLabel,
@@ -57,10 +60,12 @@ function CommentNode({
   node,
   postId,
   depth,
+  reactions,
 }: {
   node: FeedCommentNode;
   postId: string;
   depth: number;
+  reactions: ReactionAggregates;
 }) {
   const router = useRouter();
   const setCommentVote = useSetCommentVote();
@@ -237,6 +242,12 @@ function CommentNode({
             <p className="mt-1.5 text-[13px] leading-relaxed text-slate-700 dark:text-slate-200">
               <MentionText body={node.body} />
             </p>
+            <ReactionBar
+              targetKind="comment"
+              targetId={node.id}
+              counts={reactions.counts[node.id] ?? {}}
+              mine={reactions.mine[node.id] ?? null}
+            />
             <button
               type="button"
               onClick={() => setReplying((r) => !r)}
@@ -345,6 +356,7 @@ function CommentNode({
                 node={child}
                 postId={postId}
                 depth={depth + 1}
+                reactions={reactions}
               />
             ))}
           </div>
@@ -387,6 +399,22 @@ export default function FeedThreadPage() {
     () => (post ? buildCommentTree(post.comments, commentSort) : []),
     [post, commentSort],
   );
+
+  // Single batched reactions query for the post + every comment on
+  // the page — collapses into one round-trip per kind so adding a
+  // hundred-comment thread stays cheap.
+  const commentIds = useMemo(
+    () => (post ? post.comments.map((c) => c.id) : []),
+    [post],
+  );
+  const { data: reactions } = useReactions({
+    postIds: post ? [post.id] : [],
+    commentIds,
+  });
+  const reactionsView: ReactionAggregates = reactions ?? {
+    counts: {},
+    mine: {},
+  };
 
   if (!ready) return <PageLoader text="Loading" />;
 
@@ -525,6 +553,13 @@ export default function FeedThreadPage() {
           </p>
         )}
 
+        <ReactionBar
+          targetKind="post"
+          targetId={post.id}
+          counts={reactionsView.counts[post.id] ?? {}}
+          mine={reactionsView.mine[post.id] ?? null}
+        />
+
         <div className="mt-4 flex items-center gap-4 border-t border-slate-200/70 pt-3 dark:border-slate-700/60">
           <div className="inline-flex items-center gap-1">
             <button
@@ -635,6 +670,7 @@ export default function FeedThreadPage() {
               node={node}
               postId={post.id}
               depth={0}
+              reactions={reactionsView}
             />
           ))
         )}

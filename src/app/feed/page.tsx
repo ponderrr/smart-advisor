@@ -57,6 +57,7 @@ import {
   useUpdatePost,
   useFollowing,
   useMyPostVotes,
+  useReactions,
   useSaved,
   useSetPostVote,
   useToggleSave,
@@ -66,6 +67,8 @@ import { FollowButton } from "@/features/feed/components/follow-button";
 import { FeedAvatar } from "@/features/feed/components/feed-avatar";
 import { MentionText } from "@/features/feed/mention-text";
 import { PostMenuButton } from "@/features/feed/components/post-menu";
+import { ReactionBar } from "@/features/feed/reaction-bar";
+import type { ReactionEmoji } from "@/features/feed/feed-service";
 import { FinishWhatYouStartedBanner } from "@/features/library/components/finish-what-you-started-banner";
 import { AiNudgeBanner } from "@/features/feed/components/ai-nudge-banner";
 import { DashboardMovedBanner } from "@/features/feed/components/dashboard-moved-banner";
@@ -185,6 +188,8 @@ function PostCard({
   onCommunity,
   view,
   index,
+  reactionCounts,
+  reactionMine,
 }: {
   post: FeedPost;
   onOpen: () => void;
@@ -194,6 +199,10 @@ function PostCard({
   onCommunity: (c: FeedCommunity) => void;
   view: FeedView;
   index: number;
+  /** Emoji counts for this post (subset of the page-level batch). */
+  reactionCounts: Partial<Record<ReactionEmoji, number>>;
+  /** Current user's pick for this post, or null. */
+  reactionMine: ReactionEmoji | null;
 }) {
   const t = tone(post.community);
   const ribbon = getRecTypeAccent(COMMUNITY_CONTENT[post.community]).stripe;
@@ -512,6 +521,12 @@ function PostCard({
               <MentionText body={post.body} />
             </p>
           )}
+          <ReactionBar
+            targetKind="post"
+            targetId={post.id}
+            counts={reactionCounts}
+            mine={reactionMine}
+          />
         </div>
       </div>
     </motion.div>
@@ -1008,6 +1023,13 @@ export default function FeedPage() {
     return list;
   }, [posts, community, scope, sort, following]);
 
+  // Single batched reactions query for every visible card — one
+  // round-trip per kind no matter how many posts render.
+  const visibleIds = useMemo(() => visible.map((p) => p.id), [visible]);
+  const { data: reactions } = useReactions({ postIds: visibleIds });
+  const reactionCounts = reactions?.counts ?? {};
+  const reactionMine = reactions?.mine ?? {};
+
   if (!ready) return <PageLoader text="Loading" />;
 
   return (
@@ -1206,6 +1228,8 @@ export default function FeedPage() {
                       onOpen={() => router.push(`/feed/${p.id}`)}
                       onEdit={() => setEditingPost(p)}
                       onCommunity={(c) => setCommunity(c)}
+                      reactionCounts={reactionCounts[p.id] ?? {}}
+                      reactionMine={reactionMine[p.id] ?? null}
                     />
                   ))
                 )}

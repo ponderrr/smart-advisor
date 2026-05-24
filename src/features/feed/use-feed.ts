@@ -125,6 +125,39 @@ export function useVisibleFeed() {
   };
 }
 
+/** Batched reaction aggregates for a list of post + comment ids.
+ *  One query per kind, so passing both is cheaper than two hooks.
+ *  Keyed by sorted ids so two render passes with the same set of
+ *  ids share the same cache entry. */
+export function useReactions(args: {
+  postIds: string[];
+  commentIds?: string[];
+}) {
+  const { postIds, commentIds } = args;
+  const sortedPosts = useMemo(() => [...postIds].sort(), [postIds]);
+  const sortedComments = useMemo(
+    () => [...(commentIds ?? [])].sort(),
+    [commentIds],
+  );
+  return useQuery({
+    queryKey: ["feed", "reactions", sortedPosts, sortedComments] as const,
+    queryFn: () =>
+      svc.fetchReactions({ postIds: sortedPosts, commentIds: sortedComments }),
+    enabled: sortedPosts.length > 0 || sortedComments.length > 0,
+  });
+}
+
+export function useSetReaction() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: svc.setReaction,
+    // Reactions don't carry a per-query cache key fine enough to
+    // surgically invalidate, so invalidate the whole reactions family.
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: ["feed", "reactions"] }),
+  });
+}
+
 /* ── mutations ────────────────────────────────────────────────────── */
 
 export function useCreatePost() {

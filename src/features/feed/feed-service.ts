@@ -542,6 +542,119 @@ export async function fetchMyPostVotes(): Promise<Record<string, number>> {
   return out;
 }
 
+/** Set of emoji users can react with — mirrors the CHECK constraint
+ *  in 20260524000000_feed_reactions.sql. Order is the picker order. */
+export const REACTION_EMOJI = [
+  "❤️",
+  "🔥",
+  "😂",
+  "😢",
+  "🤔",
+  "👏",
+] as const;
+export type ReactionEmoji = (typeof REACTION_EMOJI)[number];
+
+export type ReactionTargetKind = "post" | "comment";
+
+export interface ReactionAggregates {
+  /** counts[targetId][emoji] = N */
+  counts: Record<string, Partial<Record<ReactionEmoji, number>>>;
+  /** mine[targetId] = the single emoji the current user picked. */
+  mine: Record<string, ReactionEmoji>;
+}
+
+/** Aggregated reactions for the given post + comment ids — one
+ *  query per kind because target_kind is part of the index. Returns
+ *  empty maps when neither id list is provided. */
+export async function fetchReactions(args: {
+  postIds?: string[];
+  commentIds?: string[];
+}): Promise<ReactionAggregates> {
+  const { postIds = [], commentIds = [] } = args;
+  if (postIds.length === 0 && commentIds.length === 0) {
+    return { counts: {}, mine: {} };
+  }
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const uid = user?.id ?? null;
+  type ReactionRow = {
+    user_id: string;
+    target_id: string;
+    emoji: string;
+  };
+  const queries: Promise<ReactionRow[]>[] = [];
+  if (postIds.length > 0) {
+    queries.push(
+      (async () => {
+        const { data } = await supabase
+          .from("feed_reactions")
+          .select("user_id, target_id, emoji")
+          .eq("target_kind", "post")
+          .in("target_id", postIds);
+        return (data ?? []) as ReactionRow[];
+      })(),
+    );
+  }
+  if (commentIds.length > 0) {
+    queries.push(
+      (async () => {
+        const { data } = await supabase
+          .from("feed_reactions")
+          .select("user_id, target_id, emoji")
+          .eq("target_kind", "comment")
+          .in("target_id", commentIds);
+        return (data ?? []) as ReactionRow[];
+      })(),
+    );
+  }
+  const batches = await Promise.all(queries);
+  const counts: ReactionAggregates["counts"] = {};
+  const mine: ReactionAggregates["mine"] = {};
+  for (const rows of batches) {
+    for (const r of rows) {
+      const e = r.emoji as ReactionEmoji;
+      const bucket = (counts[r.target_id] ??= {});
+      bucket[e] = (bucket[e] ?? 0) + 1;
+      if (uid && r.user_id === uid) mine[r.target_id] = e;
+    }
+  }
+  return { counts, mine };
+}
+
+/** Sets the current user's reaction on a post or comment. A null
+ *  `emoji` clears it (delete). One reaction per (user, target) is
+ *  enforced by the PK — upsert replaces a previous pick. */
+export async function setReaction(args: {
+  targetKind: ReactionTargetKind;
+  targetId: string;
+  emoji: ReactionEmoji | null;
+}): Promise<void> {
+  const { targetKind, targetId, emoji } = args;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not signed in");
+  if (emoji === null) {
+    await supabase
+      .from("feed_reactions")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("target_kind", targetKind)
+      .eq("target_id", targetId);
+    return;
+  }
+  await supabase.from("feed_reactions").upsert(
+    {
+      user_id: user.id,
+      target_kind: targetKind,
+      target_id: targetId,
+      emoji,
+    },
+    { onConflict: "user_id,target_kind,target_id" },
+  );
+}
+
 /** Looks up a profile id from a `@handle` (case-insensitive).
  *  Backs the @mention tap-handler in [MentionText]; returns `null`
  *  when the handle doesn't exist (don't throw — the UI shows a
