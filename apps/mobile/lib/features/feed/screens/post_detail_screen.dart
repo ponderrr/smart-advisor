@@ -756,7 +756,10 @@ class _CommentSortMenu extends StatelessWidget {
         AdaptivePopupMenuItem(
             label: 'New', value: CommentSort.newest),
       ],
-      onSelected: (_, entry) => onChanged(entry.value as CommentSort),
+      onSelected: (_, entry) {
+        Haptics.selection();
+        onChanged(entry.value as CommentSort);
+      },
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         Icon(Icons.sort, size: 18, color: context.brandInk),
         const SizedBox(width: 4),

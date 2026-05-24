@@ -127,6 +127,20 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const Eyebrow('One at a time'),
+              const SizedBox(height: 6),
+              const BrandHeading('Scan a book barcode', size: 26),
+              const SizedBox(height: 8),
+              Subtitle('Point your camera at an ISBN-13 (978/979) and '
+                  'the book gets looked up automatically — useful '
+                  'when you have a stack of paperbacks but no CSV.'),
+              const SizedBox(height: 16),
+              AdaptiveButton(
+                onPressed: () => context.push('/library/scan'),
+                label: 'Open scanner',
+                style: AdaptiveButtonStyle.bordered,
+              ),
+              const SizedBox(height: 28),
               const Eyebrow('Bulk import'),
               const SizedBox(height: 6),
               const BrandHeading('Bring your watchlist over',

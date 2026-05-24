@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:haptic_kit/haptic_kit.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../core/supabase/supabase_providers.dart';
@@ -109,6 +110,9 @@ class BlockMenuButton extends ConsumerWidget {
         offset: const Offset(0, 28),
         icon: Icon(Icons.more_horiz, size: iconSize, color: iconColor),
         onSelected: (action) async {
+          // Tactile feedback on any overflow-menu choice — the menu
+          // is otherwise silent between the tap and the action firing.
+          Haptics.selection();
           switch (action) {
             case 'edit':
               showModalBottomSheet<void>(

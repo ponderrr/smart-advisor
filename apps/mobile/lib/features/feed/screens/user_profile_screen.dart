@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:haptic_kit/haptic_kit.dart';
 
 import '../../../core/models/enums.dart';
 import '../../../core/models/library_item.dart';
@@ -239,17 +240,45 @@ class UserProfileScreen extends ConsumerWidget {
                                 ?.contains(profileId) ??
                             false;
                         return AdaptiveButton(
-                          onPressed: () {
+                          onPressed: () async {
                             if (blocked) {
-                              ref
+                              Haptics.impact(HapticImpactStyle.medium);
+                              await ref
                                   .read(feedActionsProvider)
                                   .unblock(profileId);
                               showBanner('@$name unblocked.');
                             } else {
-                              ref
-                                  .read(feedActionsProvider)
-                                  .block(profileId);
-                              showBanner('Blocked @$name.');
+                              // Symmetry with the post-overflow Block flow
+                              // in block_menu.dart — blocking from a profile
+                              // is destructive enough to warrant a confirm
+                              // dialog instead of one-tap.
+                              await AdaptiveAlertDialog.show(
+                                context: context,
+                                title: 'Block @$name?',
+                                message:
+                                    "You won't see their posts or comments "
+                                    'anymore. You can unblock them from '
+                                    'Settings → Feed → Blocked people.',
+                                icon: Icons.block,
+                                actions: [
+                                  AlertAction(
+                                      title: 'Cancel',
+                                      style: AlertActionStyle.cancel,
+                                      onPressed: () {}),
+                                  AlertAction(
+                                    title: 'Block',
+                                    style: AlertActionStyle.destructive,
+                                    onPressed: () async {
+                                      Haptics.impact(
+                                          HapticImpactStyle.medium);
+                                      await ref
+                                          .read(feedActionsProvider)
+                                          .block(profileId);
+                                      showBanner('Blocked @$name.');
+                                    },
+                                  ),
+                                ],
+                              );
                             }
                           },
                           label: blocked ? 'Unblock' : 'Block',

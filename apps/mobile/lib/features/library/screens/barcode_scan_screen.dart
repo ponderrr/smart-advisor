@@ -161,7 +161,78 @@ class _BarcodeScanScreenState extends ConsumerState<BarcodeScanScreen> {
               ),
             ),
           ),
+          // Top-right control strip: torch + camera flip. Driven off
+          // the controller's own ValueNotifier so the torch icon stays
+          // in sync if the OS auto-disables it (low battery, etc).
+          Positioned(
+            top: 12,
+            right: 12,
+            child: ValueListenableBuilder<MobileScannerState>(
+              valueListenable: _controller,
+              builder: (_, state, _) {
+                return Row(mainAxisSize: MainAxisSize.min, children: [
+                  _ScannerIconButton(
+                    icon: state.torchState == TorchState.on
+                        ? Icons.flash_on_rounded
+                        : Icons.flash_off_rounded,
+                    tooltip: 'Toggle flashlight',
+                    onTap: () {
+                      Haptics.selection();
+                      _controller.toggleTorch();
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  _ScannerIconButton(
+                    icon: Icons.cameraswitch_rounded,
+                    tooltip: 'Switch camera',
+                    onTap: () {
+                      Haptics.selection();
+                      _controller.switchCamera();
+                    },
+                  ),
+                ]);
+              },
+            ),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+/// Round translucent-black icon button used for the in-scanner
+/// torch and camera-flip controls. Same visual weight as the bottom
+/// hint pill so they don't fight for attention.
+class _ScannerIconButton extends StatelessWidget {
+  const _ScannerIconButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.55),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 20, color: Colors.white),
+          ),
+        ),
       ),
     );
   }
