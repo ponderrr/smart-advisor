@@ -287,8 +287,18 @@ const SettingsPage = () => {
   const [aboutInterests, setAboutInterests] = useState<string[]>(
     user?.interests ?? [],
   );
-  const [aboutTags, setAboutTags] = useState<string[]>(user?.tags ?? []);
-  const [tagDraft, setTagDraft] = useState("");
+  // Per-format freeform tags. Each format keeps its own array + the
+  // input draft so adding "noir" to Movies doesn't leak into Books.
+  const [movieTags, setMovieTags] = useState<string[]>(
+    user?.movie_tags ?? [],
+  );
+  const [bookTags, setBookTags] = useState<string[]>(user?.book_tags ?? []);
+  const [musicTags, setMusicTags] = useState<string[]>(
+    user?.music_tags ?? [],
+  );
+  const [movieTagDraft, setMovieTagDraft] = useState("");
+  const [bookTagDraft, setBookTagDraft] = useState("");
+  const [musicTagDraft, setMusicTagDraft] = useState("");
   const [savingAbout, setSavingAbout] = useState(false);
 
   // Re-seed once the profile loads (user is null on the first render).
@@ -296,7 +306,9 @@ const SettingsPage = () => {
     if (!user) return;
     setAboutBio(user.bio ?? "");
     setAboutInterests(user.interests ?? []);
-    setAboutTags(user.tags ?? []);
+    setMovieTags(user.movie_tags ?? []);
+    setBookTags(user.book_tags ?? []);
+    setMusicTags(user.music_tags ?? []);
   }, [user]);
 
   const toggleInterest = (interest: string) =>
@@ -306,12 +318,41 @@ const SettingsPage = () => {
         : [...prev, interest],
     );
 
-  const addTag = () => {
-    const value = tagDraft.trim().toLowerCase().replace(/^#+/, "");
-    if (value && !aboutTags.includes(value) && aboutTags.length < 10) {
-      setAboutTags((prev) => [...prev, value]);
+  /** Adds a tag to one of the three format-specific arrays. Lower-cases
+   *  + strips leading `#`s + caps at 10 per format, same hygiene the
+   *  single-tags input used before the split. */
+  const addTag = (
+    format: "movie" | "book" | "music",
+  ): void => {
+    const draft =
+      format === "movie"
+        ? movieTagDraft
+        : format === "book"
+          ? bookTagDraft
+          : musicTagDraft;
+    const setDraft =
+      format === "movie"
+        ? setMovieTagDraft
+        : format === "book"
+          ? setBookTagDraft
+          : setMusicTagDraft;
+    const current =
+      format === "movie"
+        ? movieTags
+        : format === "book"
+          ? bookTags
+          : musicTags;
+    const setCurrent =
+      format === "movie"
+        ? setMovieTags
+        : format === "book"
+          ? setBookTags
+          : setMusicTags;
+    const value = draft.trim().toLowerCase().replace(/^#+/, "");
+    if (value && !current.includes(value) && current.length < 10) {
+      setCurrent((prev) => [...prev, value]);
     }
-    setTagDraft("");
+    setDraft("");
   };
 
   // Hue for the question-count slider + number, by depth tier.
@@ -326,7 +367,9 @@ const SettingsPage = () => {
       .update({
         bio: aboutBio.trim() || null,
         interests: aboutInterests,
-        tags: aboutTags,
+        movie_tags: movieTags,
+        book_tags: bookTags,
+        music_tags: musicTags,
         updated_at: new Date().toISOString(),
       })
       .eq("id", user.id);
@@ -722,58 +765,41 @@ const SettingsPage = () => {
                         })}
                       </div>
 
-                      <label className="mt-4 block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                        {t("profile.tagsLabel")}
-                      </label>
-                      {aboutTags.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {aboutTags.map((tag) => (
-                            <span
-                              key={tag}
-                              className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"
-                            >
-                              #{tag}
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setAboutTags((prev) =>
-                                    prev.filter((x) => x !== tag),
-                                  )
-                                }
-                                aria-label={`Remove ${tag}`}
-                                className="text-slate-400 hover:text-rose-500"
-                              >
-                                <X size={12} />
-                              </button>
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                      <div className="mt-2 flex gap-2">
-                        <input
-                          value={tagDraft}
-                          onChange={(e) => setTagDraft(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              addTag();
-                            }
-                          }}
-                          maxLength={24}
-                          placeholder={t("profile.tagsPlaceholder")}
-                          className="h-10 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:ring-2 focus:ring-indigo-400 dark:border-slate-700 dark:bg-slate-800"
-                        />
-                        <button
-                          type="button"
-                          onClick={addTag}
-                          disabled={
-                            !tagDraft.trim() || aboutTags.length >= 10
-                          }
-                          className="h-10 shrink-0 rounded-full border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
-                        >
-                          {t("profile.tagsAdd")}
-                        </button>
-                      </div>
+                      {/* Per-format freeform tags. Each row is a thin
+                          editor scoped to one content type — accent
+                          colour matches the format-typed accent used
+                          everywhere else (movie=amber, book=emerald,
+                          music=rose). */}
+                      <FormatTagEditor
+                        label="Movie tags"
+                        tags={movieTags}
+                        setTags={setMovieTags}
+                        draft={movieTagDraft}
+                        setDraft={setMovieTagDraft}
+                        onAdd={() => addTag("movie")}
+                        accentChip="bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300"
+                        accentRing="focus:ring-amber-400 dark:focus:ring-amber-500"
+                      />
+                      <FormatTagEditor
+                        label="Book tags"
+                        tags={bookTags}
+                        setTags={setBookTags}
+                        draft={bookTagDraft}
+                        setDraft={setBookTagDraft}
+                        onAdd={() => addTag("book")}
+                        accentChip="bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"
+                        accentRing="focus:ring-emerald-400 dark:focus:ring-emerald-500"
+                      />
+                      <FormatTagEditor
+                        label="Music tags"
+                        tags={musicTags}
+                        setTags={setMusicTags}
+                        draft={musicTagDraft}
+                        setDraft={setMusicTagDraft}
+                        onAdd={() => addTag("music")}
+                        accentChip="bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300"
+                        accentRing="focus:ring-rose-400 dark:focus:ring-rose-500"
+                      />
 
                       <div className="mt-5 flex justify-end">
                         <StatefulButton
@@ -1903,3 +1929,88 @@ const SettingsPage = () => {
 };
 
 export default SettingsPage;
+
+/** One row of the per-format tag editor — label, existing chips with
+ *  remove buttons, and an "add" input. Used three times in the About
+ *  me section (movies / books / music); each call passes the right
+ *  accent so the chips and focus-ring carry the content-type colour. */
+function FormatTagEditor({
+  label,
+  tags,
+  setTags,
+  draft,
+  setDraft,
+  onAdd,
+  accentChip,
+  accentRing,
+}: {
+  label: string;
+  tags: string[];
+  setTags: React.Dispatch<React.SetStateAction<string[]>>;
+  draft: string;
+  setDraft: React.Dispatch<React.SetStateAction<string>>;
+  onAdd: () => void;
+  /** Tailwind classes for the chip background + text. */
+  accentChip: string;
+  /** Tailwind classes for the input focus ring. */
+  accentRing: string;
+}) {
+  return (
+    <div className="mt-4">
+      <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        {label}
+      </label>
+      {tags.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {tags.map((tag) => (
+            <span
+              key={tag}
+              className={cn(
+                "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium",
+                accentChip,
+              )}
+            >
+              #{tag}
+              <button
+                type="button"
+                onClick={() =>
+                  setTags((prev) => prev.filter((x) => x !== tag))
+                }
+                aria-label={`Remove ${tag}`}
+                className="text-current/70 hover:text-rose-600"
+              >
+                <X size={12} />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+      <div className="mt-2 flex gap-2">
+        <input
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              onAdd();
+            }
+          }}
+          maxLength={24}
+          placeholder="add a tag…"
+          className={cn(
+            "h-10 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-800",
+            accentRing,
+          )}
+        />
+        <button
+          type="button"
+          onClick={onAdd}
+          disabled={!draft.trim() || tags.length >= 10}
+          className="h-10 shrink-0 rounded-full border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
+        >
+          Add
+        </button>
+      </div>
+    </div>
+  );
+}

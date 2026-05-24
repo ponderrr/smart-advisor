@@ -25,6 +25,38 @@ import {
   agoLabel,
 } from "@/features/feed/types";
 
+/** A labelled row of `#tag` chips for one content format. The format
+ *  label sits on the left in muted-eyebrow style; chips wrap to a
+ *  new line on narrow widths. */
+function TagRow({
+  label,
+  tags,
+  chipClass,
+}: {
+  label: string;
+  tags: string[];
+  chipClass: string;
+}) {
+  return (
+    <div className="mt-2 flex flex-wrap items-center gap-1.5">
+      <span className="mr-1 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500">
+        {label}
+      </span>
+      {tags.map((tag) => (
+        <span
+          key={`${label}-${tag}`}
+          className={cn(
+            "rounded-full px-2.5 py-0.5 text-[11px] font-medium",
+            chipClass,
+          )}
+        >
+          #{tag}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 export default function FeedProfilePage() {
   const { ready } = useRequireAuth();
   const router = useRouter();
@@ -85,8 +117,7 @@ export default function FeedProfilePage() {
                       {profile.bio}
                     </p>
                   )}
-                  {((profile?.interests?.length ?? 0) > 0 ||
-                    (profile?.tags?.length ?? 0) > 0) && (
+                  {(profile?.interests?.length ?? 0) > 0 && (
                     <div className="mt-2.5 flex flex-wrap gap-1.5">
                       {profile?.interests?.map((interest) => (
                         <span
@@ -96,15 +127,33 @@ export default function FeedProfilePage() {
                           {interest}
                         </span>
                       ))}
-                      {profile?.tags?.map((tag) => (
-                        <span
-                          key={`tag-${tag}`}
-                          className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"
-                        >
-                          #{tag}
-                        </span>
-                      ))}
                     </div>
+                  )}
+                  {/* Format-grouped freeform tags. Each row only renders
+                      when the user has at least one tag for that
+                      format, so single-format taste graphs don't show
+                      empty rails. Chips carry the content-type accent
+                      (movie=amber, book=emerald, music=rose). */}
+                  {(profile?.movieTags?.length ?? 0) > 0 && (
+                    <TagRow
+                      label="Movies"
+                      tags={profile?.movieTags ?? []}
+                      chipClass="bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300"
+                    />
+                  )}
+                  {(profile?.bookTags?.length ?? 0) > 0 && (
+                    <TagRow
+                      label="Books"
+                      tags={profile?.bookTags ?? []}
+                      chipClass="bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"
+                    />
+                  )}
+                  {(profile?.musicTags?.length ?? 0) > 0 && (
+                    <TagRow
+                      label="Music"
+                      tags={profile?.musicTags ?? []}
+                      chipClass="bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300"
+                    />
                   )}
                 </div>
                 {!isYou && (

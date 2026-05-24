@@ -1118,18 +1118,29 @@ export async function fetchProfile(profileId: string): Promise<{
   avatarUrl: string | null;
   bio: string | null;
   interests: string[];
+  /** Legacy freeform tags — kept on the type so older data isn't
+   *  silently dropped, but no longer surfaced in Settings. */
   tags: string[];
+  movieTags: string[];
+  bookTags: string[];
+  musicTags: string[];
 } | null> {
   const { data } = await supabase
     .from("profiles_public")
-    .select("id, name, avatar_url, bio, interests, tags")
+    .select(
+      "id, name, avatar_url, bio, interests, tags, " +
+        "movie_tags, book_tags, music_tags",
+    )
     .eq("id", profileId)
     .maybeSingle();
   if (!data) return null;
-  const row = data as ProfileEmbed & {
+  const row = data as unknown as ProfileEmbed & {
     bio: string | null;
     interests: string[] | null;
     tags: string[] | null;
+    movie_tags: string[] | null;
+    book_tags: string[] | null;
+    music_tags: string[] | null;
   };
   return {
     id: row.id,
@@ -1138,6 +1149,9 @@ export async function fetchProfile(profileId: string): Promise<{
     bio: row.bio,
     interests: row.interests ?? [],
     tags: row.tags ?? [],
+    movieTags: row.movie_tags ?? [],
+    bookTags: row.book_tags ?? [],
+    musicTags: row.music_tags ?? [],
   };
 }
 

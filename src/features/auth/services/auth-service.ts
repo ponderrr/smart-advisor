@@ -462,6 +462,9 @@ class AuthService {
           bio: profile.bio ?? null,
           interests: profile.interests ?? [],
           tags: profile.tags ?? [],
+          movie_tags: profile.movie_tags ?? [],
+          book_tags: profile.book_tags ?? [],
+          music_tags: profile.music_tags ?? [],
         },
         error: null,
       };

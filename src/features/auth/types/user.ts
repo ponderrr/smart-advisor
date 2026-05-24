@@ -16,6 +16,14 @@ export interface User {
   bio?: string | null;
   /** Curated interest tags, chosen from a fixed set. */
   interests?: string[];
-  /** Freeform user-authored tags. */
+  /** Legacy freeform tags — superseded by the per-format tag columns
+   *  below. Kept on the type so existing rows aren't dropped; the
+   *  Settings editor no longer surfaces this field. */
   tags?: string[];
+  /** Freeform user-authored tags scoped to movies. */
+  movie_tags?: string[];
+  /** Freeform user-authored tags scoped to books. */
+  book_tags?: string[];
+  /** Freeform user-authored tags scoped to music. */
+  music_tags?: string[];
 }
