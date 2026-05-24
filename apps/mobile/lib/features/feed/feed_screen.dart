@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:haptic_kit/haptic_kit.dart';
 
+import '../../core/supabase/supabase_providers.dart';
+import '../../core/widget_data.dart';
 import '../../ui/ui.dart';
 import '../notifications/notification_prefs.dart';
 import '../notifications/notification_service.dart';
@@ -133,6 +135,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           setState(() => _newCount = count);
         }
       }
+      _pushLatestToWidget(latest);
       await _pollNotifications();
     } catch (_) {
       // Polling is best-effort; a transient miss just defers the badge.
@@ -171,6 +174,28 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
             id: n.id, title: title, body: body);
       }
     } catch (_) {/* best-effort */}
+  }
+
+  /// Fire-and-forget update for the Android home-screen widget.
+  /// Picks the most recent post NOT authored by the current user so
+  /// the widget always shows "what your people are into" — falling
+  /// back to the very latest post if every post is yours (cold-start
+  /// edge case before anyone you follow has posted).
+  void _pushLatestToWidget(List<FeedPost> latest) {
+    if (latest.isEmpty) return;
+    final me = ref.read(supabaseClientProvider).auth.currentUser?.id;
+    FeedPost? pick;
+    for (final p in latest) {
+      if (p.authorId != me) {
+        pick = p;
+        break;
+      }
+    }
+    pick ??= latest.first;
+    WidgetData.pushLatestPick(
+      title: pick.title,
+      subtitle: '${pick.community.tag} · ${pick.author}',
+    );
   }
 
   /// Boils a [FeedNotification] down into title + body strings for the

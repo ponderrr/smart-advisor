@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  2x1 home-screen widget (180x90 dp). Refreshes only on host-driven
+  events (no minUpdatePeriodMillis, since the cheapest the system
+  honors is 30 min and we drive updates from Dart anyway when new
+  feed data arrives).
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="180dp"
+    android:minHeight="90dp"
+    android:targetCellWidth="2"
+    android:targetCellHeight="1"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen"
+    android:initialLayout="@layout/latest_pick_widget"
+    android:previewLayout="@layout/latest_pick_widget" />

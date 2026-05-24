@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Violet/indigo gradient matching the app's brand. Used as the widget
+  cell's background so the home screen entry feels like part of Smart
+  Advisor and not a flat color block.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <gradient
+        android:type="linear"
+        android:angle="135"
+        android:startColor="#FF6366F1"
+        android:endColor="#FF8B5CF6" />
+    <corners android:radius="20dp" />
+</shape>

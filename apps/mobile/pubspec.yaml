@@ -66,6 +66,7 @@ dependencies:
   haptic_kit: ^1.0.0
   quick_actions: ^1.1.0
   receive_sharing_intent: ^1.8.1
+  home_widget: ^0.9.1
 
 dev_dependencies:
   flutter_test:

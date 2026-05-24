@@ -59,6 +59,20 @@
             android:name=".GroupQuizLiveService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
+        <!-- 2x1 home-screen widget showing the most recent friend pick.
+             Data lands via the home_widget plugin; the receiver class
+             extends HomeWidgetProvider and re-renders RemoteViews from
+             shared prefs on every onUpdate. -->
+        <receiver
+            android:name=".widget.LatestPickWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/latest_pick_widget_info"/>
+        </receiver>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
