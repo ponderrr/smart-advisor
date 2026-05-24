@@ -35,6 +35,29 @@ class _BarcodeScanScreenState extends ConsumerState<BarcodeScanScreen> {
   );
   bool _busy = false;
   String? _lastIsbn;
+  // Filled in after the camera initialises; renders the lens-cycle
+  // button only when the phone exposes more than one back lens
+  // (single-lens phones get a less cluttered UI).
+  List<CameraLensType> _availableLenses = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    // getSupportedLenses() needs the camera to be running; wait one
+    // frame so the controller has a chance to start before we query.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        final lenses = await _controller.getSupportedLenses();
+        if (!mounted) return;
+        setState(() =>
+            _availableLenses =
+                lenses.where((l) => l != CameraLensType.any).toList());
+      } catch (_) {
+        // Plugin may throw if called before the controller is fully
+        // ready — leave the list empty and just hide the button.
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -161,15 +184,18 @@ class _BarcodeScanScreenState extends ConsumerState<BarcodeScanScreen> {
               ),
             ),
           ),
-          // Top-right control strip: torch + camera flip. Driven off
-          // the controller's own ValueNotifier so the torch icon stays
-          // in sync if the OS auto-disables it (low battery, etc).
+          // Top-right control strip: torch + lens cycle + camera flip.
+          // Driven off the controller's own ValueNotifier so the torch
+          // icon stays in sync if the OS auto-disables it (low battery,
+          // thermal, etc). The lens-cycle button only renders when the
+          // phone has 2+ back lenses to cycle through.
           Positioned(
             top: 12,
             right: 12,
             child: ValueListenableBuilder<MobileScannerState>(
               valueListenable: _controller,
               builder: (_, state, _) {
+                final showLens = _availableLenses.length >= 2;
                 return Row(mainAxisSize: MainAxisSize.min, children: [
                   _ScannerIconButton(
                     icon: state.torchState == TorchState.on
@@ -181,6 +207,19 @@ class _BarcodeScanScreenState extends ConsumerState<BarcodeScanScreen> {
                       _controller.toggleTorch();
                     },
                   ),
+                  if (showLens) ...[
+                    const SizedBox(width: 8),
+                    _ScannerIconButton(
+                      icon: _iconForLens(state.cameraLensType),
+                      // Picker order matches the controller's internal
+                      // cycle (normal → wide → zoom → normal).
+                      tooltip: _tooltipForLens(state.cameraLensType),
+                      onTap: () {
+                        Haptics.selection();
+                        _controller.switchCamera(const ToggleLensType());
+                      },
+                    ),
+                  ],
                   const SizedBox(width: 8),
                   _ScannerIconButton(
                     icon: Icons.cameraswitch_rounded,
@@ -198,6 +237,25 @@ class _BarcodeScanScreenState extends ConsumerState<BarcodeScanScreen> {
       ),
     );
   }
+}
+
+/// Icon picked to read at-a-glance which lens is currently active.
+/// Matches the controller's normal → wide → zoom cycle.
+IconData _iconForLens(CameraLensType lens) => switch (lens) {
+      CameraLensType.wide => Icons.panorama_wide_angle_outlined,
+      CameraLensType.zoom => Icons.zoom_in_rounded,
+      CameraLensType.normal => Icons.camera_outlined,
+      CameraLensType.any => Icons.camera_outlined,
+    };
+
+String _tooltipForLens(CameraLensType lens) {
+  final current = switch (lens) {
+    CameraLensType.wide => 'wide',
+    CameraLensType.zoom => 'zoom',
+    CameraLensType.normal => 'normal',
+    CameraLensType.any => 'lens',
+  };
+  return 'Cycle lens (now: $current)';
 }
 
 /// Round translucent-black icon button used for the in-scanner
