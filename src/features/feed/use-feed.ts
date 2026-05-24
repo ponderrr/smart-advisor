@@ -166,6 +166,15 @@ export function useSearchPosts(query: string) {
   });
 }
 
+export function useIsAdmin() {
+  return useQuery({
+    queryKey: ["feed", "is-admin"] as const,
+    queryFn: svc.fetchIsAdmin,
+    // is_admin rarely changes; keep the result warm for the session.
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
 export function useMyFollowingProfiles() {
   return useQuery({
     queryKey: ["feed", "my-following-profiles"] as const,

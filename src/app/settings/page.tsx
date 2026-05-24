@@ -29,6 +29,7 @@ import {
   Trophy,
   UserCircle,
   Megaphone,
+  ShieldAlert,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "motion/react";
@@ -78,6 +79,7 @@ import {
   useFeedPrefs,
   type FeedView,
 } from "@/features/feed/use-feed-prefs";
+import { useIsAdmin } from "@/features/feed/use-feed";
 import type {
   CommentSort,
   FeedCommunity,
@@ -185,6 +187,7 @@ const SettingsPage = () => {
   const { user, refreshUser } = useAuth();
   const { ready } = useRequireAuth();
   const [feedVisibility, setFeedVisibility] = useFeedVisibility();
+  const { data: isAdmin = false } = useIsAdmin();
   const [feedPrefs, setFeedPrefs] = useFeedPrefs();
 
   const settingsTabs = SETTINGS_SECTIONS;
@@ -1650,6 +1653,25 @@ const SettingsPage = () => {
                             </span>
                           </span>
                         </button>
+                        {isAdmin && (
+                          <button
+                            type="button"
+                            onClick={() => router.push("/admin/reports")}
+                            className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left transition-colors hover:border-rose-300 hover:bg-rose-50/40 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:border-rose-500/60 dark:hover:bg-rose-500/10"
+                          >
+                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-500/15 dark:text-rose-300">
+                              <ShieldAlert size={18} />
+                            </span>
+                            <span className="min-w-0 flex-1">
+                              <span className="block text-sm font-semibold text-slate-800 dark:text-slate-100">
+                                Reports moderation
+                              </span>
+                              <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">
+                                Triage user-filed reports on posts and comments.
+                              </span>
+                            </span>
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={() => router.push("/changelog")}

@@ -655,6 +655,24 @@ export async function setReaction(args: {
   );
 }
 
+/** Whether the current user has the staff/admin bit set on their
+ *  profile. profiles_public doesn't expose is_admin (the view would
+ *  leak staff status to everyone), so this reads from the owner-only
+ *  `profiles` row. Returns false for signed-out callers. */
+export async function fetchIsAdmin(): Promise<boolean> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return false;
+  const { data } = await supabase
+    .from("profiles")
+    .select("is_admin")
+    .eq("id", user.id)
+    .maybeSingle();
+  return ((data as { is_admin: boolean | null } | null)?.is_admin ?? false) ===
+    true;
+}
+
 export interface FollowingProfile {
   id: string;
   name: string;

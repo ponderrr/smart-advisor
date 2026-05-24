@@ -82,16 +82,19 @@ export default function AdminReportsPage() {
           active={filter === "open"}
           onClick={() => setFilter("open")}
           label={`Open · ${counts.open}`}
+          tone="amber"
         />
         <FilterChip
           active={filter === "resolved"}
           onClick={() => setFilter("resolved")}
           label={`Resolved · ${counts.resolved}`}
+          tone="emerald"
         />
         <FilterChip
           active={filter === "all"}
           onClick={() => setFilter("all")}
           label={`All · ${counts.all}`}
+          tone="slate"
         />
       </div>
 
@@ -123,24 +126,55 @@ export default function AdminReportsPage() {
   );
 }
 
+/** Pills carry the status semantic — Open is the same amber as the
+ *  Open status badge below, Resolved matches the emerald Reviewed
+ *  badge, All stays neutral slate so it doesn't compete with the
+ *  status-bearing options for visual weight. */
+type ChipTone = "amber" | "emerald" | "slate";
+
+const CHIP_TONES: Record<
+  ChipTone,
+  { active: string; inactive: string }
+> = {
+  amber: {
+    active:
+      "border-amber-500 bg-amber-500/10 text-amber-700 dark:text-amber-300",
+    inactive:
+      "border-slate-300 bg-slate-50 text-slate-600 hover:border-amber-300 hover:bg-amber-50/40 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300 dark:hover:border-amber-500/60 dark:hover:bg-amber-500/10",
+  },
+  emerald: {
+    active:
+      "border-emerald-500 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+    inactive:
+      "border-slate-300 bg-slate-50 text-slate-600 hover:border-emerald-300 hover:bg-emerald-50/40 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300 dark:hover:border-emerald-500/60 dark:hover:bg-emerald-500/10",
+  },
+  slate: {
+    active:
+      "border-slate-500 bg-slate-500/10 text-slate-700 dark:text-slate-200",
+    inactive:
+      "border-slate-300 bg-slate-50 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300 dark:hover:bg-slate-800",
+  },
+};
+
 function FilterChip({
   active,
   onClick,
   label,
+  tone,
 }: {
   active: boolean;
   onClick: () => void;
   label: string;
+  tone: ChipTone;
 }) {
+  const t = CHIP_TONES[tone];
   return (
     <button
       type="button"
       onClick={onClick}
       className={cn(
         "rounded-full border px-3.5 py-1.5 text-xs font-bold tracking-tight transition-colors",
-        active
-          ? "border-violet-500 bg-violet-500/10 text-violet-600 dark:text-violet-300"
-          : "border-slate-300 bg-slate-50 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300 dark:hover:bg-slate-800",
+        active ? t.active : t.inactive,
       )}
     >
       {label}
