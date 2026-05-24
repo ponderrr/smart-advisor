@@ -8,6 +8,7 @@ import '../../features/account/screens/appearance_settings_screen.dart';
 import '../../features/account/screens/change_credential_screen.dart';
 import '../../features/account/screens/feed_settings_screen.dart';
 import '../../features/account/screens/contact_screen.dart';
+import '../../features/account/screens/changelog_screen.dart';
 import '../../features/account/screens/faq_screen.dart';
 import '../../features/account/screens/notifications_activity_screen.dart';
 import '../../features/account/screens/notifications_reminders_screen.dart';
@@ -262,6 +263,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
           path: '/account/faq',
           builder: (_, _) => const FaqScreen()),
+      GoRoute(
+          path: '/account/changelog',
+          builder: (_, _) => const ChangelogScreen()),
       GoRoute(
           path: '/account/contact',
           builder: (_, _) => const ContactScreen()),
