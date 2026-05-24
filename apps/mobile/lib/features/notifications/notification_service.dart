@@ -182,6 +182,43 @@ class NotificationService {
     }
   }
 
+  /// Surfaces a server-side `feed_notifications` row as a system
+  /// notification while the app is foregrounded (the only time the
+  /// 60s poll is running). Title / body shape mirrors the inbox card.
+  /// Tap-routing isn't wired here — that's a follow-up when true FCM
+  /// push lands; tapping a local notification today just opens the app.
+  ///
+  /// Caller is responsible for de-dup; we never look up whether the
+  /// notification id already fired. Use a hash of the id as the
+  /// notification id so the same row never stacks.
+  static Future<void> showFeedActivity({
+    required String id,
+    required String title,
+    required String body,
+  }) async {
+    await init();
+    if (!_ready) return;
+    try {
+      await _plugin.show(
+        // Mask the sign bit — flutter_local_notifications requires a
+        // positive 32-bit int and Dart hashCode can go negative.
+        id: id.hashCode & 0x7fffffff,
+        title: title,
+        body: body,
+        notificationDetails: const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'feed_activity',
+            'Activity',
+            channelDescription: 'Follows, comments, replies, upvotes',
+            importance: Importance.defaultImportance,
+            priority: Priority.defaultPriority,
+          ),
+          iOS: DarwinNotificationDetails(),
+        ),
+      );
+    } catch (_) {/* unsupported platform — ignore */}
+  }
+
   /// Refreshes the live activity's status line. The Android service polls
   /// on its own, so this only updates the iOS notification.
   static Future<void> updateGroupQuizLive({

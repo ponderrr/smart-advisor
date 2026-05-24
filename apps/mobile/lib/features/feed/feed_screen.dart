@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import 'package:haptic_kit/haptic_kit.dart';
 
 import '../../ui/ui.dart';
+import '../notifications/notification_prefs.dart';
+import '../notifications/notification_service.dart';
 import '../notifications/notifications_center.dart';
 import 'feed_providers.dart';
 import 'models/feed_models.dart';
@@ -49,6 +51,16 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   Timer? _pollTimer;
   String? _topPostId;
   int _newCount = 0;
+
+  /// Server-notification ids already surfaced as a foreground local
+  /// notification (NotificationService.showFeedActivity). The first
+  /// poll seeds the set without firing anything — we only fire for
+  /// truly new arrivals afterwards. Doesn't persist across restart;
+  /// the worst case is a cold-start replay of a notification the user
+  /// already saw on the bell badge, which is acceptable for a polling
+  /// stopgap while real FCM push is unwired.
+  final Set<String> _surfacedNotifIds = <String>{};
+  bool _surfacedSeeded = false;
 
   @override
   void initState() {
@@ -111,18 +123,77 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       if (!mounted || latest.isEmpty) return;
       if (_topPostId == null) {
         setState(() => _topPostId = latest.first.id);
-        return;
+      } else {
+        var count = 0;
+        for (final p in latest) {
+          if (p.id == _topPostId) break;
+          count++;
+        }
+        if (count != _newCount) {
+          setState(() => _newCount = count);
+        }
       }
-      var count = 0;
-      for (final p in latest) {
-        if (p.id == _topPostId) break;
-        count++;
-      }
-      if (count != _newCount) {
-        setState(() => _newCount = count);
-      }
+      await _pollNotifications();
     } catch (_) {
       // Polling is best-effort; a transient miss just defers the badge.
+    }
+  }
+
+  /// Foreground-only surrogate for true push: fetch the inbox, and
+  /// for any unread / unmuted notification we haven't surfaced yet,
+  /// fire a local system notification so the user sees it without
+  /// having to be on the feed screen. Real wake-from-closed needs
+  /// FCM/APNs (tracked separately) — this only runs while the app's
+  /// 60s timer is alive.
+  Future<void> _pollNotifications() async {
+    if (!mounted) return;
+    try {
+      final notifs =
+          await ref.read(feedServiceProvider).fetchNotifications();
+      if (!mounted) return;
+      final muted = ref.read(mutedNotificationKindsProvider);
+      // First tick after mount: just seed the "already seen" set —
+      // never replay the existing inbox as fresh local notifications.
+      if (!_surfacedSeeded) {
+        for (final n in notifs) {
+          _surfacedNotifIds.add(n.id);
+        }
+        _surfacedSeeded = true;
+        return;
+      }
+      for (final n in notifs) {
+        if (_surfacedNotifIds.contains(n.id)) continue;
+        _surfacedNotifIds.add(n.id);
+        if (n.isRead) continue;
+        if (muted.contains(n.kind)) continue;
+        final (title, body) = _renderNotification(n);
+        await NotificationService.showFeedActivity(
+            id: n.id, title: title, body: body);
+      }
+    } catch (_) {/* best-effort */}
+  }
+
+  /// Boils a [FeedNotification] down into title + body strings for the
+  /// system shade. Kept terse — long titles wrap into the body line.
+  (String, String) _renderNotification(FeedNotification n) {
+    final actor = n.actorName;
+    final post = n.postTitle ?? '';
+    switch (n.kind) {
+      case 'follow':
+        return ('$actor started following you', '');
+      case 'friend_post':
+        return ('$actor shared a pick', post);
+      case 'comment_on_post':
+        return ('$actor commented on your post',
+            n.commentBody ?? post);
+      case 'reply_to_comment':
+        return ('$actor replied to your comment', n.commentBody ?? '');
+      case 'post_upvote':
+        return ('$actor upvoted your post', post);
+      case 'comment_upvote':
+        return ('$actor upvoted your comment', n.commentBody ?? '');
+      default:
+        return ('Smart Advisor', '');
     }
   }
 
