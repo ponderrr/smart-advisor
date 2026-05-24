@@ -48,11 +48,12 @@ feedback on the existing ones.
   (matches the Open status badge below), Resolved=emerald (matches
   the Reviewed badge), All=slate. Previously every option used the
   same violet active state.
-- **Group-quiz async summary clarity.** The confirm step on a
-  hosted async quiz read &ldquo;async · 24 hours&rdquo;, which scanned as a
-  duration. Now &ldquo;Async · respond within 24 hours&rdquo; — clearer that
-  it's a deadline window, not a session length. Live path matches
-  the new capitalisation.
+- **Group-quiz summary in plain language.** The confirm step on a
+  hosted quiz read &ldquo;async · 24 hours&rdquo; / &ldquo;live · together now&rdquo;,
+  which both scanned as jargon. Now &ldquo;Reply within 24 hours&rdquo; and
+  &ldquo;Together now&rdquo; — the user already picked the mode via the
+  &ldquo;Together now / By a deadline&rdquo; segmented above, so the summary
+  just describes the window in plain English.
 
 New runtime dep: `connectivity_plus` for the offline detection.
 No migrations.

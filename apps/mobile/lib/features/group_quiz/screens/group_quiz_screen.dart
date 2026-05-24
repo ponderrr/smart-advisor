@@ -719,10 +719,11 @@ class _S extends ConsumerState<GroupQuizScreen> {
           '$_count questions',
           'up to $_maxP players',
           _mode == 1
-              // Make the format obvious — the previous "async · 24 hours"
-              // read as a duration rather than a deadline window.
-              ? 'Async · respond within ${_deadlineOptions[_deadlinePreset].$1}'
-              : 'Live · together now',
+              // Drop the "Async" jargon — the user already chose this
+              // mode via the "By a deadline" segmented above, so the
+              // summary just describes the window in plain English.
+              ? 'Reply within ${_deadlineOptions[_deadlinePreset].$1}'
+              : 'Together now',
         ];
         return Column(
           key: const ValueKey('host_confirm'),

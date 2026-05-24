@@ -51,8 +51,8 @@ const _kReleases = <_Release>[
       'Barcode scanner gained a flashlight + camera-flip strip.',
       'Reports filter pills carry the status semantic — '
           'Open=amber, Resolved=emerald, All=slate.',
-      'Group-quiz async summary reads "Async · respond within '
-          '24 hours".',
+      'Group-quiz confirm summary reads "Reply within 24 hours" / '
+          '"Together now" — no more "Async" jargon.',
     ],
   ),
   _Release(
