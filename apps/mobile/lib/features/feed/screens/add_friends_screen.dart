@@ -48,6 +48,12 @@ class _AddFriendsScreenState extends ConsumerState<AddFriendsScreen> {
           const SizedBox(height: 6),
           Subtitle("People who've shared picks in your feed."),
           const SizedBox(height: 16),
+          // Taste-graph rail: people followed by people you follow,
+          // ranked by overlap. Hidden when the search box is in use
+          // (the search list is exhaustive enough on its own) and
+          // when you have no follows yet (the provider returns an
+          // empty list — falls back to "Suggested" below).
+          if (_query.trim().isEmpty) const _MutualSuggestionsRail(),
           Align(
               alignment: Alignment.centerLeft,
               child: Eyebrow('Suggested')),
@@ -105,3 +111,38 @@ class _AddFriendsScreenState extends ConsumerState<AddFriendsScreen> {
   }
 }
 
+/// "People you may know" — taste-graph rail above the recent-posters
+/// list on the Add friends screen. Silent when the user follows
+/// nobody yet (suggestions are empty) so the cold-start surface is
+/// just the existing Suggested list.
+class _MutualSuggestionsRail extends ConsumerWidget {
+  const _MutualSuggestionsRail();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(followSuggestionsProvider);
+    final list = async.value ?? const [];
+    if (list.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Eyebrow('People you may know'),
+        const SizedBox(height: 10),
+        for (final p in list)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: PersonRow(
+              id: p.id,
+              name: p.name,
+              avatarUrl: p.avatarUrl,
+              tone: personTone(context, p.id),
+              subtitle: p.mutual == 1
+                  ? '1 mutual'
+                  : '${p.mutual} mutual',
+            ),
+          ),
+        const SizedBox(height: 6),
+      ],
+    );
+  }
+}

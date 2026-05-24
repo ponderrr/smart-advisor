@@ -478,6 +478,83 @@ class FeedService {
     };
   }
 
+  /// Aggregated reactions for the given post + comment ids. Returns a
+  /// pair of maps keyed by target_id (a post or comment uuid):
+  /// `counts[id][emoji] = N` and `mine[id] = "❤️"` for whichever single
+  /// emoji the current user picked.
+  Future<({Map<String, Map<String, int>> counts, Map<String, String> mine})>
+      fetchReactions({
+    List<String> postIds = const [],
+    List<String> commentIds = const [],
+  }) async {
+    if (postIds.isEmpty && commentIds.isEmpty) {
+      return (counts: <String, Map<String, int>>{}, mine: <String, String>{});
+    }
+    // One query per kind — target_kind is part of the index.
+    final futures = <Future<List<Map<String, dynamic>>>>[];
+    if (postIds.isNotEmpty) {
+      futures.add(_c
+          .from('feed_reactions')
+          .select('user_id, target_id, emoji')
+          .eq('target_kind', 'post')
+          .inFilter('target_id', postIds)
+          .then((v) => List<Map<String, dynamic>>.from(v)));
+    }
+    if (commentIds.isNotEmpty) {
+      futures.add(_c
+          .from('feed_reactions')
+          .select('user_id, target_id, emoji')
+          .eq('target_kind', 'comment')
+          .inFilter('target_id', commentIds)
+          .then((v) => List<Map<String, dynamic>>.from(v)));
+    }
+    final batches = await Future.wait(futures);
+    final uid = _c.auth.currentUser?.id;
+    final counts = <String, Map<String, int>>{};
+    final mine = <String, String>{};
+    for (final rows in batches) {
+      for (final r in rows) {
+        final id = r['target_id'] as String;
+        final e = r['emoji'] as String;
+        (counts[id] ??= <String, int>{})
+            .update(e, (v) => v + 1, ifAbsent: () => 1);
+        if (uid != null && r['user_id'] == uid) mine[id] = e;
+      }
+    }
+    return (counts: counts, mine: mine);
+  }
+
+  /// Sets the current user's reaction on a post or comment. A null
+  /// [emoji] clears it. One reaction per (user, target), enforced by
+  /// the PK — upsert replaces a previous pick.
+  Future<void> setReaction({
+    required String targetKind,
+    required String targetId,
+    String? emoji,
+  }) async {
+    assert(targetKind == 'post' || targetKind == 'comment');
+    final uid = _c.auth.currentUser?.id;
+    if (uid == null) throw Exception('Not signed in');
+    if (emoji == null) {
+      await _c
+          .from('feed_reactions')
+          .delete()
+          .eq('user_id', uid)
+          .eq('target_kind', targetKind)
+          .eq('target_id', targetId);
+      return;
+    }
+    await _c.from('feed_reactions').upsert(
+      {
+        'user_id': uid,
+        'target_kind': targetKind,
+        'target_id': targetId,
+        'emoji': emoji,
+      },
+      onConflict: 'user_id,target_kind,target_id',
+    );
+  }
+
   Future<List<String>> fetchFollowing() async {
     final uid = _c.auth.currentUser?.id;
     if (uid == null) return [];
@@ -570,6 +647,57 @@ class FeedService {
       }
     }
     return out;
+  }
+
+  /// Taste-graph follow suggestions: people followed by the people you
+  /// follow, that you don't follow yet. Ranked by overlap count (how
+  /// many of your follows ALSO follow this candidate), so the more
+  /// "your circle" a person is, the higher up they appear. Falls back
+  /// to an empty list when you have no follows yet — pair this with
+  /// [fetchSuggestedPeople] for the cold-start surface.
+  Future<List<({String id, String name, String? avatarUrl, int mutual})>>
+      fetchFollowSuggestions({int limit = 30}) async {
+    final uid = _c.auth.currentUser?.id;
+    if (uid == null) return const [];
+    final mine = await fetchFollowing();
+    if (mine.isEmpty) return const [];
+    // Friends-of-friends: every follow row authored by someone I
+    // follow. The follower_id is "my friend", followee_id is the
+    // candidate.
+    final rows = await _c
+        .from('feed_follows')
+        .select(
+            'follower_id, '
+            'followee:profiles_public!feed_follows_followee_id_fkey '
+            '( id, name, avatar_url )')
+        .inFilter('follower_id', mine);
+    final mineSet = mine.toSet();
+    final blocked = await fetchBlocked();
+    final blockedBy = await fetchBlockedBy();
+    final hidden = {...blocked, ...blockedBy, uid, ...mineSet};
+    final scored = <String, ({String name, String? avatarUrl, int mutual})>{};
+    for (final r in rows) {
+      final p = _embed((r as Map)['followee']);
+      final id = p?['id'] as String?;
+      if (id == null || hidden.contains(id)) continue;
+      final prev = scored[id];
+      scored[id] = (
+        name: (p?['name'] as String?) ?? 'Someone',
+        avatarUrl: p?['avatar_url'] as String?,
+        mutual: (prev?.mutual ?? 0) + 1,
+      );
+    }
+    final entries = scored.entries.toList()
+      ..sort((a, b) => b.value.mutual - a.value.mutual);
+    return [
+      for (final e in entries.take(limit))
+        (
+          id: e.key,
+          name: e.value.name,
+          avatarUrl: e.value.avatarUrl,
+          mutual: e.value.mutual,
+        ),
+    ];
   }
 
   /// Distinct people who've recently posted — for the "Add friends"
@@ -790,6 +918,107 @@ class FeedService {
     }
     await _c.from('feed_saves').insert({'user_id': uid, 'post_id': postId});
     return true;
+  }
+
+  /// Profiles matching [query] by name OR username (ilike, case-
+  /// insensitive). Cheap server-side scan — at this scale ilike is
+  /// faster to deploy than wiring tsvector. Blocked profiles (either
+  /// direction) are filtered out client-side so search never surfaces
+  /// people you've cut contact with.
+  Future<List<({String id, String name, String? username, String? avatarUrl})>>
+      searchProfiles(String query) async {
+    final q = query.trim();
+    if (q.isEmpty) return const [];
+    final like = '%${q.replaceAll('%', '\\%').replaceAll('_', '\\_')}%';
+    final blocked = await fetchBlocked();
+    final blockedBy = await fetchBlockedBy();
+    final hidden = {...blocked, ...blockedBy};
+    final rows = await _c
+        .from('profiles_public')
+        .select('id, name, username, avatar_url')
+        .or('name.ilike.$like,username.ilike.$like')
+        .limit(30);
+    final out = <({String id, String name, String? username, String? avatarUrl})>[];
+    for (final r in rows) {
+      final id = r['id'] as String?;
+      if (id == null || hidden.contains(id)) continue;
+      out.add((
+        id: id,
+        name: (r['name'] as String?) ?? 'Someone',
+        username: r['username'] as String?,
+        avatarUrl: r['avatar_url'] as String?,
+      ));
+    }
+    return out;
+  }
+
+  /// Posts matching [query] by title OR body (ilike). Returns the
+  /// trimmed list the search screen renders directly — no vote /
+  /// comment fan-in (we don't need score in the result row).
+  Future<
+      List<
+          ({
+            String id,
+            String title,
+            String? body,
+            String? posterUrl,
+            FeedCommunity community,
+            String author,
+            String authorId,
+          })>> searchPosts(String query) async {
+    final q = query.trim();
+    if (q.isEmpty) return const [];
+    final like = '%${q.replaceAll('%', '\\%').replaceAll('_', '\\_')}%';
+    final blocked = await fetchBlocked();
+    final blockedBy = await fetchBlockedBy();
+    final hidden = {...blocked, ...blockedBy};
+    final rows = await _c
+        .from('feed_posts')
+        .select('id, title, body, poster_url, community, '
+            'author:profiles_public!feed_posts_user_id_fkey ( id, name )')
+        .or('title.ilike.$like,body.ilike.$like')
+        .order('created_at', ascending: false)
+        .limit(30);
+    final out = <({
+      String id,
+      String title,
+      String? body,
+      String? posterUrl,
+      FeedCommunity community,
+      String author,
+      String authorId,
+    })>[];
+    for (final r in rows) {
+      final author = _embed(r['author']);
+      final authorId = (author?['id'] as String?) ?? '';
+      if (hidden.contains(authorId)) continue;
+      out.add((
+        id: r['id'] as String,
+        title: (r['title'] as String?) ?? '',
+        body: r['body'] as String?,
+        posterUrl: r['poster_url'] as String?,
+        community: feedCommunityFromWire(r['community'] as String),
+        author: (author?['name'] as String?) ?? 'Someone',
+        authorId: authorId,
+      ));
+    }
+    return out;
+  }
+
+  /// Resolves a @username to a profile id, or null if no match.
+  /// Used by mention tap-throughs in comment bodies — the canonical
+  /// /feed/u route is keyed by id, so we look up once on tap.
+  /// Case-insensitive: usernames are stored mixed-case but matched
+  /// against LOWER() via the existing username_lower index.
+  Future<String?> resolveUsernameToId(String username) async {
+    final clean = username.trim();
+    if (clean.isEmpty) return null;
+    final row = await _c
+        .from('profiles_public')
+        .select('id')
+        .ilike('username', clean)
+        .maybeSingle();
+    return row?['id'] as String?;
   }
 
   /// A profile's public display data, or null if missing.

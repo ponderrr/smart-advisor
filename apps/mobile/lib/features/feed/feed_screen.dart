@@ -64,8 +64,32 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     // passed since the last show (see [maybeShowFinishSetupSheet]).
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _pollNew();
-      if (mounted) maybeShowFinishSetupSheet(context, ref);
+      if (mounted) {
+        maybeShowFinishSetupSheet(context, ref);
+        _maybeOpenSharedComposer();
+      }
     });
+  }
+
+  /// Inbound share-target landing: when another app shared a URL/text
+  /// to us, `ShareIntake` routes here with `?share=...`. Open the
+  /// composer with the payload prefilled, then strip the param so a
+  /// re-render doesn't re-open the sheet.
+  void _maybeOpenSharedComposer() {
+    final uri = GoRouterState.of(context).uri;
+    final payload = uri.queryParameters['share'];
+    if (payload == null || payload.isEmpty) return;
+    context.go('/');
+    final prefs = ref.read(feedPrefsProvider);
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => Composer(
+        initialCommunity: prefs.community ?? FeedCommunity.movies,
+        prefillBody: payload,
+      ),
+    );
   }
 
   @override
@@ -216,6 +240,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           Row(
             children: [
               const Expanded(child: BrandHeading('Feed', size: 32)),
+              _SearchButton(
+                  onTap: () => context.push('/feed/search')),
               const _NotificationsBell(),
               _FriendsButton(
                   onTap: () => context.push('/feed/friends')),
@@ -481,6 +507,38 @@ class _NotificationsBell extends ConsumerWidget {
 /// Small icon button in the feed header that opens the Friends list (your
 /// follow graph; discover-people is one tap further in). Tinted to match
 /// the Public/Private pill's chrome.
+class _SearchButton extends StatelessWidget {
+  const _SearchButton({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final tone = contentAccent(
+        ContentAccentName.violet, Theme.of(context).brightness);
+    return Semantics(
+      button: true,
+      label: 'Search people and picks',
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Container(
+          width: 44,
+          height: 44,
+          alignment: Alignment.center,
+          child: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+                color: tone.iconCircleBg, shape: BoxShape.circle),
+            child: Icon(Icons.search,
+                size: 18, color: tone.iconCircleFg),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _FriendsButton extends StatelessWidget {
   const _FriendsButton({required this.onTap});
   final VoidCallback onTap;

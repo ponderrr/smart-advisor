@@ -30,6 +30,7 @@ import '../../features/feed/screens/community_screen.dart';
 import '../../features/feed/screens/friends_screen.dart';
 import '../../features/feed/screens/post_detail_screen.dart';
 import '../../features/feed/screens/report_screen.dart';
+import '../../features/feed/screens/search_screen.dart';
 import '../../features/feed/screens/user_profile_screen.dart';
 import '../../features/group_quiz/screens/group_quiz_screen.dart';
 import '../../features/group_quiz/screens/group_quiz_session_screen.dart';
@@ -314,6 +315,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               // Cold deep-links here while unauthenticated already route to
               // /auth via resolveRedirect's !authenticated branch.
               routes: [
+                GoRoute(
+                    path: 'feed/search',
+                    builder: (_, _) => const SearchScreen()),
                 GoRoute(
                     path: 'feed/people',
                     builder: (_, _) => const AddFriendsScreen()),

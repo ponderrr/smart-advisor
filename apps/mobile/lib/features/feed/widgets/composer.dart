@@ -20,6 +20,7 @@ class Composer extends ConsumerStatefulWidget {
     required this.initialCommunity,
     this.editPost,
     this.prefill,
+    this.prefillBody,
   });
   final FeedCommunity initialCommunity;
 
@@ -30,6 +31,12 @@ class Composer extends ConsumerStatefulWidget {
   /// when [editPost] is set.
   final ({String title, String? creator, int? year, String? posterUrl})?
       prefill;
+
+  /// Free-text body pre-fill — used by the inbound share-target flow
+  /// where another app handed us a URL or text snippet but no
+  /// structured title/creator metadata. Ignored when [editPost] is
+  /// set; layered on top of [prefill] otherwise.
+  final String? prefillBody;
 
   @override
   ConsumerState<Composer> createState() => _ComposerState();
@@ -80,6 +87,12 @@ class _ComposerState extends ConsumerState<Composer> {
       _creator.text = prefill.creator ?? '';
       _year.text = prefill.year?.toString() ?? '';
       _cover.text = prefill.posterUrl ?? '';
+    }
+    // Layer the share-target body on top — applies whether or not a
+    // structured prefill was passed (in the share flow, neither is).
+    final body = widget.prefillBody;
+    if (edit == null && body != null && body.isNotEmpty) {
+      _body.text = body;
     }
     // Every field rebuilds so the title counter, preview, and the
     // unsaved-changes guard (_isDirty) all stay current.

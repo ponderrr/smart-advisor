@@ -46,6 +46,40 @@ final commentVotesProvider = FutureProvider.autoDispose<Map<String, int>>(
 final postVotesProvider = FutureProvider.autoDispose<Map<String, int>>(
     (ref) => ref.watch(feedServiceProvider).fetchMyPostVotes());
 
+/// Aggregated reactions for every post + comment currently in the feed.
+/// One round-trip per kind, fanned in via [FeedService.fetchReactions].
+/// Returns `({counts, mine})` keyed by target id (post OR comment uuid).
+final feedReactionsProvider = FutureProvider.autoDispose<
+    ({Map<String, Map<String, int>> counts, Map<String, String> mine})>(
+    (ref) async {
+  final posts = ref.watch(feedProvider).value ?? const <FeedPost>[];
+  final postIds = [for (final p in posts) p.id];
+  final commentIds = [
+    for (final p in posts)
+      for (final c in p.comments) c.id,
+  ];
+  return ref.watch(feedServiceProvider).fetchReactions(
+        postIds: postIds,
+        commentIds: commentIds,
+      );
+});
+
+/// Reactions for one post + its comments (post-detail screen). Scoped
+/// independently of [feedReactionsProvider] so deep-links don't have to
+/// wait on the whole feed loading.
+final postReactionsProvider = FutureProvider.autoDispose.family<
+    ({Map<String, Map<String, int>> counts, Map<String, String> mine}),
+    String>((ref, postId) async {
+  final post = await ref.watch(singlePostProvider(postId).future);
+  if (post == null) {
+    return (counts: <String, Map<String, int>>{}, mine: <String, String>{});
+  }
+  return ref.watch(feedServiceProvider).fetchReactions(
+        postIds: [post.id],
+        commentIds: [for (final c in post.comments) c.id],
+      );
+});
+
 /// One profile's public display data.
 final feedProfileProvider = FutureProvider.autoDispose.family<
     ({
@@ -91,6 +125,33 @@ final followerProfilesProvider = FutureProvider.autoDispose.family<
 final suggestedPeopleProvider = FutureProvider.autoDispose<
     List<({String id, String name, String? avatarUrl})>>(
     (ref) => ref.watch(feedServiceProvider).fetchSuggestedPeople());
+
+/// Taste-graph follow suggestions — people followed by people you
+/// follow, ranked by overlap. Empty when you have no follows yet
+/// (cold start): UIs that consume this should fall back to
+/// [suggestedPeopleProvider] in that case.
+final followSuggestionsProvider = FutureProvider.autoDispose<
+    List<({String id, String name, String? avatarUrl, int mutual})>>(
+    (ref) => ref.watch(feedServiceProvider).fetchFollowSuggestions());
+
+/// People matching a search query (name OR @username), capped at 30.
+final searchProfilesProvider = FutureProvider.autoDispose.family<
+    List<({String id, String name, String? username, String? avatarUrl})>,
+    String>((ref, q) => ref.watch(feedServiceProvider).searchProfiles(q));
+
+/// Posts matching a search query (title OR body), capped at 30.
+final searchPostsProvider = FutureProvider.autoDispose.family<
+    List<
+        ({
+          String id,
+          String title,
+          String? body,
+          String? posterUrl,
+          FeedCommunity community,
+          String author,
+          String authorId,
+        })>,
+    String>((ref, q) => ref.watch(feedServiceProvider).searchPosts(q));
 
 /// Whether a profile's library is publicly visible on their profile.
 final libraryPublicProvider =
@@ -266,6 +327,23 @@ class FeedActions {
     _ref.invalidate(feedProvider);
     _ref.invalidate(postVotesProvider);
     _ref.invalidate(singlePostProvider);
+  }
+
+  /// Sets (or clears with [emoji] = null) the current user's reaction
+  /// on a post or comment, then refreshes the reaction providers so
+  /// the bar updates without waiting for the next poll.
+  Future<void> setReaction({
+    required String targetKind,
+    required String targetId,
+    String? emoji,
+  }) async {
+    await _svc.setReaction(
+      targetKind: targetKind,
+      targetId: targetId,
+      emoji: emoji,
+    );
+    _ref.invalidate(feedReactionsProvider);
+    _ref.invalidate(postReactionsProvider);
   }
 
   /// Returns the new following state (for undo banners).

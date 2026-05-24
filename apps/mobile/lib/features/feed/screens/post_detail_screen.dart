@@ -12,6 +12,8 @@ import '../widgets/block_menu.dart';
 import '../widgets/feed_avatar.dart';
 import '../widgets/feed_cards.dart';
 import '../widgets/follow_button.dart';
+import '../widgets/mention_text.dart';
+import '../widgets/reaction_bar.dart';
 
 /// Reddit-style thread page — a full page on the persistent shell (not a
 /// modal). Faithful port of the web `src/app/feed/[id]/page.tsx`:
@@ -38,6 +40,8 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
       ref.invalidate(feedProvider);
       ref.invalidate(postVotesProvider);
       ref.invalidate(commentVotesProvider);
+      ref.invalidate(postReactionsProvider);
+      ref.invalidate(feedReactionsProvider);
     },
   );
 
@@ -111,6 +115,11 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
         contentAccent(post.community.accent, Theme.of(context).brightness);
     final tree = buildCommentTree(
         post.comments, ref.watch(feedPrefsProvider).commentSort);
+    // Reactions for THIS post + its comments. Empty maps while loading
+    // so the bars render as just a "+" picker until the round-trip
+    // returns — never blank-canvas the whole thread on a slow network.
+    final reactions = ref.watch(postReactionsProvider(post.id)).value ??
+        (counts: <String, Map<String, int>>{}, mine: <String, String>{});
     final meta = [
       if (post.creator != null) post.creator!,
       if (post.year != null) '${post.year}',
@@ -214,13 +223,24 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                             ],
                             if (post.body != null) ...[
                               const SizedBox(height: 12),
-                              Text(post.body!,
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      height: 1.5,
-                                      fontStyle: FontStyle.italic,
-                                      color: context.brandInk)),
+                              MentionText(
+                                post.body!,
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    height: 1.5,
+                                    fontStyle: FontStyle.italic,
+                                    color: context.brandInk),
+                                tone: tone,
+                              ),
                             ],
+                            const SizedBox(height: 10),
+                            ReactionBar(
+                              targetKind: 'post',
+                              targetId: post.id,
+                              counts: reactions.counts[post.id] ?? const {},
+                              mine: reactions.mine[post.id],
+                              tone: tone,
+                            ),
                           ],
                         ),
                       ),
@@ -245,7 +265,12 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                 else
                   for (final node in tree)
                     _CommentNode(
-                        node: node, postId: post.id, depth: 0),
+                        node: node,
+                        postId: post.id,
+                        depth: 0,
+                        tone: tone,
+                        counts: reactions.counts,
+                        mine: reactions.mine),
               ],
             ),
           ),
@@ -319,10 +344,20 @@ class _CommentNode extends ConsumerStatefulWidget {
     required this.node,
     required this.postId,
     required this.depth,
+    required this.tone,
+    required this.counts,
+    required this.mine,
   });
   final FeedCommentNode node;
   final String postId;
   final int depth;
+  final ContentAccentTone tone;
+
+  /// Reaction lookups for the whole thread — keyed by comment/post id.
+  /// Threaded through to every level so each node renders its own bar
+  /// from the same single round-trip.
+  final Map<String, Map<String, int>> counts;
+  final Map<String, String> mine;
 
   @override
   ConsumerState<_CommentNode> createState() => _CommentNodeState();
@@ -568,11 +603,22 @@ class _CommentNodeState extends ConsumerState<_CommentNode> {
                 ],
                 if (!_collapsed && !_editing) ...[
                   const SizedBox(height: 6),
-                  Text(node.body,
-                      style: TextStyle(
-                          fontSize: 13,
-                          height: 1.4,
-                          color: context.brandInk)),
+                  MentionText(
+                    node.body,
+                    style: TextStyle(
+                        fontSize: 13,
+                        height: 1.4,
+                        color: context.brandInk),
+                    tone: widget.tone,
+                  ),
+                  const SizedBox(height: 8),
+                  ReactionBar(
+                    targetKind: 'comment',
+                    targetId: node.id,
+                    counts: widget.counts[node.id] ?? const {},
+                    mine: widget.mine[node.id],
+                    tone: widget.tone,
+                  ),
                   const SizedBox(height: 6),
                   Row(mainAxisSize: MainAxisSize.min, children: [
                     GestureDetector(
@@ -679,7 +725,10 @@ class _CommentNodeState extends ConsumerState<_CommentNode> {
                           _CommentNode(
                               node: child,
                               postId: widget.postId,
-                              depth: widget.depth + 1),
+                              depth: widget.depth + 1,
+                              tone: widget.tone,
+                              counts: widget.counts,
+                              mine: widget.mine),
                       ],
                     ),
                   ),

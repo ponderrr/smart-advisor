@@ -138,6 +138,10 @@ const kFeedFlairs = <String, Color>{
   'Hot take': Tw.rose500,
 };
 
+/// Emoji reactions the picker offers — must match the CHECK constraint
+/// in `feed_reactions.emoji`. Keep ordered: this drives the picker row.
+const kReactionEmoji = <String>['❤️', '🔥', '😂', '😢', '🤔', '👏'];
+
 // ---------------------------------------------------------------------------
 // Models
 // ---------------------------------------------------------------------------

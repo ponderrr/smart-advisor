@@ -64,6 +64,8 @@ dependencies:
   flutter_secure_storage: ^10.2.0
   palette_generator: ^0.3.3+7
   haptic_kit: ^1.0.0
+  quick_actions: ^1.1.0
+  receive_sharing_intent: ^1.8.1
 
 dev_dependencies:
   flutter_test:

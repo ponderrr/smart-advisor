@@ -6,7 +6,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/config/env.dart';
 import 'core/l10n/locale_provider.dart';
+import 'core/quick_actions_init.dart';
 import 'core/router/app_router.dart';
+import 'core/share_intake.dart';
 import 'core/supabase/supabase_providers.dart';
 import 'l10n/app_localizations.dart';
 import 'core/ui_messenger.dart';
@@ -36,11 +38,30 @@ Future<void> main() async {
   runApp(const ProviderScope(child: SmartAdvisorApp()));
 }
 
-class SmartAdvisorApp extends ConsumerWidget {
+class SmartAdvisorApp extends ConsumerStatefulWidget {
   const SmartAdvisorApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SmartAdvisorApp> createState() => _SmartAdvisorAppState();
+}
+
+class _SmartAdvisorAppState extends ConsumerState<SmartAdvisorApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Wire app-icon long-press shortcuts and inbound share-target
+    // ONCE after the first frame — the router is built in [build],
+    // so we read it via the provider here. Both inits are
+    // fire-and-forget; failures don't block app startup.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final router = ref.read(appRouterProvider);
+      QuickActionsInit.setup(router);
+      ShareIntake.setup(router);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final router = ref.watch(appRouterProvider);
 
     // supabase_flutter auto-exchanges the auth deep link and emits an

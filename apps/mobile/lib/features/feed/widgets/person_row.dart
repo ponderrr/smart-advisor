@@ -15,12 +15,17 @@ class PersonRow extends StatelessWidget {
     required this.name,
     required this.avatarUrl,
     required this.tone,
+    this.subtitle,
   });
 
   final String id;
   final String name;
   final String? avatarUrl;
   final ContentAccentTone tone;
+
+  /// Small muted line under the name — e.g. "3 mutual" on
+  /// taste-graph follow suggestions. Omitted by default.
+  final String? subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -44,11 +49,20 @@ class PersonRow extends StatelessWidget {
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: openProfile,
-            child: Text(name,
-                style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: context.brandInk)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(name,
+                    style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: context.brandInk)),
+                if (subtitle != null)
+                  Text(subtitle!,
+                      style: TextStyle(
+                          fontSize: 11, color: context.brandMuted)),
+              ],
+            ),
           ),
         ),
         const SizedBox(width: 12),
