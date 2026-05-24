@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/offline_cache.dart';
 import '../../core/supabase/supabase_providers.dart';
 import '../notifications/notification_prefs.dart';
 import 'models/feed_models.dart';
@@ -18,8 +19,22 @@ final feedServiceProvider = Provider<FeedService>(
 // ---------------------------------------------------------------------------
 
 /// The whole feed, newest first. Re-fetched on invalidation after a write.
-final feedProvider = FutureProvider.autoDispose<List<FeedPost>>(
-    (ref) => ref.watch(feedServiceProvider).fetchFeed());
+/// Wrapped in the offline cache: a successful fetch refreshes the snapshot,
+/// and a failure (cold launch offline / flaky network) serves the last
+/// good list so the feed never lands on a hard error state.
+final feedProvider =
+    FutureProvider.autoDispose<List<FeedPost>>((ref) async {
+  try {
+    final posts = await ref.watch(feedServiceProvider).fetchFeed();
+    await OfflineCache.writeList(
+        'feed', posts.map((p) => p.toJson()).toList());
+    return posts;
+  } catch (_) {
+    final cached = await OfflineCache.readList('feed');
+    if (cached.isEmpty) rethrow;
+    return cached.map(FeedPost.fromJson).toList();
+  }
+});
 
 /// Profile ids the current user follows.
 final followingProvider = FutureProvider.autoDispose<List<String>>(
