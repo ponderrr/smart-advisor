@@ -49,6 +49,8 @@
 	</dict>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Smart Advisor uses Face ID to unlock the app.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Smart Advisor uses the camera to scan book barcodes when adding to your library.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<!-- Supabase auth deep links (email verification, password reset).

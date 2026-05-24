@@ -74,6 +74,8 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
           Row(children: [
             const Expanded(
                 child: BrandHeading('Logged & saved', size: 32)),
+            _ScanButton(onTap: () => context.push('/library/scan')),
+            const SizedBox(width: 6),
             _ImportButton(onTap: () => context.push('/library/import')),
             if (lib.asData?.value.isNotEmpty ?? false) ...[
               const SizedBox(width: 8),
@@ -475,6 +477,42 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
       ),
     );
     reaction.dispose();
+  }
+}
+
+/// Compact "Scan" pill for the Library header — opens the camera
+/// barcode scanner so the user can add a book by pointing at its
+/// ISBN. Same shape as [_ImportButton], tinted violet.
+class _ScanButton extends StatelessWidget {
+  const _ScanButton({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        padding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(
+          color: Tw.violet500.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(999),
+          border:
+              Border.all(color: Tw.violet500.withValues(alpha: 0.4)),
+        ),
+        child: Row(mainAxisSize: MainAxisSize.min, children: const [
+          Icon(Icons.qr_code_scanner_rounded,
+              size: 16, color: Tw.violet500),
+          SizedBox(width: 6),
+          Text('Scan',
+              style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w800,
+                  color: Tw.violet500)),
+        ]),
+      ),
+    );
   }
 }
 

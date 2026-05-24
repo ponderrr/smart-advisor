@@ -36,6 +36,7 @@ import '../../features/feed/screens/user_profile_screen.dart';
 import '../../features/group_quiz/screens/group_quiz_screen.dart';
 import '../../features/group_quiz/screens/group_quiz_session_screen.dart';
 import '../../features/history/history_screen.dart';
+import '../../features/library/screens/barcode_scan_screen.dart';
 import '../../features/library/screens/import_screen.dart';
 import '../../features/library/screens/library_screen.dart';
 import '../../features/notifications/notifications_screen.dart';
@@ -285,6 +286,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
           path: '/library/import',
           builder: (_, _) => const ImportScreen()),
+      GoRoute(
+          path: '/library/scan',
+          builder: (_, _) => const BarcodeScanScreen()),
       // Quiz is a focused modal task: it slides up over the shell with a
       // dimmed barrier and a single confirmed exit (no bottom nav). The
       // Solo/Group choice is the sheet from the Quiz nav item; /quiz and
