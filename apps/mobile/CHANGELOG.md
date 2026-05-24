@@ -8,6 +8,32 @@ bullet version of these notes; this file is the long-form developer
 record (write here first when shipping a new prerelease, then condense
 into `changelog_screen.dart`).
 
+## test.24 — 2026-05-24 (versionCode 3024 / 4024)
+
+Two focused fixes on top of test.23.
+
+- **Cycle through normal / wide / zoom lenses on the barcode
+  scanner.** mobile_scanner 7.2.0 exposes `ToggleLensType` which
+  walks the available back lenses on the current facing. The
+  scanner now queries `getSupportedLenses()` on mount and shows a
+  lens-cycle button between the torch and camera-flip controls,
+  but only when the phone has 2+ back lenses to cycle. Useful on
+  phones whose default lens focuses poorly close-up — swap to the
+  normal lens (or zoom) until the ISBN snaps to focus. The icon
+  + tooltip update from the controller's `ValueNotifier` so the
+  current lens is always accurate.
+- **Tapping a &ldquo;Someone&rdquo; comment author no longer kicks you
+  to &ldquo;This post isn't available&rdquo;.** When a comment's author
+  embed came back null (e.g. a profile row with name=null), the
+  row carried authorId='' and the tap pushed `/feed/u/` —
+  go_router normalised that to `/feed/u`, which the broader
+  `feed/:id` route caught first with id='u', dropping the user
+  on PostDetailScreen's not-found state. `openUserProfile` now
+  early-returns when profileId is empty, so the tap is a no-op
+  instead of a misroute. (Root cause of the null embed is
+  separate — likely a profile row with name=null or a migration
+  not deployed — tracked.)
+
 ## test.23 — 2026-05-24 (versionCode 3023 / 4023)
 
 A polish + correctness batch — no new surfaces, just tighter

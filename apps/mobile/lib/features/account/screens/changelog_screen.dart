@@ -35,6 +35,19 @@ class _Release {
 
 const _kReleases = <_Release>[
   _Release(
+    label: 'test.24',
+    date: 'May 24, 2026',
+    headline:
+        'Barcode scanner cycles normal / wide / zoom lenses; '
+        '"Someone" comment tap no longer misroutes.',
+    bullets: [
+      'Lens-cycle button on the barcode scanner — pick the lens '
+          'that focuses best for the ISBN.',
+      'Tapping a "Someone" comment author no longer kicks you to '
+          '"This post isn\'t available".',
+    ],
+  ),
+  _Release(
     label: 'test.23',
     date: 'May 24, 2026',
     headline:
