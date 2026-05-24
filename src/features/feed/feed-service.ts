@@ -542,6 +542,23 @@ export async function fetchMyPostVotes(): Promise<Record<string, number>> {
   return out;
 }
 
+/** Looks up a profile id from a `@handle` (case-insensitive).
+ *  Backs the @mention tap-handler in [MentionText]; returns `null`
+ *  when the handle doesn't exist (don't throw — the UI shows a
+ *  toast in that case). */
+export async function resolveUsernameToId(
+  username: string,
+): Promise<string | null> {
+  const handle = username.replace(/^@/, "").trim();
+  if (!handle) return null;
+  const { data } = await supabase
+    .from("profiles_public")
+    .select("id")
+    .ilike("username", handle)
+    .maybeSingle();
+  return (data as { id: string } | null)?.id ?? null;
+}
+
 /** Profile ids the current user follows. */
 export async function fetchFollowing(): Promise<string[]> {
   const {

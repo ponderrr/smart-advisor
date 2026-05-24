@@ -64,6 +64,7 @@ import {
 } from "@/features/feed/use-feed";
 import { FollowButton } from "@/features/feed/components/follow-button";
 import { FeedAvatar } from "@/features/feed/components/feed-avatar";
+import { MentionText } from "@/features/feed/mention-text";
 import { PostMenuButton } from "@/features/feed/components/post-menu";
 import { FinishWhatYouStartedBanner } from "@/features/library/components/finish-what-you-started-banner";
 import { AiNudgeBanner } from "@/features/feed/components/ai-nudge-banner";
@@ -508,7 +509,7 @@ function PostCard({
 
           {post.body && (
             <p className="mt-2 line-clamp-3 text-[13px] italic leading-relaxed text-slate-500 dark:text-slate-400">
-              {post.body}
+              <MentionText body={post.body} />
             </p>
           )}
         </div>

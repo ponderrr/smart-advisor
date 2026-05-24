@@ -39,6 +39,7 @@ import {
 import { FollowButton } from "@/features/feed/components/follow-button";
 import { FeedAvatar } from "@/features/feed/components/feed-avatar";
 import { BlockMenuButton } from "@/features/feed/components/block-menu";
+import { MentionText } from "@/features/feed/mention-text";
 import { PostMenuButton } from "@/features/feed/components/post-menu";
 import { useFeedPrefs } from "@/features/feed/use-feed-prefs";
 import {
@@ -234,7 +235,7 @@ function CommentNode({
         {!collapsed && !editing && (
           <>
             <p className="mt-1.5 text-[13px] leading-relaxed text-slate-700 dark:text-slate-200">
-              {node.body}
+              <MentionText body={node.body} />
             </p>
             <button
               type="button"
@@ -520,7 +521,7 @@ export default function FeedThreadPage() {
 
         {post.body && (
           <p className="mt-3 text-sm italic leading-relaxed text-slate-600 dark:text-slate-300">
-            {post.body}
+            <MentionText body={post.body} />
           </p>
         )}
 
