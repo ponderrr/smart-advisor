@@ -28,6 +28,7 @@ import {
   UserPlus,
   Trophy,
   UserCircle,
+  Megaphone,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "motion/react";
@@ -1646,6 +1647,23 @@ const SettingsPage = () => {
                             </span>
                             <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">
                               {t("help.milestones.subtitle")}
+                            </span>
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => router.push("/changelog")}
+                          className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left transition-colors hover:border-emerald-300 hover:bg-emerald-50/40 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:border-emerald-500/60 dark:hover:bg-emerald-500/10"
+                        >
+                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300">
+                            <Megaphone size={18} />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-sm font-semibold text-slate-800 dark:text-slate-100">
+                              What&apos;s new
+                            </span>
+                            <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">
+                              Recent feature drops, newest first.
                             </span>
                           </span>
                         </button>
