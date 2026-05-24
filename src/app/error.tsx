@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -49,13 +50,13 @@ export default function GlobalError({
         )}
 
         <div className="mt-8 flex w-full flex-col-reverse gap-3 sm:flex-row sm:justify-center">
-          <a
+          <Link
             href="/"
             className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-6 text-sm font-bold tracking-tight text-slate-700 backdrop-blur-md transition hover:border-slate-300 hover:bg-white dark:border-slate-700/70 dark:bg-slate-900/65 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800/70"
           >
             <Home size={16} />
             {t("goHome")}
-          </a>
+          </Link>
           <button
             onClick={reset}
             className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-violet-500/10 px-6 text-sm font-bold tracking-tight text-violet-600 transition hover:bg-violet-500/15 dark:bg-violet-400/15 dark:text-violet-300 dark:hover:bg-violet-400/20"

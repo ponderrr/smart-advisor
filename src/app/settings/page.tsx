@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
@@ -1586,7 +1587,7 @@ const SettingsPage = () => {
                         description={t("help.description")}
                       />
                       <div className="space-y-3">
-                        <a
+                        <Link
                           href="/#faq"
                           className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left transition-colors hover:border-indigo-300 hover:bg-indigo-50/40 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:border-indigo-500/60 dark:hover:bg-indigo-500/10"
                         >
@@ -1601,7 +1602,7 @@ const SettingsPage = () => {
                               {t("help.faq.subtitle")}
                             </span>
                           </span>
-                        </a>
+                        </Link>
                         <button
                           type="button"
                           onClick={() => router.push("/quiz")}
