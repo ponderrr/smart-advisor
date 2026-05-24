@@ -3,9 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
+  Bell,
   CircleOff,
   Shield,
   SlidersHorizontal,
@@ -27,6 +29,8 @@ import {
   UserPlus,
   Trophy,
   UserCircle,
+  Megaphone,
+  ShieldAlert,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "motion/react";
@@ -54,6 +58,7 @@ import {
   SettingsInput,
 } from "./_components/settings-ui";
 import { RecommendationFiltersCard } from "./_components/recommendation-filters-card";
+import { ActivityNotificationsCard } from "./_components/activity-notifications-card";
 import { BlockedPeopleCard } from "./_components/blocked-people-card";
 import { MyReportsCard } from "./_components/my-reports-card";
 import { usePasswordRules } from "./_hooks/use-password-rules";
@@ -75,6 +80,7 @@ import {
   useFeedPrefs,
   type FeedView,
 } from "@/features/feed/use-feed-prefs";
+import { useIsAdmin } from "@/features/feed/use-feed";
 import type {
   CommentSort,
   FeedCommunity,
@@ -104,6 +110,7 @@ type SettingsSection =
   | "security"
   | "content"
   | "feed"
+  | "notifications"
   | "integrations"
   | "help";
 
@@ -112,6 +119,7 @@ const SETTINGS_SECTIONS: SettingsSection[] = [
   "security",
   "content",
   "feed",
+  "notifications",
   "integrations",
   "help",
 ];
@@ -180,6 +188,7 @@ const SettingsPage = () => {
   const { user, refreshUser } = useAuth();
   const { ready } = useRequireAuth();
   const [feedVisibility, setFeedVisibility] = useFeedVisibility();
+  const { data: isAdmin = false } = useIsAdmin();
   const [feedPrefs, setFeedPrefs] = useFeedPrefs();
 
   const settingsTabs = SETTINGS_SECTIONS;
@@ -363,6 +372,11 @@ const SettingsPage = () => {
     },
     { id: "feed", label: t("tabs.feed"), icon: <Newspaper size={15} /> },
     {
+      id: "notifications",
+      label: t("tabs.notifications"),
+      icon: <Bell size={15} />,
+    },
+    {
       id: "integrations",
       label: t("tabs.integrations"),
       icon: <Link2 size={15} />,
@@ -498,6 +512,7 @@ const SettingsPage = () => {
                     (tab) =>
                       tab.id === "content" ||
                       tab.id === "feed" ||
+                      tab.id === "notifications" ||
                       tab.id === "integrations" ||
                       tab.id === "help",
                   )
@@ -1478,6 +1493,19 @@ const SettingsPage = () => {
                   </motion.div>
                 )}
 
+                {activeSection === "notifications" && (
+                  <motion.div
+                    key="notifications"
+                    initial={{ opacity: 0, x: sectionSlideDir * 30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: sectionSlideDir * -30 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-4"
+                  >
+                    <ActivityNotificationsCard />
+                  </motion.div>
+                )}
+
                 {activeSection === "integrations" && (
                   <motion.div
                     key="integrations"
@@ -1559,7 +1587,7 @@ const SettingsPage = () => {
                         description={t("help.description")}
                       />
                       <div className="space-y-3">
-                        <a
+                        <Link
                           href="/#faq"
                           className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left transition-colors hover:border-indigo-300 hover:bg-indigo-50/40 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:border-indigo-500/60 dark:hover:bg-indigo-500/10"
                         >
@@ -1574,7 +1602,7 @@ const SettingsPage = () => {
                               {t("help.faq.subtitle")}
                             </span>
                           </span>
-                        </a>
+                        </Link>
                         <button
                           type="button"
                           onClick={() => router.push("/quiz")}
@@ -1623,6 +1651,42 @@ const SettingsPage = () => {
                             </span>
                             <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">
                               {t("help.milestones.subtitle")}
+                            </span>
+                          </span>
+                        </button>
+                        {isAdmin && (
+                          <button
+                            type="button"
+                            onClick={() => router.push("/admin/reports")}
+                            className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left transition-colors hover:border-rose-300 hover:bg-rose-50/40 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:border-rose-500/60 dark:hover:bg-rose-500/10"
+                          >
+                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-500/15 dark:text-rose-300">
+                              <ShieldAlert size={18} />
+                            </span>
+                            <span className="min-w-0 flex-1">
+                              <span className="block text-sm font-semibold text-slate-800 dark:text-slate-100">
+                                Reports moderation
+                              </span>
+                              <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">
+                                Triage user-filed reports on posts and comments.
+                              </span>
+                            </span>
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => router.push("/changelog")}
+                          className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left transition-colors hover:border-emerald-300 hover:bg-emerald-50/40 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:border-emerald-500/60 dark:hover:bg-emerald-500/10"
+                        >
+                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300">
+                            <Megaphone size={18} />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-sm font-semibold text-slate-800 dark:text-slate-100">
+                              What&apos;s new
+                            </span>
+                            <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">
+                              Recent feature drops, newest first.
                             </span>
                           </span>
                         </button>

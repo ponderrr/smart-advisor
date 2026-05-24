@@ -8,6 +8,7 @@
       "security": "Seguridad",
       "content": "Contenido",
       "feed": "Feed",
+      "notifications": "Notificaciones",
       "integrations": "Integraciones",
       "help": "Ayuda"
     },
@@ -50,7 +51,9 @@
         "onPost": "En una publicación",
         "onComment": "En un comentario",
         "contentGone": "Contenido eliminado",
-        "statusReview": "En revisión"
+        "statusReview": "En revisión",
+        "statusReviewed": "Revisado",
+        "statusDismissed": "Descartado"
       }
     },
     "groups": {

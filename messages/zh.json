@@ -8,6 +8,7 @@
       "security": "安全",
       "content": "内容",
       "feed": "动态",
+      "notifications": "通知",
       "integrations": "集成",
       "help": "帮助"
     },
@@ -50,7 +51,9 @@
         "onPost": "对一个帖子",
         "onComment": "对一条评论",
         "contentGone": "内容已删除",
-        "statusReview": "审核中"
+        "statusReview": "审核中",
+        "statusReviewed": "已审核",
+        "statusDismissed": "已驳回"
       }
     },
     "groups": {

@@ -29,7 +29,7 @@ import {
   useDeleteComment,
   useMyCommentVotes,
   useMyPostVotes,
-  useReportComment,
+  useReactions,
   useSaved,
   useSetCommentVote,
   useSetPostVote,
@@ -40,7 +40,10 @@ import {
 import { FollowButton } from "@/features/feed/components/follow-button";
 import { FeedAvatar } from "@/features/feed/components/feed-avatar";
 import { BlockMenuButton } from "@/features/feed/components/block-menu";
+import { MentionText } from "@/features/feed/mention-text";
 import { PostMenuButton } from "@/features/feed/components/post-menu";
+import { ReactionBar } from "@/features/feed/reaction-bar";
+import type { ReactionAggregates } from "@/features/feed/feed-service";
 import { useFeedPrefs } from "@/features/feed/use-feed-prefs";
 import {
   activityLabel,
@@ -57,17 +60,19 @@ function CommentNode({
   node,
   postId,
   depth,
+  reactions,
 }: {
   node: FeedCommentNode;
   postId: string;
   depth: number;
+  reactions: ReactionAggregates;
 }) {
+  const router = useRouter();
   const setCommentVote = useSetCommentVote();
   const { data: myVotes } = useMyCommentVotes();
   const createComment = useCreateComment();
   const deleteComment = useDeleteComment();
   const updateComment = useUpdateComment();
-  const reportComment = useReportComment();
   const { user } = useAuth();
   const isOwnComment =
     node.authorId != null && node.authorId === user?.id;
@@ -235,8 +240,14 @@ function CommentNode({
         {!collapsed && !editing && (
           <>
             <p className="mt-1.5 text-[13px] leading-relaxed text-slate-700 dark:text-slate-200">
-              {node.body}
+              <MentionText body={node.body} />
             </p>
+            <ReactionBar
+              targetKind="comment"
+              targetId={node.id}
+              counts={reactions.counts[node.id] ?? {}}
+              mine={reactions.mine[node.id] ?? null}
+            />
             <button
               type="button"
               onClick={() => setReplying((r) => !r)}
@@ -281,23 +292,15 @@ function CommentNode({
               <button
                 type="button"
                 onClick={() => {
-                  const reason = window.prompt(
-                    "Report this comment? Optionally tell us what's wrong:",
-                  );
-                  if (reason === null) return;
-                  reportComment.mutate(
-                    { commentId: node.id, reason: reason || undefined },
-                    {
-                      onSuccess: () =>
-                        toast.success(
-                          "Report submitted — thanks for flagging it.",
-                        ),
-                      onError: () =>
-                        toast.error(
-                          "Couldn't submit the report — try again.",
-                        ),
-                    },
-                  );
+                  // Carry the comment author through so the report page
+                  // can offer an "Also block @author" toggle without
+                  // re-fetching.
+                  const qs = new URLSearchParams({
+                    commentId: node.id,
+                    ...(node.authorId ? { authorId: node.authorId } : {}),
+                    ...(node.author ? { author: node.author } : {}),
+                  }).toString();
+                  router.push(`/feed/report?${qs}`);
                 }}
                 className="ml-3 mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-slate-400 hover:text-amber-600 dark:hover:text-amber-300"
               >
@@ -353,6 +356,7 @@ function CommentNode({
                 node={child}
                 postId={postId}
                 depth={depth + 1}
+                reactions={reactions}
               />
             ))}
           </div>
@@ -395,6 +399,22 @@ export default function FeedThreadPage() {
     () => (post ? buildCommentTree(post.comments, commentSort) : []),
     [post, commentSort],
   );
+
+  // Single batched reactions query for the post + every comment on
+  // the page — collapses into one round-trip per kind so adding a
+  // hundred-comment thread stays cheap.
+  const commentIds = useMemo(
+    () => (post ? post.comments.map((c) => c.id) : []),
+    [post],
+  );
+  const { data: reactions } = useReactions({
+    postIds: post ? [post.id] : [],
+    commentIds,
+  });
+  const reactionsView: ReactionAggregates = reactions ?? {
+    counts: {},
+    mine: {},
+  };
 
   if (!ready) return <PageLoader text="Loading" />;
 
@@ -529,9 +549,16 @@ export default function FeedThreadPage() {
 
         {post.body && (
           <p className="mt-3 text-sm italic leading-relaxed text-slate-600 dark:text-slate-300">
-            {post.body}
+            <MentionText body={post.body} />
           </p>
         )}
+
+        <ReactionBar
+          targetKind="post"
+          targetId={post.id}
+          counts={reactionsView.counts[post.id] ?? {}}
+          mine={reactionsView.mine[post.id] ?? null}
+        />
 
         <div className="mt-4 flex items-center gap-4 border-t border-slate-200/70 pt-3 dark:border-slate-700/60">
           <div className="inline-flex items-center gap-1">
@@ -643,6 +670,7 @@ export default function FeedThreadPage() {
               node={node}
               postId={post.id}
               depth={0}
+              reactions={reactionsView}
             />
           ))
         )}

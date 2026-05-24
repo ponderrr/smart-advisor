@@ -8,6 +8,7 @@
       "security": "보안",
       "content": "콘텐츠",
       "feed": "피드",
+      "notifications": "알림",
       "integrations": "연동",
       "help": "도움말"
     },
@@ -50,7 +51,9 @@
         "onPost": "게시물에 대해",
         "onComment": "댓글에 대해",
         "contentGone": "콘텐츠가 삭제됨",
-        "statusReview": "검토 중"
+        "statusReview": "검토 중",
+        "statusReviewed": "검토됨",
+        "statusDismissed": "기각됨"
       }
     },
     "groups": {

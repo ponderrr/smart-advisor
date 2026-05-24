@@ -1,14 +1,19 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   MoreHorizontal,
   Pencil,
+  Send,
   Share2,
   Flag,
   Trash2,
   UserX,
 } from "lucide-react";
 import { toast } from "sonner";
+
+import { SendPickDialog } from "@/features/feed/send-pick-dialog";
 
 import {
   DropdownMenu,
@@ -20,7 +25,6 @@ import { useAuth } from "@/features/auth/hooks/use-auth";
 import {
   useBlockUser,
   useDeletePost,
-  useReportPost,
 } from "@/features/feed/use-feed";
 import { cn } from "@/lib/utils";
 
@@ -75,10 +79,11 @@ export function PostMenuButton({
   size = 16,
   className,
 }: PostMenuButtonProps) {
+  const router = useRouter();
   const { user } = useAuth();
   const blockUser = useBlockUser();
   const deletePost = useDeletePost();
-  const reportPost = useReportPost();
+  const [sendOpen, setSendOpen] = useState(false);
 
   if (!authorId) return null;
   const isOwn = authorId === user?.id;
@@ -89,6 +94,7 @@ export function PostMenuButton({
       : "text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-200";
 
   return (
+    <>
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
@@ -116,6 +122,23 @@ export function PostMenuButton({
           <DropdownMenuItem onSelect={() => onEdit()} className="gap-2">
             <Pencil size={14} />
             Edit post
+          </DropdownMenuItem>
+        )}
+
+        {user && (
+          <DropdownMenuItem
+            onSelect={(e) => {
+              // The Radix dropdown closes-then-fires onSelect; defer so the
+              // dialog opens after the menu has unmounted (otherwise the
+              // backdrop pointer-events race makes the dialog
+              // un-clickable for a frame).
+              e.preventDefault();
+              setSendOpen(true);
+            }}
+            className="gap-2"
+          >
+            <Send size={14} />
+            Send to a friend
           </DropdownMenuItem>
         )}
 
@@ -152,21 +175,12 @@ export function PostMenuButton({
           <>
             <DropdownMenuItem
               onSelect={() => {
-                const reason = window.prompt(
-                  "Report this post? Optionally tell us what's wrong:",
-                );
-                if (reason === null) return;
-                reportPost.mutate(
-                  { postId, reason: reason || undefined },
-                  {
-                    onSuccess: () =>
-                      toast.success(
-                        "Report submitted — thanks for flagging it.",
-                      ),
-                    onError: () =>
-                      toast.error("Couldn't submit the report — try again."),
-                  },
-                );
+                const qs = new URLSearchParams({
+                  postId,
+                  ...(authorId ? { authorId } : {}),
+                  ...(author ? { author } : {}),
+                }).toString();
+                router.push(`/feed/report?${qs}`);
               }}
               className="gap-2"
             >
@@ -195,5 +209,12 @@ export function PostMenuButton({
         )}
       </DropdownMenuContent>
     </DropdownMenu>
+    <SendPickDialog
+      open={sendOpen}
+      onClose={() => setSendOpen(false)}
+      postId={postId}
+      postTitle={postTitle}
+    />
+    </>
   );
 }

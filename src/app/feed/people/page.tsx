@@ -8,7 +8,11 @@ import { AppNavbar } from "@/components/app-navbar";
 import { PageLoader } from "@/components/ui/loader";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
-import { useFeed, useFollowing } from "@/features/feed/use-feed";
+import {
+  useFeed,
+  useFollowSuggestions,
+  useFollowing,
+} from "@/features/feed/use-feed";
 import { FeedAvatar } from "@/features/feed/components/feed-avatar";
 import { FollowButton } from "@/features/feed/components/follow-button";
 
@@ -31,6 +35,14 @@ const PeoplePage = () => {
 
   const { data: posts, isLoading } = useFeed();
   const { data: followingIds } = useFollowing();
+  const { data: mutualSuggestions } = useFollowSuggestions();
+  const mutual = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const all = mutualSuggestions ?? [];
+    return q.length === 0
+      ? all
+      : all.filter((p) => p.name.toLowerCase().includes(q));
+  }, [mutualSuggestions, query]);
 
   const suggested = useMemo<SuggestedProfile[]>(() => {
     const followed = new Set(followingIds ?? []);
@@ -101,6 +113,45 @@ const PeoplePage = () => {
               className="w-full rounded-full border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm transition-colors focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-900/65 dark:text-slate-100 dark:focus:border-indigo-500"
             />
           </div>
+
+          {mutual.length > 0 && (
+            <>
+              <p className="mt-6 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                People you may know
+              </p>
+              <ul className="mt-3 divide-y divide-slate-200/70 overflow-hidden rounded-2xl border border-slate-200/70 bg-white/80 shadow-sm backdrop-blur-sm dark:divide-slate-700/60 dark:border-slate-700/60 dark:bg-slate-900/60">
+                {mutual.map((p) => (
+                  <li
+                    key={p.id}
+                    className="flex items-center gap-3 px-4 py-3 sm:px-5"
+                  >
+                    <FeedAvatar
+                      name={p.name}
+                      url={p.avatarUrl ?? undefined}
+                      size={36}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => router.push(`/feed/u/${p.id}`)}
+                      className="min-w-0 flex-1 text-left"
+                    >
+                      <p className="truncate text-sm font-black tracking-tight">
+                        {p.name}
+                      </p>
+                      <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                        {p.mutual} mutual
+                      </p>
+                    </button>
+                    <FollowButton
+                      authorId={p.id}
+                      authorName={p.name}
+                      size="sm"
+                    />
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
 
           <p className="mt-6 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
             Suggested
