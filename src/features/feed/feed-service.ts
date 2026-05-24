@@ -655,6 +655,73 @@ export async function setReaction(args: {
   );
 }
 
+export interface FollowingProfile {
+  id: string;
+  name: string;
+  avatarUrl: string | null;
+}
+
+/** Profiles the current user follows, newest follow first — drives
+ *  the "Send to a friend" picker. Auth-gated by the caller; returns
+ *  [] when not signed in. */
+export async function fetchMyFollowingProfiles(): Promise<FollowingProfile[]> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+  type Row = {
+    created_at: string;
+    followee: { id: string; name: string | null; avatar_url: string | null } | null;
+  };
+  const { data } = await supabase
+    .from("feed_follows")
+    .select(
+      "created_at, " +
+        "followee:profiles_public!feed_follows_followee_id_fkey ( id, name, avatar_url )",
+    )
+    .eq("follower_id", user.id)
+    .order("created_at", { ascending: false });
+  const out: FollowingProfile[] = [];
+  for (const r of (data ?? []) as unknown as Row[]) {
+    const p = r.followee;
+    if (!p?.id) continue;
+    out.push({
+      id: p.id,
+      name: p.name ?? "Someone",
+      avatarUrl: p.avatar_url,
+    });
+  }
+  return out;
+}
+
+/** Sends `postId` to `recipientId` as a "have you read this" pick.
+ *  Inserts into feed_pick_sends — the AFTER-INSERT trigger fires
+ *  the 'pick_sent' notification on the recipient's inbox; RLS
+ *  guards the sender_id check. `message` is the optional one-liner
+ *  shown to the recipient. */
+export async function sendPickToFriend(args: {
+  postId: string;
+  recipientId: string;
+  message?: string;
+}): Promise<void> {
+  const { postId, recipientId, message } = args;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not signed in");
+  if (user.id === recipientId) {
+    throw new Error("Can't send a pick to yourself");
+  }
+  const trimmed = message?.trim() ?? "";
+  const { error } = await supabase.from("feed_pick_sends").insert({
+    sender_id: user.id,
+    recipient_id: recipientId,
+    post_id: postId,
+    message: trimmed.length > 0 ? trimmed : null,
+  });
+  if (error) throw error;
+}
+
 export interface SearchProfileResult {
   id: string;
   name: string;

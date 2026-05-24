@@ -166,6 +166,19 @@ export function useSearchPosts(query: string) {
   });
 }
 
+export function useMyFollowingProfiles() {
+  return useQuery({
+    queryKey: ["feed", "my-following-profiles"] as const,
+    queryFn: svc.fetchMyFollowingProfiles,
+  });
+}
+
+export function useSendPick() {
+  return useMutation({
+    mutationFn: svc.sendPickToFriend,
+  });
+}
+
 export function useFollowSuggestions() {
   return useQuery({
     queryKey: ["feed", "follow-suggestions"] as const,
