@@ -32,8 +32,16 @@ String compactCount(int n) {
 void openPost(BuildContext context, String id) =>
     context.push('/feed/$id');
 
-void openUserProfile(BuildContext context, String profileId) =>
-    context.push('/feed/u/$profileId');
+void openUserProfile(BuildContext context, String profileId) {
+  // Guard against the "Someone" fallback: when an author embed comes
+  // back null the post/comment row carries authorId='' and a tap
+  // would push '/feed/u/' — go_router normalises that to '/feed/u',
+  // which the more general 'feed/:id' route catches with id='u',
+  // dropping the user on PostDetailScreen's "this post isn't
+  // available" state.
+  if (profileId.isEmpty) return;
+  context.push('/feed/u/$profileId');
+}
 
 void openCommunity(BuildContext context, FeedCommunity community) =>
     context.push('/feed/c/${community.wire}');
