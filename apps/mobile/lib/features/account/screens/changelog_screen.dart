@@ -35,6 +35,27 @@ class _Release {
 
 const _kReleases = <_Release>[
   _Release(
+    label: 'test.23',
+    date: 'May 24, 2026',
+    headline:
+        "You're offline banner, color-coded report pills, scan "
+        'inside import, more haptics + polish.',
+    bullets: [
+      "You're offline banner — feed auto-refreshes when the "
+          'network comes back.',
+      'Profile Block button now confirms before blocking.',
+      'Haptic ticks on overflow-menu picks (feed / library / '
+          'comment sort).',
+      'Scan moved inside Import so the Library heading stays '
+          'aligned.',
+      'Barcode scanner gained a flashlight + camera-flip strip.',
+      'Reports filter pills carry the status semantic — '
+          'Open=amber, Resolved=emerald, All=slate.',
+      'Group-quiz async summary reads "Async · respond within '
+          '24 hours".',
+    ],
+  ),
+  _Release(
     label: 'test.22',
     date: 'May 24, 2026',
     headline:

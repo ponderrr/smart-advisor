@@ -8,6 +8,55 @@ bullet version of these notes; this file is the long-form developer
 record (write here first when shipping a new prerelease, then condense
 into `changelog_screen.dart`).
 
+## test.23 — 2026-05-24 (versionCode 3023 / 4023)
+
+A polish + correctness batch — no new surfaces, just tighter
+feedback on the existing ones.
+
+- **Block confirm dialog on a user profile.** The Block button on
+  someone's profile page used to fire on a single tap, which made
+  it too easy to wipe their posts out of your feed by accident.
+  It now opens the same Cancel / Block confirm as the post-overflow
+  Block flow, with a haptic on confirm. Unblock stays one-tap
+  (matches Settings → Blocked) and now also fires a haptic on tap.
+- **More haptic feedback.** Overflow-menu picks — feed
+  block_menu, library row menu, comment-sort menu — were all
+  silent between the tap and the action firing. Now each fires a
+  selection tick so the menu choice has weight.
+- **Scan moved inside Import.** The Library header had three pills
+  side-by-side (Scan / Import / Clear) which squeezed the
+  &ldquo;Logged & saved&rdquo; heading out of alignment on phone widths.
+  Scan now lives inside the Import screen as a &ldquo;One at a time&rdquo;
+  section above the bulk CSV section — same single hub for
+  adding books from outside the app.
+- **Barcode scanner: torch + camera flip.** A top-right control
+  strip in the scanner toggles the flashlight and switches
+  between front / back cameras. Driven off MobileScannerController's
+  own ValueNotifier so the torch icon stays accurate if the OS
+  auto-disables it (low battery, thermal, etc).
+- **&ldquo;You&rsquo;re offline&rdquo; banner + auto-refresh on reconnect.**
+  Drops the last-good-snapshot OfflineCache from feed / library /
+  history — the cache was confusing because users couldn't tell
+  which rows were live vs. frozen at the moment of the last
+  successful fetch. A new connectivity_plus-backed banner sits at
+  the top of the AppShell and shows an amber &ldquo;You're offline&rdquo;
+  strip when there's no network transport up; on the offline→online
+  edge the feed auto-invalidates so it refreshes without a manual
+  pull.
+- **Color-coded report-status pills.** Admin Reports filter pills
+  (Open / Resolved / All) now carry the status semantic: Open=amber
+  (matches the Open status badge below), Resolved=emerald (matches
+  the Reviewed badge), All=slate. Previously every option used the
+  same violet active state.
+- **Group-quiz async summary clarity.** The confirm step on a
+  hosted async quiz read &ldquo;async · 24 hours&rdquo;, which scanned as a
+  duration. Now &ldquo;Async · respond within 24 hours&rdquo; — clearer that
+  it's a deadline window, not a session length. Live path matches
+  the new capitalisation.
+
+New runtime dep: `connectivity_plus` for the offline detection.
+No migrations.
+
 ## test.22 — 2026-05-24 (versionCode 3022 / 4022)
 
 Six features sitting on top of test.21. The cohesive thread is
