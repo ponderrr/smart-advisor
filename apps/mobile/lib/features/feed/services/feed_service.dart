@@ -1005,6 +1005,27 @@ class FeedService {
     return out;
   }
 
+  /// Sends [postId] to [recipientId] as a "have you seen this" pick.
+  /// Inserts into feed_pick_sends; the AFTER-INSERT trigger fires the
+  /// 'pick_sent' notification on the recipient's inbox. RLS guards the
+  /// sender_id check; we still resolve auth.uid here for the explicit
+  /// not-signed-in error.
+  Future<void> sendPick({
+    required String postId,
+    required String recipientId,
+    String? message,
+  }) async {
+    final uid = _c.auth.currentUser?.id;
+    if (uid == null) throw Exception('Not signed in');
+    if (uid == recipientId) throw Exception("Can't send a pick to yourself");
+    await _c.from('feed_pick_sends').insert({
+      'sender_id': uid,
+      'recipient_id': recipientId,
+      'post_id': postId,
+      'message': (message?.trim().isEmpty ?? true) ? null : message!.trim(),
+    });
+  }
+
   /// Resolves a @username to a profile id, or null if no match.
   /// Used by mention tap-throughs in comment bodies — the canonical
   /// /feed/u route is keyed by id, so we look up once on tap.

@@ -217,6 +217,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
         return ('$actor upvoted your post', post);
       case 'comment_upvote':
         return ('$actor upvoted your comment', n.commentBody ?? '');
+      case 'pick_sent':
+        return ('$actor sent you a pick', post);
       default:
         return ('Smart Advisor', '');
     }

@@ -75,6 +75,14 @@ class NotificationsActivityScreen extends ConsumerWidget {
                     subtitle:
                         'When someone upvotes a comment you left.',
                   ),
+                  _Divider(),
+                  _ActivityToggle(
+                    kind: 'pick_sent',
+                    icon: Icons.send,
+                    title: 'Picks sent to you',
+                    subtitle:
+                        'When a friend sends you a specific post to check out.',
+                  ),
                 ]),
               ),
             ],

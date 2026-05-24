@@ -10,6 +10,7 @@ import '../../../ui/ui.dart';
 import '../models/feed_models.dart';
 import '../feed_providers.dart';
 import 'composer.dart';
+import 'send_pick_sheet.dart';
 
 /// Web URL for a post — used by Share + Copy link.
 String _postUrl(String postId) => 'https://smartadvisor.live/feed/$postId';
@@ -120,6 +121,15 @@ class BlockMenuButton extends ConsumerWidget {
             case 'share':
               await SharePlus.instance.share(ShareParams(
                   text: '${post!.title} — ${_postUrl(post!.id)}'));
+            case 'send_to_friend':
+              if (context.mounted) {
+                await showModalBottomSheet<void>(
+                  context: context,
+                  backgroundColor: Colors.transparent,
+                  isScrollControlled: true,
+                  builder: (_) => SendPickSheet(post: post!),
+                );
+              }
             case 'copy':
               await Clipboard.setData(
                   ClipboardData(text: _postUrl(post!.id)));
@@ -146,6 +156,8 @@ class BlockMenuButton extends ConsumerWidget {
             if (isOwn)
               _item('edit', Icons.edit_outlined, 'Edit post'),
             _item('share', Icons.ios_share, 'Share'),
+            _item('send_to_friend', Icons.send_outlined,
+                'Send to a friend'),
             _item('copy', Icons.link, 'Copy link'),
           ],
           if (isOwn && (post != null || commentId != null))

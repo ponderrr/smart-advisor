@@ -37,6 +37,7 @@ import 'notifications_center.dart';
       'friend_post' => (icon: Icons.forum, color: Tw.emerald500),
       'post_upvote' || 'comment_upvote' =>
         (icon: Icons.thumb_up_alt_outlined, color: Tw.amber500),
+      'pick_sent' => (icon: Icons.send, color: Tw.rose500),
       _ => (icon: Icons.notifications_none, color: Tw.slate500),
     };
 
@@ -275,6 +276,7 @@ class _ServerCard extends ConsumerWidget {
         'friend_post' => '${n.actorName} shared a new post',
         'post_upvote' => '${n.actorName} upvoted your post',
         'comment_upvote' => '${n.actorName} upvoted your comment',
+        'pick_sent' => '${n.actorName} sent you a pick',
         _ => '${n.actorName} interacted with you',
       };
 

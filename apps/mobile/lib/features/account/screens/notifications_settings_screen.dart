@@ -88,8 +88,9 @@ class NotificationsSettingsScreen extends ConsumerWidget {
     );
   }
 
-  /// Six possible kinds; we count what's currently un-muted so the row
-  /// tells the user "All on" / "4 of 6 on" / "All off" at a glance.
+  /// All activity kinds; we count what's currently un-muted so the
+  /// row tells the user "All on" / "X of N on" / "All off" at a glance.
+  /// Keep in sync with the toggles in NotificationsActivityScreen.
   static const _activityKinds = {
     'follow',
     'friend_post',
@@ -97,6 +98,7 @@ class NotificationsSettingsScreen extends ConsumerWidget {
     'reply_to_comment',
     'post_upvote',
     'comment_upvote',
+    'pick_sent',
   };
 
   String _activitySubtitle(Set<String> muted) {

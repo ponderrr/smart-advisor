@@ -131,6 +131,16 @@ final followingProfilesProvider = FutureProvider.autoDispose.family<
     List<({String id, String name, String? avatarUrl})>, String>(
     (ref, id) => ref.watch(feedServiceProvider).fetchFollowingProfiles(id));
 
+/// The current user's own Following list — convenience over the family
+/// version above so callers (Send-to-friend sheet) don't all have to
+/// thread the auth uid through.
+final myFollowingProfilesProvider = FutureProvider.autoDispose<
+    List<({String id, String name, String? avatarUrl})>>((ref) async {
+  final uid = ref.watch(supabaseClientProvider).auth.currentUser?.id;
+  if (uid == null) return const [];
+  return ref.watch(feedServiceProvider).fetchFollowingProfiles(uid);
+});
+
 /// Profiles that follow a given profile — the "Followers" friends list.
 final followerProfilesProvider = FutureProvider.autoDispose.family<
     List<({String id, String name, String? avatarUrl})>, String>(
@@ -360,6 +370,17 @@ class FeedActions {
     _ref.invalidate(feedReactionsProvider);
     _ref.invalidate(postReactionsProvider);
   }
+
+  /// Sends a post to another user as a "have you seen this" pick. The
+  /// AFTER-INSERT trigger fans this out as a feed_notifications row on
+  /// the recipient — no client-side notification provider to invalidate.
+  Future<void> sendPick({
+    required String postId,
+    required String recipientId,
+    String? message,
+  }) =>
+      _svc.sendPick(
+          postId: postId, recipientId: recipientId, message: message);
 
   /// Returns the new following state (for undo banners).
   Future<bool> toggleFollow(String followeeId) async {
