@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:haptic_kit/haptic_kit.dart';
 
 import '../../../ui/ui.dart';
 import 'settings_helpers.dart';
@@ -240,6 +241,7 @@ class _FaqTile extends StatelessWidget {
       // provides its own visual frame.
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
+        onExpansionChanged: (_) => Haptics.selection(),
         tilePadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),

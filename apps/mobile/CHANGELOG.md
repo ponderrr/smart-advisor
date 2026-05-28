@@ -8,6 +8,68 @@ bullet version of these notes; this file is the long-form developer
 record (write here first when shipping a new prerelease, then condense
 into `changelog_screen.dart`).
 
+## test.25 — 2026-05-28 (versionCode 3025 / 4025)
+
+A polish drop — the auth screens get a more modern look, Wrapped stops
+being a wall of text, the scanner gets pinch-to-zoom + a fix for the
+"grant camera access" lockup, and a handful of haptic touches land on
+the FAQ + What's new surfaces.
+
+- **Sign-in / sign-up screen redesign.** The old layout was a small
+  `BrandCard` floating on a blank scaffold, which read tight and
+  forms-on-forms. The new layout drops the wrapping card, gives the
+  form room to breathe, uses a 32pt heading, and swaps the
+  "label-above-box" inputs for outlined floating-label fields
+  (`BrandTextField`, exported from `ui.dart`). The biometric option
+  collapses to a compact icon button alongside the primary "Sign in"
+  CTA so the primary action stays the visual anchor. Both screens
+  carry autofill hints so the system password manager works on iOS
+  and Android.
+- **Pinch-to-zoom on the barcode scanner.** Wraps `MobileScanner` in
+  a scale gesture and drives `controller.setZoomScale(0..1)` directly.
+  Useful on phones whose telephoto isn't exposed as a physically
+  separate `LENS_FACING_BACK` camera (the common Pixel / iPhone case):
+  pinch in to reach a far-away spine without relying on a third lens
+  the OS doesn't surface. Stacks cleanly with the existing lens-cycle
+  button — that picks between physically distinct lenses, this then
+  digital-zooms within the active lens.
+- **Wrapped: cover art everywhere.** The story used to be a wall of
+  large-text slides which read flat compared to the rest of the app.
+  Each slide now leans on the data's poster URLs: the intro fades in a
+  low-opacity backdrop of every poster you got this period, the Mix
+  slide shows three mini-posters above the counts (one per medium),
+  the On Repeat slide rolls a row of your top creator's works, the
+  Standout slide hero-renders the poster of the title itself, and the
+  share card carries a row of thumbs above the headline. Missing
+  covers fall back to a tinted gradient so a thin month doesn't punch
+  holes in the layout.
+- **Seasonal gating for the Wrapped entries.** Year-in-review only
+  surfaces in December and January (the Spotify-Wrapped pattern); the
+  Month-in-review tile only surfaces over the wrap-up days of one
+  month and the first day of the next. Outside those windows the
+  Notifications hub no longer shows the tile, which keeps the surface
+  honest — a mid-year tile that summarises 4 months of activity is
+  an anticlimax for everyone. The `/wrapped` and `/wrapped/month`
+  routes themselves remain reachable for QA and replay.
+- **Lens-switch debounce on the scanner.** Rapid taps on the lens-cycle
+  / camera-flip buttons used to overlap `switchCamera` calls, which on
+  Android left CameraX's Camera2 session in a state the plugin
+  surfaced as "Camera unavailable / grant permission" — and the
+  Camera2 session wouldn't drop until well after the controller was
+  disposed, so the error persisted on screen re-entry. A single
+  `_runSwitch` helper now latches an in-flight flag and ignores
+  presses while a transition is running.
+- **Selection haptic on FAQ + What's new expansions.** Tapping an
+  `ExpansionTile` in either surface fires `Haptics.selection()` on
+  expand and collapse. Matches the rest of the app's tap-feel.
+
+Note on the "telephoto" lens: `mobile_scanner` enumerates only
+physically separate back cameras via CameraX's `CameraSelector`. Phones
+that expose telephoto as digital zoom on the main lens (most modern
+Pixels, the bulk of iPhones) cycle between normal + wide only. The new
+pinch gesture is the answer for that hardware reality — there is no
+plugin or API toggle to "force-expose" a virtual zoom lens.
+
 ## test.24 — 2026-05-24 (versionCode 3024 / 4024)
 
 Two focused fixes on top of test.23.

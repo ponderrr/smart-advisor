@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:haptic_kit/haptic_kit.dart';
 
 import '../../../ui/ui.dart';
 import 'settings_helpers.dart';
@@ -34,6 +35,30 @@ class _Release {
 }
 
 const _kReleases = <_Release>[
+  _Release(
+    label: 'test.25',
+    date: 'May 28, 2026',
+    headline:
+        'Cleaner auth screens, Wrapped gets cover art, pinch-to-zoom '
+        'on the scanner, haptics on FAQ + What\'s new.',
+    bullets: [
+      'Sign in / sign up redesigned — floating-label inputs, more '
+          'breathing room, no card-in-card.',
+      'Pinch to zoom on the barcode scanner — reach a far-away '
+          'spine on phones whose telephoto isn\'t a separate lens.',
+      'Wrapped now shows cover art: a poster collage on the intro, '
+          'mini-posters in the mix, your top creator\'s works in a '
+          'row, a big standout cover, and a poster strip on the '
+          'share card.',
+      'Year / Month in review entries hide outside their seasonal '
+          'windows so the surface isn\'t cluttered with off-season '
+          'recaps.',
+      'Selection haptic on FAQ + What\'s new expansions.',
+      'Lens-cycle and camera-flip on the scanner now ignore '
+          'overlapping taps so rapid presses can no longer leave '
+          'Camera2 in a "grant permission" loop.',
+    ],
+  ),
   _Release(
     label: 'test.24',
     date: 'May 24, 2026',
@@ -206,6 +231,7 @@ class _ReleaseTile extends StatelessWidget {
       // provides its own visual frame (same pattern as FAQ).
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
+        onExpansionChanged: (_) => Haptics.selection(),
         // First release expands by default so the most-recent build
         // is visible without a tap.
         initiallyExpanded: identical(release, _kReleases.first),
