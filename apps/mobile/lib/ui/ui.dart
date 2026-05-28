@@ -13,6 +13,7 @@ export 'theme/app_theme.dart';
 export 'theme/tailwind_palette.dart';
 export 'widgets/app_loader.dart';
 export 'widgets/brand.dart';
+export 'widgets/brand_text_field.dart';
 export 'widgets/clear_all_button.dart';
 export 'widgets/message_banner.dart';
 export 'widgets/modal_sheet.dart';

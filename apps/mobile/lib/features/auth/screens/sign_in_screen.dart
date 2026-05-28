@@ -13,6 +13,12 @@ import '../auth_providers.dart';
 /// the page does one thing — Welcome back, sign in. Sign up lives at its
 /// own route (/auth/signup). Forgot-password + MFA-challenge stay inline
 /// as flow extensions: they're sign-in continuations, not destinations.
+///
+/// Visual treatment: spacious, no card-in-card. The form sits directly on
+/// the scaffold with generous spacing, big heading typography, and
+/// floating-label inputs (BrandTextField). Biometric is a compact icon
+/// button next to the primary action so the primary CTA stays the visual
+/// anchor.
 class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key});
 
@@ -147,10 +153,11 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 440),
+              constraints: const BoxConstraints(maxWidth: 420),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Row(
@@ -168,25 +175,21 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       _ThemeToggle(onTap: _toggleTheme),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  BrandHeading('Smart Advisor', size: 28)
-                      .animate()
-                      .fadeIn(duration: 500.ms)
-                      .scaleXY(begin: 0.94, end: 1, curve: Curves.easeOutBack),
-                  const SizedBox(height: 18),
-                  BrandCard(
-                    padding: const EdgeInsets.all(22),
-                    child: _form(),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Smart Advisor',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.6,
+                      color: context.colors.mutedForeground,
+                    ),
                   )
                       .animate()
-                      .fadeIn(duration: 420.ms, delay: 100.ms)
-                      .slideY(begin: 0.06, end: 0, curve: Curves.easeOut),
-                  const SizedBox(height: 16),
-                  _SwitchAuthLink(
-                    leading: 'Don\'t have an account?',
-                    cta: 'Create one',
-                    onTap: () => context.go('/auth/signup'),
-                  ),
+                      .fadeIn(duration: 400.ms)
+                      .slideY(begin: -0.2, end: 0, curve: Curves.easeOut),
+                  const SizedBox(height: 32),
+                  _form(),
                 ],
               ),
             ),
@@ -214,7 +217,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
             ),
           ),
           layoutBuilder: (current, previous) => Stack(
-            alignment: Alignment.topCenter,
+            alignment: Alignment.topLeft,
             children: [
               ...previous,
               ?current,
@@ -225,13 +228,29 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
             children: [
-              BrandHeading(_heading, size: 22),
-              const SizedBox(height: 6),
-              Subtitle(_subhead),
+              Text(
+                _heading,
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w800,
+                  height: 1.1,
+                  letterSpacing: -0.5,
+                  color: context.brandInk,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _subhead,
+                style: TextStyle(
+                  fontSize: 15,
+                  height: 1.4,
+                  color: context.brandMuted,
+                ),
+              ),
             ],
           ),
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: 28),
         for (final (i, w) in _phaseBody().indexed)
           w
               .animate()
@@ -243,14 +262,14 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   duration: 280.ms,
                   curve: Curves.easeOut),
         if (_notice != null) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           MessageBanner(message: _notice!)
               .animate()
               .fadeIn(duration: 220.ms)
               .slideY(begin: 0.4, end: 0, curve: Curves.easeOut),
         ],
         if (_error != null) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           MessageBanner.error(_error!)
               .animate()
               .fadeIn(duration: 220.ms)
@@ -260,37 +279,22 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     );
   }
 
-  Widget _field(String label, Widget input) => Padding(
-        padding: const EdgeInsets.only(bottom: 14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 6, left: 2),
-              child: Text(label,
-                  style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: context.colors.foreground)),
-            ),
-            input,
-          ],
-        ),
-      );
-
   List<Widget> _phaseBody() {
+    final biometricOn = ref.watch(biometricLoginProvider) &&
+        (ref.watch(biometricAvailableProvider).asData?.value ?? false);
     switch (_phase) {
       case _Phase.mfaChallenge:
         return [
-          _field(
-              'Authentication code',
-              AdaptiveTextField(
-                  controller: _code,
-                  placeholder: '123456',
-                  keyboardType: TextInputType.number)),
+          BrandTextField(
+            label: 'Authentication code',
+            controller: _code,
+            keyboardType: TextInputType.number,
+            autofocus: true,
+          ),
+          const SizedBox(height: 20),
           AdaptiveButton(
               onPressed: _busy ? null : _submitMfa, label: 'Verify'),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           AdaptiveButton(
               onPressed: () => setState(() {
                     _phase = _Phase.signin;
@@ -301,16 +305,18 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
         ];
       case _Phase.forgot:
         return [
-          _field(
-              'Email',
-              AdaptiveTextField(
-                  controller: _id,
-                  placeholder: 'name@example.com',
-                  keyboardType: TextInputType.emailAddress)),
+          BrandTextField(
+            label: 'Email',
+            controller: _id,
+            keyboardType: TextInputType.emailAddress,
+            autofillHints: const [AutofillHints.email],
+            autofocus: true,
+          ),
+          const SizedBox(height: 20),
           AdaptiveButton(
               onPressed: _busy ? null : _submitForgot,
               label: 'Send reset link'),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           AdaptiveButton(
               onPressed: () => setState(() {
                     _phase = _Phase.signin;
@@ -322,30 +328,45 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
         ];
       case _Phase.signin:
         return [
-          _field(
-              'Email or username',
-              AdaptiveTextField(
-                  controller: _id, placeholder: 'name@example.com')),
-          _field(
-              'Password',
-              AdaptiveTextField(
-                  controller: _pw,
-                  placeholder: 'Your password',
-                  obscureText: true)),
-          AdaptiveButton(
-              onPressed: _busy ? null : _submitSignIn, label: 'Sign in'),
-          if (ref.watch(biometricLoginProvider) &&
-              (ref.watch(biometricAvailableProvider).asData?.value ??
-                  false)) ...[
-            const SizedBox(height: 10),
+          BrandTextField(
+            label: 'Email or username',
+            controller: _id,
+            keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.next,
+            autofillHints: const [AutofillHints.username],
+          ),
+          const SizedBox(height: 14),
+          BrandTextField(
+            label: 'Password',
+            controller: _pw,
+            obscureText: true,
+            textInputAction: TextInputAction.done,
+            autofillHints: const [AutofillHints.password],
+            onSubmitted: (_) => _busy ? null : _submitSignIn(),
+          ),
+          const SizedBox(height: 24),
+          if (biometricOn)
+            Row(
+              children: [
+                Expanded(
+                  child: AdaptiveButton(
+                      onPressed: _busy ? null : _submitSignIn,
+                      label: 'Sign in'),
+                ),
+                const SizedBox(width: 10),
+                AdaptiveButton.icon(
+                  onPressed: _busy ? null : _biometricSignIn,
+                  icon: PlatformInfo.isIOS
+                      ? Icons.face_outlined
+                      : Icons.fingerprint,
+                  style: AdaptiveButtonStyle.bordered,
+                ),
+              ],
+            )
+          else
             AdaptiveButton(
-                onPressed: _busy ? null : _biometricSignIn,
-                label: PlatformInfo.isIOS
-                    ? 'Sign in with Face ID / Touch ID'
-                    : 'Sign in with biometrics',
-                style: AdaptiveButtonStyle.bordered),
-          ],
-          const SizedBox(height: 10),
+                onPressed: _busy ? null : _submitSignIn, label: 'Sign in'),
+          const SizedBox(height: 18),
           Center(
             child: GestureDetector(
               onTap: () => setState(() {
@@ -356,9 +377,15 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
               child: Text('Forgot password?',
                   style: TextStyle(
                       color: context.colors.primary,
-                      fontSize: 13,
+                      fontSize: 14,
                       fontWeight: FontWeight.w600)),
             ),
+          ),
+          const SizedBox(height: 28),
+          _SwitchAuthLink(
+            leading: 'Don\'t have an account?',
+            cta: 'Create one',
+            onTap: () => context.go('/auth/signup'),
           ),
         ];
     }
@@ -413,13 +440,13 @@ class _SwitchAuthLink extends StatelessWidget {
       children: [
         Text(leading,
             style: TextStyle(
-                fontSize: 13, color: context.colors.mutedForeground)),
+                fontSize: 14, color: context.colors.mutedForeground)),
         const SizedBox(width: 6),
         GestureDetector(
           onTap: onTap,
           child: Text(cta,
               style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: context.colors.primary)),
         ),

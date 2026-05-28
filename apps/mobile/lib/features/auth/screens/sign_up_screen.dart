@@ -11,6 +11,9 @@ import '../auth_providers.dart';
 /// the form focuses on one thing — create a new account. After a
 /// successful submit the screen morphs into a verify-email confirmation
 /// (resend + back-to-sign-in), so users never get bounced off mid-flow.
+///
+/// Visual treatment matches SignInScreen: spacious, no card-in-card,
+/// big heading typography, floating-label BrandTextField inputs.
 class SignUpScreen extends ConsumerStatefulWidget {
   const SignUpScreen({super.key});
 
@@ -145,10 +148,11 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 440),
+              constraints: const BoxConstraints(maxWidth: 420),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Row(
@@ -166,26 +170,21 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       _ThemeToggle(onTap: _toggleTheme),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  BrandHeading('Smart Advisor', size: 28)
-                      .animate()
-                      .fadeIn(duration: 500.ms)
-                      .scaleXY(begin: 0.94, end: 1, curve: Curves.easeOutBack),
-                  const SizedBox(height: 18),
-                  BrandCard(
-                    padding: const EdgeInsets.all(22),
-                    child: _form(),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Smart Advisor',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.6,
+                      color: context.colors.mutedForeground,
+                    ),
                   )
                       .animate()
-                      .fadeIn(duration: 420.ms, delay: 100.ms)
-                      .slideY(begin: 0.06, end: 0, curve: Curves.easeOut),
-                  const SizedBox(height: 16),
-                  if (_phase == _Phase.form)
-                    _SwitchAuthLink(
-                      leading: 'Already have an account?',
-                      cta: 'Sign in',
-                      onTap: () => context.go('/auth'),
-                    ),
+                      .fadeIn(duration: 400.ms)
+                      .slideY(begin: -0.2, end: 0, curve: Curves.easeOut),
+                  const SizedBox(height: 32),
+                  _form(),
                 ],
               ),
             ),
@@ -200,10 +199,26 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        BrandHeading(_heading, size: 22),
-        const SizedBox(height: 6),
-        Subtitle(_subhead),
-        const SizedBox(height: 18),
+        Text(
+          _heading,
+          style: TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.w800,
+            height: 1.1,
+            letterSpacing: -0.5,
+            color: context.brandInk,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          _subhead,
+          style: TextStyle(
+            fontSize: 15,
+            height: 1.4,
+            color: context.brandMuted,
+          ),
+        ),
+        const SizedBox(height: 28),
         for (final (i, w) in _phaseBody().indexed)
           w
               .animate()
@@ -215,14 +230,14 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   duration: 280.ms,
                   curve: Curves.easeOut),
         if (_notice != null) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           MessageBanner(message: _notice!)
               .animate()
               .fadeIn(duration: 220.ms)
               .slideY(begin: 0.4, end: 0, curve: Curves.easeOut),
         ],
         if (_error != null) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           MessageBanner.error(_error!)
               .animate()
               .fadeIn(duration: 220.ms)
@@ -232,35 +247,24 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     );
   }
 
-  Widget _field(String label, Widget input) => Padding(
-        padding: const EdgeInsets.only(bottom: 14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 6, left: 2),
-              child: Text(label,
-                  style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: context.colors.foreground)),
-            ),
-            input,
-          ],
-        ),
-      );
-
   List<Widget> _phaseBody() {
     switch (_phase) {
       case _Phase.verifyEmail:
         return [
-          Subtitle('We sent a verification link to ${_id.text.trim()}. '
-              'Open it, then come back and sign in.'),
-          const SizedBox(height: 16),
+          Text(
+            'We sent a verification link to ${_id.text.trim()}. '
+            'Open it, then come back and sign in.',
+            style: TextStyle(
+              fontSize: 15,
+              height: 1.5,
+              color: context.brandMuted,
+            ),
+          ),
+          const SizedBox(height: 24),
           AdaptiveButton(
               onPressed: _busy ? null : _resendVerification,
               label: 'Resend email'),
-          const SizedBox(height: 10),
+          const SizedBox(height: 6),
           AdaptiveButton(
               onPressed: () => context.go('/auth'),
               label: 'Back to sign in',
@@ -268,48 +272,70 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
         ];
       case _Phase.form:
         return [
-          _field(
-              'Email',
-              AdaptiveTextField(
-                  controller: _id,
-                  placeholder: 'name@example.com',
-                  keyboardType: TextInputType.emailAddress)),
-          _field(
-              'Display name (optional)',
-              AdaptiveTextField(
-                  controller: _displayName,
-                  placeholder: 'How we\'ll greet you')),
-          _field('Username',
-              AdaptiveTextField(controller: _username, placeholder: 'jane')),
-          _field(
-              'Age',
-              AdaptiveTextField(
-                  controller: _age,
-                  placeholder: '18',
-                  keyboardType: TextInputType.number)),
-          _field(
-              'Password',
-              AdaptiveTextField(
-                  controller: _pw,
-                  placeholder: '8+ chars, mixed case, number, symbol',
-                  obscureText: true)),
-          _field(
-              'Confirm password',
-              AdaptiveTextField(
-                  controller: _pw2,
-                  placeholder: 'Re-enter password',
-                  obscureText: true)),
-          const SizedBox(height: 4),
+          BrandTextField(
+            label: 'Email',
+            controller: _id,
+            keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.next,
+            autofillHints: const [AutofillHints.email],
+          ),
+          const SizedBox(height: 14),
+          BrandTextField(
+            label: 'Display name (optional)',
+            controller: _displayName,
+            textInputAction: TextInputAction.next,
+            textCapitalization: TextCapitalization.words,
+            autofillHints: const [AutofillHints.name],
+          ),
+          const SizedBox(height: 14),
+          BrandTextField(
+            label: 'Username',
+            controller: _username,
+            textInputAction: TextInputAction.next,
+            autofillHints: const [AutofillHints.newUsername],
+          ),
+          const SizedBox(height: 14),
+          BrandTextField(
+            label: 'Age',
+            controller: _age,
+            keyboardType: TextInputType.number,
+            textInputAction: TextInputAction.next,
+          ),
+          const SizedBox(height: 14),
+          BrandTextField(
+            label: 'Password',
+            controller: _pw,
+            obscureText: true,
+            textInputAction: TextInputAction.next,
+            autofillHints: const [AutofillHints.newPassword],
+          ),
+          const SizedBox(height: 14),
+          BrandTextField(
+            label: 'Confirm password',
+            controller: _pw2,
+            obscureText: true,
+            textInputAction: TextInputAction.done,
+            autofillHints: const [AutofillHints.newPassword],
+            onSubmitted: (_) => _busy ? null : _submitSignUp(),
+          ),
+          const SizedBox(height: 24),
           AdaptiveButton(
               onPressed: _busy ? null : _submitSignUp,
               label: 'Create account'),
-          const SizedBox(height: 10),
+          const SizedBox(height: 14),
           Text(
             'By continuing you agree to our Terms and Privacy Policy.',
             textAlign: TextAlign.center,
             style: TextStyle(
-                fontSize: 11,
+                fontSize: 12,
+                height: 1.4,
                 color: context.colors.mutedForeground.withValues(alpha: .9)),
+          ),
+          const SizedBox(height: 24),
+          _SwitchAuthLink(
+            leading: 'Already have an account?',
+            cta: 'Sign in',
+            onTap: () => context.go('/auth'),
           ),
         ];
     }
@@ -361,13 +387,13 @@ class _SwitchAuthLink extends StatelessWidget {
       children: [
         Text(leading,
             style: TextStyle(
-                fontSize: 13, color: context.colors.mutedForeground)),
+                fontSize: 14, color: context.colors.mutedForeground)),
         const SizedBox(width: 6),
         GestureDetector(
           onTap: onTap,
           child: Text(cta,
               style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: context.colors.primary)),
         ),
