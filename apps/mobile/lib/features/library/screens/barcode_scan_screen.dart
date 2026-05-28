@@ -39,6 +39,19 @@ class _BarcodeScanScreenState extends ConsumerState<BarcodeScanScreen> {
   // button only when the phone exposes more than one back lens
   // (single-lens phones get a less cluttered UI).
   List<CameraLensType> _availableLenses = const [];
+  // Latches while a stop/start camera transition is in flight. Without
+  // this, rapid taps on the lens-cycle / camera-flip buttons would
+  // overlap `switchCamera` calls — on Android that leaves Camera2 in
+  // a broken state and the plugin surfaces a misleading "Camera
+  // unavailable / grant permission" view that persists across screen
+  // re-entries because the OS doesn't release the camera until the
+  // bad session times out.
+  bool _switching = false;
+  // Pinch-to-zoom uses the controller's normalised scale (0..1). We
+  // snapshot the current zoom on `onScaleStart` and multiply by the
+  // gesture's factor so a pinch from the natural rest position feels
+  // continuous instead of jumping to the absolute scale.
+  double _zoomAtPinchStart = 0;
 
   @override
   void initState() {
@@ -63,6 +76,24 @@ class _BarcodeScanScreenState extends ConsumerState<BarcodeScanScreen> {
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  /// Runs a `switchCamera(...)` call, but only when no other switch is
+  /// in flight. Internally the plugin does `stop()` then `start()`, and
+  /// overlapping calls leave Camera2 in a "permission needed" looking
+  /// error state on Android.
+  Future<void> _runSwitch(SwitchCameraOption option) async {
+    if (_switching) return;
+    _switching = true;
+    Haptics.selection();
+    try {
+      await _controller.switchCamera(option);
+    } catch (_) {
+      // The plugin's errorBuilder will surface anything user-facing —
+      // don't double-surface here.
+    } finally {
+      if (mounted) _switching = false;
+    }
   }
 
   Future<void> _onDetect(BarcodeCapture cap) async {
@@ -139,10 +170,29 @@ class _BarcodeScanScreenState extends ConsumerState<BarcodeScanScreen> {
       title: 'Scan a book',
       body: Stack(
         children: [
-          MobileScanner(
-            controller: _controller,
-            onDetect: _onDetect,
-            errorBuilder: (context, error) => _ErrorView(error: error),
+          // Pinch-to-zoom: the controller normalises zoom to 0..1 across
+          // whatever the active lens supports, so a long-range spine
+          // barcode can still be reached on phones whose telephoto isn't
+          // exposed as a separate lens (the common Pixel / iPhone case).
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onScaleStart: (_) {
+              _zoomAtPinchStart = _controller.value.zoomScale;
+            },
+            onScaleUpdate: (details) {
+              if (details.pointerCount < 2) return;
+              final next =
+                  (_zoomAtPinchStart * details.scale).clamp(0.0, 1.0);
+              // Don't await: the platform stream pushes the resolved
+              // zoom back via the controller's ValueNotifier, so each
+              // setZoomScale is fire-and-forget.
+              _controller.setZoomScale(next);
+            },
+            child: MobileScanner(
+              controller: _controller,
+              onDetect: _onDetect,
+              errorBuilder: (context, error) => _ErrorView(error: error),
+            ),
           ),
           // Translucent overlay with a centered scan window — keeps
           // the user oriented and tells them where to point the
@@ -214,20 +264,14 @@ class _BarcodeScanScreenState extends ConsumerState<BarcodeScanScreen> {
                       // Picker order matches the controller's internal
                       // cycle (normal → wide → zoom → normal).
                       tooltip: _tooltipForLens(state.cameraLensType),
-                      onTap: () {
-                        Haptics.selection();
-                        _controller.switchCamera(const ToggleLensType());
-                      },
+                      onTap: () => _runSwitch(const ToggleLensType()),
                     ),
                   ],
                   const SizedBox(width: 8),
                   _ScannerIconButton(
                     icon: Icons.cameraswitch_rounded,
                     tooltip: 'Switch camera',
-                    onTap: () {
-                      Haptics.selection();
-                      _controller.switchCamera();
-                    },
+                    onTap: () => _runSwitch(const ToggleDirection()),
                   ),
                 ]);
               },
