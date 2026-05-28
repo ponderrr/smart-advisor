@@ -132,19 +132,41 @@ class _StoryState extends State<_Story> {
         creators[who] = (creators[who] ?? 0) + 1;
       }
     }
-    String top(Map<String, int> m) => m.isEmpty
-        ? '—'
-        : (m.entries.toList()
-              ..sort((a, b) => b.value.compareTo(a.value)))
-            .first
-            .key;
     final topGenres = (genres.entries.toList()
           ..sort((a, b) => b.value.compareTo(a.value)))
         .take(3)
         .map((e) => e.key)
         .toList();
+    final topCreator = creators.isEmpty
+        ? null
+        : (creators.entries.toList()
+              ..sort((a, b) => b.value.compareTo(a.value)))
+            .first
+            .key;
     final fav = yr.where((r) => r.isFavorited).toList();
-    final standout = fav.isNotEmpty ? fav.first : (yr.isNotEmpty ? yr.first : null);
+    final standout =
+        fav.isNotEmpty ? fav.first : (yr.isNotEmpty ? yr.first : null);
+
+    // Per-medium representative pick: first item with a usable cover.
+    Recommendation? firstByType(String t) {
+      for (final r in yr) {
+        if (r.type == t && (r.posterUrl?.isNotEmpty ?? false)) return r;
+      }
+      return null;
+    }
+
+    List<Recommendation> worksByCreator(String name) => yr
+        .where((r) =>
+            (r.director ?? r.author ?? r.artist) == name &&
+            (r.posterUrl?.isNotEmpty ?? false))
+        .toList();
+
+    // Distinct poster URLs across the period — drives the intro
+    // collage backdrop and the share-card thumb strip.
+    final allPosters = <String>{
+      for (final r in yr)
+        if (r.posterUrl != null && r.posterUrl!.isNotEmpty) r.posterUrl!,
+    }.toList();
 
     Widget big(String kicker, String value, String label) => Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -178,64 +200,327 @@ class _StoryState extends State<_Story> {
         );
 
     return [
+      // Intro — emojis + headline floating over a low-opacity
+      // backdrop of the period's posters so the screen reads as
+      // "your year/month in covers" the moment it opens.
       _Slide(const [Tw.indigo500, Tw.violet600], (_) {
-        return Center(
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const Text('🎬 📚 🎧',
-                    style: TextStyle(fontSize: 44))
-                .animate()
-                .scale(duration: 500.ms, curve: Curves.easeOutBack),
-            const SizedBox(height: 16),
-            Text('Your $_periodTitle\nWrapped',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 40,
-                        height: 1.1,
-                        fontWeight: FontWeight.w900))
-                .animate()
-                .fadeIn(delay: 200.ms),
-          ]),
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            _posterBackdrop(allPosters),
+            Center(
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                const Text('🎬 📚 🎧', style: TextStyle(fontSize: 44))
+                    .animate()
+                    .scale(duration: 500.ms, curve: Curves.easeOutBack),
+                const SizedBox(height: 16),
+                Text('Your $_periodTitle\nWrapped',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 40,
+                            height: 1.1,
+                            fontWeight: FontWeight.w900,
+                            shadows: [
+                              Shadow(blurRadius: 16, color: Colors.black54),
+                            ]))
+                    .animate()
+                    .fadeIn(delay: 200.ms),
+              ]),
+            ),
+          ],
         );
       }),
       _Slide(const [Tw.violet600, Tw.rose500],
           (_) => big('This $_scopeWord', '${yr.length}',
               'recommendations you got')),
-      _Slide(const [Tw.amber500, Tw.orange500],
-          (_) => big('Your mix', '${by('movie')}·${by('book')}·${by('music')}',
-              'movies · books · music')),
+      // Mix — three mini-posters above their counts.
+      _Slide(const [Tw.amber500, Tw.orange500], (_) {
+        return _mixSlide(
+          firstByType('movie'),
+          firstByType('book'),
+          firstByType('music'),
+          by('movie'),
+          by('book'),
+          by('music'),
+        );
+      }),
       _Slide(const [Tw.emerald500, Tw.teal500],
           (_) => big('Your vibe', topGenres.isEmpty ? '—' : topGenres.first,
               topGenres.length > 1
                   ? 'also ${topGenres.skip(1).join(', ')}'
                   : 'your top genre')),
-      _Slide(const [Tw.rose500, Tw.fuchsia500],
-          (_) => big('On repeat', top(creators),
-              'your most-recommended creator')),
-      _Slide(const [Tw.indigo900, Tw.violet600], (_) {
-        return big('Standout', standout?.title ?? '—',
-            standout != null
-                ? 'a favorite this $_scopeWord'
-                : 'take a quiz!');
+      // On repeat — creator name plus a row of their cover-art works.
+      _Slide(const [Tw.rose500, Tw.fuchsia500], (_) {
+        final works =
+            topCreator == null ? <Recommendation>[] : worksByCreator(topCreator);
+        return _creatorSlide(topCreator ?? '—', works);
       }),
-      _Slide(const [Tw.indigo500, Tw.rose500], (_) => _outro(yr.length)),
+      // Standout — single large poster with the title underneath.
+      _Slide(const [Tw.indigo900, Tw.violet600],
+          (_) => _standoutSlide(standout)),
+      _Slide(const [Tw.indigo500, Tw.rose500],
+          (_) => _outro(yr.length, allPosters)),
     ];
   }
 
-  Widget _outro(int total) {
+  /// Cover thumbnail with a tinted fallback that matches the slide so
+  /// missing covers don't punch a hole in the layout. Network errors
+  /// and missing URLs both go to the same fallback.
+  Widget _poster(String? url,
+          {double w = 96, double h = 144, double radius = 10}) =>
+      ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        child: SizedBox(
+          width: w,
+          height: h,
+          child: url == null || url.isEmpty
+              ? _posterFallback()
+              : Image.network(
+                  url,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => _posterFallback(),
+                  loadingBuilder: (_, child, p) =>
+                      p == null ? child : ColoredBox(color: Colors.white12),
+                ),
+        ),
+      );
+
+  Widget _posterFallback() => DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Colors.white24, Color(0x14FFFFFF)],
+          ),
+        ),
+        child: const Center(
+          child: Icon(Icons.movie_filter_outlined,
+              color: Colors.white54, size: 22),
+        ),
+      );
+
+  /// Drifting wall of small posters at low opacity, used behind the
+  /// intro headline. Empty list → renders nothing so the gradient
+  /// still reads clean on a brand-new account.
+  Widget _posterBackdrop(List<String> urls) {
+    if (urls.isEmpty) return const SizedBox.shrink();
+    return IgnorePointer(
+      child: Opacity(
+        opacity: 0.22,
+        child: OverflowBox(
+          maxWidth: double.infinity,
+          maxHeight: double.infinity,
+          child: Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final u in urls.take(18))
+                _poster(u, w: 58, h: 86, radius: 6),
+            ],
+          ),
+        ).animate().fadeIn(duration: 800.ms),
+      ),
+    );
+  }
+
+  Widget _mixSlide(Recommendation? m, Recommendation? b, Recommendation? mu,
+      int movies, int books, int music) {
+    Widget cell(Recommendation? r, String label, int n) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _poster(r?.posterUrl, w: 84, h: 124, radius: 10),
+          const SizedBox(height: 10),
+          Text('$n',
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                  height: 1,
+                  fontSize: 26)),
+          const SizedBox(height: 2),
+          Text(label,
+              style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700)),
+        ],
+      );
+    }
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('YOUR MIX',
+                style: const TextStyle(
+                    color: Colors.white70,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 3,
+                    fontSize: 13))
+            .animate()
+            .fadeIn(duration: 400.ms),
+        const SizedBox(height: 18),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            cell(m, 'Movies', movies),
+            cell(b, 'Books', books),
+            cell(mu, 'Music', music),
+          ],
+        )
+            .animate()
+            .fadeIn(delay: 150.ms, duration: 500.ms)
+            .slideY(begin: 0.15, curve: Curves.easeOut),
+        const SizedBox(height: 18),
+        Text('your $_scopeWord, in three covers',
+                style: const TextStyle(
+                    color: Colors.white, fontSize: 18, height: 1.3))
+            .animate()
+            .fadeIn(delay: 350.ms),
+      ],
+    );
+  }
+
+  Widget _creatorSlide(String name, List<Recommendation> works) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('ON REPEAT',
+                style: const TextStyle(
+                    color: Colors.white70,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 3,
+                    fontSize: 13))
+            .animate()
+            .fadeIn(duration: 400.ms),
+        const SizedBox(height: 10),
+        Text(name,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    height: 1,
+                    fontSize: 44))
+            .animate()
+            .fadeIn(delay: 150.ms, duration: 500.ms)
+            .slideY(begin: 0.15, curve: Curves.easeOut),
+        const SizedBox(height: 8),
+        const Text('your most-recommended creator',
+                style: TextStyle(
+                    color: Colors.white, fontSize: 18, height: 1.3))
+            .animate()
+            .fadeIn(delay: 300.ms),
+        if (works.isNotEmpty) ...[
+          const SizedBox(height: 22),
+          SizedBox(
+            height: 128,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: works.length > 6 ? 6 : works.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 10),
+              itemBuilder: (_, i) =>
+                  _poster(works[i].posterUrl, w: 84, h: 126, radius: 10),
+            ),
+          )
+              .animate()
+              .fadeIn(delay: 450.ms, duration: 500.ms)
+              .slideX(begin: 0.06, curve: Curves.easeOut),
+        ],
+      ],
+    );
+  }
+
+  Widget _standoutSlide(Recommendation? standout) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text('STANDOUT',
+                style: const TextStyle(
+                    color: Colors.white70,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 3,
+                    fontSize: 13))
+            .animate()
+            .fadeIn(duration: 400.ms),
+        const SizedBox(height: 18),
+        if (standout != null)
+          DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.45),
+                  blurRadius: 28,
+                  offset: const Offset(0, 14),
+                ),
+              ],
+            ),
+            child: _poster(standout.posterUrl,
+                w: 200, h: 290, radius: 14),
+          )
+              .animate()
+              .fadeIn(delay: 150.ms, duration: 500.ms)
+              .scale(
+                  begin: const Offset(0.92, 0.92),
+                  end: const Offset(1, 1),
+                  curve: Curves.easeOut),
+        const SizedBox(height: 22),
+        Text(
+          standout?.title ?? '—',
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w900,
+              height: 1.05,
+              fontSize: 28),
+        ).animate().fadeIn(delay: 350.ms),
+        const SizedBox(height: 8),
+        Text(
+                standout != null
+                    ? 'a favorite this $_scopeWord'
+                    : 'take a quiz!',
+                style: const TextStyle(
+                    color: Colors.white, fontSize: 17, height: 1.3))
+            .animate()
+            .fadeIn(delay: 500.ms),
+      ],
+    );
+  }
+
+  Widget _outro(int total, List<String> posters) {
+    final strip = posters.take(5).toList();
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         RepaintBoundary(
           key: _shotKey,
           child: Container(
-            padding: const EdgeInsets.all(28),
+            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                   colors: [Tw.indigo500, Tw.violet600, Tw.rose500]),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Column(mainAxisSize: MainAxisSize.min, children: [
+              if (strip.isNotEmpty) ...[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    for (final u in strip)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 3),
+                        child: _poster(u, w: 44, h: 64, radius: 6),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+              ],
               Text('$_periodTitle Wrapped',
                   style: const TextStyle(
                       color: Colors.white70,

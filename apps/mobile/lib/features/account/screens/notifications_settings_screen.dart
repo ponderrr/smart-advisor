@@ -71,13 +71,21 @@ class NotificationsSettingsScreen extends ConsumerWidget {
                         color: context.colors.mutedForeground),
                     onTap: () => context.push('/notifications'),
                   ),
-                  settingsTile(context, Icons.auto_awesome,
-                      l.notificationsYearInReview,
-                      onTap: () => context.push('/wrapped')),
-                  settingsDivider(context),
-                  settingsTile(context, Icons.calendar_month,
-                      l.notificationsMonthInReview,
-                      onTap: () => context.push('/wrapped/month')),
+                  // Wrapped entries are seasonal — hide them outside
+                  // their windows so the surface doesn't carry a
+                  // mid-year "look at 2 months of activity" tile that
+                  // most users will find anticlimactic. The route at
+                  // /wrapped stays reachable for QA / sharing.
+                  if (_yearWrappedInSeason()) ...[
+                    settingsTile(context, Icons.auto_awesome,
+                        l.notificationsYearInReview,
+                        onTap: () => context.push('/wrapped')),
+                    if (_monthWrappedInSeason()) settingsDivider(context),
+                  ],
+                  if (_monthWrappedInSeason())
+                    settingsTile(context, Icons.calendar_month,
+                        l.notificationsMonthInReview,
+                        onTap: () => context.push('/wrapped/month')),
                 ]),
               ),
               const SizedBox(height: 24),
@@ -114,6 +122,27 @@ class NotificationsSettingsScreen extends ConsumerWidget {
     if (on == total) return 'All on';
     return '$on of $total on';
   }
+}
+
+/// Year wrapped is "in season" through December and January — that's
+/// when the year's data is full or just-closed and the share moment
+/// is most compelling. Outside that window the tile would either
+/// summarise an empty year or a stale one, so we hide it. The route
+/// itself stays reachable for QA and replay.
+bool _yearWrappedInSeason([DateTime? now]) {
+  final n = now ?? DateTime.now();
+  return n.month == 12 || n.month == 1;
+}
+
+/// Month wrapped is "in season" over the wrap-up days of one month
+/// and the first day of the next — a four-day shareable window
+/// (28/29/30/31 → 1, depending on month length).
+bool _monthWrappedInSeason([DateTime? now]) {
+  final n = now ?? DateTime.now();
+  if (n.day == 1) return true;
+  // Days remaining in the current month, counting today.
+  final lastDay = DateTime(n.year, n.month + 1, 0).day;
+  return (lastDay - n.day) <= 2;
 }
 
 /// How many of the three local reminder toggles are currently on —
