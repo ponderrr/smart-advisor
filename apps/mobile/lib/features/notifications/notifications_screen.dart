@@ -235,10 +235,22 @@ class _LocalCard extends ConsumerWidget {
       onTap: n.route == null
           ? null
           : () {
+              // Warm the single-post fetch when the route points at one
+              // — same trick as the server-notification card above so
+              // post-tap loaders don't dominate the perceived nav time.
+              final route = n.route!;
+              if (route.startsWith('/feed/') &&
+                  !route.startsWith('/feed/u/') &&
+                  !route.startsWith('/feed/c/')) {
+                final id = route.substring('/feed/'.length).split('?').first;
+                if (id.isNotEmpty) {
+                  ref.read(singlePostProvider(id).future);
+                }
+              }
               ref
                   .read(notificationsCenterProvider.notifier)
                   .markRead(n.id);
-              context.push(n.route!);
+              context.push(route);
             },
       child: BrandCard(
         padding: const EdgeInsets.all(14),
@@ -306,6 +318,14 @@ class _ServerCard extends ConsumerWidget {
       onTap: route == null
           ? null
           : () {
+              // Warm the single-post fetch BEFORE the push so the
+              // request is already in flight by the time
+              // PostDetailScreen mounts and watches the provider —
+              // shaves the visible loader time down to whatever's
+              // left of the round-trip after the route transition.
+              if (n.postId != null) {
+                ref.read(singlePostProvider(n.postId!).future);
+              }
               ref.read(feedActionsProvider).markNotificationRead(n.id);
               context.push(route);
             },

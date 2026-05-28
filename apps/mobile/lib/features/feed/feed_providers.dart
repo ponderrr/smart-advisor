@@ -180,9 +180,17 @@ final userPostsProvider = FutureProvider.autoDispose
 /// A single post by id — fast path for the post-detail screen so deep
 /// links and admin "Open post" jumps don't have to wait for the entire
 /// feed to load. `null` if the post no longer exists.
-final singlePostProvider =
-    FutureProvider.autoDispose.family<FeedPost?, String>(
-        (ref, id) => ref.watch(feedServiceProvider).fetchPostById(id));
+///
+/// NOT autoDispose on purpose: notifications_screen warms the fetch on
+/// tap before pushing, so the request is already in flight when
+/// PostDetailScreen mounts and watches. autoDispose would tear that
+/// in-flight request down during the push transition (no listener
+/// while the route animates), wasting the prefetch. The cache cost is
+/// one FeedPost per visited id per session, and feedActionsProvider
+/// already invalidates the whole family on votes / comments / edits
+/// so stale data isn't a concern.
+final singlePostProvider = FutureProvider.family<FeedPost?, String>(
+    (ref, id) => ref.watch(feedServiceProvider).fetchPostById(id));
 
 /// Server notifications (feed_notifications), with muted kinds
 /// filtered out so the bell badge and inbox match the toggles in
